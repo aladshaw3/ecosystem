@@ -1,0 +1,75 @@
+# Test input file for YAML and SHARK
+
+Batty: fatty # this produces an error, Document names cannot have associated values
+
+Foxie: &batty # this is okay, creates anchor for document named Foxie
+
+TestDoc1: # this key should be at the front of all documents
+---
+- scenario:
+  numvar: 25
+  act_fun: DAVIES
+  steadystate: FALSE
+  t_out: 1
+  pH: 0
+  
+- testblock:
+  another: block
+  - subblock:
+    sub: block
+...
+
+TestDoc2:
+---
+- masterspecies:
+  "Cl - (aq)": 0
+  "Na + (aq)": 1
+  "H2O (l)": 2
+  3: NaCl (aq)
+...
+
+TestDoc3:
+---
+apple: red
+pear: green
+
+- array: # Block
+  banana: yellow
+# List 1 in array 
+  - list1: &a # also a block
+    a: 1 # key : value
+    b: 2
+    c: 3
+# List 2 in array
+  - list2: *a
+    a: 4
+    b: 5
+    c: 6
+...
+
+TestDoc4:
+---
+- anchor: &anchor
+  stuff: to do
+- alias: *anchor
+
+anchor2: &2nd
+alias2: *2nd
+
+- list:
+  - anchored: &list_anchor
+    info: blah
+    atta: boy
+  - aliased: *list_anchor
+    info: bruh
+    atta: ber
+...
+
+# WARNING: MAKE SURE FILE DOES NOT CONTAIN TABS!!!
+
+TestDoc5:
+---
+other: *2nd
+- grab: *anchor
+  stuff: end
+...

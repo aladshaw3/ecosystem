@@ -1,0 +1,3 @@
+BinderFraction(-)	BinderPorosity(-)	Tortuosity(-)
+CrystalRadius(um)	PelletDiameter(cm)	MacroPoreRadius(cm)
+PelletDensity(g/cm^3)	PelletHeatCapacity(J/g/K)
