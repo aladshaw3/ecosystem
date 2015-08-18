@@ -82,8 +82,8 @@ int main(int argc, const char * argv[])
 	//success = YAML_TEST01();
 	//success = YAML_TEST02();
 	//success = YAML_TEST03();
-	//success = YAML_WRAPPER_TESTS();
-	success = Run_Trajectory();
+	success = YAML_WRAPPER_TESTS();
+	//success = Run_Trajectory();
 	
 	
 	std::cout << "Exit Code:\t" << success << std::endl;
