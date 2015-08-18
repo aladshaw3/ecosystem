@@ -67,7 +67,7 @@ int main(int argc, const char * argv[])
 	//------------------------------Testing Suite--------------------------------
 	
     //success = MACAW_TESTS();
-	//success = LARK_TESTS();
+	success = LARK_TESTS();
 	//success = FINCH_TESTS();
 	//success = MESH_TESTS();
 	//success = SKUA_TESTS();
@@ -82,7 +82,7 @@ int main(int argc, const char * argv[])
 	//success = YAML_TEST01();
 	//success = YAML_TEST02();
 	//success = YAML_TEST03();
-	success = YAML_WRAPPER_TESTS();
+	//success = YAML_WRAPPER_TESTS();
 	//success = Run_Trajectory();
 	
 	
