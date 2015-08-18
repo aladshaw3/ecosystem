@@ -100,8 +100,6 @@ int Trajectory_SetupConstants(TRAJECTORY_DATA *dat)
 	dat->eta = 0.001;							//Dynamic viscosity, Kg/m-s
 	dat->Hamaker = 1.3e-21;					//Hamaker constant for ferric oxide particle
 	
-	//Missing some parameters here...
-	
 	//Separator Parameters
 	
 	dat->Rs = 0.0026925;								//separator radius, m
@@ -117,7 +115,7 @@ int Trajectory_SetupConstants(TRAJECTORY_DATA *dat)
 	dat->A_separator = M_PI*pow(dat->Rs,2.0);
 	dat->A_wire = dat->V_wire/dat->L_wire;
 	dat->B0 = 1.1;								//Applied magnetic induction,T
-	dat->H0 = dat->B0/dat->mu_0;				//???? ------------------------- what is this parameter for? ---------------------
+	dat->H0 = dat->B0/dat->mu_0;
 	dat->Ms = 0.6;								//Saturated magnetization,T
 	
 	//Particle parameters
@@ -125,21 +123,17 @@ int Trajectory_SetupConstants(TRAJECTORY_DATA *dat)
 	dat->b = 1.0e-6;							//Particle radius,m
 	dat->chi_p = 3.87e-7;						//Volume magnetic susceptibility, dimensionless
 	dat->rho_p = 8700.0;						//Particle density, Kg/m3
-	
-	//Some more missing info
-	
+		
 	//Model parameters
 	dat->Q_in = 9.5e-7;											//Volumetric fluid flow, m^3/sec
 	dat->V0 = dat->Q_in/(dat->A_separator - dat->A_wire);		//Superficial velocity,m/s
 	dat->Y_initial = 20.0;										//initial position in Y-axis, Y=y/a, dimensionless
-	dat->dt = 2.0*dat->Y_initial*dat->a/(dat->V0*100.0);				//???? --------------- what is this parameter for? -----------
+	dat->dt = 2.0*dat->Y_initial*dat->a/(dat->V0*100.0);		
 	
 	//Breakthrough parameters
-	dat->M = 2.0*dat->Ms/dat->mu_0;							//???? --------------- what is this parameter for? -----------
-	dat->mp = 4.0*3.1415*pow(dat->b,3.0)*dat->rho_p/3.0;	//Particle Mass, Kg //???? --------------- what is this parameter for? -----------
-	
-	//Some more missing info
-	
+	dat->M = 2.0*dat->Ms/dat->mu_0;			
+	dat->mp = 4.0*3.1415*pow(dat->b,3.0)*dat->rho_p/3.0;	//Particle Mass, Kg 
+		
 	return 0;
 }
 
@@ -200,6 +194,27 @@ int Run_Trajectory()
 	
 	dat.X.Display("Distance X");
 	dat.Y.Display("Diatacne Y");
+	
+	const int nrolls=10000;  // number of experiments
+	const int nstars=100;    // maximum number of stars to distribute
+	
+	std::default_random_engine generator;
+	std::normal_distribution<double> distribution(5.0,2.0);
+	
+	int p[10]={};
+	
+	for (int i=0; i<nrolls; ++i) {
+		double number = distribution(generator);
+		if ((number>=0.0)&&(number<10.0)) ++p[int(number)];
+	}
+	
+	std::cout << "normal_distribution (5.0,2.0):" << std::endl;
+	
+	for (int i=0; i<10; ++i) {
+		std::cout << i << "-" << (i+1) << ": ";
+		std::cout << std::string(p[i]*nstars/nrolls,'*') << std::endl;
+	}
+
 	
 	return success;
 }

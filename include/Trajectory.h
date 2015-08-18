@@ -1,4 +1,5 @@
 #include "macaw.h"
+#include <random>
 
 typedef struct
 {
