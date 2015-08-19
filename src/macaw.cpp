@@ -447,11 +447,11 @@ Matrix Matrix::operator*(const Matrix &M)
 		{
 			for (int J=0; J<M.num_cols; J++)
 			{
-        temp.edit(i, J, 0);
+				temp.edit(i, J, 0);
 				j=0;
 				for (int I=0; I<M.num_rows; I++)
 				{
-          temp.edit(i, J,temp(i,J) + (this->Data[(i*num_cols)+j] * M.Data[(I*M.num_cols)+J]) );
+					temp.edit(i, J,temp(i,J) + (this->Data[(i*num_cols)+j] * M.Data[(I*M.num_cols)+J]) );
 					j++;
 				}
 			}

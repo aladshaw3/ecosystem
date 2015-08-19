@@ -3331,7 +3331,7 @@ int LARK_TESTS()
     double time;
     ex01_dat.M.set_size(rows, cols);
     ex01_dat.b.set_size(rows, 1);
-    ex01_dat.M.tridiagonalFill(-1, 2, -1, true);
+    ex01_dat.M.tridiagonalFill(-1, 2, -1, false);
     ex01_dat.b.dirichletBCFill(0, 1, bound);
 
     Matrix solution(rows,1), guess;
@@ -3409,14 +3409,13 @@ int LARK_TESTS()
    			Solve Example 1 iteratively using the default settings for GMRES
    
    	*/
+	
   	std::cout << "------------------Begin Example 3------------------" << std::endl;
   	std::cout << "Solving Example 1 with default GMRES arguments" << std::endl;
   	GMRESLP_DATA gmres_dat;
   	gmres_dat.restart = 20;
   	time = clock();
   	success = gmresLeftPreconditioned(matvec_ex01,precon_ex01,ex01_dat.b,&gmres_dat,(void *)&ex01_dat,(void *)&ex01_dat); //(PASS)
-	//success = gmresr(matvec_ex01,NULL,ex01_dat.b,&gmres_dat,(void *)&ex01_dat,(void *)&ex01_dat);
-  	//gmres_dat.x.Display("x");
   	time = clock() - time;
   	std::cout << "GMRES Solve (s):\t" << (time / CLOCKS_PER_SEC) << std::endl;
   	std::cout << "GMRES Norm: " << (ex01_dat.b - ex01_dat.M*gmres_dat.x).norm() << std::endl;
