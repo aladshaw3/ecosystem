@@ -2473,7 +2473,7 @@ int SHARK_TESTS()
 	
 	//kf_UO2CO3 = 1.15E+16 * 0.5;				// per hour { kinetics - 75 ppb U} - 140 ppm and No Salt
 	//kf_UO2CO3 = 1.15E+16;				// per hour { kinetics - 75 ppb U} - 140 ppm
-	kf_UO2CO3 = 7.50E+15;
+	kf_UO2CO3 = 8.9E+15;
 	//kf_UO2CO3 = 4.25E+15;				// per hour { kinetics - 75 ppb U} - 70 ppm
 	//kf_UO2CO3 = 2.05E+15;				// per hour { kinetics - 75 ppb U} - 35 ppm
 	logK_UO2CO3 = 3.45;					// mol/L	{ kinetics - 75 ppb U} - MAX = 3.47 (3.45)
