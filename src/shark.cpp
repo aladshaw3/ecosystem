@@ -2397,7 +2397,7 @@ int SHARK_TESTS()
 	//shark_dat.simulationtime = 1440.0; //hours
 	
 	// ------------------ 140 ppm Carbonate No Spike Case -------------------------
-	//NaCl = 1e-100;
+	NaCl = 1e-100;
 	NaCl = 0.43;
 	NaHCO3 = 0.00167; //140 ppm
 	UO2 = 4.1429E-8;   // ~9.86 ppb
@@ -2472,7 +2472,8 @@ int SHARK_TESTS()
 	//These Work for All Kinetics (kf is a function of carbonate concentration and salt)
 	
 	//kf_UO2CO3 = 1.15E+16 * 0.5;				// per hour { kinetics - 75 ppb U} - 140 ppm and No Salt
-	kf_UO2CO3 = 1.15E+16;				// per hour { kinetics - 75 ppb U} - 140 ppm
+	//kf_UO2CO3 = 1.15E+16;				// per hour { kinetics - 75 ppb U} - 140 ppm
+	kf_UO2CO3 = 7.50E+15;
 	//kf_UO2CO3 = 4.25E+15;				// per hour { kinetics - 75 ppb U} - 70 ppm
 	//kf_UO2CO3 = 2.05E+15;				// per hour { kinetics - 75 ppb U} - 35 ppm
 	logK_UO2CO3 = 3.45;					// mol/L	{ kinetics - 75 ppb U} - MAX = 3.47 (3.45)
