@@ -522,6 +522,8 @@ int krylov( int (*matvec) (const Matrix& v, Matrix &w, const void *data),
 				for (int n=0; n<r0.rows(); n++)
 					krylov_dat->Vk[j+1].edit(n, 0, krylov_dat->w(n,0)/krylov_dat->hp1);
         	}
+			else
+				krylov_dat->v = krylov_dat->w/krylov_dat->hp1;
 		}
       
         krylov_dat->iter++;
@@ -3348,8 +3350,8 @@ int LARK_TESTS()
     krylov_dat.k = maxk;
     
     time = clock();
-    success = krylov(matvec_ex01,precon_ex01,r0,&krylov_dat,(void *)&ex01_dat, (void *)&ex01_dat);
-    
+    success = krylov(matvec_ex01,NULL,r0,&krylov_dat,(void *)&ex01_dat, (void *)&ex01_dat);
+	    
     Matrix x;
     success = update_krylov_solution(x, guess, krylov_dat.Vk, krylov_dat.yk);
     time = clock() - time;
