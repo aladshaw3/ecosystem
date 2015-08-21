@@ -96,30 +96,30 @@ typedef struct
   	std::vector<double> uz_l_E, uz_lm1_E, uz_lp1_E;
 	
 	//comp
-	Matrix unm1;			//Conserved Quantity Older
-	Matrix un;				//Conserved Quantity Old
-	Matrix unp1;			//Conserved Quantity New
-	Matrix u_star;			//Conserved Quantity Projected New
-	Matrix ubest;			//Best found solution if solving iteratively
+	Matrix<double> unm1;			//Conserved Quantity Older
+	Matrix<double> un;				//Conserved Quantity Old
+	Matrix<double> unp1;			//Conserved Quantity New
+	Matrix<double> u_star;			//Conserved Quantity Projected New
+	Matrix<double> ubest;			//Best found solution if solving iteratively
 	//sys
-	Matrix vn;				//Velocity Old
-	Matrix vnp1;			//Velocity New
-	Matrix Dn;				//Dispersion Old
-	Matrix Dnp1;			//Dispersion New
-  	Matrix kn;				//Reaction Old
-  	Matrix knp1;			//Reaction New
-	Matrix Sn;				//Forcing Function Old
-	Matrix Snp1;			//Forcing Function New
-  	Matrix Rn;				//Time Coeff Old
-  	Matrix Rnp1;			//Time Coeff New
+	Matrix<double> vn;				//Velocity Old
+	Matrix<double> vnp1;			//Velocity New
+	Matrix<double> Dn;				//Dispersion Old
+	Matrix<double> Dnp1;			//Dispersion New
+  	Matrix<double> kn;				//Reaction Old
+  	Matrix<double> knp1;			//Reaction New
+	Matrix<double> Sn;				//Forcing Function Old
+	Matrix<double> Snp1;			//Forcing Function New
+  	Matrix<double> Rn;				//Time Coeff Old
+  	Matrix<double> Rnp1;			//Time Coeff New
 	//comp
-	Matrix Fn;				//Flux Limiter Old
-	Matrix Fnp1;			//Flux Limiter New
-	Matrix gI;				//Implicit Side BC
-	Matrix gE;				//Explicit Side BC
+	Matrix<double> Fn;				//Flux Limiter Old
+	Matrix<double> Fnp1;			//Flux Limiter New
+	Matrix<double> gI;				//Implicit Side BC
+	Matrix<double> gE;				//Explicit Side BC
   	//Iteration Info
-  	Matrix res;				//Current residual
-  	Matrix pres;			//Current search direction
+  	Matrix<double> res;				//Current residual
+  	Matrix<double> pres;			//Current search direction
 	
 	//Function pointers for user defined functions (defaults are provided)
 	//NOTE: if defaults are used, user_data must be a FINCH_DATA object
@@ -132,8 +132,8 @@ typedef struct
 	int (*setparams) (const void *user_data);
 	int (*discretize) (const void *user_data);
 	int (*setbcs) (const void *user_data);
-	int (*evalres) (const Matrix& x, Matrix& res, const void *user_data);
-	int (*evalprecon) (const Matrix& b, Matrix& p, const void *user_data);
+	int (*evalres) (const Matrix<double>& x, Matrix<double>& res, const void *user_data);
+	int (*evalprecon) (const Matrix<double>& b, Matrix<double>& p, const void *user_data);
 	int (*setpostprocess) (const void *user_data);
 	int (*resettime) (const void *user_data);
 	
@@ -158,7 +158,7 @@ int check_Mass(FINCH_DATA *dat);
 
 int l_direct(FINCH_DATA *dat);
 
-int lark_picard_step(const Matrix &x, Matrix &G, const void *data);
+int lark_picard_step(const Matrix<double> &x, Matrix<double> &G, const void *data);
 
 int nl_picard(FINCH_DATA *dat);
 
@@ -171,8 +171,8 @@ int setup_FINCH_DATA( int (*user_callroutine) (const void *user_data),
 					  int (*user_setparams) (const void *user_data),
 					  int (*user_discretize) (const void *user_data),
 					  int (*user_bcs) (const void *user_data),
-					  int (*user_res) (const Matrix&x, Matrix& res, const void *user_data),
-					  int (*user_precon) (const Matrix&b, Matrix& p, const void *user_data),
+					  int (*user_res) (const Matrix<double>&x, Matrix<double>& res, const void *user_data),
+					  int (*user_precon) (const Matrix<double>&b, Matrix<double>& p, const void *user_data),
 					  int (*user_postprocess) (const void *user_data),
 					  int (*user_reset) (const void *user_data),
 					  FINCH_DATA *dat, const void *param_data);
@@ -210,9 +210,9 @@ int ospre_discretization(const void *user_data);
 
 int default_bcs(const void *user_data);
 
-int default_res(const Matrix &x, Matrix &res, const void *user_data);
+int default_res(const Matrix<double> &x, Matrix<double> &res, const void *user_data);
 
-int default_precon(const Matrix &b, Matrix &p, const void *user_data);
+int default_precon(const Matrix<double> &b, Matrix<double> &p, const void *user_data);
 
 int default_postprocess(const void *user_data);
 

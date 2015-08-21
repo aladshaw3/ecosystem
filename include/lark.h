@@ -22,13 +22,13 @@ typedef struct
 	
 	bool Output = true; //True = print messages to console
 	
-  	std::vector<Matrix> Vk; // (N) x (k) orthonormal vector basis stored as a vector of column matrices
-    Matrix Hkp1;        	// (k+1) x (k) upper Hessenberg matrix
-    Matrix yk;          	// (k) x (1) vector search direction
-    Matrix e1;          	// (k) x (1) orthonormal vector with 1 in first position
-    Matrix w;           	// (N) x (1) interim result of the matrix_vector multiplication
-  	Matrix v;				// (N) x (1) holding cell for the column entries of Vk and other interims
-  	Matrix sum;				// (N) x (1) running sum of subspace vectors for use in altering w
+  	std::vector< Matrix<double> > Vk; // (N) x (k) orthonormal vector basis stored as a vector of column matrices
+    Matrix<double> Hkp1;        	// (k+1) x (k) upper Hessenberg matrix
+    Matrix<double> yk;          	// (k) x (1) vector search direction
+    Matrix<double>e1;          	// (k) x (1) orthonormal vector with 1 in first position
+    Matrix<double> w;           	// (N) x (1) interim result of the matrix_vector multiplication
+  	Matrix<double> v;				// (N) x (1) holding cell for the column entries of Vk and other interims
+  	Matrix<double> sum;				// (N) x (1) running sum of subspace vectors for use in altering w
 	
 }KRYLOV_DATA;
 
@@ -49,9 +49,9 @@ typedef struct
 	
 	bool Output = true;			//True = print messages to console
     
-    Matrix x;           		//Solution to the linear system
-	Matrix bestx;				//Best found solution to the linear system
-  	Matrix r;					//Residual vector for the linear system
+    Matrix<double> x;           		//Solution to the linear system
+	Matrix<double> bestx;				//Best found solution to the linear system
+  	Matrix<double> r;					//Residual vector for the linear system
 	
     KRYLOV_DATA krylov_dat; //Data structure for the kyrlov subspace
     
@@ -75,21 +75,21 @@ typedef struct
 	
 	bool Output = true;			//True = print messages to console
 	
-	Matrix x;					//Solution to the linear system
-	Matrix bestx;				//Best found solution to the linear system
-	Matrix r;					//Residual vector for the linear system
+	Matrix<double> x;					//Solution to the linear system
+	Matrix<double> bestx;				//Best found solution to the linear system
+	Matrix<double> r;					//Residual vector for the linear system
 	
 	//NOTE: The value of k changes meaning these vectors and matrices grow in size
-	std::vector<Matrix> Vk;						// (N x k) orthonormal vector basis
+	std::vector< Matrix<double> > Vk;						// (N x k) orthonormal vector basis
 	std::vector< std::vector< double > > H;		// (k+1 x k) upper Hessenberg storage matrix
 	std::vector< std::vector< double > > H_bar;	// (k+1 x k) Factorized matrix
 	std::vector< double > y;					// (k x 1) Vector search direction
 	std::vector< double > e0;					// (k+1 x 1) Normalized vector with residual info
 	std::vector< double > e0_bar;				// (k+1 x 1) Factorized normal vector
 	
-	Matrix w;           	// (N) x (1) interim result of the matrix_vector multiplication
-	Matrix v;				// (N) x (1) holding cell for the column entries of Vk and other interims
-	Matrix sum;				// (N) x (1) running sum of subspace vectors for use in altering w
+	Matrix<double> w;           	// (N) x (1) interim result of the matrix_vector multiplication
+	Matrix<double> v;				// (N) x (1) holding cell for the column entries of Vk and other interims
+	Matrix<double> sum;				// (N) x (1) running sum of subspace vectors for use in altering w
 	
 }GMRESRP_DATA;
 
@@ -110,14 +110,14 @@ typedef struct
 	
 	bool Output = true;			//True = print messages to console
   
-  	Matrix x;						//Solution to the linear system
-	Matrix bestx;					//Best found solution to the linear system
-  	Matrix r;						//Residual vector for the linear system
-  	Matrix r_old;					//Previous residual vector
-  	Matrix z;						//Preconditioned residual vector (result of precon function)
-  	Matrix z_old;					//Previous preconditioned residual vector
-  	Matrix p;						//Search direction
-  	Matrix Ap;						//Result of matrix-vector multiplication
+  	Matrix<double> x;						//Solution to the linear system
+	Matrix<double> bestx;					//Best found solution to the linear system
+  	Matrix<double> r;						//Residual vector for the linear system
+  	Matrix<double> r_old;					//Previous residual vector
+  	Matrix<double> z;						//Preconditioned residual vector (result of precon function)
+  	Matrix<double> z_old;					//Previous preconditioned residual vector
+  	Matrix<double> p;						//Search direction
+  	Matrix<double> Ap;						//Result of matrix-vector multiplication
   
 }PCG_DATA;
 
@@ -143,16 +143,16 @@ typedef struct
 	
 	bool Output = true;			//True = print messages to console
 	
-	Matrix x;					//Solution to the linear system
-	Matrix bestx;				//Best found solution to the linear system
-	Matrix r;					//Residual vector for the linear system
-	Matrix r0;					//Initial residual vector
-	Matrix v;					//Search direction for p
-	Matrix p;					//Search direction for updating
-	Matrix y;					//Preconditioned search direction
-	Matrix s;					//Residual updating vector
-	Matrix z;					//Preconditioned residual updating vector
-	Matrix t;					//Search direction for resdidual updates
+	Matrix<double> x;					//Solution to the linear system
+	Matrix<double> bestx;				//Best found solution to the linear system
+	Matrix<double> r;					//Residual vector for the linear system
+	Matrix<double> r0;					//Initial residual vector
+	Matrix<double> v;					//Search direction for p
+	Matrix<double> p;					//Search direction for updating
+	Matrix<double> y;					//Preconditioned search direction
+	Matrix<double> s;					//Residual updating vector
+	Matrix<double> z;					//Preconditioned residual updating vector
+	Matrix<double> t;					//Search direction for resdidual updates
 	
 }BiCGSTAB_DATA;
 
@@ -176,16 +176,16 @@ typedef struct
 	
 	bool Output = true;			//True = print messages to console
 	
-	Matrix x;					//Solution to the linear system
-	Matrix bestx;				//Best found solution to the linear system
-	Matrix r;					//Residual vector for the linear system
-	Matrix r0;					//Initial residual vector
-	Matrix u;					//Search direction for v
-	Matrix w;					//Updates sigma and u
-	Matrix v;					//Search direction for x
-	Matrix p;					//Preconditioning result for w, z, and matvec for Ax
-	Matrix c;					//Holds the matvec result between A and p
-	Matrix z;					//Full search direction for x
+	Matrix<double> x;					//Solution to the linear system
+	Matrix<double> bestx;				//Best found solution to the linear system
+	Matrix<double> r;					//Residual vector for the linear system
+	Matrix<double> r0;					//Initial residual vector
+	Matrix<double> u;					//Search direction for v
+	Matrix<double> w;					//Updates sigma and u
+	Matrix<double> v;					//Search direction for x
+	Matrix<double> p;					//Preconditioning result for w, z, and matvec for Ax
+	Matrix<double> c;					//Holds the matvec result between A and p
+	Matrix<double> z;					//Full search direction for x
 	
 }CGS_DATA;
 
@@ -210,13 +210,13 @@ typedef struct
 	
 	bool Output = true;			//True = print messages to the console
 	
-	Matrix x;					//Solution to the linear system
-	Matrix bestx;				//Best found solution to the linear system
-	Matrix r;					//Residual Vector
-	Matrix c_temp;				//Temporary c vector to be updated
-	Matrix u_temp;				//Temporary u vector to be updated
-	std::vector<Matrix> u;		//Vector span for updating x
-	std::vector<Matrix> c;		//Vector span for updating r
+	Matrix<double> x;					//Solution to the linear system
+	Matrix<double> bestx;				//Best found solution to the linear system
+	Matrix<double> r;					//Residual Vector
+	Matrix<double> c_temp;				//Temporary c vector to be updated
+	Matrix<double> u_temp;				//Temporary u vector to be updated
+	std::vector<Matrix<double>> u;		//Vector span for updating x
+	std::vector<Matrix<double>> c;		//Vector span for updating r
 	
 }GCR_DATA;
 
@@ -239,15 +239,15 @@ typedef struct
 	double gcr_rel_tol = 1e-6;	//Relative outer residual tolerance
 	double gcr_abs_tol = 1e-6;	//Absolute outer residual tolerance
 	
-	Matrix arg;					//Argument matrix passed between preconditioner and iterator
+	Matrix<double> arg;					//Argument matrix passed between preconditioner and iterator
 	
 	GCR_DATA gcr_dat;			//Data structure for the outer GCR steps
 	GMRESRP_DATA gmres_dat;		//Data structure for the inner GMRES steps
 	
 	//User supplied matrix-vector product function
-	int (*matvec) (const Matrix &x, Matrix &Ax, const void *matvec_data);
+	int (*matvec) (const Matrix<double> &x, Matrix<double> &Ax, const void *matvec_data);
 	//Optional user supplied terminal preconditioner
-	int (*terminal_precon) (const Matrix &r, Matrix &p, const void *precon_data);
+	int (*terminal_precon) (const Matrix<double> &r, Matrix<double> &p, const void *precon_data);
 	
 	const void *matvec_data;	//Data structure for the user's matvec function
 	const void *term_precon;	//Data structure for the user's terminal preconditioner
@@ -269,9 +269,9 @@ typedef struct
 	
 	bool Output = true;			//True = print messages to console
 	
-	Matrix x0;						//Previous iterate solution vector
-	Matrix bestx;					//Best found solution vector
-	Matrix r;						//Residual of the non-linear system
+	Matrix<double> x0;						//Previous iterate solution vector
+	Matrix<double> bestx;					//Best found solution vector
+	Matrix<double> r;						//Residual of the non-linear system
 	
 }PICARD_DATA;
 
@@ -285,8 +285,8 @@ typedef struct
 	
 	bool constRho = false;				//True = use a constant value for rho
 	
-	Matrix Fk;							//Old residual vector of the Newton step
-	Matrix xk;							//Old solution vector of the Newton step
+	Matrix<double> Fk;							//Old residual vector of the Newton step
+	Matrix<double> xk;							//Old solution vector of the Newton step
 	
 }BACKTRACK_DATA;
 
@@ -322,11 +322,11 @@ typedef struct
 	bool LineSearch = false;	//True = use Backtracking Linesearch for global convergence
 	bool Bounce = false;		//True = allow Linesearch to go outside local well, False = Strict local convergence
 	
-	Matrix F;					//Stored fuction evaluation at x (also the residual)
-	Matrix Fv;					//Stored function evaluation at x+eps*v
-	Matrix v;					//Stored vector of x+eps*v
-	Matrix x;					//Current solution vector for the non-linear system
-	Matrix bestx;				//Best found solution vector to the non-linear system
+	Matrix<double> F;					//Stored fuction evaluation at x (also the residual)
+	Matrix<double> Fv;					//Stored function evaluation at x+eps*v
+	Matrix<double> v;					//Stored vector of x+eps*v
+	Matrix<double> x;					//Current solution vector for the non-linear system
+	Matrix<double> bestx;				//Best found solution vector to the non-linear system
 	
 	//The PJFNK implementation will choose the linear method best suited for your problem
 	GMRESLP_DATA gmreslp_dat;   	//Data structure for the GMRESLP method (solver = 0)
@@ -347,31 +347,31 @@ typedef struct
 	//Data structure pointer for user's preconditioning data
 	const void *precon_data;
 	//Function pointer for the user's function F(x) using there data
-	int (*funeval) (const Matrix &x, Matrix &F, const void *res_data);
+	int (*funeval) (const Matrix<double> &x, Matrix<double> &F, const void *res_data);
 	//Function pointer for the user's preconditioning function for the linear system
-	int (*precon) (const Matrix &r, Matrix &p, const void *precon_data);
+	int (*precon) (const Matrix<double> &r, Matrix<double> &p, const void *precon_data);
 	
 }PJFNK_DATA;
 
 //Data structures used by examples to test the algorithms of LARK
 typedef struct
 {
-    Matrix M;               //(N) x (N) coefficient matrix
-    Matrix b;               //(N) x (1) right side vector solution
+    Matrix<double> M;               //(N) x (N) coefficient matrix
+    Matrix<double> b;               //(N) x (1) right side vector solution
     
 }EX01_DATA;
 
 typedef struct
 {
-  	Matrix M;               //(N) x (N) coefficient matrix
-	Matrix b;               //(N) x (1) right side vector solution
+  	Matrix<double> M;               //(N) x (N) coefficient matrix
+	Matrix<double> b;               //(N) x (1) right side vector solution
   
 }EX02_DATA;
 
 typedef struct
 {
-  	Matrix M;               //(N) x (N) coefficient matrix
-  	Matrix b;               //(N) x (1) right side vector solution
+  	Matrix<double> M;               //(N) x (N) coefficient matrix
+  	Matrix<double> b;               //(N) x (1) right side vector solution
   
 }EX04_DATA;
 
@@ -380,106 +380,106 @@ typedef struct
 	double h;				//Mesh size for non-linear PDE
 	double k;				//Scaling factor for non-linear portion of PDE
 	int N;					//Number of nodes in mesh
-	Matrix x;				//Nx1 solution vector
-	Matrix M;				//NxN preconditioning matrix
-	Matrix s;				//Search direction for Picard
-	Matrix p;				//Conditioned search direction
+	Matrix<double> x;				//Nx1 solution vector
+	Matrix<double> M;				//NxN preconditioning matrix
+	Matrix<double> s;				//Search direction for Picard
+	Matrix<double> p;				//Conditioned search direction
 }EX09_DATA;
 
 typedef struct
 {
 	int N;					//Number of nodes in the mesh
 	int m;					//Dimensional length for natural laplacian
-	Matrix b;				//Boundary Conditions for the problem
+	Matrix<double> b;				//Boundary Conditions for the problem
 }EX15_DATA;
 
 //These functions are used to run LARK Tests
-int matvec_ex01(const Matrix& v, Matrix& w, const void *data);
+int matvec_ex01(const Matrix<double>& v, Matrix<double>& w, const void *data);
 
-int precon_ex01(const Matrix& b, Matrix& p, const void *data);
+int precon_ex01(const Matrix<double>& b, Matrix<double>& p, const void *data);
 
-int matvec_ex02(const Matrix& v, Matrix& w, const void *data);
+int matvec_ex02(const Matrix<double>& v, Matrix<double>& w, const void *data);
 
-int matvec_ex04(const Matrix& v, Matrix& w, const void *data);
+int matvec_ex04(const Matrix<double>& v, Matrix<double>& w, const void *data);
 
-int precon_ex04(const Matrix& b, Matrix& p, const void *data);
+int precon_ex04(const Matrix<double>& b, Matrix<double>& p, const void *data);
 
-int evalx_ex09(const Matrix &x, Matrix& G, const void *data);
+int evalx_ex09(const Matrix<double> &x, Matrix<double>& G, const void *data);
 
-int funeval_ex09(const Matrix &x, Matrix& F, const void *data);
+int funeval_ex09(const Matrix<double> &x, Matrix<double>& F, const void *data);
 
-int funeval_ex10(const Matrix &x, Matrix& F, const void *data);
+int funeval_ex10(const Matrix<double> &x, Matrix<double>& F, const void *data);
 
-int precon_ex10(const Matrix &r, Matrix& p, const void *data);
+int precon_ex10(const Matrix<double> &r, Matrix<double>& p, const void *data);
 
-int matvec_ex15(const Matrix& v, Matrix& w, const void *data);
+int matvec_ex15(const Matrix<double>& v, Matrix<double>& w, const void *data);
 
-int precon_ex15(const Matrix& w, Matrix& p, const void *data);
+int precon_ex15(const Matrix<double>& w, Matrix<double>& p, const void *data);
 
 //Below are the actual functions available in LARK
-int update_krylov_solution(Matrix& x, Matrix& x0, std::vector<Matrix>& Vk, Matrix& yk);
+int update_krylov_solution(Matrix<double>& x, Matrix<double>& x0, std::vector<Matrix<double>>& Vk, Matrix<double>& yk);
 
-int krylov( int (*matvec) (const Matrix& v, Matrix &w, const void *data),
-            int (*precon) (const Matrix& b, Matrix &p, const void *data),
-            Matrix &r0, KRYLOV_DATA *krylov_dat, const void *matvec_data,
+int krylov( int (*matvec) (const Matrix<double>& v, Matrix<double> &w, const void *data),
+            int (*precon) (const Matrix<double>& b, Matrix<double> &p, const void *data),
+            Matrix<double> &r0, KRYLOV_DATA *krylov_dat, const void *matvec_data,
 		    const void *precon_data );
 
-int gmresLeftPreconditioned( int (*matvec) (const Matrix& v, Matrix &w, const void *data),
-           int (*precon) (const Matrix& b, Matrix &p, const void *data),
-           Matrix &b, GMRESLP_DATA *gmreslp_dat, const void *matvec_data,
+int gmresLeftPreconditioned( int (*matvec) (const Matrix<double>& v, Matrix<double> &w, const void *data),
+           int (*precon) (const Matrix<double>& b, Matrix<double> &p, const void *data),
+           Matrix<double> &b, GMRESLP_DATA *gmreslp_dat, const void *matvec_data,
 		   const void *precon_data );
 
-int fom( int (*matvec) (const Matrix& v, Matrix &w, const void *data),
-         int (*precon) (const Matrix& b, Matrix &p, const void *data),
-         Matrix &b, GMRESLP_DATA *gmreslp_dat, const void *matvec_data,
+int fom( int (*matvec) (const Matrix<double>& v, Matrix<double> &w, const void *data),
+         int (*precon) (const Matrix<double>& b, Matrix<double> &p, const void *data),
+         Matrix<double> &b, GMRESLP_DATA *gmreslp_dat, const void *matvec_data,
 		 const void *precon_data );
 
-int gmresRightPreconditioned( int (*matvec) (const Matrix& v, Matrix &w, const void *data),
-		  int (*precon) (const Matrix& b, Matrix &p, const void *data),
-		  Matrix &b, GMRESRP_DATA *gmresrp_dat, const void *matvec_data,
+int gmresRightPreconditioned( int (*matvec) (const Matrix<double>& v, Matrix<double> &w, const void *data),
+		  int (*precon) (const Matrix<double>& b, Matrix<double> &p, const void *data),
+		  Matrix<double> &b, GMRESRP_DATA *gmresrp_dat, const void *matvec_data,
 		  const void *precon_data );
 
-int pcg( int (*matvec) (const Matrix& p, Matrix &Ap, const void *data),
-		 int (*precon) (const Matrix& r, Matrix &z, const void *data),
-		 Matrix &b, PCG_DATA *pcg_dat, const void *matvec_data,
+int pcg( int (*matvec) (const Matrix<double>& p, Matrix<double> &Ap, const void *data),
+		 int (*precon) (const Matrix<double>& r, Matrix<double> &z, const void *data),
+		 Matrix<double> &b, PCG_DATA *pcg_dat, const void *matvec_data,
 		 const void *precon_data );
 
-int bicgstab( int (*matvec) (const Matrix& p, Matrix &Ap, const void *data),
-			  int (*precon) (const Matrix& r, Matrix &z, const void *data),
-			  Matrix &b, BiCGSTAB_DATA *bicg_dat, const void *matvec_data,
+int bicgstab( int (*matvec) (const Matrix<double>& p, Matrix<double> &Ap, const void *data),
+			  int (*precon) (const Matrix<double>& r, Matrix<double> &z, const void *data),
+			  Matrix<double> &b, BiCGSTAB_DATA *bicg_dat, const void *matvec_data,
 			  const void *precon_data );
 
-int cgs( int (*matvec) (const Matrix& p, Matrix &Ap, const void *data),
-		 int (*precon) (const Matrix& r, Matrix &z, const void *data),
-		 Matrix &b, CGS_DATA *cgs_dat, const void *matvec_data,
+int cgs( int (*matvec) (const Matrix<double>& p, Matrix<double> &Ap, const void *data),
+		 int (*precon) (const Matrix<double>& r, Matrix<double> &z, const void *data),
+		 Matrix<double> &b, CGS_DATA *cgs_dat, const void *matvec_data,
 		 const void *precon_data );
 
-int gcr( int (*matvec) (const Matrix& x, Matrix &Ax, const void *data),
-		 int (*precon) (const Matrix& r, Matrix &Mr, const void *data),
-		 Matrix &b, GCR_DATA *gcr_dat, const void *matvec_data,
+int gcr( int (*matvec) (const Matrix<double>& x, Matrix<double> &Ax, const void *data),
+		 int (*precon) (const Matrix<double>& r, Matrix<double> &Mr, const void *data),
+		 Matrix<double> &b, GCR_DATA *gcr_dat, const void *matvec_data,
 		 const void *precon_data );
 
-int gmresPreconditioner( const Matrix& r, Matrix &Mr, const void *data);
+int gmresPreconditioner( const Matrix<double>& r, Matrix<double> &Mr, const void *data);
 
-int gmresr( int (*matvec) (const Matrix& x, Matrix &Ax, const void *data),
-		  int (*terminal_precon) (const Matrix& r, Matrix &Mr, const void *data),
-		  Matrix &b, GMRESR_DATA *gmresr_dat, const void *matvec_data,
+int gmresr( int (*matvec) (const Matrix<double>& x, Matrix<double> &Ax, const void *data),
+		  int (*terminal_precon) (const Matrix<double>& r, Matrix<double> &Mr, const void *data),
+		  Matrix<double> &b, GMRESR_DATA *gmresr_dat, const void *matvec_data,
 		  const void *term_precon_data );
 
-int picard( int (*res) (const Matrix& x, Matrix &r, const void *data),
-		    int (*evalx) (const Matrix& x0, Matrix &x, const void *data),
-			Matrix &x, PICARD_DATA *picard_dat, const void *res_data,
+int picard( int (*res) (const Matrix<double>& x, Matrix<double> &r, const void *data),
+		    int (*evalx) (const Matrix<double>& x0, Matrix<double> &x, const void *data),
+			Matrix<double> &x, PICARD_DATA *picard_dat, const void *res_data,
 		    const void *evalx_data);
 
-int jacvec( const Matrix& v, Matrix& Jv, const void *data);
+int jacvec( const Matrix<double>& v, Matrix<double>& Jv, const void *data);
 
-int backtrackLineSearch( int (*feval) (const Matrix& x, Matrix &F, const void *data),
-						 Matrix &Fkp1, Matrix &xkp1, Matrix &pk, double normFk,
+int backtrackLineSearch( int (*feval) (const Matrix<double>& x, Matrix<double> &F, const void *data),
+						 Matrix<double> &Fkp1, Matrix<double> &xkp1, Matrix<double> &pk, double normFk,
 						 BACKTRACK_DATA *backtrack_dat, const void *feval_data);
 
-int pjfnk( int (*res) (const Matrix& x, Matrix &F, const void *data),
-		   int (*precon) (const Matrix& r, Matrix& p, const void *data),
-		   Matrix &x, PJFNK_DATA *pjfnk_dat, const void *res_data,
+int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *data),
+		   int (*precon) (const Matrix<double>& r, Matrix<double>& p, const void *data),
+		   Matrix<double> &x, PJFNK_DATA *pjfnk_dat, const void *res_data,
 		   const void *precon_data );
 
 int LARK_TESTS();

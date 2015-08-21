@@ -14,7 +14,7 @@
 #include "sandbox.h"
 
 //Test function number 01 for speciation problems
-int Speciation_Test01_Function(const Matrix &x, Matrix &F, const void *res_data)
+int Speciation_Test01_Function(const Matrix<double> &x, Matrix<double> &F, const void *res_data)
 {
 	int success = 0;
 	Speciation_Test01_Data *dat = (Speciation_Test01_Data *) res_data;
@@ -28,7 +28,7 @@ int Speciation_Test01_Function(const Matrix &x, Matrix &F, const void *res_data)
 }
 
 //Analytical Jacobian for Test function number 01
-int Speciation_Test01_Jacobian(const Matrix &x, Matrix &J, const void *precon_data)
+int Speciation_Test01_Jacobian(const Matrix<double> &x, Matrix<double> &J, const void *precon_data)
 {
 	int success = 0;
 	Speciation_Test01_Data *dat = (Speciation_Test01_Data *) precon_data;
@@ -64,7 +64,7 @@ int Speciation_Test01_Guess(const void *user_data)
 }
 
 //Simple MatVec product
-int Speciation_Test01_MatVec(const Matrix &x, Matrix &Ax, const void *matvec_data)
+int Speciation_Test01_MatVec(const Matrix<double> &x, Matrix<double> &Ax, const void *matvec_data)
 {
 	int success = 0;
 	Speciation_Test01_Data *dat = (Speciation_Test01_Data *) matvec_data;
@@ -75,8 +75,8 @@ int Speciation_Test01_MatVec(const Matrix &x, Matrix &Ax, const void *matvec_dat
 }
 
 //Form a numerical jacobian matrix
-int NumericalJacobian( int (*Func) (const Matrix &x, Matrix &F, const void *user_data),
-					  const Matrix &x, Matrix &J, int Nx, int Nf, NUM_JAC_DATA *jac_dat,
+int NumericalJacobian( int (*Func) (const Matrix<double> &x, Matrix<double> &F, const void *user_data),
+					  const Matrix<double> &x, Matrix<double> &J, int Nx, int Nf, NUM_JAC_DATA *jac_dat,
 					  const void *user_data)
 {
 	int success = 0;
@@ -176,7 +176,7 @@ int RUN_SANDBOX()
 	dat01.Jacobian.Display("Jac01");
 	
 	//Form a temp BC matrix to solve Jacobian iteratively
-	Matrix b;
+	Matrix<double> b;
 	b.set_size(dat01.N, 1);
 	b.edit(0, 0, 1);
 	GMRESRP_DATA gmres_dat01;
@@ -199,7 +199,7 @@ int RUN_SANDBOX()
 	dat01.NumJac.Display("NumJac");
 	
 	//Check the jacobian
-	Matrix Check;
+	Matrix<double> Check;
 	Check = dat01.Jacobian - dat01.NumJac;
 	Check.Display("Check");
 	std::cout << "Check norm = " << Check.norm() << std::endl;

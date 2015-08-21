@@ -23,32 +23,32 @@ typedef struct
 	
 	std::vector<Molecule> x;
 	
-	Matrix Jacobian;
-	Matrix NumJac;
-	Matrix logC;
-	Matrix C;
+	Matrix<double> Jacobian;
+	Matrix<double> NumJac;
+	Matrix<double> logC;
+	Matrix<double> C;
 	
 }Speciation_Test01_Data;
 
 typedef struct
 {
 	double eps = sqrt(DBL_EPSILON);
-	Matrix Fx;
-	Matrix Fxp;
-	Matrix dxj;
+	Matrix<double> Fx;
+	Matrix<double> Fxp;
+	Matrix<double> dxj;
 	
 }NUM_JAC_DATA;
 
-int Speciation_Test01_Function(const Matrix &x, Matrix &F, const void *res_data);
+int Speciation_Test01_Function(const Matrix<double> &x, Matrix<double> &F, const void *res_data);
 
-int Speciation_Test01_Jacobian(const Matrix &x, Matrix &J, const void *precon_data);
+int Speciation_Test01_Jacobian(const Matrix<double> &x, Matrix<double> &J, const void *precon_data);
 
 int Speciation_Test01_Guess(const void *user_data);
 
-int Speciation_Test01_MatVec(const Matrix &x, Matrix &Ax, const void *matvec_data);
+int Speciation_Test01_MatVec(const Matrix<double> &x, Matrix<double> &Ax, const void *matvec_data);
 
-int NumericalJacobian( int (*Func) (const Matrix &x, Matrix &F, const void *user_data),
-					   const Matrix &x, Matrix &J, int Nx, int Nf, NUM_JAC_DATA *jac_dat,
+int NumericalJacobian( int (*Func) (const Matrix<double> &x, Matrix<double> &F, const void *user_data),
+					   const Matrix<double> &x, Matrix<double> &J, int Nx, int Nf, NUM_JAC_DATA *jac_dat,
 					   const void *user_data);
 
 int RUN_SANDBOX();

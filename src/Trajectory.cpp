@@ -4,42 +4,42 @@
 #include "Trajectory.h"
 
 //Force Calculations
-double Magnetic_R(const Matrix& dX, const Matrix& dY, int i, double b, double mu_0, double chi_p, double M, double H0, double a)
+double Magnetic_R(const Matrix<double>& dX, const Matrix<double>& dY, int i, double b, double mu_0, double chi_p, double M, double H0, double a)
 {
 	return -((4.0*3.1415*pow(b,3)*mu_0*chi_p*M*H0)/(3.0*a))*((M/(2.0*H0*pow(dY(i-1,0),5.0)))+(cos(2.0*dX(i-1,0))/pow(dY(i-1,0),3.0)));
 }
 
-double Magnetic_T(const Matrix& dX, const Matrix& dY, int i, double b, double mu_0, double chi_p, double M, double H0, double a)
+double Magnetic_T(const Matrix<double>& dX, const Matrix<double>& dY, int i, double b, double mu_0, double chi_p, double M, double H0, double a)
 {
 	return -((4.0*3.1415*pow(b,3.0)*mu_0*chi_p*M*H0)/(3.0*a))*(sin(2.0*dX(i-1,0))/pow(dY(i-1,0),3.0));
 }
 
-double Grav_R(const Matrix& dX, int i, double b, double rho_p, double rho_f)
+double Grav_R(const Matrix<double>& dX, int i, double b, double rho_p, double rho_f)
 {
 	return -(4.0*3.1415*pow(b,3.0)/3.0)*(rho_p-rho_f)*9.81*sin(dX(i-1,0));
 }
 
-double Grav_T(const Matrix& dX, int i, double b, double rho_p, double rho_f)
+double Grav_T(const Matrix<double>& dX, int i, double b, double rho_p, double rho_f)
 {
 	return -(4.0*3.1415*pow(b,3.0)/3.0)*(rho_p-rho_f)*9.81*cos(dX(i-1,0));
 }
 
-double Van_R(const Matrix& dX, const Matrix& dY, int i, double Hamaker, double b, double a)
+double Van_R(const Matrix<double>& dX, const Matrix<double>& dY, int i, double Hamaker, double b, double a)
 {
 	return -2.0*Hamaker/(3.0*b*pow(((dY(i-1,0)*a-a-b)/b)+2.0,2.0)*pow((dY(i-1,0)*a-a-b)/b,2.0));
 }
 
-double V_RAD (const Matrix& dX, const Matrix& dY, int i, double V0, double rho_f, double a, double eta)
+double V_RAD (const Matrix<double>& dX, const Matrix<double>& dY, int i, double V0, double rho_f, double a, double eta)
 {
 	return -V0*(log(dY(i-1,0))-0.5*(1-pow(1/dY(i-1,0),2.0)))*sin(dX(i-1,0))/(2.002-log(2.0*V0*rho_f*a/eta));
 }
 
-double V_THETA (const Matrix& dX, const Matrix& dY, int i, double V0, double rho_f, double a, double eta)
+double V_THETA (const Matrix<double>& dX, const Matrix<double>& dY, int i, double V0, double rho_f, double a, double eta)
 {
 	return -V0*(log(dY(i-1,0))+0.5*(1-pow(1/dY(i-1,0),2.0)))*cos(dX(i-1,0))/(2.002-log(2.0*V0*rho_f*a/eta));
 }
 
-int POLAR(Matrix& POL, const Matrix& dX, const Matrix& dY, const void *data, int i)
+int POLAR(Matrix<double>& POL, const Matrix<double>& dX, const Matrix<double>& dY, const void *data, int i)
 {
 	TRAJECTORY_DATA *dat = (TRAJECTORY_DATA *) data;
 	POL(0,0) = Magnetic_R(dX, dY, i, dat->b, dat->mu_0, dat->chi_p, dat-> M, dat->H0, dat->a);
@@ -55,19 +55,19 @@ int POLAR(Matrix& POL, const Matrix& dX, const Matrix& dY, const void *data, int
 	return 0;
 }
 
-double RADIAL_FORCE (const Matrix& POL, double eta, double b, double mp, double t, double a)
+double RADIAL_FORCE (const Matrix<double>& POL, double eta, double b, double mp, double t, double a)
 {
 	//return ((POL(0,0)+POL(1,0)+POL(2,0))*((t/(6.0*3.1415*eta*b))-((1-exp(-6.0*3.1415*eta*b*t/mp))/(pow(6.0*3.1415*eta*b,2.0)/mp)))+POL(3,0)*t)/a;
 	return (POL(3,0)*t)/a;
 }
 
-double TANGENTIAL_FORCE (const Matrix& POL, const Matrix& dY, double eta, double b, double mp, double t, double a, int i)
+double TANGENTIAL_FORCE (const Matrix<double>& POL, const Matrix<double>& dY, double eta, double b, double mp, double t, double a, int i)
 {
 	//return (POL(4,0)+POL(5,0)*((t/(6.0*3.1415*eta*b))-((1-exp(-6.0*3.1415*eta*b*t/mp))/(pow(6.0*3.1415*eta*b,2.0)/mp)))+POL(7,0)*t)/(a*dY(i-1,0));
 	return (POL(7,0)*t)/(a*dY(i-1,0));
 }
 
-int CARTESIAN(const Matrix& POL, Matrix& H, const Matrix& dY, double i, const void *data)
+int CARTESIAN(const Matrix<double>& POL, Matrix<double>& H, const Matrix<double>& dY, double i, const void *data)
 {
 	TRAJECTORY_DATA *dat = (TRAJECTORY_DATA *) data;
 	H(0,0) = RADIAL_FORCE(POL, dat->eta, dat->b, dat->mp, dat->dt, dat-> a);
@@ -76,14 +76,14 @@ int CARTESIAN(const Matrix& POL, Matrix& H, const Matrix& dY, double i, const vo
 	return 0;
 }
 
-int DISPLACEMENT (Matrix& dX, Matrix& dY, const Matrix& H, int i)
+int DISPLACEMENT (Matrix<double>& dX, Matrix<double>& dY, const Matrix<double>& H, int i)
 {
 	dX(i,0) = dX(i-1,0)+H(1,0);
 	dY(i,0) = dY(i-1,0)+H(0,0);
 	return 0;
 }
 
-int LOCATION (const Matrix& dY, const Matrix& dX, Matrix& XX, Matrix& YY, int i)
+int LOCATION (const Matrix<double>& dY, const Matrix<double>& dX, Matrix<double>& XX, Matrix<double>& YY, int i)
 {
 	XX(i,0) = dY(i,0)*cos(dX(i,0));
 	YY(i,0) = dY(i,0)*sin(dX(i,0));
@@ -167,7 +167,7 @@ int Run_Trajectory()
 		int Force_Balance;
 		Force_Balance = CARTESIAN(dat.POL,dat.H,dat.dY,i,(void *)&dat);
 		
-		//dat.H.Display("H-Matrix");
+		//dat.H.Display("H-Matrix<double>");
 		
 		int Next;
 		Next = DISPLACEMENT(dat.dX,dat.dY,dat.H,i);

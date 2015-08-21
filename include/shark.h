@@ -46,7 +46,7 @@ public:
 	
 	void DisplayInfo(int i);									//Function to display information of ith object
 	void DisplayAll();											//Function to display all information of list
-	void DisplayConcentrations(Matrix &C);						//Function to display the concentrations of species in list
+	void DisplayConcentrations(Matrix<double> &C);						//Function to display the concentrations of species in list
 	
 	void set_alkalinity(double alk);							//Set the alkalinity of the solution
 	
@@ -58,7 +58,7 @@ public:
 	
 	std::string speciesName(int i);								//Function to return the name of the ith species
 	
-	double Eval_ChargeResidual(const Matrix &x);				//Calculate charge balance residual
+	double Eval_ChargeResidual(const Matrix<double> &x);				//Calculate charge balance residual
 	
 protected:
 	int size;													//Size of the list
@@ -97,7 +97,7 @@ public:
 	double Get_Entropy();								//Fetch the entropy of the reaction
 	double Get_Energy();								//Fetch the energy of the reaction
 	
-	double Eval_Residual(const Matrix &x, const Matrix &gama);	//Evaluate a residual for the reaction given variable x and activity gama
+	double Eval_Residual(const Matrix<double> &x, const Matrix<double> &gama);	//Evaluate a residual for the reaction given variable x and activity gama
 	
 protected:
 	
@@ -135,7 +135,7 @@ public:
 	double Get_TotalConcentration ();					//Fetch the total concentration (mol/L)
 	std::string Get_Name ();							//Return name of mass balance species
 	
-	double Eval_Residual(const Matrix &x);				//Evaluate a residual for the reaction given variable x
+	double Eval_Residual(const Matrix<double> &x);				//Evaluate a residual for the reaction given variable x
 	
 protected:
 	MasterSpeciesList *List;							//Pointer to a master species object
@@ -198,12 +198,12 @@ public:
 	double Get_Affinity();								//Fetch the temperature affinity for the reaction
 	double Get_TimeStep();								//Fetch the time step
 	
-	double Eval_ReactionRate(const Matrix &x, const Matrix &gama);	//Calculate reation rate from concentrations and activities
-	double Eval_Residual(const Matrix &x_new, const Matrix &x_old,
-						 const Matrix &gama_new, const Matrix &gama_old); //Calculate the unsteady residual
-	double Eval_Residual(const Matrix &x, const Matrix &gama);		//Calculate the steady-state residual
-	double Eval_IC_Residual(const Matrix &x);						//Calculate the unsteady residual for initial conditions
-	double Explicit_Eval(const Matrix &x, const Matrix &gama);		//Return an approximate explicit solution
+	double Eval_ReactionRate(const Matrix<double> &x, const Matrix<double> &gama);	//Calculate reation rate from concentrations and activities
+	double Eval_Residual(const Matrix<double> &x_new, const Matrix<double> &x_old,
+						 const Matrix<double> &gama_new, const Matrix<double> &gama_old); //Calculate the unsteady residual
+	double Eval_Residual(const Matrix<double> &x, const Matrix<double> &gama);		//Calculate the steady-state residual
+	double Eval_IC_Residual(const Matrix<double> &x);						//Calculate the unsteady residual for initial conditions
+	double Explicit_Eval(const Matrix<double> &x, const Matrix<double> &gama);		//Return an approximate explicit solution
 	
 protected:
 	double initial_value;								//Initial value given at t=0 (in mol/L)
@@ -290,7 +290,7 @@ typedef struct SHARK_DATA
 	std::vector<UnsteadyReaction> UnsteadyList;		//Unsteady Reaction objects
 	
 	std::vector<
-		double (*) (const Matrix &x,
+		double (*) (const Matrix<double> &x,
 					SHARK_DATA *shark_dat,
 					const void *data) > OtherList;	//Array of Other Residual functions to be defined by user
 													//NOTE: These must be setup individually by the user
@@ -329,17 +329,17 @@ typedef struct SHARK_DATA
 	bool Contains_pOH = false;						//True = system contains pOH as a variable
 	bool Converged = false;							//True = system converged within tolerance 
 	
-	Matrix X_old;									//Solution vector for old time step
-	Matrix X_new;									//Solution vector for current time step
-	Matrix Conc_old;								//Concentration vector for old time step
-	Matrix Conc_new;								//Concentration vector for current time step
-	Matrix activity_new;							//Activity matrix for current time step
-	Matrix activity_old;							//Activity matrix from prior time step
+	Matrix<double> X_old;									//Solution vector for old time step
+	Matrix<double> X_new;									//Solution vector for current time step
+	Matrix<double> Conc_old;								//Concentration vector for old time step
+	Matrix<double> Conc_new;								//Concentration vector for current time step
+	Matrix<double> activity_new;							//Activity matrix for current time step
+	Matrix<double> activity_old;							//Activity matrix from prior time step
 	
 	//Function pointers for activity and residual evaluations
-	int (*EvalActivity) (const Matrix& x, Matrix &F, const void *data);
-	int (*Residual) (const Matrix& x, Matrix &F, const void *data);
-	int (*lin_precon) (const Matrix &r, Matrix &p, const void *data);
+	int (*EvalActivity) (const Matrix<double>& x, Matrix<double> &F, const void *data);
+	int (*Residual) (const Matrix<double>& x, Matrix<double> &F, const void *data);
+	int (*lin_precon) (const Matrix<double> &r, Matrix<double> &p, const void *data);
 	
 	PJFNK_DATA Newton_data;							//Data structure for the Newton-Krylov solver
 	const void *activity_data;						//User defined data structure for an activity model
@@ -358,25 +358,25 @@ void print2file_shark_results_new(SHARK_DATA *shark_dat);
 
 void print2file_shark_results_old(SHARK_DATA *shark_dat);
 
-int ideal_solution (const Matrix& x, Matrix &F, const void *data);
+int ideal_solution (const Matrix<double>& x, Matrix<double> &F, const void *data);
 
-int Davies_equation (const Matrix& x, Matrix &F, const void *data);
+int Davies_equation (const Matrix<double>& x, Matrix<double> &F, const void *data);
 
-int DebyeHuckel_equation (const Matrix &x, Matrix &F, const void *data);
+int DebyeHuckel_equation (const Matrix<double> &x, Matrix<double> &F, const void *data);
 
-int DaviesLadshaw_equation (const Matrix& x, Matrix &F, const void *data);
+int DaviesLadshaw_equation (const Matrix<double>& x, Matrix<double> &F, const void *data);
 
-int Convert2LogConcentration(const Matrix &x, Matrix &logx);
+int Convert2LogConcentration(const Matrix<double> &x, Matrix<double> &logx);
 
-int Convert2Concentration(const Matrix &logx, Matrix &x);
+int Convert2Concentration(const Matrix<double> &logx, Matrix<double> &x);
 
-int setup_SHARK_DATA( FILE *file, int (*residual) (const Matrix &x, Matrix &res, const void *data),
-					  int (*activity) (const Matrix &x, Matrix &gama, const void *data),
-					  int (*precond) (const Matrix &r, Matrix &p, const void *data),
+int setup_SHARK_DATA( FILE *file, int (*residual) (const Matrix<double> &x, Matrix<double> &res, const void *data),
+					  int (*activity) (const Matrix<double> &x, Matrix<double> &gama, const void *data),
+					  int (*precond) (const Matrix<double> &r, Matrix<double> &p, const void *data),
 					  SHARK_DATA *dat, const void *activity_data, const void *residual_data,
 					  const void *precon_data, const void *other_data);
 
-int shark_add_customResidual(int i, double (*other_res) (const Matrix &x, SHARK_DATA *shark_dat, const void *other_data),
+int shark_add_customResidual(int i, double (*other_res) (const Matrix<double> &x, SHARK_DATA *shark_dat, const void *other_data),
 							 SHARK_DATA *shark_dat);
 
 int shark_parameter_check(SHARK_DATA *shark_dat);
@@ -405,7 +405,7 @@ int shark_postprocesses(SHARK_DATA *shark_dat);
 
 int shark_reset(SHARK_DATA *shark_dat);
 
-int shark_residual(const Matrix &x, Matrix &F, const void *data);
+int shark_residual(const Matrix<double> &x, Matrix<double> &F, const void *data);
 
 int SHARK(SHARK_DATA *shark_dat);
 

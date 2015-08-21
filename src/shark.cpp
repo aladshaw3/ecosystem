@@ -110,7 +110,7 @@ void MasterSpeciesList::DisplayAll()
 }
 
 //Function to display the given concentrations of all species
-void MasterSpeciesList::DisplayConcentrations(Matrix &C)
+void MasterSpeciesList::DisplayConcentrations(Matrix<double> &C)
 {
 	if (this->list_size() != C.rows())
 	{
@@ -193,7 +193,7 @@ std::string MasterSpeciesList::speciesName(int i)
 }
 
 //Function to evaluate charge balance residual from given concentrations and activities
-double MasterSpeciesList::Eval_ChargeResidual(const Matrix &x)
+double MasterSpeciesList::Eval_ChargeResidual(const Matrix<double> &x)
 {
 	double res = 0.0;
 	
@@ -470,7 +470,7 @@ double Reaction::Get_Energy()
 }
 
 //Evaluate the reaction object residual from variable x and activity gama
-double Reaction::Eval_Residual(const Matrix &x, const Matrix &gama)
+double Reaction::Eval_Residual(const Matrix<double> &x, const Matrix<double> &gama)
 {
 	double res = 0.0;
 	
@@ -606,7 +606,7 @@ std::string MassBalance::Get_Name()
 }
 
 //Function to evaluate the mass balance residual given the concentration matrix x
-double MassBalance::Eval_Residual(const Matrix &x)
+double MassBalance::Eval_Residual(const Matrix<double> &x)
 {
 	double res = 0.0;
 	
@@ -1003,7 +1003,7 @@ double UnsteadyReaction::Get_TimeStep()
 }
 
 //Function to calculate the reaction rate from given concentration and activities
-double UnsteadyReaction::Eval_ReactionRate(const Matrix &x, const Matrix &gama)
+double UnsteadyReaction::Eval_ReactionRate(const Matrix<double> &x, const Matrix<double> &gama)
 {
 	double R = 0.0;
 	
@@ -1043,7 +1043,7 @@ double UnsteadyReaction::Eval_ReactionRate(const Matrix &x, const Matrix &gama)
 }
 
 //Function to calculate the unsteady reaction residual contribution
-double UnsteadyReaction::Eval_Residual(const Matrix &x_new, const Matrix &x_old, const Matrix &gama_new, const Matrix &gama_old)
+double UnsteadyReaction::Eval_Residual(const Matrix<double> &x_new, const Matrix<double> &x_old, const Matrix<double> &gama_new, const Matrix<double> &gama_old)
 {
 	double res = 0.0, rate;
 	double step, log_step;
@@ -1064,13 +1064,13 @@ double UnsteadyReaction::Eval_Residual(const Matrix &x_new, const Matrix &x_old,
 }
 
 //Call the steady-state version of the residual function
-double UnsteadyReaction::Eval_Residual(const Matrix &x, const Matrix &gama)
+double UnsteadyReaction::Eval_Residual(const Matrix<double> &x, const Matrix<double> &gama)
 {
 	return this->Reaction::Eval_Residual(x, gama);
 }
 
 //Calculate the residual for the initial condtions
-double UnsteadyReaction::Eval_IC_Residual(const Matrix &x)
+double UnsteadyReaction::Eval_IC_Residual(const Matrix<double> &x)
 {
 	double ic = 0.0;
 	if (this->Get_InitialValue() <= 0.0)
@@ -1082,7 +1082,7 @@ double UnsteadyReaction::Eval_IC_Residual(const Matrix &x)
 }
 
 //Function to estimate the new concentration by an explicit step
-double UnsteadyReaction::Explicit_Eval(const Matrix &x, const Matrix &gama)
+double UnsteadyReaction::Explicit_Eval(const Matrix<double> &x, const Matrix<double> &gama)
 {
 	double conc = pow(10.0,x(this->Get_Species_Index(),0))+(this->Get_TimeStep()*this->Eval_ReactionRate(x, gama)/gama(this->Get_Species_Index(),0));
 	if (conc <= 0.0)
@@ -1399,7 +1399,7 @@ void print2file_shark_results_old(SHARK_DATA *shark_dat)
 }
 
 //Default Activity function is ideal solution
-int ideal_solution (const Matrix& x, Matrix &F, const void *data)
+int ideal_solution (const Matrix<double>& x, Matrix<double> &F, const void *data)
 {
 	int success = 0;
 	for (int i = 0; i<F.rows(); i++)
@@ -1410,7 +1410,7 @@ int ideal_solution (const Matrix& x, Matrix &F, const void *data)
 }
 
 //Default non-ideal solution will use the Davies Equations
-int Davies_equation (const Matrix& x, Matrix &F, const void *data)
+int Davies_equation (const Matrix<double>& x, Matrix<double> &F, const void *data)
 {
 	int success = 0;
 	double ionic_strength = 0.0;
@@ -1440,7 +1440,7 @@ int Davies_equation (const Matrix& x, Matrix &F, const void *data)
 }
 
 //Debye-Huckel Equation for activity coefficients
-int DebyeHuckel_equation (const Matrix &x, Matrix &F, const void *data)
+int DebyeHuckel_equation (const Matrix<double> &x, Matrix<double> &F, const void *data)
 {
 	int success = 0;
 	double ionic_strength = 0.0;
@@ -1470,7 +1470,7 @@ int DebyeHuckel_equation (const Matrix &x, Matrix &F, const void *data)
 }
 
 //Empirical Correction model for high-ionic strength solutions
-int DaviesLadshaw_equation (const Matrix& x, Matrix &F, const void *data)
+int DaviesLadshaw_equation (const Matrix<double>& x, Matrix<double> &F, const void *data)
 {
 	int success = 0;
 	
@@ -1509,7 +1509,7 @@ int DaviesLadshaw_equation (const Matrix& x, Matrix &F, const void *data)
 }
 
 //Make a conversion from x to logx
-int Convert2LogConcentration(const Matrix &x, Matrix &logx)
+int Convert2LogConcentration(const Matrix<double> &x, Matrix<double> &logx)
 {
 	int success = 0;
 	for (int i=0; i<logx.rows(); i++)
@@ -1523,7 +1523,7 @@ int Convert2LogConcentration(const Matrix &x, Matrix &logx)
 }
 
 //Make a conversion from logx to x
-int Convert2Concentration(const Matrix &logx, Matrix &x)
+int Convert2Concentration(const Matrix<double> &logx, Matrix<double> &x)
 {
 	int success = 0;
 	for (int i=0; i<x.rows(); i++)
@@ -1539,9 +1539,9 @@ int Convert2Concentration(const Matrix &logx, Matrix &x)
 }
 
 //Setup function for a SHARK object
-int setup_SHARK_DATA( FILE *file, int (*residual) (const Matrix &x, Matrix &res, const void *data),
-					 int (*activity) (const Matrix &x, Matrix &gama, const void *data),
-					 int (*precond) (const Matrix &r, Matrix &p, const void *data),
+int setup_SHARK_DATA( FILE *file, int (*residual) (const Matrix<double> &x, Matrix<double> &res, const void *data),
+					 int (*activity) (const Matrix<double> &x, Matrix<double> &gama, const void *data),
+					 int (*precond) (const Matrix<double> &r, Matrix<double> &p, const void *data),
 					 SHARK_DATA *dat, const void *activity_data, const void *residual_data,
 					 const void *precon_data, const void *other_data)
 {
@@ -1702,7 +1702,7 @@ int setup_SHARK_DATA( FILE *file, int (*residual) (const Matrix &x, Matrix &res,
 }
 
 //Function to add a custom residual function to the solver
-int shark_add_customResidual(int i, double (*other_res) (const Matrix &x, SHARK_DATA *shark_dat, const void *other_data),
+int shark_add_customResidual(int i, double (*other_res) (const Matrix<double> &x, SHARK_DATA *shark_dat, const void *other_data),
 							 SHARK_DATA *shark_dat)
 {
 	int success = 0;
@@ -2179,7 +2179,7 @@ int shark_reset(SHARK_DATA *shark_dat)
 }
 
 //Default residual function for shark evaluations
-int shark_residual(const Matrix &x, Matrix &F, const void *data)
+int shark_residual(const Matrix<double> &x, Matrix<double> &F, const void *data)
 {
 	int success = 0;
 	SHARK_DATA *dat = (SHARK_DATA *) data;
@@ -2390,19 +2390,19 @@ int SHARK_TESTS()
 	//shark_dat.simulationtime = 96.0; //hours
 	
 	// ------------------ No Carbonate Case ------------------------
-	//NaCl = 1e-100;
-	//NaHCO3 = 1E-100;  // ~0 ppb
-	//UO2 = 4.21E-8;   // ~10.02 ppb
-	//AOH = 5.9625E-7;   //8.1 mg fiber with 200 mg AOH per g fiber in 19 L of solution with MW = 143 g/mol
-	//shark_dat.simulationtime = 1440.0; //hours
+	NaCl = 1e-100;
+	NaHCO3 = 1E-100;  // ~0 ppb
+	UO2 = 4.21E-8;   // ~10.02 ppb
+	AOH = 5.9625E-7;   //8.1 mg fiber with 200 mg AOH per g fiber in 19 L of solution with MW = 143 g/mol
+	shark_dat.simulationtime = 1440.0; //hours
 	
 	// ------------------ 140 ppm Carbonate No Spike Case -------------------------
-	NaCl = 1e-100;
-	NaCl = 0.43;
-	NaHCO3 = 0.00167; //140 ppm
-	UO2 = 4.1429E-8;   // ~9.86 ppb
-	AOH = 6.1097E-7;   //8.3 mg fiber with 200 mg AOH per g fiber in 19 L of solution with MW = 143 g/mol
-	shark_dat.simulationtime = 1440.0; //hours
+	//NaCl = 1e-100;
+	//NaCl = 0.43;
+	//NaHCO3 = 0.00167; //140 ppm
+	//UO2 = 4.1429E-8;   // ~9.86 ppb
+	//AOH = 6.1097E-7;   //8.3 mg fiber with 200 mg AOH per g fiber in 19 L of solution with MW = 143 g/mol
+	//shark_dat.simulationtime = 1440.0; //hours
 	
 	// ------------------ 1-L Various Carbonate Concentrations -------------------------
 	//NaCl = 0.43;
@@ -2473,11 +2473,12 @@ int SHARK_TESTS()
 	
 	//kf_UO2CO3 = 1.15E+16 * 0.5;				// per hour { kinetics - 75 ppb U} - 140 ppm and No Salt
 	//kf_UO2CO3 = 1.15E+16;				// per hour { kinetics - 75 ppb U} - 140 ppm
-	kf_UO2CO3 = 8.9E+15;
+	kf_UO2CO3 = 7.3E+15;
 	//kf_UO2CO3 = 4.25E+15;				// per hour { kinetics - 75 ppb U} - 70 ppm
 	//kf_UO2CO3 = 2.05E+15;				// per hour { kinetics - 75 ppb U} - 35 ppm
 	logK_UO2CO3 = 3.45;					// mol/L	{ kinetics - 75 ppb U} - MAX = 3.47 (3.45)
 	
+	//kf_UO2 = 3.5E+5;
 	kf_UO2 = 4.5E+6;					// per hour { kinetics - 75 ppb U - MAX = 6.5E+7} - diffusion limited
 	//kf_UO2 = 4.5E+5;					// per hour { kinetics - 75 ppb U - MAX = 6.5E+7} - reaction limited
 	logK_UO2 = -1.35;					// mol/L    { kinetics - 75 ppb U} - MIN = -4.55 : MAX = -1.35 (-4.55)

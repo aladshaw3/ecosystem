@@ -233,7 +233,7 @@ int l_direct(FINCH_DATA *dat)
 }
 
 //Function to evaluate the Picard Step x = G(x) (Used by LARK for Method Testing)
-int lark_picard_step(const Matrix &x, Matrix &G, const void *data)
+int lark_picard_step(const Matrix<double> &x, Matrix<double> &G, const void *data)
 {
 	int success = 0;
 	FINCH_DATA *dat = (FINCH_DATA *) data;
@@ -354,8 +354,8 @@ int setup_FINCH_DATA( int (*user_callroutine) (const void *user_data),
 					 int (*user_setparams) (const void *user_data),
 					 int (*user_discretize) (const void *user_data),
 					 int (*user_bcs) (const void *user_data),
-					 int (*user_res) (const Matrix&x, Matrix& res, const void *user_data),
-					 int (*user_precon) (const Matrix&b, Matrix& p, const void *user_data),
+					 int (*user_res) (const Matrix<double>&x, Matrix<double>& res, const void *user_data),
+					 int (*user_precon) (const Matrix<double>&b, Matrix<double>& p, const void *user_data),
 					 int (*user_postprocess) (const void *user_data),
 					 int (*user_reset) (const void *user_data),
 					 FINCH_DATA *dat, const void *param_data)
@@ -3615,7 +3615,7 @@ int default_bcs(const void *user_data)
 }
 
 //Function to evalute the residual (res) of the current iterate (x) using user data
-int default_res(const Matrix &x, Matrix &res, const void *user_data)
+int default_res(const Matrix<double> &x, Matrix<double> &res, const void *user_data)
 {
 	int success = 0;
 	FINCH_DATA *dat = (FINCH_DATA *) user_data;
@@ -3652,8 +3652,8 @@ int default_res(const Matrix &x, Matrix &res, const void *user_data)
 	return success;
 }
 
-//Function to solve the Tridiagonal Matrix Directly (Can be used as preconditioner)
-int default_precon(const Matrix &b, Matrix &p, const void *user_data)
+//Function to solve the Tridiagonal Matrix<double> Directly (Can be used as preconditioner)
+int default_precon(const Matrix<double> &b, Matrix<double> &p, const void *user_data)
 {
 	int success = 0;
 	FINCH_DATA *dat = (FINCH_DATA *) user_data;

@@ -23,8 +23,8 @@ typedef struct
 	double intraparticle_diffusion;			//Units: um^2/hr
 	double film_transfer_coeff;				//Units: um/hr
 	
-	Matrix avg_sorption;					//Units: mg/g
-	Matrix avg_sorption_old;				//Units: mg/g
+	Matrix<double> avg_sorption;					//Units: mg/g
+	Matrix<double> avg_sorption_old;				//Units: mg/g
 	
 	Molecule species;						//Species in the liquid phase
 	

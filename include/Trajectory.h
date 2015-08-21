@@ -43,36 +43,36 @@ typedef struct
 	double M;
 	double mp;										//Particle Mass, Kg
 	
-	Matrix POL,H,dX,dY;
-	Matrix X, Y;
+	Matrix<double> POL,H,dX,dY;
+	Matrix<double> X, Y;
 
 }TRAJECTORY_DATA;
 
-double Magnetic_R(const Matrix& dX, const Matrix& dY, int i, double b, double mu_0, double chi_p, double M, double H0, double a);
+double Magnetic_R(const Matrix<double>& dX, const Matrix<double>& dY, int i, double b, double mu_0, double chi_p, double M, double H0, double a);
 
-double Magnetic_T(const Matrix& dX, const Matrix& dY, int i, double b, double mu_0, double chi_p, double M, double H0, double a);
+double Magnetic_T(const Matrix<double>& dX, const Matrix<double>& dY, int i, double b, double mu_0, double chi_p, double M, double H0, double a);
 
-double Grav_R(const Matrix& dX, int i, double b, double rho_p, double rho_f);
+double Grav_R(const Matrix<double>& dX, int i, double b, double rho_p, double rho_f);
 
-double Grav_T(const Matrix& dX, int i, double b, double rho_p, double rho_f);
+double Grav_T(const Matrix<double>& dX, int i, double b, double rho_p, double rho_f);
 
-double Van_R(const Matrix& dX, const Matrix& dY, int i, double Hamaker, double b, double a);
+double Van_R(const Matrix<double>& dX, const Matrix<double>& dY, int i, double Hamaker, double b, double a);
 
-double V_RAD (const Matrix& dX, const Matrix& dY, int i, double V0, double rho_f, double a, double eta);
+double V_RAD (const Matrix<double>& dX, const Matrix<double>& dY, int i, double V0, double rho_f, double a, double eta);
 
-double V_THETA (const Matrix& dX, const Matrix& dY, int i, double V0, double rho_f, double a, double eta);
+double V_THETA (const Matrix<double>& dX, const Matrix<double>& dY, int i, double V0, double rho_f, double a, double eta);
 
-int POLAR(Matrix& POL, const Matrix& dX, const Matrix& dY, const void *data, int i);
+int POLAR(Matrix<double>& POL, const Matrix<double>& dX, const Matrix<double>& dY, const void *data, int i);
 
-double RADIAL_FORCE (const Matrix& POL, double eta, double b, double mp, double t, double a);
+double RADIAL_FORCE (const Matrix<double>& POL, double eta, double b, double mp, double t, double a);
 
-double TANGENTIAL_FORCE (const Matrix& POL, const Matrix& dY, double eta, double b, double mp, double t, double a, int i);
+double TANGENTIAL_FORCE (const Matrix<double>& POL, const Matrix<double>& dY, double eta, double b, double mp, double t, double a, int i);
 
-int CARTESIAN(const Matrix& POL, Matrix& H, const Matrix& dY, double i, const void *data);
+int CARTESIAN(const Matrix<double>& POL, Matrix<double>& H, const Matrix<double>& dY, double i, const void *data);
 
-int DISPLACEMENT (Matrix& dX, Matrix& dY, const Matrix& H, int i);
+int DISPLACEMENT (Matrix<double>& dX, Matrix<double>& dY, const Matrix<double>& H, int i);
 
-int LOCATION (const Matrix& dY, const Matrix& dX, Matrix& XX, Matrix& YY, int i);
+int LOCATION (const Matrix<double>& dY, const Matrix<double>& dX, Matrix<double>& XX, Matrix<double>& YY, int i);
 
 int Trajectory_SetupConstants(TRAJECTORY_DATA *dat);
 

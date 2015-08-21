@@ -25,13 +25,13 @@
 
 typedef struct
 {
-	Matrix qAvg;								//Average adsorbed amount for a species at each node (mol/kg)
-	Matrix qAvg_old;							//Old Average adsorbed amount for a species at each node (mol/kg)
+	Matrix<double> qAvg;								//Average adsorbed amount for a species at each node (mol/kg)
+	Matrix<double> qAvg_old;							//Old Average adsorbed amount for a species at each node (mol/kg)
 	
-	Matrix Qst;									//Heat of adsorption for all nodes (J/mol)
-	Matrix Qst_old;								//Old Heat of adsorption for all nodes (J/mol)
+	Matrix<double> Qst;									//Heat of adsorption for all nodes (J/mol)
+	Matrix<double> Qst_old;								//Old Heat of adsorption for all nodes (J/mol)
 	
-	Matrix dq_dc;							//Storage vector for current adsorption slope (dq/dc) (L/kg)
+	Matrix<double> dq_dc;							//Storage vector for current adsorption slope (dq/dc) (L/kg)
 	
 	double xIC;									//Initial conditions for adsorbed molefractions
 	
