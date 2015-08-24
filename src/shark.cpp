@@ -2390,11 +2390,11 @@ int SHARK_TESTS()
 	//shark_dat.simulationtime = 96.0; //hours
 	
 	// ------------------ No Carbonate Case ------------------------
-	NaCl = 1e-100;
-	NaHCO3 = 1E-100;  // ~0 ppb
-	UO2 = 4.21E-8;   // ~10.02 ppb
-	AOH = 5.9625E-7;   //8.1 mg fiber with 200 mg AOH per g fiber in 19 L of solution with MW = 143 g/mol
-	shark_dat.simulationtime = 1440.0; //hours
+	//NaCl = 1e-100;
+	//NaHCO3 = 1E-100;  // ~0 ppb
+	//UO2 = 4.21E-8;   // ~10.02 ppb
+	//AOH = 5.9625E-7;   //8.1 mg fiber with 200 mg AOH per g fiber in 19 L of solution with MW = 143 g/mol
+	//shark_dat.simulationtime = 1440.0; //hours
 	
 	// ------------------ 140 ppm Carbonate No Spike Case -------------------------
 	//NaCl = 1e-100;
@@ -2405,16 +2405,16 @@ int SHARK_TESTS()
 	//shark_dat.simulationtime = 1440.0; //hours
 	
 	// ------------------ 1-L Various Carbonate Concentrations -------------------------
-	//NaCl = 0.43;
+	NaCl = 0.43;
 	//NaHCO3 = 0.00167; //140 ppm
 	//NaHCO3 = 0.00167 / 2.0; //70 ppm
-	//NaHCO3 = 0.00167 / 4.0; //35 ppm
+	NaHCO3 = 0.00167 / 4.0; //35 ppm
 	//NaHCO3 = 1E-100; //~0 ppm
-	//UO2 = 3.151E-7;   // ~75 ppb
-	//AOH = 2.098E-5;   // 15 mg fiber with 200 mg AOH per g fiber in 1.00 L of solution with MW = 143 g/mol
+	UO2 = 3.151E-7;   // ~75 ppb
+	AOH = 2.098E-5;   // 15 mg fiber with 200 mg AOH per g fiber in 1.00 L of solution with MW = 143 g/mol
 	//AOH = 2.797E-5;   // 15 mg fiber with 200 mg AOH per g fiber in 0.75 L of solution with MW = 143 g/mol (USE THIS)
 	//AOH = 4.196E-5;   // 15 mg fiber with 200 mg AOH per g fiber in 0.50 L of solution with MW = 143 g/mol
-	//shark_dat.simulationtime = 96.0; //hours
+	shark_dat.simulationtime = 96.0; //hours
 	
 	
 	
@@ -2471,11 +2471,11 @@ int SHARK_TESTS()
 	
 	//These Work for All Kinetics (kf is a function of carbonate concentration and salt)
 	
-	//kf_UO2CO3 = 1.15E+16 * 0.5;				// per hour { kinetics - 75 ppb U} - 140 ppm and No Salt
-	//kf_UO2CO3 = 1.15E+16;				// per hour { kinetics - 75 ppb U} - 140 ppm
-	kf_UO2CO3 = 7.3E+15;
-	//kf_UO2CO3 = 4.25E+15;				// per hour { kinetics - 75 ppb U} - 70 ppm
-	//kf_UO2CO3 = 2.05E+15;				// per hour { kinetics - 75 ppb U} - 35 ppm
+	//kf_UO2CO3 = 1.15E+16 * 0.5;		// per hour { kinetics - 75 ppb U} - 140 ppm and No Salt
+	//kf_UO2CO3 = 1.55E+16;				// per hour { kinetics - 75 ppb U} - 140 ppm opt
+	//kf_UO2CO3 = 7.3E+15;				// per hour { kinetics - AVG}
+	//kf_UO2CO3 = 5.85E+15;				// per hour { kinetics - 75 ppb U} - 70 ppm
+	kf_UO2CO3 = 2.55E+15;				// per hour { kinetics - 75 ppb U} - 35 ppm
 	logK_UO2CO3 = 3.45;					// mol/L	{ kinetics - 75 ppb U} - MAX = 3.47 (3.45)
 	
 	//kf_UO2 = 3.5E+5;

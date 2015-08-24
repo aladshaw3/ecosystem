@@ -1,5 +1,6 @@
 #include "macaw.h"
 #include <random>
+#include <chrono>
 
 typedef struct
 {
@@ -8,6 +9,8 @@ typedef struct
 	double rho_f = 1000.0;						//Fluid density, Kg/m3
 	double eta = 0.001;							//Dynamic viscosity, Kg/m-s
 	double Hamaker = 1.3e-21;					//Hamaker constant for ferric oxide particles
+	double Temp = 298;                          //Temperature, Kelvin
+	double k = 1.38e-23;						//Boltzmann constant
 
 	//Separator Parameters
 
@@ -43,7 +46,22 @@ typedef struct
 	double M;
 	double mp;										//Particle Mass, Kg
 	
-	Matrix<double> POL,H,dX,dY;
+	//Brownian Variables
+	double beta;									//Friction coefficient per unit mass
+	double q_bar;
+	double sigma_v; 								//Take square root to get actual value for sigma v
+	double sigma_vz;
+	double sigma_z; 								//Take square root for actual value of sigma z
+	double sigma_n;
+	double sigma_m;
+
+	//Random Numbers
+	double n_rand;
+	double m_rand;
+	double s_rand;
+	double t_rand;
+
+	Matrix<double> POL,H,dX,dY,Temporary;
 	Matrix<double> X, Y;
 
 }TRAJECTORY_DATA;
@@ -62,6 +80,10 @@ double V_RAD (const Matrix<double>& dX, const Matrix<double>& dY, int i, double 
 
 double V_THETA (const Matrix<double>& dX, const Matrix<double>& dY, int i, double V0, double rho_f, double a, double eta);
 
+double Brown_RAD (double n_rand, double m_rand, double sigma_n, double sigma_m);
+
+double Brown_THETA (double s_rand, double t_rand, double sigma_n, double sigma_m);
+
 int POLAR(Matrix<double>& POL, const Matrix<double>& dX, const Matrix<double>& dY, const void *data, int i);
 
 double RADIAL_FORCE (const Matrix<double>& POL, double eta, double b, double mp, double t, double a);
@@ -75,5 +97,7 @@ int DISPLACEMENT (Matrix<double>& dX, Matrix<double>& dY, const Matrix<double>& 
 int LOCATION (const Matrix<double>& dY, const Matrix<double>& dX, Matrix<double>& XX, Matrix<double>& YY, int i);
 
 int Trajectory_SetupConstants(TRAJECTORY_DATA *dat);
+
+int Number_Generator(Matrix<double>& Temporary, TRAJECTORY_DATA *dat);
 
 int Run_Trajectory();
