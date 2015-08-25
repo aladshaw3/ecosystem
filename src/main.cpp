@@ -18,7 +18,10 @@ int main(int argc, const char * argv[])
 	
 	//------------------------------Command Line Interface------------------------
 	
+	success = run_executable(argc, argv);
+	
 	//std::cout << argv[0] << std::endl;	//Name of executable with path
+	/*
 	if (argc > 1)						//Next array of arguments
 		std::cout << argv[1] << std::endl;
 	if (argc > 2)						//Next array of arguments
@@ -43,6 +46,7 @@ int main(int argc, const char * argv[])
 			//Note this will get the file even if said file is in another location 
 		}
 	}
+	*/
 	
 	//------------------------------Scenario Suite--------------------------------
 	
@@ -79,7 +83,7 @@ int main(int argc, const char * argv[])
 	//success = RUN_SANDBOX();
 	//success = SHARK_TESTS();
 	//success = YAML_WRAPPER_TESTS();
-	success = YAML_CPP_TEST("test_input.yml");
+	//success = YAML_CPP_TEST("test_input.yml");
 	//success = Run_Trajectory();
 	
 	

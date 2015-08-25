@@ -8,6 +8,12 @@ CFLAGS=-I$(IDIR) -std=c++11 -fpermissive -Wwrite-strings -w
 CXXFLAGS= $(CFLAGS) -Wconversion-null
 
 ODIR=src/obj
+INSDIR=/usr/local/bin
+
+mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
+current_dir := $(notdir $(patsubst %/,%,$(dir $(mkfile_path))))
+
+EXE=eco0
 
 _DEPS = config.h lmmin.h lmcurve.h dogfish.h eel.h egret.h error.h \
 	finch.h flock.h gsta_opt.h lark.h macaw.h magpie.h mola.h \
@@ -30,10 +36,13 @@ $(ODIR)/%.o: src/%.c $(DEPS)
 $(ODIR)/%.o: src/%.cpp $(DEPS)
 	$(CXX) -O2 -c -o $@ $< $(CXXFLAGS)
 
-ecosystem: $(OBJ)
+$(EXE): $(OBJ)
 	$(CXX) -O2 -o $@ $^ $(CXXFLAGS)
 
-.PHONY: clean
+.PHONY: clean install
 
 clean:
-	rm -f ecosystem $(ODIR)/*.o *~ core $(INCDIR)/*~
+	rm -f $(EXE) $(ODIR)/*.o *~ core $(INCDIR)/*~
+	sudo rm -f $(INSDIR)/$(EXE)
+install:
+	sudo cp $(EXE) $(INSDIR)

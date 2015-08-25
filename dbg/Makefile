@@ -9,6 +9,8 @@ CXXFLAGS= $(CFLAGS) -Wconversion-null
 
 ODIR=obj
 
+DBG=eco0-dbg
+
 _DEPS = config.h lmmin.h lmcurve.h dogfish.h eel.h egret.h error.h \
 	finch.h flock.h gsta_opt.h lark.h macaw.h magpie.h mola.h \
 	monkfish.h sandbox.h school.h scopsowl_opt.h scopsowl.h shark.h \
@@ -30,10 +32,10 @@ $(ODIR)/%.o: ../src/%.c $(DEPS)
 $(ODIR)/%.o: ../src/%.cpp $(DEPS)
 	$(CXX) -g -c -o $@ $< $(CXXFLAGS)
 
-ecosystem-dbg: $(OBJ)
+$(DBG): $(OBJ)
 	$(CXX) -g -o $@ $^ $(CXXFLAGS)
 
 .PHONY: clean
 
 clean:
-	rm -f ecosystem-dbg $(ODIR)/*.o *~ core $(INCDIR)/*~
+	rm -f $(DBG) $(ODIR)/*.o *~ core $(INCDIR)/*~
