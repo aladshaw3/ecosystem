@@ -6,7 +6,7 @@
 //  Copyright (c) 2015 Georgia Institute of Technology. All rights reserved.
 //
 
-#include <fstream>
+#include "ui.h"
 #include "flock.h"
 #include "school.h"
 #include "sandbox.h"
