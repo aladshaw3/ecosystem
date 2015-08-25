@@ -10,7 +10,6 @@
 #include "flock.h"
 #include "school.h"
 #include "sandbox.h"
-#include "yaml_tests.h"
 #include "Trajectory.h"
 
 int main(int argc, const char * argv[])
@@ -19,7 +18,7 @@ int main(int argc, const char * argv[])
 	
 	//------------------------------Command Line Interface------------------------
 	
-	std::cout << argv[0] << std::endl;	//Name of executable with path
+	//std::cout << argv[0] << std::endl;	//Name of executable with path
 	if (argc > 1)						//Next array of arguments
 		std::cout << argv[1] << std::endl;
 	if (argc > 2)						//Next array of arguments
@@ -79,11 +78,9 @@ int main(int argc, const char * argv[])
 	//success = MONKFISH_TESTS();
 	//success = RUN_SANDBOX();
 	//success = SHARK_TESTS();
-	//success = YAML_TEST01();
-	//success = YAML_TEST02();
-	//success = YAML_TEST03();
 	//success = YAML_WRAPPER_TESTS();
-	success = Run_Trajectory();
+	success = YAML_CPP_TEST("test_input.yml");
+	//success = Run_Trajectory();
 	
 	
 	std::cout << "Exit Code:\t" << success << std::endl;

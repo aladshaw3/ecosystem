@@ -2077,6 +2077,374 @@ Document& YamlWrapper::getDocFromSubAlias(std::string alias)
  =========================================== END YamlWrapper Class ==============================================
  */
 
+/*
+ =========================================== START yaml_cpp_class ==============================================
+ */
+
+//Default constructor
+yaml_cpp_class::yaml_cpp_class()
+{
+}
+
+//Default destructor
+yaml_cpp_class::~yaml_cpp_class()
+{
+	yaml_wrapper.clear();
+	yaml_token_delete(&this->previous_token);
+	yaml_token_delete(&this->current_token);
+	yaml_parser_delete(&this->token_parser);
+	fclose(this->input_file);
+}
+
+//Set the input file for reading
+int yaml_cpp_class::setInputFile(const char *file)
+{
+	int success = 0;
+	
+	this->file_name = file;
+	if (*this->file_name == ' ' || this->file_name == NULL)
+	{
+		mError(file_dne);
+		return -1;
+	}
+	this->input_file = fopen(this->file_name, "r");
+	if(!yaml_parser_initialize(&this->token_parser))
+	{
+		mError(initial_error);
+		return -1;
+	}
+	if (this->input_file == NULL)
+	{
+		mError(file_dne);
+		return -1;
+	}
+	yaml_parser_set_input_file(&this->token_parser, this->input_file);
+	
+	return success;
+}
+
+//Reads the input file and store the results into the YamlWrapper
+int yaml_cpp_class::readInputFile()
+{
+	int success = 0;
+	
+	bool new_block = false;
+	bool block_key = false;
+	bool sub_block = false;
+	bool doc_start = false;
+	std::string current_key;
+	std::string current_value;
+	std::string current_head;
+	std::string current_sub;
+	std::string current_doc;
+	std::string current_alias;
+	std::string current_anchor;
+	
+	do
+	{
+		yaml_parser_scan(&this->token_parser, &this->current_token);
+		
+		//Switch case that is used to change code behavior based on token type
+		switch(this->current_token.type)
+		{
+			case YAML_STREAM_START_TOKEN:
+			{
+				break;
+			}
+			case YAML_STREAM_END_TOKEN:
+			{
+				break;
+			}
+			case YAML_KEY_TOKEN:
+			{
+				//Check to see if we are in a header/block
+				if (this->previous_token.type == YAML_BLOCK_MAPPING_START_TOKEN)
+				{
+					block_key = true;
+				}
+				else
+				{
+					block_key = false;
+				}
+				break;
+			}
+			case YAML_VALUE_TOKEN:
+			{
+				break;
+			}
+			case YAML_BLOCK_SEQUENCE_START_TOKEN:
+			{
+				break;
+			}
+			case YAML_BLOCK_ENTRY_TOKEN:
+			{
+				//Check to see if we are in a subheader or main header
+				if (new_block == true)
+					sub_block = true;
+				else
+					sub_block = false;
+				new_block = true;
+				break;
+			}
+			case YAML_BLOCK_END_TOKEN:
+			{
+				if (sub_block == true)
+					sub_block = false;
+				else
+					new_block = false;
+				break;
+			}
+			case YAML_BLOCK_MAPPING_START_TOKEN:
+			{
+				break;
+			}
+			case YAML_SCALAR_TOKEN:
+			{
+				//Check to see what the type is for the current scalar
+				//NOTE: Current scalar is always the type of the previous token
+				if (this->previous_token.type == YAML_KEY_TOKEN)
+				{
+					current_key = (char*) this->current_token.data.scalar.value;
+					
+					//Check to see what kind of key needs to be added
+					if (doc_start == false)
+					{
+						current_doc = current_key;
+						this->yaml_wrapper.addDocKey(current_doc);
+						this->yaml_wrapper(current_doc).setName(current_doc);
+					}
+					else if (block_key == true && sub_block == false && new_block == true)
+					{
+						current_head = current_key;
+						this->yaml_wrapper(current_doc).addHeadKey(current_head);
+						this->yaml_wrapper(current_doc)(current_head).setName(current_head);
+					}
+					else if (block_key == true && sub_block == true &&  new_block == true)
+					{
+						current_sub = current_key;
+						this->yaml_wrapper(current_doc)(current_head).addSubKey(current_sub);
+						this->yaml_wrapper(current_doc)(current_head)(current_sub).setName(current_sub);
+					}
+					else
+					{
+						//Check to see if we are in a document, header, or sub-header
+						if (sub_block == false && new_block == false)
+						{
+							this->yaml_wrapper(current_doc).getDataMap().addKey(current_key);
+						}
+						else if (block_key == false && sub_block == false && new_block == true)
+						{
+							this->yaml_wrapper(current_doc)(current_head).getDataMap().addKey(current_key);
+						}
+						else if (block_key == false && sub_block == true && new_block == true)
+						{
+							this->yaml_wrapper(current_doc)(current_head)(current_sub).getMap().addKey(current_key);
+						}
+						else
+						{
+							mError(not_a_token);
+							return -1;
+						}
+					}
+					
+				}
+				else if (this->previous_token.type == YAML_VALUE_TOKEN && doc_start == true)
+				{
+					current_value = (char*) this->current_token.data.scalar.value;
+					//Check to see if we are in a document, header, or sub-header
+					if (sub_block == false && new_block == false)
+					{
+						this->yaml_wrapper(current_doc).getDataMap().editValue4Key(current_value, current_key);
+					}
+					else if (block_key == false && sub_block == false && new_block == true)
+					{
+						this->yaml_wrapper(current_doc)(current_head).getDataMap().editValue4Key(current_value, current_key);
+					}
+					else if (block_key == false && sub_block == true && new_block == true)
+					{
+						this->yaml_wrapper(current_doc)(current_head)(current_sub).getMap().editValue4Key(current_value, current_key);
+					}
+					else
+					{
+						mError(not_a_token);
+						return -1;
+					}
+	
+				}
+				else
+				{
+					mError(not_a_token);
+					return -1;
+				}
+				break;
+			}
+			case YAML_NO_TOKEN:
+			{
+				mError(not_a_token);
+				return -1;
+			}
+			case YAML_VERSION_DIRECTIVE_TOKEN:
+			{
+				break;
+			}
+			case YAML_TAG_DIRECTIVE_TOKEN:
+			{
+				break;
+			}
+			case YAML_DOCUMENT_START_TOKEN:
+			{
+				doc_start = true;
+				break;
+			}
+			case YAML_DOCUMENT_END_TOKEN:
+			{
+				doc_start = false;
+				break;
+			}
+			case YAML_FLOW_SEQUENCE_START_TOKEN:
+			{
+				break;
+			}
+			case YAML_FLOW_SEQUENCE_END_TOKEN:
+			{
+				break;
+			}
+			case YAML_FLOW_MAPPING_START_TOKEN:
+			{
+				break;
+			}
+			case YAML_FLOW_MAPPING_END_TOKEN:
+			{
+				break;
+			}
+			case YAML_FLOW_ENTRY_TOKEN:
+			{
+				break;
+			}
+			case YAML_ALIAS_TOKEN:
+			{
+				current_alias = (char *) this->current_token.data.alias.value;
+				if (doc_start == true && sub_block == false && new_block == false)
+				{
+					mError(not_a_token);
+					return -1;
+				}
+				
+				//Check to see what it is an alias of
+				if (doc_start == false)
+				{
+					// Search for document anchor and copy contents
+					this->yaml_wrapper.copyAnchor2Alias(current_alias, this->yaml_wrapper(current_doc));
+				}
+				else if (block_key == true && sub_block == false && new_block == true)
+				{
+					// Search through all documents for header anchor and copy contents
+					this->yaml_wrapper.getDocFromHeadAlias(current_alias).copyAnchor2Alias(current_alias, this->yaml_wrapper(current_doc)(current_head));
+				}
+				else if (block_key == true && sub_block == true &&  new_block == true)
+				{
+					// Search through all documents and headers for sub-header anchor and copy contents
+					this->yaml_wrapper.getDocFromSubAlias(current_alias).getHeadFromSubAlias(current_alias).copyAnchor2Alias(current_alias, this->yaml_wrapper(current_doc)(current_head)(current_sub));
+				}
+				
+				break;
+			}
+			case YAML_ANCHOR_TOKEN:
+			{
+				current_anchor = (char *) this->current_token.data.anchor.value;
+				if (doc_start == true && sub_block == false && new_block == false)
+				{
+					mError(not_a_token);
+					return -1;
+				}
+				
+				//Check to see what it is an anchor of
+				if (doc_start == false)
+				{
+					this->yaml_wrapper(current_doc).setAlias(current_anchor);
+					this->yaml_wrapper(current_doc).setState(ANCHOR);
+				}
+				else if (block_key == true && sub_block == false && new_block == true)
+				{
+					this->yaml_wrapper(current_doc)(current_head).setAlias(current_anchor);
+					this->yaml_wrapper(current_doc)(current_head).setState(ANCHOR);
+				}
+				else if (block_key == true && sub_block == true &&  new_block == true)
+				{
+					this->yaml_wrapper(current_doc)(current_head)(current_sub).setAlias(current_anchor);
+					this->yaml_wrapper(current_doc)(current_head)(current_sub).setState(ANCHOR);
+				}
+				
+				break;
+			}
+			case YAML_TAG_TOKEN:
+			{
+				break;
+			}
+			default:
+			{
+				mError(not_a_token);
+				return -1;
+			}
+				
+		}//END SWITCH CASE
+		this->previous_token = this->current_token;
+		
+	} while (this->current_token.type != YAML_STREAM_END_TOKEN);
+	
+	return success;
+}
+
+//Deletes the yaml_c objects and closes the input file
+int yaml_cpp_class::cleanup()
+{
+	int success = 0;
+	
+	yaml_token_delete(&this->previous_token);
+	yaml_token_delete(&this->current_token);
+	yaml_parser_delete(&this->token_parser);
+	fclose(this->input_file);
+	
+	return success;
+}
+
+//Runs full execution of object intialization, data reading, and cleaning of the structure
+int yaml_cpp_class::executeYamlRead(const char *file)
+{
+	int success = 0;
+	
+	//Try to open file and initialize yaml objects
+	success = this->setInputFile(file);
+	if (success != 0)
+	{
+		mError(read_error);
+		return -1;
+	}
+	
+	//Try to read the opened file and store the data
+	success = this->readInputFile();
+	if (success != 0)
+	{
+		mError(read_error);
+		return -1;
+	}
+	
+	//Close the file and delete temporary objects
+	success = this->cleanup();
+	
+	return success;
+}
+
+//Display contents of the read to the console window
+void yaml_cpp_class::DisplayContents()
+{
+	this->yaml_wrapper.DisplayContents();
+}
+
+/*
+ =========================================== END yaml_cpp_class ==============================================
+ */
+
 int YAML_WRAPPER_TESTS()
 {
 	int success = 0;
@@ -2299,6 +2667,23 @@ int YAML_WRAPPER_TESTS()
 	
 	std::cout << "--------------------------- END FINAL TEST ------------------------------\n";
 	
+	
+	return success;
+}
+
+//Run tests for YAML_CPP_CLASS
+int YAML_CPP_TEST(const char *file)
+{
+	int success = 0;
+
+	yaml_cpp_class yaml_object;
+	success = yaml_object.executeYamlRead(file);
+	if (success != 0)
+	{
+		mError(simulation_fail);
+		return -1;
+	}
+	yaml_object.DisplayContents();
 	
 	return success;
 }

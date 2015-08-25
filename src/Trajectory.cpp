@@ -165,6 +165,7 @@ int Number_Generator(Matrix<double>& Temporary, TRAJECTORY_DATA *dat)
 {
 	unsigned seed = (unsigned) std::chrono::system_clock::now().time_since_epoch().count();
 	std::default_random_engine generator (seed);
+	//std::random_device generator;
 	std::normal_distribution<double> distribution(0.0,1.0);
 	dat-> n_rand = distribution(generator);
 	dat-> m_rand = distribution(generator);

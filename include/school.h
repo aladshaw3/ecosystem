@@ -15,5 +15,6 @@
 #include "shark.h"
 #include "dogfish.h"
 #include "monkfish.h"
+#include "yaml_wrapper.h"
 
 #endif

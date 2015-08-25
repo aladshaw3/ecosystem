@@ -12,7 +12,7 @@
 #include "mola.h"
 #include "macaw.h"
 #include "lark.h"
-#include "yaml.h"
+#include "yaml_wrapper.h"
 
 #ifndef SHARK_HPP_
 #define SHARK_HPP_

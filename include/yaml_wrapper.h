@@ -335,12 +335,22 @@ private:
 class yaml_cpp_class
 {
 public:
+	yaml_cpp_class();									//Default constructor
+	~yaml_cpp_class();									//Default destructor
+	
+	int setInputFile(const char *file);					//Set the input file to be read
+	int readInputFile();								//Reads through input file and stores into YamlWrapper
+	int cleanup();										//Deletes yaml_c objects and closes the input file
+	int executeYamlRead(const char *file);				//Runs the full execution of initialization, reading, and cleaning
+	
+	void DisplayContents();								//Print out the contents of the read to the console window
 	
 protected:
 	
 private:
 	YamlWrapper yaml_wrapper;
 	FILE *input_file;
+	const char *file_name;
 	yaml_parser_t token_parser;
 	yaml_token_t current_token;
 	yaml_token_t previous_token;
@@ -348,5 +358,7 @@ private:
 };
 
 int YAML_WRAPPER_TESTS();
+
+int YAML_CPP_TEST(const char *file);
 
 #endif

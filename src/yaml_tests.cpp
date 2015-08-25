@@ -407,7 +407,23 @@ int YAML_TEST03()
 					else
 					{
 						read.key_type = KEY;
-						std::cout << "\t\tYAML_SCALAR_TOKEN is a KEY\t" << current_key << std::endl;
+						std::cout << "\t\tYAML_SCALAR_TOKEN is a KEY\t" << current_key << " and we are in ";
+						if (sub_block == false && new_block == false)
+						{
+							std::cout << "a DOCUMENT\n";
+						}
+						else if (block_key == false && sub_block == false && new_block == true)
+						{
+							std::cout << "a HEADER\n";
+						}
+						else if (block_key == false && sub_block == true && new_block == true)
+						{
+							std::cout << "a SUB-HEADER\n";
+						}
+						else
+						{
+							std::cout << "UNKNOWN\t" << block_key << sub_block << new_block << std::endl;
+						}
 					}
 						
 				}
@@ -429,7 +445,23 @@ int YAML_TEST03()
 					current_value = (char*) token.data.scalar.value;
 					d_value = atof(current_value.c_str());
 					//printf("YAML_SCALAR_TOKEN is a VALUE\t%s\n",token.data.scalar.value);
-					std::cout << "\t\tYAML_SCALAR_TOKEN is a VALUE\t" << current_value << std::endl;
+					std::cout << "\t\tYAML_SCALAR_TOKEN is a VALUE\t" << current_value << " and we are in ";
+					if (sub_block == false && new_block == false)
+					{
+						std::cout << "a DOCUMENT\n";
+					}
+					else if (block_key == false && sub_block == false && new_block == true)
+					{
+						std::cout << "a HEADER\n";
+					}
+					else if (block_key == false && sub_block == true && new_block == true)
+					{
+						std::cout << "a SUB-HEADER\n";
+					}
+					else
+					{
+						std::cout << "UNKNOWN\t" << block_key << sub_block << new_block << std::endl;
+					}
 					
 					//Check the mapped key for data specifics
 					if (current_key == "numvar" || current_key == "num_ssr" || current_key == "num_mbe" || current_key == "num_usr")
@@ -516,15 +548,56 @@ int YAML_TEST03()
 			case YAML_ALIAS_TOKEN:
 			{
 				printf("\t---YAML_ALIAS_TOKEN = \t");
+				if (doc_start == true && sub_block == false && new_block == false)
+				{
+					std::cout << "THIS IS ERROR!!!\n";
+					break;
+				}
 				current_alias = (char *) token.data.alias.value;
-				std::cout << current_alias << std::endl;
+				std::cout << current_alias << " is a ";
+				
+				if (doc_start == false)
+				{
+					std::cout << "DOC-ALIAS = " << current_key << std::endl;
+				}
+				else if (block_key == true && sub_block == false && new_block == true)
+				{
+					//current_block = current_key;
+					std::cout << "HEAD-ALIAS = " << current_block << std::endl;
+				}
+				else if (block_key == true && sub_block == true &&  new_block == true)
+				{
+					//current_block = current_key;
+					std::cout << "SUB-ALIAS = " << current_block << std::endl;
+				}
 				break;
 			}
 			case YAML_ANCHOR_TOKEN:
 			{
 				printf("\t---YAML_ANCHOR_TOKEN = \t");
+				if (doc_start == true && sub_block == false && new_block == false)
+				{
+					std::cout << "THIS IS ERROR!!!\n";
+					break;
+				}
 				current_anchor = (char *) token.data.anchor.value;
-				std::cout << current_anchor << std::endl;
+				std::cout << current_anchor << " is a ";
+				
+				if (doc_start == false)
+				{
+					std::cout << "DOC-ANCHOR = " << current_key << std::endl;
+				}
+				else if (block_key == true && sub_block == false && new_block == true)
+				{
+					//current_block = current_key;
+					std::cout << "HEAD-ANCHOR = " << current_block << std::endl;
+				}
+				else if (block_key == true && sub_block == true &&  new_block == true)
+				{
+					//current_block = current_key;
+					std::cout << "SUB-ANCHOR = " << current_block << std::endl;
+				}
+				
 				break;
 			}
 			case YAML_TAG_TOKEN:

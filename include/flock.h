@@ -18,5 +18,6 @@
 #include "magpie.h"
 #include "skua_opt.h"
 #include "scopsowl_opt.h"
+#include "yaml_wrapper.h"
 
 #endif

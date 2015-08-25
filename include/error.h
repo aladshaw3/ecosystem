@@ -65,6 +65,9 @@ std::cout << "Source: " << __FILE__ << "\nLine: " << __LINE__ << std::endl;}
 #define invalid_type 45
 #define key_not_found 46
 #define anchor_alias_dne 47
+#define initial_error 48
+#define not_a_token 49
+#define read_error 50
 
 
 void error(int flag);
