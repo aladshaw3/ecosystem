@@ -1504,7 +1504,12 @@ int SCOPSOWL_TESTS()
 	
 	//Initializations
 	time = clock();
-	TestOutput = fopen("SCOPSOWL_Test_Output.txt","w+");
+	TestOutput = fopen("output/SCOPSOWL_Test_Output.txt","w+");
+	if (TestOutput == nullptr)
+	{
+		system("mkdir output");
+		TestOutput = fopen("output/SCOPSOWL_Test_Output.txt","w+");
+	}
 	dat.Print2File = true;
 	dat.NonLinear = true;						//-
 	dat.level = 1;

@@ -404,8 +404,14 @@ int SKUA_OPTIMIZE(const char *scene, const char *sorbent, const char *comp, cons
 	
 	//Initializations
 	time = clock();
-	ParamResults = fopen("SKUA_OPT_ParamFile.txt", "w+");
-	Comparison = fopen("SKUA_OPT_CompareFile.txt", "w+");
+	ParamResults = fopen("output/SKUA_OPT_ParamFile.txt", "w+");
+	Comparison = fopen("output/SKUA_OPT_CompareFile.txt", "w+");
+	if (ParamResults == nullptr)
+	{
+		system("mkdir output");
+		ParamResults = fopen("output/SKUA_OPT_ParamFile.txt", "w+");
+		Comparison = fopen("output/SKUA_OPT_CompareFile.txt", "w+");
+	}
 	skua_opt.skua_dat.total_steps = 0;
 	skua_opt.total_eval = 0;
 	skua_opt.evaluation = 0;

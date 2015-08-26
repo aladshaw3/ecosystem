@@ -2346,7 +2346,12 @@ int SHARK_TESTS()
 	time = clock();
 	
 	//Read problem size info here
-	TestOutput = fopen("SHARK_Test.txt", "w+");
+	TestOutput = fopen("output/SHARK_Test.txt", "w+");
+	if (TestOutput == nullptr)
+	{
+		system("mkdir output");
+		TestOutput = fopen("output/SHARK_Test.txt", "w+");
+	}
 	shark_dat.numvar = 25;
 	shark_dat.num_ssr = 15;
 	shark_dat.num_mbe = 7;

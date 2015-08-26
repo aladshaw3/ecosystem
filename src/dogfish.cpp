@@ -415,7 +415,12 @@ int DOGFISH_TESTS()
 	
 	//Standard initializations
 	time = clock();
-	TestOutput = fopen("DOGFISH_TestOutput.txt","w+");
+	TestOutput = fopen("output/DOGFISH_TestOutput.txt","w+");
+	if (TestOutput == nullptr)
+	{
+		system("mkdir output");
+		TestOutput = fopen("output/DOGFISH_TestOutput.txt","w+");
+	}
 	dog_dat.total_steps = 0;
 	dog_dat.time_old = 0.0;
 	dog_dat.time = 0.0;

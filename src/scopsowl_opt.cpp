@@ -528,8 +528,15 @@ int SCOPSOWL_OPTIMIZE(const char *scene, const char *sorbent, const char *comp, 
 	
 	//Initializations
 	time = clock();
-	ParamResults = fopen("SCOPSOWL_OPT_ParamFile.txt", "w+");
-	Comparison = fopen("SCOPSOWL_OPT_CompareFile.txt", "w+");
+	ParamResults = fopen("output/SCOPSOWL_OPT_ParamFile.txt", "w+");
+	Comparison = fopen("output/SCOPSOWL_OPT_CompareFile.txt", "w+");
+	if (ParamResults == nullptr)
+	{
+		system("mkdir output");
+		ParamResults = fopen("output/SCOPSOWL_OPT_ParamFile.txt", "w+");
+		Comparison = fopen("output/SCOPSOWL_OPT_CompareFile.txt", "w+");
+	}
+	
 	owl_opt.owl_dat.total_steps = 0;
 	owl_opt.total_eval = 0;
 	owl_opt.evaluation = 0;
