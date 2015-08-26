@@ -19,14 +19,14 @@
         vector result and (2) this allows the user to use any kind of preconditioner
         they see fit for their problem.
  
-        The Krylov function is typically not called by the user, but can be if
+        The Arnoldi function is typically not called by the user, but can be if
         desired. It accepts the function arguments and a residual vector to form
         an orthonormal basis of the Krylov subspace using the Modified Gram-Schmidt
-        process. This function is called by GMRES to iteratively solve a linear
-        system of equations. Note that you can use this function to directly solve
-        the linear system as long as that system is not too large. Construction of
-        the basis is expensive, which is why this is used as a sub-function of an
-        iterative method.
+        process (aka Arnoldi Iteration). This function is called by GMRES to iteratively 
+		solve a linear system of equations. Note that you can use this function to 
+		directly solve the linear system as long as that system is not too large. 
+		Construction of the basis is expensive, which is why this is used as a sub-function 
+		of an iterative method.
  
         The Restarted GMRES function will accept function arguments for a linear system
         and attempt to solve said system iteratively by constructing an orthonormal
@@ -354,12 +354,12 @@ int precon_ex15(const Matrix<double>& w, Matrix<double>& p, const void *data)
 }
 
 //Function to compute the updated solution given the matrix-vector arguments
-int update_krylov_solution(Matrix<double>& x, Matrix<double>& x0, std::vector<Matrix<double>>& Vk, Matrix<double>& yk)
+int update_arnoldi_solution(Matrix<double>& x, Matrix<double>& x0, ARNOLDI_DATA *arnoldi_dat)
 {
   	int success = 0;
 	
   	//Check for wrong matrix sizes
-  	if (Vk.size() == 0 || Vk.size() != yk.rows() || Vk[0].rows() != x0.rows())
+  	if (arnoldi_dat->Vk.size() == 0 || arnoldi_dat->Vk.size() != arnoldi_dat->yk.rows() || arnoldi_dat->Vk[0].rows() != x0.rows())
     {
       	mError(dim_mis_match);
       	return -1;
@@ -368,15 +368,21 @@ int update_krylov_solution(Matrix<double>& x, Matrix<double>& x0, std::vector<Ma
     {
       	x.set_size(x0.rows(), 1);
     }
+	
+	//perform transformations to get the search direction yk
+	arnoldi_dat->Hkp1.upperHessenberg2Triangular(arnoldi_dat->e1);
+    arnoldi_dat->Hkp1.rowShrink();
+    arnoldi_dat->e1.rowShrink();
+  	arnoldi_dat->yk.upperTriangularSolve(arnoldi_dat->Hkp1, arnoldi_dat->e1);
   
   	//Loop over all rows
   	double sum = 0.0;
   	for (int i=0; i<x.rows(); i++)
   	{
       	sum = 0.0;
-      	for (int k=0; k<Vk.size(); k++)
+      	for (int k=0; k<arnoldi_dat->Vk.size(); k++)
       	{
-          	sum = sum + (Vk[k](i,0) * yk(k,0));
+          	sum = sum + (arnoldi_dat->Vk[k](i,0) * arnoldi_dat->yk(k,0));
       	}
       	x.edit(i, 0, sum + x0(i,0));
   	}
@@ -385,17 +391,17 @@ int update_krylov_solution(Matrix<double>& x, Matrix<double>& x0, std::vector<Ma
 }
 
 //Function to construct the orthonormal basis with optional preconditioning
-int krylov( int (*matvec) (const Matrix<double>& v, Matrix<double> &w, const void *data),
+int arnoldi( int (*matvec) (const Matrix<double>& v, Matrix<double> &w, const void *data),
             int (*precon) (const Matrix<double>& b, Matrix<double> &p, const void *data),
-            Matrix<double> &r0, KRYLOV_DATA *krylov_dat, const void *matvec_data,
+            Matrix<double> &r0, ARNOLDI_DATA *arnoldi_dat, const void *matvec_data,
 		    const void *precon_data )
 {
     int success = 0;
 	double h = 0;
     
     //Initialize the krylov data
-    if (krylov_dat->k < 2 || krylov_dat->k > r0.rows())
-        krylov_dat->k = r0.rows();
+    if (arnoldi_dat->k < 2 || arnoldi_dat->k > r0.rows())
+        arnoldi_dat->k = r0.rows();
     if (r0.rows() < 2)
     {
         success = -1;
@@ -408,39 +414,39 @@ int krylov( int (*matvec) (const Matrix<double>& v, Matrix<double> &w, const voi
       	mError(nullptr_func);
       	return success;
     }
-  	if ( krylov_dat->Vk.size() != krylov_dat->k )
+  	if ( arnoldi_dat->Vk.size() != arnoldi_dat->k )
     {
-      	krylov_dat->Vk.resize(krylov_dat->k);
+      	arnoldi_dat->Vk.resize(arnoldi_dat->k);
     }
-  	if ( krylov_dat->w.rows() != r0.rows() )
+  	if ( arnoldi_dat->w.rows() != r0.rows() )
   	{
-		krylov_dat->w.set_size(r0.rows(), 1);
+		arnoldi_dat->w.set_size(r0.rows(), 1);
   	}
-  	if ( krylov_dat->v.rows() != r0.rows() )
+  	if ( arnoldi_dat->v.rows() != r0.rows() )
   	{
-		krylov_dat->v.set_size(r0.rows(), 1);
+		arnoldi_dat->v.set_size(r0.rows(), 1);
   	}
-  	if ( krylov_dat->sum.rows() != r0.rows() )
+  	if ( arnoldi_dat->sum.rows() != r0.rows() )
   	{
-		krylov_dat->sum.set_size(r0.rows(), 1);
+		arnoldi_dat->sum.set_size(r0.rows(), 1);
   	}
-  	if ( krylov_dat->Hkp1.rows() != krylov_dat->k+1 )
+  	if ( arnoldi_dat->Hkp1.rows() != arnoldi_dat->k+1 )
     {
-      	krylov_dat->Hkp1.set_size(krylov_dat->k+1, krylov_dat->k);
+      	arnoldi_dat->Hkp1.set_size(arnoldi_dat->k+1, arnoldi_dat->k);
     }
-  	if ( krylov_dat->e1.rows() != krylov_dat->k+1)
+  	if ( arnoldi_dat->e1.rows() != arnoldi_dat->k+1)
     {
-      	krylov_dat->e1.set_size(krylov_dat->k+1, 1);
+      	arnoldi_dat->e1.set_size(arnoldi_dat->k+1, 1);
     }
-  	if ( krylov_dat->yk.rows() != krylov_dat->k )
+  	if ( arnoldi_dat->yk.rows() != arnoldi_dat->k )
     {
-      	krylov_dat->yk.set_size(krylov_dat->k, 1);
+      	arnoldi_dat->yk.set_size(arnoldi_dat->k, 1);
     }
   
     //Check for and apply preconditioning
     if ( (*precon) != NULL)
     {
-      	success = (*precon) (r0, krylov_dat->v, precon_data);
+      	success = (*precon) (r0, arnoldi_dat->v, precon_data);
         if (success != 0)
         {
             mError(simulation_fail);
@@ -449,27 +455,27 @@ int krylov( int (*matvec) (const Matrix<double>& v, Matrix<double> &w, const voi
     }
     else
     {
-        krylov_dat->v = r0;
+        arnoldi_dat->v = r0;
     }
 	
   	//Initialize data before loop
-    krylov_dat->beta = krylov_dat->v.norm(); 
-    krylov_dat->e1.edit(0, 0, krylov_dat->beta);
-	if (krylov_dat->Vk[0].rows() != r0.rows())
-		krylov_dat->Vk[0].set_size(r0.rows(), 1);
+    arnoldi_dat->beta = arnoldi_dat->v.norm(); 
+    arnoldi_dat->e1.edit(0, 0, arnoldi_dat->beta);
+	if (arnoldi_dat->Vk[0].rows() != r0.rows())
+		arnoldi_dat->Vk[0].set_size(r0.rows(), 1);
 	for (int n=0; n<r0.rows(); n++)
-		krylov_dat->Vk[0].edit(n, 0, krylov_dat->v(n,0)/krylov_dat->beta);
+		arnoldi_dat->Vk[0].edit(n, 0, arnoldi_dat->v(n,0)/arnoldi_dat->beta);
 	
     //Begin looping for the size of the subspace
-    krylov_dat->iter = 0;
-    for (int j=0; j<krylov_dat->k; j++)
+    arnoldi_dat->iter = 0;
+    for (int j=0; j<arnoldi_dat->k; j++)
     {
-		if (krylov_dat->Output == true)
+		if (arnoldi_dat->Output == true)
 		{
-			std::cout << "Krylov vector " << j+1 << " being built..." << std::endl;
+			std::cout << "Arnoldi vector " << j+1 << " being built..." << std::endl;
 		}
-      	krylov_dat->sum.zeros();
-        success = (*matvec) (krylov_dat->Vk[j], krylov_dat->w, matvec_data);
+      	arnoldi_dat->sum.zeros();
+        success = (*matvec) (arnoldi_dat->Vk[j], arnoldi_dat->w, matvec_data);
         if (success != 0)
         {
             mError(simulation_fail);
@@ -477,8 +483,8 @@ int krylov( int (*matvec) (const Matrix<double>& v, Matrix<double> &w, const voi
         }
         if ( (*precon) != NULL)
         {
-          	krylov_dat->v = krylov_dat->w;
-          	success = (*precon) (krylov_dat->v, krylov_dat->w, precon_data);
+          	arnoldi_dat->v = arnoldi_dat->w;
+          	success = (*precon) (arnoldi_dat->v, arnoldi_dat->w, precon_data);
             if (success != 0)
             {
                 mError(simulation_fail);
@@ -490,55 +496,51 @@ int krylov( int (*matvec) (const Matrix<double>& v, Matrix<double> &w, const voi
         //Inner loop for formation of Hessenberg matrix
         for (int i=0; i<=j; i++)
         {
-			h = krylov_dat->w.inner_product(krylov_dat->Vk[i]);
-			krylov_dat->Hkp1.edit(i, j, h);
+			h = arnoldi_dat->w.inner_product(arnoldi_dat->Vk[i]);
+			arnoldi_dat->Hkp1.edit(i, j, h);
 			for (int n=0; n<r0.rows(); n++)
-				krylov_dat->sum.edit(n, 0, krylov_dat->sum(n,0) + (krylov_dat->Vk[i](n,0)*h));
+				arnoldi_dat->sum.edit(n, 0, arnoldi_dat->sum(n,0) + (arnoldi_dat->Vk[i](n,0)*h));
 					
         } //END inner loop
         
-        krylov_dat->w = krylov_dat->w - krylov_dat->sum;
-        krylov_dat->hp1 = krylov_dat->w.norm();
-		krylov_dat->Hkp1.edit(j+1, j, krylov_dat->hp1);
-		if (j<krylov_dat->k-1 && krylov_dat->Vk[j+1].rows() != r0.rows())
-			krylov_dat->Vk[j+1].set_size(r0.rows(), 1);
+        arnoldi_dat->w = arnoldi_dat->w - arnoldi_dat->sum;
+        arnoldi_dat->hp1 = arnoldi_dat->w.norm();
+		arnoldi_dat->Hkp1.edit(j+1, j, arnoldi_dat->hp1);
+		if (j<arnoldi_dat->k-1 && arnoldi_dat->Vk[j+1].rows() != r0.rows())
+			arnoldi_dat->Vk[j+1].set_size(r0.rows(), 1);
 		
-        if (krylov_dat->hp1 == 0.0)
+        if (arnoldi_dat->hp1 == 0.0)
 		{
-			if (j==0 && krylov_dat->Hkp1(j,j)==0.0)
-				krylov_dat->Hkp1.edit(j, j, 1.0);
-			for (int i=j+1; i<krylov_dat->k; i++)
+			if (j==0 && arnoldi_dat->Hkp1(j,j)==0.0)
+				arnoldi_dat->Hkp1.edit(j, j, 1.0);
+			for (int i=j+1; i<arnoldi_dat->k; i++)
 			{
-				krylov_dat->Hkp1.edit(i, i, 1.0);
-				if (j<krylov_dat->k-1 && krylov_dat->Vk[j+1].rows() != r0.rows())
-					krylov_dat->Vk[j+1].set_size(r0.rows(), 1);
+				arnoldi_dat->Hkp1.edit(i, i, 1.0);
+				if (j<arnoldi_dat->k-1 && arnoldi_dat->Vk[j+1].rows() != r0.rows())
+					arnoldi_dat->Vk[j+1].set_size(r0.rows(), 1);
 			}
 			break;
 		}
         else
 		{
-        	if (j<krylov_dat->k-1)
+        	if (j<arnoldi_dat->k-1)
         	{
 				for (int n=0; n<r0.rows(); n++)
-					krylov_dat->Vk[j+1].edit(n, 0, krylov_dat->w(n,0)/krylov_dat->hp1);
+					arnoldi_dat->Vk[j+1].edit(n, 0, arnoldi_dat->w(n,0)/arnoldi_dat->hp1);
         	}
 			else
-				krylov_dat->v = krylov_dat->w/krylov_dat->hp1;
+				arnoldi_dat->v = arnoldi_dat->w/arnoldi_dat->hp1;
 		}
       
-        krylov_dat->iter++;
+        arnoldi_dat->iter++;
         
     } //END Subspace loop
     
     //Solve the resulting least squares problem
-	if (krylov_dat->Output == true)
+	if (arnoldi_dat->Output == true)
 	{
 		std::cout << "Krylov subspace construction complete!\n" << std::endl;
 	}
-    krylov_dat->Hkp1.upperHessenberg2Triangular(krylov_dat->e1);
-    krylov_dat->Hkp1.rowShrink();
-    krylov_dat->e1.rowShrink();
-  	krylov_dat->yk.upperTriangularSolve(krylov_dat->Hkp1, krylov_dat->e1);
     
     return success;
 }
@@ -597,49 +599,49 @@ int gmresLeftPreconditioned( int (*matvec) (const Matrix<double>& v, Matrix<doub
     {
       	gmreslp_dat->tol_abs = 1.0e-6;
     }
-  	gmreslp_dat->krylov_dat.k = gmreslp_dat->restart;
-	gmreslp_dat->krylov_dat.Output = gmreslp_dat->Output;
+  	gmreslp_dat->arnoldi_dat.k = gmreslp_dat->restart;
+	gmreslp_dat->arnoldi_dat.Output = gmreslp_dat->Output;
   
   	//Check to see if the data has been properly initialized
-  	if (gmreslp_dat->krylov_dat.Vk.size() != gmreslp_dat->krylov_dat.k)
+  	if (gmreslp_dat->arnoldi_dat.Vk.size() != gmreslp_dat->arnoldi_dat.k)
     {
-      	gmreslp_dat->krylov_dat.Vk.resize(gmreslp_dat->krylov_dat.k);
+      	gmreslp_dat->arnoldi_dat.Vk.resize(gmreslp_dat->arnoldi_dat.k);
     }
-  	if ( gmreslp_dat->krylov_dat.w.rows() != b.rows() )
+  	if ( gmreslp_dat->arnoldi_dat.w.rows() != b.rows() )
   	{
-		gmreslp_dat->krylov_dat.w.set_size(b.rows(), 1);
+		gmreslp_dat->arnoldi_dat.w.set_size(b.rows(), 1);
   	}
-  	if ( gmreslp_dat->krylov_dat.v.rows() != b.rows() )
+  	if ( gmreslp_dat->arnoldi_dat.v.rows() != b.rows() )
   	{
-		gmreslp_dat->krylov_dat.v.set_size(b.rows(), 1);
+		gmreslp_dat->arnoldi_dat.v.set_size(b.rows(), 1);
   	}
-  	if ( gmreslp_dat->krylov_dat.sum.rows() != b.rows() )
+  	if ( gmreslp_dat->arnoldi_dat.sum.rows() != b.rows() )
   	{
-		gmreslp_dat->krylov_dat.sum.set_size(b.rows(), 1);
+		gmreslp_dat->arnoldi_dat.sum.set_size(b.rows(), 1);
   	}
-  	if ( gmreslp_dat->krylov_dat.Hkp1.rows() != gmreslp_dat->krylov_dat.k+1 )
+  	if ( gmreslp_dat->arnoldi_dat.Hkp1.rows() != gmreslp_dat->arnoldi_dat.k+1 )
   	{
-		gmreslp_dat->krylov_dat.Hkp1.set_size(gmreslp_dat->krylov_dat.k+1, gmreslp_dat->krylov_dat.k);
+		gmreslp_dat->arnoldi_dat.Hkp1.set_size(gmreslp_dat->arnoldi_dat.k+1, gmreslp_dat->arnoldi_dat.k);
   	}
-  	if ( gmreslp_dat->krylov_dat.e1.rows() != gmreslp_dat->krylov_dat.k+1)
+  	if ( gmreslp_dat->arnoldi_dat.e1.rows() != gmreslp_dat->arnoldi_dat.k+1)
   	{
-		gmreslp_dat->krylov_dat.e1.set_size(gmreslp_dat->krylov_dat.k+1, 1);
+		gmreslp_dat->arnoldi_dat.e1.set_size(gmreslp_dat->arnoldi_dat.k+1, 1);
   	}
-  	if ( gmreslp_dat->krylov_dat.yk.rows() != gmreslp_dat->krylov_dat.k )
+  	if ( gmreslp_dat->arnoldi_dat.yk.rows() != gmreslp_dat->arnoldi_dat.k )
   	{
-		gmreslp_dat->krylov_dat.yk.set_size(gmreslp_dat->krylov_dat.k, 1);
+		gmreslp_dat->arnoldi_dat.yk.set_size(gmreslp_dat->arnoldi_dat.k, 1);
   	}
   	gmreslp_dat->iter = 0;
   	gmreslp_dat->steps = 0;
   
   	//Form first matrix vector product
-  	success = (*matvec) (gmreslp_dat->x, gmreslp_dat->krylov_dat.w, matvec_data);
+  	success = (*matvec) (gmreslp_dat->x, gmreslp_dat->arnoldi_dat.w, matvec_data);
   	if (success != 0)
   	{
 		mError(simulation_fail);
 		return success;
   	}
-  	gmreslp_dat->r = b - gmreslp_dat->krylov_dat.w;
+  	gmreslp_dat->r = b - gmreslp_dat->arnoldi_dat.w;
   	gmreslp_dat->relres_base = gmreslp_dat->r.norm();
   	gmreslp_dat->res = gmreslp_dat->relres_base;
 	gmreslp_dat->bestres = gmreslp_dat->res;
@@ -664,26 +666,26 @@ int gmresLeftPreconditioned( int (*matvec) (const Matrix<double>& v, Matrix<doub
   	for (int m=0; m<gmreslp_dat->maxit; m++)
   	{
 		//Call the Krylov Function
-      	success = krylov(matvec,precon,gmreslp_dat->r,&gmreslp_dat->krylov_dat,matvec_data,precon_data);
+      	success = arnoldi(matvec,precon,gmreslp_dat->r,&gmreslp_dat->arnoldi_dat,matvec_data,precon_data);
       	if (success != 0)
       	{
 			mError(simulation_fail);
 			std::cout << "Vk = \n";
 			for (int n=0; n<b.rows(); n++)
 			{
-				for (int k=0; k<gmreslp_dat->krylov_dat.k; k++)
+				for (int k=0; k<gmreslp_dat->arnoldi_dat.k; k++)
 				{
-					std::cout << "\t" << gmreslp_dat->krylov_dat.Vk[k](n,0);
+					std::cout << "\t" << gmreslp_dat->arnoldi_dat.Vk[k](n,0);
 				}
 				std::cout << std::endl;
 			}
-			gmreslp_dat->krylov_dat.Hkp1.Display("H");
-			gmreslp_dat->krylov_dat.yk.Display("yk");
+			gmreslp_dat->arnoldi_dat.Hkp1.Display("H");
+			gmreslp_dat->arnoldi_dat.yk.Display("yk");
 			gmreslp_dat->x.Display("x0");
-			success = update_krylov_solution(gmreslp_dat->x, gmreslp_dat->x, gmreslp_dat->krylov_dat.Vk, gmreslp_dat->krylov_dat.yk);
+			success = update_arnoldi_solution(gmreslp_dat->x, gmreslp_dat->x, &gmreslp_dat->arnoldi_dat);
 			gmreslp_dat->x.Display("x");
-			success = (*matvec) (gmreslp_dat->x, gmreslp_dat->krylov_dat.w, matvec_data);
-			gmreslp_dat->r = b - gmreslp_dat->krylov_dat.w;
+			success = (*matvec) (gmreslp_dat->x, gmreslp_dat->arnoldi_dat.w, matvec_data);
+			gmreslp_dat->r = b - gmreslp_dat->arnoldi_dat.w;
 			gmreslp_dat->res = gmreslp_dat->r.norm();
 			std::cout << "RelRes at stop = \t" << gmreslp_dat->relres << std::endl;
 			std::cout << "AbsRes at stop = \t" << gmreslp_dat->res << std::endl << std::endl;
@@ -692,23 +694,23 @@ int gmresLeftPreconditioned( int (*matvec) (const Matrix<double>& v, Matrix<doub
       	}
       
       	//From the new solution and residual vector
-      	success = update_krylov_solution(gmreslp_dat->x, gmreslp_dat->x, gmreslp_dat->krylov_dat.Vk, gmreslp_dat->krylov_dat.yk);
+      	success = update_arnoldi_solution(gmreslp_dat->x, gmreslp_dat->x, &gmreslp_dat->arnoldi_dat);
       	if (success != 0)
       	{
 			mError(simulation_fail);
 			return success;
 		}
-      	success = (*matvec) (gmreslp_dat->x, gmreslp_dat->krylov_dat.w, matvec_data);
+      	success = (*matvec) (gmreslp_dat->x, gmreslp_dat->arnoldi_dat.w, matvec_data);
       	if (success != 0)
       	{
 			mError(simulation_fail);
 			return success;
       	}
-      	gmreslp_dat->r = b - gmreslp_dat->krylov_dat.w;
+      	gmreslp_dat->r = b - gmreslp_dat->arnoldi_dat.w;
       	gmreslp_dat->res = gmreslp_dat->r.norm();
       	gmreslp_dat->relres = gmreslp_dat->res / gmreslp_dat->relres_base;
       	gmreslp_dat->iter++;
-      	gmreslp_dat->steps = gmreslp_dat->steps + gmreslp_dat->iter + gmreslp_dat->krylov_dat.iter;
+      	gmreslp_dat->steps = gmreslp_dat->steps + gmreslp_dat->iter + gmreslp_dat->arnoldi_dat.iter;
 		if (gmreslp_dat->Output == true)
 			std::cout << "RelRes[" << m+1 << "] =\t" << gmreslp_dat->relres << std::endl;
 	
@@ -3328,7 +3330,7 @@ int LARK_TESTS()
     EX01_DATA ex01_dat;
     int rows = 100;
     int cols = 100;
-    int maxk = 50;
+    int maxk = 100;
     double bound = -1.0;
     double time;
     ex01_dat.M.set_size(rows, cols);
@@ -3346,14 +3348,14 @@ int LARK_TESTS()
     
     Matrix<double> r0(rows,1);
     r0 = ex01_dat.b - ex01_dat.M*guess;
-    KRYLOV_DATA krylov_dat;
-    krylov_dat.k = maxk;
+    ARNOLDI_DATA arnoldi_dat;
+    arnoldi_dat.k = maxk;
     
     time = clock();
-    success = krylov(matvec_ex01,NULL,r0,&krylov_dat,(void *)&ex01_dat, (void *)&ex01_dat);
+    success = arnoldi(matvec_ex01,NULL,r0,&arnoldi_dat,(void *)&ex01_dat, (void *)&ex01_dat);
 	    
     Matrix<double> x;
-    success = update_krylov_solution(x, guess, krylov_dat.Vk, krylov_dat.yk);
+    success = update_arnoldi_solution(x, guess, &arnoldi_dat);
     time = clock() - time;
     std::cout << "Krylov Solve (s):\t" << (time / CLOCKS_PER_SEC) << std::endl;;
     std::cout << "Norm =\t" << (ex01_dat.b - ex01_dat.M*x).norm() << std::endl; //(PASS)
@@ -3392,12 +3394,12 @@ int LARK_TESTS()
   	ex02_dat.b.ConstantICFill(1);
   	x0.ConstantICFill(0);
   	r0 = ex02_dat.b - ex02_dat.M*x0;
-  	krylov_dat.k = 2;
-  	krylov_dat.iter = 0;
+  	arnoldi_dat.k = 2;
+  	arnoldi_dat.iter = 0;
   	time = clock();
-  	success = krylov(matvec_ex02,NULL,r0,&krylov_dat,(void *)&ex02_dat,(void *)&ex02_dat);
+  	success = arnoldi(matvec_ex02,NULL,r0,&arnoldi_dat,(void *)&ex02_dat,(void *)&ex02_dat);
 	std::cout << "Krylov Exit Code: " << success << std::endl;
-	success = update_krylov_solution(x, x0, krylov_dat.Vk, krylov_dat.yk);
+	success = update_arnoldi_solution(x, x0, &arnoldi_dat);
   	time = clock() - time;
   	std::cout << "Krylov Solve (s):\t" << (time / CLOCKS_PER_SEC) << std::endl;
   	x.Display("x");

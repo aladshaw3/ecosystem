@@ -30,7 +30,7 @@ typedef struct
   	Matrix<double> v;				// (N) x (1) holding cell for the column entries of Vk and other interims
   	Matrix<double> sum;				// (N) x (1) running sum of subspace vectors for use in altering w
 	
-}KRYLOV_DATA;
+}ARNOLDI_DATA;
 
 //Data structure for implementation of the Restarted GMRES algorithm with Left Preconditioning
 typedef struct
@@ -53,7 +53,7 @@ typedef struct
 	Matrix<double> bestx;				//Best found solution to the linear system
   	Matrix<double> r;					//Residual vector for the linear system
 	
-    KRYLOV_DATA krylov_dat; //Data structure for the kyrlov subspace
+    ARNOLDI_DATA arnoldi_dat; //Data structure for the kyrlov subspace
     
 }GMRESLP_DATA;
 
@@ -417,11 +417,11 @@ int matvec_ex15(const Matrix<double>& v, Matrix<double>& w, const void *data);
 int precon_ex15(const Matrix<double>& w, Matrix<double>& p, const void *data);
 
 //Below are the actual functions available in LARK
-int update_krylov_solution(Matrix<double>& x, Matrix<double>& x0, std::vector<Matrix<double>>& Vk, Matrix<double>& yk);
+int update_arnoldi_solution(Matrix<double>& x, Matrix<double>& x0, ARNOLDI_DATA *arnoldi_dat);
 
-int krylov( int (*matvec) (const Matrix<double>& v, Matrix<double> &w, const void *data),
+int arnoldi( int (*matvec) (const Matrix<double>& v, Matrix<double> &w, const void *data),
             int (*precon) (const Matrix<double>& b, Matrix<double> &p, const void *data),
-            Matrix<double> &r0, KRYLOV_DATA *krylov_dat, const void *matvec_data,
+            Matrix<double> &r0, ARNOLDI_DATA *arnoldi_dat, const void *matvec_data,
 		    const void *precon_data );
 
 int gmresLeftPreconditioned( int (*matvec) (const Matrix<double>& v, Matrix<double> &w, const void *data),
