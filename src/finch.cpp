@@ -3944,7 +3944,12 @@ int FINCH_TESTS()
 	
 	//Initializations
 	time = clock();
-	Output = fopen("FINCH_TEST_Output.txt","w+");
+	Output = fopen("output/FINCH_TEST_Output.txt","w+");
+	if (Output == nullptr)
+	{
+		system("mkdir output");
+		Output = fopen("output/FINCH_TEST_Output.txt","w+");
+	}
 	
   	//Change Parameters for Testing
 	dat.uIC = 0.0;

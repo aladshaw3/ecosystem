@@ -7,10 +7,6 @@
 //
 
 #include "ui.h"
-#include "flock.h"
-#include "school.h"
-#include "sandbox.h"
-#include "Trajectory.h"
 
 int main(int argc, const char * argv[])
 {	
@@ -72,7 +68,6 @@ int main(int argc, const char * argv[])
     //success = MACAW_TESTS();
 	//success = LARK_TESTS();
 	//success = FINCH_TESTS();
-	//success = MESH_TESTS();
 	//success = SKUA_TESTS();
 	//success = EGRET_TESTS();
 	//success = SCOPSOWL_TESTS();

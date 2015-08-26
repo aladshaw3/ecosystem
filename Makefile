@@ -39,10 +39,13 @@ $(ODIR)/%.o: src/%.cpp $(DEPS)
 $(EXE): $(OBJ)
 	$(CXX) -O2 -o $@ $^ $(CXXFLAGS)
 
-.PHONY: clean install
+.PHONY: clean install cleanall
 
 clean:
 	rm -f $(EXE) $(ODIR)/*.o *~ core $(INCDIR)/*~
-	sudo rm -f $(INSDIR)/$(EXE)
 install:
 	sudo cp $(EXE) $(INSDIR)
+cleanall:
+	rm -f $(EXE) $(ODIR)/*.o *~ core $(INCDIR)/*~
+	rm -f *.txt
+	sudo rm -f $(INSDIR)/$(EXE)
