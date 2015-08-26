@@ -1,7 +1,0 @@
-ref_Dc[i](um^2/hr)	ref_T[i](K)
-affinity_const[i](-)	act_energy_Dc[i](J/mol)
-van_der_Waals_vol[i](cm^3/mol)
-qmax[i](mol/kg)
-m[i](-)
-dH[n][i](J/mol)	dS[n][i](J/mol/K)
-…		…

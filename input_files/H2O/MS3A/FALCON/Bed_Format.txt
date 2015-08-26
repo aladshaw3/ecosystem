@@ -1,4 +1,0 @@
-Bed_Length(cm)	Bed_inner_dia(cm)	Bed_outer_dia(cm)	Bed_porosity(-)
-Dispersion(cm^2/hr)	Conductivity(J/hr/cm/K)
-Wall_Density(g/cm^3)		Wall_heat_capacity(J/g/K)	
-Wall_trans_coeff(J/hr/cm^2/K)	exterior_trans_coeff(J/hr/cm^2/K)

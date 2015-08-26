@@ -1,6 +1,0 @@
-End_Sim_Time_(hr)
-Gas_Stream_Temp_(K)	Gas_Stream_PT_(kPa)	Flow_Rate_(cm^3/hr)	Ambient_Temp_(K)
-Num_Gas_Species
-Initial_qT	InitialGas_temp(K)		Initial_PT(kPa)		InitialWall_temp(K)
-Input_y[i]		Initial_y[i]		Initial_x[i]
-…			…			...

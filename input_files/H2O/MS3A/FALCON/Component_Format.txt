@@ -1,3 +1,0 @@
-bool_Adsorbable[i](0=false;1=true)		
-MolecularWeight[i](g/mol)	heat_capacity[i](J/g/K)
-ref_viscosity[i](g/cm/s)	ref_Temp[i](K)		Sutherland_const[i](K)

@@ -1,10 +1,6 @@
 # Test input file for YAML and SHARK
 
-Batty: fatty # this produces an error, Document names cannot have associated values
-
-Foxie: &batty # this is okay, creates anchor for document named Foxie
-
-TestDoc1: # this key should be at the front of all documents
+TestDoc1: &hat
 ---
 - scenario:
   numvar: 25
@@ -19,7 +15,7 @@ TestDoc1: # this key should be at the front of all documents
     sub: block
 ...
 
-TestDoc2:
+TestDoc2: *hat
 ---
 - masterspecies:
   "Cl - (aq)": 0
@@ -52,9 +48,7 @@ TestDoc4:
 - anchor: &anchor
   stuff: to do
 - alias: *anchor
-
-anchor2: &2nd
-alias2: *2nd
+  add: to stuff
 
 - list:
   - anchored: &list_anchor
@@ -69,7 +63,11 @@ alias2: *2nd
 
 TestDoc5:
 ---
-other: *2nd
+
 - grab: *anchor
-  stuff: end
+  add2: more adds
+  - listcopy: *a
+  
+- block: {1: 2, 3: 4}
+  still: in block
 ...

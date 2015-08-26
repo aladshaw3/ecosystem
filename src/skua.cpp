@@ -1190,8 +1190,8 @@ int SKUA_SCENARIOS(const char *scene, const char *sorbent, const char *comp, con
 	sceneFile >> d_read; dat.sim_time = d_read;
 	sceneFile >> d_read; dat.t_print = d_read;
 	sceneFile >> i_read;
-	if (i_read == 0) dat.DirichletBC = true;
-	else if (i_read == 1) dat.DirichletBC = false;
+	if (i_read == 0) dat.DirichletBC = false;
+	else if (i_read == 1) dat.DirichletBC = true;
 	else {mError(invalid_boolean); return -1;}
 	sceneFile >> i_read; dat.magpie_dat.sys_dat.N = i_read;
 	dat.magpie_dat.gpast_dat.resize(dat.magpie_dat.sys_dat.N);
@@ -1276,6 +1276,8 @@ int SKUA_SCENARIOS(const char *scene, const char *sorbent, const char *comp, con
 		{
 			sorbateFile >> d_read; dat.param_dat[i].ref_diffusion = d_read;			//um^2/hr
 			sorbateFile >> d_read; dat.param_dat[i].activation_energy = d_read;		//J/mol
+			sorbateFile >> d_read; dat.param_dat[i].ref_temperature = d_read;		//K
+			sorbateFile >> d_read; dat.param_dat[i].affinity = d_read;				//-
 			sorbateFile >> d_read; dat.magpie_dat.mspd_dat[i].v = d_read;				//cm^3/mol
 			sorbateFile >> d_read; dat.magpie_dat.gsta_dat[i].qmax = d_read;			//mol/kg
 			sorbateFile >> i_read; dat.magpie_dat.gsta_dat[i].m = i_read;				//-
@@ -1292,6 +1294,8 @@ int SKUA_SCENARIOS(const char *scene, const char *sorbent, const char *comp, con
 		{
 			dat.param_dat[i].ref_diffusion = 0.0;			//um^2/hr
 			dat.param_dat[i].activation_energy = 0.0;		//J/mol
+			dat.param_dat[i].ref_temperature = 0.0;			//K
+			dat.param_dat[i].affinity = 0.0;				//-
 			dat.magpie_dat.mspd_dat[i].v = 0.0;				//cm^3/mol
 			dat.magpie_dat.gsta_dat[i].qmax = 0.0;			//mol/kg
 			dat.magpie_dat.gsta_dat[i].m = 1;				//-
@@ -1429,6 +1433,8 @@ int SKUA_TESTS()
 		{
 			dat.param_dat[i].ref_diffusion = 0.0;			//um^2/hr
 			dat.param_dat[i].activation_energy = 0.0;		//J/mol
+			dat.param_dat[i].ref_temperature = 0.0;			//K
+			dat.param_dat[i].affinity = 0.0;				//-
 			dat.magpie_dat.mspd_dat[i].v = 0.0;				//cm^3/mol
 			dat.magpie_dat.gsta_dat[i].qmax = 0.0;			//mol/kg
 			dat.magpie_dat.gsta_dat[i].m = 1;				//-
@@ -1444,6 +1450,8 @@ int SKUA_TESTS()
 		{
 			dat.param_dat[i].ref_diffusion = 0.0;			//um^2/hr
 			dat.param_dat[i].activation_energy = 0.0;		//J/mol
+			dat.param_dat[i].ref_temperature = 0.0;			//K
+			dat.param_dat[i].affinity = 0.0;				//-
 			dat.magpie_dat.mspd_dat[i].v = 0.0;				//cm^3/mol
 			dat.magpie_dat.gsta_dat[i].qmax = 0.0;			//mol/kg
 			dat.magpie_dat.gsta_dat[i].m = 1;				//-
@@ -1490,6 +1498,8 @@ int SKUA_TESTS()
 			
 			
 			dat.param_dat[i].activation_energy = 5657.18;	//J/mol
+			dat.param_dat[i].ref_temperature = 0.0;			//K
+			dat.param_dat[i].affinity = 0.0;				//-
 			dat.magpie_dat.mspd_dat[i].v = 13.91;			//cm^3/mol
 			dat.magpie_dat.gsta_dat[i].qmax = 11.67;		//mol/kg
 			dat.magpie_dat.gsta_dat[i].m = 4;				//-

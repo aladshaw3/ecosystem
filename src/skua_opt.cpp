@@ -512,10 +512,14 @@ int SKUA_OPTIMIZE(const char *scene, const char *sorbent, const char *comp, cons
 		{
 			sorbateFile >> d_read; skua_opt.skua_dat.param_dat[i].ref_diffusion = d_read;			//um^2/hr
 			sorbateFile >> d_read; skua_opt.skua_dat.param_dat[i].activation_energy = d_read;		//J/mol
+			sorbateFile >> d_read; skua_opt.skua_dat.param_dat[i].ref_temperature = d_read;			//K
+			sorbateFile >> d_read; skua_opt.skua_dat.param_dat[i].affinity = d_read;				//-
 			if (skua_opt.Optimize == true)
 			{
 				skua_opt.skua_dat.param_dat[i].activation_energy = 0.0;
 				skua_opt.skua_dat.param_dat[i].ref_diffusion = 1.0;
+				skua_opt.skua_dat.param_dat[i].ref_temperature = 0.0;
+				skua_opt.skua_dat.param_dat[i].affinity = 0.0;
 			}
 			sorbateFile >> d_read; skua_opt.skua_dat.magpie_dat.mspd_dat[i].v = d_read;				//cm^3/mol
 			sorbateFile >> d_read; skua_opt.skua_dat.magpie_dat.gsta_dat[i].qmax = d_read;			//mol/kg
