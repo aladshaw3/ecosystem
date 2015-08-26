@@ -503,20 +503,20 @@ int gsta_optimize(const char* fileName)
 
     	//Open the output text files
     	FILE *output, *best, *norm, *params, *heats;
-    	output = fopen("output/All_Results.txt","w+");
-    	best = fopen("output/Best_Results.txt", "w+");
-    	norm = fopen("output/Norms_v_Fobj.txt","w+");
-    	params = fopen("output/Parameter_Results.txt","w+");
-    	heats = fopen("output/Energy_Results.txt","w+");
+    	output = fopen("output/All_GSTA_Results.txt","w+");
+    	best = fopen("output/Best_GSTA_Results.txt", "w+");
+    	norm = fopen("output/GSTA_Norms_v_Fobj.txt","w+");
+    	params = fopen("output/GSTA_Parameter_Results.txt","w+");
+    	heats = fopen("output/GSTA_Energy_Results.txt","w+");
 		
 		if (output == nullptr)
 		{
 			system("mkdir output");
-			output = fopen("output/All_Results.txt","w+");
-			best = fopen("output/Best_Results.txt", "w+");
-			norm = fopen("output/Norms_v_Fobj.txt","w+");
-			params = fopen("output/Parameter_Results.txt","w+");
-			heats = fopen("output/Energy_Results.txt","w+");
+			output = fopen("output/All_GSTA_Results.txt","w+");
+			best = fopen("output/Best_GSTA_Results.txt", "w+");
+			norm = fopen("output/GSTA_Norms_v_Fobj.txt","w+");
+			params = fopen("output/GSTA_Parameter_Results.txt","w+");
+			heats = fopen("output/GSTA_Energy_Results.txt","w+");
 		}
 
     	//Start outer loop for all isotherms

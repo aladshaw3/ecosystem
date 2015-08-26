@@ -1366,11 +1366,11 @@ int MAGPIE_SCENARIOS(const char *inputFileName, const char *sceneFileName)
 		std::cout << "Check file names, then re-run program..." << std::endl;
 		return -1;
 	}
-	sceneResults = fopen("output/Scenario_Results.txt","w+");
+	sceneResults = fopen("output/MAGPIE_Results.txt","w+");
 	if (sceneResults == nullptr)
 	{
 		system("mkdir output");
-		sceneResults = fopen("output/Scenario_Results.txt","w+");
+		sceneResults = fopen("output/MAGPIE_Results.txt","w+");
 	}
 
 	//Read in data from Input File

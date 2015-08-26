@@ -1728,8 +1728,8 @@ int SCOPSOWL_TESTS()
 	if (success != 0) {mError(simulation_fail); return -1;}
 		
 	//Call Routine
-	//success = SCOPSOWL(&dat);
-	success = LARGE_CYCLE_TEST01(&dat);
+	success = SCOPSOWL(&dat);
+	//success = LARGE_CYCLE_TEST01(&dat);
 	//success = SMALL_CYCLE_TEST02(&dat);
 	//success = CURVE_TEST03(&dat);
 	//success = CURVE_TEST04(&dat);

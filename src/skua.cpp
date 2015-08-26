@@ -1518,9 +1518,9 @@ int SKUA_TESTS()
 	if (success != 0) {mError(simulation_fail); return -1;}
 	
 	//Call the simulation routine
-	//success = SKUA(&dat);
+	success = SKUA(&dat);
 	//success = SKUA_CYCLE_TEST01(&dat);
-	success = SKUA_CYCLE_TEST02(&dat);
+	//success = SKUA_CYCLE_TEST02(&dat);
 	//success = SKUA_LOW_TEST03(&dat);
 	//success = SKUA_MID_TEST04(&dat);
 	if (success != 0) {mError(simulation_fail); return -1;}
