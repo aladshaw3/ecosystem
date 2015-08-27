@@ -47,5 +47,4 @@ install:
 	sudo cp $(EXE) $(INSDIR)
 cleanall:
 	rm -f $(EXE) $(ODIR)/*.o *~ core $(INCDIR)/*~
-	rm -f *.txt
 	sudo rm -f $(INSDIR)/$(EXE)

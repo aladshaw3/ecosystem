@@ -446,7 +446,6 @@ double default_effective_diffusion(int i, int l, const void *user_data)
 	
 	Dp = default_pore_diffusion(i, l, user_data);
 	Dc = (*dat->eval_surfDiff) (i,l,user_data);
-	//Dc = default_surf_diffusion(i, l, user_data);
 	if (l < 0)
 		De = (Dp*dat->binder_porosity*dat->binder_porosity) + (dat->pellet_density*Dc*dat->param_dat[i].dq_dco*1.0E-8);
 	else
