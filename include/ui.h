@@ -24,7 +24,7 @@ typedef enum {TEST, EXECUTE, EXIT, CONTINUE, HELP,
 				macaw, mola, monkfish, sandbox,
 	
 				scopsowl, shark, skua, gsta_opt, magpie,
-				scops_opt, skua_opt} valid_options;
+				scops_opt, skua_opt, trajectory} valid_options;
 
 typedef struct
 {
@@ -45,6 +45,10 @@ std::string allLower(const std::string input);
 bool exit(const std::string input);
 
 bool help(const std::string input);
+
+void current_tests();
+
+void current_execs();
 
 void display_help(int argc);
 

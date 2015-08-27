@@ -6,7 +6,7 @@
 //----------------------------------------
 
 /*
- *		MACAW = MAtrix CAlculation Workshop
+ *		MACAW = MAtrix CAlculation Workspace
  *
  *		This is a small C++ library that faciltates the use and construction of
  *		real matrices using vector objects. It has functions for both dense and
