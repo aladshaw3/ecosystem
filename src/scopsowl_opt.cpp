@@ -560,9 +560,9 @@ int SCOPSOWL_OPTIMIZE(const char *scene, const char *sorbent, const char *comp, 
 	else if (i_read == 1) owl_opt.Rough = true;
 	else {mError(invalid_boolean); return -1;}
 	sceneFile >> i_read; owl_opt.diffusion_type = i_read;
-	if (i_read == 0) owl_opt.owl_dat.eval_surfDiff = (*default_Dc);//GOOD
-	else if (i_read == 1) owl_opt.owl_dat.eval_surfDiff = (*simple_darken_Dc);//GOOD
-	else if (i_read == 2) owl_opt.owl_dat.eval_surfDiff = (*theoretical_darken_Dc);//GOOD
+	if (i_read == 0) owl_opt.owl_dat.eval_surfDiff = (*default_Dc);
+	else if (i_read == 1) owl_opt.owl_dat.eval_surfDiff = (*simple_darken_Dc);
+	else if (i_read == 2) owl_opt.owl_dat.eval_surfDiff = (*theoretical_darken_Dc);
 	else {mError(invalid_boolean); return -1;}
 	sceneFile >> i_read;
 	if (i_read == 0) owl_opt.owl_dat.DirichletBC = false;
@@ -642,9 +642,16 @@ int SCOPSOWL_OPTIMIZE(const char *scene, const char *sorbent, const char *comp, 
 		}
 		else
 			owl_opt.owl_dat.char_micro = 1.0;
+		sorbentFile >> d_read; owl_opt.owl_dat.crystal_radius = d_read;
+		sorbentFile >> d_read; owl_opt.owl_dat.binder_fraction = d_read;
 	}
-	sorbentFile >> d_read; owl_opt.owl_dat.crystal_radius = d_read;
-	sorbentFile >> d_read; owl_opt.owl_dat.binder_fraction = d_read;
+	else
+	{
+		owl_opt.owl_dat.binder_fraction = 1.0;
+		owl_opt.owl_dat.char_micro = 1.0;
+		owl_opt.owl_dat.crystal_radius = 1.0;
+		owl_opt.owl_dat.coord_micro = 2;
+	}
 	sorbentFile.close();
 	
 	// Read (3) compFile
@@ -818,7 +825,7 @@ int SCOPSOWL_OPTIMIZE(const char *scene, const char *sorbent, const char *comp, 
 	fclose(ParamResults);
 	fclose(Comparison);
 	time = clock() - time;
-	std::cout << "Simulation Runtime: " << (time / CLOCKS_PER_SEC) << " seconds\n";
+	std::cout << "Optimization Runtime: " << (time / CLOCKS_PER_SEC) << " seconds\n";
 	std::cout << "Total Evaluations: " << owl_opt.total_eval << "\n";
 	std::cout << "Evaluations/sec: " << owl_opt.total_eval/(time / CLOCKS_PER_SEC) << "\n";
 	

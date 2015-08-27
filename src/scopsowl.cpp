@@ -579,9 +579,9 @@ int setup_SCOPSOWL_DATA(FILE *file,
 		if (success != 0) {mError(simulation_fail); return -1;}
 		owl_data->finch_dat[i].max_iter = 300;
 		owl_data->finch_dat[i].nl_method = FINCH_Picard;
-		//owl_data->finch_dat[i].pjfnk_dat.LineSearch = true;
-		//owl_data->finch_dat[i].pjfnk_dat.Bounce = true;
-		owl_data->finch_dat[i].pjfnk_dat.linear_solver = GMRESR;
+		owl_data->finch_dat[i].pjfnk_dat.LineSearch = false;
+		owl_data->finch_dat[i].pjfnk_dat.Bounce = false;
+		owl_data->finch_dat[i].pjfnk_dat.linear_solver = GMRESRP;
 		owl_data->finch_dat[i].pjfnk_dat.nl_maxit = 300;
 						
 		owl_data->param_dat[i].qAvg.set_size(owl_data->finch_dat[i].LN, 1);
@@ -628,6 +628,10 @@ int setup_SCOPSOWL_DATA(FILE *file,
 	{
 		owl_data->eval_diff = (*default_effective_diffusion);
 		owl_data->eval_surfDiff = (*eval_surface_diff);
+	}
+	else
+	{
+		//No Action
 	}
 	
 	return success;
@@ -1487,6 +1491,231 @@ int CURVE_TEST05(SCOPSOWL_DATA *owl_dat)
 int SCOPSOWL_SCENARIOS(const char *scene, const char *sorbent, const char *comp, const char *sorbate)
 {
 	int success = 0;
+	std::string sceneName, sorbentName, compName, sorbateName;
+	
+	//Check the input files
+	if (scene == NULL || sorbent == NULL || comp == NULL || sorbate == NULL)
+	{
+		std::cout << "Enter name of Scenario File: ";
+		std::cin >> sceneName;
+		std::cout << "Enter name of Adsorbent Property File: ";
+		std:: cin >> sorbentName;
+		std::cout << "Enter name of Component Property File: ";
+		std::cin >> compName;
+		std::cout << "Enter name of Adsorbate Property File: ";
+		std::cin >> sorbateName;
+		std::cout << "\n";
+		
+		scene = sceneName.c_str();
+		sorbent = sorbentName.c_str();
+		comp = compName.c_str();
+		sorbate = sorbateName.c_str();
+	}
+	
+	std::ifstream sceneFile ( scene );
+	std::ifstream sorbentFile ( sorbent );
+	std::ifstream compFile ( comp );
+	std::ifstream sorbateFile ( sorbate );
+	
+	if (sceneFile.good()==false || sorbentFile.good()==false || compFile.good()==false || sorbateFile.good()==false)
+	{
+		mError(file_dne);
+		return -1;
+	}
+	
+	//Declarations
+	SCOPSOWL_DATA dat;
+	MIXED_GAS mixture;
+	double time;
+	FILE *Output;
+	int i_read;
+	double d_read;
+	std::string s_read;
+	
+	//Initializations
+	time = clock();
+	Output = fopen("output/SCOPSOWL_Output.txt","w+");
+	if (Output == nullptr)
+	{
+		system("mkdir output");
+		Output = fopen("output/SCOPSOWL_Output.txt","w+");
+	}
+	dat.Print2File = true;
+	dat.NonLinear = true;						//-
+	dat.level = 1;
+	dat.Print2Console = true;					//-
+	dat.magpie_dat.sys_dat.Output = false;
+	mixture.CheckMolefractions = true;
+	dat.total_steps = 0;
+	
+	//	(1) - Read the Scenario File
+	sceneFile >> d_read; dat.magpie_dat.sys_dat.T = d_read;
+	sceneFile >> d_read; dat.magpie_dat.sys_dat.PT = d_read;
+	dat.total_pressure = dat.magpie_dat.sys_dat.PT;
+	dat.gas_temperature = dat.magpie_dat.sys_dat.T;
+	sceneFile >> d_read; dat.gas_velocity = d_read;
+	sceneFile >> d_read; dat.sim_time = d_read;
+	sceneFile >> d_read; dat.t_print = d_read;
+	sceneFile >> i_read;
+	if (i_read == 0) dat.DirichletBC = false;
+	else if (i_read == 1) dat.DirichletBC = true;
+	else {mError(invalid_boolean); return -1;}
+	sceneFile >> i_read; dat.magpie_dat.sys_dat.N = i_read;
+	dat.magpie_dat.gpast_dat.resize(dat.magpie_dat.sys_dat.N);
+	dat.magpie_dat.gsta_dat.resize(dat.magpie_dat.sys_dat.N);
+	dat.magpie_dat.mspd_dat.resize(dat.magpie_dat.sys_dat.N);
+	dat.param_dat.resize(dat.magpie_dat.sys_dat.N);
+	dat.finch_dat.resize(dat.magpie_dat.sys_dat.N);
+	dat.y.resize(dat.magpie_dat.sys_dat.N);
+	sceneFile >> d_read; dat.magpie_dat.sys_dat.qT = d_read;
+	
+	for (int i=0; i<dat.magpie_dat.sys_dat.N; i++)
+	{
+		sceneFile >> s_read; dat.param_dat[i].speciesName = s_read;
+		sceneFile >> i_read;
+		if (i_read == 0) dat.param_dat[i].Adsorbable = false;
+		else if (i_read == 1) dat.param_dat[i].Adsorbable = true;
+		else {mError(invalid_boolean); return -1;}
+		sceneFile >> d_read; dat.y[i] = d_read;
+		sceneFile >> d_read; dat.param_dat[i].xIC = d_read;
+		dat.param_dat[i].qIntegralAvg_old = dat.param_dat[i].xIC * dat.magpie_dat.sys_dat.qT;
+		
+		//Additional magpie initializations
+		dat.magpie_dat.mspd_dat[i].eta.resize(dat.magpie_dat.sys_dat.N);
+		dat.magpie_dat.gpast_dat[i].gama_inf.resize(dat.magpie_dat.sys_dat.N);
+		dat.magpie_dat.gpast_dat[i].po.resize(dat.magpie_dat.sys_dat.N);
+	}
+	sceneFile.close();
+	
+	//Initialize gas mixture data
+	success = initialize_data(dat.magpie_dat.sys_dat.N, &mixture);
+	if (success != 0) {mError(simulation_fail); return -1;}
+	
+	// Read (2) sorbentFile
+	sorbentFile >> i_read;
+	if (i_read == 0) dat.Heterogeneous = false;
+	else if (i_read == 1) dat.Heterogeneous = true;
+	else {mError(invalid_boolean); return -1;}
+	
+	sorbentFile >> i_read;
+	if (i_read == 0) dat.SurfDiff = false;
+	else if (i_read == 1) dat.SurfDiff = true;
+	else {mError(invalid_boolean); return -1;}
+	
+	sorbentFile >> i_read; dat.coord_macro = i_read;
+	if (i_read > 2 || i_read < 0) {mError(invalid_boolean); return -1;}
+	if (i_read == 0 || i_read == 1)
+	{
+		sorbentFile >> d_read; dat.char_macro = d_read;
+	}
+	else
+		dat.char_macro = 1.0;
+	sorbentFile	>> d_read; dat.pellet_radius = d_read;
+	sorbentFile >> d_read; dat.pellet_density = d_read;
+	sorbentFile >> d_read; dat.binder_porosity = d_read;
+	sorbentFile >> d_read; dat.binder_poresize = d_read;
+	if (dat.Heterogeneous == true)
+	{
+		sorbentFile >> i_read; dat.coord_micro = i_read;
+		if (i_read > 2 || i_read < 0) {mError(invalid_boolean); return -1;}
+		if (i_read == 0 || i_read == 1)
+		{
+			sorbentFile >> d_read; dat.char_micro = d_read;
+		}
+		else
+			dat.char_micro = 1.0;
+		sorbentFile >> d_read; dat.crystal_radius = d_read;
+		sorbentFile >> d_read; dat.binder_fraction = d_read;
+	}
+	else
+	{
+		dat.binder_fraction = 1.0;
+		dat.crystal_radius = 1.0;
+		dat.coord_micro = 2;
+		dat.char_micro = 1.0;
+	}
+	sorbentFile.close();
+	
+	// Read (3) compFile
+	for (int i=0; i<dat.magpie_dat.sys_dat.N; i++)
+	{
+		compFile >> d_read; mixture.species_dat[i].molecular_weight = d_read;
+		compFile >> d_read; mixture.species_dat[i].specific_heat = d_read;
+		compFile >> d_read; mixture.species_dat[i].Sutherland_Viscosity = d_read;
+		compFile >> d_read; mixture.species_dat[i].Sutherland_Temp = d_read;
+		compFile >> d_read; mixture.species_dat[i].Sutherland_Const = d_read;
+	}
+	compFile.close();
+
+	// Read (4) sorbateFile
+	if (dat.Heterogeneous == true)
+	{
+		sorbateFile >> i_read;
+		if (i_read == 0) dat.eval_surfDiff = (*default_Dc);
+		else if (i_read == 1) dat.eval_surfDiff = (*simple_darken_Dc);
+		else if (i_read == 2) dat.eval_surfDiff = (*theoretical_darken_Dc);
+		else {mError(invalid_boolean); return -1;}
+	}
+	else
+	{
+		dat.eval_surfDiff = (*default_surf_diffusion);
+	}
+	for (int i=0; i<dat.magpie_dat.sys_dat.N; i++)
+	{
+		//Only read in data for adsorbable components in order of appearence
+		if (dat.param_dat[i].Adsorbable == true)
+		{
+			sorbateFile >> d_read; dat.param_dat[i].ref_diffusion = d_read;			//um^2/hr
+			sorbateFile >> d_read; dat.param_dat[i].activation_energy = d_read;		//J/mol
+			sorbateFile >> d_read; dat.param_dat[i].ref_temperature = d_read;		//K
+			sorbateFile >> d_read; dat.param_dat[i].affinity = d_read;				//-
+
+			sorbateFile >> d_read; dat.magpie_dat.mspd_dat[i].v = d_read;				//cm^3/mol
+			sorbateFile >> d_read; dat.magpie_dat.gsta_dat[i].qmax = d_read;			//mol/kg
+			sorbateFile >> i_read; dat.magpie_dat.gsta_dat[i].m = i_read;				//-
+			dat.magpie_dat.gsta_dat[i].dHo.resize(dat.magpie_dat.gsta_dat[i].m);
+			dat.magpie_dat.gsta_dat[i].dSo.resize(dat.magpie_dat.gsta_dat[i].m);
+			for (int n=0; n<dat.magpie_dat.gsta_dat[i].m; n++)
+			{
+				sorbateFile >> d_read; dat.magpie_dat.gsta_dat[i].dHo[n] = d_read;	//J/mol
+				sorbateFile >> d_read; dat.magpie_dat.gsta_dat[i].dSo[n] = d_read;	//J/K/mol
+			}
+		}
+		//Otherwise, set values to zeros
+		else
+		{
+			dat.param_dat[i].ref_diffusion = 0.0;				//um^2/hr
+			dat.param_dat[i].activation_energy = 0.0;			//J/mol
+			dat.param_dat[i].ref_temperature = 0.0;				//K
+			dat.param_dat[i].affinity = 0.0;					//-
+			dat.magpie_dat.mspd_dat[i].v = 0.0;				//cm^3/mol
+			dat.magpie_dat.gsta_dat[i].qmax = 0.0;			//mol/kg
+			dat.magpie_dat.gsta_dat[i].m = 1;					//-
+			dat.magpie_dat.gsta_dat[i].dHo.resize(dat.magpie_dat.gsta_dat[i].m);
+			dat.magpie_dat.gsta_dat[i].dSo.resize(dat.magpie_dat.gsta_dat[i].m);
+			for (int n=0; n<dat.magpie_dat.gsta_dat[i].m; n++)
+			{
+				dat.magpie_dat.gsta_dat[i].dHo[n] = 0.0;	//J/mol
+				dat.magpie_dat.gsta_dat[i].dSo[n] = 0.0;	//J/K/mol
+			}
+		}
+	}
+	sorbateFile.close();
+	
+	//Call the setup function
+	success = setup_SCOPSOWL_DATA(Output, default_adsorption, default_retardation, default_pore_diffusion, default_filmMassTransfer, dat.eval_surfDiff, (void *)&dat, &mixture, &dat);
+	if (success != 0) {mError(simulation_fail); return -1;}
+	
+	//Call Routine
+	success = SCOPSOWL(&dat);
+	if (success != 0) {mError(simulation_fail); return -1;}
+
+	//END execution
+	fclose(Output);
+	time = clock() - time;
+	std::cout << "Simulation Runtime: " << (time / CLOCKS_PER_SEC) << " seconds\n";
+	std::cout << "Total Evaluations: " << dat.total_steps << "\n";
+	std::cout << "Evaluations/sec: " << dat.total_steps/(time / CLOCKS_PER_SEC) << "\n";
 	
 	return success;
 }
@@ -1673,7 +1902,7 @@ int SCOPSOWL_TESTS()
 			//dat.param_dat[i].affinity = 0.0003701;				//-
 			
 			//Const Dc Parameters
-			dat.param_dat[i].ref_diffusion = 0.88136;		//um^2/hr
+			dat.param_dat[i].ref_diffusion = 0.8814;		//um^2/hr
 			dat.param_dat[i].activation_energy = 0.0;	//J/mol
 			dat.param_dat[i].ref_temperature = 267.999;			//K
 			dat.param_dat[i].affinity = 0.0;				//-

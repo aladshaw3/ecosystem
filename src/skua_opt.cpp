@@ -653,7 +653,7 @@ int SKUA_OPTIMIZE(const char *scene, const char *sorbent, const char *comp, cons
 	fclose(ParamResults);
 	fclose(Comparison);
 	time = clock() - time;
-	std::cout << "Simulation Runtime: " << (time / CLOCKS_PER_SEC) << " seconds\n";
+	std::cout << "Optimization Runtime: " << (time / CLOCKS_PER_SEC) << " seconds\n";
 	std::cout << "Total Evaluations: " << skua_opt.total_eval << "\n";
 	std::cout << "Evaluations/sec: " << skua_opt.total_eval/(time / CLOCKS_PER_SEC) << "\n";
 	
