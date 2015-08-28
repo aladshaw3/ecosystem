@@ -93,10 +93,10 @@ int DISPLACEMENT (Matrix<double>& dX, Matrix<double>& dY, const Matrix<double>& 
 	return 0;
 }
 
-int LOCATION (const Matrix<double>& dY, const Matrix<double>& dX, Matrix<double>& XX, Matrix<double>& YY, int i)
+int LOCATION (const Matrix<double>& dY, const Matrix<double>& dX, Matrix<double>& X, Matrix<double>& Y, int i)
 {
-	XX(i,0) = dY(i,0)*cos(dX(i,0));
-	YY(i,0) = dY(i,0)*sin(dX(i,0));
+	X(i,0) = dY(i,0)*cos(dX(i,0));
+	Y(i,0) = dY(i,0)*sin(dX(i,0));
 
 	return 0;
 }
@@ -132,7 +132,7 @@ int Trajectory_SetupConstants(TRAJECTORY_DATA *dat)
 	
 	//Particle parameters
 	
-	dat->b = 1.0e-6;											//Particle radius,m
+	dat->b = 1.85e-6;											//Particle radius,m
 	dat->chi_p = 3.87e-7;										//Volume magnetic susceptibility, dimensionless
 	dat->rho_p = 8700.0;										//Particle density, Kg/m3
 	
@@ -155,27 +155,20 @@ int Trajectory_SetupConstants(TRAJECTORY_DATA *dat)
 	dat-> sigma_vz = (dat->q_bar/pow(dat->beta,2.0))*pow(1-exp(-dat->beta*dat->dt),2.0);
 	dat-> sigma_z = (dat->q_bar/pow(dat->beta,3.0))*(2.0*dat->beta*dat->dt-3.0-4.0*exp(-dat->beta*dat->dt)-exp(-2.0*dat->beta*dat->dt));
 	dat-> sigma_n = (dat->sigma_vz/pow(dat->sigma_v,0.5));
-	dat-> sigma_m = (dat->sigma_z-pow(dat->sigma_vz,2.0))/dat->sigma_v;
+	dat-> sigma_m = pow((dat->sigma_z-(pow(dat->sigma_vz,2.0)/dat->sigma_v)),0.5);
 
 	return 0;
 }
 
 //Generates Random Numbers
-int Number_Generator(Matrix<double>& Temporary, TRAJECTORY_DATA *dat)
+int Number_Generator(TRAJECTORY_DATA *dat)
 {
-	unsigned seed = (unsigned) std::chrono::system_clock::now().time_since_epoch().count();
-	std::default_random_engine generator (seed);
-	//std::random_device generator;
+	std::random_device generator;
 	std::normal_distribution<double> distribution(0.0,1.0);
 	dat-> n_rand = distribution(generator);
 	dat-> m_rand = distribution(generator);
 	dat-> s_rand = distribution(generator);
 	dat-> t_rand = distribution(generator);
-
-	Temporary(0,0) = dat->n_rand;
-	Temporary(1,0) = dat->m_rand;
-	Temporary(2,0) = dat->s_rand;
-	Temporary(3,0) = dat->t_rand;
 
 	return 0;
 }
@@ -194,51 +187,55 @@ int Run_Trajectory()
 	dat.dY.set_size(300,1);
 	dat.X.set_size(300, 1);
 	dat.Y.set_size(300, 1);
-	dat.Temporary.set_size(4,1);
+	dat.Cap.set_size(1000,1);
 	
+
 	bool Hit = false;
 	
-	dat.dY(0,0) = 20.0;
-	dat.dX(0,0) = 89.99/180.0*M_PI;			//FIXED negative starting values for x
+	dat.Y(0,0) = 20.0;
+	dat.dX(0,0) = 89.99/180.0*M_PI;		//FIXED negative starting values for x
+	dat.dY(0,0) = dat.Y(0,0)/sin(dat.dX(0,0));
 	
-	for (int i = 1; i<299; i++)
+	for (int j = 0; j<1000; j++)
 	{
-		int Random;
-		Random = Number_Generator(dat.Temporary,&dat);
-
-		dat.Temporary.Display("Random Numbers");
-
-		int Force_Polar;
-		Force_Polar = POLAR(dat.POL,dat.dX,dat.dY,(void *)&dat,i);
-		
-		int Force_Balance;
-		Force_Balance = CARTESIAN(dat.POL,dat.H,dat.dY,i,(void *)&dat);
-
-		int Next;
-		Next = DISPLACEMENT(dat.dX,dat.dY,dat.H,i);
-		
-		if (dat.dY(i,0) <= (1.0+(1.85/33.0)) && dat.H(0,0) < 0.0)
+		for (int i = 1; i<299; i++)
 		{
-			Hit = true;
-			break;
-		}
-		else
-		{
-			Hit = false;
-		}
+			int Random;
+			Random = Number_Generator(&dat);
+
+			int Force_Polar;
+			Force_Polar = POLAR(dat.POL,dat.dX,dat.dY,(void *)&dat,i);
+
+			int Force_Balance;
+			Force_Balance = CARTESIAN(dat.POL,dat.H,dat.dY,i,(void *)&dat);
+
+			int Next;
+			Next = DISPLACEMENT(dat.dX,dat.dY,dat.H,i);
 		
+			if (dat.dY(i,0) <= (1.0+(1.85/33.0)) && dat.H(0,0) < 0.0)
+			{
+				Hit = true;
+				break;
+			}
+			else
+			{
+				Hit = false;
+			}
+		
+		}
+
+		for (int i=0; i<300; i++)
+		{
+		
+			int Final;
+			Final = LOCATION (dat.dY,dat.dX,dat.X,dat.Y,i);
+		
+		}
+
+		dat.Cap(j, 0) = Hit;
 	}
 	
-	for (int i=0; i<300; i++)
-	{
-		
-		int Final;
-		Final = LOCATION (dat.dY,dat.dX,dat.X,dat.Y,i);
-		
-	}
-	
-	//dat.X.Display("Distance X");
-	//dat.Y.Display("Diatacne Y");
+	dat.Cap.Display("Capture");
 
 	return success;
 }

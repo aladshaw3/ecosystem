@@ -32,7 +32,7 @@ typedef struct
 
 	//Particle parameters
 
-	double b = 1.0e-6;								//Particle radius,m
+	double b = 1.85e-6;								//Particle radius,m
 	double chi_p = 3.87e-6;							//Volume magnetic susceptibility, dimensionless
 	double rho_p = 8700.0;							//Particle density, Kg/m3
 
@@ -61,8 +61,9 @@ typedef struct
 	double s_rand;
 	double t_rand;
 
-	Matrix<double> POL,H,dX,dY,Temporary;
+	Matrix<double> POL,H,dX,dY;
 	Matrix<double> X, Y;
+	Matrix<int> Cap;
 
 }TRAJECTORY_DATA;
 
@@ -94,10 +95,10 @@ int CARTESIAN(const Matrix<double>& POL, Matrix<double>& H, const Matrix<double>
 
 int DISPLACEMENT (Matrix<double>& dX, Matrix<double>& dY, const Matrix<double>& H, int i);
 
-int LOCATION (const Matrix<double>& dY, const Matrix<double>& dX, Matrix<double>& XX, Matrix<double>& YY, int i);
+int LOCATION (const Matrix<double>& dY, const Matrix<double>& dX, Matrix<double>& X, Matrix<double>& Y, int i);
 
 int Trajectory_SetupConstants(TRAJECTORY_DATA *dat);
 
-int Number_Generator(Matrix<double>& Temporary, TRAJECTORY_DATA *dat);
+int Number_Generator(TRAJECTORY_DATA *dat);
 
 int Run_Trajectory();

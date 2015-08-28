@@ -68,6 +68,7 @@ std::cout << "Source: " << __FILE__ << "\nLine: " << __LINE__ << std::endl;}
 #define initial_error 48
 #define not_a_token 49
 #define read_error 50
+#define invalid_console_input 51
 
 
 void error(int flag);
