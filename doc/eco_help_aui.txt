@@ -1,9 +1,53 @@
 The following message provides information on running this software with the advanced ui...
 
-           ADVANCED USER INTERFACE (AUI)          
----------------------------------------------------
+         ADVANCED USER INTERFACE (AUI)         
+-----------------------------------------------
 
-Usage: eco0 [ --run option {opt_name} ] [ --add_option {variables} ]	
+Usage: eco0 [ --run_option {opt_name} ] [ --add_option {variables} ]
+
+run_option
+----------
+-v, --version : prints out version information for the program
+-h, --help    : prints out the help information for the program
+-t, --test    : tells the program that you have requested to run a test (see below for available test names)
+-e, --execute : tells the program that you have requested to run an executable (see below for available exe names)
+
+opt_name
+--------
+Designates the type of test or executable to run. List of available test and executable names below. NOT CASE SENSITIVE
+
+add_option
+----------
+-p, --path    : designate the path to a series of input files, if all those files share a common path
+-i, --input   : designate the path, name, and extension for an input file to a particular executable
+
+variables
+---------
+The actual option values, i.e., path and/or input files necessary to run the specific executable
+
+Usage Examples
+--------------
+eco0 -t lark
+
+	Directs the program to run the LARK tests for the linear algebra library
+
+eco0 --version
+
+	Directs the program to print out the version information for the software
+
+eco0 --execute gsta_opt -i input/data.txt
+
+	Directs the program to run the GSTA optimization routine on a set of data located in a sub-directory called input in the file named data.txt
+
+eco0 -e scopsowl -p path/to/input/ --input scene.txt sorbent.txt comp.txt sorbate.txt
+
+	Directs the program to run a SCOPSOWL simulation given a series of input files all located in the common path denoted by path/to/input/ with the names and extenstions of the files given after the -i flag
+
+Usage Notes
+--------------
+(i) All input files must be given in the order expected and must include paths and extensions
+(ii) All paths must be given relative to the directory from which the program is being called
+(iii) Most common usage errors are caused by mistakes in input file order or within the structure of the input files themselves
 
            CURRENTLY AVAILABLE TESTS           
 -----------------------------------------------
@@ -21,8 +65,8 @@ Usage: eco0 [ --run option {opt_name} ] [ --add_option {variables} ]
 (11) SHARK (Speciation-object Hierarchy for Aqueous Reaction Kinetics)
 (12) SKUA (Surface Kinetics for Uptake by Adsorption)
 
-           CURRENTLY AVAILABLE EXECUTABLES           
----------------------------------------------------------
+        CURRENTLY AVAILABLE EXECUTABLES        
+-----------------------------------------------
 
 (1) GSTA_OPT (Optimization Routine for GSTA analysis of adsorption equilibrium data)
 (2) MAGPIE (Multicomponent Adsorption Generalized Procedure for Isothermal Equilibria)
@@ -31,7 +75,3 @@ Usage: eco0 [ --run option {opt_name} ] [ --add_option {variables} ]
 (5) SKUA (Surface Kinetics for Uptake by Adsorption)
 (6) SKUA_OPT (Optimization scheme for analysis of kinetic uptake data with the SKUA model)
 
-ADDITIONAL NOTES
------------------
-(i) Details on how each input file must be structured can be viewed the instructions file under doc sub-directory of the ecosystem project folder
-(ii) INSTRUCTIONS ARE CURRENTLY UNDER CONSTRUCTION AND ARE LIKELY INCOMPLETE!!!

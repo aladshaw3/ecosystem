@@ -2,10 +2,7 @@ The following message provides information on running this software with the bas
 
            BASIC USER INTERFACE (BUI)          
 -----------------------------------------------
-	Initial BUI options (TEST and EXECUTABLES) allow the user to choose to run either a library test function
-or a simulation based on the currently available, problem specific algorithms. The ouput from any test or
-executable will be placed into a sub-directory named output. If no such directory exists, then one will be
-created. You can then navigate to this directory to view output from the software.
+	Initial BUI options (TEST and EXECUTABLES) allow the user to choose to run either a library test function or a simulation based on the currently available, problem specific algorithms. The ouput from any test or executable will be placed into a sub-directory named output. If no such directory exists, then one will be created. You can then navigate to this directory to view output from the software.
 
            CURRENTLY AVAILABLE TESTS           
 -----------------------------------------------
@@ -52,7 +49,7 @@ created. You can then navigate to this directory to view output from the softwar
 
 (9) SANDBOX - this one has no fancy acronym :-( 
 
-	This test runs the sandbox executable. The sandbox is just an application where we store different temporary algorithms, methods, and functions before applying them in the rest of the library. Feel free to modify these source files (sandbox.h and sandbox.cpp) with any of your own methods and tests. Please note that after modifying any source file you must run make and make install in the primary directory of the ecosystem project folder before any changes that you make will be implemented
+	This test runs the sandbox executable. The sandbox is just an application where we store different temporary algorithms, methods, and functions before applying them in the rest of the library. Feel free to modify these source files (sandbox.h and sandbox.cpp) with any of your own methods and tests. Please note that after modifying any source file you must run make and make install in the primary directory of the ecosystem project folder before any changes that you make will be implemented.
 
 
 (10) SCOPSOWL (Simultaneously Coupled Objects for Pore and Surface diffusion Operations With Linear systems)
@@ -101,9 +98,3 @@ created. You can then navigate to this directory to view output from the softwar
 (6) SKUA_OPT (Optimization scheme for analysis of kinetic uptake data with the SKUA model)
 
 	This algorithm requires five input files: (i) a scenario file detailing some system parameters and the species of interest, (ii) an adsorbent properties file giving information on the type of adsorbent used, (iii) a component properties file that gives basic information on specifc properies of each gaseous species, (iv) an adsorbate properties file detailing the type of surface diffusion equation to use, the parameters of surface diffusion, and the isotherm parameters for the GSTA isotherm, and (v) a data file containing the actual adsorption time-series data for the model to be compared against. PLEASE NOTE, that the structure of these input files vary compared to running a standard SKUA simulation.
-
-
-ADDITIONAL NOTES
------------------
-(i) Details on how each input file must be structured can be viewed the instructions file under doc sub-directory of the ecosystem project folder
-(ii) INSTRUCTIONS ARE CURRENTLY UNDER CONSTRUCTION AND ARE LIKELY INCOMPLETE!!!

@@ -45,10 +45,10 @@ clean:
 	rm -f $(EXE) $(ODIR)/*.o *~ core $(INCDIR)/*~
 install:
 	cp $(EXE) $(INSDIR)
-	mkdir $(INSDIR)/doc
-	cp eco_doc/eco_help_bui.txt $(INSDIR)/eco_doc
-	cp eco_doc/eco_help_aui.txt $(INSDIR)/eco_doc
+	mkdir $(INSDIR)/ecodoc
+	cp doc/eco_help_bui.txt $(INSDIR)/ecodoc
+	cp doc/eco_help_aui.txt $(INSDIR)/ecodoc
 cleanall:
 	rm -f $(EXE) $(ODIR)/*.o *~ core $(INCDIR)/*~
 	rm -f $(INSDIR)/$(EXE)
-	rm -r $(INSDIR)/eco_doc
+	rm -r $(INSDIR)/ecodoc

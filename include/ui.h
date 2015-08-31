@@ -47,6 +47,10 @@ typedef struct
 	
 }UI_DATA;
 
+void aui_help();
+
+void bui_help();
+
 std::string allLower(const std::string &input);
 
 bool exit(const std::string &input);
