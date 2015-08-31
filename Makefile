@@ -46,9 +46,9 @@ clean:
 install:
 	cp $(EXE) $(INSDIR)
 	mkdir $(INSDIR)/doc
-	cp doc/eco_help_bui.txt $(INSDIR)/doc
-	cp doc/eco_help_aui.txt $(INSDIR)/doc
+	cp eco_doc/eco_help_bui.txt $(INSDIR)/eco_doc
+	cp eco_doc/eco_help_aui.txt $(INSDIR)/eco_doc
 cleanall:
 	rm -f $(EXE) $(ODIR)/*.o *~ core $(INCDIR)/*~
 	rm -f $(INSDIR)/$(EXE)
-	rm -r $(INSDIR)/doc
+	rm -r $(INSDIR)/eco_doc

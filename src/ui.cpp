@@ -327,11 +327,11 @@ void display_help(UI_DATA *ui_dat)
 {
 	if (ui_dat->argc == 1 || ui_dat->BasicUI == true)
 	{
-		system("more doc/eco_help_bui.txt");
+		system("more eco_doc/eco_help_bui.txt");
 	}
 	else
 	{
-		system("more doc/eco_help_aui.txt");
+		system("more eco_doc/eco_help_aui.txt");
 	}
 	std::cout << std::endl;
 }
