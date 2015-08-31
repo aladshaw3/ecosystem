@@ -63,10 +63,6 @@ bool path(const std::string &input);
 
 bool input(const std::string &input);
 
-void current_tests();
-
-void current_execs();
-
 bool valid_test_string(const std::string &input, UI_DATA *ui_dat);
 
 bool valid_exec_string(const std::string &input, UI_DATA *ui_dat);

@@ -1,0 +1,37 @@
+The following message provides information on running this software with the advanced ui...
+
+           ADVANCED USER INTERFACE (AUI)          
+---------------------------------------------------
+
+Usage: eco0 [ --run option {opt_name} ] [ --add_option {variables} ]	
+
+           CURRENTLY AVAILABLE TESTS           
+-----------------------------------------------
+
+(1) DOGFISH (Diffusion Object Governing Fiber Interior Sorption History)
+(2) EEL (Easy-access Element Library)
+(3) EGRET (Estimation of Gas-phase pRopErTies)
+(4) FINCH (Flux-limiting Implicit Non-oscillatory Conservative High-resolution scheme)
+(5) LARK (Linear Algebra Residual Kernels)
+(6) MACAW (MAtrix CAlculation Workspace)
+(7) MOLA (Molecule Object Library from Atoms)
+(8) MONKFISH (Multi-fiber wOven Nest Kernel For Interparticle Sorption History)
+(9) SANDBOX (NO ACRONYM) -  Runs misc code tests in self contained functions
+(10) SCOPSOWL (Simultaneously Coupled Objects for Pore and Surface diffusion Operations With Linear systems)
+(11) SHARK (Speciation-object Hierarchy for Aqueous Reaction Kinetics)
+(12) SKUA (Surface Kinetics for Uptake by Adsorption)
+
+           CURRENTLY AVAILABLE EXECUTABLES           
+---------------------------------------------------------
+
+(1) GSTA_OPT (Optimization Routine for GSTA analysis of adsorption equilibrium data)
+(2) MAGPIE (Multicomponent Adsorption Generalized Procedure for Isothermal Equilibria)
+(3) SCOPSOWL (Simultaneously Coupled Objects for Pore and Surface diffusion Operations With Linear systems)
+(4) SCOPSOWL_OPT (Optimization scheme for analysis of kinetic uptake data with the SCOPSOWL model)
+(5) SKUA (Surface Kinetics for Uptake by Adsorption)
+(6) SKUA_OPT (Optimization scheme for analysis of kinetic uptake data with the SKUA model)
+
+ADDITIONAL NOTES
+-----------------
+(i) Details on how each input file must be structured can be viewed the instructions file under doc sub-directory of the ecosystem project folder
+(ii) INSTRUCTIONS ARE CURRENTLY UNDER CONSTRUCTION AND ARE LIKELY INCOMPLETE!!!

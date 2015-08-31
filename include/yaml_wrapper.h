@@ -342,6 +342,7 @@ public:
 	int readInputFile();								//Reads through input file and stores into YamlWrapper
 	int cleanup();										//Deletes yaml_c objects and closes the input file
 	int executeYamlRead(const char *file);				//Runs the full execution of initialization, reading, and cleaning
+	YamlWrapper& getYamlWrapper();						//Returns reference to the YamlWrapper Object
 	
 	void DisplayContents();								//Print out the contents of the read to the console window
 	

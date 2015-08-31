@@ -86,75 +86,6 @@ bool input(const std::string &input)
 	return file;
 }
 
-//Display to console the current test info
-void current_tests()
-{
-	std::cout << "           CURRENTLY AVAILABLE TESTS           \n-----------------------------------------------\n\n";
-	
-	std::cout << "(1) DOGFISH (Diffusion Object Governing Fiber Interior Sorption History)\n\n";
-	puts("\tThis test runs a simple example of the intraparticle mass transfer uptake of aqueous ions into cylindrical adsorbent fibers. Currently, there is no executable for this set of algorithms.\n\n");
-	
-	std::cout << "(2) EEL (Easy-access Element Library)\n\n";
-	puts("\tThis test runs a series of checks on our digital atom library to ensure that all objects are operating as they should. There is no output file associated with this test and these algorithms are not used directly by the user, but are called by other algorithms in the library.\n\n");
-	
-	std::cout << "(3) EGRET (Estimation of Gas-phase pRopErTies)\n\n";
-	puts("\tThis test runs a series of checks on our implementations of kinetic gas theory to predict various gas phase properties from the basic molecular information of each molecule in a gas. Properties calculated include binary diffusivities, molecular diffusivities, and film mass transfer coefficients for each individual gas species, as well as determining the overall gas viscosity, density, and heat capacity. There is no output file associated with this test and these algorithms are not used directly by the user, but are called by other algorithms in the library.\n\n");
-	
-	std::cout << "(4) FINCH (Flux-limiting Implicit Non-oscillatory Conservative High-resolution scheme)\n\n";
-	puts("\tThis test runs an example calculation for a 1-D PDE representing a conservation law. Our algorithms are based on a MUSCL scheme for high accuracy solutions to PDEs involving highly advective components. There is an output file associated with this test. However, these algorithms are not used directly by the user, but are called by other algorithms in the library when PDE solutions are needed.\n\n");
-	
-	std::cout << "(5) LARK (Linear Algebra Residual Kernels)\n\n";
-	puts("\tThis test runs a series of checks on our implementations of various iterative solvers to systems of equations. The available solvers include multiple Krylov Subpace techniques, such as PCG, GMRES, CGS, BiCGSTAB, and GMRESR, as well as two different non-linear solvers: Picard's Method and the Jacobian-Free Newton-Krylov method. We also have an implementation of the Arnoldi Iteration to produce a full orthonormal basis from any non-singular matrix operator. There is no output file associated with this test and these algorithms are not used directly by the user, but are called by other algorithms in the library.\n\n");
-	
-	std::cout << "(6) MACAW (MAtrix CAlculation Workspace)\n\n";
-	puts("\tThis test runs a series of checks on our Matrix template object. This object is use extensively throughout the entire library. Therefore, it is critical that it runs correctly. If errors are reported in other simulations or tests, be sure to run the MACAW tests and check for any error messages. If this runs without error, then all is well with these sub-routines and objects. here is no output file associated with this test and these algorithms are not used directly by the user, but are called by other algorithms in the library.\n\n");
-	
-	std::cout << "(7) MOLA (Molecule Object Library from Atoms)\n\n";
-	puts("\tThis test runs a series of checks on our Molecule objects. These objects are built from the EEL atoms and allow for registration of new and/or existing molecules. If you ever get a message say that a molecule is not registerd in the library. First, check to make sure you used the proper alias/name for the molecule, then look through the mola.cpp file to see if that molecule has not yet been added to the record. This is a growing digital library so do not expect it to contain every molecule you want. There is no output file associated with this test and these algorithms are not used directly by the user, but are called by other algorithms in the library.\n\n");
-	
-	std::cout << "(8) MONKFISH (Multi-fiber wOven Nest Kernel For Interparticle Sorption History)\n\n";
-	puts("\tThis test runs a simple example of the interparticle mass transfer uptake of aqueous ions into a woven conglomeration of cylindrical adsorbent fibers. Currently, there is no executable for this set of algorithms. NOTE: THIS IS A PLACE HOLDER! THIS TEST DOES NOTHING RIGHT NOW!\n\n");
-	
-	std::cout << "(9) SANDBOX - this one has no fancy acronym :-( \n\n";
-	puts("\tThis test runs the sandbox executable. The sandbox is just an application where we store different temporary algorithms, methods, and functions before applying them in the rest of the library. Feel free to modify these source files (sandbox.h and sandbox.cpp) with any of your own methods and tests. Please note that after modifying any source file you must run make and make install in the primary directory of the ecosystem project folder before any changes that you make will be implemented\n\n");
-	
-	std::cout << "(10) SCOPSOWL (Simultaneously Coupled Objects for Pore and Surface diffusion Operations With Linear systems)\n\n";
-	puts("\tThis test runs an example problem for gasoues, multi-species adsorption via a pore and surface diffusion mechanism through a bi-porous, spherical adsorbent pellet. The SCOPSOWL object is coupled to both the SKUA and MAGPIE objects, which are responsible for resolving surface diffusion and multi-species adsorption, respectively. There is an executable available for the user to interface with to run simulations and optimizations.\n\n");
-	
-	std::cout << "(11) SHARK (Speciation-object Hierarchy for Aqueous Reaction Kinetics)\n\n";
-	puts("\tThis test runs an example problem for aqeous adsorption in a multi-species solution. Adsorption is represented as a metal-ligand complexation reaction. All other species in solution are at a pseudo-steady-state and are resolved in a series of speciation reactions coupled with overall mass balances on all major sub-species in solution. Currently, there is no executable for this set of algorithms.\n\n");
-	
-	std::cout << "(12) SKUA (Surface Kinetics for Uptake by Adsorption)\n\n";
-	puts("\tThis test runs an example problem for gasoues, multi-species adsorption via a surface diffusion mechanism spherical adsorbent pellet. The SKUA object is coupled to the MAGPIE object, which resolves the multi-species adsorption equilibria between gas and solid phases. There is an executable available for the user to interface with to run simulations and optimizations.\n\n");
-	
-}
-
-//Display info about the currently available executable routines
-void current_execs()
-{
-	std::cout << "           CURRENTLY AVAILABLE EXECUTABLES           \n---------------------------------------------------------\n\n";
-	
-	std::cout << "(1) GSTA_OPT (Optimization Routine for GSTA analysis of adsorption equilibrium data)\n\n";
-	puts("\tThis algorithm requires a single input file containing the raw adsorption data, as well as some other basis information about the system the data represents. It will produce a series of output files giving the full analysis of the data and the optimium equilibrium parameters associated with the Generalized Statistical Thermodynamic Adsorption (GSTA) isotherm.\n\n");
-	
-	std::cout << "(2) MAGPIE (Multicomponent Adsorption Generalized Procedure for Isothermal Equilibria)\n\n";
-	puts("\tThis algorithm requires two input files: (i) a file containing the GSTA isotherm parameters for each adsorbing species in the system and (ii) a file detailing all the scenarios you wish to simulate. It will produce a single output file showing the results of the scenario simulations requested for adsorption capacity at various temperature, pressures, and gas compositions.\n\n");
-	
-	std::cout << "(3) SCOPSOWL (Simultaneously Coupled Objects for Pore and Surface diffusion Operations With Linear systems)\n\n";
-	puts("\tThis algorithm requires four input files: (i) a scenario file detailing the system parameters and the species of interest, (ii) an adsorbent properties file giving information on the type of adsorbent used, (iii) a component properties file that gives basic information on specifc properies of each gaseous species, and (iv) an adsorbate properties file detailing the type of surface diffusion equation to use, the parameters of surface diffusion, and the isotherm parameters for the GSTA isotherm.\n\n");
-	
-	std::cout << "(4) SCOPSOWL_OPT (Optimization scheme for analysis of kinetic uptake data with the SCOPSOWL model)\n\n";
-	puts("\tThis algorithm requires five input files: (i) a scenario file detailing some system parameters and the species of interest, (ii) an adsorbent properties file giving information on the type of adsorbent used, (iii) a component properties file that gives basic information on specifc properies of each gaseous species, (iv) an adsorbate properties file detailing the type of surface diffusion equation to use, the parameters of surface diffusion, and the isotherm parameters for the GSTA isotherm, and (v) a data file containing the actual adsorption time-series data for the model to be compared against. PLEASE NOTE, that the structure of these input files vary compared to running a standard SCOPSOWL simulation.\n\n");
-	
-	std::cout << "(5) SKUA (Surface Kinetics for Uptake by Adsorption)\n\n";
-	puts("\tThis algorithm requires four input files: (i) a scenario file detailing the system parameters and the species of interest, (ii) an adsorbent properties file giving information on the type of adsorbent used, (iii) a component properties file that gives basic information on specifc properies of each gaseous species, and (iv) an adsorbate properties file detailing the type of surface diffusion equation to use, the parameters of surface diffusion, and the isotherm parameters for the GSTA isotherm.\n\n");
-	
-	std::cout << "(6) SKUA_OPT (Optimization scheme for analysis of kinetic uptake data with the SKUA model)\n\n";
-	puts("\tThis algorithm requires five input files: (i) a scenario file detailing some system parameters and the species of interest, (ii) an adsorbent properties file giving information on the type of adsorbent used, (iii) a component properties file that gives basic information on specifc properies of each gaseous species, (iv) an adsorbate properties file detailing the type of surface diffusion equation to use, the parameters of surface diffusion, and the isotherm parameters for the GSTA isotherm, and (v) a data file containing the actual adsorption time-series data for the model to be compared against. PLEASE NOTE, that the structure of these input files vary compared to running a standard SKUA simulation.\n\n");
-	
-	puts("ADDITIONAL NOTES\n-----------------\n(i) Details on how each input file must be structured can be viewed the instructions file under doc sub-directory of the ecosystem project folder\n(ii) INSTRUCTIONS ARE CURRENTLY UNDER CONSTRUCTION AND ARE LIKELY INCOMPLETE!!!\n\n");
-}
-
 //Determine the users Test Option
 bool valid_test_string(const std::string &input, UI_DATA *ui_dat)
 {
@@ -396,20 +327,11 @@ void display_help(UI_DATA *ui_dat)
 {
 	if (ui_dat->argc == 1 || ui_dat->BasicUI == true)
 	{
-		std::cout << "The following message provides information on running this software with the basic ui...\n\n";
-		std::cout << "           BASIC USER INTERFACE (BUI)          \n-----------------------------------------------\n";
-		std::cout << "\tInitial BUI options (TEST and EXECUTABLES) allow the user to choose to run either a library test function\n";
-		std::cout << "or a simulation based on the currently available, problem specific algorithms. The ouput from any test or\n";
-		std::cout << "executable will be placed into a sub-directory named output. If no such directory exists, then one will be\n";
-		std::cout << "created. You can then navigate to this directory to view output from the software.\n\n";
-		
-		current_tests();
-		current_execs();
+		system("more doc/eco_help_bui.txt");
 	}
 	else
 	{
-		std::cout << "\nThe following message provides information on running this software with the advanced ui...\n\n";
-		std::cout << "           ADVANCED USER INTERFACE (AUI)          \n----------------------------------------------------\n";
+		system("more doc/eco_help_aui.txt");
 	}
 	std::cout << std::endl;
 }

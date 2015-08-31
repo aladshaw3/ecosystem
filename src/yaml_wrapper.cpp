@@ -2102,7 +2102,7 @@ int yaml_cpp_class::setInputFile(const char *file)
 	int success = 0;
 	
 	this->file_name = file;
-	if (*this->file_name == ' ' || this->file_name == NULL)
+	if (this->file_name == NULL || *this->file_name == ' ')
 	{
 		mError(file_dne);
 		return -1;
@@ -2439,6 +2439,12 @@ int yaml_cpp_class::executeYamlRead(const char *file)
 void yaml_cpp_class::DisplayContents()
 {
 	this->yaml_wrapper.DisplayContents();
+}
+
+//Return reference to the YamlWrapper object
+YamlWrapper& yaml_cpp_class::getYamlWrapper()
+{
+	return this->yaml_wrapper;
 }
 
 /*
