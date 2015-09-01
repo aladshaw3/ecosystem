@@ -8,7 +8,7 @@
 /*
  
  DISCLAIMER: Niether Austin Ladshaw, nor the Georgia Institute of Technology, is the author or owner of any YAML Library or source code.
- Only the files labeld "yaml_tests" were created by Austin Ladshaw for the sole purpose of running and testing the yaml code before
+ Only the files labeld "yaml_wrapper" were created by Austin Ladshaw for the sole purpose of running and testing the yaml code before
  implementation in the main adsorption software packages developed by Austin Ladshaw at the Georgia Institute of Technology.
  
  The YAML Library (LibYAML) was written by Kirill Simonov and is released under the MIT license. For more information on YAML, go to

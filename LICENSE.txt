@@ -1,0 +1,116 @@
+The following document outlines all the necessary license information. 
+
+The primary functions and source of this full software was developed by Austin Ladshaw at 
+the Georgia Institute of Technology. Development began in late 2012. Individual dates 
+associated with each source may be found at the top of each source file.
+
+Austin Ladshaw retains full rights to use, copy, modify, merge, publish, distribute, 
+sublicense, and/or sell copies for substaintial portions of this software. However, there 
+are two other included libraries of source code that have different license requirements. 
+Below are the three licenses as well as the source files that each license will apply to.  
+
+There are 3 different licenses associated with the software, as the entire collection is 
+was a conglomeration between 3 different software libraries developed under slightly 
+different licenses. 
+
+
+### ECOSYSTEM Software License ###
+
+All source files found in the include and src sub-directories, except the source files 
+metioned below in the other two licenses, are the property of their authors: Austin 
+Ladshaw, Alex Wiechert, Sotira Yiacoumi, and Costas Tsouris. 
+
+The ECOSYSTEM Software License
+------------------------------
+
+ecosystem (c) 2012
+
+Authors: Austin Ladshaw, Alex Wiechert, Sotira Yiacoumi, and Costas Tsouris
+Address: 200 Bobby Dodd Way, Georgia Institute of Technology, Atlanta, Ga 30332
+Contact: aladshaw3@gatech.edu or sotira.yiacoumi@ce.gatech.edu
+
+The Authors of the ECOSYSTEM Software retain all rights for use, copy, modify, merge, 
+publish, distribute, sublicense, and/or sell copies for substaintial portions of this 
+software. DO NOT REDISTRIBUTE WITHOUT PRIOR CONSENT FROM THE AUTHORS.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+------------------------------------------------------------------------------------
+
+
+### YAML C Library and the MIT LICENSE ###
+
+The following source files,
+
+* config.h
+* yaml.h
+* yaml_private.h
+* api.c
+* dumper.c
+* emitter.c
+* loader.c
+* parser.c
+* reader.c
+* scanner.c
+* writer.c
+
+hereby refered to as the "YAML C Library", are distributed under the MIT LICENSE. 
+
+ The MIT License (MIT)
+-----------------------
+ 
+ Copyright (c) 2006 Kirill Simonov
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+-------------------------------------------------------------------------------
+
+
+### The LMFIT C Library and the LMFIT-BEER-WARE License ###
+
+The following source files,
+
+* lmmin.h
+* lmcurve.h
+* lmmin.c
+* lmcurve.c
+
+hereby referred to as the "LMFIT C Library", are distributed under the LMFIT-BEER-WARE License.
+
+The LMFIT-BEER-WARE License
+---------------------------
+
+ * Author: Joachim Wuttke <j.wuttke@fz-juelich.de>
+ * Copyright: 2013
+ * 
+ * lmfit is released under the LMFIT-BEER-WARE licence:
+ *
+ * In writing this software, I borrowed heavily from the public domain,
+ * especially from work by Burton S. Garbow, Kenneth E. Hillstrom,
+ * Jorge J. Moré, Steve Moshier, and the authors of lapack. To avoid
+ * unneccessary complications, I put my additions and amendments also
+ * into the public domain. Please retain this notice. Otherwise feel
+ * free to do whatever you want with this stuff. If we meet some day,
+ * and you think this work is worth it, you can buy me a beer in return.
+
+-------------------------------------------------------------------------
