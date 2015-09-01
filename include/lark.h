@@ -215,8 +215,8 @@ typedef struct
 	Matrix<double> r;					//Residual Vector
 	Matrix<double> c_temp;				//Temporary c vector to be updated
 	Matrix<double> u_temp;				//Temporary u vector to be updated
-	std::vector<Matrix<double>> u;		//Vector span for updating x
-	std::vector<Matrix<double>> c;		//Vector span for updating r
+	std::vector<Matrix<double> > u;		//Vector span for updating x
+	std::vector<Matrix<double> > c;		//Vector span for updating r
 	
 }GCR_DATA;
 
