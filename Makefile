@@ -10,8 +10,8 @@ CXXFLAGS= $(CFLAGS) -Wconversion-null
 ODIR=src/obj
 INSDIR=/usr/local/bin
 
-mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
-current_dir := $(notdir $(patsubst %/,%,$(dir $(mkfile_path))))
+#mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
+#current_dir := $(notdir $(patsubst %/,%,$(dir $(mkfile_path))))
 
 EXE=eco0
 
