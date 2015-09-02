@@ -2,14 +2,15 @@
 #Works for any g++ v4.7 or higher
 
 IDIR=../include
-CC=gcc
-CXX=g++
+CC=i686-pc-mingw32-gcc
+CXX=i686-pc-mingw32-g++
 CFLAGS=-I$(IDIR) -std=c++11 -fpermissive -Wwrite-strings -w
 CXXFLAGS= $(CFLAGS) -Wconversion-null
 
 ODIR=obj
+INSDIR=/usr/local/bin
 
-DBG=eco0-dbg
+EXE=eco0-win32
 
 _DEPS = config.h lmmin.h lmcurve.h dogfish.h eel.h egret.h error.h \
 	finch.h flock.h gsta_opt.h lark.h macaw.h magpie.h mola.h \
@@ -27,15 +28,15 @@ OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 
 $(ODIR)/%.o: ../src/%.c $(DEPS)
-	$(CC) -g -c -o $@ $< $(CFLAGS)
+	$(CC) -O2 -c -o $@ $< $(CFLAGS)
 
 $(ODIR)/%.o: ../src/%.cpp $(DEPS)
-	$(CXX) -g -c -o $@ $< $(CXXFLAGS)
+	$(CXX) -O2 -c -o $@ $< $(CXXFLAGS)
 
-$(DBG): $(OBJ)
-	$(CXX) -g -o $@ $^ $(CXXFLAGS)
+$(EXE): $(OBJ)
+	$(CXX) -O2 -o $@ $^ $(CXXFLAGS)
 
 .PHONY: clean
 
 clean:
-	rm -f $(DBG) $(ODIR)/*.o *~ core $(INCDIR)/*~
+	rm -f $(EXE) $(ODIR)/*.o *~ core $(INCDIR)/*~
