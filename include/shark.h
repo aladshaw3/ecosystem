@@ -52,6 +52,7 @@ public:
 	
 	int list_size();											//Returns size of list
 	Molecule& get_species(int i);								//Returns a reference to the ith species in master list
+	int get_index(std::string name);							//Returns an integer representing location of the species in the object
 	
 	double charge(int i);										//Fetch and return charge of ith species in list
 	double alkalinity();										//Fetch the value of alkalinity of the solution (mol/L)
@@ -266,21 +267,7 @@ private:
 	
 };
 
-#ifndef IDEAL
-#define IDEAL 0
-#endif
-
-#ifndef DAVIES
-#define DAVIES 1
-#endif
-
-#ifndef DEBYE_HUCKEL
-#define DEBYE_HUCKEL 2
-#endif
-
-#ifndef DAVIES_LADSHAW
-#define DAVIES_LADSHAW 3
-#endif
+typedef enum {IDEAL, DAVIES, DEBYE_HUCKEL, DAVIES_LADSHAW} valid_act;
 
 typedef struct SHARK_DATA
 {
@@ -348,6 +335,8 @@ typedef struct SHARK_DATA
 	const void *other_data;							//User define data structure used for user defined residuals
 	FILE *OutputFile;								//Output File pointer
 	
+	yaml_cpp_class yaml_object;						//yaml object to read and access digitized yaml documents
+	
 } SHARK_DATA;
 
 void print2file_shark_info(SHARK_DATA *shark_dat);
@@ -366,9 +355,17 @@ int DebyeHuckel_equation (const Matrix<double> &x, Matrix<double> &F, const void
 
 int DaviesLadshaw_equation (const Matrix<double>& x, Matrix<double> &F, const void *data);
 
+int act_choice(const std::string &input);
+
 int Convert2LogConcentration(const Matrix<double> &x, Matrix<double> &logx);
 
 int Convert2Concentration(const Matrix<double> &logx, Matrix<double> &x);
+
+int read_scenario(SHARK_DATA *shark_dat);
+
+int read_species(SHARK_DATA *shark_dat);
+
+int read_massbalance(SHARK_DATA *shark_dat);
 
 int setup_SHARK_DATA( FILE *file, int (*residual) (const Matrix<double> &x, Matrix<double> &res, const void *data),
 					  int (*activity) (const Matrix<double> &x, Matrix<double> &gama, const void *data),
@@ -408,6 +405,8 @@ int shark_reset(SHARK_DATA *shark_dat);
 int shark_residual(const Matrix<double> &x, Matrix<double> &F, const void *data);
 
 int SHARK(SHARK_DATA *shark_dat);
+
+int SHARK_SCENARIO(const char *yaml_input);
 
 int SHARK_TESTS();
 

@@ -307,7 +307,7 @@ bool ValueTypePair::getBool()
 //Returns the double of the value
 double ValueTypePair::getDouble()
 {
-	if (this->Value_Type.second != DOUBLE)
+	if (this->Value_Type.second != DOUBLE && this->Value_Type.second != INT)
 		mError(invalid_type);
 	return atof(this->Value_Type.first.c_str());
 }
@@ -315,7 +315,7 @@ double ValueTypePair::getDouble()
 //Returns the int of the value
 int ValueTypePair::getInt()
 {
-	if (this->Value_Type.second != INT)
+	if (this->Value_Type.second != INT && this->Value_Type.second != DOUBLE)
 		mError(invalid_type);
 	return atoi(this->Value_Type.first.c_str());
 }
@@ -402,6 +402,7 @@ ValueTypePair& KeyValueMap::operator[](const std::string key)
 	}
 	catch (std::out_of_range)
 	{
+		throw;
 		mError(key_not_found);
 		std::map<std::string, ValueTypePair>::iterator it;
 		it = this->Key_Value.end();
@@ -418,6 +419,7 @@ ValueTypePair KeyValueMap::operator[](const std::string key) const
 	}
 	catch (std::out_of_range)
 	{
+		throw;
 		mError(key_not_found);
 		std::map<std::string, ValueTypePair>::const_iterator it;
 		it = this->Key_Value.end();
@@ -485,6 +487,7 @@ void KeyValueMap::editValue4Key(std::string val, std::string key)
 	}
 	catch (std::out_of_range)
 	{
+		throw;
 		mError(key_not_found);
 	}
 }
@@ -498,6 +501,7 @@ void KeyValueMap::editValue4Key(std::string val, int t,std::string key)
 	}
 	catch (std::out_of_range)
 	{
+		throw;
 		mError(key_not_found);
 	}
 }
@@ -532,6 +536,7 @@ void KeyValueMap::findType(std::string key)
 	}
 	catch (std::out_of_range)
 	{
+		throw;
 		mError(key_not_found);
 	}
 }
@@ -545,6 +550,7 @@ void KeyValueMap::assertType(std::string key, int t)
 	}
 	catch (std::out_of_range)
 	{
+		throw;
 		mError(key_not_found);
 	}
 }
@@ -596,6 +602,7 @@ std::string KeyValueMap::getString(std::string key)
 	}
 	catch (std::out_of_range)
 	{
+		throw;
 		mError(key_not_found);
 		return "NO_KEY";
 	}
@@ -610,6 +617,7 @@ bool KeyValueMap::getBool(std::string key)
 	}
 	catch (std::out_of_range)
 	{
+		throw;
 		mError(key_not_found);
 		return false;
 	}
@@ -624,6 +632,7 @@ double KeyValueMap::getDouble(std::string key)
 	}
 	catch (std::out_of_range)
 	{
+		throw;
 		mError(key_not_found);
 		return 0;
 	}
@@ -638,6 +647,7 @@ int KeyValueMap::getInt(std::string key)
 	}
 	catch (std::out_of_range)
 	{
+		throw;
 		mError(key_not_found);
 		return 0;
 	}
@@ -652,6 +662,7 @@ std::string KeyValueMap::getValue(std::string key)
 	}
 	catch (std::out_of_range)
 	{
+		throw;
 		mError(key_not_found);
 		return "NO_KEY";
 	}
@@ -666,6 +677,7 @@ int KeyValueMap::getType(std::string key)
 	}
 	catch (std::out_of_range)
 	{
+		throw;
 		mError(key_not_found);
 		return UNKNOWN;
 	}
@@ -680,6 +692,7 @@ ValueTypePair& KeyValueMap::getPair(std::string key)
 	}
 	catch (std::out_of_range)
 	{
+		throw;
 		mError(key_not_found);
 		std::map<std::string, ValueTypePair>::iterator it;
 		it = this->Key_Value.end();
@@ -771,6 +784,7 @@ ValueTypePair& SubHeader::operator[](const std::string key)
 	}
 	catch (std::out_of_range)
 	{
+		throw;
 		mError(key_not_found);
 		std::map<std::string, ValueTypePair>::iterator it;
 		it = this->Data_Map.end();
@@ -787,6 +801,7 @@ ValueTypePair SubHeader::operator[](const std::string key) const
 	}
 	catch (std::out_of_range)
 	{
+		throw;
 		mError(key_not_found);
 		std::map<std::string, ValueTypePair>::const_iterator it;
 		it = this->Data_Map.end();
@@ -1012,6 +1027,7 @@ ValueTypePair& Header::operator[](const std::string key)
 	}
 	catch (std::out_of_range)
 	{
+		throw;
 		mError(key_not_found);
 		std::map<std::string, ValueTypePair>::iterator it;
 		it = this->Data_Map.end();
@@ -1028,6 +1044,7 @@ ValueTypePair Header::operator[](const std::string key) const
 	}
 	catch (std::out_of_range)
 	{
+		throw;
 		mError(key_not_found);
 		std::map<std::string, ValueTypePair>::const_iterator it;
 		it = this->Data_Map.end();
@@ -1044,6 +1061,7 @@ SubHeader& Header::operator()(const std::string key)
 	}
 	catch (std::out_of_range)
 	{
+		throw;
 		mError(key_not_found);
 		std::map<std::string, SubHeader>::iterator it;
 		it = this->Sub_Map.end();
@@ -1060,6 +1078,7 @@ SubHeader Header::operator()(const std::string key) const
 	}
 	catch (std::out_of_range)
 	{
+		throw;
 		mError(key_not_found);
 		std::map<std::string, SubHeader>::const_iterator it;
 		it = this->Sub_Map.end();
@@ -1088,6 +1107,7 @@ SubHeader & Header::getSubHeader(std::string key)
 	}
 	catch (std::out_of_range)
 	{
+		throw;
 		mError(key_not_found);
 		std::map<std::string, SubHeader>::iterator it;
 		it = this->Sub_Map.end();
@@ -1409,6 +1429,7 @@ ValueTypePair& Document::operator[](const std::string key)
 	}
 	catch (std::out_of_range)
 	{
+		throw;
 		mError(key_not_found);
 		std::map<std::string, ValueTypePair>::iterator it;
 		it = this->Data_Map.end();
@@ -1425,6 +1446,7 @@ ValueTypePair Document::operator[](const std::string key) const
 	}
 	catch (std::out_of_range)
 	{
+		throw;
 		mError(key_not_found);
 		std::map<std::string, ValueTypePair>::const_iterator it;
 		it = this->Data_Map.end();
@@ -1441,6 +1463,7 @@ Header& Document::operator()(const std::string key)
 	}
 	catch (std::out_of_range)
 	{
+		throw;
 		mError(key_not_found);
 		std::map<std::string, Header>::iterator it;
 		it = this->Head_Map.end();
@@ -1457,6 +1480,7 @@ Header Document::operator()(const std::string key) const
 	}
 	catch (std::out_of_range)
 	{
+		throw;
 		mError(key_not_found);
 		std::map<std::string, Header>::const_iterator it;
 		it = this->Head_Map.end();
@@ -1485,6 +1509,7 @@ Header & Document::getHeader(std::string key)
 	}
 	catch (std::out_of_range)
 	{
+		throw;
 		mError(key_not_found);
 		std::map<std::string, Header>::iterator it;
 		it = this->Head_Map.end();
@@ -1807,6 +1832,7 @@ Document& YamlWrapper::operator()(const std::string key)
 	}
 	catch (std::out_of_range)
 	{
+		throw;
 		mError(key_not_found);
 		std::map<std::string, Document>::iterator it;
 		it = this->Doc_Map.end();
@@ -1823,6 +1849,7 @@ Document YamlWrapper::operator()(const std::string key) const
 	}
 	catch (std::out_of_range)
 	{
+		throw;
 		mError(key_not_found);
 		std::map<std::string, Document>::const_iterator it;
 		it = this->Doc_Map.end();
@@ -1845,6 +1872,7 @@ Document& YamlWrapper::getDocument(std::string key)
 	}
 	catch (std::out_of_range)
 	{
+		throw;
 		mError(key_not_found);
 		std::map<std::string, Document>::iterator it;
 		it = this->Doc_Map.end();

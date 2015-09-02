@@ -1,0 +1,157 @@
+# This will serve as a test input file for shark to demo how to structure the document
+
+# In practice, this section should be listed first, but it doesn't really matter
+Scenario:
+---
+- vars_fun:
+  numvar: 25
+  num_ssr: 15
+  num_mbe: 7
+  num_usr: 2
+
+- sys_data:
+  act_fun: DAVIES    
+  const_pH: true	
+  pH: 7              #Only required if we are specifying a const_pH
+  temp: 298.15       #Units must be in Kelvin 
+  dielec: 78.325     #Units must be in (1/Kelvin)
+
+- run_time:
+  steady: false         #NOTE: All time must be represented in hours
+  specs_curve: false    #Only needed if steady = true, and will default to false
+  dt: 0.001             #Only required if steady = false
+  time_adapt: true      #Only needed if steady = false, and will default to false
+  sim_time: 96.0        #Only required if steady = false
+  t_out: 0.01           #Only required if steady = false
+...
+
+# After the Scenario read, shark will call the setup_function, then read info below
+MasterSpecies:
+---
+- reg:
+  0: NaHCO3 (aq)
+  1: NaCO3 - (aq)
+  2: Na + (aq)
+  3: HNO3 (aq)
+  4: NO3 - (aq)
+  5: H2CO3 (aq)
+  6: HCO3 - (aq)
+  7: CO3 2- (aq)
+  8: UO2 2+ (aq)
+  9: UO2NO3 + (aq)
+  10: UO2(NO3)2 (aq)
+  11: UO2OH + (aq)
+  12: UO2(OH)3 - (aq)
+  13: (UO2)2(OH)2 2+ (aq)
+  14: (UO2)3(OH)5 + (aq)
+  15: UO2CO3 (aq)
+  16: UO2(CO3)2 2- (aq)
+  17: UO2(CO3)3 4- (aq)
+  18: H2O (l)
+  19: OH - (aq)
+  20: H + (aq)
+  21: Cl - (aq)
+
+- unreg:
+  - 22: 
+    formula: A(OH)2 (aq)
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: Aqueous
+    name: Amidoxime
+    lin_form: none
+
+  - 23: 
+    formula: UO2AO2 (aq)
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: Aqueous
+    name: Uranyl-amidoximate
+    lin_form: none
+
+  - 24: 
+    formula: UO2CO3AO2 2- (aq)
+    charge: -2
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: Aqueous
+    name: Uranyl-carbonate-amidoximate
+    lin_form: none
+...
+
+#NOTE: Total concentrations must be given in mol/L
+MassBalance:
+---
+- water:
+  total_conc: 1
+  - delta: 
+    "H2O (l)": 1
+
+- carbonate:
+  total_conc: 0.00167
+  - delta: 
+    "NaHCO3 (aq)": 1
+    "NaCO3 - (aq)": 1 
+    "H2CO3 (aq)": 1 
+    "HCO3 - (aq)": 1
+    "CO3 2- (aq)": 1
+    "UO2CO3 (aq)": 1
+    "UO2(CO3)2 2- (aq)": 2
+    "UO2(CO3)3 4- (aq)": 3
+    "UO2CO3AO2 2- (aq)": 1
+
+- nitrate:
+  total_conc: 6.302E-7
+  - delta:
+    "HNO3 (aq)": 1
+    "NO3 - (aq)": 1
+    "UO2NO3 + (aq)": 1
+    "UO2(NO3)2 (aq)": 2
+
+- sodium: 
+  total_conc: 4.3167E-1
+  - delta:
+    "NaHCO3 (aq)": 1
+    "NaCO3 - (aq)": 1
+    "Na + (aq)": 1
+
+- uranium:
+  total_conc: 3.151E-7
+  - delta:
+    "UO2AO2 (aq)": 1
+    "UO2CO3AO2 2- (aq)": 1
+    "UO2 2+ (aq)": 1
+    "UO2NO3 + (aq)": 1
+    "UO2(NO3)2 (aq)": 1
+    "UO2OH + (aq)": 1
+    "UO2(OH)3 - (aq)": 1
+    "(UO2)2(OH)2 2+ (aq)": 2
+    "(UO2)3(OH)5 + (aq)": 3
+    "UO2CO3 (aq)": 1
+    "UO2(CO3)2 2- (aq)": 1
+    "UO2(CO3)3 4- (aq)": 1
+
+- amidoxime:
+  total_conc: 2.098E-5
+  - delta:
+    "A(OH)2 (aq)": 1
+    "UO2AO2 (aq)": 1
+    "UO2CO3AO2 2- (aq)": 1
+
+- chlorine:
+  total_conc: 0.43
+  - delta:
+    "Cl - (aq)": 1
+
+...

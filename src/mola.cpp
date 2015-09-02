@@ -486,6 +486,12 @@ void Molecule::Register(std::string formula)
 	this->registered = true;
 }
 
+//Set the formula for a given molecule (useful for working with unregistered molecules)
+void Molecule::setFormula(std::string form)
+{
+	this->Formula = form;
+}
+
 //Function forces recalculation of molar weight based on current atomic makeup
 void Molecule::recalculateMolarWeight()
 {

@@ -154,6 +154,22 @@ Molecule& MasterSpeciesList::get_species(int i)
 	}
 }
 
+//Function to return the index that a species is located in
+int MasterSpeciesList::get_index(std::string name)
+{
+	//Function returns an invalid index if name is not in the list
+	int index = -1;
+	for (int i=0; i<this->species.size(); i++)
+	{
+		if (this->species[i].MolecularFormula() == name)
+		{
+			index = i;
+			break;
+		}
+	}
+	return index;
+}
+
 //Fetch and return charge of ith species in list
 double MasterSpeciesList::charge(int i)
 {
@@ -1508,6 +1524,29 @@ int DaviesLadshaw_equation (const Matrix<double>& x, Matrix<double> &F, const vo
 	return success;
 }
 
+//Determine the activity function choosen by user
+int act_choice(const std::string &input)
+{
+	int act = IDEAL;
+	
+	std::string copy = input;
+	for (int i=0; i<copy.size(); i++)
+		copy[i] = tolower(copy[i]);
+	
+	if (copy == "davies")
+		act = DAVIES;
+	else if (copy == "ideal")
+		act = IDEAL;
+	else if (copy == "debye-huckel")
+		act = DEBYE_HUCKEL;
+	else if (copy == "davies-ladshaw")
+		act = DAVIES_LADSHAW;
+	else
+		act = IDEAL;
+	
+	return act;
+}
+
 //Make a conversion from x to logx
 int Convert2LogConcentration(const Matrix<double> &x, Matrix<double> &logx)
 {
@@ -1535,6 +1574,209 @@ int Convert2Concentration(const Matrix<double> &logx, Matrix<double> &x)
 		else
 			x.edit(i, 0, pow(10.0, logx(i,0)));
 	}
+	return success;
+}
+
+//Check and read the scenario portion of the yaml object
+int read_scenario(SHARK_DATA *shark_dat)
+{
+	int success = 0;
+	
+	//Find all required info from Scenario Document in Header vars_fun
+	try
+	{
+		shark_dat->numvar = shark_dat->yaml_object.getYamlWrapper()("Scenario")("vars_fun")["numvar"].getInt();
+		shark_dat->num_ssr = shark_dat->yaml_object.getYamlWrapper()("Scenario")("vars_fun")["num_ssr"].getInt();
+		shark_dat->num_mbe = shark_dat->yaml_object.getYamlWrapper()("Scenario")("vars_fun")["num_mbe"].getInt();
+		shark_dat->num_usr = shark_dat->yaml_object.getYamlWrapper()("Scenario")("vars_fun")["num_usr"].getInt();
+	}
+	catch (std::out_of_range)
+	{
+		mError(missing_information);
+		return -1;
+	}
+	//Find all optional info from Scenario Document in Header vars_fun
+	try
+	{
+		shark_dat->num_other = shark_dat->yaml_object.getYamlWrapper()("Scenario")("vars_fun")["num_other"].getInt();
+	} catch (std::out_of_range)
+	{
+		shark_dat->num_other = 0;
+	}
+	
+	//All sys_data is optional, missing info will be replaced with defaults
+	try
+	{
+		shark_dat->const_pH = shark_dat->yaml_object.getYamlWrapper()("Scenario")("sys_data")["const_pH"].getBool();
+	} catch (std::out_of_range)
+	{
+		shark_dat->const_pH = false;
+	}
+	
+	if (shark_dat->const_pH == true)
+	{
+		try
+		{
+			shark_dat->pH = shark_dat->yaml_object.getYamlWrapper()("Scenario")("sys_data")["pH"].getDouble();
+		}
+		catch (std::out_of_range)
+		{
+			mError(missing_information);
+			return -1;
+		}
+	}
+	
+	try
+	{
+		shark_dat->temperature = shark_dat->yaml_object.getYamlWrapper()("Scenario")("sys_data")["temp"].getDouble();
+	} catch (std::out_of_range)
+	{
+		shark_dat->temperature = 298.15;
+	}
+	
+	try
+	{
+		shark_dat->dielectric_const = shark_dat->yaml_object.getYamlWrapper()("Scenario")("sys_data")["dielec"].getDouble();
+	} catch (std::out_of_range)
+	{
+		shark_dat->dielectric_const = 78.325;
+	}
+	
+	try
+	{
+		std::string act = shark_dat->yaml_object.getYamlWrapper()("Scenario")("sys_data")["act_fun"].getString();
+		shark_dat->act_fun = act_choice(act);
+	} catch (std::out_of_range)
+	{
+		shark_dat->act_fun = IDEAL;
+	}
+	
+	//Now read in the run_time Header
+	try
+	{
+		shark_dat->steadystate = shark_dat->yaml_object.getYamlWrapper()("Scenario")("run_time")["steady"].getBool();
+	}
+	catch (std::out_of_range)
+	{
+		mError(missing_information);
+		return -1;
+	}
+	if (shark_dat->steadystate == true)
+	{
+		try
+		{
+			shark_dat->SpeciationCurve = shark_dat->yaml_object.getYamlWrapper()("Scenario")("run_time")["specs_curve"].getBool();
+		}
+		catch (std::out_of_range)
+		{
+			shark_dat->SpeciationCurve = false;
+		}
+	}
+	else
+	{
+		try
+		{
+			shark_dat->dt = shark_dat->yaml_object.getYamlWrapper()("Scenario")("run_time")["dt"].getDouble();
+			shark_dat->simulationtime = shark_dat->yaml_object.getYamlWrapper()("Scenario")("run_time")["sim_time"].getDouble();
+			shark_dat->t_out = shark_dat->yaml_object.getYamlWrapper()("Scenario")("run_time")["t_out"].getDouble();
+		}
+		catch (std::out_of_range)
+		{
+			mError(missing_information);
+			return -1;
+		}
+		
+		try
+		{
+			shark_dat->TimeAdaptivity = shark_dat->yaml_object.getYamlWrapper()("Scenario")("run_time")["time_adapt"].getBool();
+		}
+		catch (std::out_of_range)
+		{
+			shark_dat->TimeAdaptivity = false;
+		}
+	}
+
+	
+	return success;
+}
+
+//Check and read the species information
+int read_species(SHARK_DATA *shark_dat)
+{
+	int success = 0;
+	
+	//Start reading in the registered species from the reg Header
+	int reg_species = shark_dat->yaml_object.getYamlWrapper()("MasterSpecies")("reg").getDataMap().size();
+	try
+	{
+		for (auto &x: shark_dat->yaml_object.getYamlWrapper()("MasterSpecies")("reg").getDataMap().getMap())
+		{
+			int index = atoi(x.first.c_str());
+			shark_dat->MasterList.set_species(index, x.second.getString());
+		}
+	}
+	catch (std::out_of_range)
+	{
+		mError(missing_information);
+		return -1;
+	}
+	
+	//Now read in the unregistered species and their corresponding information
+	if (reg_species < shark_dat->numvar)
+	{
+		try
+		{
+			std::string formula, phase, name, lin_form;
+			double charge, enthalpy, entropy, energy;
+			bool haveHS, haveG;
+			
+			for (auto &x: shark_dat->yaml_object.getYamlWrapper()("MasterSpecies")("unreg").getSubMap())
+			{
+				int index = atoi(x.first.c_str());
+				formula = x.second.getMap().getString("formula");
+				charge = x.second.getMap().getDouble("charge");
+				enthalpy = x.second.getMap().getDouble("enthalpy");
+				entropy = x.second.getMap().getDouble("entropy");
+				haveHS = x.second.getMap().getBool("have_HS");
+				energy = x.second.getMap().getDouble("energy");
+				haveG = x.second.getMap().getBool("have_G");
+				phase = x.second.getMap().getString("phase");
+				name = x.second.getMap().getString("name");
+				lin_form = x.second.getMap().getString("lin_form");
+				shark_dat->MasterList.set_species(index, charge, enthalpy, entropy, energy, haveHS, haveG, phase, name, formula, lin_form);
+			}
+		}
+		catch (std::out_of_range)
+		{
+			mError(missing_information);
+			return -1;
+		}
+	}
+	
+	//Lastly, check the newly registered objects in MasterSpecies list to ensure that no register errors occured
+	bool reg_error = false;
+	for (int i=0; i<shark_dat->numvar; i++)
+	{
+		if (shark_dat->MasterList.get_species(i).isRegistered() == false)
+		{
+			reg_error = true;
+			break;
+		}
+	}
+	if (reg_error == true)
+	{
+		mError(missing_information);
+		return -1;
+	}
+	
+	return success;
+}
+
+//Read and check the mass balance document
+int read_massbalance(SHARK_DATA *shark_dat)
+{
+	int success = 0;
+	
 	return success;
 }
 
@@ -2335,6 +2577,57 @@ int SHARK(SHARK_DATA *shark_dat)
 	return success;
 }
 
+//Run a SHARK simulation based on the yaml input file
+int SHARK_SCENARIO(const char *yaml_input)
+{
+	int success = 0;
+	
+	//Declarations
+	double time;
+	SHARK_DATA shark_dat;
+	FILE *Output;
+	
+	//Initializations
+	time = clock();
+	Output = fopen("output/SHARK_Output.txt","w+");
+	if (Output == nullptr)
+	{
+		system("mkdir output");
+		Output = fopen("output/SHARK_Output.txt", "w+");
+	}
+	
+	//Read the input file
+	success = shark_dat.yaml_object.executeYamlRead(yaml_input);
+	if (success != 0) {mError(file_dne); return -1;}
+	shark_dat.yaml_object.DisplayContents();
+	
+	//Read and check Scenario document
+	success = read_scenario(&shark_dat);
+	if (success != 0) {mError(read_error); return -1;}
+	
+	//Call the setup function
+	success = setup_SHARK_DATA(Output,shark_residual, NULL, NULL, &shark_dat, NULL, &shark_dat, NULL, NULL);
+	if (success != 0) {mError(initial_error); return -1;}
+	
+	//Read and check the MasterSpeciesList
+	success = read_species(&shark_dat);
+	if (success != 0) {mError(read_error); return -1;}
+	
+	//Read and check the MassBalance
+	success = read_massbalance(&shark_dat);
+	if (success != 0) {mError(read_error); return -1;}
+		
+	//Close files and display end messages
+	fclose(Output);
+	time = clock() - time;
+	std::cout << "\nSimulation Runtime: " << (time / CLOCKS_PER_SEC) << " seconds\n";
+	std::cout << "Total Time Steps: " << shark_dat.timesteps << "\n";
+	std::cout << "Total Evaluations: " << shark_dat.totalsteps << "\n";
+	std::cout << "Evaluations/sec: " << shark_dat.totalsteps/(time / CLOCKS_PER_SEC) << "\n";
+	
+	return success;
+}
+
 //Test of Shark
 int SHARK_TESTS()
 {
@@ -2411,9 +2704,9 @@ int SHARK_TESTS()
 	
 	// ------------------ 1-L Various Carbonate Concentrations -------------------------
 	NaCl = 0.43;
-	//NaHCO3 = 0.00167; //140 ppm
+	NaHCO3 = 0.00167; //140 ppm
 	//NaHCO3 = 0.00167 / 2.0; //70 ppm
-	NaHCO3 = 0.00167 / 4.0; //35 ppm
+	//NaHCO3 = 0.00167 / 4.0; //35 ppm
 	//NaHCO3 = 1E-100; //~0 ppm
 	UO2 = 3.151E-7;   // ~75 ppb
 	AOH = 2.098E-5;   // 15 mg fiber with 200 mg AOH per g fiber in 1.00 L of solution with MW = 143 g/mol

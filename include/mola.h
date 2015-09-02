@@ -49,6 +49,7 @@ public:
 	*	editing the source code of the mola.cpp file. However, this is a relatively simple task.
 	*/
 	
+	void setFormula(std::string form);				//Sets the formula for a molecules
 	void recalculateMolarWeight();					//Forces molecule to recalculate its molar weight
 	void setMolarWeigth(double mw);					//Set the molar weight of species to a constant
 	void editCharge(int c);							//Change the ionic charge of a molecule
