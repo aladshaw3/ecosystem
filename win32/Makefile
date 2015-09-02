@@ -2,8 +2,8 @@
 #Works for any g++ v4.7 or higher
 
 IDIR=../include
-CC=x86_64-pc-cygwin-gcc
-CXX=x86_64-pc-cygwin-g++
+CC=x86_64-w64-mingw32-gcc
+CXX=x86_64-w64-mingw32-g++
 CFLAGS=-I$(IDIR) -std=c++11 -fpermissive -Wwrite-strings -w
 CXXFLAGS= $(CFLAGS) -Wconversion-null
 
@@ -19,7 +19,7 @@ _DEPS = config.h lmmin.h lmcurve.h dogfish.h eel.h egret.h error.h \
 	ui.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
-_OBJ = main.o api.o  lmmin.o lmcurve.o dogfish.o dumper.o eel.o egret.o emitter.o \
+_OBJ = main.o api.o lmmin.o lmcurve.o dogfish.o dumper.o eel.o egret.o emitter.o \
 	error.o finch.o flock.o gsta_opt.o lark.o loader.o macaw.o magpie.o \
 	mola.o monkfish.o parser.o reader.o sandbox.o scanner.o school.o scopsowl_opt.o \
 	scopsowl.o shark.o skua_opt.o skua.o writer.o yaml_wrapper.o Trajectory.o \
@@ -28,13 +28,13 @@ OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 
 $(ODIR)/%.o: ../src/%.c $(DEPS)
-	$(CC) -O2 -c -o $@ $< $(CFLAGS)
+	$(CC) -O0 -c -o $@ $< $(CFLAGS)
 
 $(ODIR)/%.o: ../src/%.cpp $(DEPS)
-	$(CXX) -O2 -c -o $@ $< $(CXXFLAGS)
+	$(CXX) -O0 -c -o $@ $< $(CXXFLAGS)
 
 $(EXE): $(OBJ)
-	$(CXX) -O2 -o $@ $^ $(CXXFLAGS)
+	$(CXX) -O0 -o $@ $^ $(CXXFLAGS)
 
 .PHONY: clean
 
