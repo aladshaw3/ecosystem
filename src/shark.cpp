@@ -1724,6 +1724,12 @@ int read_species(SHARK_DATA *shark_dat)
 	//Now read in the unregistered species and their corresponding information
 	if (reg_species < shark_dat->numvar)
 	{
+		int unreg_species = (int) shark_dat->yaml_object.getYamlWrapper()("MasterSpecies")("unreg").getSubMap().size();
+		if ((unreg_species+reg_species) != shark_dat->numvar)
+		{
+			mError(missing_information);
+			return -1;
+		}
 		try
 		{
 			std::string formula, phase, name, lin_form;
@@ -1776,6 +1782,8 @@ int read_species(SHARK_DATA *shark_dat)
 int read_massbalance(SHARK_DATA *shark_dat)
 {
 	int success = 0;
+	
+	//Check the number of headers in MassBalance Doc and make sure it matches number of equations specified earlier
 	
 	return success;
 }
