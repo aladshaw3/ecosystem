@@ -2,15 +2,15 @@
 #Works for any g++ v4.7 or higher
 
 IDIR=../include
-CC=i686-pc-mingw32-gcc
-CXX=i686-pc-mingw32-g++
+CC=x86_64-pc-cygwin-gcc
+CXX=x86_64-pc-cygwin-g++
 CFLAGS=-I$(IDIR) -std=c++11 -fpermissive -Wwrite-strings -w
 CXXFLAGS= $(CFLAGS) -Wconversion-null
 
 ODIR=obj
 INSDIR=/usr/local/bin
 
-EXE=eco0-win32
+EXE=eco0-win32.exe
 
 _DEPS = config.h lmmin.h lmcurve.h dogfish.h eel.h egret.h error.h \
 	finch.h flock.h gsta_opt.h lark.h macaw.h magpie.h mola.h \
