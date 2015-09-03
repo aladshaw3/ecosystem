@@ -357,15 +357,25 @@ int DaviesLadshaw_equation (const Matrix<double>& x, Matrix<double> &F, const vo
 
 int act_choice(const std::string &input);
 
+bool linesearch_choice(const std::string &input);
+
+int linearsolve_choice(const std::string &input);
+
 int Convert2LogConcentration(const Matrix<double> &x, Matrix<double> &logx);
 
 int Convert2Concentration(const Matrix<double> &logx, Matrix<double> &x);
 
 int read_scenario(SHARK_DATA *shark_dat);
 
+int read_options(SHARK_DATA *shark_dat);
+
 int read_species(SHARK_DATA *shark_dat);
 
 int read_massbalance(SHARK_DATA *shark_dat);
+
+int read_equilrxn(SHARK_DATA *shark_dat);
+
+int read_unsteadyrxn(SHARK_DATA *shark_dat);
 
 int setup_SHARK_DATA( FILE *file, int (*residual) (const Matrix<double> &x, Matrix<double> &res, const void *data),
 					  int (*activity) (const Matrix<double> &x, Matrix<double> &gama, const void *data),

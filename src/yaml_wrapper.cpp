@@ -2118,9 +2118,6 @@ yaml_cpp_class::yaml_cpp_class()
 yaml_cpp_class::~yaml_cpp_class()
 {
 	yaml_wrapper.clear();
-	yaml_token_delete(&this->previous_token);
-	yaml_token_delete(&this->current_token);
-	yaml_parser_delete(&this->token_parser);
 	fclose(this->input_file);
 }
 

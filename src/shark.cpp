@@ -250,6 +250,8 @@ void Reaction::Initialize_List (MasterSpeciesList &List)
 {
 	this->List = &List;
 	this->Stoichiometric.resize(this->List->list_size());
+	for (int i=0; i<this->Stoichiometric.size(); i++)
+		this->Stoichiometric[i] = 0.0;
 }
 
 //Function to display all objects in the list
@@ -519,6 +521,8 @@ void MassBalance::Initialize_List (MasterSpeciesList &List)
 {
 	this->List = &List;
 	this->Delta.resize(this->List->list_size());
+	for (int i=0; i<this->Delta.size(); i++)
+		this->Delta[i] = 0.0;
 }
 
 //Function to display all objects in the list
@@ -678,6 +682,8 @@ void UnsteadyReaction::Initialize_List (MasterSpeciesList &List)
 {
 	this->List = &List;
 	this->Stoichiometric.resize(this->List->list_size());
+	for (int i=0; i<this->Stoichiometric.size(); i++)
+		this->Stoichiometric[i] = 0.0;
 }
 
 //Function to display all objects in the list
@@ -869,15 +875,11 @@ void UnsteadyReaction::calculateRate(double T)
 	if (this->HaveForRef == true)
 	{
 		this->Set_Forward(this->forward_ref_rate * pow(T, this->temperature_affinity) * exp(-this->activation_energy/(Rstd*T)));
-		//this->forward_rate = this->forward_ref_rate * pow(T, this->temperature_affinity) * exp(-this->activation_energy/(Rstd*T));
-		//this->reverse_rate = this->forward_rate / pow(10.0,this->Equilibrium);
 		return;
 	}
 	else if (this->HaveRevRef == true)
 	{
 		this->Set_Reverse(this->reverse_ref_rate * pow(T, this->temperature_affinity) * exp(-this->activation_energy/(Rstd*T)));
-		//this->reverse_rate = this->reverse_ref_rate * pow(T, this->temperature_affinity) * exp(-this->activation_energy/(Rstd*T));
-		//this->forward_rate = this->reverse_rate * pow(10.0,this->Equilibrium);
 		return;
 	}
 	else if (this->HaveForward == true)
@@ -1547,6 +1549,56 @@ int act_choice(const std::string &input)
 	return act;
 }
 
+//Determine the line search option
+bool linesearch_choice(const std::string &input)
+{
+	bool Bounce = false;
+	
+	std::string copy = input;
+	for (int i=0; i<copy.size(); i++)
+		copy[i] = tolower(copy[i]);
+	
+	if (copy == "standard")
+		Bounce = false;
+	else if (copy == "bounce" || copy == "bouncing")
+		Bounce = true;
+	else
+		Bounce = false;
+	
+	return Bounce;
+}
+
+//Determine what linear solver to use
+int linearsolve_choice(const std::string &input)
+{
+	int choice = GMRESRP;
+	
+	std::string copy = input;
+	for (int i=0; i<copy.size(); i++)
+		copy[i] = tolower(copy[i]);
+	
+	if (copy == "gmreslp")
+		choice = GMRESLP;
+	else if (copy == "pcg")
+		choice = PCG;
+	else if (copy == "bicgstab")
+		choice = BiCGSTAB;
+	else if (copy == "cgs")
+		choice = CGS;
+	else if (copy == "fom")
+		choice = FOM;
+	else if (copy == "gmresrp")
+		choice = GMRESRP;
+	else if (copy == "gcr")
+		choice = GCR;
+	else if (copy == "gmresr")
+		choice = GMRESR;
+	else
+		choice = GMRESRP;
+	
+	return choice;
+}
+
 //Make a conversion from x to logx
 int Convert2LogConcentration(const Matrix<double> &x, Matrix<double> &logx)
 {
@@ -1644,6 +1696,15 @@ int read_scenario(SHARK_DATA *shark_dat)
 	
 	try
 	{
+		shark_dat->MasterList.set_alkalinity(shark_dat->yaml_object.getYamlWrapper()("Scenario")("sys_data")["res_alk"].getDouble());
+	}
+	catch (std::out_of_range)
+	{
+		shark_dat->MasterList.set_alkalinity(0.0);
+	}
+	
+	try
+	{
 		std::string act = shark_dat->yaml_object.getYamlWrapper()("Scenario")("sys_data")["act_fun"].getString();
 		shark_dat->act_fun = act_choice(act);
 	} catch (std::out_of_range)
@@ -1700,13 +1761,116 @@ int read_scenario(SHARK_DATA *shark_dat)
 	return success;
 }
 
+//Check for user options to set variables
+int read_options(SHARK_DATA *shark_dat)
+{
+	int success = 0;
+	
+	try
+	{
+		shark_dat->Newton_data.LineSearch = shark_dat->yaml_object.getYamlWrapper()("SolverOptions")["line_search"].getBool();
+	}
+	catch (std::out_of_range)
+	{
+		shark_dat->Newton_data.LineSearch = true;
+	}
+	
+	if (shark_dat->Newton_data.LineSearch == true)
+	{
+		try
+		{
+			shark_dat->Newton_data.Bounce = linesearch_choice(shark_dat->yaml_object.getYamlWrapper()("SolverOptions")["search_type"].getString());
+		}
+		catch (std::out_of_range)
+		{
+			shark_dat->Newton_data.Bounce =false;
+		}
+	}
+	
+	try
+	{
+		shark_dat->Newton_data.NL_Output = shark_dat->yaml_object.getYamlWrapper()("SolverOptions")["nl_print"].getBool();
+	}
+	catch (std::out_of_range)
+	{
+		shark_dat->Newton_data.NL_Output = false;
+	}
+	
+	try
+	{
+		shark_dat->Newton_data.linear_solver = linearsolve_choice(shark_dat->yaml_object.getYamlWrapper()("SolverOptions")["linear_solve"].getString());
+	}
+	catch (std::out_of_range)
+	{
+		if ( shark_dat->lin_precon == NULL && shark_dat->numvar >= 100)
+		{
+			shark_dat->Newton_data.linear_solver = GMRESR;
+		}
+		else
+		{
+			shark_dat->Newton_data.linear_solver = GMRESRP;
+		}
+	}
+	
+	try
+	{
+		shark_dat->Newton_data.nl_maxit = shark_dat->yaml_object.getYamlWrapper()("SolverOptions")["nl_maxit"].getInt();
+	}
+	catch (std::out_of_range)
+	{
+		if (shark_dat->steadystate == true)
+			shark_dat->Newton_data.nl_maxit = 2*shark_dat->numvar;
+		else
+			shark_dat->Newton_data.nl_maxit = shark_dat->numvar;
+	}
+	
+	try
+	{
+		shark_dat->Newton_data.nl_tol_abs = shark_dat->yaml_object.getYamlWrapper()("SolverOptions")["nl_abstol"].getDouble();
+	}
+	catch (std::out_of_range)
+	{
+		shark_dat->Newton_data.nl_tol_abs = 1e-5;
+	}
+	
+	try
+	{
+		shark_dat->Newton_data.nl_tol_rel = shark_dat->yaml_object.getYamlWrapper()("SolverOptions")["nl_reltol"].getDouble();
+	}
+	catch (std::out_of_range)
+	{
+		shark_dat->Newton_data.nl_tol_rel = 1e-8;
+	}
+	
+	try
+	{
+		shark_dat->Newton_data.lin_tol = shark_dat->yaml_object.getYamlWrapper()("SolverOptions")["lin_tol"].getDouble();
+	}
+	catch (std::out_of_range)
+	{
+		shark_dat->Newton_data.lin_tol = 1e-6;
+	}
+	
+	return success;
+}
+
 //Check and read the species information
 int read_species(SHARK_DATA *shark_dat)
 {
 	int success = 0;
 	
 	//Start reading in the registered species from the reg Header
-	int reg_species = shark_dat->yaml_object.getYamlWrapper()("MasterSpecies")("reg").getDataMap().size();
+	int reg_species;
+	try
+	{
+		reg_species = shark_dat->yaml_object.getYamlWrapper()("MasterSpecies")("reg").getDataMap().size();
+	}
+	catch (std::out_of_range)
+	{
+		mError(missing_information);
+		return -1;
+	}
+	
 	try
 	{
 		for (auto &x: shark_dat->yaml_object.getYamlWrapper()("MasterSpecies")("reg").getDataMap().getMap())
@@ -1724,7 +1888,17 @@ int read_species(SHARK_DATA *shark_dat)
 	//Now read in the unregistered species and their corresponding information
 	if (reg_species < shark_dat->numvar)
 	{
-		int unreg_species = (int) shark_dat->yaml_object.getYamlWrapper()("MasterSpecies")("unreg").getSubMap().size();
+		int unreg_species;
+		try
+		{
+			unreg_species = (int) shark_dat->yaml_object.getYamlWrapper()("MasterSpecies")("unreg").getSubMap().size();
+		}
+		catch (std::out_of_range)
+		{
+			mError(missing_information);
+			return -1;
+		}
+		
 		if ((unreg_species+reg_species) != shark_dat->numvar)
 		{
 			mError(missing_information);
@@ -1784,6 +1958,407 @@ int read_massbalance(SHARK_DATA *shark_dat)
 	int success = 0;
 	
 	//Check the number of headers in MassBalance Doc and make sure it matches number of equations specified earlier
+	int mbes;
+	try
+	{
+		mbes = (int) shark_dat->yaml_object.getYamlWrapper()("MassBalance").getHeadMap().size();
+	}
+	catch (std::out_of_range)
+	{
+		mError(missing_information);
+		return -1;
+	}
+	
+	if (mbes != shark_dat->num_mbe)
+	{
+		mError(missing_information);
+		return -1;
+	}
+	else
+	{
+		int i=0;
+		for (auto &x: shark_dat->yaml_object.getYamlWrapper()("MassBalance").getHeadMap())
+		{
+			shark_dat->MassBalanceList[i].Set_Name(x.first);
+			try
+			{
+				shark_dat->MassBalanceList[i].Set_TotalConcentration(shark_dat->yaml_object.getYamlWrapper()("MassBalance")(x.first)["total_conc"].getDouble());
+			}
+			catch (std::out_of_range)
+			{
+				mError(missing_information);
+				return -1;
+			}
+			
+			int species;
+			try
+			{
+				species = (int) shark_dat->yaml_object.getYamlWrapper()("MassBalance")(x.first)("delta").getMap().size();
+			}
+			catch (std::out_of_range)
+			{
+				mError(missing_information);
+				return -1;
+			}
+			if (species < 1)
+			{
+				mError(missing_information);
+				return -1;
+			}
+			
+			for (auto &y: shark_dat->yaml_object.getYamlWrapper()("MassBalance")(x.first)("delta").getMap())
+			{
+				int index = shark_dat->MasterList.get_index(y.first);
+				if (index < 0 || index > (shark_dat->numvar-1))
+				{
+					mError(read_error);
+					return -1;
+				}
+				else
+				{
+					try
+					{
+						shark_dat->MassBalanceList[i].Set_Delta(index, y.second.getDouble());
+					}
+					catch (std::out_of_range)
+					{
+						mError(read_error);
+						return -1;
+					}
+				}
+			}
+			
+			i++;
+		}
+	}
+	
+	return success;
+}
+
+//Check and read the equilibiurm reaction document
+int read_equilrxn(SHARK_DATA *shark_dat)
+{
+	int success = 0;
+	
+	//Check the number of headers to make sure it matches the expected number of reaction objects
+	if (shark_dat->num_ssr > 0)
+	{
+		int ssr;
+		try
+		{
+			ssr = (int) shark_dat->yaml_object.getYamlWrapper()("EquilRxn").getHeadMap().size();
+		}
+		catch (std::out_of_range)
+		{
+			mError(missing_information);
+			return -1;
+		}
+		if (ssr != shark_dat->num_ssr)
+		{
+			mError(missing_information);
+			return -1;
+		}
+		
+		int i=0;
+		for (auto &x: shark_dat->yaml_object.getYamlWrapper()("EquilRxn").getHeadMap())
+		{
+			try
+			{
+				shark_dat->ReactionList[i].Set_Equilibrium(shark_dat->yaml_object.getYamlWrapper()("EquilRxn")(x.first)["logK"].getDouble());
+			}
+			catch (std::out_of_range)
+			{
+				//At this point, it is unknown as to whether or not this is an actual error
+				//It will be checked later whether or not this causes a problem
+			}
+			
+			int count = 0;
+			double dH, dS;
+			try
+			{
+				dH = shark_dat->yaml_object.getYamlWrapper()("EquilRxn")(x.first)["enthalpy"].getDouble();
+				shark_dat->ReactionList[i].Set_Enthalpy(dH);
+				count++;
+			}
+			catch (std::out_of_range)
+			{
+				//At this point, it is unknown as to whether or not this is an actual error
+				//It will be checked later whether or not this causes a problem
+			}
+			
+			try
+			{
+				dS = shark_dat->yaml_object.getYamlWrapper()("EquilRxn")(x.first)["entropy"].getDouble();
+				shark_dat->ReactionList[i].Set_Entropy(dS);
+				count++;
+			}
+			catch (std::out_of_range)
+			{
+				//At this point, it is unknown as to whether or not this is an actual error
+				//It will be checked later whether or not this causes a problem
+			}
+			if (count == 2)
+				shark_dat->ReactionList[i].Set_EnthalpyANDEntropy(dH, dS);
+			
+			try
+			{
+				shark_dat->ReactionList[i].Set_Energy(shark_dat->yaml_object.getYamlWrapper()("EquilRxn")(x.first)["energy"].getDouble());
+			}
+			catch (std::out_of_range)
+			{
+				//At this point, it is unknown as to whether or not this is an actual error
+				//It will be checked later whether or not this causes a problem
+			}
+			
+			int stoich;
+			try
+			{
+				stoich = shark_dat->yaml_object.getYamlWrapper()("EquilRxn")(x.first)("stoichiometry").getMap().size();
+			}
+			catch (std::out_of_range)
+			{
+				mError(missing_information);
+				return -1;
+			}
+			if (stoich < 1)
+			{
+				mError(missing_information);
+				return -1;
+			}
+			
+			for (auto &y: shark_dat->yaml_object.getYamlWrapper()("EquilRxn")(x.first)("stoichiometry").getMap())
+			{
+				int index = shark_dat->MasterList.get_index(y.first);
+				if (index < 0 || index > (shark_dat->numvar-1))
+				{
+					mError(read_error);
+					return -1;
+				}
+				else
+				{
+					try
+					{
+						shark_dat->ReactionList[i].Set_Stoichiometric(index, y.second.getDouble());
+					}
+					catch (std::out_of_range)
+					{
+						mError(read_error);
+						return -1;
+					}
+				}
+			}
+			
+			i++;
+		}
+	}
+	
+	return success;
+}
+
+//Check and read the unsteady reaction object
+int read_unsteadyrxn(SHARK_DATA *shark_dat)
+{
+	int success = 0;
+	
+	//Check the number of headers to make sure it matches the expected number of reaction objects
+	if (shark_dat->num_usr > 0)
+	{
+		int usr;
+		try
+		{
+			usr = (int) shark_dat->yaml_object.getYamlWrapper()("UnsteadyRxn").getHeadMap().size();
+		}
+		catch (std::out_of_range)
+		{
+			mError(missing_information);
+			return -1;
+		}
+		if (usr != shark_dat->num_usr)
+		{
+			mError(missing_information);
+			return -1;
+		}
+		
+		int i=0;
+		for (auto &x: shark_dat->yaml_object.getYamlWrapper()("UnsteadyRxn").getHeadMap())
+		{
+			int var_index;
+			try
+			{
+				var_index = shark_dat->MasterList.get_index(shark_dat->yaml_object.getYamlWrapper()("UnsteadyRxn")(x.first)["unsteady_var"].getString());
+			}
+			catch (std::out_of_range)
+			{
+				mError(missing_information);
+				return -1;
+			}
+			if (var_index < 0 || var_index > (shark_dat->numvar-1))
+			{
+				mError(read_error);
+				return -1;
+			}
+			shark_dat->UnsteadyList[i].Set_Species_Index(var_index);
+			
+			try
+			{
+				shark_dat->UnsteadyList[i].Set_InitialValue(shark_dat->yaml_object.getYamlWrapper()("UnsteadyRxn")(x.first)["initial_condition"].getDouble());
+			}
+			catch (std::out_of_range)
+			{
+				mError(missing_information);
+				return -1;
+			}
+			
+			try
+			{
+				shark_dat->UnsteadyList[i].Set_Equilibrium(shark_dat->yaml_object.getYamlWrapper()("UnsteadyRxn")(x.first)["logK"].getDouble());
+			}
+			catch (std::out_of_range)
+			{
+				//At this point, it is unknown as to whether or not this is an actual error
+				//It will be checked later whether or not this causes a problem
+			}
+			
+			try
+			{
+				shark_dat->UnsteadyList[i].Set_Forward(shark_dat->yaml_object.getYamlWrapper()("UnsteadyRxn")(x.first)["forward"].getDouble());
+			}
+			catch (std::out_of_range)
+			{
+				//At this point, it is unknown as to whether or not this is an actual error
+				//It will be checked later whether or not this causes a problem
+			}
+			
+			try
+			{
+				shark_dat->UnsteadyList[i].Set_Reverse(shark_dat->yaml_object.getYamlWrapper()("UnsteadyRxn")(x.first)["reverse"].getDouble());
+			}
+			catch (std::out_of_range)
+			{
+				//At this point, it is unknown as to whether or not this is an actual error
+				//It will be checked later whether or not this causes a problem
+			}
+			
+			try
+			{
+				shark_dat->UnsteadyList[i].Set_ReverseRef(shark_dat->yaml_object.getYamlWrapper()("UnsteadyRxn")(x.first)["reverse_ref"].getDouble());
+			}
+			catch (std::out_of_range)
+			{
+				//At this point, it is unknown as to whether or not this is an actual error
+				//It will be checked later whether or not this causes a problem
+			}
+			
+			try
+			{
+				shark_dat->UnsteadyList[i].Set_ForwardRef(shark_dat->yaml_object.getYamlWrapper()("UnsteadyRxn")(x.first)["forward_ref"].getDouble());
+			}
+			catch (std::out_of_range)
+			{
+				//At this point, it is unknown as to whether or not this is an actual error
+				//It will be checked later whether or not this causes a problem
+			}
+			
+			try
+			{
+				shark_dat->UnsteadyList[i].Set_ActivationEnergy(shark_dat->yaml_object.getYamlWrapper()("UnsteadyRxn")(x.first)["activation_energy"].getDouble());
+			}
+			catch (std::out_of_range)
+			{
+				//At this point, it is unknown as to whether or not this is an actual error
+				//It will be checked later whether or not this causes a problem
+			}
+			
+			try
+			{
+				shark_dat->UnsteadyList[i].Set_Affinity(shark_dat->yaml_object.getYamlWrapper()("UnsteadyRxn")(x.first)["temp_affinity"].getDouble());
+			}
+			catch (std::out_of_range)
+			{
+				//At this point, it is unknown as to whether or not this is an actual error
+				//It will be checked later whether or not this causes a problem
+			}
+			
+			int count = 0;
+			double dH, dS;
+			try
+			{
+				dH = shark_dat->yaml_object.getYamlWrapper()("UnsteadyRxn")(x.first)["enthalpy"].getDouble();
+				shark_dat->UnsteadyList[i].Set_Enthalpy(dH);
+				count++;
+			}
+			catch (std::out_of_range)
+			{
+				//At this point, it is unknown as to whether or not this is an actual error
+				//It will be checked later whether or not this causes a problem
+			}
+			
+			try
+			{
+				dS = shark_dat->yaml_object.getYamlWrapper()("UnsteadyRxn")(x.first)["entropy"].getDouble();
+				shark_dat->UnsteadyList[i].Set_Entropy(dS);
+				count++;
+			}
+			catch (std::out_of_range)
+			{
+				//At this point, it is unknown as to whether or not this is an actual error
+				//It will be checked later whether or not this causes a problem
+			}
+			if (count == 2)
+				shark_dat->UnsteadyList[i].Set_EnthalpyANDEntropy(dH, dS);
+			
+			try
+			{
+				shark_dat->UnsteadyList[i].Set_Energy(shark_dat->yaml_object.getYamlWrapper()("UnsteadyRxn")(x.first)["energy"].getDouble());
+			}
+			catch (std::out_of_range)
+			{
+				//At this point, it is unknown as to whether or not this is an actual error
+				//It will be checked later whether or not this causes a problem
+			}
+			
+			int stoich;
+			try
+			{
+				stoich = shark_dat->yaml_object.getYamlWrapper()("UnsteadyRxn")(x.first)("stoichiometry").getMap().size();
+			}
+			catch (std::out_of_range)
+			{
+				mError(missing_information);
+				return -1;
+			}
+			if (stoich < 1)
+			{
+				mError(missing_information);
+				return -1;
+			}
+			
+			for (auto &y: shark_dat->yaml_object.getYamlWrapper()("UnsteadyRxn")(x.first)("stoichiometry").getMap())
+			{
+				int index = shark_dat->MasterList.get_index(y.first);
+				if (index < 0 || index > (shark_dat->numvar-1))
+				{
+					mError(read_error);
+					return -1;
+				}
+				else
+				{
+					try
+					{
+						shark_dat->UnsteadyList[i].Set_Stoichiometric(index, y.second.getDouble());
+					}
+					catch (std::out_of_range)
+					{
+						mError(read_error);
+						return -1;
+					}
+				}
+			}
+			
+			i++;
+		}
+	}
+
 	
 	return success;
 }
@@ -1854,13 +2429,13 @@ int setup_SHARK_DATA( FILE *file, int (*residual) (const Matrix<double> &x, Matr
 	if ( (activity_data) == NULL)
 		dat->activity_data = dat;
 	else
-		dat->activity_data = &activity_data;
+		dat->activity_data = activity_data;
 	if ( (residual_data) == NULL)
 		dat->residual_data = dat;
 	else
-		dat->residual_data = &residual_data;
-	dat->precon_data = &precon_data;
-	dat->other_data = &other_data;
+		dat->residual_data = residual_data;
+	dat->precon_data = precon_data;
+	dat->other_data = other_data;
 	dat->totalsteps = 0;
 	dat->timesteps = 0;
 	dat->time_old = 0.0;
@@ -1906,7 +2481,7 @@ int setup_SHARK_DATA( FILE *file, int (*residual) (const Matrix<double> &x, Matr
 		dat->Newton_data.nl_maxit = dat->numvar;
 	dat->Newton_data.nl_tol_abs = 1e-5;
 	dat->Newton_data.nl_tol_rel = 1e-8;
-	dat->Newton_data.lin_tol = 0.1;
+	dat->Newton_data.lin_tol = 1e-6;
 	dat->Newton_data.NL_Output = dat->Console_Output;
 	if (dat->steadystate == false)
 		dat->Newton_data.NL_Output = false;
@@ -2607,15 +3182,18 @@ int SHARK_SCENARIO(const char *yaml_input)
 	//Read the input file
 	success = shark_dat.yaml_object.executeYamlRead(yaml_input);
 	if (success != 0) {mError(file_dne); return -1;}
-	shark_dat.yaml_object.DisplayContents();
 	
 	//Read and check Scenario document
 	success = read_scenario(&shark_dat);
 	if (success != 0) {mError(read_error); return -1;}
 	
 	//Call the setup function
-	success = setup_SHARK_DATA(Output,shark_residual, NULL, NULL, &shark_dat, NULL, &shark_dat, NULL, NULL);
+	success = setup_SHARK_DATA(Output,shark_residual, NULL, NULL, &shark_dat, NULL, (void *)&shark_dat, NULL, NULL);
 	if (success != 0) {mError(initial_error); return -1;}
+	
+	//Read options
+	success = read_options(&shark_dat);
+	if (success != 0) {mError(read_error); return -1;}
 	
 	//Read and check the MasterSpeciesList
 	success = read_species(&shark_dat);
@@ -2624,6 +3202,18 @@ int SHARK_SCENARIO(const char *yaml_input)
 	//Read and check the MassBalance
 	success = read_massbalance(&shark_dat);
 	if (success != 0) {mError(read_error); return -1;}
+	
+	//Read and check the EquilRxn
+	success = read_equilrxn(&shark_dat);
+	if (success != 0) {mError(read_error); return -1;}
+	
+	//Read and check the UnsteadyRxn
+	success = read_unsteadyrxn(&shark_dat);
+	if (success != 0) {mError(read_error); return -1;}
+	
+	//Call the SHARK routine
+	success = SHARK(&shark_dat);
+	if (success != 0) {mError(simulation_fail); return -1;}
 		
 	//Close files and display end messages
 	fclose(Output);
@@ -2712,9 +3302,9 @@ int SHARK_TESTS()
 	
 	// ------------------ 1-L Various Carbonate Concentrations -------------------------
 	NaCl = 0.43;
-	NaHCO3 = 0.00167; //140 ppm
+	//NaHCO3 = 0.00167; //140 ppm
 	//NaHCO3 = 0.00167 / 2.0; //70 ppm
-	//NaHCO3 = 0.00167 / 4.0; //35 ppm
+	NaHCO3 = 0.00167 / 4.0; //35 ppm
 	//NaHCO3 = 1E-100; //~0 ppm
 	UO2 = 3.151E-7;   // ~75 ppb
 	AOH = 2.098E-5;   // 15 mg fiber with 200 mg AOH per g fiber in 1.00 L of solution with MW = 143 g/mol

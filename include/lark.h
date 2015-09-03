@@ -35,7 +35,7 @@ typedef struct
 //Data structure for implementation of the Restarted GMRES algorithm with Left Preconditioning
 typedef struct
 {
-    int restart = 20;    		//Restart parameter - default = min(vector_size,20)
+    int restart = 50;    		//Restart parameter - default = min(vector_size,50)
     int maxit = 0;          	//Maximum allowable iterations - default = min(vector_size,1000)
     int iter = 0;           	//Number of iterations needed for convergence
   	int steps = 0;				//Total number of gmres iterations and krylov iterations
@@ -60,7 +60,7 @@ typedef struct
 //Data structure for the Restarted GMRES algorithm with Right Preconditioning
 typedef struct
 {
-	int restart = 20;			//Restart parameter - default = min(20,vector_size)
+	int restart = 50;			//Restart parameter - default = min(50,vector_size)
 	int maxit = 0;				//Maximum allowable outer iterations
 	int iter_outer = 0;			//Total number of outer iterations
 	int iter_inner = 0;			//Total number of inner iterations
@@ -192,7 +192,7 @@ typedef struct
 //Data structure for the implementation of the GCR algorithm for non-symmetric linear systems
 typedef struct
 {
-	int restart = 20;			//Restart parameter for outer iterations - default = 20
+	int restart = 50;			//Restart parameter for outer iterations - default = 50
 	int maxit = 0;				//Maximum allowable outer iterations
 	int iter_outer = 0;			//Number of outer iterations taken
 	int iter_inner = 0;			//Number of inner iterations taken
@@ -223,7 +223,7 @@ typedef struct
 //Data structure for the implementation of GCR with Nested GMRES preconditioning (Named GMRESR from literature)
 typedef struct
 {
-	int gcr_restart = 20;		//Number of GCR restarts (default = 20, max = N)
+	int gcr_restart = 50;		//Number of GCR restarts (default = 50, max = N)
 	int gcr_maxit = 0;			//Number of GCR iterations
 	int gmres_restart = 0;		//Number of GMRES restarts (max = 20)
 	int gmres_maxit = 0;		//Number of GMRES iterations (max = 5)
@@ -290,15 +290,18 @@ typedef struct
 	
 }BACKTRACK_DATA;
 
-//List of macro definitions for linear solver types in PJFNK
-#define GMRESLP 0
-#define PCG 1
-#define BiCGSTAB 2
-#define CGS 3
-#define FOM 4
-#define GMRESRP 5
-#define GCR 6
-#define GMRESR 7
+//Enum of definitions for linear solver types in PJFNK
+typedef enum
+{
+	GMRESLP,
+	PCG,
+	BiCGSTAB,
+	CGS,
+	FOM,
+	GMRESRP,
+	GCR,
+	GMRESR,
+} krylov_method;
 
 //Data structure for the implementation of the PJFNK algorithm for non-linear systems
 typedef struct
@@ -310,7 +313,7 @@ typedef struct
 	
 	double nl_tol_abs = 1e-6;   //Absolute Convergence tolerance for non-linear system - default = 1e-6
 	double nl_tol_rel = 1e-6;	//Relative Convergence tol for the non-linear system - default = 1e-6
-	double lin_tol = 0.1;		//Tolerance of the linear solver - default = 0.1 (Inexact Newton)
+	double lin_tol = 1e-6;		//Tolerance of the linear solver - default = 1e-6 (Exact Newton)
 	double nl_res;				//Absolute redidual norm for the non-linear system
 	double nl_relres;       	//Relative residual for the non-linear system
 	double nl_res_base;     	//Initial residual norm for the non-linear system
@@ -329,13 +332,13 @@ typedef struct
 	Matrix<double> bestx;				//Best found solution vector to the non-linear system
 	
 	//The PJFNK implementation will choose the linear method best suited for your problem
-	GMRESLP_DATA gmreslp_dat;   	//Data structure for the GMRESLP method (solver = 0)
-	PCG_DATA pcg_dat;				//Data structure for the PCG method (solver = 1)
-	BiCGSTAB_DATA bicgstab_dat;		//Data structure for the BiCGSTAB method (solver = 2)
-	CGS_DATA cgs_dat;				//Data structure for the CGS method (solver = 3)
-	GMRESRP_DATA gmresrp_dat;		//Data structure for the GMRESRP method (solver = 5)
-	GCR_DATA gcr_dat;				//Data structure for the GCR method (solver = 6)
-	GMRESR_DATA gmresr_dat;			//Data structure for the GMRESR method (solver = 7)
+	GMRESLP_DATA gmreslp_dat;   	//Data structure for the GMRESLP method 
+	PCG_DATA pcg_dat;				//Data structure for the PCG method 
+	BiCGSTAB_DATA bicgstab_dat;		//Data structure for the BiCGSTAB method 
+	CGS_DATA cgs_dat;				//Data structure for the CGS method 
+	GMRESRP_DATA gmresrp_dat;		//Data structure for the GMRESRP method 
+	GCR_DATA gcr_dat;				//Data structure for the GCR method 
+	GMRESR_DATA gmresr_dat;			//Data structure for the GMRESR method 
 	
 	
 	BACKTRACK_DATA backtrack_dat;	//Data structure for the Backtracking Linesearch algorithm

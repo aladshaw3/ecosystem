@@ -571,7 +571,7 @@ int gmresLeftPreconditioned( int (*matvec) (const Matrix<double>& v, Matrix<doub
   	//Initialize Krylov Data and GMRES Data
   	if (gmreslp_dat->restart < 2 || gmreslp_dat->restart > b.rows())
     {
-      	gmreslp_dat->restart = std::min(20,b.rows());
+      	gmreslp_dat->restart = std::min(50,b.rows());
     }
   	if (gmreslp_dat->maxit < 1 || gmreslp_dat->maxit > b.rows())
     {
@@ -835,7 +835,7 @@ int gmresRightPreconditioned( int (*matvec) (const Matrix<double>& v, Matrix<dou
 	//Initialize Data
 	if (gmresrp_dat->restart <= 1)
 	{
-		gmresrp_dat->restart = std::min(b.rows(),20);
+		gmresrp_dat->restart = std::min(b.rows(),50);
 	}
 	else if (gmresrp_dat->restart > b.rows() && b.rows() <= 1000)
 	{
@@ -1996,7 +1996,7 @@ int gcr( int (*matvec) (const Matrix<double>& x, Matrix<double> &Ax, const void 
 	//Initialize Data
 	if (gcr_dat->restart <= 0)
 	{
-		gcr_dat->restart = std::min(b.rows(),20);
+		gcr_dat->restart = std::min(b.rows(),50);
 	}
 	else if (gcr_dat->restart > b.rows() && b.rows() <= 1000)
 	{
@@ -2369,7 +2369,7 @@ int gmresr( int (*matvec) (const Matrix<double>& x, Matrix<double> &Ax, const vo
 	gmresr_dat->gcr_dat.tol_rel = gmresr_dat->gcr_rel_tol;
 	if (gmresr_dat->gcr_restart <= 0)
 	{
-		gmresr_dat->gcr_restart = std::min(b.rows(),20);
+		gmresr_dat->gcr_restart = std::min(b.rows(),50);
 	}
 	else if (gmresr_dat->gcr_restart > b.rows() && b.rows() <= 1000)
 	{
@@ -2840,7 +2840,7 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 	}
 	if (pjfnk_dat->nl_maxit <= 0)
 		pjfnk_dat->nl_maxit = std::min(3*x.rows(),1000);
-	if (pjfnk_dat->linear_solver < 0 || pjfnk_dat->linear_solver > 7)
+	if (pjfnk_dat->linear_solver < GMRESLP || pjfnk_dat->linear_solver > GMRESR)
 	{
 		//Choose the best linear solver based on problem size and availability of preconditioning
 		if (x.rows() >= 100 && (*precon) == NULL)
@@ -2868,8 +2868,6 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 		pjfnk_dat->eps = sqrt(DBL_EPSILON);
 	if (pjfnk_dat->Bounce == true)
 		pjfnk_dat->LineSearch = true;
-	if (pjfnk_dat->LineSearch == true)
-		pjfnk_dat->lin_tol = 1e-10;
 		
 	//Start the method by calling the users F(x) function to form an initial residual
 	success = (*pjfnk_dat->funeval) (pjfnk_dat->x,pjfnk_dat->F,pjfnk_dat->res_data);
