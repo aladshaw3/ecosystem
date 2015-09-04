@@ -187,7 +187,5 @@ int MACAW_TESTS()
 	
 	std::cout << iv_test.inner_product(iv_test) << std::endl;
 	
-	
-	
     return success;
 }

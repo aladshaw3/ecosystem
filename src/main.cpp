@@ -15,7 +15,7 @@ int main(int argc, const char * argv[])
 	success = run_executable(argc, argv);
 	
 	//Space below for overrides of the run_executable function
-	//success = SHARK_SCENARIO("shark_input.yml");
+	//success = MACAW_TESTS();
 	
 	std::cout << "Exit Code:\t" << success << std::endl;
 	return success;
