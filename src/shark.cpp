@@ -1798,6 +1798,15 @@ int read_options(SHARK_DATA *shark_dat)
 	
 	try
 	{
+		shark_dat->Newton_data.L_Output = shark_dat->yaml_object.getYamlWrapper()("SolverOptions")["l_print"].getBool();
+	}
+	catch (std::out_of_range)
+	{
+		shark_dat->Newton_data.L_Output = false;
+	}
+	
+	try
+	{
 		shark_dat->Newton_data.linear_solver = linearsolve_choice(shark_dat->yaml_object.getYamlWrapper()("SolverOptions")["linear_solve"].getString());
 	}
 	catch (std::out_of_range)
@@ -2487,11 +2496,11 @@ int setup_SHARK_DATA( FILE *file, int (*residual) (const Matrix<double> &x, Matr
 		dat->Newton_data.NL_Output = false;
 	if ( (*precond) == NULL && dat->numvar >= 100)
 	{
-		dat->Newton_data.linear_solver = GMRESR;
+		dat->Newton_data.linear_solver = GMRESRP;
 	}
 	else
 	{
-		dat->Newton_data.linear_solver = GMRESRP;
+		dat->Newton_data.linear_solver = FOM;
 	}
 	
 	//Setup the memory working space for the problem

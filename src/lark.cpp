@@ -571,7 +571,7 @@ int gmresLeftPreconditioned( int (*matvec) (const Matrix<double>& v, Matrix<doub
   	//Initialize Krylov Data and GMRES Data
   	if (gmreslp_dat->restart < 2 || gmreslp_dat->restart > b.rows())
     {
-      	gmreslp_dat->restart = std::min(50,b.rows());
+      	gmreslp_dat->restart = std::min(20,b.rows());
     }
   	if (gmreslp_dat->maxit < 1 || gmreslp_dat->maxit > b.rows())
     {
@@ -835,7 +835,7 @@ int gmresRightPreconditioned( int (*matvec) (const Matrix<double>& v, Matrix<dou
 	//Initialize Data
 	if (gmresrp_dat->restart <= 1)
 	{
-		gmresrp_dat->restart = std::min(b.rows(),50);
+		gmresrp_dat->restart = std::min(b.rows(),20);
 	}
 	else if (gmresrp_dat->restart > b.rows() && b.rows() <= 1000)
 	{
@@ -1996,7 +1996,7 @@ int gcr( int (*matvec) (const Matrix<double>& x, Matrix<double> &Ax, const void 
 	//Initialize Data
 	if (gcr_dat->restart <= 0)
 	{
-		gcr_dat->restart = std::min(b.rows(),50);
+		gcr_dat->restart = std::min(b.rows(),20);
 	}
 	else if (gcr_dat->restart > b.rows() && b.rows() <= 1000)
 	{
@@ -2369,7 +2369,7 @@ int gmresr( int (*matvec) (const Matrix<double>& x, Matrix<double> &Ax, const vo
 	gmresr_dat->gcr_dat.tol_rel = gmresr_dat->gcr_rel_tol;
 	if (gmresr_dat->gcr_restart <= 0)
 	{
-		gmresr_dat->gcr_restart = std::min(b.rows(),50);
+		gmresr_dat->gcr_restart = std::min(b.rows(),20);
 	}
 	else if (gmresr_dat->gcr_restart > b.rows() && b.rows() <= 1000)
 	{
@@ -2917,7 +2917,7 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 		if (pjfnk_dat->linear_solver == GMRESLP)
 		{
 			pjfnk_dat->gmreslp_dat.Output = pjfnk_dat->L_Output;
-			pjfnk_dat->gmreslp_dat.tol_abs = pjfnk_dat->lin_tol * pjfnk_dat->nl_res;
+			pjfnk_dat->gmreslp_dat.tol_abs = pjfnk_dat->lin_tol;
 			pjfnk_dat->gmreslp_dat.tol_rel = pjfnk_dat->lin_tol;
 			pjfnk_dat->gmreslp_dat.maxit = x.rows();
 			success = gmresLeftPreconditioned(jacvec, pjfnk_dat->precon, pjfnk_dat->F, &pjfnk_dat->gmreslp_dat, pjfnk_dat, pjfnk_dat->precon_data);
@@ -2952,7 +2952,7 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 		else if (pjfnk_dat->linear_solver == PCG)
 		{
 			pjfnk_dat->pcg_dat.Output = pjfnk_dat->L_Output;
-			pjfnk_dat->pcg_dat.tol_abs = pjfnk_dat->lin_tol * pjfnk_dat->nl_res;
+			pjfnk_dat->pcg_dat.tol_abs = pjfnk_dat->lin_tol;
 			pjfnk_dat->pcg_dat.tol_rel = pjfnk_dat->lin_tol;
 			pjfnk_dat->pcg_dat.maxit = x.rows();
 			success = pcg(jacvec, pjfnk_dat->precon, pjfnk_dat->F, &pjfnk_dat->pcg_dat, pjfnk_dat, pjfnk_dat->precon_data);
@@ -2986,7 +2986,7 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 		else if (pjfnk_dat->linear_solver == BiCGSTAB)
 		{
 			pjfnk_dat->bicgstab_dat.Output = pjfnk_dat->L_Output;
-			pjfnk_dat->bicgstab_dat.tol_abs = pjfnk_dat->lin_tol * pjfnk_dat->nl_res;
+			pjfnk_dat->bicgstab_dat.tol_abs = pjfnk_dat->lin_tol;
 			pjfnk_dat->bicgstab_dat.tol_rel = pjfnk_dat->lin_tol;
 			pjfnk_dat->bicgstab_dat.maxit = x.rows();
 			success = bicgstab(jacvec, pjfnk_dat->precon, pjfnk_dat->F, &pjfnk_dat->bicgstab_dat, pjfnk_dat, pjfnk_dat->precon_data);
@@ -3020,7 +3020,7 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 		else if (pjfnk_dat->linear_solver == CGS)
 		{
 			pjfnk_dat->cgs_dat.Output = pjfnk_dat->L_Output;
-			pjfnk_dat->cgs_dat.tol_abs = pjfnk_dat->lin_tol * pjfnk_dat->nl_res;
+			pjfnk_dat->cgs_dat.tol_abs = pjfnk_dat->lin_tol;
 			pjfnk_dat->cgs_dat.tol_rel = pjfnk_dat->lin_tol;
 			pjfnk_dat->cgs_dat.maxit = x.rows();
 			success = cgs(jacvec, pjfnk_dat->precon, pjfnk_dat->F, &pjfnk_dat->cgs_dat, pjfnk_dat, pjfnk_dat->precon_data);
@@ -3054,7 +3054,7 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 		else if (pjfnk_dat->linear_solver == FOM)
 		{
 			pjfnk_dat->gmreslp_dat.Output = pjfnk_dat->L_Output;
-			pjfnk_dat->gmreslp_dat.tol_abs = pjfnk_dat->lin_tol * pjfnk_dat->nl_res;
+			pjfnk_dat->gmreslp_dat.tol_abs = pjfnk_dat->lin_tol;
 			pjfnk_dat->gmreslp_dat.tol_rel = pjfnk_dat->lin_tol;
 			success = fom(jacvec, pjfnk_dat->precon, pjfnk_dat->F, &pjfnk_dat->gmreslp_dat, pjfnk_dat, pjfnk_dat->precon_data);
 			if (success != 0) {mError(simulation_fail); success = -1; break;}
@@ -3087,7 +3087,7 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 		else if (pjfnk_dat->linear_solver == GMRESRP)
 		{
 			pjfnk_dat->gmresrp_dat.Output = pjfnk_dat->L_Output;
-			pjfnk_dat->gmresrp_dat.tol_abs = pjfnk_dat->lin_tol * pjfnk_dat->nl_res;
+			pjfnk_dat->gmresrp_dat.tol_abs = pjfnk_dat->lin_tol;
 			pjfnk_dat->gmresrp_dat.tol_rel = pjfnk_dat->lin_tol;
 			if (x.rows() <= 1000)
 				pjfnk_dat->gmresrp_dat.restart = x.rows();
@@ -3124,7 +3124,7 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 		else if (pjfnk_dat->linear_solver == GCR)
 		{
 			pjfnk_dat->gcr_dat.Output = pjfnk_dat->L_Output;
-			pjfnk_dat->gcr_dat.tol_abs = pjfnk_dat->lin_tol * pjfnk_dat->nl_res;
+			pjfnk_dat->gcr_dat.tol_abs = pjfnk_dat->lin_tol;
 			pjfnk_dat->gcr_dat.tol_rel = pjfnk_dat->lin_tol;
 			if (x.rows() <= 500)
 				pjfnk_dat->gcr_dat.restart = x.rows();
@@ -3162,7 +3162,7 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 		{
 			pjfnk_dat->gmresr_dat.GCR_Output = pjfnk_dat->L_Output;
 			pjfnk_dat->gmresr_dat.GMRES_Output = false;
-			pjfnk_dat->gmresr_dat.gcr_abs_tol = pjfnk_dat->lin_tol * pjfnk_dat->nl_res;
+			pjfnk_dat->gmresr_dat.gcr_abs_tol = pjfnk_dat->lin_tol;
 			pjfnk_dat->gmresr_dat.gcr_rel_tol = pjfnk_dat->lin_tol;
 			pjfnk_dat->gmresr_dat.gmres_tol = pjfnk_dat->lin_tol;
 			if (x.rows() <= 500)

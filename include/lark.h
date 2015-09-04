@@ -35,7 +35,7 @@ typedef struct
 //Data structure for implementation of the Restarted GMRES algorithm with Left Preconditioning
 typedef struct
 {
-    int restart = 50;    		//Restart parameter - default = min(vector_size,50)
+    int restart = -1;    		//Restart parameter - default = min(vector_size,20)
     int maxit = 0;          	//Maximum allowable iterations - default = min(vector_size,1000)
     int iter = 0;           	//Number of iterations needed for convergence
   	int steps = 0;				//Total number of gmres iterations and krylov iterations
@@ -60,7 +60,7 @@ typedef struct
 //Data structure for the Restarted GMRES algorithm with Right Preconditioning
 typedef struct
 {
-	int restart = 50;			//Restart parameter - default = min(50,vector_size)
+	int restart = -1;			//Restart parameter - default = min(20,vector_size)
 	int maxit = 0;				//Maximum allowable outer iterations
 	int iter_outer = 0;			//Total number of outer iterations
 	int iter_inner = 0;			//Total number of inner iterations
@@ -192,7 +192,7 @@ typedef struct
 //Data structure for the implementation of the GCR algorithm for non-symmetric linear systems
 typedef struct
 {
-	int restart = 50;			//Restart parameter for outer iterations - default = 50
+	int restart = -1;			//Restart parameter for outer iterations - default = 20
 	int maxit = 0;				//Maximum allowable outer iterations
 	int iter_outer = 0;			//Number of outer iterations taken
 	int iter_inner = 0;			//Number of inner iterations taken
@@ -223,9 +223,9 @@ typedef struct
 //Data structure for the implementation of GCR with Nested GMRES preconditioning (Named GMRESR from literature)
 typedef struct
 {
-	int gcr_restart = 50;		//Number of GCR restarts (default = 50, max = N)
+	int gcr_restart = -1;		//Number of GCR restarts (default = 20, max = N)
 	int gcr_maxit = 0;			//Number of GCR iterations
-	int gmres_restart = 0;		//Number of GMRES restarts (max = 20)
+	int gmres_restart = -1;		//Number of GMRES restarts (max = 20)
 	int gmres_maxit = 0;		//Number of GMRES iterations (max = 5)
 	int N;						//Dimension of the linear system
 	int total_iter;				//Total GMRES and GCR iterations
@@ -243,7 +243,7 @@ typedef struct
 	
 	GCR_DATA gcr_dat;			//Data structure for the outer GCR steps
 	GMRESRP_DATA gmres_dat;		//Data structure for the inner GMRES steps
-	
+		
 	//User supplied matrix-vector product function
 	int (*matvec) (const Matrix<double> &x, Matrix<double> &Ax, const void *matvec_data);
 	//Optional user supplied terminal preconditioner
@@ -313,7 +313,7 @@ typedef struct
 	
 	double nl_tol_abs = 1e-6;   //Absolute Convergence tolerance for non-linear system - default = 1e-6
 	double nl_tol_rel = 1e-6;	//Relative Convergence tol for the non-linear system - default = 1e-6
-	double lin_tol = 1e-6;		//Tolerance of the linear solver - default = 1e-6 (Exact Newton)
+	double lin_tol = 0.1;		//Tolerance of the linear solver - default = 0.1 (Inexact Newton)
 	double nl_res;				//Absolute redidual norm for the non-linear system
 	double nl_relres;       	//Relative residual for the non-linear system
 	double nl_res_base;     	//Initial residual norm for the non-linear system

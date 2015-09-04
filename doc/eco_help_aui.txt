@@ -74,4 +74,4 @@ Usage Notes
 (4) SCOPSOWL_OPT (Optimization scheme for analysis of kinetic uptake data with the SCOPSOWL model)
 (5) SKUA (Surface Kinetics for Uptake by Adsorption)
 (6) SKUA_OPT (Optimization scheme for analysis of kinetic uptake data with the SKUA model)
-
+(7) SHARK (Speciation and Kinetic simulation for aqueous and/or mixed multi-species systems)

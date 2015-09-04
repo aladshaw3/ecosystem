@@ -76,7 +76,8 @@ void aui_help()
 	puts("(3) SCOPSOWL (Simultaneously Coupled Objects for Pore and Surface diffusion Operations With Linear systems)");
 	puts("(4) SCOPSOWL_OPT (Optimization scheme for analysis of kinetic uptake data with the SCOPSOWL model)");
 	puts("(5) SKUA (Surface Kinetics for Uptake by Adsorption)");
-	puts("(6) SKUA_OPT (Optimization scheme for analysis of kinetic uptake data with the SKUA model)\n");
+	puts("(6) SKUA_OPT (Optimization scheme for analysis of kinetic uptake data with the SKUA model)");
+	puts("(7) SHARK (Speciation and Kinetic simulation for aqueous and/or mixed multi-species systems)\n");
 	
 }
 
@@ -148,6 +149,9 @@ void bui_help()
 	
 	puts("(6) SKUA_OPT (Optimization scheme for analysis of kinetic uptake data with the SKUA model)\n");
 	puts("\tThis algorithm requires five input files: (i) a scenario file detailing some system parameters and the species of interest, (ii) an adsorbent properties file giving information on the type of adsorbent used, (iii) a component properties file that gives basic information on specifc properies of each gaseous species, (iv) an adsorbate properties file detailing the type of surface diffusion equation to use, the parameters of surface diffusion, and the isotherm parameters for the GSTA isotherm, and (v) a data file containing the actual adsorption time-series data for the model to be compared against. PLEASE NOTE, that the structure of these input files vary compared to running a standard SKUA simulation.\n");
+	
+	puts("(7) SHARK (Speciation and Kinetic simulation for aqueous and/or mixed multi-species systems)\n");
+	puts("\tThis algorithm requires one input files: (i) a yaml file detailing all system parameters, the species of interest, the reactions and mass balances, as well as some solver options. NOTE: These routines are still under development and will have new features and functions available to the user as they come available.\n");
 }
 
 //Convert input to all lower case
@@ -339,6 +343,11 @@ bool valid_exec_string(const std::string &input, UI_DATA *ui_dat)
 		ui_dat->option = skua_opt;
 		valid_input = true;
 	}
+	else if (allLower(input) == "shark")
+	{
+		ui_dat->option = shark;
+		valid_input = true;
+	}
 	else
 	{
 		valid_input = false;
@@ -389,6 +398,12 @@ int number_files(UI_DATA *ui_dat)
 		case skua_opt:
 		{
 			num = 5;
+			break;
+		}
+			
+		case shark:
+		{
+			num = 1;
 			break;
 		}
 			
@@ -474,7 +489,7 @@ void display_help(UI_DATA *ui_dat)
 		if (helpFile.good() == true)
 		{
 			helpFile.close();
-			system("more /usr/local/bin/ecodoc/eco_help_bui.txt");
+			system("less /usr/local/bin/ecodoc/eco_help_bui.txt");
 		}
 		else
 			bui_help();
@@ -485,7 +500,7 @@ void display_help(UI_DATA *ui_dat)
 		if (helpFile.good() == true)
 		{
 			helpFile.close();
-			system("more /usr/local/bin/ecodoc/eco_help_aui.txt");
+			system("less /usr/local/bin/ecodoc/eco_help_aui.txt");
 		}
 		else
 			aui_help();
@@ -761,6 +776,7 @@ bool valid_input_execute(UI_DATA *ui_dat)
 	std::cout << "Choose a simulation to run from the list below\n-----------------------------------------------\n\n";
 	std::cout << "(1)  GSTA_OPT      (2)  MAGPIE   (3)  SCOPSOWL\n";
 	std::cout << "(4)  SCOPSOWL_OPT  (5)  SKUA     (6)  SKUA_OPT\n";
+	std::cout << "(7)  SHARK\n";
 	std::cout << "\nChoice: ";
 	std::cin >> ui_dat->user_input[0];
 	std::cout << std::endl;
@@ -829,6 +845,13 @@ bool valid_input_execute(UI_DATA *ui_dat)
 			case 6:
 			{
 				ui_dat->option = skua_opt;
+				valid_input = true;
+				break;
+			}
+				
+			case 7:
+			{
+				ui_dat->option = shark;
 				valid_input = true;
 				break;
 			}
@@ -1124,6 +1147,22 @@ int run_exec(UI_DATA *ui_dat)
 			}
 			
 			success = SKUA_OPTIMIZE(ui_dat->input_files[0].c_str(), ui_dat->input_files[1].c_str(), ui_dat->input_files[2].c_str(), ui_dat->input_files[3].c_str(), ui_dat->input_files[4].c_str());
+			break;
+		}
+			
+		case shark:
+		{
+			if (ui_dat->argc == 1 || ui_dat->MissingArg == true)
+			{
+				ui_dat->input_files.resize(1);
+				std::cout << "SHARK needs 1 yaml structured input file containing all information about the simulation.\n";
+				std::cout << "Please provide the file and full path...\n\n";
+				std::cout << "SHARK input: ";
+				std::cin >> ui_dat->input_files[0];
+				std::cout << std::endl;
+			}
+			
+			success = SHARK_SCENARIO(ui_dat->input_files[0].c_str());
 			break;
 		}
 			
