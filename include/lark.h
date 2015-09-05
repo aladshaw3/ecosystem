@@ -189,6 +189,14 @@ typedef struct
 	
 }CGS_DATA;
 
+//Data structure for implementation of linear operator transposition
+typedef struct
+{
+	Matrix<double> Ii;					//The ith column vector of the identity operator
+	Matrix<double> Ai;					//The ith column vector of the user's linear operator
+
+}OPTRANS_DATA;
+
 //Data structure for the implementation of the GCR algorithm for non-symmetric linear systems
 typedef struct
 {
@@ -217,6 +225,8 @@ typedef struct
 	Matrix<double> u_temp;				//Temporary u vector to be updated
 	std::vector<Matrix<double> > u;		//Vector span for updating x
 	std::vector<Matrix<double> > c;		//Vector span for updating r
+
+	OPTRANS_DATA transpose_dat;			//Data structure to only be initialized and used if necessary
 	
 }GCR_DATA;
 
@@ -456,6 +466,10 @@ int cgs( int (*matvec) (const Matrix<double>& p, Matrix<double> &Ap, const void 
 		 int (*precon) (const Matrix<double>& r, Matrix<double> &z, const void *data),
 		 Matrix<double> &b, CGS_DATA *cgs_dat, const void *matvec_data,
 		 const void *precon_data );
+
+int operatorTranspose(int(*matvec) (const Matrix<double>& v, Matrix<double> &Av, const void *data),
+					  const Matrix<double> &r, Matrix<double> &u, OPTRANS_DATA *transpose_dat, 
+					  const void *matvec_data);
 
 int gcr( int (*matvec) (const Matrix<double>& x, Matrix<double> &Ax, const void *data),
 		 int (*precon) (const Matrix<double>& r, Matrix<double> &Mr, const void *data),

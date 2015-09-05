@@ -2098,7 +2098,7 @@ int gcr( int (*matvec) (const Matrix<double>& x, Matrix<double> &Ax, const void 
 			{
 				gcr_dat->breakdown = true;
 				if (gcr_dat->Output == true)
-					std::cout << "\nGCR may have broken down at the " << m+step+1 << " iterate...\n" << std::endl;
+					std::cout << "\nGCR may have broken down at the " << m+step+1 << " iterate... LSQR SWITCH REQUIRED!!!\n" << std::endl;
 				break;
 			}
 			
