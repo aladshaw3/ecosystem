@@ -468,7 +468,7 @@ int cgs( int (*matvec) (const Matrix<double>& p, Matrix<double> &Ap, const void 
 		 const void *precon_data );
 
 int operatorTranspose(int(*matvec) (const Matrix<double>& v, Matrix<double> &Av, const void *data),
-					  const Matrix<double> &r, Matrix<double> &u, OPTRANS_DATA *transpose_dat, 
+					  Matrix<double> &r, Matrix<double> &u, OPTRANS_DATA *transpose_dat, 
 					  const void *matvec_data);
 
 int gcr( int (*matvec) (const Matrix<double>& x, Matrix<double> &Ax, const void *data),

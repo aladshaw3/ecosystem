@@ -1970,6 +1970,60 @@ int cgs( int (*matvec) (const Matrix<double>& p, Matrix<double> &Ap, const void 
 	return success;
 }
 
+//Function for forming the tranpose multiplication operation for a given linear operator
+int operatorTranspose(int(*matvec) (const Matrix<double>& v, Matrix<double> &Av, const void *data),
+	Matrix<double> &r, Matrix<double> &u, OPTRANS_DATA *transpose_dat,
+	const void *matvec_data)
+{
+	int success = 0;
+
+	//Check arguments
+	if ((*matvec) == NULL)
+	{
+		mError(nullptr_error);
+		return -1;
+	}
+	if (r.rows() < 2)
+	{
+		mError(matrix_too_small);
+		return -1;
+	}
+	if (u.rows() != r.rows())
+	{
+		u.set_size(r.rows(), 1);
+	}
+	if (transpose_dat->Ai.rows() != u.rows())
+	{
+		transpose_dat->Ai.set_size(u.rows(), 1);
+	}
+	if (transpose_dat->Ii.rows() != u.rows())
+	{
+		transpose_dat->Ii.set_size(u.rows(), 1);
+	}
+	transpose_dat->Ii.zeros();
+
+	//Form the matrix elements of u as r^T*A*Ii
+	transpose_dat->Ii.edit(0, 0, 1.0);
+	for (int i = 0; i < u.rows(); i++)
+	{
+		//Form the matrix-vector product of A with the identity vector
+		success = (*matvec) (transpose_dat->Ii, transpose_dat->Ai, matvec_data);
+		if (success != 0)
+		{
+			mError(simulation_fail);
+			return success;
+		}
+		u.edit(i, 0, r.inner_product(transpose_dat->Ai));
+
+		//Reset the identity vector for next loop
+		transpose_dat->Ii.edit(i, 0, 0.0);
+		if (i < (u.rows()-1)) transpose_dat->Ii.edit(i + 1, 0, 1.0);
+
+	}
+
+	return success;
+}
+
 //Function for solving a non-symmetric linear system using GCR
 int gcr( int (*matvec) (const Matrix<double>& x, Matrix<double> &Ax, const void *data),
 		int (*precon) (const Matrix<double>& r, Matrix<double> &Mr, const void *data),
@@ -2096,10 +2150,12 @@ int gcr( int (*matvec) (const Matrix<double>& x, Matrix<double> &Ax, const void 
 			//Check for a breakdown of the algorithm
 			if (gcr_dat->u_temp.norm() == 0.0)
 			{
-				gcr_dat->breakdown = true;
-				if (gcr_dat->Output == true)
-					std::cout << "\nGCR may have broken down at the " << m+step+1 << " iterate... LSQR SWITCH REQUIRED!!!\n" << std::endl;
-				break;
+				success = operatorTranspose(matvec, gcr_dat->r, gcr_dat->u_temp, &gcr_dat->transpose_dat, matvec_data);
+				if (success != 0)
+				{
+					mError(simulation_fail);
+					return success;
+				}
 			}
 			
 			//Form initial c vector
