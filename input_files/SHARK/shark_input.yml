@@ -32,11 +32,13 @@ SolverOptions:
 ---
 line_search: true      #Default = true, and is recommended to be true
 search_type: standard
-linear_solve: fom
-nl_maxit: 30
+linear_solve: fom      #Note: FOM will be fastest for small problems
+restart: 25            #Note: restart only used if using GMRES or GCR type solvers
+nl_maxit: 50
 nl_abstol: 1e-5
 nl_reltol: 1e-8
-lin_tol: 1e-8
+lin_reltol: 1e-6
+lin_abstol: 1e-6
 nl_print: true
 l_print: false
 

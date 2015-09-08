@@ -1357,7 +1357,8 @@ void print2file_shark_header(SHARK_DATA *shark_dat)
 	fprintf(shark_dat->OutputFile, "Maximum Non-Linear Iterations = %i\n", shark_dat->Newton_data.nl_maxit);
 	fprintf(shark_dat->OutputFile, "Absolute Non-Linear Tolerance = %.6g\n", shark_dat->Newton_data.nl_tol_abs);
 	fprintf(shark_dat->OutputFile, "Relative Non-Linear Tolerance = %.6g\n", shark_dat->Newton_data.nl_tol_rel);
-	fprintf(shark_dat->OutputFile, "Relative Linear Tolerance = %.6g\n", shark_dat->Newton_data.lin_tol);
+	fprintf(shark_dat->OutputFile, "Absolute Linear Tolerance = %.6g\n", shark_dat->Newton_data.lin_tol_abs);
+	fprintf(shark_dat->OutputFile, "Relative Linear Tolerance = %.6g\n", shark_dat->Newton_data.lin_tol_rel);
 	fprintf(shark_dat->OutputFile, "\n-----------------END SOLVER OPTIONS-------------------\n\n");
 	
 	fprintf(shark_dat->OutputFile, "-----------------SHARK SIMULATION RESULTS-------------------\n\n");
@@ -1821,6 +1822,47 @@ int read_options(SHARK_DATA *shark_dat)
 		}
 	}
 	
+	if (shark_dat->Newton_data.linear_solver == GMRESRP || shark_dat->Newton_data.linear_solver == GMRESLP || shark_dat->Newton_data.linear_solver == GCR || shark_dat->Newton_data.linear_solver == GMRESR)
+	{
+		int restart;
+		try
+		{
+			restart = shark_dat->yaml_object.getYamlWrapper()("SolverOptions")["restart"].getDouble();
+		}
+		catch (std::out_of_range)
+		{
+			if (shark_dat->numvar <= 100)
+				restart = shark_dat->numvar;
+			else
+				restart = 100;
+			
+			if (restart > shark_dat->numvar)
+				restart = shark_dat->numvar;
+		}
+		
+		switch (shark_dat->Newton_data.linear_solver)
+		{
+			case GMRESRP:
+				shark_dat->Newton_data.gmresrp_dat.restart = restart;
+				break;
+			
+			case GMRESLP:
+				shark_dat->Newton_data.gmreslp_dat.restart = restart;
+				break;
+				
+			case GMRESR:
+				shark_dat->Newton_data.gmresr_dat.gcr_restart = restart;
+				break;
+				
+			case GCR:
+				shark_dat->Newton_data.gcr_dat.restart = restart;
+				break;
+				
+			default:
+				break;
+		}
+	}
+	
 	try
 	{
 		shark_dat->Newton_data.nl_maxit = shark_dat->yaml_object.getYamlWrapper()("SolverOptions")["nl_maxit"].getInt();
@@ -1853,11 +1895,20 @@ int read_options(SHARK_DATA *shark_dat)
 	
 	try
 	{
-		shark_dat->Newton_data.lin_tol = shark_dat->yaml_object.getYamlWrapper()("SolverOptions")["lin_tol"].getDouble();
+		shark_dat->Newton_data.lin_tol_rel = shark_dat->yaml_object.getYamlWrapper()("SolverOptions")["lin_reltol"].getDouble();
 	}
 	catch (std::out_of_range)
 	{
-		shark_dat->Newton_data.lin_tol = 1e-6;
+		shark_dat->Newton_data.lin_tol_rel = 1e-6;
+	}
+	
+	try
+	{
+		shark_dat->Newton_data.lin_tol_abs = shark_dat->yaml_object.getYamlWrapper()("SolverOptions")["lin_abstol"].getDouble();
+	}
+	catch (std::out_of_range)
+	{
+		shark_dat->Newton_data.lin_tol_abs = 1e-6;
 	}
 	
 	return success;
@@ -2490,7 +2541,8 @@ int setup_SHARK_DATA( FILE *file, int (*residual) (const Matrix<double> &x, Matr
 		dat->Newton_data.nl_maxit = dat->numvar;
 	dat->Newton_data.nl_tol_abs = 1e-5;
 	dat->Newton_data.nl_tol_rel = 1e-8;
-	dat->Newton_data.lin_tol = 1e-6;
+	dat->Newton_data.lin_tol_abs = 1e-6;
+	dat->Newton_data.lin_tol_rel = 1e-6;
 	dat->Newton_data.NL_Output = dat->Console_Output;
 	if (dat->steadystate == false)
 		dat->Newton_data.NL_Output = false;

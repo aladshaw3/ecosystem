@@ -2918,8 +2918,10 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 		pjfnk_dat->nl_tol_abs = 1e-6;
 	if (pjfnk_dat->nl_tol_rel >= 1.0 || pjfnk_dat->nl_tol_rel < DBL_EPSILON)
 		pjfnk_dat->nl_tol_rel = 1e-6;
-	if (pjfnk_dat->lin_tol >= 1.0 || pjfnk_dat->lin_tol < DBL_EPSILON)
-		pjfnk_dat->lin_tol = 0.1;
+	if (pjfnk_dat->lin_tol_rel >= 1.0 || pjfnk_dat->lin_tol_rel < DBL_EPSILON)
+		pjfnk_dat->lin_tol_rel = 1e-6;
+	if (pjfnk_dat->lin_tol_abs >= 1.0 || pjfnk_dat->lin_tol_abs < DBL_EPSILON)
+		pjfnk_dat->lin_tol_abs = 1e-6;
 	if (pjfnk_dat->eps >= 1.0 || pjfnk_dat->eps < sqrt(DBL_EPSILON))
 		pjfnk_dat->eps = sqrt(DBL_EPSILON);
 	if (pjfnk_dat->Bounce == true)
@@ -2973,8 +2975,8 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 		if (pjfnk_dat->linear_solver == GMRESLP)
 		{
 			pjfnk_dat->gmreslp_dat.Output = pjfnk_dat->L_Output;
-			pjfnk_dat->gmreslp_dat.tol_abs = pjfnk_dat->lin_tol;
-			pjfnk_dat->gmreslp_dat.tol_rel = pjfnk_dat->lin_tol;
+			pjfnk_dat->gmreslp_dat.tol_abs = pjfnk_dat->lin_tol_abs;
+			pjfnk_dat->gmreslp_dat.tol_rel = pjfnk_dat->lin_tol_rel;
 			pjfnk_dat->gmreslp_dat.maxit = x.rows();
 			success = gmresLeftPreconditioned(jacvec, pjfnk_dat->precon, pjfnk_dat->F, &pjfnk_dat->gmreslp_dat, pjfnk_dat, pjfnk_dat->precon_data);
 			if (success != 0) {mError(simulation_fail); success = -1; break;}
@@ -3008,9 +3010,9 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 		else if (pjfnk_dat->linear_solver == PCG)
 		{
 			pjfnk_dat->pcg_dat.Output = pjfnk_dat->L_Output;
-			pjfnk_dat->pcg_dat.tol_abs = pjfnk_dat->lin_tol;
-			pjfnk_dat->pcg_dat.tol_rel = pjfnk_dat->lin_tol;
-			pjfnk_dat->pcg_dat.maxit = x.rows();
+			pjfnk_dat->pcg_dat.tol_abs = pjfnk_dat->lin_tol_abs;
+			pjfnk_dat->pcg_dat.tol_rel = pjfnk_dat->lin_tol_rel;
+			pjfnk_dat->pcg_dat.maxit = 2*x.rows();
 			success = pcg(jacvec, pjfnk_dat->precon, pjfnk_dat->F, &pjfnk_dat->pcg_dat, pjfnk_dat, pjfnk_dat->precon_data);
 			if (success != 0) {mError(simulation_fail); success = -1; break;}
 			pjfnk_dat->l_iter = pjfnk_dat->l_iter + pjfnk_dat->pcg_dat.iter;
@@ -3042,9 +3044,9 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 		else if (pjfnk_dat->linear_solver == BiCGSTAB)
 		{
 			pjfnk_dat->bicgstab_dat.Output = pjfnk_dat->L_Output;
-			pjfnk_dat->bicgstab_dat.tol_abs = pjfnk_dat->lin_tol;
-			pjfnk_dat->bicgstab_dat.tol_rel = pjfnk_dat->lin_tol;
-			pjfnk_dat->bicgstab_dat.maxit = x.rows();
+			pjfnk_dat->bicgstab_dat.tol_abs = pjfnk_dat->lin_tol_abs;
+			pjfnk_dat->bicgstab_dat.tol_rel = pjfnk_dat->lin_tol_rel;
+			pjfnk_dat->bicgstab_dat.maxit = 2*x.rows();
 			success = bicgstab(jacvec, pjfnk_dat->precon, pjfnk_dat->F, &pjfnk_dat->bicgstab_dat, pjfnk_dat, pjfnk_dat->precon_data);
 			if (success != 0) {mError(simulation_fail); success = -1; break;}
 			pjfnk_dat->l_iter = pjfnk_dat->l_iter + pjfnk_dat->bicgstab_dat.iter;
@@ -3076,9 +3078,9 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 		else if (pjfnk_dat->linear_solver == CGS)
 		{
 			pjfnk_dat->cgs_dat.Output = pjfnk_dat->L_Output;
-			pjfnk_dat->cgs_dat.tol_abs = pjfnk_dat->lin_tol;
-			pjfnk_dat->cgs_dat.tol_rel = pjfnk_dat->lin_tol;
-			pjfnk_dat->cgs_dat.maxit = x.rows();
+			pjfnk_dat->cgs_dat.tol_abs = pjfnk_dat->lin_tol_abs;
+			pjfnk_dat->cgs_dat.tol_rel = pjfnk_dat->lin_tol_rel;
+			pjfnk_dat->cgs_dat.maxit = 2*x.rows();
 			success = cgs(jacvec, pjfnk_dat->precon, pjfnk_dat->F, &pjfnk_dat->cgs_dat, pjfnk_dat, pjfnk_dat->precon_data);
 			if (success != 0) {mError(simulation_fail); success = -1; break;}
 			pjfnk_dat->l_iter = pjfnk_dat->l_iter + pjfnk_dat->cgs_dat.iter;
@@ -3110,8 +3112,8 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 		else if (pjfnk_dat->linear_solver == FOM)
 		{
 			pjfnk_dat->gmreslp_dat.Output = pjfnk_dat->L_Output;
-			pjfnk_dat->gmreslp_dat.tol_abs = pjfnk_dat->lin_tol;
-			pjfnk_dat->gmreslp_dat.tol_rel = pjfnk_dat->lin_tol;
+			pjfnk_dat->gmreslp_dat.tol_abs = pjfnk_dat->lin_tol_abs;
+			pjfnk_dat->gmreslp_dat.tol_rel = pjfnk_dat->lin_tol_rel;
 			success = fom(jacvec, pjfnk_dat->precon, pjfnk_dat->F, &pjfnk_dat->gmreslp_dat, pjfnk_dat, pjfnk_dat->precon_data);
 			if (success != 0) {mError(simulation_fail); success = -1; break;}
 			pjfnk_dat->l_iter = pjfnk_dat->l_iter + pjfnk_dat->gmreslp_dat.steps;
@@ -3143,12 +3145,9 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 		else if (pjfnk_dat->linear_solver == GMRESRP)
 		{
 			pjfnk_dat->gmresrp_dat.Output = pjfnk_dat->L_Output;
-			pjfnk_dat->gmresrp_dat.tol_abs = pjfnk_dat->lin_tol;
-			pjfnk_dat->gmresrp_dat.tol_rel = pjfnk_dat->lin_tol;
-			if (x.rows() <= 1000)
-				pjfnk_dat->gmresrp_dat.restart = x.rows();
-			else
-				pjfnk_dat->gmresrp_dat.restart = 1000;
+			pjfnk_dat->gmresrp_dat.tol_abs = pjfnk_dat->lin_tol_abs;
+			pjfnk_dat->gmresrp_dat.tol_rel = pjfnk_dat->lin_tol_rel;
+			pjfnk_dat->gmresrp_dat.maxit = x.rows();
 			success = gmresRightPreconditioned(jacvec, pjfnk_dat->precon, pjfnk_dat->F, &pjfnk_dat->gmresrp_dat, pjfnk_dat, pjfnk_dat->precon_data);
 			if (success != 0) {mError(simulation_fail); success = -1; break;}
 			pjfnk_dat->l_iter = pjfnk_dat->l_iter + pjfnk_dat->gmresrp_dat.iter_total;
@@ -3180,12 +3179,9 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 		else if (pjfnk_dat->linear_solver == GCR)
 		{
 			pjfnk_dat->gcr_dat.Output = pjfnk_dat->L_Output;
-			pjfnk_dat->gcr_dat.tol_abs = pjfnk_dat->lin_tol;
-			pjfnk_dat->gcr_dat.tol_rel = pjfnk_dat->lin_tol;
-			if (x.rows() <= 500)
-				pjfnk_dat->gcr_dat.restart = x.rows();
-			else
-				pjfnk_dat->gcr_dat.restart = 500;
+			pjfnk_dat->gcr_dat.tol_abs = pjfnk_dat->lin_tol_abs;
+			pjfnk_dat->gcr_dat.tol_rel = pjfnk_dat->lin_tol_rel;
+			pjfnk_dat->gcr_dat.maxit = x.rows();
 			success = gcr(jacvec, pjfnk_dat->precon, pjfnk_dat->F, &pjfnk_dat->gcr_dat, pjfnk_dat, pjfnk_dat->precon_data);
 			if (success != 0) {mError(simulation_fail); success = -1; break;}
 			pjfnk_dat->l_iter = pjfnk_dat->l_iter + pjfnk_dat->gcr_dat.total_iter;
@@ -3218,13 +3214,10 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 		{
 			pjfnk_dat->gmresr_dat.GCR_Output = pjfnk_dat->L_Output;
 			pjfnk_dat->gmresr_dat.GMRES_Output = false;
-			pjfnk_dat->gmresr_dat.gcr_abs_tol = pjfnk_dat->lin_tol;
-			pjfnk_dat->gmresr_dat.gcr_rel_tol = pjfnk_dat->lin_tol;
-			pjfnk_dat->gmresr_dat.gmres_tol = pjfnk_dat->lin_tol;
-			if (x.rows() <= 500)
-				pjfnk_dat->gmresr_dat.gcr_restart = x.rows();
-			else
-				pjfnk_dat->gmresr_dat.gcr_restart = 500;
+			pjfnk_dat->gmresr_dat.gcr_abs_tol = pjfnk_dat->lin_tol_abs;
+			pjfnk_dat->gmresr_dat.gcr_rel_tol = pjfnk_dat->lin_tol_rel;
+			pjfnk_dat->gmresr_dat.gmres_tol = pjfnk_dat->lin_tol_rel;
+			pjfnk_dat->gmresr_dat.gcr_maxit = x.rows();
 			success = gmresr(jacvec, pjfnk_dat->precon, pjfnk_dat->F, &pjfnk_dat->gmresr_dat, pjfnk_dat, pjfnk_dat->precon_data);
 			if (success != 0) {mError(simulation_fail); success = -1; break;}
 			pjfnk_dat->l_iter = pjfnk_dat->l_iter + pjfnk_dat->gmresr_dat.total_iter;
@@ -3913,7 +3906,7 @@ int LARK_TESTS()
 	
 	std::cout << "------------------Begin Example 14------------------" << std::endl;
 	
-	ex09_dat.k = 4.0;
+	ex09_dat.k = 2.0;
 	ex09_dat.N = 102;
 	ex09_dat.h = 1.0/ex09_dat.N;
 	ex09_dat.N = ex09_dat.N-2;
@@ -4057,7 +4050,7 @@ int LARK_TESTS()
 	
 	GMRESR_DATA gmresr15;
 	//gmresr15.GMRES_Output = true;
-	//gmresr15.gmres_restart = 10;
+	gmresr15.gmres_maxit = 1;
 	
 	time = clock();
 	success = gmresr(matvec_ex15,NULL,ex15_dat.b,&gmresr15,(void *)&ex15_dat,(void *)&ex15_dat);
