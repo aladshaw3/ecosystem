@@ -16,7 +16,7 @@ typedef struct
 
 	double Rs = 0.0026925;						//separator radius, m
 	double L = 0.0611;							//0.05separator length, m
-	double porosity = 0.9036;					//0.965separator porosity
+	double porosity = 0.8979;					//0.965separator porosity
 	double V_separator;							//volume of separator, m^3
 
 	//System Parameters
@@ -32,12 +32,12 @@ typedef struct
 
 	//Particle parameters
 
-	double b = 1.85e-6;								//Particle radius,m
+	double b = 0.25e-6;								//Particle radius,m
 	double chi_p = 3.87e-6;							//Volume magnetic susceptibility, dimensionless
 	double rho_p = 8700.0;							//Particle density, Kg/m3
 
 	//Model parameters
-	double Q_in = 9.5e-7;							//Volumetric fluid flow, m^3/sec
+	double Q_in;									//Volumetric fluid flow, m^3/sec
 	double V0;										//Superficial velocity,m/s
 	double Y_initial = 20.0;						//initial position in Y-axis, Y=y/a, dimensionless
 	double dt;										//Time step size
@@ -96,6 +96,8 @@ int CARTESIAN(const Matrix<double>& POL, Matrix<double>& H, const Matrix<double>
 int DISPLACEMENT (Matrix<double>& dX, Matrix<double>& dY, const Matrix<double>& H, int i);
 
 int LOCATION (const Matrix<double>& dY, const Matrix<double>& dX, Matrix<double>& X, Matrix<double>& Y, int i);
+
+double Removal_Efficiency (double Sum_Cap, const void *data);
 
 int Trajectory_SetupConstants(TRAJECTORY_DATA *dat);
 

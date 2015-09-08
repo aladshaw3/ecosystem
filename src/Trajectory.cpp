@@ -93,6 +93,7 @@ int DISPLACEMENT (Matrix<double>& dX, Matrix<double>& dY, const Matrix<double>& 
 	return 0;
 }
 
+
 int LOCATION (const Matrix<double>& dY, const Matrix<double>& dX, Matrix<double>& X, Matrix<double>& Y, int i)
 {
 	X(i,0) = dY(i,0)*cos(dX(i,0));
@@ -100,6 +101,13 @@ int LOCATION (const Matrix<double>& dY, const Matrix<double>& dX, Matrix<double>
 
 	return 0;
 }
+
+double Removal_Efficiency (double Sum_Cap, const void *data)
+{
+	TRAJECTORY_DATA *dat = (TRAJECTORY_DATA *) data;
+	return 1.0-exp((-0.2*(1-dat->porosity)*Sum_Cap*dat->L)/(234520*M_PI*pow(dat->Rs,2.0)));
+}
+
 
 //Set values of constants and other variable declared in the data structure
 int Trajectory_SetupConstants(TRAJECTORY_DATA *dat)
@@ -116,7 +124,7 @@ int Trajectory_SetupConstants(TRAJECTORY_DATA *dat)
 	
 	dat->Rs = 0.0026925;										//Separator radius, m
 	dat->L = 0.0611;											//Separator length, m
-	dat->porosity = 0.9036;										//Separator porosity
+	dat->porosity = 0.8979;										//Separator porosity
 	dat->V_separator=M_PI*pow(dat->Rs,2.0)*dat->L;				//Volume of separator, m^3
 	
 	//System Parameters
@@ -132,8 +140,8 @@ int Trajectory_SetupConstants(TRAJECTORY_DATA *dat)
 	
 	//Particle parameters
 	
-	dat->b = 1.85e-6;											//Particle radius,m
-	dat->chi_p = 3.87e-7;										//Volume magnetic susceptibility, dimensionless
+	dat->b = 0.25e-6;											//Particle radius,m
+	dat->chi_p = 3.87e-6;										//Volume magnetic susceptibility, dimensionless
 	dat->rho_p = 8700.0;										//Particle density, Kg/m3
 	
 	//Some more missing info
@@ -153,7 +161,7 @@ int Trajectory_SetupConstants(TRAJECTORY_DATA *dat)
 	dat-> q_bar = dat->beta*dat->Temp*dat->k/dat->mp;
 	dat-> sigma_v = (dat->q_bar/dat->beta)*(1-exp(-2.0*dat->beta*dat->dt)); 		//Take square root to get actual value for sigma v and z
 	dat-> sigma_vz = (dat->q_bar/pow(dat->beta,2.0))*pow(1-exp(-dat->beta*dat->dt),2.0);
-	dat-> sigma_z = (dat->q_bar/pow(dat->beta,3.0))*(2.0*dat->beta*dat->dt-3.0-4.0*exp(-dat->beta*dat->dt)-exp(-2.0*dat->beta*dat->dt));
+	dat-> sigma_z = (dat->q_bar/pow(dat->beta,3.0))*(2.0*dat->beta*dat->dt-3.0+4.0*exp(-dat->beta*dat->dt)-exp(-2.0*dat->beta*dat->dt));
 	dat-> sigma_n = (dat->sigma_vz/pow(dat->sigma_v,0.5));
 	dat-> sigma_m = pow((dat->sigma_z-(pow(dat->sigma_vz,2.0)/dat->sigma_v)),0.5);
 
@@ -187,16 +195,16 @@ int Run_Trajectory()
 	dat.dY.set_size(300,1);
 	dat.X.set_size(300, 1);
 	dat.Y.set_size(300, 1);
-	dat.Cap.set_size(1000,1);
+	dat.Cap.set_size(500,41);
 	
-
 	bool Hit = false;
-	
-	dat.Y(0,0) = 20.0;
-	dat.dX(0,0) = 89.99/180.0*M_PI;		//FIXED negative starting values for x
-	dat.dY(0,0) = dat.Y(0,0)/sin(dat.dX(0,0));
-	
-	for (int j = 0; j<1000; j++)
+	for (int q = 0; q<41; q++)
+	{
+			dat.Y(0,0) = 20.0;
+			dat.dX(0,0) = (89.9+q*0.005)/180.0*M_PI;				//FIXED negative starting values for x
+			dat.dY(0,0) = dat.Y(0,0)/sin(dat.dX(0,0));
+
+	for (int j = 0; j<500; j++)
 	{
 		for (int i = 1; i<299; i++)
 		{
@@ -212,7 +220,7 @@ int Run_Trajectory()
 			int Next;
 			Next = DISPLACEMENT(dat.dX,dat.dY,dat.H,i);
 		
-			if (dat.dY(i,0) <= (1.0+(1.85/33.0)) && dat.H(0,0) < 0.0)
+			if (dat.dY(i,0) <= (1.0+(0.25/33.0)) && dat.H(0,0) < 0.0)
 			{
 				Hit = true;
 				break;
@@ -224,19 +232,30 @@ int Run_Trajectory()
 		
 		}
 
-		for (int i=0; i<300; i++)
+		/*for (int i=0; i<300; i++)
 		{
 		
 			int Final;
 			Final = LOCATION (dat.dY,dat.dX,dat.X,dat.Y,i);
 		
-		}
+		}*/
 
-		dat.Cap(j, 0) = Hit;
+		if (Hit == true)
+		{
+		dat.Cap(j,q) = 1;
+		}
+		else if(Hit == false)
+		{
+		dat.Cap(j,q) = 0;
+		}
+	}
 	}
 	
-	dat.Cap.Display("Capture");
-
+	dat.Cap.Display("Capture Profile");
+	double Sum_Cap = dat.Cap.sum();
+	double Output = Removal_Efficiency (Sum_Cap, (void *)&dat);
+	std::cout<<"Capture:   "<<dat.Cap.sum()<<"   ";
+	std::cout<<"Removal Efficiency:   "<<Output*100.0<<"%   ";
 	return success;
 }
 
