@@ -2002,7 +2002,7 @@ int operatorTranspose(int(*matvec) (const Matrix<double>& v, Matrix<double> &Av,
 	}
 	transpose_dat->Ii.zeros();
 
-	//Form the matrix elements of u as r^T*A*Ii
+	//Form the matrix elements of u as r^T*A*Ii == A^T*r @ i
 	transpose_dat->Ii.edit(0, 0, 1.0);
 	for (int i = 0; i < u.rows(); i++)
 	{
@@ -2017,7 +2017,7 @@ int operatorTranspose(int(*matvec) (const Matrix<double>& v, Matrix<double> &Av,
 
 		//Reset the identity vector for next loop
 		transpose_dat->Ii.edit(i, 0, 0.0);
-		if (i < (u.rows()-1)) transpose_dat->Ii.edit(i + 1, 0, 1.0);
+		if (i < (u.rows()-1)) transpose_dat->Ii.edit(i+1, 0, 1.0);
 
 	}
 

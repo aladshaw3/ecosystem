@@ -267,7 +267,7 @@ private:
 	
 };
 
-typedef enum {IDEAL, DAVIES, DEBYE_HUCKEL, DAVIES_LADSHAW} valid_act;
+typedef enum {IDEAL, DAVIES, DEBYE_HUCKEL, DAVIES_LADSHAW, SIT, PITZER} valid_act;
 
 typedef struct SHARK_DATA
 {

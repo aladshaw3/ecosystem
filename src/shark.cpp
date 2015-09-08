@@ -1544,6 +1544,10 @@ int act_choice(const std::string &input)
 		act = DEBYE_HUCKEL;
 	else if (copy == "davies-ladshaw")
 		act = DAVIES_LADSHAW;
+	else if (copy == "pitzer")
+		act = PITZER;
+	else if (copy == "sit")
+		act = SIT;
 	else
 		act = IDEAL;
 	
@@ -1723,6 +1727,10 @@ int read_scenario(SHARK_DATA *shark_dat)
 		mError(missing_information);
 		return -1;
 	}
+	
+	if (shark_dat->num_usr == 0)
+		shark_dat->steadystate = true;
+	
 	if (shark_dat->steadystate == true)
 	{
 		try
@@ -1794,7 +1802,10 @@ int read_options(SHARK_DATA *shark_dat)
 	}
 	catch (std::out_of_range)
 	{
-		shark_dat->Newton_data.NL_Output = false;
+		if (shark_dat->steadystate == true)
+			shark_dat->Newton_data.NL_Output = true;
+		else
+			shark_dat->Newton_data.NL_Output = false;
 	}
 	
 	try
@@ -1814,11 +1825,11 @@ int read_options(SHARK_DATA *shark_dat)
 	{
 		if ( shark_dat->lin_precon == NULL && shark_dat->numvar >= 100)
 		{
-			shark_dat->Newton_data.linear_solver = GMRESR;
+			shark_dat->Newton_data.linear_solver = GMRESRP;
 		}
 		else
 		{
-			shark_dat->Newton_data.linear_solver = GMRESRP;
+			shark_dat->Newton_data.linear_solver = FOM;
 		}
 	}
 	
@@ -2524,6 +2535,17 @@ int setup_SHARK_DATA( FILE *file, int (*residual) (const Matrix<double> &x, Matr
 		dat->EvalActivity = DaviesLadshaw_equation;
 		dat->activity_data = dat;
 	}
+	//NOTE: The below lines of code will change after we define the PITZER and SIT models and what data structures they need
+	else if (dat->act_fun == PITZER)
+	{
+		dat->EvalActivity = ideal_solution;
+		dat->activity_data = dat;
+	}
+	else if (dat->act_fun == SIT)
+	{
+		dat->EvalActivity = ideal_solution;
+		dat->activity_data = dat;
+	}
 	else
 	{
 		mError(invalid_boolean);
@@ -3001,7 +3023,8 @@ int shark_solver(SHARK_DATA *shark_dat)
 		{
 			if (shark_dat->dt > shark_dat->dt_min)
 			{
-				std::cout << "Time step failed... Reducing dt...\n\n";
+				if (shark_dat->steadystate == false)
+					std::cout << "Time step failed... Reducing dt...\n\n";
 			}
 			else
 			{
@@ -3076,6 +3099,11 @@ int shark_residual(const Matrix<double> &x, Matrix<double> &F, const void *data)
 	
 	//Form all residuals
 	int index = 0;
+	for (int i=0; i<dat->MassBalanceList.size(); i++)
+	{
+		F(index,0) = dat->MassBalanceList[i].Eval_Residual(x);
+		index++;
+	}
 	for (int i=0; i<dat->ReactionList.size(); i++)
 	{
 		F(index,0) = dat->ReactionList[i].Eval_Residual(x, dat->activity_new);
@@ -3094,11 +3122,6 @@ int shark_residual(const Matrix<double> &x, Matrix<double> &F, const void *data)
 		{
 			F(index,0) = dat->UnsteadyList[i].Eval_Residual(x, dat->activity_new);
 		}
-		index++;
-	}
-	for (int i=0; i<dat->MassBalanceList.size(); i++)
-	{
-		F(index,0) = dat->MassBalanceList[i].Eval_Residual(x);
 		index++;
 	}
 	for (int i=0; i<dat->OtherList.size(); i++)
@@ -3227,6 +3250,7 @@ int SHARK_SCENARIO(const char *yaml_input)
 	int success = 0;
 	
 	//Declarations
+	//NOTE: we may have to declare objects for the pitzer and sit models here
 	double time;
 	SHARK_DATA shark_dat;
 	FILE *Output;
@@ -3248,7 +3272,10 @@ int SHARK_SCENARIO(const char *yaml_input)
 	success = read_scenario(&shark_dat);
 	if (success != 0) {mError(read_error); return -1;}
 	
+	//NOTE: we may have to build a custom read option for pitzer and sit models to establish their structures here
+	
 	//Call the setup function
+	//NOTE: The NULL option between &shark_dat and (void *)&shark_dat needs to reflect the data structure for the PITZER model
 	success = setup_SHARK_DATA(Output,shark_residual, NULL, NULL, &shark_dat, NULL, (void *)&shark_dat, NULL, NULL);
 	if (success != 0) {mError(initial_error); return -1;}
 	
