@@ -2816,7 +2816,7 @@ int backtrackLineSearch( int (*feval) (const Matrix<double>& x, Matrix<double> &
 			{
 				lambda_temp = backtrack_dat->rho * lambda;
 			}
-			if (lambda_temp < 0.1*lambda)
+			if (lambda_temp < 0.1*lambda || isnan(lambda_temp))
 				lambda = 0.1 * lambda;
 			else
 				lambda = lambda_temp;

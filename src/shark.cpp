@@ -220,6 +220,9 @@ double MasterSpeciesList::Eval_ChargeResidual(const Matrix<double> &x)
 	}
 	res = res + this->alkalinity();
 	
+	if (isnan(res) || isinf(res))
+		res = sqrt(DBL_MAX)/this->list_size();
+	
 	return res;
 }
 
@@ -639,6 +642,9 @@ double MassBalance::Eval_Residual(const Matrix<double> &x)
 		res = (res - this->Get_TotalConcentration())/pow(DBL_EPSILON, 2.0);
 	else
 		res = (res / this->Get_TotalConcentration()) - 1.0;
+	
+	if (isnan(res) || isinf(res))
+		res = sqrt(DBL_MAX)/this->List->list_size();
 	
 	return res;
 }
@@ -1077,6 +1083,9 @@ double UnsteadyReaction::Eval_Residual(const Matrix<double> &x_new, const Matrix
 		res = this->Reaction::Eval_Residual(x_new, gama_new);
 	else
 		res = log10(gama_new(this->species_index,0)) + x_new(this->species_index,0) - log_step;
+	
+	if (isnan(res) || isinf(res))
+		res = sqrt(DBL_MAX)/this->List->list_size();
 	
 	return res;
 }
@@ -3099,11 +3108,6 @@ int shark_residual(const Matrix<double> &x, Matrix<double> &F, const void *data)
 	
 	//Form all residuals
 	int index = 0;
-	for (int i=0; i<dat->MassBalanceList.size(); i++)
-	{
-		F(index,0) = dat->MassBalanceList[i].Eval_Residual(x);
-		index++;
-	}
 	for (int i=0; i<dat->ReactionList.size(); i++)
 	{
 		F(index,0) = dat->ReactionList[i].Eval_Residual(x, dat->activity_new);
@@ -3122,6 +3126,11 @@ int shark_residual(const Matrix<double> &x, Matrix<double> &F, const void *data)
 		{
 			F(index,0) = dat->UnsteadyList[i].Eval_Residual(x, dat->activity_new);
 		}
+		index++;
+	}
+	for (int i=0; i<dat->MassBalanceList.size(); i++)
+	{
+		F(index,0) = dat->MassBalanceList[i].Eval_Residual(x);
 		index++;
 	}
 	for (int i=0; i<dat->OtherList.size(); i++)
