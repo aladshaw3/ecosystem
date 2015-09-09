@@ -3366,6 +3366,71 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 	return success;
 }
 
+//Form a numerical jacobian matrix
+int NumericalJacobian( int (*Func) (const Matrix<double> &x, Matrix<double> &F, const void *user_data),
+					  const Matrix<double> &x, Matrix<double> &J, int Nx, int Nf, NUM_JAC_DATA *jac_dat,
+					  const void *user_data)
+{
+	int success = 0;
+	
+	//Check input arguments for problems
+	if ( (*Func) == NULL )
+	{
+		mError(nullptr_func);
+		return -1;
+	}
+	if ( jac_dat == NULL)
+	{
+		mError(nullptr_func);
+		return -1;
+	}
+	if (jac_dat->dxj.rows() != Nx)
+	{
+		jac_dat->dxj.set_size(Nx, 1);
+	}
+	if (J.rows() != Nf && J.columns() != Nx)
+	{
+		J.set_size(Nf, Nx);
+	}
+	if (jac_dat->Fx.rows() != Nf)
+	{
+		jac_dat->Fx.set_size(Nf, 1);
+	}
+	if (jac_dat->Fxp.rows() != Nf)
+	{
+		jac_dat->Fxp.set_size(Nf, 1);
+	}
+	if (jac_dat->eps < sqrt(DBL_EPSILON) || jac_dat->eps >= 1.0)
+	{
+		jac_dat->eps = sqrt(DBL_EPSILON);
+	}
+	
+	//Form the first fuction evaluation
+	success = (*Func) (x, jac_dat->Fx, user_data);
+	if (success != 0) {mError(simulation_fail); return -1;}
+	
+	//Create a copy of x to change piecewise
+	jac_dat->dxj = x;
+	for (int j=0; j<Nx; j++)
+	{
+		//Change the jth variable
+		jac_dat->dxj(j,0) = x(j,0) + jac_dat->eps;
+		success = (*Func) (jac_dat->dxj, jac_dat->Fxp, user_data);
+		if (success != 0) {mError(simulation_fail); return -1;}
+		
+		//Approximate each row of the first column of the jacobian
+		for (int i=0; i<Nf; i++)
+		{
+			J(i,j) = (jac_dat->Fxp(i,0) - jac_dat->Fx(i,0)) / jac_dat->eps;
+		}
+		
+		//Recover the jth variable before continuing
+		jac_dat->dxj(j,0) = x(j,0);
+	}
+	
+	return success;
+}
+
 //Testing grounds for the LARK Functions
 int LARK_TESTS()
 {

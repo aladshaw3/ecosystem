@@ -367,6 +367,16 @@ typedef struct
 	
 }PJFNK_DATA;
 
+//Data structure to form a numerical jacobian matrix with finite differences
+typedef struct
+{
+	double eps = sqrt(DBL_EPSILON);		//Perturbation value
+	Matrix<double> Fx;					//Vector of function evaluations at x
+	Matrix<double> Fxp;					//Vector of function evaluations at x+eps
+	Matrix<double> dxj;					//Vector of perturbed x values
+	
+}NUM_JAC_DATA;
+
 //Data structures used by examples to test the algorithms of LARK
 typedef struct
 {
@@ -499,6 +509,10 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 		   int (*precon) (const Matrix<double>& r, Matrix<double>& p, const void *data),
 		   Matrix<double> &x, PJFNK_DATA *pjfnk_dat, const void *res_data,
 		   const void *precon_data );
+
+int NumericalJacobian( int (*Func) (const Matrix<double> &x, Matrix<double> &F, const void *user_data),
+					  const Matrix<double> &x, Matrix<double> &J, int Nx, int Nf, NUM_JAC_DATA *jac_dat,
+					  const void *user_data);
 
 int LARK_TESTS();
 

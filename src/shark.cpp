@@ -3044,8 +3044,19 @@ int shark_solver(SHARK_DATA *shark_dat)
 				//Conversion to concentration units
 				success = Convert2Concentration(shark_dat->X_new, shark_dat->Conc_new);
 				if (success != 0) {mError(simulation_fail); return -1;}
-				
 				shark_dat->MasterList.DisplayConcentrations(shark_dat->Conc_new);
+				std::cout << "\n";
+				
+				//Form a Numerical Jacobian and print out
+				if (shark_dat->numvar <= 100)
+				{
+					Matrix<double> J(shark_dat->numvar,shark_dat->numvar);
+					NUM_JAC_DATA num_jac;
+					success = NumericalJacobian(shark_dat->Residual, shark_dat->X_new, J, shark_dat->numvar, shark_dat->numvar, &num_jac, shark_dat->residual_data);
+					J.Display("Numerical Jacobian");
+				}
+				
+				
 				mError(simulation_fail);
 				return -1;
 			}

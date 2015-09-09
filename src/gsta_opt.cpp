@@ -265,7 +265,7 @@ void orthoLinReg(double *x, double *y, double *par, int m_dat, int n_par)
 		par[0] = fabs(1 / vint);
 		par[1] = fabs(vint / slope);
 	}
-	else //performed if n_par is NULL
+	else //performed if n_par is other
 	{
 		par[0] = vint;
 		par[1] = slope;
@@ -754,7 +754,7 @@ int gsta_optimize(const char* fileName)
     			}
     			//At this line: X & Y have been filled for one LinReg
     			//NOTE: heat_par[0] = (dSo/R) & heat_par[1] = (-dHo/R)
-    			orthoLinReg(X,Y,heat_par,n_iso,NULL);
+    			orthoLinReg(X,Y,heat_par,n_iso,0);
     			dSo.push_back(heat_par[0] * R);
     			dHo.push_back(heat_par[1] * -R);
     			R_SQ = rSq(X,Y,heat_par[1], heat_par[0], n_iso);
