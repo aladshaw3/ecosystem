@@ -4209,12 +4209,11 @@ int SHARK_TESTS()
 	
 	//Close files and display end messages
 	fclose(TestOutput);
-	fflush(TestOutput);
 	time = clock() - time;
 	std::cout << "\nSimulation Runtime: " << (time / CLOCKS_PER_SEC) << " seconds\n";
 	std::cout << "Total Time Steps: " << shark_dat.timesteps << "\n";
 	std::cout << "Total Evaluations: " << shark_dat.totalsteps << "\n";
 	std::cout << "Evaluations/sec: " << shark_dat.totalsteps/(time / CLOCKS_PER_SEC) << "\n";
-	exit(success); //I don't know why, but I was forced to add this line of code to successfully exit without stack errors
+
 	return success;
 }

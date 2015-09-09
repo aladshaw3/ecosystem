@@ -2118,7 +2118,6 @@ yaml_cpp_class::yaml_cpp_class()
 yaml_cpp_class::~yaml_cpp_class()
 {
 	yaml_wrapper.clear();
-	fclose(this->input_file);
 }
 
 //Set the input file for reading
