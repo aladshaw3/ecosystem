@@ -3056,7 +3056,6 @@ int shark_solver(SHARK_DATA *shark_dat)
 					J.Display("Numerical Jacobian");
 				}
 				
-				
 				mError(simulation_fail);
 				return -1;
 			}
@@ -3538,11 +3537,6 @@ int SHARK_TESTS()
 	shark_dat.MasterList.set_species(21, 0.0, 0.0, 0.0, 0.0, false, false, "Aqueous", "Amidoxime", "A(OH)2 (aq)", "");
 	shark_dat.MasterList.set_species(22, 0.0, 0.0, 0.0, 0.0, false, false, "Aqueous", "Uranyl-amidoximate", "UO2AO2 (aq)", "");
 	shark_dat.MasterList.set_species(23, -2.0, 0.0, 0.0, 0.0,false, false,"Aqueous","Uranyl-carbonate-amidoximate", "UO2CO3AO2 2- (aq)", "");
-	
-	// ------------------ (2) Complexes ---------------------
-	//shark_dat.MasterList.set_species(21, 0.0, 0.0, 0.0, 0.0, false, false, "Aqueous", "Amidoxime", "AOH (aq)", "");
-	//shark_dat.MasterList.set_species(22, 0.0, 0.0, 0.0, 0.0, false, false, "Aqueous", "Uranyl-amidoximate", "UO2(AO)2 (aq)", "");
-	//shark_dat.MasterList.set_species(23, -2.0, 0.0, 0.0, 0.0,false, false,"Aqueous","Uranyl-carbonate-amidoximate", "UO2CO3(AO)2 2- (aq)", "");
 	shark_dat.MasterList.set_species(24, "Cl - (aq)");
 	
 	shark_dat.ReactionList[0].Set_Equilibrium(-14.0);
@@ -4092,7 +4086,6 @@ int SHARK_TESTS()
 	
 	shark_dat.MassBalanceList[5].Set_Name("Amidoxime Balance");
 	shark_dat.MassBalanceList[5].Set_TotalConcentration(AOH);
-	//shark_dat.MassBalanceList[5].Set_TotalConcentration(1.0);
 	shark_dat.MassBalanceList[5].Set_Delta(0, 0);
 	shark_dat.MassBalanceList[5].Set_Delta(1, 0);
 	shark_dat.MassBalanceList[5].Set_Delta(2, 0);
@@ -4115,12 +4108,8 @@ int SHARK_TESTS()
 	shark_dat.MassBalanceList[5].Set_Delta(19, 0);
 	shark_dat.MassBalanceList[5].Set_Delta(20, 0);
 	shark_dat.MassBalanceList[5].Set_Delta(21, 1);
-	//shark_dat.MassBalanceList[5].Set_Delta(22, 0);
-	//shark_dat.MassBalanceList[5].Set_Delta(23, 0);
 	shark_dat.MassBalanceList[5].Set_Delta(22, 1);
 	shark_dat.MassBalanceList[5].Set_Delta(23, 1);
-	//shark_dat.MassBalanceList[5].Set_Delta(22, 2);
-	//shark_dat.MassBalanceList[5].Set_Delta(23, 2);
 	shark_dat.MassBalanceList[5].Set_Delta(24, 0);
 	
 	shark_dat.MassBalanceList[6].Set_Name("Chlorine Balance");
@@ -4151,40 +4140,6 @@ int SHARK_TESTS()
 	shark_dat.MassBalanceList[6].Set_Delta(23, 0);
 	shark_dat.MassBalanceList[6].Set_Delta(24, 1);
 	
-	/*
-	shark_dat.UnsteadyList[0].Set_Species_Index(23);
-	shark_dat.UnsteadyList[0].Set_Equilibrium(logK_UO2CO3);
-	shark_dat.UnsteadyList[0].Set_InitialValue(0.0);
-	shark_dat.UnsteadyList[0].Set_Forward(kf_UO2CO3);
-	shark_dat.UnsteadyList[0].Set_TimeStep(0.0);
-	shark_dat.UnsteadyList[0].Set_Stoichiometric(0, 0);
-	shark_dat.UnsteadyList[0].Set_Stoichiometric(1, 0);
-	shark_dat.UnsteadyList[0].Set_Stoichiometric(2, 0);
-	shark_dat.UnsteadyList[0].Set_Stoichiometric(3, 0);
-	shark_dat.UnsteadyList[0].Set_Stoichiometric(4, 0);
-	shark_dat.UnsteadyList[0].Set_Stoichiometric(5, 0);
-	shark_dat.UnsteadyList[0].Set_Stoichiometric(6, 2);
-	shark_dat.UnsteadyList[0].Set_Stoichiometric(7, 0);
-	shark_dat.UnsteadyList[0].Set_Stoichiometric(8, 0);
-	shark_dat.UnsteadyList[0].Set_Stoichiometric(9, 0);
-	shark_dat.UnsteadyList[0].Set_Stoichiometric(10, 0);
-	shark_dat.UnsteadyList[0].Set_Stoichiometric(11, 0);
-	shark_dat.UnsteadyList[0].Set_Stoichiometric(12, 0);
-	shark_dat.UnsteadyList[0].Set_Stoichiometric(13, 0);
-	shark_dat.UnsteadyList[0].Set_Stoichiometric(14, 0);
-	shark_dat.UnsteadyList[0].Set_Stoichiometric(15, 0);
-	shark_dat.UnsteadyList[0].Set_Stoichiometric(16, 0);
-	shark_dat.UnsteadyList[0].Set_Stoichiometric(17, -1);
-	shark_dat.UnsteadyList[0].Set_Stoichiometric(18, 0);
-	shark_dat.UnsteadyList[0].Set_Stoichiometric(19, 0);
-	shark_dat.UnsteadyList[0].Set_Stoichiometric(20, 0);
-	shark_dat.UnsteadyList[0].Set_Stoichiometric(21, -1);
-	//shark_dat.UnsteadyList[0].Set_Stoichiometric(21, -2);
-	shark_dat.UnsteadyList[0].Set_Stoichiometric(22, 0);
-	shark_dat.UnsteadyList[0].Set_Stoichiometric(23, 1);
-	shark_dat.UnsteadyList[0].Set_Stoichiometric(24,0);
-	*/
-	
 	shark_dat.UnsteadyList[0].Set_Species_Index(23);
 	shark_dat.UnsteadyList[0].Set_Equilibrium(logK_UO2CO3);
 	shark_dat.UnsteadyList[0].Set_InitialValue(0.0);
@@ -4212,7 +4167,6 @@ int SHARK_TESTS()
 	shark_dat.UnsteadyList[0].Set_Stoichiometric(19, 0);
 	shark_dat.UnsteadyList[0].Set_Stoichiometric(20, 2);
 	shark_dat.UnsteadyList[0].Set_Stoichiometric(21, -1);
-	//shark_dat.UnsteadyList[0].Set_Stoichiometric(21, -2);
 	shark_dat.UnsteadyList[0].Set_Stoichiometric(22, 0);
 	shark_dat.UnsteadyList[0].Set_Stoichiometric(23, 1);
 	shark_dat.UnsteadyList[0].Set_Stoichiometric(24, 0);
@@ -4244,7 +4198,6 @@ int SHARK_TESTS()
 	shark_dat.UnsteadyList[1].Set_Stoichiometric(19, 0);
 	shark_dat.UnsteadyList[1].Set_Stoichiometric(20, 2);
 	shark_dat.UnsteadyList[1].Set_Stoichiometric(21, -1);
-	//shark_dat.UnsteadyList[1].Set_Stoichiometric(21, -2);
 	shark_dat.UnsteadyList[1].Set_Stoichiometric(22, 1);
 	shark_dat.UnsteadyList[1].Set_Stoichiometric(23, 0);
 	shark_dat.UnsteadyList[1].Set_Stoichiometric(24, 0);
@@ -4256,11 +4209,12 @@ int SHARK_TESTS()
 	
 	//Close files and display end messages
 	fclose(TestOutput);
+	fflush(TestOutput);
 	time = clock() - time;
 	std::cout << "\nSimulation Runtime: " << (time / CLOCKS_PER_SEC) << " seconds\n";
 	std::cout << "Total Time Steps: " << shark_dat.timesteps << "\n";
 	std::cout << "Total Evaluations: " << shark_dat.totalsteps << "\n";
 	std::cout << "Evaluations/sec: " << shark_dat.totalsteps/(time / CLOCKS_PER_SEC) << "\n";
-	
+	exit(success); //I don't know why, but I was forced to add this line of code to successfully exit without stack errors
 	return success;
 }
