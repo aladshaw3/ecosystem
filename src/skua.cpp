@@ -366,8 +366,10 @@ int setup_SKUA_DATA(FILE *file, double (*eval_Dc) (int i, int l, const void *use
 		skua_dat->eval_diff = (*default_Dc);
 	else
 		skua_dat->eval_diff = (*eval_Dc);
-	if ((*eval_Kf) == NULL)
+	if ((*eval_Kf) == NULL && skua_dat->DirichletBC == true)
 		skua_dat->eval_kf = (*default_kf);
+	else if ((*eval_Kf) == NULL && skua_dat->DirichletBC == false)
+		skua_dat->eval_kf = (*empirical_kf);
 	else
 		skua_dat->eval_kf = (*eval_Kf);
 	skua_dat->user_data = user_data;
@@ -1311,7 +1313,7 @@ int SKUA_SCENARIOS(const char *scene, const char *sorbent, const char *comp, con
 	sorbateFile.close();
 	
 	//Setup the SKUA Problem with the correct pointer arguments
-	success = setup_SKUA_DATA(Output, dat.eval_diff, default_kf, (void *)&dat, &mixture, &dat);
+	success = setup_SKUA_DATA(Output, dat.eval_diff, NULL, (void *)&dat, &mixture, &dat);
 	if (success != 0) {mError(simulation_fail); return -1;}
 	
 	//Call the standard simulation routine
