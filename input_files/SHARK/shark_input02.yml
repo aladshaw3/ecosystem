@@ -1,0 +1,230 @@
+# This will serve as a test input file for shark to demo how to structure the document
+
+# In practice, this section should be listed first, but it doesn't really matter
+Scenario:
+---
+- vars_fun:
+  numvar: 22
+  num_ssr: 15
+  num_mbe: 6
+  num_usr: 0
+
+- sys_data:
+  act_fun: davies    
+  const_pH: false	
+  temp: 280.15       #Units must be in Kelvin 
+
+- run_time:
+  steady: true         #NOTE: All time must be represented in hours
+  specs_curve: true    #Only needed if steady = true, and will default to false
+...
+
+#The following header is entirely optional, but is used to set solver options
+SolverOptions:
+---
+line_search: true      #Default = true, and is recommended to be true
+search_type: standard
+linear_solve: gmresrp      #Note: FOM will be fastest for small problems
+nl_print: true
+
+...
+
+# After the Scenario read, shark will call the setup_function, then read info below
+MasterSpecies:
+---
+# Header names are specific 
+# Keys are chosen by user, but must span numbers 0 through numvar-1
+# Keys will denote the ordering of the variables
+# Note: Currently, the number of reg molecules is very limited
+- reg:
+  0: NaHCO3 (aq)
+  1: NaCO3 - (aq)
+  2: Na + (aq)
+  3: HNO3 (aq)
+  4: NO3 - (aq)
+  5: H2CO3 (aq)
+  6: HCO3 - (aq)
+  7: CO3 2- (aq)
+  8: UO2 2+ (aq)
+  9: UO2NO3 + (aq)
+  10: UO2(NO3)2 (aq)
+  11: UO2OH + (aq)
+  12: UO2(OH)3 - (aq)
+  13: (UO2)2(OH)2 2+ (aq)
+  14: (UO2)3(OH)5 + (aq)
+  15: UO2CO3 (aq)
+  16: UO2(CO3)2 2- (aq)
+  17: UO2(CO3)3 4- (aq)
+  18: H2O (l)
+  19: Cl - (aq)
+  20: OH - (aq)
+  21: H + (aq)
+
+...
+
+#NOTE: Total concentrations must be given in mol/L
+MassBalance:
+---
+# Header names under MassBalance are choosen by the user
+# All other keys will be checked
+- water:
+  total_conc: 1
+  - delta: 
+    "H2O (l)": 1
+
+- carbonate:
+  total_conc: 0.0004175
+  - delta: 
+    "NaHCO3 (aq)": 1
+    "NaCO3 - (aq)": 1 
+    "H2CO3 (aq)": 1 
+    "HCO3 - (aq)": 1
+    "CO3 2- (aq)": 1
+    "UO2CO3 (aq)": 1
+    "UO2(CO3)2 2- (aq)": 2
+    "UO2(CO3)3 4- (aq)": 3
+
+- nitrate:
+  total_conc: 6.302E-7
+  - delta:
+    "HNO3 (aq)": 1
+    "NO3 - (aq)": 1
+    "UO2NO3 + (aq)": 1
+    "UO2(NO3)2 (aq)": 2
+
+- sodium: 
+  total_conc: 0.430418
+  - delta:
+    "NaHCO3 (aq)": 1
+    "NaCO3 - (aq)": 1
+    "Na + (aq)": 1
+
+- uranyl:
+  total_conc: 3.151E-7
+  - delta:
+    "UO2 2+ (aq)": 1
+    "UO2NO3 + (aq)": 1
+    "UO2(NO3)2 (aq)": 1
+    "UO2OH + (aq)": 1
+    "UO2(OH)3 - (aq)": 1
+    "(UO2)2(OH)2 2+ (aq)": 2
+    "(UO2)3(OH)5 + (aq)": 3
+    "UO2CO3 (aq)": 1
+    "UO2(CO3)2 2- (aq)": 1
+    "UO2(CO3)3 4- (aq)": 1
+
+- chlorine:
+  total_conc: 0.43
+  - delta:
+    "Cl - (aq)": 1
+
+...
+
+#Document for equilibrium or steady reactions
+EquilRxn:
+---
+# Headers under EquilRxn separate out each reaction object
+# Keys for these headers only factor into the order of the equations
+# Stoichiometry follows the convention that products are pos(+) and reactants are neg(-)
+# Note: logK is only required if any species in stoichiometry is unregistered
+# Example: below represents - {H2O (l)} --> {H + (aq)} + {OH - (aq)}
+# Note: a valid reaction statement requires at least 1 stoichiometry args
+
+# Note: You can also provide reaction energies: enthalpy, entropy, and energy
+
+- rxn00:
+  - stoichiometry:
+    "H2O (l)": -1
+    "OH - (aq)": 1
+    "H + (aq)": 1
+
+- rxn01:
+  - stoichiometry:
+    "H2CO3 (aq)": -1
+    "HCO3 - (aq)": 1
+    "H + (aq)": 1
+
+- rxn02:
+  - stoichiometry:
+    "HCO3 - (aq)": -1
+    "CO3 2- (aq)": 1
+    "H + (aq)": 1
+
+- rxn03:
+  - stoichiometry:
+    "NaHCO3 (aq)": -1
+    "Na + (aq)": 1
+    "CO3 2- (aq)": 1
+    "H + (aq)": 1
+
+- rxn04:
+  - stoichiometry:
+    "NaCO3 - (aq)": -1
+    "Na + (aq)": 1
+    "CO3 2- (aq)": 1
+
+- rxn05:
+  - stoichiometry:
+    "HNO3 (aq)": -1
+    "NO3 - (aq)": 1
+    "H + (aq)": 1
+
+- rxn06:
+  - stoichiometry:
+    "NO3 - (aq)": -1
+    "UO2 2+ (aq)": -1
+    "UO2NO3 + (aq)": 1
+
+- rxn07:
+  - stoichiometry:
+    "NO3 - (aq)": -2
+    "UO2 2+ (aq)": -1
+    "UO2(NO3)2 (aq)": 1
+
+- rxn08:
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "H2O (l)": -1
+    "UO2OH + (aq)": 1
+    "H + (aq)": 1
+
+- rxn09:
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "H2O (l)": -3
+    "UO2(OH)3 - (aq)": 1
+    "H + (aq)": 3
+
+- rxn10:
+  - stoichiometry:
+    "UO2 2+ (aq)": -2
+    "H2O (l)": -2
+    "(UO2)2(OH)2 2+ (aq)": 1
+    "H + (aq)": 2
+
+- rxn11:
+  - stoichiometry:
+    "UO2 2+ (aq)": -3
+    "H2O (l)": -5
+    "(UO2)3(OH)5 + (aq)": 1
+    "H + (aq)": 5
+
+- rxn12:
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "CO3 2- (aq)": -1
+    "UO2CO3 (aq)": 1
+
+- rxn13:
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "CO3 2- (aq)": -2
+    "UO2(CO3)2 2- (aq)": 1
+
+- rxn14:
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "CO3 2- (aq)": -3
+    "UO2(CO3)3 4- (aq)": 1
+
+...
