@@ -1,0 +1,8 @@
+*.o
+*.DS_Store
+*~
+output
+doc/doxygen/html
+doc/doxygen/latex
+*.exe
+eco0
