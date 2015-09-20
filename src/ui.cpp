@@ -248,6 +248,11 @@ bool valid_test_string(const std::string &input, UI_DATA *ui_dat)
 		ui_dat->option = eel;
 		valid_input = true;
 	}
+	else if (allLower(input) == "egret")
+	{
+		ui_dat->option = egret;
+		valid_input = true;
+	}
 	else if (allLower(input) == "finch")
 	{
 		ui_dat->option = finch;
