@@ -1,9 +1,85 @@
-//----------------------------------------
-//  Created by Austin Ladshaw on 10/14/14
-//  Copyright (c) 2014
-//	Austin Ladshaw
-//	All rights reserved
-//----------------------------------------
+/*!
+ *  \file lark.h lark.cpp
+ *	\brief Linear Algebra Residual Kernels
+ *	\details	The functions contained within are designed to solve generic linear and
+				non-linear square systems of equations given a function argument and
+				data from the user. Optionally, the user can also provide a function to
+				return a preconditioning result that will be applied to the system.
+ 
+				Having the user define how the preconditioning is carried out provides
+				two major advantages: (1) we do not need to store and large, sparse
+				preconditioning matrices and instead only store the preconditioned
+				vector result and (2) this allows the user to use any kind of preconditioner
+				they see fit for their problem.
+ 
+				The Arnoldi function is typically not called by the user, but can be if
+				desired. It accepts the function arguments and a residual vector to form
+				an orthonormal basis of the Krylov subspace using the Modified Gram-Schmidt
+				process (aka Arnoldi Iteration). This function is called by GMRES to iteratively
+				solve a linear system of equations. Note that you can use this function to
+				directly solve the linear system as long as that system is not too large.
+				Construction of the basis is expensive, which is why this is used as a sub-function
+				of an iterative method.
+ 
+				The Restarted GMRES function will accept function arguments for a linear system
+				and attempt to solve said system iteratively by constructing an orthonormal
+				basis from the Krylov function. Note that this GMRES function does support
+				restarting and will use restarting by default if the linear system is too
+				large.
+ 
+				Also included is a GMRES algorithm without restarting. This will directly solve
+				the linear system within residual tolerance using a Full Orthogonal basis set
+				of that system. It is equivalent to calling the Krylov method with the k parameter
+				equal to N (i.e. the number of equations). This method is nick-named the Full
+				Othogonalization Method (FOM), although the true FOM algorithm in literature is
+				slightly different.
+ 
+				The PJFNK function will accept function arguments for a square, non-linear
+				system of equations and attempt to solve it iteratively using both the
+				GMRES and Krylov functions with Newton's method to convert the non-linear
+				system into a linear system.
+ 
+				Also built here is a PCG implementation for solving symmetric linear systems.
+				Can also be called by PJFNK if we know that the linear system (i.e. the
+				Jacobian) is symmetric. This algorithm is significantly more efficient
+				than GMRES, but is only valid if the system of equations is symmetric.
+ 
+				Other linear solvers implemented in this work are the BiCGSTAB and CGS algorithms
+				for non-symmetric, positive definite matrices. These algorithms are significantly
+				more computationally efficient than GMRES or FOM. However, they can both break down
+				if the linear system is poorly conditioned. In general, you only want to use these
+				methods if you have preconditioning available and your linear system is very, very
+				large. Otherwise, you will be better suited to using GMRES or FOM.
+ 
+				There is also an implementation of the Generalized Conjugate Residual (GCR) method
+				with and without restarting. This is a GMRES-like method that should give the
+				exact solution within N iterations, where N is the original size of the matrix. Built
+				ontop of the GCR method is a GMRESR (or GMRES Recursive) algorithm that uses GCR as
+				the base method and performs GMRESRP iterations as a preconditioner at each iteration
+				of GCR. This is the only linear solver that has built-in preconditioning. As a result,
+				it may be slower than other algorithms for simple problems, but generally will have
+				much better convergence behavior and will almost always give better residual reduction,
+				even for hard to solve problems.
+ 
+				NOTE: There are three GMRES implementations: (i) gmresLP, (ii) fom, and
+				(iii) gmresRP. GMRESLP is a restarted GMRES implementation that is left
+				preconditioned and only checks the residual on the outer loops. This may
+				be less efficient than GMRESRP, which can check both outer and inner loop
+				residuals. However, GMRESRP has to use right preconditioning, which also
+				slightly changes the convergence behavior of the linear system. GMRES with
+				left preconditioning and without restarting will just build the full
+				subspace by default, thus solving the system exactly, but may require too
+				much memory. You can do a GMRESRP unrestarted by specifying that the
+				restart parameter be equal to the size of the problem.
+ 
+ *  \author Austin Ladshaw
+ *	\version 0.0 beta
+ *	\date 10/14/2014
+ *	\copyright This software was designed and built at the Georgia Institute
+ *             of Technology by Austin Ladshaw for PhD research in the area
+ *             of adsorption and surface science. Copyright (c) 2015, all
+ *             rights reserved.
+ */
 
 #ifndef LARK_HPP_
 #define LARK_HPP_
@@ -11,296 +87,345 @@
 #include "macaw.h"
 #include <float.h>
 
-//Data structure for the construction of the Krylov subspaces for a linear system
+/// Data structure for the construction of the Krylov subspaces for a linear system
+/** C-style object used in conjunction with the Arnoldi algorithm to construct an orthonormal
+	basis and upper Hessenberg representation of a given linear operator. This is used to solve
+	a linear system both iteratively (i.e., in conjunction with GMRESLP) and directly (i.e., in
+	conjunction with FOM). Alternatively, you can just store the factorized components for later
+	use in another routine. */
 typedef struct
 {
-    int k;              // Desired size of the Krylov subspace
-    int iter;           // Actual size of the Krylov subspace
+    int k;              ///< Desired size of the Krylov subspace
+    int iter;           ///< Actual size of the Krylov subspace
     
-    double beta;        // Normalization parameter
-    double hp1;         // Additional row element of H (separate storage for holding)
+    double beta;        ///< Normalization parameter
+    double hp1;         ///< Additional row element of H (separate storage for holding)
 	
-	bool Output = true; //True = print messages to console
+	bool Output = true; ///< True = print messages to console
 	
-  	std::vector< Matrix<double> > Vk; // (N) x (k) orthonormal vector basis stored as a vector of column matrices
-    Matrix<double> Hkp1;        	// (k+1) x (k) upper Hessenberg matrix
-    Matrix<double> yk;          	// (k) x (1) vector search direction
-    Matrix<double>e1;          	// (k) x (1) orthonormal vector with 1 in first position
-    Matrix<double> w;           	// (N) x (1) interim result of the matrix_vector multiplication
-  	Matrix<double> v;				// (N) x (1) holding cell for the column entries of Vk and other interims
-  	Matrix<double> sum;				// (N) x (1) running sum of subspace vectors for use in altering w
+  	std::vector< Matrix<double> > Vk; ///< (N) x (k) orthonormal vector basis stored as a vector of column matrices
+    Matrix<double> Hkp1;			///< (k+1) x (k) upper Hessenberg matrix
+    Matrix<double> yk;          	///< (k) x (1) vector search direction
+    Matrix<double>e1;				///< (k) x (1) orthonormal vector with 1 in first position
+    Matrix<double> w;           	///< (N) x (1) interim result of the matrix_vector multiplication
+  	Matrix<double> v;				///< (N) x (1) holding cell for the column entries of Vk and other interims
+  	Matrix<double> sum;				///< (N) x (1) running sum of subspace vectors for use in altering w
 	
 }ARNOLDI_DATA;
 
-//Data structure for implementation of the Restarted GMRES algorithm with Left Preconditioning
+/// Data structure for implementation of the Restarted GMRES algorithm with Left Preconditioning
+/** C-style object used in conjunction with Generalized Minimum RESidual Left-Precondtioned
+	(GMRESLP) and Full Orthogonalization Method (FOM) algorithms to iteratively or directly
+	solve a linear system of equations. When using with GMRESLP, you can only check/observe the linear
+	residuals before a restart or after the Arnoldi space is constructed. This is because this object
+	uses Left-side Preconditioning. A faster routine may be GMRESRP, which is able to construct residuals
+	after each Arnoldi iteration. */
 typedef struct
 {
-    int restart = -1;    		//Restart parameter - default = min(vector_size,50)
-    int maxit = 0;          	//Maximum allowable iterations - default = min(vector_size,1000)
-    int iter = 0;           	//Number of iterations needed for convergence
-  	int steps = 0;				//Total number of gmres iterations and krylov iterations
+    int restart = -1;    		///< Restart parameter - default = min(vector_size,50)
+    int maxit = 0;          	///< Maximum allowable iterations - default = min(vector_size,1000)
+    int iter = 0;           	///< Number of iterations needed for convergence
+  	int steps = 0;				///< Total number of gmres iterations and krylov iterations
   
-	double tol_rel = 1e-6;		//Relative tolerance for convergence - default = 1e-6
-	double tol_abs = 1e-6;		//Absolution tolerance for convergence - default = 1e-6
-  	double res;					//Absolution redisual norm of the linear system
-    double relres;      		//Relative residual norm of the linear system
-    double relres_base; 		//Initial residual norm of the linear system
-	double bestres;				//Best found residual norm of the linear system
+	double tol_rel = 1e-6;		///< Relative tolerance for convergence - default = 1e-6
+	double tol_abs = 1e-6;		///< Absolution tolerance for convergence - default = 1e-6
+  	double res;					///< Absolution redisual norm of the linear system
+    double relres;      		///< Relative residual norm of the linear system
+    double relres_base; 		///< Initial residual norm of the linear system
+	double bestres;				///< Best found residual norm of the linear system
 	
-	bool Output = true;			//True = print messages to console
+	bool Output = true;			///< True = print messages to console
     
-    Matrix<double> x;           		//Solution to the linear system
-	Matrix<double> bestx;				//Best found solution to the linear system
-  	Matrix<double> r;					//Residual vector for the linear system
+    Matrix<double> x;           ///< Current solution to the linear system
+	Matrix<double> bestx;		///< Best found solution to the linear system
+  	Matrix<double> r;			///< Residual vector for the linear system
 	
-    ARNOLDI_DATA arnoldi_dat; //Data structure for the kyrlov subspace
+    ARNOLDI_DATA arnoldi_dat;	///< Data structure for the kyrlov subspace
     
 }GMRESLP_DATA;
 
-//Data structure for the Restarted GMRES algorithm with Right Preconditioning
+/// Data structure for the Restarted GMRES algorithm with Right Preconditioning
+/** C-style object used in conjunction with Generalized Minimum RESidual Right Preconditioned 
+	(GMRESRP) algorithm to iteratively solve a linear system of equations. Unlike GMRESLP, the 
+	GMRESRP method is capable of checking linear residuals at both the inner and outer steps. As 
+	a result, this algorithm may terminate earlier than GMRESLP if it has found a suitable solution 
+	during one of the inner steps. */
 typedef struct
 {
-	int restart = -1;			//Restart parameter - default = min(50,vector_size)
-	int maxit = 0;				//Maximum allowable outer iterations
-	int iter_outer = 0;			//Total number of outer iterations
-	int iter_inner = 0;			//Total number of inner iterations
-	int iter_total = 0;			//Total number of overall iterations
+	int restart = -1;			///< Restart parameter - default = min(50,vector_size)
+	int maxit = 0;				///< Maximum allowable outer iterations
+	int iter_outer = 0;			///< Total number of outer iterations
+	int iter_inner = 0;			///< Total number of inner iterations
+	int iter_total = 0;			///< Total number of overall iterations
 	
-	double tol_rel = 1e-6;		//Relative tolerance for convergence - default = 1e-6
-	double tol_abs = 1e-6;		//Absolute tolerance for convergence - default = 1e-6
-	double res;					//Absolute residual norm for linear system
-	double relres;				//Relative residual norm for linear system
-	double relres_base;			//Initial residual norm of the linear system
-	double bestres;				//Best found residual norm of the linear system
+	double tol_rel = 1e-6;		///< Relative tolerance for convergence - default = 1e-6
+	double tol_abs = 1e-6;		///< Absolute tolerance for convergence - default = 1e-6
+	double res;					///< Absolute residual norm for linear system
+	double relres;				///< Relative residual norm for linear system
+	double relres_base;			///< Initial residual norm of the linear system
+	double bestres;				///< Best found residual norm of the linear system
 	
-	bool Output = true;			//True = print messages to console
+	bool Output = true;			///< True = print messages to console
 	
-	Matrix<double> x;					//Solution to the linear system
-	Matrix<double> bestx;				//Best found solution to the linear system
-	Matrix<double> r;					//Residual vector for the linear system
+	Matrix<double> x;					///< Current solution to the linear system
+	Matrix<double> bestx;				///< Best found solution to the linear system
+	Matrix<double> r;					///< Residual vector for the linear system
 	
-	//NOTE: The value of k changes meaning these vectors and matrices grow in size
-	std::vector< Matrix<double> > Vk;						// (N x k) orthonormal vector basis
-	std::vector< std::vector< double > > H;		// (k+1 x k) upper Hessenberg storage matrix
-	std::vector< std::vector< double > > H_bar;	// (k+1 x k) Factorized matrix
-	std::vector< double > y;					// (k x 1) Vector search direction
-	std::vector< double > e0;					// (k+1 x 1) Normalized vector with residual info
-	std::vector< double > e0_bar;				// (k+1 x 1) Factorized normal vector
+	std::vector< Matrix<double> > Vk;			///< (N x k) orthonormal vector basis
+	std::vector< std::vector< double > > H;		///< (k+1 x k) upper Hessenberg storage matrix
+	std::vector< std::vector< double > > H_bar;	///< (k+1 x k) Factorized matrix
+	std::vector< double > y;					///< (k x 1) Vector search direction
+	std::vector< double > e0;					///< (k+1 x 1) Normalized vector with residual info
+	std::vector< double > e0_bar;				///< (k+1 x 1) Factorized normal vector
 	
-	Matrix<double> w;           	// (N) x (1) interim result of the matrix_vector multiplication
-	Matrix<double> v;				// (N) x (1) holding cell for the column entries of Vk and other interims
-	Matrix<double> sum;				// (N) x (1) running sum of subspace vectors for use in altering w
+	Matrix<double> w;           	///< (N) x (1) interim result of the matrix_vector multiplication
+	Matrix<double> v;				///< (N) x (1) holding cell for the column entries of Vk and other interims
+	Matrix<double> sum;				///< (N) x (1) running sum of subspace vectors for use in altering w
 	
 }GMRESRP_DATA;
 
-//Data structure for implementation of the PCG algorithms for symmetric linear systems
+/// Data structure for implementation of the PCG algorithms for symmetric linear systems
+/** C-style object used in conjunction with the Preconditioned Conjugate Gradient (PCG)
+	algorithm to iteratively solve a symmetric linear system of equations. This algorithm 
+	is optimal if your linear system is symmetric, but will not work at all if your system is 
+	asymmetric. For asymmetric systems, use one of the other linear methods. */
 typedef struct
 {
-  	int maxit = 0;			//Maximum allowable iterations - default = min(vector_size,1000)
-  	int iter = 0;				//Actual number of iterations taken
+  	int maxit = 0;				///< Maximum allowable iterations - default = min(vector_size,1000)
+  	int iter = 0;				///< Actual number of iterations taken
   
-  	double alpha;				//Step size for new solution
-  	double beta;				//Step size for new search direction
-	double tol_rel = 1e-6;		//Relative tolerance for convergence - default = 1e-6
-	double tol_abs = 1e-6;		//Absolution tolerance for convergence - default = 1e-6
-	double res;					//Absolute residual norm
-	double relres;				//Relative residual norm
-	double relres_base;			//Initial residual norm
-	double bestres;				//Best found residual norm
+  	double alpha;				///< Step size for new solution
+  	double beta;				///< Step size for new search direction
+	double tol_rel = 1e-6;		///< Relative tolerance for convergence - default = 1e-6
+	double tol_abs = 1e-6;		///< Absolution tolerance for convergence - default = 1e-6
+	double res;					///< Absolute residual norm
+	double relres;				///< Relative residual norm
+	double relres_base;			///< Initial residual norm
+	double bestres;				///< Best found residual norm
 	
-	bool Output = true;			//True = print messages to console
+	bool Output = true;			///< True = print messages to console
   
-  	Matrix<double> x;						//Solution to the linear system
-	Matrix<double> bestx;					//Best found solution to the linear system
-  	Matrix<double> r;						//Residual vector for the linear system
-  	Matrix<double> r_old;					//Previous residual vector
-  	Matrix<double> z;						//Preconditioned residual vector (result of precon function)
-  	Matrix<double> z_old;					//Previous preconditioned residual vector
-  	Matrix<double> p;						//Search direction
-  	Matrix<double> Ap;						//Result of matrix-vector multiplication
+  	Matrix<double> x;						///< Current solution to the linear system
+	Matrix<double> bestx;					///< Best found solution to the linear system
+  	Matrix<double> r;						///< Residual vector for the linear system
+  	Matrix<double> r_old;					///< Previous residual vector
+  	Matrix<double> z;						///< Preconditioned residual vector (result of precon function)
+  	Matrix<double> z_old;					///< Previous preconditioned residual vector
+  	Matrix<double> p;						///< Search direction
+  	Matrix<double> Ap;						///< Result of matrix-vector multiplication
   
 }PCG_DATA;
 
-//Data structure for the implementation of the BiCGSTAB algorithm for non-symmetric linear systems
+/// Data structure for the implementation of the BiCGSTAB algorithm for non-symmetric linear systems
+/** C-style object used in conjunction with the Bi-Conjugate Gradient STABalized (BiCGSTAB) algorithm 
+	to solve a linear system of equations. This algorithm is generally more efficient than any GMRES 
+	or GCR variant, but may not always reduce the residual at each step. However, if used with preconditioning, 
+	then this algorithm is very efficient, especially when used for solving grid-based linear systems. */
 typedef struct
 {
-	int maxit = 0;			//Maximum allowable iterations - default = min(2*vector_size,1000)
-	int iter = 0;				//Actual number of iterations
-	bool breakdown;				//Boolean to determine if the method broke down
+	int maxit = 0;				///< Maximum allowable iterations - default = min(2*vector_size,1000)
+	int iter = 0;				///< Actual number of iterations
+	bool breakdown;				///< Boolean to determine if the method broke down
 	
-	double alpha;				//Step size parameter for next solution
-	double beta;				//Step size parameter for search direction
-	double rho;					//Scaling parameter for alpha and beta
-	double rho_old;				//Previous scaling parameter for alpha and beta
-	double omega;				//Scaling parameter and additional step length
-	double omega_old;			//Previous scaling parameter and step length
-	double tol_rel = 1e-6;		//Relative tolerance for convergence - default = 1e-6
-	double tol_abs = 1e-6;		//Absolution tolerance for convergence - default = 1e-6
-	double res;					//Absolute residual norm
-	double relres;				//Relative residual norm
-	double relres_base;			//Initial residual norm
-	double bestres;				//Best found residual norm
+	double alpha;				///< Step size parameter for next solution
+	double beta;				///< Step size parameter for search direction
+	double rho;					///< Scaling parameter for alpha and beta
+	double rho_old;				///< Previous scaling parameter for alpha and beta
+	double omega;				///< Scaling parameter and additional step length
+	double omega_old;			///< Previous scaling parameter and step length
+	double tol_rel = 1e-6;		///< Relative tolerance for convergence - default = 1e-6
+	double tol_abs = 1e-6;		///< Absolution tolerance for convergence - default = 1e-6
+	double res;					///< Absolute residual norm
+	double relres;				///< Relative residual norm
+	double relres_base;			///< Initial residual norm
+	double bestres;				///< Best found residual norm
 	
-	bool Output = true;			//True = print messages to console
+	bool Output = true;			///< True = print messages to console
 	
-	Matrix<double> x;					//Solution to the linear system
-	Matrix<double> bestx;				//Best found solution to the linear system
-	Matrix<double> r;					//Residual vector for the linear system
-	Matrix<double> r0;					//Initial residual vector
-	Matrix<double> v;					//Search direction for p
-	Matrix<double> p;					//Search direction for updating
-	Matrix<double> y;					//Preconditioned search direction
-	Matrix<double> s;					//Residual updating vector
-	Matrix<double> z;					//Preconditioned residual updating vector
-	Matrix<double> t;					//Search direction for resdidual updates
+	Matrix<double> x;					///< Current solution to the linear system
+	Matrix<double> bestx;				///< Best found solution to the linear system
+	Matrix<double> r;					///< Residual vector for the linear system
+	Matrix<double> r0;					///< Initial residual vector
+	Matrix<double> v;					///< Search direction for p
+	Matrix<double> p;					///< Search direction for updating
+	Matrix<double> y;					///< Preconditioned search direction
+	Matrix<double> s;					///< Residual updating vector
+	Matrix<double> z;					///< Preconditioned residual updating vector
+	Matrix<double> t;					///< Search direction for resdidual updates
 	
 }BiCGSTAB_DATA;
 
-//Data structure for the implementation of the CGS algorithm for non-symmetric linear systems
+/// Data structure for the implementation of the CGS algorithm for non-symmetric linear systems
+/** C-style object to be used in conjunction with the Conjugate Gradient Squared (CGS) algorithm 
+	to solve linear systems of equations. This algorithm is slightly less computational work than
+	BiCGSTAB, but is much less stable. As a result, I do not recommend using this algorithm unless
+	you also use some form of preconditioning. */
 typedef struct
 {
-	int maxit = 0;			//Maximum allowable iterations - default = min(2*vector_size,1000)
-	int iter = 0;				//Actual number of iterations
-	bool breakdown;				//Boolean to determine if the method broke down
+	int maxit = 0;				///< Maximum allowable iterations - default = min(2*vector_size,1000)
+	int iter = 0;				///< Actual number of iterations
+	bool breakdown;				///< Boolean to determine if the method broke down
 	
-	double alpha;				//Step size parameter for next solution
-	double beta;				//Step size parameter for search direction
-	double rho;					//Scaling parameter for alpha and beta
-	double sigma;				//Scaling parameter and additional step length
-	double tol_rel = 1e-6;		//Relative tolerance for convergence - default = 1e-6
-	double tol_abs = 1e-6;		//Absolution tolerance for convergence - default = 1e-6
-	double res;					//Absolute residual norm
-	double relres;				//Relative residual norm
-	double relres_base;			//Initial residual norm
-	double bestres;				//Best found residual norm
+	double alpha;				///< Step size parameter for next solution
+	double beta;				///< Step size parameter for search direction
+	double rho;					///< Scaling parameter for alpha and beta
+	double sigma;				///< Scaling parameter and additional step length
+	double tol_rel = 1e-6;		///< Relative tolerance for convergence - default = 1e-6
+	double tol_abs = 1e-6;		///< Absolution tolerance for convergence - default = 1e-6
+	double res;					///< Absolute residual norm
+	double relres;				///< Relative residual norm
+	double relres_base;			///< Initial residual norm
+	double bestres;				///< Best found residual norm
 	
-	bool Output = true;			//True = print messages to console
+	bool Output = true;			///< True = print messages to console
 	
-	Matrix<double> x;					//Solution to the linear system
-	Matrix<double> bestx;				//Best found solution to the linear system
-	Matrix<double> r;					//Residual vector for the linear system
-	Matrix<double> r0;					//Initial residual vector
-	Matrix<double> u;					//Search direction for v
-	Matrix<double> w;					//Updates sigma and u
-	Matrix<double> v;					//Search direction for x
-	Matrix<double> p;					//Preconditioning result for w, z, and matvec for Ax
-	Matrix<double> c;					//Holds the matvec result between A and p
-	Matrix<double> z;					//Full search direction for x
+	Matrix<double> x;					///< Current solution to the linear system
+	Matrix<double> bestx;				///< Best found solution to the linear system
+	Matrix<double> r;					///< Residual vector for the linear system
+	Matrix<double> r0;					///< Initial residual vector
+	Matrix<double> u;					///< Search direction for v
+	Matrix<double> w;					///< Updates sigma and u
+	Matrix<double> v;					///< Search direction for x
+	Matrix<double> p;					///< Preconditioning result for w, z, and matvec for Ax
+	Matrix<double> c;					///< Holds the matvec result between A and p
+	Matrix<double> z;					///< Full search direction for x
 	
 }CGS_DATA;
 
-//Data structure for implementation of linear operator transposition
+/// Data structure for implementation of linear operator transposition
+/** C-style object used in conjunction with the Operator Transpose algorithm to form
+	an action of A^T*r when A is only available as a linear operator and not a matrix. 
+	This is a sub-routine required by GCR and GMRESR to stabilize the outer iterations. */
 typedef struct
 {
-	Matrix<double> Ii;					//The ith column vector of the identity operator
-	Matrix<double> Ai;					//The ith column vector of the user's linear operator
+	Matrix<double> Ii;					///< The ith column vector of the identity operator
+	Matrix<double> Ai;					///< The ith column vector of the user's linear operator
 
 }OPTRANS_DATA;
 
-//Data structure for the implementation of the GCR algorithm for non-symmetric linear systems
+/// Data structure for the implementation of the GCR algorithm for non-symmetric linear systems
+/** C-style object used in conjunction with the Generalized Conjugate Residual (GCR) algorithm for
+	solving a non-symmetric linear system of equations. When the linear system in question has a 
+	positive-definite-symmetric component to it, then this algorithm is equivalent to GMRESRP. However,
+	it is generally less efficient than GMRESRP and can suffer breakdowns. */
 typedef struct
 {
-	int restart = -1;			//Restart parameter for outer iterations - default = 50
-	int maxit = 0;				//Maximum allowable outer iterations
-	int iter_outer = 0;			//Number of outer iterations taken
-	int iter_inner = 0;			//Number of inner iterations taken
-	int total_iter = 0;			//Total number of iterations taken
-	bool breakdown = false;		//Boolean to determine if a step has failed
+	int restart = -1;			///< Restart parameter for outer iterations - default = 50
+	int maxit = 0;				///< Maximum allowable outer iterations
+	int iter_outer = 0;			///< Number of outer iterations taken
+	int iter_inner = 0;			///< Number of inner iterations taken
+	int total_iter = 0;			///< Total number of iterations taken
+	bool breakdown = false;		///< Boolean to determine if a step has failed
 	
-	double alpha;				//Inner iteration step size
-	double beta;				//Outer iteration step size
-	double tol_rel = 1e-6;		//Relative tolerance for convergence - default = 1e-6
-	double tol_abs = 1e-6;		//Absolute tolerance for convergence - default = 1e-6
-	double res;					//Absolute residual norm for linear system
-	double relres;				//Relative residual norm for linear system
-	double relres_base;			//Initial residual norm of the linear system
-	double bestres;				//Best found residual norm of the linear system
+	double alpha;				///< Inner iteration step size
+	double beta;				///< Outer iteration step size
+	double tol_rel = 1e-6;		///< Relative tolerance for convergence - default = 1e-6
+	double tol_abs = 1e-6;		///< Absolute tolerance for convergence - default = 1e-6
+	double res;					///< Absolute residual norm for linear system
+	double relres;				///< Relative residual norm for linear system
+	double relres_base;			///< Initial residual norm of the linear system
+	double bestres;				///< Best found residual norm of the linear system
 	
-	bool Output = true;			//True = print messages to the console
+	bool Output = true;			///< True = print messages to the console
 	
-	Matrix<double> x;					//Solution to the linear system
-	Matrix<double> bestx;				//Best found solution to the linear system
-	Matrix<double> r;					//Residual Vector
-	Matrix<double> c_temp;				//Temporary c vector to be updated
-	Matrix<double> u_temp;				//Temporary u vector to be updated
-	std::vector<Matrix<double> > u;		//Vector span for updating x
-	std::vector<Matrix<double> > c;		//Vector span for updating r
+	Matrix<double> x;					///< Current solution to the linear system
+	Matrix<double> bestx;				///< Best found solution to the linear system
+	Matrix<double> r;					///< Residual Vector
+	Matrix<double> c_temp;				///< Temporary c vector to be updated
+	Matrix<double> u_temp;				///< Temporary u vector to be updated
+	std::vector<Matrix<double> > u;		///< Vector span for updating x
+	std::vector<Matrix<double> > c;		///< Vector span for updating r
 
-	OPTRANS_DATA transpose_dat;			//Data structure to only be initialized and used if necessary
+	OPTRANS_DATA transpose_dat;			///< Data structure for Operator Transposition
 	
 }GCR_DATA;
 
-//Data structure for the implementation of GCR with Nested GMRES preconditioning (Named GMRESR from literature)
+/// Data structure for the implementation of GCR with Nested GMRES preconditioning (i.e., GMRESR)
+/** C-style object to be used in conjunction with the Generalized Minimum RESidual Recurive (GMRESR)
+	algorithm. Although the name suggests that this method used GMRES recursively, what it is actually
+	doing is nesting GMRESRP iterations inside the GCR method to form a preconditioner for GCR. The name
+	GMRESR came from literature (Vorst and Vuik, "GMRESR: A family of nested GMRES methods", 1991).*/
 typedef struct
 {
-	int gcr_restart = -1;		//Number of GCR restarts (default = 50, max = N)
-	int gcr_maxit = 0;			//Number of GCR iterations
-	int gmres_restart = -1;		//Number of GMRES restarts (max = 20)
-	int gmres_maxit = 1;		//Number of GMRES iterations (max = 5, default = 1)
-	int N;						//Dimension of the linear system
-	int total_iter;				//Total GMRES and GCR iterations
-	int iter_outer;				//Total GCR iterations
-	int iter_inner;				//Total GMRES iterations
+	int gcr_restart = -1;		///< Number of GCR restarts (default = 50, max = N)
+	int gcr_maxit = 0;			///< Number of GCR iterations
+	int gmres_restart = -1;		///< Number of GMRES restarts (max = 20)
+	int gmres_maxit = 1;		///< Number of GMRES iterations (max = 5, default = 1)
+	int N;						///< Dimension of the linear system
+	int total_iter;				///< Total GMRES and GCR iterations
+	int iter_outer;				///< Total GCR iterations
+	int iter_inner;				///< Total GMRES iterations
 	
-	bool GCR_Output = true;		//True = print GCR messages
-	bool GMRES_Output = false;	//True = print GMRES messages
+	bool GCR_Output = true;		///< True = print GCR messages
+	bool GMRES_Output = false;	///< True = print GMRES messages
 	
-	double gmres_tol = 0.1;		//Tolerance relative to GCR iterations
-	double gcr_rel_tol = 1e-6;	//Relative outer residual tolerance
-	double gcr_abs_tol = 1e-6;	//Absolute outer residual tolerance
+	double gmres_tol = 0.1;		///< Tolerance relative to GCR iterations
+	double gcr_rel_tol = 1e-6;	///< Relative outer residual tolerance
+	double gcr_abs_tol = 1e-6;	///< Absolute outer residual tolerance
 	
-	Matrix<double> arg;					//Argument matrix passed between preconditioner and iterator
+	Matrix<double> arg;			///< Argument matrix passed between preconditioner and iterator
 	
-	GCR_DATA gcr_dat;			//Data structure for the outer GCR steps
-	GMRESRP_DATA gmres_dat;		//Data structure for the inner GMRES steps
+	GCR_DATA gcr_dat;			///< Data structure for the outer GCR steps
+	GMRESRP_DATA gmres_dat;		///< Data structure for the inner GMRES steps
 		
-	//User supplied matrix-vector product function
+	/// User supplied matrix-vector product function
 	int (*matvec) (const Matrix<double> &x, Matrix<double> &Ax, const void *matvec_data);
-	//Optional user supplied terminal preconditioner
+	/// Optional user supplied terminal preconditioner
 	int (*terminal_precon) (const Matrix<double> &r, Matrix<double> &p, const void *precon_data);
 	
-	const void *matvec_data;	//Data structure for the user's matvec function
-	const void *term_precon;	//Data structure for the user's terminal preconditioner
+	const void *matvec_data;	///< Data structure for the user's matvec function
+	const void *term_precon;	///< Data structure for the user's terminal preconditioner
 	
 }GMRESR_DATA;
 
-//Data structure for the implementation of a Picard or Fixed-Point iteration for non-linear systems
+/// Data structure for the implementation of a Picard or Fixed-Point iteration for non-linear systems
+/** C-style object used in conjunction with the Picard algorithm for solving a non-linear system of equations.
+	This is an extradorinarily simple iterative method by which a weak or loose form of the non-linear system
+	is solved based on an initial guess. User must supplied a residual function for the non-linear system and
+	a function representing the weak solution. Generally, this method is less efficient than Newton methods, 
+	but is significantly cheaper. */
 typedef struct
 {
-	int maxit = 0;				//Maximum allowable iterations - default = min(3*vec_size,1000)
-	int iter = 0;					//Actual number of iterations
+	int maxit = 0;					///< Maximum allowable iterations - default = min(3*vec_size,1000)
+	int iter = 0;					///< Actual number of iterations
 	
-	double tol_rel = 1e-6;			//Relative tolerance for convergence - default = 1e-6
-	double tol_abs = 1e-6;			//Absolution tolerance for convergence - default = 1e-6
-	double res;						//Residual norm of the iterate
-	double relres;					//Relative residual norm of the iterate
-	double relres_base;				//Initial residual norm
-	double bestres;					//Best found residual norm
+	double tol_rel = 1e-6;			///< Relative tolerance for convergence - default = 1e-6
+	double tol_abs = 1e-6;			///< Absolution tolerance for convergence - default = 1e-6
+	double res;						///< Residual norm of the iterate
+	double relres;					///< Relative residual norm of the iterate
+	double relres_base;				///< Initial residual norm
+	double bestres;					///< Best found residual norm
 	
-	bool Output = true;			//True = print messages to console
+	bool Output = true;			///< True = print messages to console
 	
-	Matrix<double> x0;						//Previous iterate solution vector
-	Matrix<double> bestx;					//Best found solution vector
-	Matrix<double> r;						//Residual of the non-linear system
+	Matrix<double> x0;						///< Previous iterate solution vector
+	Matrix<double> bestx;					///< Best found solution vector
+	Matrix<double> r;						///< Residual of the non-linear system
 	
 }PICARD_DATA;
 
-//Data structure for the implementation of Backtracking Linesearch
+/// Data structure for the implementation of Backtracking Linesearch
+/** C-style object used in conjunction with the Backtracking Linesearch algorithm to smooth out convergence 
+	of Netwon based iterative methods for non-linear systems of equations. The actual algorithm has been separated
+	from the interior of the Newton method so that it can be included in any future Newton based iterative methods
+	being developed. */
 typedef struct
 {
-	double alpha = 1e-4;				//Scaling parameter for determination of search step size
-	double rho = 0.1;					//Scaling parameter for to change step size by
-	double lambdaMin=DBL_EPSILON;	//Smallest allowable step length
-	double normFkp1;					//New residual norm of the Newton step
+	double alpha = 1e-4;				///< Scaling parameter for determination of search step size
+	double rho = 0.1;					///< Scaling parameter for to change step size by
+	double lambdaMin=DBL_EPSILON;		///< Smallest allowable step length
+	double normFkp1;					///< New residual norm of the Newton step
 	
-	bool constRho = false;				//True = use a constant value for rho
+	bool constRho = false;				///< True = use a constant value for rho
 	
-	Matrix<double> Fk;							//Old residual vector of the Newton step
-	Matrix<double> xk;							//Old solution vector of the Newton step
+	Matrix<double> Fk;					///< Old residual vector of the Newton step
+	Matrix<double> xk;					///< Old solution vector of the Newton step
 	
 }BACKTRACK_DATA;
 
-//Enum of definitions for linear solver types in PJFNK
+/// Enum of definitions for linear solver types in PJFNK
+/** Enum delineates the available Krylov Subspace methods that can be used to 
+	solve the linear sub-problem at each non-linear iteration in a Newton method. */
 typedef enum
 {
 	GMRESLP,
@@ -313,69 +438,80 @@ typedef enum
 	GMRESR,
 } krylov_method;
 
-//Data structure for the implementation of the PJFNK algorithm for non-linear systems
+/// Data structure for the implementation of the PJFNK algorithm for non-linear systems
+/** C-style object to be used in conjunction with the Preconditioned Jacobian-Free Newton-Krylov
+	(PJFNK) method for solving a non-linear system of equations. You can use any of the Krylov methods
+	listed in the krylov_method enum to solve the linear sub-problem. When FOM is specified as the
+	Krylov method, this algorithm becomes equivalent to an exact Newton method. If no Krylov method
+	is specified, then the algorithm will try to pick a method based on the problem size and availability
+	of preconditioning. */
 typedef struct
 {
-	int nl_iter = 0;         	//Number of non-linear iterations
-	int l_iter = 0;				//Number of linear iterations
-	int nl_maxit = 0;			//Maximum allowable non-linear steps
-	int linear_solver = -1;		//Flag to denote which linear solver to use - default = PJFNK Chooses
+	int nl_iter = 0;         	///< Number of non-linear iterations
+	int l_iter = 0;				///< Number of linear iterations
+	int nl_maxit = 0;			///< Maximum allowable non-linear steps
+	int linear_solver = -1;		///< Flag to denote which linear solver to use - default = PJFNK Chooses
 	
-	double nl_tol_abs = 1e-6;   //Absolute Convergence tolerance for non-linear system - default = 1e-6
-	double nl_tol_rel = 1e-6;	//Relative Convergence tol for the non-linear system - default = 1e-6
-	double lin_tol_rel = 1e-6;	//Relative tolerance of the linear solver - default = 1e-6
-	double lin_tol_abs = 1e-6;	//Absolute tolerance of the linear solver - default = 1e-6
-	double nl_res;				//Absolute redidual norm for the non-linear system
-	double nl_relres;       	//Relative residual for the non-linear system
-	double nl_res_base;     	//Initial residual norm for the non-linear system
-	double nl_bestres;			//Best found residual norm
-	double eps=sqrt(DBL_EPSILON);//Value of epsilon used jacvec - default = sqrt(DBL_EPSILON)
+	double nl_tol_abs = 1e-6;   ///< Absolute Convergence tolerance for non-linear system - default = 1e-6
+	double nl_tol_rel = 1e-6;	///< Relative Convergence tol for the non-linear system - default = 1e-6
+	double lin_tol_rel = 1e-6;	///< Relative tolerance of the linear solver - default = 1e-6
+	double lin_tol_abs = 1e-6;	///< Absolute tolerance of the linear solver - default = 1e-6
+	double nl_res;				///< Absolute redidual norm for the non-linear system
+	double nl_relres;       	///< Relative residual for the non-linear system
+	double nl_res_base;     	///< Initial residual norm for the non-linear system
+	double nl_bestres;			///< Best found residual norm
+	double eps=sqrt(DBL_EPSILON);///< Value of epsilon used jacvec - default = sqrt(DBL_EPSILON)
 	
-	bool NL_Output = true;		//True = print PJFNK messages to console
-	bool L_Output = false;		//True = print Linear messages to console
-	bool LineSearch = false;	//True = use Backtracking Linesearch for global convergence
-	bool Bounce = false;		//True = allow Linesearch to go outside local well, False = Strict local convergence
+	bool NL_Output = true;		///< True = print PJFNK messages to console
+	bool L_Output = false;		///< True = print Linear messages to console
+	bool LineSearch = false;	///< True = use Backtracking Linesearch for global convergence
+	bool Bounce = false;		///< True = allow Linesearch to go outside local well, False = Strict local convergence
 	
-	Matrix<double> F;					//Stored fuction evaluation at x (also the residual)
-	Matrix<double> Fv;					//Stored function evaluation at x+eps*v
-	Matrix<double> v;					//Stored vector of x+eps*v
-	Matrix<double> x;					//Current solution vector for the non-linear system
-	Matrix<double> bestx;				//Best found solution vector to the non-linear system
+	Matrix<double> F;					///< Stored fuction evaluation at x (also the residual)
+	Matrix<double> Fv;					///< Stored function evaluation at x+eps*v
+	Matrix<double> v;					///< Stored vector of x+eps*v
+	Matrix<double> x;					///< Current solution vector for the non-linear system
+	Matrix<double> bestx;				///< Best found solution vector to the non-linear system
 	
 	//The PJFNK implementation will choose the linear method best suited for your problem
-	GMRESLP_DATA gmreslp_dat;   	//Data structure for the GMRESLP method 
-	PCG_DATA pcg_dat;				//Data structure for the PCG method 
-	BiCGSTAB_DATA bicgstab_dat;		//Data structure for the BiCGSTAB method 
-	CGS_DATA cgs_dat;				//Data structure for the CGS method 
-	GMRESRP_DATA gmresrp_dat;		//Data structure for the GMRESRP method 
-	GCR_DATA gcr_dat;				//Data structure for the GCR method 
-	GMRESR_DATA gmresr_dat;			//Data structure for the GMRESR method 
+	GMRESLP_DATA gmreslp_dat;   	///< Data structure for the GMRESLP method
+	PCG_DATA pcg_dat;				///< Data structure for the PCG method
+	BiCGSTAB_DATA bicgstab_dat;		///< Data structure for the BiCGSTAB method
+	CGS_DATA cgs_dat;				///< Data structure for the CGS method
+	GMRESRP_DATA gmresrp_dat;		///< Data structure for the GMRESRP method
+	GCR_DATA gcr_dat;				///< Data structure for the GCR method
+	GMRESR_DATA gmresr_dat;			///< Data structure for the GMRESR method
 	
 	
-	BACKTRACK_DATA backtrack_dat;	//Data structure for the Backtracking Linesearch algorithm
+	BACKTRACK_DATA backtrack_dat;	///< Data structure for the Backtracking Linesearch algorithm
 	
 	//------------Below is a list of pointers the user must provide---------------
 	
-	//Data structure pointer for user's residual data
+	/// Data structure pointer for user's residual data
 	const void *res_data;
-	//Data structure pointer for user's preconditioning data
+	/// Data structure pointer for user's preconditioning data
 	const void *precon_data;
-	//Function pointer for the user's function F(x) using there data
+	/// Function pointer for the user's function F(x) using there data
 	int (*funeval) (const Matrix<double> &x, Matrix<double> &F, const void *res_data);
-	//Function pointer for the user's preconditioning function for the linear system
+	/// Function pointer for the user's preconditioning function for the linear system
 	int (*precon) (const Matrix<double> &r, Matrix<double> &p, const void *precon_data);
 	
 }PJFNK_DATA;
 
-//Data structure to form a numerical jacobian matrix with finite differences
+/// Data structure to form a numerical jacobian matrix with finite differences
+/** C-style object to be used in conjunction with the Numerical Jacobian algorithm. This algorithm
+	will used double-precision finite-differences to formulate an approximate Jacobian matrix at the
+	given variable state for the given residual/non-linear function. */
 typedef struct
 {
-	double eps = sqrt(DBL_EPSILON);		//Perturbation value
-	Matrix<double> Fx;					//Vector of function evaluations at x
-	Matrix<double> Fxp;					//Vector of function evaluations at x+eps
-	Matrix<double> dxj;					//Vector of perturbed x values
+	double eps = sqrt(DBL_EPSILON);		///< Perturbation value
+	Matrix<double> Fx;					///< Vector of function evaluations at x
+	Matrix<double> Fxp;					///< Vector of function evaluations at x+eps
+	Matrix<double> dxj;					///< Vector of perturbed x values
 	
 }NUM_JAC_DATA;
+
+/// \cond
 
 //Data structures used by examples to test the algorithms of LARK
 typedef struct
@@ -440,7 +576,11 @@ int matvec_ex15(const Matrix<double>& v, Matrix<double>& w, const void *data);
 
 int precon_ex15(const Matrix<double>& w, Matrix<double>& p, const void *data);
 
-//Below are the actual functions available in LARK
+/// \endcond
+
+//---------------Below are the actual functions available in LARK---------------------
+
+
 int update_arnoldi_solution(Matrix<double>& x, Matrix<double>& x0, ARNOLDI_DATA *arnoldi_dat);
 
 int arnoldi( int (*matvec) (const Matrix<double>& v, Matrix<double> &w, const void *data),

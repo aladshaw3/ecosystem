@@ -1,9 +1,14 @@
-//----------------------------------------
-//  Created by Austin Ladshaw on 08/25/15
-//  Copyright (c) 2015
-//	Austin Ladshaw
-//	All rights reserved
-//----------------------------------------
+/*!
+ *  \file ui.cpp ui.h
+ *	\brief User Interface for Ecosystem
+ *  \author Austin Ladshaw
+ *	\version 0.0 beta
+ *	\date 08/25/2015
+ *	\copyright This software was designed and built at the Georgia Institute
+ *             of Technology by Austin Ladshaw for PhD research in the area
+ *             of adsorption and surface science. Copyright (c) 2015, all
+ *             rights reserved.
+ */
 
 #include "ui.h"
 
@@ -154,7 +159,7 @@ void bui_help()
 	puts("\tThis algorithm requires one input files: (i) a yaml file detailing all system parameters, the species of interest, the reactions and mass balances, as well as some solver options. NOTE: These routines are still under development and will have new features and functions available to the user as they come available.\n");
 }
 
-//Convert input to all lower case
+// Convert input to all lower case
 std::string allLower(const std::string &input)
 {
 	std::string copy = input;

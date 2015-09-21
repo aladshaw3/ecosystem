@@ -1,80 +1,18 @@
-//----------------------------------------
-//  Created by Austin Ladshaw on 10/14/14
-//  Copyright (c) 2014
-//	Austin Ladshaw
-//	All rights reserved
-//----------------------------------------
-
-/*
-		LARK = Linear Algebra Residual Kernels
- 
-        The functions contained within are designed to solve generic linear and 
-        non-linear square systems of equations given a function argument and 
-        data from the user. Optionally, the user can also provide a function to
-        return a preconditioning result that will be applied to the system.
- 
-        Having the user define how the preconditioning is carried out provides
-        two major advantages: (1) we do not need to store and large, sparse
-        preconditioning matrices and instead only store the preconditioned
-        vector result and (2) this allows the user to use any kind of preconditioner
-        they see fit for their problem.
- 
-        The Arnoldi function is typically not called by the user, but can be if
-        desired. It accepts the function arguments and a residual vector to form
-        an orthonormal basis of the Krylov subspace using the Modified Gram-Schmidt
-        process (aka Arnoldi Iteration). This function is called by GMRES to iteratively 
-		solve a linear system of equations. Note that you can use this function to 
-		directly solve the linear system as long as that system is not too large. 
-		Construction of the basis is expensive, which is why this is used as a sub-function 
-		of an iterative method.
- 
-        The Restarted GMRES function will accept function arguments for a linear system
-        and attempt to solve said system iteratively by constructing an orthonormal
-        basis from the Krylov function. Note that this GMRES function does support
-        restarting and will use restarting by default if the linear system is too
-        large.
- 
-        Also included is a GMRES algorithm without restarting. This will directly solve
-        the linear system within residual tolerance using a Full Orthogonal basis set
-        of that system. It is equivalent to calling the Krylov method with the k parameter 
-		equal to N (i.e. the number of equations). This method is nick-named the Full 
- 		Othogonalization Method (FOM), although the true FOM algorithm in literature is
- 		slightly different. 
- 
-        The PJFNK function will accept function arguments for a square, non-linear
-        system of equations and attempt to solve it iteratively using both the 
-        GMRES and Krylov functions with Newton's method to convert the non-linear
-        system into a linear system.
- 
-        Also built here is a PCG implementation for solving symmetric linear systems.
-        Can also be called by PJFNK if we know that the linear system (i.e. the
-        Jacobian) is symmetric. This algorithm is significantly more efficient
-        than GMRES, but is only valid if the system of equations is symmetric.
- 
-		Other linear solvers implemented in this work are the BiCGSTAB and CGS algorithms
- 		for non-symmetric, positive definite matrices. These algorithms are significantly
- 		more computationally efficient than GMRES or FOM. However, they can both break down
- 		if the linear system is poorly conditioned. In general, you only want to use these
- 		methods if you have preconditioning available and your linear system is very, very
- 		large. Otherwise, you will be better suited to using GMRES or FOM. 
- 
- 		There is also an implementation of the Generalized Conjugate Residual (GCR) method
- 		with and without restarting. This is a GMRES-like method that should give the 
- 		exact solution within N iterations, where N is the original size of the matrix.
- 
- 		NOTE: There are three GMRES implementations: (i) gmresLP, (ii) fom, and
- 		(iii) gmresRP. GMRESLP is a restarted GMRES implementation that is left
- 		preconditioned and only checks the residual on the outer loops. This may
- 		be less efficient than GMRESRP, which can check both outer and inner loop
- 		residuals. However, GMRESRP has to use right preconditioning, which also
- 		slightly changes the convergence behavior of the linear system. GMRES with
- 		left preconditioning and without restarting will just build the full 
- 		subspace by default, thus solving the system exactly, but may require too
- 		much memory. You can do a GMRESRP unrestarted by specifying that the
- 		restart parameter be equal to the size of the problem. 
+/*!
+ *  \file lark.cpp lark.h
+ *	\brief Linear Algebra Residual Kernels
+ *  \author Austin Ladshaw
+ *	\version 0.0 beta
+ *	\date 10/14/2014
+ *	\copyright This software was designed and built at the Georgia Institute
+ *             of Technology by Austin Ladshaw for PhD research in the area
+ *             of adsorption and surface science. Copyright (c) 2015, all
+ *             rights reserved.
  */
 
 #include "lark.h"
+
+/// \cond
 
 //Example matrix vector product function
 int matvec_ex01(const Matrix<double>& v, Matrix<double>& w, const void *data)
@@ -352,6 +290,8 @@ int precon_ex15(const Matrix<double>& w, Matrix<double>& p, const void *data)
 	}
 	return success;
 }
+
+/// \endcond
 
 //Function to compute the updated solution given the matrix-vector arguments
 int update_arnoldi_solution(Matrix<double>& x, Matrix<double>& x0, ARNOLDI_DATA *arnoldi_dat)
