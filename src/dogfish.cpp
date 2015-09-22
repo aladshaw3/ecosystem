@@ -1,13 +1,12 @@
-//----------------------------------------
-//  Created by Austin Ladshaw on 4/9/15
-//  Copyright (c) 2015
-//	Austin Ladshaw
-//	All rights reserved
-//----------------------------------------
-
-/*
- *			DOGFISH = Diffusion Object Governing Fiber Interior Sorption History
- *
+/*!
+ *  \file dogfish.cpp dogfish.h
+ *	\brief Diffusion Object Governing Fiber Interior Sorption History
+ *  \author Austin Ladshaw
+ *	\date 04/09/2015
+ *	\copyright This software was designed and built at the Georgia Institute
+ *             of Technology by Austin Ladshaw for PhD research in the area
+ *             of adsorption and surface science. Copyright (c) 2015, all
+ *             rights reserved.
  */
 
 #include "dogfish.h"

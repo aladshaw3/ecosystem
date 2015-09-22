@@ -2,7 +2,6 @@
  *  \file lark.cpp lark.h
  *	\brief Linear Algebra Residual Kernels
  *  \author Austin Ladshaw
- *	\version 0.0 beta
  *	\date 10/14/2014
  *	\copyright This software was designed and built at the Georgia Institute
  *             of Technology by Austin Ladshaw for PhD research in the area

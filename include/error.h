@@ -1,9 +1,17 @@
-//----------------------------------------
-//  Created by Austin Ladshaw on 4/28/14
-//  Copyright (c) 2014
-//	Austin Ladshaw
-//	All rights reserved
-//----------------------------------------
+/*!
+ *  \file error.h error.cpp
+ *	\brief All error types are defined here
+ *	\details This file defines all the different errors that may occur in any simulation
+ *			in any file. Those errors are recognized by an enum with is then passed through
+ *			to the error.cpp file that customizes the error message to the console. A macro will
+ *			also print out the file name and line number where the error occured.
+ *  \author Austin Ladshaw
+ *	\date 04/28/2014
+ *	\copyright This software was designed and built at the Georgia Institute
+ *             of Technology by Austin Ladshaw for PhD research in the area
+ *             of adsorption and surface science. Copyright (c) 2015, all
+ *             rights reserved.
+ */
 
 #ifndef ERROR_HPP_
 #define ERROR_HPP_
@@ -16,7 +24,7 @@
 std::cout << "Source: " << __FILE__ << "\nLine: " << __LINE__ << std::endl;}
 #endif
 
-//List of names for error type
+/// List of names for error type
 typedef enum
 {
 generic_error,
@@ -73,7 +81,10 @@ read_error,
 invalid_console_input
 } error_type;
 
-
+/// Error function customizes output message based on flag
+/** This error function is reference in the error.cpp file, but is not called by any other
+	file. Instead, all other files call the mError(i) macro that expands into this error
+	function call plus prints out the file name and line number where the error occured. */
 void error(int flag);
 
-#endif /* ERROR_HPP_ */
+#endif

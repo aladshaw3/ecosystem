@@ -72,8 +72,13 @@
 				much memory. You can do a GMRESRP unrestarted by specifying that the
 				restart parameter be equal to the size of the problem.
  
+				Basic Implementation Details: 
+				-----------------------------
+				Linear Solvers -> Solve Ax=b for x \n
+				Non-Linear Solvers -> Solve F(x)=0 for x \n
+				All implementations require system size to be 2 or greater
+ 
  *  \author Austin Ladshaw
- *	\version 0.0 beta
  *	\date 10/14/2014
  *	\copyright This software was designed and built at the Georgia Institute
  *             of Technology by Austin Ladshaw for PhD research in the area
@@ -580,80 +585,539 @@ int precon_ex15(const Matrix<double>& w, Matrix<double>& p, const void *data);
 
 //---------------Below are the actual functions available in LARK---------------------
 
-
+/// Function to update the linear vector x based on the Arnoldi Krylov subspace
+/** This function will update a solution vector x based on the previous solution x0 given
+	the orthonormal basis and upper Hessenberg matrix formed in the Arnoldi algorithm. Updating
+	is automatically called by the GMRESLP function. It is expected that the Arnoldi algorithm 
+	has already been called prior to calling this function. 
+ 
+	\param x matrix that will hold the new updated solution to the linear system
+	\param x0 matrix that holds the previous solution to the linear system
+	\param arnoldi_dat pointer to the ARNOLDI_DATA data structure*/
 int update_arnoldi_solution(Matrix<double>& x, Matrix<double>& x0, ARNOLDI_DATA *arnoldi_dat);
 
+/// Function to factor a linear operator into an orthonormal basis and upper Hessenberg matrix
+/** This function performs the Arnoldi algorithm to factor a linear operator into an orthonormal
+	basis and upper Hessenberg matrix. Each orthonormal vector is formed using a Modified Gram-Schmidt
+	procedure. When used in conjunction with GMRESLP, user may supply a preconditioning operator to
+	improve convergence of the linear system. However, this function can be used by itself to 
+	factor the user's linear operator. 
+ 
+	\param matvec user supplied linear operator given as an int function
+	\param precon user supplied preconditioning operator given as an int function
+	\param r0 user supplied vector to serve as the first basis vector in the orthonormal basis
+	\param arnoldi_dat pointer to the ARNOLDI_DATA data structure
+	\param matvec_data user supplied void pointer to a data structure needed for the linear operator
+	\param precon_data user supplied void pointer to a data structure needed for the precondtioning operator*/
+
+/**	\note int (*matvec) (const Matrix<double>& v, Matrix<double> &Av, const void *data)
+	\n --------------------------------------------------------------------------------
+	\n This is a user supplied function for a linear operator. User's function must return an
+		int of 0 upon success and anything else denotes a failure. The function accepts a matrix
+		v that will act on the linear operator a modified the matrix entries of Av to form the
+		result of a matrix-vector product. Void pointer data is used to pass any user data structure
+		that the function may need in order to perform the linear operation. 
+	\n --------------------------------------------------------------------------------*/
+ 
+/**	\note int (*precon) (const Matrix<double>& b, Matrix<double> &Mb, const void *data)
+	\n --------------------------------------------------------------------------------
+	\n This is a user supplied function for a preconditioning operator. It has the same form as
+		the above linear operator function and should have all the same properties. The only 
+		difference is that this function must form an approximate matrix inversion on the original
+		linear operator and modify the entries of Mb to represent the result of that approximate
+		matrix inversion. The matrix b is given as the vector that this operator is acting on and
+		the void pointer data is for any user data structure that the operator may need.
+	\n --------------------------------------------------------------------------------*/
 int arnoldi( int (*matvec) (const Matrix<double>& v, Matrix<double> &w, const void *data),
             int (*precon) (const Matrix<double>& b, Matrix<double> &p, const void *data),
             Matrix<double> &r0, ARNOLDI_DATA *arnoldi_dat, const void *matvec_data,
 		    const void *precon_data );
 
+/// Function to iteratively solve a non-symmetric, indefinite linear system with GMRESLP
+/** This function iteratively solves a non-symmetric, indefinite linear system using the
+	Generalized Minimum RESidual method with Left Preconditioning (GMRESLP). It calls the 
+	Arnoldi algorithm to factor a linear operator into an orthonormal basis and upper 
+	Hessenberg matrix, then uses that factorization to form an approximation to the linear 
+	system. Because this algorithm uses left-side preconditioning, it can only check the
+	linear residuals at the outer iterations.
+ 
+	\param matvec user supplied linear operator given as an int function
+	\param precon user supplied preconditioning operator given as an int function
+	\param b matrix of boundary conditions in the linear system Ax=b
+	\param gmreslp_dat pointer to the GMRESLP_DATA data structure
+	\param matvec_data user supplied void pointer to a data structure needed for the linear operator
+	\param precon_data user supplied void pointer to a data structure needed for the precondtioning operator*/
+
+/**	\note int (*matvec) (const Matrix<double>& v, Matrix<double> &Av, const void *data)
+	\n --------------------------------------------------------------------------------
+	\n This is a user supplied function for a linear operator. User's function must return an 
+ int of 0 upon success and anything else denotes a failure. The function accepts a matrix
+ v that will act on the linear operator a modified the matrix entries of Av to form the
+ result of a matrix-vector product. Void pointer data is used to pass any user data structure
+ that the function may need in order to perform the linear operation.
+	\n --------------------------------------------------------------------------------*/
+
+/**	\note int (*precon) (const Matrix<double>& b, Matrix<double> &Mb, const void *data)
+	\n --------------------------------------------------------------------------------
+	\n This is a user supplied function for a preconditioning operator. It has the same form as
+ the above linear operator function and should have all the same properties. The only
+ difference is that this function must form an approximate matrix inversion on the original
+ linear operator and modify the entries of Mb to represent the result of that approximate
+ matrix inversion. The matrix b is given as the vector that this operator is acting on and
+ the void pointer data is for any user data structure that the operator may need.
+	\n --------------------------------------------------------------------------------*/
 int gmresLeftPreconditioned( int (*matvec) (const Matrix<double>& v, Matrix<double> &w, const void *data),
            int (*precon) (const Matrix<double>& b, Matrix<double> &p, const void *data),
            Matrix<double> &b, GMRESLP_DATA *gmreslp_dat, const void *matvec_data,
 		   const void *precon_data );
 
+/// Function to directly solve a non-symmetric, indefinite linear system with FOM
+/** This function directly solves a non-symmetric, indefinite linear system using the
+	Full Orthogonalization Method (FOM). This algorithm is exactly equivalent to GMRESLP
+	without restarting. Therefore, it uses the GMRESLP_DATA structure and calls the
+	GMRESLP algorithm without using restarts. As a result, it never checks linear residuals.
+	However, this should give the exact solution upon completion, assuming the linear
+	operator is not singular.
+ 
+	\param matvec user supplied linear operator given as an int function
+	\param precon user supplied preconditioning operator given as an int function
+	\param b matrix of boundary conditions in the linear system Ax=b
+	\param gmreslp_dat pointer to the GMRESLP_DATA data structure
+	\param matvec_data user supplied void pointer to a data structure needed for the linear operator
+	\param precon_data user supplied void pointer to a data structure needed for the precondtioning operator*/
+
+/**	\note int (*matvec) (const Matrix<double>& v, Matrix<double> &Av, const void *data)
+	\n --------------------------------------------------------------------------------
+	\n This is a user supplied function for a linear operator. User's function must return an
+ int of 0 upon success and anything else denotes a failure. The function accepts a matrix
+ v that will act on the linear operator a modified the matrix entries of Av to form the
+ result of a matrix-vector product. Void pointer data is used to pass any user data structure
+ that the function may need in order to perform the linear operation.
+	\n --------------------------------------------------------------------------------*/
+
+/**	\note int (*precon) (const Matrix<double>& b, Matrix<double> &Mb, const void *data)
+	\n --------------------------------------------------------------------------------
+	\n This is a user supplied function for a preconditioning operator. It has the same form as
+ the above linear operator function and should have all the same properties. The only
+ difference is that this function must form an approximate matrix inversion on the original
+ linear operator and modify the entries of Mb to represent the result of that approximate
+ matrix inversion. The matrix b is given as the vector that this operator is acting on and
+ the void pointer data is for any user data structure that the operator may need.
+	\n --------------------------------------------------------------------------------*/
 int fom( int (*matvec) (const Matrix<double>& v, Matrix<double> &w, const void *data),
          int (*precon) (const Matrix<double>& b, Matrix<double> &p, const void *data),
          Matrix<double> &b, GMRESLP_DATA *gmreslp_dat, const void *matvec_data,
 		 const void *precon_data );
 
+/// Function to iteratively solve a non-symmetric, indefinite linear system with GMRESRP
+/** This function iteratively solves a non-symmetric, indefinite linear system using the
+	Generalized Minimum RESidual method with Right Preconditioning (GMRESRP). Because this
+	algorithm uses right preconditioning, it is able to check the linear residuals at both
+	the outer and inner iterations. This may be much for efficient compared to GMRESLP. In
+	order to check inner residuals, this algorithm has to perform it's own internal Modified
+	Gram-Schmidt procedure and will not call the Arnoldi algorithm.
+ 
+	\param matvec user supplied linear operator given as an int function
+	\param precon user supplied preconditioning operator given as an int function
+	\param b matrix of boundary conditions in the linear system Ax=b
+	\param gmresrp_dat pointer to the GMRESRP_DATA data structure
+	\param matvec_data user supplied void pointer to a data structure needed for the linear operator
+	\param precon_data user supplied void pointer to a data structure needed for the precondtioning operator*/
+
+/**	\note int (*matvec) (const Matrix<double>& v, Matrix<double> &Av, const void *data)
+	\n --------------------------------------------------------------------------------
+	\n This is a user supplied function for a linear operator. User's function must return an
+ int of 0 upon success and anything else denotes a failure. The function accepts a matrix
+ v that will act on the linear operator a modified the matrix entries of Av to form the
+ result of a matrix-vector product. Void pointer data is used to pass any user data structure
+ that the function may need in order to perform the linear operation.
+	\n --------------------------------------------------------------------------------*/
+
+/**	\note int (*precon) (const Matrix<double>& b, Matrix<double> &Mb, const void *data)
+	\n --------------------------------------------------------------------------------
+	\n This is a user supplied function for a preconditioning operator. It has the same form as
+ the above linear operator function and should have all the same properties. The only
+ difference is that this function must form an approximate matrix inversion on the original
+ linear operator and modify the entries of Mb to represent the result of that approximate
+ matrix inversion. The matrix b is given as the vector that this operator is acting on and
+ the void pointer data is for any user data structure that the operator may need.
+	\n --------------------------------------------------------------------------------*/
 int gmresRightPreconditioned( int (*matvec) (const Matrix<double>& v, Matrix<double> &w, const void *data),
 		  int (*precon) (const Matrix<double>& b, Matrix<double> &p, const void *data),
 		  Matrix<double> &b, GMRESRP_DATA *gmresrp_dat, const void *matvec_data,
 		  const void *precon_data );
 
+/// Function to iteratively solve a symmetric, definite linear system with PCG
+/** This function iteratively solves a symmetric, definite linear system using the
+	Preconditioned Conjugate Gradient (PCG) method. The PCG algorithm is optimal in
+	terms of efficiency and residual reduction, but only if the linear system is
+	symmetric. PCG will fail if the linear operator is non-symmetric!
+ 
+	\param matvec user supplied linear operator given as an int function
+	\param precon user supplied preconditioning operator given as an int function
+	\param b matrix of boundary conditions in the linear system Ax=b
+	\param pcg_dat pointer to the PCG_DATA data structure
+	\param matvec_data user supplied void pointer to a data structure needed for the linear operator
+	\param precon_data user supplied void pointer to a data structure needed for the precondtioning operator*/
+
+/**	\note int (*matvec) (const Matrix<double>& v, Matrix<double> &Av, const void *data)
+	\n --------------------------------------------------------------------------------
+	\n This is a user supplied function for a linear operator. User's function must return an
+ int of 0 upon success and anything else denotes a failure. The function accepts a matrix
+ v that will act on the linear operator a modified the matrix entries of Av to form the
+ result of a matrix-vector product. Void pointer data is used to pass any user data structure
+ that the function may need in order to perform the linear operation.
+	\n --------------------------------------------------------------------------------*/
+
+/**	\note int (*precon) (const Matrix<double>& b, Matrix<double> &Mb, const void *data)
+	\n --------------------------------------------------------------------------------
+	\n This is a user supplied function for a preconditioning operator. It has the same form as
+ the above linear operator function and should have all the same properties. The only
+ difference is that this function must form an approximate matrix inversion on the original
+ linear operator and modify the entries of Mb to represent the result of that approximate
+ matrix inversion. The matrix b is given as the vector that this operator is acting on and
+ the void pointer data is for any user data structure that the operator may need.
+	\n --------------------------------------------------------------------------------*/
 int pcg( int (*matvec) (const Matrix<double>& p, Matrix<double> &Ap, const void *data),
 		 int (*precon) (const Matrix<double>& r, Matrix<double> &z, const void *data),
 		 Matrix<double> &b, PCG_DATA *pcg_dat, const void *matvec_data,
 		 const void *precon_data );
 
+/// Function to iteratively solve a non-symmetric, definite linear system with BiCGSTAB
+/** This function iteratively solves a non-symmetric, definite linear system using the
+	Bi-Conjugate Gradient STABilized (BiCGSTAB) method. This is a highly efficient algorithm
+	for solving non-symmetric problems, but will occassionally breakdown and fail. Most 
+	common failures are caused by poor preconditioning. Works very well for grid-based 
+	linear systems.
+ 
+	\param matvec user supplied linear operator given as an int function
+	\param precon user supplied preconditioning operator given as an int function
+	\param b matrix of boundary conditions in the linear system Ax=b
+	\param bicg_dat pointer to the BiCGSTAB_DATA data structure
+	\param matvec_data user supplied void pointer to a data structure needed for the linear operator
+	\param precon_data user supplied void pointer to a data structure needed for the precondtioning operator*/
+
+/**	\note int (*matvec) (const Matrix<double>& v, Matrix<double> &Av, const void *data)
+	\n --------------------------------------------------------------------------------
+	\n This is a user supplied function for a linear operator. User's function must return an
+ int of 0 upon success and anything else denotes a failure. The function accepts a matrix
+ v that will act on the linear operator a modified the matrix entries of Av to form the
+ result of a matrix-vector product. Void pointer data is used to pass any user data structure
+ that the function may need in order to perform the linear operation.
+	\n --------------------------------------------------------------------------------*/
+
+/**	\note int (*precon) (const Matrix<double>& b, Matrix<double> &Mb, const void *data)
+	\n --------------------------------------------------------------------------------
+	\n This is a user supplied function for a preconditioning operator. It has the same form as
+ the above linear operator function and should have all the same properties. The only
+ difference is that this function must form an approximate matrix inversion on the original
+ linear operator and modify the entries of Mb to represent the result of that approximate
+ matrix inversion. The matrix b is given as the vector that this operator is acting on and
+ the void pointer data is for any user data structure that the operator may need.
+	\n --------------------------------------------------------------------------------*/
 int bicgstab( int (*matvec) (const Matrix<double>& p, Matrix<double> &Ap, const void *data),
 			  int (*precon) (const Matrix<double>& r, Matrix<double> &z, const void *data),
 			  Matrix<double> &b, BiCGSTAB_DATA *bicg_dat, const void *matvec_data,
 			  const void *precon_data );
 
+/// Function to iteratively solve a non-symmetric, definite linear system with CGS
+/** This function iteratively solves a non-symmetric, definite linear system using the
+	Conjugate Gradient Squared (CGS) method. This is an extremely efficient algorithm
+	for solving non-symmetric problems, but will often breakdown and fail. Most common 
+	failures are caused by poor or no preconditioning. Works very will for grid-based
+	linear systems.
+ 
+	\param matvec user supplied linear operator given as an int function
+	\param precon user supplied preconditioning operator given as an int function
+	\param b matrix of boundary conditions in the linear system Ax=b
+	\param cgs_dat pointer to the CGS_DATA data structure
+	\param matvec_data user supplied void pointer to a data structure needed for the linear operator
+	\param precon_data user supplied void pointer to a data structure needed for the precondtioning operator*/
+
+/**	\note int (*matvec) (const Matrix<double>& v, Matrix<double> &Av, const void *data)
+	\n --------------------------------------------------------------------------------
+	\n This is a user supplied function for a linear operator. User's function must return an
+ int of 0 upon success and anything else denotes a failure. The function accepts a matrix
+ v that will act on the linear operator a modified the matrix entries of Av to form the
+ result of a matrix-vector product. Void pointer data is used to pass any user data structure
+ that the function may need in order to perform the linear operation.
+	\n --------------------------------------------------------------------------------*/
+
+/**	\note int (*precon) (const Matrix<double>& b, Matrix<double> &Mb, const void *data)
+	\n --------------------------------------------------------------------------------
+	\n This is a user supplied function for a preconditioning operator. It has the same form as
+ the above linear operator function and should have all the same properties. The only
+ difference is that this function must form an approximate matrix inversion on the original
+ linear operator and modify the entries of Mb to represent the result of that approximate
+ matrix inversion. The matrix b is given as the vector that this operator is acting on and
+ the void pointer data is for any user data structure that the operator may need.
+	\n --------------------------------------------------------------------------------*/
 int cgs( int (*matvec) (const Matrix<double>& p, Matrix<double> &Ap, const void *data),
 		 int (*precon) (const Matrix<double>& r, Matrix<double> &z, const void *data),
 		 Matrix<double> &b, CGS_DATA *cgs_dat, const void *matvec_data,
 		 const void *precon_data );
 
+/// Function that is used to perform transposition of a linear operator and results in a new vector A^T*r=u
+/** This function takes a user supplied linear operator and forms the result of that operator transposed
+	and multiplied by a given vector r (A^T*r=u). Transposition is accomplised by reordering the transpose
+	operator and multiplying the non-transposed operator by a complete set of orthonormal vectors. The end
+	result gives the ith component of the vector u for each operation (u_i = r^T*A*i). Here, i is a vector
+	made from the ith column of the identity matrix. If the linear system if sufficiently large, then this
+	operation may take some time. 
+ 
+	\param matvec user supplied linear operator given as an int function
+	\param r vector to be multiplied by the transpose of the operator
+	\param u vector to store the result of the operator transposition (u=A^T*r)
+	\param transpose_dat pointer to the OPTRANS_DATA data structure
+	\param matvec_data user supplied void pointer to a data structure needed for the linear operator*/
+
+/**	\note int (*matvec) (const Matrix<double>& v, Matrix<double> &Av, const void *data)
+	\n --------------------------------------------------------------------------------
+	\n This is a user supplied function for a linear operator. User's function must return an
+ int of 0 upon success and anything else denotes a failure. The function accepts a matrix
+ v that will act on the linear operator a modified the matrix entries of Av to form the
+ result of a matrix-vector product. Void pointer data is used to pass any user data structure
+ that the function may need in order to perform the linear operation.
+	\n --------------------------------------------------------------------------------*/
 int operatorTranspose(int(*matvec) (const Matrix<double>& v, Matrix<double> &Av, const void *data),
 					  Matrix<double> &r, Matrix<double> &u, OPTRANS_DATA *transpose_dat, 
 					  const void *matvec_data);
 
+/// Function to iteratively solve a non-symmetric, definite linear system with GCR
+/** This function iteratively solves a non-symmetric, definite linear system using the
+	Generalized Conjugate Residual (GCR) method. Similar to GMRESRP, this algorithm 
+	will construct a growing orthonormal basis set that will eventually form the exact
+	solution to the linear system. However, this algorithm is less efficient than GMRESRP
+	and can suffer breakdowns if the linear system is indefinite.
+ 
+	\param matvec user supplied linear operator given as an int function
+	\param precon user supplied preconditioning operator given as an int function
+	\param b matrix of boundary conditions in the linear system Ax=b
+	\param gcr_dat pointer to the GCR_DATA data structure
+	\param matvec_data user supplied void pointer to a data structure needed for the linear operator
+	\param precon_data user supplied void pointer to a data structure needed for the precondtioning operator*/
+
+/**	\note int (*matvec) (const Matrix<double>& v, Matrix<double> &Av, const void *data)
+	\n --------------------------------------------------------------------------------
+	\n This is a user supplied function for a linear operator. User's function must return an
+ int of 0 upon success and anything else denotes a failure. The function accepts a matrix
+ v that will act on the linear operator a modified the matrix entries of Av to form the
+ result of a matrix-vector product. Void pointer data is used to pass any user data structure
+ that the function may need in order to perform the linear operation.
+	\n --------------------------------------------------------------------------------*/
+
+/**	\note int (*precon) (const Matrix<double>& b, Matrix<double> &Mb, const void *data)
+	\n --------------------------------------------------------------------------------
+	\n This is a user supplied function for a preconditioning operator. It has the same form as
+ the above linear operator function and should have all the same properties. The only
+ difference is that this function must form an approximate matrix inversion on the original
+ linear operator and modify the entries of Mb to represent the result of that approximate
+ matrix inversion. The matrix b is given as the vector that this operator is acting on and
+ the void pointer data is for any user data structure that the operator may need.
+	\n --------------------------------------------------------------------------------*/
 int gcr( int (*matvec) (const Matrix<double>& x, Matrix<double> &Ax, const void *data),
 		 int (*precon) (const Matrix<double>& r, Matrix<double> &Mr, const void *data),
 		 Matrix<double> &b, GCR_DATA *gcr_dat, const void *matvec_data,
 		 const void *precon_data );
 
+/// Function used in conjunction with GMRESR to apply GMRESRP iterations as a preconditioner
+/** This function is required to take the form of the user supplied preconditioning functions
+	for other iterative methods. However, it cannot be used in conjunction with any other
+	Krylov method. It is only called by the GMRESR function when the preconditioner needs to
+	be applied.
+ 
+	\param r vector supplied to the preconditioner to operate on
+	\param Mr vector to hold the result of the preconditioning operation
+	\param data void pointer to the GMRESR_DATA data structure*/
 int gmresPreconditioner( const Matrix<double>& r, Matrix<double> &Mr, const void *data);
 
+/// Function to iteratively solve a non-symmetric, indefinite linear system with GMRESR
+/** This function iteratively solves a non-symmetric, indefinite linear system using the
+	Generalized Minimum RESidual Recursive (GMRESR) method. This algorithm actually uses
+	GCR at the outer iterations, but stabilizes GCR with GMRESRP inner iterations to 
+	implicitly form a variable preconditioner to the linear system. As such, this is the
+	only linear method that inherently includes preconditioning, without any user supplied
+	preconditioning operator. However, this algorithms is signficantly more computationally
+	expensive than GCR or GMRESRP separately. It should only be used for solving very large
+	or very hard to solve linear systems.
+ 
+	\param matvec user supplied linear operator given as an int function
+	\param terminal_precon user supplied preconditioning operator given as an int function
+	\param b matrix of boundary conditions in the linear system Ax=b
+	\param gmresr_dat pointer to the GMRESR_DATA data structure
+	\param matvec_data user supplied void pointer to a data structure needed for the linear operator
+	\param term_precon_data user supplied void pointer to a data structure needed for the precondtioning operator*/
+
+/**	\note int (*matvec) (const Matrix<double>& v, Matrix<double> &Av, const void *data)
+	\n --------------------------------------------------------------------------------
+	\n This is a user supplied function for a linear operator. User's function must return an
+ int of 0 upon success and anything else denotes a failure. The function accepts a matrix
+ v that will act on the linear operator a modified the matrix entries of Av to form the
+ result of a matrix-vector product. Void pointer data is used to pass any user data structure
+ that the function may need in order to perform the linear operation.
+	\n --------------------------------------------------------------------------------*/
+
+/**	\note int (*terminal_precon) (const Matrix<double>& b, Matrix<double> &Mb, const void *data)
+	\n --------------------------------------------------------------------------------
+	\n This is a user supplied function for a preconditioning operator. It has the same form as
+ the above linear operator function and should have all the same properties. The only
+ difference is that this function must form an approximate matrix inversion on the original
+ linear operator and modify the entries of Mb to represent the result of that approximate
+ matrix inversion. The matrix b is given as the vector that this operator is acting on and
+ the void pointer data is for any user data structure that the operator may need.
+	\n --------------------------------------------------------------------------------*/
 int gmresr( int (*matvec) (const Matrix<double>& x, Matrix<double> &Ax, const void *data),
 		  int (*terminal_precon) (const Matrix<double>& r, Matrix<double> &Mr, const void *data),
 		  Matrix<double> &b, GMRESR_DATA *gmresr_dat, const void *matvec_data,
 		  const void *term_precon_data );
 
+/// Function to iteratively solve a non-linear system using the Picard or Fixed-Point method
+/** This function iteratively solves a non-linear system using the Picard method. User supplies
+	a residual function and a weak solution form function. The weak form function is used to 
+	approximate the next solution vector for the non-linear system and the residual function is	
+	used to determine convergence. User also supplies an initial guess to the non-linear system
+	as a matix x, which will also be used to store the solution. This algorithm is very simple
+	and may not be sufficient to solve complex non-linear systems.
+ 
+	\param res user supplied function for the non-linear residuals of the system
+	\param evalx user supplied function for the weak form to estimate the next solution
+	\param x user supplied matrix holding the initial guess to the non-linear system
+	\param picard_dat pointer to the PICARD_DATA data structure
+	\param res_data user supplied void pointer to a data structure used for residual evaluations
+	\param evalx_data user supplied void pointer to a data structure used for evaluation of weak form*/
+
+/**	\note int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *data)
+	\n --------------------------------------------------------------------------------
+	\n This is a user supplied function for the non-linear residuals. User's function must return an
+ int of 0 upon success and anything else denotes a failure. The function accepts a matrix
+ x representing the current non-linear variables. Those variables are used to evaluate the
+ users functions and return the residuals in the matrix F. The void pointer data is a data
+ structure provided by the user to hold information the function may need in order to form
+ the residuals.
+	\n --------------------------------------------------------------------------------*/
+
+/**	\note int (*evalx) (const Matrix<double>& x0, Matrix<double> &x, const void *data)
+	\n --------------------------------------------------------------------------------
+	\n This is a user supplied function to approximate the next solution vector x based on
+		the previous solution vector x0. The x0 matrix is passed to this function and must
+		be used to edit the entries of x based on the weak form of the problem. The user
+		is free to define any weak form approximation. Void pointer data is the users
+		data structure that may be used to pass additional information into this function
+		in order to evaluate the weak form. \n
+
+		Example Residual: F(x) = x^2 + x - 1    Goal is to make this function equal zero \n
+		Example Weak Form: x = 1 - x0^2         Rearrage residual to form a weak solution
+	\n --------------------------------------------------------------------------------*/
 int picard( int (*res) (const Matrix<double>& x, Matrix<double> &r, const void *data),
 		    int (*evalx) (const Matrix<double>& x0, Matrix<double> &x, const void *data),
 			Matrix<double> &x, PICARD_DATA *picard_dat, const void *res_data,
 		    const void *evalx_data);
 
+/// Function to form a linear operator of a Jacobian matrix used along with the PJFNK method
+/** This function is used in conjunction with the PJFNK routine to form a linear operator that
+	a Krylov method can operate on. This linear operator is formed from the current residual
+	vector of the non-linear iteration in PJFNK using a finite difference approximation. \n
+	
+	Jacobian Linear Operator: J*v = ( F(x_k + eps*v) - F(x_k) ) / eps
+ 
+	\param v vector to be multiplied by the Jacobian matrix
+	\param Jv storage vector for the result of the Jacobi-vector product
+	\param data void pointer to the PJFNK_DATA data structure holding solver information*/
 int jacvec( const Matrix<double>& v, Matrix<double>& Jv, const void *data);
 
+/// Function to perform a Backtracking Line Search operation to smooth out convergence of PJFNK
+/** This function performs a simple backtracking line search operation on the residuals from the
+	PJFNK method. The step size of the non-linear iteration is checked against a level of tolerance
+	for residual reduction, then adjusted down if necessary. This method always starts out with the
+	maximum allowable step size. If the largest step size is fine, then the algorithm does nothing.
+	Otherwise, it iteratively adjusts the step size down, until a suitable step is found. In the 
+	case that no suitable step is found, this algorithm will report failure to the PJFNK method and
+	PJFNK will decide whether to continue trying to find a global minimum or report that it is stuck
+	in a local minimum. 
+ 
+	\param feval user supplied residual function for the non-linear system
+	\param Fkp1 vector holding the residuals for the next non-linear step
+	\param xkp1 vector holding the solution for the next non-linear step
+	\param pk vector holding the current non-linear search direction
+	\param normFk value of the current non-linear residual
+	\param backtrack_dat pointer to the BACKTRACK_DATA data structure
+	\param feval_data user supplied void pointer to the data structure needed for residual evaluation*/
+
+/**	\note int (*feval) (const Matrix<double>& x, Matrix<double> &F, const void *data)
+	\n --------------------------------------------------------------------------------
+	\n This is a user supplied function for the non-linear residuals. User's function must return an
+ int of 0 upon success and anything else denotes a failure. The function accepts a matrix
+ x representing the current non-linear variables. Those variables are used to evaluate the
+ users functions and return the residuals in the matrix F. The void pointer data is a data
+ structure provided by the user to hold information the function may need in order to form
+ the residuals.
+	\n --------------------------------------------------------------------------------*/
 int backtrackLineSearch( int (*feval) (const Matrix<double>& x, Matrix<double> &F, const void *data),
 						 Matrix<double> &Fkp1, Matrix<double> &xkp1, Matrix<double> &pk, double normFk,
 						 BACKTRACK_DATA *backtrack_dat, const void *feval_data);
 
+/// Function to perform the PJFNK algorithm to solve a non-linear system of equations
+/** This function solves a non-linear system of equations using the Preconditioned Jacobian-
+	Free Newton-Krylov (PJFNK) algorithm. Each non-linear step of this method results in a 
+	linear sub-problem that is solved iteratively with one of the Krylov methods in the 
+	krylov_method enum. User must supplied a residual function that computes the non-linear
+	residuals of the system given the current state of the variables x. Additionally, the
+	user must also supplied an initial guess to the non-linear system. Optionally, the user
+	may supply a preconditioning function for the linear sub-problem. \n
+ 
+	Basic Steps: (i) Calc F(x_k), (ii) Solve J(x_k)*s_k=-F(x_k) for s_k, (iii) Form x_kp1 = x_k + s_k
+	
+	\param res user supplied residual function for the non-linear system
+	\param precon user supplied preconditioning function for the linear sub-problems
+	\param x user supplied initial guess and storage location of the solution
+	\param pjfnk_dat pointer to the PJFNK_DATA data structure
+	\param res_data user supplied void pointer to data structure used in residual function
+	\param precon_data user supplied void pointer to data structure used in preconditioning function*/
+
+/**	\note int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *data)
+	\n --------------------------------------------------------------------------------
+	\n This is a user supplied function for the non-linear residuals. User's function must return an
+ int of 0 upon success and anything else denotes a failure. The function accepts a matrix
+ x representing the current non-linear variables. Those variables are used to evaluate the
+ users functions and return the residuals in the matrix F. The void pointer data is a data
+ structure provided by the user to hold information the function may need in order to form
+ the residuals.
+	\n --------------------------------------------------------------------------------*/
+
+/**	\note int (*precon) (const Matrix<double>& b, Matrix<double> &Mb, const void *data)
+	\n --------------------------------------------------------------------------------
+	\n This is a user supplied function for a preconditioning operator. It has the same form as
+ the linear operators from the Krylov methods and should have all the same properties. The only
+ difference is that this function must form an approximate matrix inversion on the jacvec
+ linear operator and modify the entries of Mb to represent the result of that approximate
+ matrix inversion. The matrix b is given as the vector that this operator is acting on and
+ the void pointer data is for any user data structure that the operator may need.
+	\n --------------------------------------------------------------------------------*/
 int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *data),
 		   int (*precon) (const Matrix<double>& r, Matrix<double>& p, const void *data),
 		   Matrix<double> &x, PJFNK_DATA *pjfnk_dat, const void *res_data,
 		   const void *precon_data );
 
+/// Function to form a full numerical Jacobian matrix from a given non-linear function
+/** This function uses finite differences to form a full rank Jacobian matrix for a user
+	supplied non-linear function. The Jacobian matrix will be formed at the current state
+	of the non-linear variables x and stored in a full matrix J. Integers Nx and Nf are 
+	used to determine the size of the Jacobian matrix. 
+ 
+	\param Func user supplied function for evaluation of the non-linear system
+	\param x matrix holding the current value of the non-linear variables
+	\param J matrix that will store the numerical Jacobian result
+	\param Nx number of non-linear variables in the system
+	\param Nf number of non-linear functions in the system
+	\param jac_dat pointer to the NUM_JAC_DATA data structure
+	\param user_data user supplied void pointer to a data structure used in the non-linear function*/
 int NumericalJacobian( int (*Func) (const Matrix<double> &x, Matrix<double> &F, const void *user_data),
 					  const Matrix<double> &x, Matrix<double> &J, int Nx, int Nf, NUM_JAC_DATA *jac_dat,
 					  const void *user_data);
 
+/// Function that runs a variety of tests on all the functions in LARK
+/** This function runs a variety of tests on the linear and non-linear methods
+	developed in LARK. It can be called from the UI.*/
 int LARK_TESTS();
 
 #endif
