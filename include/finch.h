@@ -1,10 +1,3 @@
-//----------------------------------------
-//  Created by Austin Ladshaw on 6/10/14
-//  Copyright (c) 2014
-//	Austin Ladshaw
-//	All rights reserved
-//----------------------------------------
-
 /*!
  *  \file finch.h finch.cpp
  *	\brief Flux-limiting Implicit Non-oscillatory Conservative High-resolution scheme
@@ -102,11 +95,11 @@ typedef struct
   	double uT_old = 0.0;	///< Old Total amount of conserved quantity
   	double uAvg = 0.0;		///< Average amount of conserved quantity in domain
   	double uAvg_old = 0.0;	///< Old Average amount of conserved quantity
-	double uIC = 0.0;		///< Initial condition of Conserved Quantity
-	double vIC = 1.0;		///< Initial condition of Velocity
-	double DIC = 1.0;		///< Initial condition of Dispersion
-  	double kIC = 1.0;		///< Initial condition of Reaction
-  	double RIC = 1.0;		///< Initial condition of the Time Coefficient
+	double uIC = 0.0;		///< Initial condition of Conserved Quantity (if constant)
+	double vIC = 1.0;		///< Initial condition of Velocity (if constant)
+	double DIC = 1.0;		///< Initial condition of Dispersion (if constant)
+  	double kIC = 1.0;		///< Initial condition of Reaction (if constant)
+  	double RIC = 1.0;		///< Initial condition of the Time Coefficient (if constant)
 	double uo = 1.0;		///< Boundary Value of Conserved Quantity
 	double vo = 1.0;		///< Boundary Value of Velocity
 	double Do = 1.0;		///< Boundary Value of Dispersion
@@ -290,32 +283,94 @@ void print2file_tab(FILE *Output, FINCH_DATA *dat);
 //Default Functions in FINCH--------------------------------------------
 
 /// Default executioner function for FINCH
+/** The default executioner function for FINCH assumes the user_data parameter is
+	the FINCH_DATA structure and calls the preprocesses, solve, postprocesses, checkMass,
+	uTotal, and uAverage functions in that order. */
 int default_execution(const void *user_data);
 
+/// Default initial conditions function for FINCH
+/** The default initial condition function for FINCH assumes the user_data parameter is
+	the FINCH_DATA structure and sets the initial values of all system parameters according
+	to the given constants in that structure. */
 int default_ic(const void *user_data);
 
+/// Default time step function for FINCH
+/** The default time step function for FINCH assumes the user_data parameter is
+	the FINCH_DATA structure and sets the time step to 1/2 the mesh size or bases the time
+	step off of the CFL condition if the problem is not being solved iteratively and involves
+	an advective portion. */
 int default_timestep(const void *user_data);
 
+/// Default preprocesses function for FINCH
+/** The default preprocesses function for FINCH assumes the user_data parameter is
+	the FINCH_DATA structure and does nothing. */
 int default_preprocess(const void *user_data);
 
+/// Default solve function for FINCH
+/** The default solve function for FINCH assumes the user_data parameter is
+	the FINCH_DATA structure and calls the corresponding solution method depending
+	on the users conditions. */
 int default_solve(const void *user_data);
 
+/// Default params function for FINCH
+/** The default params function for FINCH assumes the user_data parameter is
+	the FINCH_DATA structure and sets the values of all parameters at all nodes equal
+	to the values of those parameters at the boundaries. */
 int default_params(const void *user_data);
 
+/// Minmod Discretization function for FINCH
+/** The minmod discretization function for FINCH assumes the user_data parameter is
+	the FINCH_DATA structure and discretizes the time and space portion of the problem
+	with 2nd order finite differences and uses the minmod slope limiter function to 
+	stabilize the advective physics. */
 int minmod_discretization(const void *user_data);
 
+/// Van Albada Discretization function for FINCH
+/** The van Albada discretization function for FINCH assumes the user_data parameter is
+	the FINCH_DATA structure and discretizes the time and space portion of the problem
+	with 2nd order finite differences and uses the van Albada slope limiter function to
+	stabilize the advective physics. */
 int vanAlbada_discretization(const void *user_data);
 
+/// Ospre Discretization function for FINCH
+/** The ospre discretization function for FINCH assumes the user_data parameter is
+	the FINCH_DATA structure and discretizes the time and space portion of the problem
+	with 2nd order finite differences and uses the ospre slope limiter function to
+	stabilize the advective physics. This is the default discretization function. */
 int ospre_discretization(const void *user_data);
 
+/// Default boundary conditions function for FINCH
+/** The default boundary conditions function for FINCH assumes the user_data parameter is
+	the FINCH_DATA structure and sets the boundary conditions according to the type of problem
+	requested. The input BCs will always be either Neumann or Dirichlet and the output BC will
+	always be a zero flux Neumann BC. */
 int default_bcs(const void *user_data);
 
+/// Default residual function for FINCH
+/** The default residual function for FINCH assumes the user_data parameter is
+	the FINCH_DATA structure and calls the setparams function (passing the param_data structure),
+	the discretization function, and the set BCs functions, in that order. It then forms the 
+	implicit and explicit side residuals that go into the iterative solver. */
 int default_res(const Matrix<double> &x, Matrix<double> &res, const void *user_data);
 
+/// Default preconditioning function for FINCH
+/** The default preconditioning function for FINCH assumes the user_data parameter is
+	the FINCH_DATA structure and performs a tridiagonal linear solve using a Modified
+	Thomas Algorithm. This preconditioner will solve the linear problem exactly if there
+	is no advective portion of the physics. Additionally, this preconditioner is also used
+	as the basis for forming the default FINCH non-linear iterations and is sufficient for
+	solving most problems. */
 int default_precon(const Matrix<double> &b, Matrix<double> &p, const void *user_data);
 
+// Default postprocesses function for FINCH
+/** The default postprocesses function for FINCH assumes the user_data parameter is
+	the FINCH_DATA structure and does nothing. */
 int default_postprocess(const void *user_data);
 
+/// Default reset function for FINCH
+/** The default reset function for FINCH assumes the user_data parameter is
+	the FINCH_DATA structure and sets all old state parameters and variables to the new
+	state. */
 int default_reset(const void *user_data);
 //END Default Functions------------------------------------------------
 
@@ -333,6 +388,9 @@ int burgers_bcs(const void *user_data);
 /// \endcond
 //END Specific Functions-----------------------------------------------
 
+/// Function runs a particular FINCH test
+/** The FINCH_TESTS function is used to exercise and test out the FINCH algorithms for
+	correctness, efficiency, and accuracy. This test should never report a failure. */
 int FINCH_TESTS();
 
 #endif

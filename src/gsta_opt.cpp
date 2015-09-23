@@ -1,27 +1,12 @@
-//----------------------------------------
-//  Created by Austin Ladshaw on 12/17/13
-//  Copyright (c) 2013
-//	Austin Ladshaw
-//	All rights reserved
-//----------------------------------------
-
-/*
- * gsta_opt.C
- *
- *  v1.0.0
- *
- *			1.0.0 - Optimization routine developed for the GSTA isotherm and data analysis. This
- *					algorithm was the primary subject of a publication made in Fluid Phase Equilibria.
- *					Please refer to the below paper for technical information about the algorithms.
- *
- *					Reference: Ladshaw, Yiacoumi, Tsouris, and DePaoli, Fluid Phase Equilibria, 388,
- *								169-181, 2015.
- *
- *					The GSTA model was first introduced by Llano-Restrepo and Mosquera (2009). Please
- *					refer to the below reference for theoretical information about the model.
- *
- *					Reference: Llano-Restrepo and Mosquera, Fluid Phase Equilibria, 283, 73-88, 2009.
- *
+/*!
+ *  \file gsta_opt.cpp gsta_opt.h
+ *	\brief Generalized Statistical Thermodynamic Adsorption (GSTA) Optimization Routine
+ *  \author Austin Ladshaw
+ *	\date 12/17/2012
+ *	\copyright This software was designed and built at the Georgia Institute
+ *             of Technology by Austin Ladshaw for PhD research in the area
+ *             of adsorption and surface science. Copyright (c) 2015, all
+ *             rights reserved.
  */
 
 #include "gsta_opt.h"
@@ -67,8 +52,8 @@ int orderMag(double x)
 	return m;
 }
 
-//Overloaded constructor for the function minValue
-int minValue(std::vector<int> array)
+//Function returns the minimum int in a vector
+int minValue(std::vector<int> &array)
 {
 	int min = array[0];
 	unsigned long int length = array.size();
@@ -80,7 +65,7 @@ int minValue(std::vector<int> array)
 }
 
 //Function to find lowest (minimum) value in array
-int minIndex(std::vector<double> array)
+int minIndex(std::vector<double> &array)
 {
      double min = array[0];
      unsigned long int length = array.size();
@@ -98,7 +83,7 @@ int minIndex(std::vector<double> array)
 }
 
 //Function to determine the average of an array of ints and return a rounded int
-int avgPar(std::vector<int> array)
+int avgPar(std::vector<int> &array)
 {
 	int avg = 0; double avgd=0;
 	unsigned long int length = array.size();
@@ -112,7 +97,7 @@ int avgPar(std::vector<int> array)
 }
 
 //Function to determine the average of an array of doubles
-double avgValue(std::vector<double> array)
+double avgValue(std::vector<double> &array)
 {
 	double avg=0;
 	unsigned long int length = array.size();
@@ -168,13 +153,12 @@ double rSq(double *x, double *y, double slope, double vint, int m_dat)
 	return rSq;
 }
 
-//Check the smoothness of the parameter array (NEEDS WORK and more testing)
+//Check the smoothness of the parameter array
 bool isSmooth(double *par, void *data)
 {
 	GSTA_OPT_DATA *dat = (GSTA_OPT_DATA *) data;
 	bool ans; int count=0;
 	std::vector<double> first, second;
-	//double temp;
 
 	ans = true;
 	if (dat->qmax != 0)
@@ -185,8 +169,6 @@ bool isSmooth(double *par, void *data)
 			first.push_back( (orderMag(fabs(par[(i+1)])) - orderMag(fabs(par[(i)]))) / 1.0 );
 			second.push_back( (orderMag(fabs(par[(i+1)])) - (2*orderMag(fabs(par[i]))) + orderMag(fabs(par[(i-1)]))) / 1.0 );
 
-			//cout << first[count] << endl;
-			//cout << second[count] << endl;
 			if (count !=0 && fabs( second[(count)] - second[(count-1)] ) > 6 )
 			{
 				ans = false;
@@ -200,14 +182,10 @@ bool isSmooth(double *par, void *data)
 		//checking interior points
 		for(int i=2; i<(dat->n_par-1); i++)
 		{
-			//temp = (double) ( (1.0*orderMag(fabs(par[(i+1)])) - 1.0*orderMag(fabs(par[(i)]))) / 1.0 );
-			//cout << temp << endl;
 			first.push_back( ( (1.0*orderMag(fabs(par[(i+1)])) - 1.0*orderMag(fabs(par[(i)]))) / 1.0 ) );
 			second.push_back( ( (orderMag(fabs(par[(i+1)])) -
 					(2.0*orderMag(fabs(par[i]))) + orderMag(fabs(par[(i-1)]))) / 1.0 ) );
 
-			//cout << first[count] << endl;
-			//cout << second[count] << endl;
 			if (count !=0 && fabs( second[(count)] - second[(count-1)] ) > 6)
 			{
 				ans = false;
@@ -296,10 +274,8 @@ void eduGuess(double *P, double *q, double *par, int k, int m_dat, void *data)
 			{
 				if(k < 2)
 				{
-					//cout << "Here" << endl;
 					par[i] = fabs(dat->all_pars[dat->iso][(k - 1)][i]);
 					par_sum = par_sum + orderMag(fabs(par[i]));
-					//cout << par_sum << endl;
 				}
 				else
 				{
@@ -312,10 +288,8 @@ void eduGuess(double *P, double *q, double *par, int k, int m_dat, void *data)
 			//Set the additional parameter argument to a projection based off of other optimized parameters
 			else if (i < (dat->n_par - 1))
 			{
-				//cout << "Here1.5" << endl;
 				par[i] = pow(10, (slope + orderMag(fabs(dat->all_pars[dat->iso][(k-1)][i])) ) );
 				par_sum = par_sum + orderMag(fabs(par[i]));
-				//cout << par_sum << endl;
 			}
 			else
 			{
@@ -326,10 +300,8 @@ void eduGuess(double *P, double *q, double *par, int k, int m_dat, void *data)
 				}
 				else
 				{
-					//cout << "Here2" << endl;
 					//Remove qmax from par_sum if it was adjustable
 					if (dat->qmax == 0) par_sum = par_sum - orderMag(fabs(par[0]));
-					//cout << par_sum << endl;
 					par[i] = pow(10, roundIt((par_sum / (dat->n_par - 1))));
 				}
 			}
@@ -369,8 +341,7 @@ double gstaObjFunc(double *t, double *y, double *par, int m_dat, void *data)
 	double objF, sigma = 0;
 	for (int i=0;i<m_dat;i++)
 	{
-		sigma = sigma + pow(((y[i] - gstaFunc(t[i],par,dat->qmax, dat->n_par))/y[i]),2);		//Relative Difference
-		//sigma = sigma + pow(((y[i] - gstaFunc(t[i],par, dat->qmax, dat->n_par))),2);			//Absolute Difference
+		sigma = sigma + pow(((y[i] - gstaFunc(t[i],par,dat->qmax, dat->n_par))/y[i]),2);
 	}
 	objF = sqrt(sigma / (m_dat - (dat->n_par) - 1));
 	return objF;
