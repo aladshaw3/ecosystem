@@ -499,8 +499,6 @@ void eval_GPAST(const double *par, int m_dat, const void *data, double *fvec, in
 	 * par[0] = PI			par[(i+1)] = x[i]
 	 *
 	 * n_par = 1 + dat->sys_dat.N; m_dat = n_par
-	 *
-	 * First attempt is to replicate IAST results using activity evaluations of unity
 	 */
 	MAGPIE_DATA *dat = (MAGPIE_DATA *) data;
 

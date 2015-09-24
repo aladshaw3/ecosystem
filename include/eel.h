@@ -35,7 +35,7 @@
 #include <string>				// Line to allow use of strings as a data type
 #include "error.h"				// Line to allow use of the custom error file
 
-/// Atom object to hold information about specific atoms in the periodic table
+/// Atom object to hold information about specific atoms in the periodic table (click Atom to go to function definitions)
 /** C++ class object holding data and functions associated with atoms. Objects can be 
 	registered at the time of object construction, or after declaring an Atom object.
 	Registration can be done via the atomic symbol or atomic number. Valid atoms go 

@@ -1,16 +1,20 @@
-//----------------------------------------
-//  Created by Austin Ladshaw on 02/24/15
-//  Copyright (c) 2015
-//	Austin Ladshaw
-//	All rights reserved
-//----------------------------------------
+/*!
+ *  \file mola.cpp mola.h
+ *	\brief Molecule Object Library from Atoms
+ *  \author Austin Ladshaw
+ *	\date 02/24/2014
+ *	\copyright This software was designed and built at the Georgia Institute
+ *             of Technology by Austin Ladshaw for PhD research in the area
+ *             of adsorption and surface science. Copyright (c) 2015, all
+ *             rights reserved.
+ */
 
 #include "mola.h"
 
 //Default constructor
 Molecule::Molecule()
 :
-Atom(0)
+atoms(0)
 {
 	registered = false;
 	haveG = false;

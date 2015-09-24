@@ -14,7 +14,7 @@
  *			Reference: Llano-Restrepo and Mosquera, Fluid Phase Equilibria, 283, 73-88, 2009.
  *
  *  \author Austin Ladshaw
- *	\date 12/17/2012
+ *	\date 12/17/2013
  *	\copyright This software was designed and built at the Georgia Institute
  *             of Technology by Austin Ladshaw for PhD research in the area
  *             of adsorption and surface science. Copyright (c) 2015, all

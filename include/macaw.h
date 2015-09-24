@@ -1792,7 +1792,11 @@ void Matrix<T>::columnExtend(const Matrix &v)
     }
 }
 
+/// Function to run the MACAW tests
+/** This function is callable from the UI and is used to run several
+	algorithm tests for the Matrix objects. This test should never
+	report any errors. */
 int MACAW_TESTS();
 
 
-#endif /* MACAW_HPP_ */
+#endif
