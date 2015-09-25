@@ -177,6 +177,7 @@ typedef struct
 	Matrix<double> r;					///< Residual vector for the linear system
 	
 	std::vector< Matrix<double> > Vk;			///< (N x k) orthonormal vector basis
+	std::vector< Matrix<double> > Zk;			///< (N x k) preconditioned vector set
 	std::vector< std::vector< double > > H;		///< (k+1 x k) upper Hessenberg storage matrix
 	std::vector< std::vector< double > > H_bar;	///< (k+1 x k) Factorized matrix
 	std::vector< double > y;					///< (k x 1) Vector search direction
@@ -929,7 +930,7 @@ int gcr( int (*matvec) (const Matrix<double>& x, Matrix<double> &Ax, const void 
 	\param r vector supplied to the preconditioner to operate on
 	\param Mr vector to hold the result of the preconditioning operation
 	\param data void pointer to the GMRESR_DATA data structure*/
-int gmresPreconditioner( const Matrix<double>& r, Matrix<double> &Mr, const void *data);
+int gmresrPreconditioner( const Matrix<double>& r, Matrix<double> &Mr, const void *data);
 
 /// Function to iteratively solve a non-symmetric, indefinite linear system with GMRESR
 /** This function iteratively solves a non-symmetric, indefinite linear system using the

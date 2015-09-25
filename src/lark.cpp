@@ -519,16 +519,6 @@ int gmresLeftPreconditioned( int (*matvec) (const Matrix<double>& v, Matrix<doub
   	if (gmreslp_dat->x.rows() != b.rows())
     {
 		gmreslp_dat->x.set_size(b.rows(), 1);
-		//Apply preconditioner as intial guess if available
-		if ( (*precon) != NULL)
-        {
-          	success = (*precon) (b, gmreslp_dat->x, precon_data);
-            if (success != 0)
-            {
-                mError(simulation_fail);
-                return success;
-            }
-        }
     }
   	if (gmreslp_dat->tol_rel < DBL_EPSILON || gmreslp_dat->tol_rel >= 1)
     {
@@ -799,16 +789,6 @@ int gmresRightPreconditioned( int (*matvec) (const Matrix<double>& v, Matrix<dou
 	if (gmresrp_dat->x.rows() != b.rows())
 	{
 		gmresrp_dat->x.set_size(b.rows(), 1);
-		//Apply preconditioner as intial guess if available
-		if ( (*precon) != NULL)
-		{
-			success = (*precon) (b, gmresrp_dat->x, precon_data);
-			if (success != 0)
-			{
-				mError(simulation_fail);
-				return success;
-			}
-		}
 	}
 	if (gmresrp_dat->w.rows() != b.rows())
 	{
@@ -913,6 +893,11 @@ int gmresRightPreconditioned( int (*matvec) (const Matrix<double>& v, Matrix<dou
 			{
 				gmresrp_dat->v = gmresrp_dat->Vk[j];
 			}
+			//Store result in growing preconditioned vector space
+			if (gmresrp_dat->Zk.size() < j+1)
+				gmresrp_dat->Zk.push_back(gmresrp_dat->v);
+			else
+				gmresrp_dat->Zk[j] = gmresrp_dat->v;
 			success = (*matvec) (gmresrp_dat->v, gmresrp_dat->w, matvec_data);
 			if (success != 0)
 			{
@@ -1072,28 +1057,15 @@ int gmresRightPreconditioned( int (*matvec) (const Matrix<double>& v, Matrix<dou
 			}
 		}
 				
-		//Form the new solution vector (x = x0 + M^-1*Vk*y)
+		//Form the new solution vector (x = x0 + Zk*y)
 		for (int n=0; n<b.rows(); n++)
 		{
 			sum = 0.0;
 			for (int i=0; i<gmresrp_dat->iter_inner; i++)
 			{
-				sum = sum + (gmresrp_dat->Vk[i](n,0) * gmresrp_dat->y[i]);
+				sum = sum + (gmresrp_dat->Zk[i](n,0) * gmresrp_dat->y[i]);
 			}
-			gmresrp_dat->v.edit(n, 0, sum);
-		}
-		if ( (*precon) != NULL)
-		{
-			success = (*precon) (gmresrp_dat->v, gmresrp_dat->w, precon_data);
-			if (success != 0)
-			{
-				mError(simulation_fail);
-				return success;
-			}
-		}
-		else
-		{
-			gmresrp_dat->w = gmresrp_dat->v;
+			gmresrp_dat->w.edit(n, 0, sum);
 		}
 		gmresrp_dat->x = gmresrp_dat->x + gmresrp_dat->w;
 		
@@ -1220,15 +1192,6 @@ int pcg( int (*matvec) (const Matrix<double>& p, Matrix<double> &Ap, const void 
 	if (pcg_dat->x.rows() != b.rows())
 	{
 		pcg_dat->x.set_size(b.rows(), 1);
-		if ( (*precon) != NULL)
-        {
-          	success = (*precon) (b, pcg_dat->x, precon_data);
-            if (success != 0)
-            {
-                mError(simulation_fail);
-                return success;
-            }
-        }
 	}
 	if (pcg_dat->r.rows() != b.rows())
 	{
@@ -1439,15 +1402,6 @@ int bicgstab( int (*matvec) (const Matrix<double>& p, Matrix<double> &Ap, const 
 	if (bicg_dat->x.rows() != b.rows())
 	{
 		bicg_dat->x.set_size(b.rows(), 1);
-		if ( (*precon) != NULL)
-        {
-          	success = (*precon) (b, bicg_dat->x, precon_data);
-            if (success != 0)
-            {
-                mError(simulation_fail);
-                return success;
-            }
-        }
 	}
 	if (bicg_dat->r.rows() != b.rows())
 	{
@@ -1696,15 +1650,6 @@ int cgs( int (*matvec) (const Matrix<double>& p, Matrix<double> &Ap, const void 
 	if (cgs_dat->x.rows() != b.rows())
 	{
 		cgs_dat->x.set_size(b.rows(), 1);
-		if ( (*precon) != NULL)
-        {
-          	success = (*precon) (b, cgs_dat->x, precon_data);
-            if (success != 0)
-            {
-                mError(simulation_fail);
-                return success;
-            }
-        }
 	}
 	if (cgs_dat->r.rows() != b.rows())
 	{
@@ -2014,16 +1959,6 @@ int gcr( int (*matvec) (const Matrix<double>& x, Matrix<double> &Ax, const void 
 	if (gcr_dat->x.rows() != b.rows())
 	{
 		gcr_dat->x.set_size(b.rows(), 1);
-		//Apply preconditioner as intial guess if available
-		if ( (*precon) != NULL)
-		{
-			success = (*precon) (b, gcr_dat->x, precon_data);
-			if (success != 0)
-			{
-				mError(simulation_fail);
-				return success;
-			}
-		}
 	}
 	if (gcr_dat->c_temp.rows() != b.rows())
 	{
@@ -2278,7 +2213,7 @@ int gcr( int (*matvec) (const Matrix<double>& x, Matrix<double> &Ax, const void 
 }
 
 //Function for preconditioning GCR in the GMRESR application
-int gmresPreconditioner( const Matrix<double>& r, Matrix<double> &Mr, const void *data)
+int gmresrPreconditioner( const Matrix<double>& r, Matrix<double> &Mr, const void *data)
 {
 	int success = 0;
 	GMRESR_DATA *dat = (GMRESR_DATA *) data;
@@ -2403,7 +2338,7 @@ int gmresr( int (*matvec) (const Matrix<double>& x, Matrix<double> &Ax, const vo
 	gmresr_dat->iter_outer = 0;
 	
 	//Call GCR with the GMRES preconditioner
-	success = gcr(gmresr_dat->matvec, gmresPreconditioner, b, &gmresr_dat->gcr_dat, gmresr_dat->matvec_data, (void *)gmresr_dat);
+	success = gcr(gmresr_dat->matvec, gmresrPreconditioner, b, &gmresr_dat->gcr_dat, gmresr_dat->matvec_data, (void *)gmresr_dat);
 	if (success != 0) {mError(simulation_fail); return -1;}
 	gmresr_dat->iter_outer = gmresr_dat->gcr_dat.total_iter;
 	gmresr_dat->total_iter = gmresr_dat->iter_outer + gmresr_dat->iter_inner;
