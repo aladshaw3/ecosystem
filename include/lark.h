@@ -92,6 +92,10 @@
 #include "macaw.h"
 #include <float.h>
 
+#ifndef MIN_TOL
+#define MIN_TOL 1e-15	///< Minimum Allowable Tolerance for linear and non-linear problems
+#endif
+
 /// Data structure for the construction of the Krylov subspaces for a linear system
 /** C-style object used in conjunction with the Arnoldi algorithm to construct an orthonormal
 	basis and upper Hessenberg representation of a given linear operator. This is used to solve
@@ -127,7 +131,7 @@ typedef struct
 	after each Arnoldi iteration. */
 typedef struct
 {
-    int restart = -1;    		///< Restart parameter - default = min(vector_size,50)
+    int restart = -1;    		///< Restart parameter - default = min(vector_size,20)
     int maxit = 0;          	///< Maximum allowable iterations - default = min(vector_size,1000)
     int iter = 0;           	///< Number of iterations needed for convergence
   	int steps = 0;				///< Total number of gmres iterations and krylov iterations
@@ -157,7 +161,7 @@ typedef struct
 	during one of the inner steps. */
 typedef struct
 {
-	int restart = -1;			///< Restart parameter - default = min(50,vector_size)
+	int restart = -1;			///< Restart parameter - default = min(20,vector_size)
 	int maxit = 0;				///< Maximum allowable outer iterations
 	int iter_outer = 0;			///< Total number of outer iterations
 	int iter_inner = 0;			///< Total number of inner iterations
@@ -316,7 +320,7 @@ typedef struct
 	it is generally less efficient than GMRESRP and can suffer breakdowns. */
 typedef struct
 {
-	int restart = -1;			///< Restart parameter for outer iterations - default = 50
+	int restart = -1;			///< Restart parameter for outer iterations - default = 20
 	int maxit = 0;				///< Maximum allowable outer iterations
 	int iter_outer = 0;			///< Number of outer iterations taken
 	int iter_inner = 0;			///< Number of inner iterations taken
@@ -353,7 +357,7 @@ typedef struct
 	GMRESR came from literature (Vorst and Vuik, "GMRESR: A family of nested GMRES methods", 1991).*/
 typedef struct
 {
-	int gcr_restart = -1;		///< Number of GCR restarts (default = 50, max = N)
+	int gcr_restart = -1;		///< Number of GCR restarts (default = 20, max = N)
 	int gcr_maxit = 0;			///< Number of GCR iterations
 	int gmres_restart = -1;		///< Number of GMRES restarts (max = 20)
 	int gmres_maxit = 1;		///< Number of GMRES iterations (max = 5, default = 1)
@@ -383,6 +387,43 @@ typedef struct
 	const void *term_precon;	///< Data structure for the user's terminal preconditioner
 	
 }GMRESR_DATA;
+
+/// Data structure for the implemenation of the Krylov Multi-Space (KMS) Method
+/** C-style object to be used in conjunction with the Krylov Multi-Space (KMS) Algorithm to iteratively
+	solve non-symmetric, indefinite linear systems. This method was inspired by the Flexible GMRES (FGMRES)
+	and Recursive GMRES (GMRESR) methods proposed by Saad (1993) and Vorst and Vuik (1991), respectively.
+	The idea behind this method is to recursively call FGMRES to solve a linear system with pregressively
+	smaller Krylov Subspaces built by a Right-Preconditioned GMRES algorithm. Thus creating a "V-cycle" 
+	of iteration similar to that seen in Multi-Grid algorithms. */
+typedef struct
+{
+	int level = 0;			///< Current level in the recursion
+	int max_level = 0;		///< Maximum allowable recursion levels (Default = 1, Max = 5)
+	int restart = -1;		///< Restart parameter for the outer iterates (Default = 20, Max = N)
+	int maxit = 0;			///< Maximum allowable iterations for the outer steps
+	int inner_iter = 0;		///< Number of inner steps taken
+	int outer_iter = 0;		///< Number of outer steps taken
+	int total_iter = 0;		///< Total number of iterations in all steps
+	
+	double outer_reltol = 1e-6;		///< Relative residual tolerance for outer steps (Default = 1e-6)
+	double outer_abstol = 1e-6;		///< Absolute residual tolerance for outer steps (Default = 1e-6)
+	double inner_reltol = 0.1;		///< Residual tolerance for inner steps made relative to outer steps (Default = 0.1)
+	
+	bool Output_out = true;			///< True = Print the outer steps residuals
+	bool Output_in = false;			///< True = Print the inner steps residuals
+	
+	GMRESRP_DATA gmres_out;					///< Data structure for the outer steps
+	std::vector<GMRESRP_DATA> gmres_in;		///< Data structures for each recursion level
+	
+	/// User supplied matrix-vector product function
+	int (*matvec) (const Matrix<double> &x, Matrix<double> &Ax, const void *matvec_data);
+	/// Optional user supplied terminal preconditioner
+	int (*terminal_precon) (const Matrix<double> &r, Matrix<double> &p, const void *precon_data);
+	
+	const void *matvec_data;	///< Data structure for the user's matvec function
+	const void *term_precon;	///< Data structure for the user's terminal preconditioner
+	
+}KMS_DATA;
 
 /// Data structure for the implementation of a Picard or Fixed-Point iteration for non-linear systems
 /** C-style object used in conjunction with the Picard algorithm for solving a non-linear system of equations.
@@ -971,6 +1012,15 @@ int gmresr( int (*matvec) (const Matrix<double>& x, Matrix<double> &Ax, const vo
 		  int (*terminal_precon) (const Matrix<double>& r, Matrix<double> &Mr, const void *data),
 		  Matrix<double> &b, GMRESR_DATA *gmresr_dat, const void *matvec_data,
 		  const void *term_precon_data );
+
+/// Preconditioner function for the Krylov Multi-Space
+int kmsPreconditioner( const Matrix<double>& r, Matrix<double> &Mr, const void *data);
+
+/// Function to iteratively solve a non-symmetric, indefinite linear system with KMS
+int krylovMultiSpace( int (*matvec) (const Matrix<double>& x, Matrix<double> &Ax, const void *data),
+					 int (*terminal_precon) (const Matrix<double>& r, Matrix<double> &Mr, const void *data),
+					 Matrix<double> &b, KMS_DATA *kms_dat, const void *matvec_data,
+					 const void *term_precon_data );
 
 /// Function to iteratively solve a non-linear system using the Picard or Fixed-Point method
 /** This function iteratively solves a non-linear system using the Picard method. User supplies

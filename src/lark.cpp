@@ -520,13 +520,21 @@ int gmresLeftPreconditioned( int (*matvec) (const Matrix<double>& v, Matrix<doub
     {
 		gmreslp_dat->x.set_size(b.rows(), 1);
     }
-  	if (gmreslp_dat->tol_rel < DBL_EPSILON || gmreslp_dat->tol_rel >= 1)
+	if (gmreslp_dat->tol_rel >= 1)
+	{
+		gmreslp_dat->tol_rel = 1e-6;
+	}
+	if (gmreslp_dat->tol_abs >= 1)
+	{
+		gmreslp_dat->tol_abs = 1e-6;
+	}
+  	if (gmreslp_dat->tol_rel < MIN_TOL)
     {
-      	gmreslp_dat->tol_rel = 1.0e-6;
+      	gmreslp_dat->tol_rel = MIN_TOL;
     }
-	if (gmreslp_dat->tol_abs < DBL_EPSILON)
+	if (gmreslp_dat->tol_abs < MIN_TOL)
     {
-      	gmreslp_dat->tol_abs = 1.0e-6;
+		gmreslp_dat->tol_abs = MIN_TOL;
     }
   	gmreslp_dat->arnoldi_dat.k = gmreslp_dat->restart;
 	gmreslp_dat->arnoldi_dat.Output = gmreslp_dat->Output;
@@ -778,13 +786,21 @@ int gmresRightPreconditioned( int (*matvec) (const Matrix<double>& v, Matrix<dou
 	{
 		gmresrp_dat->maxit = std::min(b.rows(),1000);
 	}
-	if (gmresrp_dat->tol_rel < DBL_EPSILON || gmresrp_dat->tol_rel >= 1)
+	if (gmresrp_dat->tol_rel >= 1)
 	{
-		gmresrp_dat->tol_rel = 1.0e-6;
+		gmresrp_dat->tol_rel = 1e-6;
 	}
-	if (gmresrp_dat->tol_abs < DBL_EPSILON)
+	if (gmresrp_dat->tol_abs >= 1)
 	{
-		gmresrp_dat->tol_abs = 1.0e-6;
+		gmresrp_dat->tol_abs = 1e-6;
+	}
+	if (gmresrp_dat->tol_rel < MIN_TOL)
+	{
+		gmresrp_dat->tol_rel = MIN_TOL;
+	}
+	if (gmresrp_dat->tol_abs < MIN_TOL)
+	{
+		gmresrp_dat->tol_abs = MIN_TOL;
 	}
 	if (gmresrp_dat->x.rows() != b.rows())
 	{
@@ -854,7 +870,6 @@ int gmresRightPreconditioned( int (*matvec) (const Matrix<double>& v, Matrix<dou
 			gmresrp_dat->e0.push_back(beta);
 		else
 			gmresrp_dat->e0[0] = beta;
-		gmresrp_dat->e0_bar = gmresrp_dat->e0;
 		
 		if (m == 0)
 		{
@@ -864,7 +879,6 @@ int gmresRightPreconditioned( int (*matvec) (const Matrix<double>& v, Matrix<dou
 				gmresrp_dat->H.push_back(temp);
 			else
 				gmresrp_dat->H[0] = temp;
-			gmresrp_dat->H_bar = gmresrp_dat->H;
 		}
 		
 		//Normalize and prepare vector space
@@ -915,11 +929,6 @@ int gmresRightPreconditioned( int (*matvec) (const Matrix<double>& v, Matrix<dou
 				else
 					gmresrp_dat->H[j][i] = h;
 				
-				if (gmresrp_dat->H_bar[j].size() < i+1)
-					gmresrp_dat->H_bar[j].push_back(h);
-				else
-					gmresrp_dat->H_bar[j][i] = h;
-				
 				for (int n=0; n<b.rows(); n++)
 					gmresrp_dat->sum.edit(n, 0, gmresrp_dat->sum(n,0) + (gmresrp_dat->Vk[i](n,0)*h));
 				
@@ -932,11 +941,6 @@ int gmresRightPreconditioned( int (*matvec) (const Matrix<double>& v, Matrix<dou
 				gmresrp_dat->H[j].push_back(h);
 			else
 				gmresrp_dat->H[j][j+1] = h;
-			
-			if (gmresrp_dat->H_bar[j].size() < j+2)
-				gmresrp_dat->H_bar[j].push_back(h);
-			else
-				gmresrp_dat->H_bar[j][j+1] = h;
 			
 			if (gmresrp_dat->e0.size() < j+2)
 				gmresrp_dat->e0.push_back(0.0);
@@ -1011,11 +1015,6 @@ int gmresRightPreconditioned( int (*matvec) (const Matrix<double>& v, Matrix<dou
 						gmresrp_dat->H.push_back(gmresrp_dat->H[j]);
 					else
 						gmresrp_dat->H[j+1] = gmresrp_dat->H[j];
-					
-					if (gmresrp_dat->H_bar.size() < j+2)
-						gmresrp_dat->H_bar.push_back(gmresrp_dat->H[j]);
-					else
-						gmresrp_dat->H_bar[j+1] = gmresrp_dat->H[j];
 					
 				}
 			}
@@ -1181,13 +1180,21 @@ int pcg( int (*matvec) (const Matrix<double>& p, Matrix<double> &Ap, const void 
 	{
 		pcg_dat->maxit = std::min(1000,b.rows());
 	}
-	if (pcg_dat->tol_rel >= 1.0 || pcg_dat->tol_rel <= DBL_EPSILON)
+	if (pcg_dat->tol_rel >= 1)
 	{
-		pcg_dat->tol_rel = 1.0e-6;
+		pcg_dat->tol_rel = 1e-6;
 	}
-	if (pcg_dat->tol_abs <= DBL_EPSILON)
+	if (pcg_dat->tol_abs >= 1)
 	{
-		pcg_dat->tol_abs = 1.0e-6;
+		pcg_dat->tol_abs = 1e-6;
+	}
+	if (pcg_dat->tol_rel < MIN_TOL)
+	{
+		pcg_dat->tol_rel = MIN_TOL;
+	}
+	if (pcg_dat->tol_abs < MIN_TOL)
+	{
+		pcg_dat->tol_abs = MIN_TOL;
 	}
 	if (pcg_dat->x.rows() != b.rows())
 	{
@@ -1391,13 +1398,21 @@ int bicgstab( int (*matvec) (const Matrix<double>& p, Matrix<double> &Ap, const 
 	{
 		bicg_dat->maxit = std::min(1000,2*b.rows());
 	}
-	if (bicg_dat->tol_rel >= 1.0 || bicg_dat->tol_rel <= DBL_EPSILON)
+	if (bicg_dat->tol_rel >= 1)
 	{
-		bicg_dat->tol_rel = 1.0e-6;
+		bicg_dat->tol_rel = 1e-6;
 	}
-	if (bicg_dat->tol_abs <= DBL_EPSILON)
+	if (bicg_dat->tol_abs >= 1)
 	{
-		bicg_dat->tol_abs = 1.0e-6;
+		bicg_dat->tol_abs = 1e-6;
+	}
+	if (bicg_dat->tol_rel < MIN_TOL)
+	{
+		bicg_dat->tol_rel = MIN_TOL;
+	}
+	if (bicg_dat->tol_abs < MIN_TOL)
+	{
+		bicg_dat->tol_abs = MIN_TOL;
 	}
 	if (bicg_dat->x.rows() != b.rows())
 	{
@@ -1639,13 +1654,21 @@ int cgs( int (*matvec) (const Matrix<double>& p, Matrix<double> &Ap, const void 
 	{
 		cgs_dat->maxit = std::min(1000,2*b.rows());
 	}
-	if (cgs_dat->tol_rel >= 1.0 || cgs_dat->tol_rel <= DBL_EPSILON)
+	if (cgs_dat->tol_rel >= 1)
 	{
-		cgs_dat->tol_rel = 1.0e-6;
+		cgs_dat->tol_rel = 1e-6;
 	}
-	if (cgs_dat->tol_abs <= DBL_EPSILON)
+	if (cgs_dat->tol_abs >= 1)
 	{
-		cgs_dat->tol_abs = 1.0e-6;
+		cgs_dat->tol_abs = 1e-6;
+	}
+	if (cgs_dat->tol_rel < MIN_TOL)
+	{
+		cgs_dat->tol_rel = MIN_TOL;
+	}
+	if (cgs_dat->tol_abs < MIN_TOL)
+	{
+		cgs_dat->tol_abs = MIN_TOL;
 	}
 	if (cgs_dat->x.rows() != b.rows())
 	{
@@ -1948,13 +1971,21 @@ int gcr( int (*matvec) (const Matrix<double>& x, Matrix<double> &Ax, const void 
 	{
 		gcr_dat->maxit = std::min(b.rows(),1000);
 	}
-	if (gcr_dat->tol_rel < DBL_EPSILON || gcr_dat->tol_rel >= 1)
+	if (gcr_dat->tol_rel >= 1)
 	{
-		gcr_dat->tol_rel = 1.0e-6;
+		gcr_dat->tol_rel = 1e-6;
 	}
-	if (gcr_dat->tol_abs < DBL_EPSILON)
+	if (gcr_dat->tol_abs >= 1)
 	{
-		gcr_dat->tol_abs = 1.0e-6;
+		gcr_dat->tol_abs = 1e-6;
+	}
+	if (gcr_dat->tol_rel < MIN_TOL)
+	{
+		gcr_dat->tol_rel = MIN_TOL;
+	}
+	if (gcr_dat->tol_abs < MIN_TOL)
+	{
+		gcr_dat->tol_abs = MIN_TOL;
 	}
 	if (gcr_dat->x.rows() != b.rows())
 	{
@@ -2283,17 +2314,33 @@ int gmresr( int (*matvec) (const Matrix<double>& x, Matrix<double> &Ax, const vo
 	}
 	gmresr_dat->gmres_dat.Output = gmresr_dat->GMRES_Output;
 	gmresr_dat->gcr_dat.Output = gmresr_dat->GCR_Output;
-	if (gmresr_dat->gmres_tol >= 1.0 || gmresr_dat->gmres_tol <= DBL_EPSILON)
+	
+	//GMRESR Precondtioner Tolerance
+	if (gmresr_dat->gmres_tol >= 1)
 	{
 		gmresr_dat->gmres_tol = 0.1;
 	}
-	if (gmresr_dat->gcr_abs_tol >= 1.0 || gmresr_dat->gcr_abs_tol <= DBL_EPSILON)
+	if (gmresr_dat->gmres_tol < 1e-4)
+	{
+		gmresr_dat->gmres_tol = 1e-4;
+	}
+	
+	//GCR Tolerances
+	if (gmresr_dat->gcr_rel_tol >= 1)
+	{
+		gmresr_dat->gcr_rel_tol = 1e-6;
+	}
+	if (gmresr_dat->gcr_abs_tol >= 1)
 	{
 		gmresr_dat->gcr_abs_tol = 1e-6;
 	}
-	if (gmresr_dat->gcr_rel_tol >= 1.0 || gmresr_dat->gcr_rel_tol <= DBL_EPSILON)
+	if (gmresr_dat->gcr_abs_tol < MIN_TOL)
 	{
-		gmresr_dat->gcr_rel_tol = 1e-6;
+		gmresr_dat->gcr_abs_tol = MIN_TOL;
+	}
+	if (gmresr_dat->gcr_rel_tol < MIN_TOL)
+	{
+		gmresr_dat->gcr_rel_tol = MIN_TOL;
 	}
 	gmresr_dat->gcr_dat.tol_abs = gmresr_dat->gcr_abs_tol;
 	gmresr_dat->gcr_dat.tol_rel = gmresr_dat->gcr_rel_tol;
@@ -2346,6 +2393,132 @@ int gmresr( int (*matvec) (const Matrix<double>& x, Matrix<double> &Ax, const vo
 	return success;
 }
 
+// Preconditioner function for the Krylov Multi-Space
+int kmsPreconditioner( const Matrix<double>& r, Matrix<double> &Mr, const void *data)
+{
+	int success = 0;
+	KMS_DATA * kms_dat = (KMS_DATA *) data;
+	
+	//Check for errors
+	if ( kms_dat->matvec == NULL)
+	{
+		mError(nullptr_func);
+		return -1;
+	}
+	kms_dat->level++;
+	
+	kms_dat->gmres_in[kms_dat->level-1].restart = 5; //EDIT
+	kms_dat->gmres_in[kms_dat->level-1].maxit = 2;	//EDIT
+	kms_dat->gmres_in[kms_dat->level-1].Output = kms_dat->Output_in;
+	kms_dat->gmres_in[kms_dat->level-1].tol_abs = kms_dat->gmres_out.res * kms_dat->inner_reltol;
+	kms_dat->gmres_in[kms_dat->level-1].tol_rel = kms_dat->inner_reltol;
+	
+	Matrix<double> temp = r;
+	if (kms_dat->level == kms_dat->max_level)
+		success = gmresRightPreconditioned(kms_dat->matvec, kms_dat->terminal_precon, temp, &kms_dat->gmres_in[kms_dat->level-1], kms_dat->matvec_data, kms_dat->term_precon);
+	else
+		success = gmresRightPreconditioned(kms_dat->matvec, kmsPreconditioner, temp, &kms_dat->gmres_in[kms_dat->level-1], kms_dat->matvec_data, (void *)kms_dat);
+	kms_dat->inner_iter += kms_dat->gmres_in[kms_dat->level-1].iter_total;
+	Mr = kms_dat->gmres_in[kms_dat->level-1].x;
+	kms_dat->level--;
+	
+	return success;
+}
+
+// Function to iteratively solve a non-symmetric, indefinite linear system with KMS
+int krylovMultiSpace( int (*matvec) (const Matrix<double>& x, Matrix<double> &Ax, const void *data),
+					 int (*terminal_precon) (const Matrix<double>& r, Matrix<double> &Mr, const void *data),
+					 Matrix<double> &b, KMS_DATA *kms_dat, const void *matvec_data,
+					 const void *term_precon_data )
+{
+	int success = 0;
+	
+	//Check input args for errors
+	if ( (*matvec) == NULL)
+	{
+		mError(nullptr_func);
+		return -1;
+	}
+	else
+	{
+		kms_dat->matvec = (*matvec);
+	}
+	kms_dat->matvec_data = matvec_data;
+	kms_dat->terminal_precon = terminal_precon;
+	kms_dat->term_precon = term_precon_data;
+	if (b.rows() < 2)
+	{
+		success = -1;
+		mError(matrix_too_small);
+		return success;
+	}
+	kms_dat->gmres_out.Output = kms_dat->Output_out;
+	
+	//Preconditioner Tolerances
+	if (kms_dat->inner_reltol >= 1)
+	{
+		kms_dat->inner_reltol = 0.1;
+	}
+	if (kms_dat->inner_reltol < 1e-4)
+	{
+		kms_dat->inner_reltol = 1e-4;
+	}
+	
+	//Outer Step Tolerances
+	if (kms_dat->outer_reltol >= 1)
+	{
+		kms_dat->outer_reltol = 1e-6;
+	}
+	if (kms_dat->outer_abstol >= 1)
+	{
+		kms_dat->outer_abstol = 1e-6;
+	}
+	if (kms_dat->outer_abstol < MIN_TOL)
+	{
+		kms_dat->outer_abstol = MIN_TOL;
+	}
+	if (kms_dat->outer_reltol < MIN_TOL)
+	{
+		kms_dat->outer_reltol = MIN_TOL;
+	}
+	kms_dat->gmres_out.tol_abs = kms_dat->outer_abstol;
+	kms_dat->gmres_out.tol_rel = kms_dat->outer_reltol;
+	if (kms_dat->restart <= 0)
+	{
+		kms_dat->restart = std::min(b.rows(),20);
+	}
+	else if (kms_dat->restart > b.rows() && b.rows() <= 1000)
+	{
+		kms_dat->restart = b.rows();
+	}
+	if (kms_dat->restart == b.rows())
+	{
+		kms_dat->maxit = 1;
+	}
+	else if (kms_dat->maxit <= 0 || kms_dat->maxit > b.rows())
+	{
+		kms_dat->maxit = std::min(b.rows(),1000);
+	}
+	kms_dat->gmres_out.restart = kms_dat->restart;
+	kms_dat->gmres_out.maxit = kms_dat->maxit;
+	kms_dat->total_iter = 0;
+	kms_dat->inner_iter = 0;
+	kms_dat->outer_iter = 0;
+	
+	if (kms_dat->max_level <= 0)
+		kms_dat->max_level = 1; //EDIT
+	
+	if (kms_dat->gmres_in.size() != kms_dat->max_level)
+		kms_dat->gmres_in.resize(kms_dat->max_level);
+
+	success = gmresRightPreconditioned(kms_dat->matvec, kmsPreconditioner, b, &kms_dat->gmres_out, kms_dat->matvec_data, (void *)kms_dat);
+	if (success != 0) {mError(simulation_fail); return -1;}
+	kms_dat->outer_iter = kms_dat->gmres_out.iter_total;
+	kms_dat->total_iter = kms_dat->outer_iter + kms_dat->inner_iter;
+	
+	return success;
+}
+
 //Function for solving a non-linear system using a Picard or Fixed-Point iteration
 int picard( int (*res) (const Matrix<double>& x, Matrix<double> &r, const void *data),
 		    int (*evalx) (const Matrix<double>& x0, Matrix<double> &x, const void *data),
@@ -2374,13 +2547,21 @@ int picard( int (*res) (const Matrix<double>& x, Matrix<double> &r, const void *
 	{
 		picard_dat->maxit = std::min(3*x.rows(),1000);
 	}
-	if (picard_dat->tol_rel >= 1.0 || picard_dat->tol_rel <= DBL_EPSILON)
+	if (picard_dat->tol_rel >= 1.0)
 	{
 		picard_dat->tol_rel = 1e-6;
 	}
-	if (picard_dat->tol_abs <= DBL_EPSILON)
+	if (picard_dat->tol_abs >= 1.0)
 	{
 		picard_dat->tol_abs = 1e-6;
+	}
+	if (picard_dat->tol_rel < MIN_TOL)
+	{
+		picard_dat->tol_rel = MIN_TOL;
+	}
+	if (picard_dat->tol_abs < MIN_TOL)
+	{
+		picard_dat->tol_abs = MIN_TOL;
 	}
 	if ( picard_dat->x0.rows() != x.rows() )
 	{
@@ -2788,14 +2969,22 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 		//NOTE: you would specify linear_solver = FOM if you wanted to take an exact
 		//Newton step. Otherwise, all steps are only approximate.
 	}
-	if (pjfnk_dat->nl_tol_abs >= 1.0 || pjfnk_dat->nl_tol_abs < DBL_EPSILON)
+	if (pjfnk_dat->nl_tol_abs >= 1.0)
 		pjfnk_dat->nl_tol_abs = 1e-6;
-	if (pjfnk_dat->nl_tol_rel >= 1.0 || pjfnk_dat->nl_tol_rel < DBL_EPSILON)
+	if (pjfnk_dat->nl_tol_abs < MIN_TOL)
+		pjfnk_dat->nl_tol_abs = MIN_TOL;
+	if (pjfnk_dat->nl_tol_rel >= 1.0)
 		pjfnk_dat->nl_tol_rel = 1e-6;
-	if (pjfnk_dat->lin_tol_rel >= 1.0 || pjfnk_dat->lin_tol_rel < DBL_EPSILON)
-		pjfnk_dat->lin_tol_rel = 1e-6;
-	if (pjfnk_dat->lin_tol_abs >= 1.0 || pjfnk_dat->lin_tol_abs < DBL_EPSILON)
-		pjfnk_dat->lin_tol_abs = 1e-6;
+	if (pjfnk_dat->nl_tol_rel < MIN_TOL)
+		pjfnk_dat->nl_tol_rel = MIN_TOL;
+	if (pjfnk_dat->lin_tol_rel >= 1.0)
+		pjfnk_dat->lin_tol_rel = 0.1;
+	if (pjfnk_dat->lin_tol_rel < MIN_TOL)
+		pjfnk_dat->lin_tol_rel = MIN_TOL;
+	if (pjfnk_dat->lin_tol_abs >= 1.0)
+		pjfnk_dat->lin_tol_abs = 0.1;
+	if (pjfnk_dat->lin_tol_abs < MIN_TOL)
+		pjfnk_dat->lin_tol_abs = MIN_TOL;
 	if (pjfnk_dat->eps >= 1.0 || pjfnk_dat->eps < sqrt(DBL_EPSILON))
 		pjfnk_dat->eps = sqrt(DBL_EPSILON);
 	if (pjfnk_dat->Bounce == true)
@@ -3901,7 +4090,6 @@ int LARK_TESTS()
 	ex15_dat.b.edit(ex15_dat.m*ex15_dat.m-1, 0, -1);
 	ex15_dat.b.edit(ex15_dat.m*ex15_dat.m*ex15_dat.m-1, 0, -1);
 	x.set_size(ex15_dat.N, 1);
-	
 
 	std::cout << "\n------------------START GMRES------------------" << std::endl;
 	
@@ -4000,6 +4188,22 @@ int LARK_TESTS()
 	std::cout << "GMRESR inner iterations: " << gmresr15.iter_inner << std::endl;
 	std::cout << "GMRESR outer iterations: " << gmresr15.iter_outer	<< std::endl;
 	std::cout << "GMRESR total iterations: " << gmresr15.total_iter << std::endl;
+	
+	std::cout << "\n------------------START KMS-------------------" << std::endl;
+	
+	KMS_DATA kms15;
+	//kms15.Output_in = true;
+	kms15.maxit = 1;
+	
+	time = clock();
+	success = krylovMultiSpace(matvec_ex15,NULL,ex15_dat.b,&kms15,(void *)&ex15_dat,(void *)&ex15_dat);
+	time = clock() - time;
+	std::cout << "KMS Solve (s):\t" << (time / CLOCKS_PER_SEC) << std::endl;
+	success = matvec_ex15(kms15.gmres_out.x, x, (void *)&ex15_dat);
+	std::cout << "KMS Norm: " << (ex15_dat.b - x).norm() << std::endl; //
+	std::cout << "KMS inner iterations: " << kms15.inner_iter << std::endl;
+	std::cout << "KMS outer iterations: " << kms15.outer_iter << std::endl;
+	std::cout << "KMS total iterations: " << kms15.total_iter << std::endl;
 	
 	
 	std::cout << "------------------END Example 15------------------\n" << std::endl;
