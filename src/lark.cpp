@@ -2410,8 +2410,17 @@ int kmsPreconditioner( const Matrix<double>& r, Matrix<double> &Mr, const void *
 	kms_dat->gmres_in[kms_dat->level-1].restart = 5; //EDIT
 	kms_dat->gmres_in[kms_dat->level-1].maxit = 2;	//EDIT
 	kms_dat->gmres_in[kms_dat->level-1].Output = kms_dat->Output_in;
-	kms_dat->gmres_in[kms_dat->level-1].tol_abs = kms_dat->gmres_out.res * kms_dat->inner_reltol;
-	kms_dat->gmres_in[kms_dat->level-1].tol_rel = kms_dat->inner_reltol;
+	
+	if (kms_dat->level > 1)
+	{
+		kms_dat->gmres_in[kms_dat->level-1].tol_abs = kms_dat->gmres_in[kms_dat->level-2].res * kms_dat->inner_reltol;
+		kms_dat->gmres_in[kms_dat->level-1].tol_rel = kms_dat->inner_reltol;
+	}
+	else
+	{
+		kms_dat->gmres_in[kms_dat->level-1].tol_abs = kms_dat->gmres_out.res * kms_dat->inner_reltol;
+		kms_dat->gmres_in[kms_dat->level-1].tol_rel = kms_dat->inner_reltol;
+	}
 	
 	Matrix<double> temp = r;
 	if (kms_dat->level == kms_dat->max_level)
