@@ -2453,6 +2453,10 @@ int kmsPreconditioner( const Matrix<double>& r, Matrix<double> &Mr, const void *
 	}
 	
 	Matrix<double> temp = r;
+	if (kms_dat->gmres_in[kms_dat->level - 1].x.rows() != Mr.rows())
+		kms_dat->gmres_in[kms_dat->level - 1].x.set_size(Mr.rows(), 1);
+	else
+		kms_dat->gmres_in[kms_dat->level - 1].x.zeros();
 	if (kms_dat->level == kms_dat->max_level)
 		success = gmresRightPreconditioned(kms_dat->matvec, kms_dat->terminal_precon, temp, &kms_dat->gmres_in[kms_dat->level-1], kms_dat->matvec_data, kms_dat->term_precon);
 	else
@@ -2494,9 +2498,9 @@ int krylovMultiSpace( int (*matvec) (const Matrix<double>& x, Matrix<double> &Ax
 	kms_dat->gmres_out.Output = kms_dat->Output_out;
 	
 	//Preconditioner Tolerances
-	if (kms_dat->inner_reltol >= 1)
+	if (kms_dat->inner_reltol >= 0.5)
 	{
-		kms_dat->inner_reltol = 0.1;
+		kms_dat->inner_reltol = 0.5;
 	}
 	if (kms_dat->inner_reltol < 1e-4)
 	{
@@ -4243,6 +4247,7 @@ int LARK_TESTS()
 	KMS_DATA kms15;
 	kms15.Output_in = false;
 	kms15.max_level = 2;
+	kms15.inner_reltol = 0.001;
 	
 	time = clock();
 	success = krylovMultiSpace(matvec_ex15,NULL,ex15_dat.b,&kms15,(void *)&ex15_dat,(void *)&ex15_dat);
