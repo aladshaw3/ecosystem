@@ -398,7 +398,7 @@ typedef struct
 typedef struct
 {
 	int level = 0;			///< Current level in the recursion
-	int max_level = 0;		///< Maximum allowable recursion levels (Default = 1, Max = 5)
+	int max_level = 0;		///< Maximum allowable recursion levels (Default =0 -> Standard GMRES, Max = 5)
 	int restart = -1;		///< Restart parameter for the outer iterates (Default = 20, Max = N)
 	int maxit = 0;			///< Maximum allowable iterations for the outer steps
 	int inner_iter = 0;		///< Number of inner steps taken

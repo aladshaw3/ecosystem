@@ -991,6 +991,7 @@ int gmresRightPreconditioned( int (*matvec) (const Matrix<double>& v, Matrix<dou
 			
 			beta1 = fabs(gmresrp_dat->e0_bar[j+1]);
 			eta = beta1/beta0;
+			gmresrp_dat->relres = eta;
 			if (gmresrp_dat->Output == true)
 				std::cout << "RelRes[" << step+m+1 << "] =\t" << eta << std::endl;
 			
@@ -2406,10 +2407,39 @@ int kmsPreconditioner( const Matrix<double>& r, Matrix<double> &Mr, const void *
 		return -1;
 	}
 	kms_dat->level++;
-	
-	kms_dat->gmres_in[kms_dat->level-1].restart = 5; //EDIT
-	kms_dat->gmres_in[kms_dat->level-1].maxit = 2;	//EDIT
 	kms_dat->gmres_in[kms_dat->level-1].Output = kms_dat->Output_in;
+
+	//Formulate the best number of inner and outer preconditioning iterates based on current status
+	double inner_par = 0;
+
+	if (kms_dat->level == 1)
+		inner_par += 3;
+	else if (kms_dat->level > 1 && kms_dat->level <= 2)
+		inner_par += 5;
+	else if (kms_dat->level > 2 && kms_dat->level <= 3)
+		inner_par += 8;
+	else if (kms_dat->level > 3 && kms_dat->level <= 4)
+		inner_par += 12;
+	else
+		inner_par += 20;
+
+	if (kms_dat->max_level == 1)
+		inner_par += 20;
+	else if (kms_dat->max_level > 1 && kms_dat->max_level <= 2)
+		inner_par += 12;
+	else if (kms_dat->max_level > 2 && kms_dat->max_level <= 3)
+		inner_par += 8;
+	else if (kms_dat->max_level > 3 && kms_dat->max_level <= 4)
+		inner_par += 5;
+	else
+		inner_par += 3;
+
+	kms_dat->gmres_in[kms_dat->level - 1].restart = (int) (inner_par / 2.0);
+
+	if (kms_dat->gmres_in[kms_dat->level - 1].restart <= 20 && kms_dat->gmres_in[kms_dat->level - 1].restart > 10)
+		kms_dat->gmres_in[kms_dat->level - 1].maxit = 1;
+	else
+		kms_dat->gmres_in[kms_dat->level - 1].maxit = 2;
 	
 	if (kms_dat->level > 1)
 	{
@@ -2514,14 +2544,24 @@ int krylovMultiSpace( int (*matvec) (const Matrix<double>& x, Matrix<double> &Ax
 	kms_dat->inner_iter = 0;
 	kms_dat->outer_iter = 0;
 	
-	if (kms_dat->max_level <= 0)
-		kms_dat->max_level = 1; //EDIT
+	if (kms_dat->max_level < 0)
+		kms_dat->max_level = 0; 
+	if (kms_dat->max_level > 5)
+		kms_dat->max_level = 5;
 	
 	if (kms_dat->gmres_in.size() != kms_dat->max_level)
 		kms_dat->gmres_in.resize(kms_dat->max_level);
 
-	success = gmresRightPreconditioned(kms_dat->matvec, kmsPreconditioner, b, &kms_dat->gmres_out, kms_dat->matvec_data, (void *)kms_dat);
-	if (success != 0) {mError(simulation_fail); return -1;}
+	if (kms_dat->max_level == 0)
+	{
+		success = gmresRightPreconditioned(kms_dat->matvec, kms_dat->terminal_precon, b, &kms_dat->gmres_out, kms_dat->matvec_data, kms_dat->term_precon);
+		if (success != 0) { mError(simulation_fail); return -1; }
+	}
+	else
+	{
+		success = gmresRightPreconditioned(kms_dat->matvec, kmsPreconditioner, b, &kms_dat->gmres_out, kms_dat->matvec_data, (void *)kms_dat);
+		if (success != 0) { mError(simulation_fail); return -1; }
+	}
 	kms_dat->outer_iter = kms_dat->gmres_out.iter_total;
 	kms_dat->total_iter = kms_dat->outer_iter + kms_dat->inner_iter;
 	
@@ -4088,11 +4128,11 @@ int LARK_TESTS()
 	 *			SOLVE a 3D Laplacian without using matrices... Sparse System Handling
 	 */
 	
-	std::cout << "Solving a 125,000 Linear Equations with default Right-Preconditioned GMRES, PCG, BiCGSTAB, and CGS" << std::endl;
+	std::cout << "Solving a 125,000 Linear Equations with GMRESRP, PCG, BiCGSTAB, CGS, GMRESLP, GMRESR, and KMS" << std::endl;
 	
 	//Setup Data Structure for Sparse Laplacian
 	EX15_DATA ex15_dat;
-	ex15_dat.m = 50;
+	ex15_dat.m =50;
 	ex15_dat.N = ex15_dat.m*ex15_dat.m*ex15_dat.m;
 	ex15_dat.b.set_size(ex15_dat.N, 1);
 	ex15_dat.b.edit(0, 0, -1);
@@ -4201,15 +4241,15 @@ int LARK_TESTS()
 	std::cout << "\n------------------START KMS-------------------" << std::endl;
 	
 	KMS_DATA kms15;
-	//kms15.Output_in = true;
-	kms15.maxit = 1;
+	kms15.Output_in = false;
+	kms15.max_level = 2;
 	
 	time = clock();
 	success = krylovMultiSpace(matvec_ex15,NULL,ex15_dat.b,&kms15,(void *)&ex15_dat,(void *)&ex15_dat);
 	time = clock() - time;
 	std::cout << "KMS Solve (s):\t" << (time / CLOCKS_PER_SEC) << std::endl;
 	success = matvec_ex15(kms15.gmres_out.x, x, (void *)&ex15_dat);
-	std::cout << "KMS Norm: " << (ex15_dat.b - x).norm() << std::endl; //
+	std::cout << "KMS Norm: " << (ex15_dat.b - x).norm() << std::endl; //PASS
 	std::cout << "KMS inner iterations: " << kms15.inner_iter << std::endl;
 	std::cout << "KMS outer iterations: " << kms15.outer_iter << std::endl;
 	std::cout << "KMS total iterations: " << kms15.total_iter << std::endl;
