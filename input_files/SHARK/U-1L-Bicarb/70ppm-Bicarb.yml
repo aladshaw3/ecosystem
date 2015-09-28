@@ -1,0 +1,344 @@
+#Scenario Info
+Scenario:
+---
+- vars_fun:
+  numvar: 25
+  num_ssr: 15
+  num_mbe: 7
+  num_usr: 2
+
+- sys_data:
+  act_fun: davies    
+  const_pH: false	
+  pH: 7              #Only required if we are specifying a const_pH
+  temp: 298.15       #Units must be in Kelvin 
+  dielec: 78.325     #Units must be in (1/Kelvin)
+  res_alk: 0         #Units must be in mol/L (Residual Alkalinity)
+
+- run_time:
+  steady: false         #NOTE: All time must be represented in hours
+  specs_curve: false    #Only needed if steady = true, and will default to false
+  dt: 0.001             #Only required if steady = false
+  time_adapt: true      #Only needed if steady = false, and will default to false
+  sim_time: 96.0        #Only required if steady = false
+  t_out: 0.01           #Only required if steady = false
+...
+
+#Solver Options
+SolverOptions:
+---
+line_search: true      #Default = true, and is recommended to be true
+search_type: standard
+linear_solve: fom      #Note: FOM will be fastest for small problems
+nl_maxit: 50
+nl_abstol: 1e-5
+nl_reltol: 1e-8
+lin_reltol: 1e-10
+lin_abstol: 1e-10
+nl_print: true
+l_print: false
+
+...
+
+# Master Species List
+MasterSpecies:
+---
+# Header names are specific 
+# Keys are chosen by user, but must span numbers 0 through numvar-1
+# Keys will denote the ordering of the variables
+# Note: Currently, the number of reg molecules is very limited
+- reg:
+  24: Cl - (aq)
+  0: NaHCO3 (aq)
+  1: NaCO3 - (aq)
+  2: Na + (aq)
+  3: HNO3 (aq)
+  4: NO3 - (aq)
+  5: H2CO3 (aq)
+  6: HCO3 - (aq)
+  7: CO3 2- (aq)
+  8: UO2 2+ (aq)
+  9: UO2NO3 + (aq)
+  10: UO2(NO3)2 (aq)
+  11: UO2OH + (aq)
+  12: UO2(OH)3 - (aq)
+  13: (UO2)2(OH)2 2+ (aq)
+  14: (UO2)3(OH)5 + (aq)
+  15: UO2CO3 (aq)
+  16: UO2(CO3)2 2- (aq)
+  17: UO2(CO3)3 4- (aq)
+  18: H2O (l)
+  19: OH - (aq)
+  20: H + (aq)
+
+# Keys for the sub-headers must follow same rules as keys from above
+- unreg:
+  - 21: 
+    formula: A(OH)2 (aq)
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: Aqueous
+    name: Amidoxime
+    lin_form: none
+
+  - 22: 
+    formula: UO2AO2 (aq)
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: Aqueous
+    name: Uranyl-amidoximate
+    lin_form: none
+
+  - 23: 
+    formula: UO2CO3AO2 2- (aq)
+    charge: -2
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: Aqueous
+    name: Uranyl-carbonate-amidoximate
+    lin_form: none
+...
+
+#NOTE: Total concentrations must be given in mol/L
+MassBalance:
+---
+# Header names under MassBalance are choosen by the user
+# All other keys will be checked
+- water:
+  total_conc: 1
+  - delta: 
+    "H2O (l)": 1
+
+- carbonate:
+  total_conc: 0.000835
+  - delta: 
+    "NaHCO3 (aq)": 1
+    "NaCO3 - (aq)": 1 
+    "H2CO3 (aq)": 1 
+    "HCO3 - (aq)": 1
+    "CO3 2- (aq)": 1
+    "UO2CO3 (aq)": 1
+    "UO2(CO3)2 2- (aq)": 2
+    "UO2(CO3)3 4- (aq)": 3
+    "UO2CO3AO2 2- (aq)": 1
+
+- nitrate:
+  total_conc: 6.302E-7
+  - delta:
+    "HNO3 (aq)": 1
+    "NO3 - (aq)": 1
+    "UO2NO3 + (aq)": 1
+    "UO2(NO3)2 (aq)": 2
+
+- sodium: 
+  total_conc: 0.430835
+  - delta:
+    "NaHCO3 (aq)": 1
+    "NaCO3 - (aq)": 1
+    "Na + (aq)": 1
+
+- uranyl:
+  total_conc: 3.151E-7
+  - delta:
+    "UO2AO2 (aq)": 1
+    "UO2CO3AO2 2- (aq)": 1
+    "UO2 2+ (aq)": 1
+    "UO2NO3 + (aq)": 1
+    "UO2(NO3)2 (aq)": 1
+    "UO2OH + (aq)": 1
+    "UO2(OH)3 - (aq)": 1
+    "(UO2)2(OH)2 2+ (aq)": 2
+    "(UO2)3(OH)5 + (aq)": 3
+    "UO2CO3 (aq)": 1
+    "UO2(CO3)2 2- (aq)": 1
+    "UO2(CO3)3 4- (aq)": 1
+
+- amidoxime:
+  total_conc: 1.188875E-5  #8.5 mg
+  - delta:
+    "A(OH)2 (aq)": 1
+    "UO2AO2 (aq)": 1
+    "UO2CO3AO2 2- (aq)": 1
+
+- chlorine:
+  total_conc: 0.43
+  - delta:
+    "Cl - (aq)": 1
+
+...
+
+#Document for equilibrium or steady reactions
+EquilRxn:
+---
+# Headers under EquilRxn separate out each reaction object
+# Keys for these headers only factor into the order of the equations
+# Stoichiometry follows the convention that products are pos(+) and reactants are neg(-)
+# Note: logK is only required if any species in stoichiometry is unregistered
+# Example: below represents - {H2O (l)} --> {H + (aq)} + {OH - (aq)}
+# Note: a valid reaction statement requires at least 1 stoichiometry args
+
+# Note: You can also provide reaction energies: enthalpy, entropy, and energy
+
+- rxn00:
+  logK: -14
+  - stoichiometry:
+    "H2O (l)": -1
+    "OH - (aq)": 1
+    "H + (aq)": 1
+
+- rxn01:
+  logK: -6.35
+  - stoichiometry:
+    "H2CO3 (aq)": -1
+    "HCO3 - (aq)": 1
+    "H + (aq)": 1
+
+- rxn02:
+  logK: -10.33
+  - stoichiometry:
+    "HCO3 - (aq)": -1
+    "CO3 2- (aq)": 1
+    "H + (aq)": 1
+
+- rxn03:
+  logK: -10.14
+  - stoichiometry:
+    "NaHCO3 (aq)": -1
+    "Na + (aq)": 1
+    "CO3 2- (aq)": 1
+    "H + (aq)": 1
+
+- rxn04:
+  logK: -1.02
+  - stoichiometry:
+    "NaCO3 - (aq)": -1
+    "Na + (aq)": 1
+    "CO3 2- (aq)": 1
+
+- rxn05:
+  logK: 1.4
+  - stoichiometry:
+    "HNO3 (aq)": -1
+    "NO3 - (aq)": 1
+    "H + (aq)": 1
+
+- rxn06:
+  logK: -0.3
+  - stoichiometry:
+    "NO3 - (aq)": -1
+    "UO2 2+ (aq)": -1
+    "UO2NO3 + (aq)": 1
+
+- rxn07:
+  logK: -12.15
+  - stoichiometry:
+    "NO3 - (aq)": -2
+    "UO2 2+ (aq)": -1
+    "UO2(NO3)2 (aq)": 1
+
+- rxn08:
+  logK: -6.2
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "H2O (l)": -1
+    "UO2OH + (aq)": 1
+    "H + (aq)": 1
+
+- rxn09:
+  logK: -20.2
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "H2O (l)": -3
+    "UO2(OH)3 - (aq)": 1
+    "H + (aq)": 3
+
+- rxn10:
+  logK: -5.87
+  - stoichiometry:
+    "UO2 2+ (aq)": -2
+    "H2O (l)": -2
+    "(UO2)2(OH)2 2+ (aq)": 1
+    "H + (aq)": 2
+
+- rxn11:
+  logK: -16.5
+  - stoichiometry:
+    "UO2 2+ (aq)": -3
+    "H2O (l)": -5
+    "(UO2)3(OH)5 + (aq)": 1
+    "H + (aq)": 5
+
+- rxn12:
+  logK: 8.4
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "CO3 2- (aq)": -1
+    "UO2CO3 (aq)": 1
+
+- rxn13:
+  logK: 15.7
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "CO3 2- (aq)": -2
+    "UO2(CO3)2 2- (aq)": 1
+
+- rxn14:
+  logK: 21.6
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "CO3 2- (aq)": -3
+    "UO2(CO3)3 4- (aq)": 1
+
+...
+
+# Document for unsteady reactions
+UnsteadyRxn:
+---
+# Same basic standards for this doc as the EquilRxn
+# Main difference is the inclusion of rate information
+# You are required to give at least 1 rate
+# You are also required to denote which variable is unsteady
+# You must give the initial concentration for the variable in mol/L
+# Rate units are in (L/mol)^n/hr
+
+# Note: we also have keys for forward_ref, reverse_ref,
+#       activation_energy, and temp_affinity.
+#       These are optional if forward and/or reverse are given
+
+# Note: You can also provide reaction energies: enthalpy, entropy, and energy
+
+- rxn00:
+  unsteady_var: UO2AO2 (aq)
+  initial_condition: 0
+  logK: -1.35
+  forward: 4.50e+6
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "A(OH)2 (aq)": -1
+    "UO2AO2 (aq)": 1
+    "H + (aq)": 2
+
+- rxn01:
+  unsteady_var: UO2CO3AO2 2- (aq)
+  initial_condition: 0
+  logK: 3.45
+  forward: 7.30e+15
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "CO3 2- (aq)": -1
+    "A(OH)2 (aq)": -1
+    "UO2CO3AO2 2- (aq)": 1
+    "H + (aq)": 2
+
+...
