@@ -61,6 +61,21 @@
 				much better convergence behavior and will almost always give better residual reduction,
 				even for hard to solve problems.
  
+				We have also developed a novel/experimental iterative method based on the idea of 
+				recursively preconditioning a Krylov Subspace with more Krylov Subspaces. We have 
+				called with algorithm the Krylov Multi-Space (KMS) method. This algorithm is based on
+				publications from Vorst and Vuik (1991) and Saad (1993). The idea is too use the FGMRES
+				algorithm developed by Saad (1993) and precondition it with more FGMRES steps, i.e., 
+				nesting the iterations as Vorst and Vuik (1991) had proposed. In this way, we have 
+				created a generalized Krylov Subspace method that has it's own variable preconditioner
+				that can be adjusted depending on the user's desired complexity and convergence rate. 
+				If the levels of recursion requested is zero, then this algorithm is exactly equal to
+				GMRES with right preconditioning. If the level is one, then it is FGMRES with a GMRES
+				preconditioner. However, we allow the levels of recursion to reach up to 5, thus allowing
+				us to precondition the preconitioners with more GMRES steps. This can result is significantly
+				faster convergence rates, but is typically only necessary for very large or difficult
+				to solve problems. 
+ 
 				NOTE: There are three GMRES implementations: (i) gmresLP, (ii) fom, and
 				(iii) gmresRP. GMRESLP is a restarted GMRES implementation that is left
 				preconditioned and only checks the residual on the outer loops. This may
@@ -398,7 +413,7 @@ typedef struct
 typedef struct
 {
 	int level = 0;			///< Current level in the recursion
-	int max_level = 0;		///< Maximum allowable recursion levels (Default =0 -> Standard GMRES, Max = 5)
+	int max_level = 0;		///< Maximum allowable recursion levels (Default = 0 -> GMRES, Max = 5)
 	int restart = -1;		///< Restart parameter for the outer iterates (Default = 20, Max = N)
 	int maxit = 0;			///< Maximum allowable iterations for the outer steps
 	int inner_iter = 0;		///< Number of inner steps taken
@@ -977,11 +992,11 @@ int gmresrPreconditioner( const Matrix<double>& r, Matrix<double> &Mr, const voi
 /** This function iteratively solves a non-symmetric, indefinite linear system using the
 	Generalized Minimum RESidual Recursive (GMRESR) method. This algorithm actually uses
 	GCR at the outer iterations, but stabilizes GCR with GMRESRP inner iterations to 
-	implicitly form a variable preconditioner to the linear system. As such, this is the
-	only linear method that inherently includes preconditioning, without any user supplied
-	preconditioning operator. However, this algorithms is signficantly more computationally
-	expensive than GCR or GMRESRP separately. It should only be used for solving very large
-	or very hard to solve linear systems.
+	implicitly form a variable preconditioner to the linear system. As such, this is one
+	of only two methods that inherently includes preconditioning (the other is KMS), without 
+	any user supplied preconditioning operator. However, this algorithms is signficantly more 
+	computationally expensive than GCR or GMRESRP separately. It should only be used for solving 
+	very large or very hard to solve linear systems.
  
 	\param matvec user supplied linear operator given as an int function
 	\param terminal_precon user supplied preconditioning operator given as an int function
@@ -1014,9 +1029,55 @@ int gmresr( int (*matvec) (const Matrix<double>& x, Matrix<double> &Ax, const vo
 		  const void *term_precon_data );
 
 /// Preconditioner function for the Krylov Multi-Space
+/** This function is required to take the form of the user supplied preconditioning functions
+	for other iterative methods. However, it cannot be used in conjunction with any other
+	Krylov method. It is only called by the KMS function when the preconditioner needs to
+	be applied.
+ 
+	\param r vector supplied to the preconditioner to operate on
+	\param Mr vector to hold the result of the preconditioning operation
+	\param data void pointer to the KMS_DATA data structure*/
 int kmsPreconditioner( const Matrix<double>& r, Matrix<double> &Mr, const void *data);
 
 /// Function to iteratively solve a non-symmetric, indefinite linear system with KMS
+/** This function iteratively solves a non-symmetric, indefinite linear system using the
+	Krylov Multi-Space (KMS) method. This algorithm uses GMRESRP at both outer and inner
+	iterations to implicitly form a variable preconditioner to the linear system. As such, 
+	this is one of only two methods that inherently includes preconditioning, without any user 
+	supplied preconditioning operator (the other being GMRESR). The advantage to this method
+	over GMRESR is that this method is GMRES at its core, and will therefore never breakdown
+	or need to be stabilized. Additionally, you can call this method and set it's max_level
+	parameter (see KMS_DATA) to 0, which will make this algorithm exactly equal to GMRESRP.
+	If the max_level is set to 1, then this algorithm is exactly FGMRES (Saad, 1993) with the
+	GMRES algorithm as a preconditioner. However, you can set max_level higher to precondition
+	the preconditioners with more preconditioners. Thus creating a method with any desired
+	complexity or rate of convergence.
+ 
+	\param matvec user supplied linear operator given as an int function
+	\param terminal_precon user supplied preconditioning operator given as an int function
+	\param b matrix of boundary conditions in the linear system Ax=b
+	\param kms_dat pointer to the KMS_DATA data structure
+	\param matvec_data user supplied void pointer to a data structure needed for the linear operator
+	\param term_precon_data user supplied void pointer to a data structure needed for the precondtioning operator*/
+
+/**	\note int (*matvec) (const Matrix<double>& v, Matrix<double> &Av, const void *data)
+	\n --------------------------------------------------------------------------------
+	\n This is a user supplied function for a linear operator. User's function must return an
+ int of 0 upon success and anything else denotes a failure. The function accepts a matrix
+ v that will act on the linear operator a modified the matrix entries of Av to form the
+ result of a matrix-vector product. Void pointer data is used to pass any user data structure
+ that the function may need in order to perform the linear operation.
+	\n --------------------------------------------------------------------------------*/
+
+/**	\note int (*terminal_precon) (const Matrix<double>& b, Matrix<double> &Mb, const void *data)
+	\n --------------------------------------------------------------------------------
+	\n This is a user supplied function for a preconditioning operator. It has the same form as
+ the above linear operator function and should have all the same properties. The only
+ difference is that this function must form an approximate matrix inversion on the original
+ linear operator and modify the entries of Mb to represent the result of that approximate
+ matrix inversion. The matrix b is given as the vector that this operator is acting on and
+ the void pointer data is for any user data structure that the operator may need.
+	\n --------------------------------------------------------------------------------*/
 int krylovMultiSpace( int (*matvec) (const Matrix<double>& x, Matrix<double> &Ax, const void *data),
 					 int (*terminal_precon) (const Matrix<double>& r, Matrix<double> &Mr, const void *data),
 					 Matrix<double> &b, KMS_DATA *kms_dat, const void *matvec_data,

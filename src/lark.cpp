@@ -2526,6 +2526,8 @@ int krylovMultiSpace( int (*matvec) (const Matrix<double>& x, Matrix<double> &Ax
 	}
 	kms_dat->gmres_out.tol_abs = kms_dat->outer_abstol;
 	kms_dat->gmres_out.tol_rel = kms_dat->outer_reltol;
+	
+	//Method Parameters
 	if (kms_dat->restart <= 0)
 	{
 		kms_dat->restart = std::min(b.rows(),20);
@@ -2542,16 +2544,15 @@ int krylovMultiSpace( int (*matvec) (const Matrix<double>& x, Matrix<double> &Ax
 	{
 		kms_dat->maxit = std::min(b.rows(),1000);
 	}
+	if (kms_dat->max_level < 0)
+		kms_dat->max_level = 0;
+	if (kms_dat->max_level > 5)
+		kms_dat->max_level = 5;
 	kms_dat->gmres_out.restart = kms_dat->restart;
 	kms_dat->gmres_out.maxit = kms_dat->maxit;
 	kms_dat->total_iter = 0;
 	kms_dat->inner_iter = 0;
 	kms_dat->outer_iter = 0;
-	
-	if (kms_dat->max_level < 0)
-		kms_dat->max_level = 0; 
-	if (kms_dat->max_level > 5)
-		kms_dat->max_level = 5;
 	
 	if (kms_dat->gmres_in.size() != kms_dat->max_level)
 		kms_dat->gmres_in.resize(kms_dat->max_level);
