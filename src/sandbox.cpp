@@ -1,15 +1,16 @@
-//----------------------------------------
-//  Created by Austin Ladshaw on 04/11/15
-//  Copyright (c) 2015
-//	Austin Ladshaw
-//	All rights reserved
-//----------------------------------------
-
-/*
- *		The SANDBOX is a clean working space where new algorithms and ideas can be tested before
- *		attempting to have those ideas implemented in the FLOCK or SCHOOL. 
+/*!
+ *  \file sandbox.h sandbox.cpp
+ *	\brief Coding Test Area
  *
+ *	\warning Functions and methods in this file are not meant to be used anywhere else.
+ *  \author Austin Ladshaw
+ *	\date 04/11/2015
+ *	\copyright This software was designed and built at the Georgia Institute
+ *             of Technology by Austin Ladshaw for PhD research in the area
+ *             of adsorption and surface science. Copyright (c) 2015, all
+ *             rights reserved.
  */
+
 
 #include "sandbox.h"
 

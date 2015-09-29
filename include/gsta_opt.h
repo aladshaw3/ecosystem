@@ -194,7 +194,7 @@ void eval_GSTA(const double *par, int m_dat, const void *data, double *fvec, int
 	Theoretical Maximum Adsorption Capacity (if unknown, provide 0) \n
 	Temperature of the ith Isotherm (K) \n
 	Number of Data points for the ith Isotherm \n
-	Partial Pressure (kPa)      (tab)       Corresponding Adsorbed Amount (any units) \n
+	Partial Pressure (kPa)      [tab]       Corresponding Adsorbed Amount (any units) \n
  
 	(2nd Line down is repeated for all isotherms you are optimizing on...) \n
  

@@ -380,7 +380,7 @@ int MAGPIE(const void *data);
 	van der Waals Volume (cm^3/mol) of ith species \n
 	GSTA adsorption capacity (mol/kg) of ith species \n
 	Number of GSTA parameters of ith species \n
-	Enthalpy (J/mol) of nth site       (tab)       Entropy of nth site (J/K/mol)       of ith species \n
+	Enthalpy (J/mol) of nth site       [tab]       Entropy of nth site (J/K/mol)       of ith species \n
        (repeat above for all n sites in species i) \n
 	(repeat above for all species i) \n
  
@@ -417,7 +417,7 @@ int MAGPIE(const void *data);
 	---------------------------------
 	Integer Flag to mark Forward (0) or { Reverse (1) evaluations } \n
 	Number of Simulations to Run \n
-	Total Pressure (kPa) (tab) Temperature (K) { (tab) Total Adsorption (mol/kg) (tab) Carrier Gas Flag (0=false, 1=true) } \n
+	Total Pressure (kPa) [tab] Temperature (K) { [tab] Total Adsorption (mol/kg) [tab] Carrier Gas Flag (0=false, 1=true) } \n
 	Gas/Adsorbed Mole Fractions for each species in the order given in prior file (tab separated) \n
 	(repeat above for all simulations desired) \n
 	NOTE: only provide the Total Adsorption and Carrier Flag if doing Reverse evaluations! \n

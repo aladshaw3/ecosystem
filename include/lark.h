@@ -74,7 +74,7 @@
 				preconditioner. However, we allow the levels of recursion to reach up to 5, thus allowing
 				us to precondition the preconitioners with more GMRES steps. This can result is significantly
 				faster convergence rates, but is typically only necessary for very large or difficult
-				to solve problems. 
+				to solve problems.
  
 				NOTE: There are three GMRES implementations: (i) gmresLP, (ii) fom, and
 				(iii) gmresRP. GMRESLP is a restarted GMRES implementation that is left

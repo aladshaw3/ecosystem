@@ -247,7 +247,22 @@ int nl_picard(FINCH_DATA *dat);
 	it's own functions. You can write your own executioner, initial conditions, and other functions
 	and decided how and when everything is called. Then just call the solve function in FINCH_DATA
 	when you want to use the FINCH solver. This is how FINCH is used in SKUA, SCOPSOWL, DOGFISH, and
-	MONKFISH. */
+	MONKFISH. 
+ 
+	\param user_callroutine function pointer the the call routine function
+	\param user_setic function pointer to set initial conditions for problem
+	\param user_timestep function pointer to set the next time step
+	\param user_preprocess function pointer to setup a preprocess operation
+	\param user_solve function pointer to solve the system of equations
+	\param user_setparams function pointer to set the parameters in the problem (always override this)
+	\param user_discretize function pointer to select discretization scheme for the problem
+	\param user_bcs function pointer to evaluate boundary conditions for the problem
+	\param user_res function pointer to evaluate non-linear residuals for the problem
+	\param user_precon function pointer to perform a linear preconditioning operation
+	\param user_postprocess function pointer to setup a postprocess operation
+	\param user_reset function pointer to reset stateful data for next simulation
+	\param dat pointer to the FINCH_DATA structure
+	\param param_data user supplied pointer to a data structure needed in user_setparams*/
 int setup_FINCH_DATA( int (*user_callroutine) (const void *user_data),
 					  int (*user_setic) (const void *user_data),
 					  int (*user_timestep) (const void *user_data),

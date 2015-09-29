@@ -91,32 +91,54 @@ void print2file_DOGFISH_result_new(DOGFISH_DATA *dog_dat);
 
 /// Default function for the retardation coefficient
 /** The default retardation coefficient for this problem is 1.0 for all time and space. Therefore,
-	this function will only ever return a 1. */
+	this function will only ever return a 1.
+ 
+	\param i index for the ith adsorbing species
+	\param l index for the lth node in the domain
+	\param data pointer to the DOGFISH_DATA structure*/
 double default_Retardation(int i, int l, const void *data);
 
 /// Default function for the intraparticle diffusion coefficient
 /** The default intraparticle diffusivity is to assume that each species i has a constant diffusivity.
 	Therefore, this function returns the value of the parameter intraparticle_diffusion from the 
-	DOGFISH_PARAM structure for each adsorbing species i. Each species may have a different diffusivity.*/
+	DOGFISH_PARAM structure for each adsorbing species i. Each species may have a different diffusivity.
+ 
+	\param i index for the ith adsorbing species
+	\param l index for the lth node in the domain
+	\param data pointer to the DOGFISH_DATA structure*/
 double default_IntraDiffusion(int i, int l, const void *data);
 
 /// Default function for the film mass transfer coefficient
 /** The default film mass transfer coefficient will be to assume that this value is a constant for
 	each species i. Therefore, this function returns the parameter value of film_transfer_coeff from
-	the DOGFISH_PARAM structure for each adsorbing species i. */
+	the DOGFISH_PARAM structure for each adsorbing species i.
+ 
+	\param i index for the ith adsorbing species
+	\param data pointer to the DOGFISH_DATA structure */
 double default_FilmMTCoeff(int i, const void *data);
 
 /// Default function for the fiber surface concentration
 /** The default fiber surface concentration will be to assume that this value is a constant for
 	each species i. Therefore, this function returns the parameter value of surface_concentration from
-	the DOGFISH_PARAM structure for each adsorbing species i. */
+	the DOGFISH_PARAM structure for each adsorbing species i.
+ 
+	\param i index for the ith adsorbing species
+	\param data pointer to the DOGFISH_DATA structure*/
 double default_SurfaceConcentration(int i, const void *data);
 //----- END Default function definitions -------------
 
 /// Function will set up the memory and pointers for use in the DOGFISH simulations
 /** The pointers to the output file, parameter functions, and data structures are passed into
 	this function to setup the problem in memory. This function must always be called prior to
-	calling any other DOGFISH routine and after the DOGFISH_DATA structure has been initialized. */
+	calling any other DOGFISH routine and after the DOGFISH_DATA structure has been initialized.
+ 
+	\param file pointer to the output file to print out results
+	\param eval_R function pointer for the retardation coefficient function
+	\param eval_DI function pointer for the intraparticle diffusion function
+	\param eval_kf function pointer for the film mass transfer function
+	\param eval_qs function pointer for the surface concentration function
+	\param user_data pointer for the user's own data structure (only if using custom functions)
+	\param dog_dat pointer for the DOGFISH_DATA structure*/
 int setup_DOGFISH_DATA(FILE *file, double (*eval_R) (int i, int l, const void *user_data),
 					   double (*eval_DI) (int i, int l, const void *user_data),
 					   double (*eval_kf) (int i, const void *user_data),
