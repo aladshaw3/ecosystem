@@ -1,12 +1,13 @@
-//----------------------------------------
-//  Created by Austin Ladshaw on 05/27/15
-//  Copyright (c) 2015
-//	Austin Ladshaw
-//	All rights reserved
-//----------------------------------------
-
-/*
- *		SHARK = Speciation-object Hierarchy for Aqueous Reaction Kinetics
+/*!
+ *  \file shark.cpp shark.h
+ *	\brief Speciation-object Hierarchy for Aqueous Reaction Kinetics
+ *
+ *  \author Austin Ladshaw
+ *	\date 05/27/2015
+ *	\copyright This software was designed and built at the Georgia Institute
+ *             of Technology by Austin Ladshaw for PhD research in the area
+ *             of adsorption and surface science. Copyright (c) 2015, all
+ *             rights reserved.
  */
 
 #include "shark.h"
