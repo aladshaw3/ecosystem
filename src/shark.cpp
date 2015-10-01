@@ -1306,8 +1306,6 @@ void print2file_shark_header(SHARK_DATA *shark_dat)
 		fprintf(shark_dat->OutputFile, "Activity Function = DAVIES\n");
 	else if (shark_dat->act_fun == DEBYE_HUCKEL)
 		fprintf(shark_dat->OutputFile, "Activity Function = DEBYE_HUCKEL\n");
-	else if (shark_dat->act_fun == DAVIES_LADSHAW)
-		fprintf(shark_dat->OutputFile, "Activity Function = DAVIES_LADSHAW\n");
 	else
 		fprintf(shark_dat->OutputFile, "Activity Function = UNREGISTERED\n");
 	if (shark_dat->Contains_pH == true)
@@ -1498,45 +1496,6 @@ int DebyeHuckel_equation (const Matrix<double> &x, Matrix<double> &F, const void
 	return success;
 }
 
-//Empirical Correction model for high-ionic strength solutions
-int DaviesLadshaw_equation (const Matrix<double>& x, Matrix<double> &F, const void *data)
-{
-	int success = 0;
-	
-	double ionic_strength = 0.0;
-	SHARK_DATA *dat = (SHARK_DATA *) data;
-	
-	//Loop to calculate ionic strength
-	for (int i=0; i<dat->numvar; i++)
-	{
-		ionic_strength = ionic_strength + (pow(10.0,x(i,0)) * dat->MasterList.charge(i) * dat->MasterList.charge(i));
-	}
-	ionic_strength = ionic_strength / 2.0;
-	if (isinf(ionic_strength) || isnan(ionic_strength))
-		ionic_strength = DBL_MAX_10_EXP;
-	
-	//Calculate log10(activity) from ionic_strength and variable A
-	double A = 1.82E+6 * pow((dat->dielectric_const*dat->temperature), (-3.0/2.0));
-	double log_gama = 0.0;
-	for (int i=0; i<dat->numvar; i++)
-	{
-		log_gama = -A * dat->MasterList.charge(i) * dat->MasterList.charge(i) * ( (sqrt(ionic_strength)/(1.0+sqrt(ionic_strength))) - (0.2*ionic_strength));
-		
-		//Species sum for molefractions
-		double sum = 0.0;
-		for (int j=0; j<dat->numvar; j++)
-		{
-			sum = sum + pow(10.0,x(j,0));
-		}
-		log_gama = log_gama + ( (pow(10.0,x(i,0))/sum) * ionic_strength );
-		F.edit(i, 0, pow(10.0, log_gama));
-		if (isinf(F(i,0)) || isnan(F(i,0)))
-			F.edit(i, 0, DBL_MAX);
-	}
-	
-	return success;
-}
-
 //Determine the activity function choosen by user
 int act_choice(const std::string &input)
 {
@@ -1552,8 +1511,6 @@ int act_choice(const std::string &input)
 		act = IDEAL;
 	else if (copy == "debye-huckel")
 		act = DEBYE_HUCKEL;
-	else if (copy == "davies-ladshaw")
-		act = DAVIES_LADSHAW;
 	else if (copy == "pitzer")
 		act = PITZER;
 	else if (copy == "sit")
@@ -2538,11 +2495,6 @@ int setup_SHARK_DATA( FILE *file, int (*residual) (const Matrix<double> &x, Matr
 	else if (dat->act_fun == DEBYE_HUCKEL)
 	{
 		dat->EvalActivity = DebyeHuckel_equation;
-		dat->activity_data = dat;
-	}
-	else if (dat->act_fun == DAVIES_LADSHAW)
-	{
-		dat->EvalActivity = DaviesLadshaw_equation;
 		dat->activity_data = dat;
 	}
 	//NOTE: The below lines of code will change after we define the PITZER and SIT models and what data structures they need

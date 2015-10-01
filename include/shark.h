@@ -513,158 +513,578 @@ private:
 
 /// Enumeration for the list of valid activity models for non-ideal solutions
 /** \note The SIT and PITZER models are not currently supported. */
-typedef enum {IDEAL, DAVIES, DEBYE_HUCKEL, DAVIES_LADSHAW, SIT, PITZER} valid_act;
+typedef enum {IDEAL, DAVIES, DEBYE_HUCKEL, SIT, PITZER} valid_act;
 
 /// Data structure for SHARK simulations
+/** C-style object holding data and function pointers associated with solving aqueous speciation and reaction
+	kinetics. This object couples all other objects available in shark.h in order to provide residual calculations
+	for each individual function that makes up the overall system model. Those residuals are brought together inside
+	the residual function and fed into the lark.h PJFNK solver routine. That solver then attempts to find a solution
+	to all non-linear variables simultaneously. Any function or data pointers in this structure can be overriden
+	to change how you interface with and solve the problem. Users may also provide a set of custom residual functions
+	through the "OtherList" vector object. Those residual function must all have the same format. */
 typedef struct SHARK_DATA
 {
-	MasterSpeciesList MasterList;					//Master List of species object
-	std::vector<Reaction> ReactionList;				//Equilibrium reaction objects
-	std::vector<MassBalance> MassBalanceList;		//Mass balance objects
-	std::vector<UnsteadyReaction> UnsteadyList;		//Unsteady Reaction objects
+	MasterSpeciesList MasterList;					///< Master List of species object
+	std::vector<Reaction> ReactionList;				///< Equilibrium reaction objects
+	std::vector<MassBalance> MassBalanceList;		///< Mass balance objects
+	std::vector<UnsteadyReaction> UnsteadyList;		///< Unsteady Reaction objects
 	
+	/// Array of Other Residual functions to be defined by user
+	/** This list of function pointers can be declared and set up by the user in order to add to or change
+		the behavior of the SHARK system. Each one must be declared setup individually by the user. They will
+		be called by the shark_residual function when needed. Alternatively, the user is free to provide their
+		own shark_residual function for the overall system. 
+	 
+		\param x matrix of the log(C) concentration values at the current non-linear step
+		\param shark_dat pointer to the SHARK_DATA data structure
+		\param data pointer to a user defined data structure that is used to evaluate this residual*/
 	std::vector<
 		double (*) (const Matrix<double> &x,
 					SHARK_DATA *shark_dat,
-					const void *data) > OtherList;	//Array of Other Residual functions to be defined by user
-													//NOTE: These must be setup individually by the user
+					const void *data) > OtherList;
 	
-	int numvar;										//Total number of functions and species
-	int num_ssr;									//Number of steady-state reactions
-	int num_mbe;									//Number of mass balance equations
-	int num_usr;									//Number of unsteady-state reactions
-	int num_other = 0;								//Number of other functions to be used (default is always 0)
-	int act_fun = IDEAL;							//Number denoting the activity function to use (default is ideal)
-	int totalsteps = 0;								//Number of iterations and function calls
-	int timesteps = 0;								//Number of time steps taken to complete simulation
-	int pH_index = -1;								//Contains the index of the pH variable
-	int pOH_index = -1;								//Contains the index of the pOH variable
+	int numvar;										///< Total number of functions and species
+	int num_ssr;									///< Number of steady-state reactions
+	int num_mbe;									///< Number of mass balance equations
+	int num_usr;									///< Number of unsteady-state reactions
+	int num_other = 0;								///< Number of other functions to be used (default is always 0)
+	int act_fun = IDEAL;							///< Flag denoting the activity function to use (default is IDEAL)
+	int totalsteps = 0;								///< Number of iterations and function calls
+	int timesteps = 0;								///< Number of time steps taken to complete simulation
+	int pH_index = -1;								///< Contains the index of the pH variable (set internally)
+	int pOH_index = -1;								///< Contains the index of the pOH variable (set internally)
 	
-	double simulationtime = 0.0;					//Time to simulate unsteady reactions for (default = 0.0 for steady problem)
-	double dt = 0.1;								//Time step size
-	double dt_min = sqrt(DBL_EPSILON);				//Minimum allowable step size
-	double t_out = 0.0;								//Time increment by which file output is made (default = always print)
-	double t_count = 0.0;							//Running count of time increments
-	double time = 0.0;								//Current value of time
-	double time_old = 0.0;							//Previous value of time (start from t = 0.0)
-	double pH = 7.0;								//Value of pH if needed (default = 7)
-	double Norm = 0.0;								//Current value of euclidean norm in solution
+	double simulationtime = 0.0;					///< Time to simulate unsteady reactions for (default = 0.0 hrs)
+	double dt = 0.1;								///< Time step size (hrs)
+	double dt_min = sqrt(DBL_EPSILON);				///< Minimum allowable step size
+	double t_out = 0.0;								///< Time increment by which file output is made (default = print all time steps)
+	double t_count = 0.0;							///< Running count of time increments
+	double time = 0.0;								///< Current value of time (starts from t = 0.0 hrs)
+	double time_old = 0.0;							///< Previous value of time (start from t = 0.0 hrs)
+	double pH = 7.0;								///< Value of pH if needed (default = 7)
+	double Norm = 0.0;								///< Current value of euclidean norm in solution
 	
-	double dielectric_const = 78.325;				//Dielectric constant used in many activity models (default: water = 78.325 (1/K))
-	double temperature = 298.15;					//Solution temperature (default = 25 oC or 298 K)
+	double dielectric_const = 78.325;				///< Dielectric constant used in many activity models (default: water = 78.325 (1/K))
+	double temperature = 298.15;					///< Solution temperature (default = 25 oC or 298.15 K)
 	
-	bool steadystate = true;						//True = solve steady problem; False = solve transient problem
-	bool TimeAdaptivity = false;					//True = solve using variable time step
-	bool const_pH = false;							//True = set pH to a constant; False = solve for pH
-	bool SpeciationCurve = false;					//True = runs a series of constant pH steady-state problems to produce curves
-	bool Console_Output = true;						//True = display output to console
-	bool File_Output = false;						//True = write output to a file
-	bool Contains_pH = false;						//True = system contains pH as a variable
-	bool Contains_pOH = false;						//True = system contains pOH as a variable
-	bool Converged = false;							//True = system converged within tolerance 
+	bool steadystate = true;						///< True = solve steady problem; False = solve transient problem
+	bool TimeAdaptivity = false;					///< True = solve using variable time step
+	bool const_pH = false;							///< True = set pH to a constant; False = solve for pH
+	bool SpeciationCurve = false;					///< True = runs a series of constant pH steady-state problems to produce curves
+	bool Console_Output = true;						///< True = display output to console
+	bool File_Output = false;						///< True = write output to a file
+	bool Contains_pH = false;						///< True = system contains pH as a variable (set internally)
+	bool Contains_pOH = false;						///< True = system contains pOH as a variable (set internally)
+	bool Converged = false;							///< True = system converged within tolerance
 	
-	Matrix<double> X_old;									//Solution vector for old time step
-	Matrix<double> X_new;									//Solution vector for current time step
-	Matrix<double> Conc_old;								//Concentration vector for old time step
-	Matrix<double> Conc_new;								//Concentration vector for current time step
-	Matrix<double> activity_new;							//Activity matrix for current time step
-	Matrix<double> activity_old;							//Activity matrix from prior time step
+	Matrix<double> X_old;							///< Solution vector for old time step - log(C)
+	Matrix<double> X_new;							///< Solution vector for current time step - log(C)
+	Matrix<double> Conc_old;						///< Concentration vector for old time step - 10^x
+	Matrix<double> Conc_new;						///< Concentration vector for current time step - 10^x
+	Matrix<double> activity_new;					///< Activity matrix for current time step
+	Matrix<double> activity_old;					///< Activity matrix from prior time step
 	
 	//Function pointers for activity and residual evaluations
+	
+	/// Function pointer to evaluate activity coefficients
+	/** This function pointer is called within the shark_residual function to calculate and modify the activity_new
+		matrix entries. When using the SHARK default options, this function pointer will be automatically set to a
+		cooresponding activity function for the list of valid functions from the valid_act enum. User may override
+		this function pointer if they desire. Must be overriden after calling the setup function. 
+	 
+		\param x matrix of the log(C) concentration values at the current non-linear step
+		\param F matrix of activity coefficients that are to be altered by this function
+		\param data pointer to a data structure needed to evaluate the activity model*/
 	int (*EvalActivity) (const Matrix<double>& x, Matrix<double> &F, const void *data);
+	
+	/// Function pointer to evaluate all residuals in the system
+	/** This function will be fed into the PJFNK solver (see lark.h) to solve the non-linear system of equations.
+		By default, this pointer will be the shark_residual function (see below). However, the user may override
+		the function and provide their own residuals for the PJFNK solver to operate on.
+	 
+		\param x matrix of the log(C) concentration values at the current non-linear step
+		\param F matrix of residuals that are to be altered from the functions in the system
+		\param data pointer to a data structure needed to evaluate the activity model*/
 	int (*Residual) (const Matrix<double>& x, Matrix<double> &F, const void *data);
+	
+	/// Function pointer to form a linear preconditioning operation for the Jacobian
+	/** This function will be fed into the linear solver used for each non-linear step in PJFNK (see lark.h). By
+		default, we cannot provide any linear preconditioner, because we do not know the form or sparcity of the
+		Jacobian before hand. It will be the user's responsibility to form their own preconditioner until we can
+		figure out a generic way to precondition the system. */
 	int (*lin_precon) (const Matrix<double> &r, Matrix<double> &p, const void *data);
 	
-	PJFNK_DATA Newton_data;							//Data structure for the Newton-Krylov solver
-	const void *activity_data;						//User defined data structure for an activity model
-	const void *residual_data;						//User defined data structure for the residual function
-	const void *precon_data;						//User defined data structure for preconditioning
-	const void *other_data;							//User define data structure used for user defined residuals
-	FILE *OutputFile;								//Output File pointer
+	PJFNK_DATA Newton_data;							///< Data structure for the Newton-Krylov solver (see lark.h)
+	const void *activity_data;						///< User defined data structure for an activity model
+	const void *residual_data;						///< User defined data structure for the residual function
+	const void *precon_data;						///< User defined data structure for preconditioning
+	const void *other_data;							///< User define data structure used for user defined residuals
+	FILE *OutputFile;								///< Output File pointer
 	
-	yaml_cpp_class yaml_object;						//yaml object to read and access digitized yaml documents
+	yaml_cpp_class yaml_object;						///< yaml object to read and access digitized yaml documents (see yaml_wrapper.h)
 	
 } SHARK_DATA;
 
+/// Function to print out simulation conditions and options to the output file
 void print2file_shark_info(SHARK_DATA *shark_dat);
 
+/// Function to print out the head of species and time stamps to the output file
 void print2file_shark_header(SHARK_DATA *shark_dat);
 
+/// Function to print out the simulation results for the current time step
 void print2file_shark_results_new(SHARK_DATA *shark_dat);
 
+/// Function to print out the simulation results for the previous time step
 void print2file_shark_results_old(SHARK_DATA *shark_dat);
 
+/// Activity function for Ideal Solution
+/** This is one of the default activity models available. It assumes the system behaves ideally and sets the
+	activity coefficients to 1 for all species. 
+ 
+	\param x matrix of the log(C) concentration values at the current non-linear step
+	\param F matrix of activity coefficients that are to be altered by this function
+	\param data pointer to a data structure needed to evaluate the activity model*/
 int ideal_solution (const Matrix<double>& x, Matrix<double> &F, const void *data);
 
+/// Activity function for Davies Equation
+/** This is one of the default activity models available. It uses the Davies semi-empirical model to calculate
+	average activities of each species in solution. This model is typically valid for systems involving high
+	ionic strengths upto 0.5 M (mol/L).
+ 
+	\param x matrix of the log(C) concentration values at the current non-linear step
+	\param F matrix of activity coefficients that are to be altered by this function
+	\param data pointer to a data structure needed to evaluate the activity model*/
 int Davies_equation (const Matrix<double>& x, Matrix<double> &F, const void *data);
 
+/// Activity function for Debye-Huckel Equation
+/** This is one of the default activity models available. It uses the Debye-Huckel limiting model to calculate
+	average activities of each species in solution. This model is typically valid for systems involving low
+	ionic strengths and is only good for solutions between 0 and 0.01 M.
+ 
+	\param x matrix of the log(C) concentration values at the current non-linear step
+	\param F matrix of activity coefficients that are to be altered by this function
+	\param data pointer to a data structure needed to evaluate the activity model*/
 int DebyeHuckel_equation (const Matrix<double> &x, Matrix<double> &F, const void *data);
 
-int DaviesLadshaw_equation (const Matrix<double>& x, Matrix<double> &F, const void *data);
-
+/// Function takes a given string and returns a flag denoting which activity model was choosen
+/** This function returns an integer flag that will be one of the valid activity model flags from the 
+	valid_act enum. If the input string was not recognized, then it defaults to returning the IDEAL flag. 
+ 
+	\param input string for the name of the activity model*/
 int act_choice(const std::string &input);
 
+/// Function returns a bool to determine the form of line search requested
+/** This function returns true if the user requests a bouncing line search algorithm and false if the
+	user wants a standard line search. If the input string is unrecognized, then it returns false. 
+ 
+	\param input string for the line search method option*/
 bool linesearch_choice(const std::string &input);
 
+/// Function returns the linear solver flag for the PJFNK method
+/** This function takes in a string argument and returns the integer flag for the appropriate linear
+	solver in PJFNK. If the input string was unrecognized, then it returns the GMRESRP flag. 
+ 
+	\param input string for the linear solver method option*/
 int linearsolve_choice(const std::string &input);
 
+/// Function to convert the given values of variables (x) to the log of those variables (logx)
+/** This function returns an integer flag to denote success of failure. It takes a constant matrix argument x
+	and replaces the elements of the matrix logx with the base 10 log of those x values. This is used mainly
+	to convert a set of concentrations (x) to their respective log(C) values (logx).
+ 
+	\param x matrix of values to take the base 10 log of
+	\param logx matrix whose entries are to be changed to base 10 log(x)*/
 int Convert2LogConcentration(const Matrix<double> &x, Matrix<double> &logx);
 
+/// Function to convert the given log values of variables (logx) to the values of those variables (x)
+/** This function returns an integer flag to denote success of failure. It takes a constant matrix argument logx
+	and replaces the elements of the matrix x with 10^logx. This is used mainly to convert a set of log(C) values
+	(logx) to their respective concentration values (x).
+ 
+	\param logx matrix of values to apply as the power of 10 (i.e., 10^logx)
+	\param x matrix whose entries are to be changed to the result of 10^logx*/
 int Convert2Concentration(const Matrix<double> &logx, Matrix<double> &x);
 
+/// Function to go through the yaml object for the scenario document
+/** This function checks the yaml object for the expected keys and values of the scenario document
+	to setup the shark simulation for the input given in the input file. */
 int read_scenario(SHARK_DATA *shark_dat);
 
+/// Function to go through the yaml object for the solver options document
+/** This function checks the yaml object for the expected keys and values of the solver options document
+	to setup the shark simulation for the input given in the input file. */
 int read_options(SHARK_DATA *shark_dat);
 
+/// Function to go through the yaml object for the master species document
+/** This function checks the yaml object for the expected keys and values of the master species document
+	to setup the shark simulation for the input given in the input file. */
 int read_species(SHARK_DATA *shark_dat);
 
+/// Function to go through the yaml object for the mass balance document
+/** This function checks the yaml object for the expected keys and values of the mass balance document
+	to setup the shark simulation for the input given in the input file. */
 int read_massbalance(SHARK_DATA *shark_dat);
 
+/// Function to go through the yaml object for the equilibrium reaction document
+/** This function checks the yaml object for the expected keys and values of the equilibrium reaction document
+	to setup the shark simulation for the input given in the input file. */
 int read_equilrxn(SHARK_DATA *shark_dat);
 
+/// Function to go through the yaml object for the unsteady reaction document
+/** This function checks the yaml object for the expected keys and values of the unsteady reaction document
+	to setup the shark simulation for the input given in the input file. */
 int read_unsteadyrxn(SHARK_DATA *shark_dat);
 
+/// Function to setup the memory and pointers for the SHARK_DATA structure for the current simulation
+/** This function will be called after reading the scenario file and is used to setup the memory and other pointers
+	for the user requested simulation. This function must be called before running a simulation or trying to read in 
+	the remander of the yaml formatted input file. Options may be overriden manually after calling this function. 
+ 
+	\param file pointer for the output file where shark results will be stored
+	\param residual pointer to the residual function that will be fed into the PJFNK solver
+	\param activity pointer to the activity function that will determine the activity coefficients 
+	\param precond pointer to the linear preconditioning operation to be applied to the Jacobian
+	\param dat pointer to the SHARK_DATA data structure
+	\param activity_data optional pointer for data needed in activity functions
+	\param residual_data optional pointer for data needed in residual functions
+	\param precon_data optional pointer for data needed in preconditioning functions
+	\param other_data optional pointer for data needed in the evaluation of user defined residual functions*/
 int setup_SHARK_DATA( FILE *file, int (*residual) (const Matrix<double> &x, Matrix<double> &res, const void *data),
 					  int (*activity) (const Matrix<double> &x, Matrix<double> &gama, const void *data),
 					  int (*precond) (const Matrix<double> &r, Matrix<double> &p, const void *data),
 					  SHARK_DATA *dat, const void *activity_data, const void *residual_data,
 					  const void *precon_data, const void *other_data);
 
+/// Function to add user defined custom residual functions to the OtherList vector object in SHARK_DATA
+/** This function will need to be used if the user wants to include custom residuals into the system via the OtherList
+	object in SHARK_DATA. For each i residual you want to add, you must call this function passing your residual function and
+	the SHARK_DATA structure pointer. The order that those functions are executed in are determined by the integer i.
+ 
+	\param i index that the other_res function will appear at in the OtherList object
+	\param other_res function pointer for the user's custom residual function
+	\param shark_dat pointer to the SHARK_DATA data structure*/
 int shark_add_customResidual(int i, double (*other_res) (const Matrix<double> &x, SHARK_DATA *shark_dat, const void *other_data),
 							 SHARK_DATA *shark_dat);
 
+/// Function to check the Reaction and UnsteadyReaction objects for missing info
+/** This function checks the Reaction and UnsteadyReaction objects for missing information. If information is missing, this
+	function will return an error that will cause the program to force quit. */
 int shark_parameter_check(SHARK_DATA *shark_dat);
 
+/// Function to calculate all Reaction and UnsteadyReaction energies
+/** This function will call the calculate energy functions for Reaction and UnsteadyReaction objects.*/
 int shark_energy_calculations(SHARK_DATA *shark_dat);
 
+/// Function to calculate all Reaction and UnsteadyReaction parameters as a function of temperature
+/** This function will call all temperature dependent functions in Reaction and UnsteadyReaction to calculate equilibirium
+	and reaction rate parameters as a function of system temperature. */
 int shark_temperature_calculations(SHARK_DATA *shark_dat);
 
+/// Function will search MasterSpeciesList for existance of H + (aq) and OH - (aq) molecules
+/** This function searches all molecules in the MasterSpeciesList object for the H + (aq) and OH - (aq) molecules. If they
+	are found, then it sets the pH_index and pOH_index of the SHARK_DATA structure and indicates that the system contains
+	these variables. */
 int shark_pH_finder(SHARK_DATA *shark_dat);
 
+/// Function provides a rough initial guess for the values of all non-linear variables
+/** This function constructs an rough initial guess for the values of all non-linear variables in the system. The guess
+	is based primarily off of trying to statisfy all mass balance constraints, initial conditions, and pH constraints if
+	any apply. */
 int shark_guess(SHARK_DATA *shark_dat);
 
+/// Function to establish the initial conditions of the shark simulation
+/** This function will establish the initial conditions for a transient problem by solving the speciation of the system
+	while holding the transient/unsteady variables constant at their respective initial values. However, if the system
+	we are trying to solve is steady, then this function just calls the shark_guess function. */
 int shark_initial_conditions(SHARK_DATA *shark_dat);
 
+/// Function to execute a shark simulation at a single time step or pH value
+/** This function calls the preprocess, solver, and postprocess functions in order. If a particular solve did not converge,
+	then it will retry the solver routine until it runs out of tries or attains convergence. */
 int shark_executioner(SHARK_DATA *shark_dat);
 
+/// Function to set up all time steps in the simulation to a specified constant
+/** This function will set all time steps for the current simulation to a constant that is specified in the input file.
+	The time step will not be changed unless the simulation fails, then it will be reduced in order to try to get the
+	system to converge. */
 int shark_timestep_const(SHARK_DATA *shark_dat);
 
+/// Function to set up all time steps in the simulation based on success or failure to converge
+/** This function will set all time steps for the current simulation based on some factor multiple of the prior time
+	step used and whether or not the previous solution step was successful. If the previous step converged, then the
+	new time step will be 1.5x the old time step. If it failed, then the simulation will be retried with a new time
+	step of 0.5x the old time step. */
 int shark_timestep_adapt(SHARK_DATA *shark_dat);
 
+/// Function to call other functions for calculation of parameters and setting of time steps
+/** This function will call the shark_temperature_calculations function and the appropriate time step function. If the
+	user requests a constant time step, it will call the shark_timestep_const function. Otherwise, it calls the 
+	shark_timestep_adapt function. */
 int shark_preprocesses(SHARK_DATA *shark_dat);
 
+/// Function to call the PJFNK solver routine given the current SHARK_DATA information
+/** This function will perform the necessary steps before and after calling the PJFNK solver routine. Based on the 
+	simulation flags, the solver function will perform an intial guess for unsteady variables, call the PJFNK method,
+	and the printout a console message about the performance. If a terminal failure occurs during the solver, it will
+	print out the current state of residuals, variables, and the Jacobian matrix to the console. Analyzing this information
+	could provide clues as to why failure occured. */
 int shark_solver(SHARK_DATA *shark_dat);
 
+/// Function to convert PJFNK solutions to concentration values and print to the output file
+/** This function will convert the non-linear variables to their respective concentration values, then print the solve 
+	information out to the output file. */
 int shark_postprocesses(SHARK_DATA *shark_dat);
 
+/// Function to reset the values of all stateful information in SHARK_DATA
+/** This function will reset all stateful matrix data in the SHARK_DATA structure in preparation of the next time
+	step simulation. */
 int shark_reset(SHARK_DATA *shark_dat);
 
+/// Default residual function for shark evaluations
+/** This function calls each individual object's residual function to formulate the overall residual function used
+	in the PJFNK solver routine. It will also call the activity function. The order in which these function calls
+	occurs is as follows: (i) activities, (ii) Reaction, (iii) UnsteadyReaction, (iv) MassBalance, (v) OtherList, 
+	and (vi) MasterSpeciesList. If a constant pH is specified, then the MasterSpeciesList residual call is replaced
+	with a constraint on the H + (aq) variable (if one exists). */
 int shark_residual(const Matrix<double> &x, Matrix<double> &F, const void *data);
 
+/// Function to call all above functions to perform a shark simulation
+/** This function is called after reading in all inputs, setting all constants, and calling the setup function. It
+	will call all the necessary functions and subroutines iteratively until the desired simulation is complete. */
 int SHARK(SHARK_DATA *shark_dat);
 
+/// Function to perform a shark simulation based on the conditions in a yaml formatted input file
+/** This is the primary function used to run shark simulations from the UI. It requires that ths user provide one
+	input file that is formatted with yaml keys, symbols, and spacing so that it can be recognized by the parser.
+	This style of input file is much easier to use and understand than the input files used for SCOPSOWL or SKUA.
+	Below shows an example of a typical input file. Note that the # symbol is used in the input file to comment
+	out lines of text that the parser does not need to read. \n
+ 
+	Example Yaml Input for SHARK
+	----------------------------
+	\#This will serve as a test input file for shark to demo how to structure the document \n
+	\#In practice, this section should be listed first, but it doesn't really matter \n
+	\#DO NOT USE TABS IN THESE INPUT FILES \n
+	\#--- Starts a document ... Ends a document \n
+	\#All keys must be proceeded by a : \n
+	\#All lists/header must be preceeded by a - \n
+	\#Spacing of the keys will indicate which list/header they belong to \n
+	Scenario: \n
+	--- \n
+	- vars_fun: \n
+	  numvar: 25 \n
+	  num_ssr: 15 \n
+	  num_mbe: 7 \n
+	  num_usr: 2 \n
+      num_other: 0      \#Not required or used in current version \n
+ 
+	- sys_data: \n
+	  act_fun: davies \n
+	  const_pH: false \n
+	  pH: 7              \#Only required if we are specifying a const_pH \n
+	  temp: 298.15       \#Units must be in Kelvin \n
+	  dielec: 78.325     \#Units must be in (1/Kelvin) \n
+	  res_alk: 0         \#Units must be in mol/L (Residual Alkalinity) \n
+ 
+	- run_time: \n
+      steady: false         \#NOTE: All time must be represented in hours \n
+	  specs_curve: false    \#Only needed if steady = true, and will default to false \n
+	  dt: 0.001             \#Only required if steady = false \n
+	  time_adapt: true      \#Only needed if steady = false, and will default to false \n
+	  sim_time: 96.0        \#Only required if steady = false \n
+	  t_out: 0.01           \#Only required if steady = false \n
+	...
+ 
+	\#The following header is entirely optional, but is used to set solver options \n
+	SolverOptions: \n
+	--- \n
+	line_search: true      \#Default = true, and is recommended to be true \n
+	search_type: standard \n
+	linear_solve: gmresrp      \#Note: FOM will be fastest for small problems \n
+	restart: 25                \#Note: restart only used if using GMRES or GCR type solvers \n
+	nl_maxit: 50 \n
+	nl_abstol: 1e-5 \n
+	nl_reltol: 1e-8 \n
+	lin_reltol: 1e-10 	    \#Min Tol = 1e-15 \n
+	lin_abstol: 1e-10		\#Min Tol = 1e-15 \n
+	nl_print: true \n
+	l_print: true \n
+	...
+ 
+	\#After the Scenario read, shark will call the setup_function, then read info below \n
+	MasterSpecies: \n
+	--- \n
+	\#Header names are specific \n
+	\#Keys are chosen by user, but must span numbers 0 through numvar-1 \n
+	\#Keys will denote the ordering of the variables \n
+	\#Note: Currently, the number of reg molecules is very limited \n
+	- reg: \n
+	  0: Cl - (aq) \n
+	  1: NaHCO3 (aq) \n
+	  2: NaCO3 - (aq) \n
+	  3: Na + (aq) \n
+	  4: HNO3 (aq) \n
+	  5: NO3 - (aq) \n
+	  6: H2CO3 (aq) \n
+      7: HCO3 - (aq) \n
+	  8: CO3 2- (aq) \n
+	  9: UO2 2+ (aq) \n
+	  10: UO2NO3 + (aq) \n
+	  11: UO2(NO3)2 (aq) \n
+	  12: UO2OH + (aq) \n
+	  13: UO2(OH)3 - (aq) \n
+	  14: (UO2)2(OH)2 2+ (aq) \n
+	  15: (UO2)3(OH)5 + (aq) \n
+	  16: UO2CO3 (aq) \n
+	  17: UO2(CO3)2 2- (aq) \n
+	  18: UO2(CO3)3 4- (aq) \n
+	  19: H2O (l) \n
+	  20: OH - (aq) \n
+	  21: H + (aq) \n
+ 
+	\#Keys for the sub-headers must follow same rules as keys from above \n
+	- unreg: \n
+	  - 22: \n
+	    formula: A(OH)2 (aq) \n
+	    charge: 0 \n
+	    enthalpy: 0 \n
+	    entropy: 0 \n
+	    have_HS: false \n
+	    energy: 0 \n
+	    have_G: false \n
+	    phase: Aqueous \n
+	    name: Amidoxime \n
+	   lin_form: none \n
+ 
+	  - 23: \n
+	    formula: UO2AO2 (aq) \n
+	    charge: 0 \n
+	    enthalpy: 0 \n
+	    entropy: 0 \n
+	    have_HS: false \n
+	    energy: 0 \n
+	    have_G: false \n
+	    phase: Aqueous \n
+	    name: Uranyl-amidoximate \n
+	    lin_form: none \n
+ 
+	  - 24: \n
+	    formula: UO2CO3AO2 2- (aq) \n
+	    charge: -2 \n
+	    enthalpy: 0 \n
+	    entropy: 0 \n
+	    have_HS: false \n
+	    energy: 0 \n
+	    have_G: false \n
+	    phase: Aqueous \n
+	    name: Uranyl-carbonate-amidoximate \n
+	    lin_form: none \n
+	... \n
+ 
+	\#NOTE: Total concentrations must be given in mol/L \n
+	MassBalance: \n
+	--- \n
+	\#Header names under MassBalance are choosen by the user \n
+	\#All other keys will be checked \n
+	- water: \n
+	  total_conc: 1 \n
+	  - delta: \n
+	    "H2O (l)": 1 \n
+ 
+	- carbonate: \n
+	  total_conc: 0.0004175 \n
+	  - delta: \n
+	   "NaHCO3 (aq)": 1 \n
+	   "NaCO3 - (aq)": 1 \n
+	   "H2CO3 (aq)": 1 \n
+	   "HCO3 - (aq)": 1 \n
+	   "CO3 2- (aq)": 1 \n
+	   "UO2CO3 (aq)": 1 \n
+	   "UO2(CO3)2 2- (aq)": 2 \n
+	   "UO2(CO3)3 4- (aq)": 3 \n
+	   "UO2CO3AO2 2- (aq)": 1 \n
+ 
+	\#Other mass balances skipped for demo purposes... \n
+	... \n
+ 
+	\#Document for equilibrium or steady reactions \n
+	EquilRxn: \n
+	--- \n
+	\#Headers under EquilRxn separate out each reaction object \n
+	\#Keys for these headers only factor into the order of the equations \n
+	\#Stoichiometry follows the convention that products are pos(+) and reactants are neg(-) \n
+	\#Note: logK is only required if any species in stoichiometry is unregistered \n
+	\#Example: below represents - {H2O (l)} --> {H + (aq)} + {OH - (aq)} \n
+	\#Note: a valid reaction statement requires at least 1 stoichiometry args \n
+	\#Note: You can also provide reaction energies: enthalpy, entropy, and energy \n
+ 
+	- rxn00: \n
+	  logK: -14 \n
+	  - stoichiometry: \n
+	   "H2O (l)": -1 \n
+	   "OH - (aq)": 1 \n
+	   "H + (aq)": 1 \n
+ 
+	- rxn01: \n
+	  logK: -6.35 \n
+	   - stoichiometry: \n
+	     "H2CO3 (aq)": -1 \n
+	     "HCO3 - (aq)": 1 \n
+	     "H + (aq)": 1 \n
+ 
+	\#Other reactions skipped for demo purposes... \n
+	... \n
+ 
+	\#Document for unsteady reactions \n
+	UnsteadyRxn: \n
+	--- \n
+	\#Same basic standards for this doc as the EquilRxn \n
+	\#Main difference is the inclusion of rate information \n
+	\#You are required to give at least 1 rate \n
+	\#You are also required to denote which variable is unsteady \n
+	\#You must give the initial concentration for the variable in mol/L \n
+	\#Rate units are in (L/mol)^n/hr \n
+	\#Note: we also have keys for forward_ref, reverse_ref, \n
+	\#activation_energy, and temp_affinity. \n
+	\#These are optional if forward and/or reverse are given \n
+	\#Note: You can also provide reaction energies: enthalpy, entropy, and energy \n
+ 
+	- rxn00: \n
+	  unsteady_var: UO2AO2 (aq) \n
+	  initial_condition: 0 \n
+	  logK: -1.35 \n
+	  forward: 4.5e+6 \n
+	  reverse: 1.00742e+8 \n
+	  - stoichiometry: \n
+	    "UO2 2+ (aq)": -1 \n
+	    "A(OH)2 (aq)": -1 \n
+	    "UO2AO2 (aq)": 1 \n
+	    "H + (aq)": 2 \n
+ 
+	- rxn01: \n
+	  unsteady_var: UO2CO3AO2 2- (aq) \n
+	  initial_condition: 0 \n
+	  logK: 3.45 \n
+	  forward: 2.55e+15 \n
+	  reverse: 9.04774e+11 \n
+	  - stoichiometry: \n
+	    "UO2 2+ (aq)": -1 \n
+	    "CO3 2- (aq)": -1 \n
+	    "A(OH)2 (aq)": -1 \n
+	    "UO2CO3AO2 2- (aq)": 1 \n
+	    "H + (aq)": 2 \n
+ 
+	... \n
+ 
+	\note It may be advantageous to look at some other shark input file examples. More input files are provided in the 
+	input_files/SHARK directory of the ecosystem project folder. Please refer to your own source file location for more
+	input file examples for SHARK.
+ */
 int SHARK_SCENARIO(const char *yaml_input);
 
+/// Function to perform a series of shark calculation tests
+/** This function sets up and solves a test problem for shark. It is callable from the UI. */
 int SHARK_TESTS();
 
 #endif
