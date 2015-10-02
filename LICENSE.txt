@@ -23,7 +23,7 @@ Ladshaw, Alex Wiechert, Sotira Yiacoumi, and Costas Tsouris.
 The ECOSYSTEM Software License
 ------------------------------
 
-ecosystem (c) 2012
+ecosystem (c) 2015
 
 Authors: Austin Ladshaw, Alex Wiechert, Sotira Yiacoumi, and Costas Tsouris
 Address: 200 Bobby Dodd Way, Georgia Institute of Technology, Atlanta, Ga 30332
