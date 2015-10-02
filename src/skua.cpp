@@ -1,13 +1,13 @@
-//----------------------------------------
-//  Created by Austin Ladshaw on 1/26/15
-//  Copyright (c) 2015
-//	Austin Ladshaw
-//	All rights reserved
-//----------------------------------------
-
-/*
- *			SKUA = Surface Kinetics for Uptake by Adsorption
+/*!
+ *  \file skua.h skua.cpp
+ *	\brief Surface Kinetics for Uptake by Adsorption
  *
+ *  \author Austin Ladshaw
+ *	\date 01/26/2015
+ *	\copyright This software was designed and built at the Georgia Institute
+ *             of Technology by Austin Ladshaw for PhD research in the area
+ *             of adsorption and surface science. Copyright (c) 2015, all
+ *             rights reserved.
  */
 
 #include "skua.h"
@@ -163,34 +163,6 @@ double simple_darken_Dc(int i, int l, const void *data)
 	return Dc;
 }
 
-//Average value Darken Dc {DO NOT USE}
-/*
-double average_darken_Dc(int i, int l, const void *data)
-{
-	double Dc = 0.0;
-	SKUA_DATA *dat = (SKUA_DATA *) data;
-	
-	if (i < 0)
-	{
-		mError(indexing_error);
-		return -1;
-	}
-	
-	//Boundary Dc
-	if (l < 0)
-	{
-		Dc = D_c(D_o(dat->param_dat[i].ref_diffusion, dat->param_dat[i].activation_energy, dat->magpie_dat.sys_dat.T),dat->finch_dat[i].uAvg/(dat->magpie_dat.gsta_dat[i].qmax+1.0E-6));
-	}
-	//Interior Dc
-	else
-	{
-		Dc = D_c(D_o(dat->param_dat[i].ref_diffusion, dat->param_dat[i].activation_energy, dat->magpie_dat.sys_dat.T),dat->finch_dat[i].uAvg/(dat->magpie_dat.gsta_dat[i].qmax+1.0E-6));
-	}
-	
-	return Dc;
-}
-*/
-
 //Theoretical Darken Dc (Much more computationally intense)
 double theoretical_darken_Dc(int i, int l, const void *data)
 {
@@ -254,51 +226,6 @@ double theoretical_darken_Dc(int i, int l, const void *data)
 	
 	return Dc;
 }
-
-//Based on average qT and y_eff to use the theoretical Darken Dc expression {DO NOT USE}
-/*
-double average_theoretical_darken_Dc(int i, int l, const void *data)
-{
-	double Dc = 0.0;
-	SKUA_DATA *dat = (SKUA_DATA *) data;
-	
-	if (i < 0)
-	{
-		mError(indexing_error);
-		return -1;
-	}
-	
-	if (dat->param_dat[i].Adsorbable == true)
-	{
-		//Boundary Dc
-		if (l < 0)
-		{
-			Dc = D_o(dat->param_dat[i].ref_diffusion, dat->param_dat[i].activation_energy, dat->magpie_dat.sys_dat.T);
-			Dc = Dc * q_p(dat->param_dat[i].y_eff*dat->magpie_dat.sys_dat.PT, (void *)&dat->magpie_dat, i) / dq_dp(dat->param_dat[i].y_eff*dat->magpie_dat.sys_dat.PT, (void *)&dat->magpie_dat, i);
-		}
-		//Interior Dc
-		else
-		{
-			Dc = D_o(dat->param_dat[i].ref_diffusion, dat->param_dat[i].activation_energy, dat->magpie_dat.sys_dat.T);
-			Dc = Dc * q_p(dat->param_dat[i].y_eff*dat->magpie_dat.sys_dat.PT, (void *)&dat->magpie_dat, i) / dq_dp(dat->param_dat[i].y_eff*dat->magpie_dat.sys_dat.PT, (void *)&dat->magpie_dat, i);
-		}
-	}
-	else
-	{
-		Dc = 0.0;
-	}
-	
-	return Dc;
-}
-*/
-
-//Estimate crystal diffusivity with a constant Darken model {DO NOT USE}
-/*
-double const_darken_Dc(int i, int l, const void *data)
-{
-	return theoretical_darken_Dc(i, -1, data);
-}
-*/
 
 //Estimation of Film Mass Transfer based on gas phase properties
 double empirical_kf(int i, const void *data)
