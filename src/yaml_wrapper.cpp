@@ -1,47 +1,44 @@
-//----------------------------------------
-//  Created by Austin Ladshaw on 07/29/15
-//  Copyright (c) 2015
-//	Austin Ladshaw
-//	All rights reserved
-//----------------------------------------
-
-/*
+/*!
+ *  \file yaml_wrapper.cpp yaml_wrapper.h
+ *	\brief C++ Wrapper for the C-YAML Library
+ *  \author Austin Ladshaw
+ *	\date 07/29/2015
+ *	\copyright This software was designed and built at the Georgia Institute
+ *             of Technology by Austin Ladshaw for PhD research in the area
+ *             of adsorption and surface science. Copyright (c) 2015, all
+ *             rights reserved. This copyright only applies to yaml_wrapper.h
+ *			   and yaml_wrapper.cpp. \n
+ *
+ *				DISCLAIMER:
+				----------
+				Niether Austin Ladshaw, nor the Georgia Institute of Technology, is the author or owner of any C-YAML
+				Library or source code. Only the files labeld "yaml_wrapper" were created by Austin Ladshaw. Therefore, any C-YAML
+				files distributed will be given a portions copyright under the MIT License (see below). For more information on YAML,
+				go to pyyaml.org/wiki/LibYAML.\n
  
- DISCLAIMER: Niether Austin Ladshaw, nor the Georgia Institute of Technology, is the author or owner of any YAML Library or source code.
- Only the files labeld "yaml_wrapper" were created by Austin Ladshaw for the sole purpose of running and testing the yaml code before
- implementation in the main adsorption software packages developed by Austin Ladshaw at the Georgia Institute of Technology.
+				Portions copyright 2006 Kirill Simonov \n
  
- The YAML Library (LibYAML) was written by Kirill Simonov and is released under the MIT license. For more information on YAML, go to
- pyyaml.org/wiki/LibYAML. The MIT License is provided below...
+				The MIT License (MIT) \n
  
+				Permission is hereby granted, free of charge, to any person obtaining a copy
+				of this software and associated documentation files (the "Software"), to deal
+				in the Software without restriction, including without limitation the rights
+				to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+				copies of the Software, and to permit persons to whom the Software is
+				furnished to do so, subject to the following conditions: \n
+ 
+				The above copyright notice and this permission notice shall be included in
+				all copies or substantial portions of the Software. \n
+ 
+				THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+				IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+				FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+				AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+				LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+				OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+				THE SOFTWARE. \n
  */
 
-/*
- 
- The MIT License (MIT)
- 
- Copyright (c) 2015 Austin Ladshaw
- Portions copyright 2006 Kirill Simonov
- 
- Permission is hereby granted, free of charge, to any person obtaining a copy
- of this software and associated documentation files (the "Software"), to deal
- in the Software without restriction, including without limitation the rights
- to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- copies of the Software, and to permit persons to whom the Software is
- furnished to do so, subject to the following conditions:
- 
- The above copyright notice and this permission notice shall be included in
- all copies or substantial portions of the Software.
- 
- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- THE SOFTWARE.
- 
- */
 
 #include "yaml_wrapper.h"
 

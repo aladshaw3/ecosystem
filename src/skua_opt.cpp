@@ -1,9 +1,14 @@
-//----------------------------------------
-//  Created by Austin Ladshaw on 5/11/15
-//  Copyright (c) 2015
-//	Austin Ladshaw
-//	All rights reserved
-//----------------------------------------
+/*!
+ *  \file skua_opt.cpp skua_opt.h
+ *	\brief Optimization Routine for the SKUA Model
+ *
+ *  \author Austin Ladshaw
+ *	\date 05/11/2015
+ *	\copyright This software was designed and built at the Georgia Institute
+ *             of Technology by Austin Ladshaw for PhD research in the area
+ *             of adsorption and surface science. Copyright (c) 2015, all
+ *             rights reserved.
+ */
 
 #include "skua_opt.h"
 

@@ -1,47 +1,133 @@
-//----------------------------------------
-//  Created by Austin Ladshaw on 07/29/15
-//  Copyright (c) 2015
-//	Austin Ladshaw
-//	All rights reserved
-//----------------------------------------
-
-/*
+/*!
+ *  \file yaml_wrapper.h yaml_wrapper.cpp
+ *	\brief C++ Wrapper for the C-YAML Library
+ *	\details This file holds objects, structures, and functions associatied with using the C-YAML library.
+ *			A C++ wrapper has been created for the Kirill Simonov (2006) LibYAML library to more easily
+ *			store and query information in yaml style input files. The wrapper uses the C-YAML parser to
+ *			identify the file structure and store the read in information from that document into an
+ *			object using C++ maps. Those maps are hold information in a series of Key-Value pairs as well
+ *			as lists of Key-Value pairs. This allows the user to create well organized input files to
+ *			change the behavior of simulations. 
+ *
+ *			The yaml_wrapper is restricted to the same limitations in the C-YAML source code in terms of
+ *			how the documents are allowed to be structured for TOKEN based parsing. C-YAML only recognizes
+ *			specific tokens and will only allow a certain level of Sub-Header mapping. Therefore, this
+ *			wrapper has the same limitations. Below is an example of acceptable formatting for a C-YAML
+ *			document.
+ *
+ 			\#Test input file for YAML and SHARK \n
  
- DISCLAIMER: Niether Austin Ladshaw, nor the Georgia Institute of Technology, is the author or owner of any YAML Library or source code.
- Only the files labeld "yaml_wrapper" were created by Austin Ladshaw for the sole purpose of running and testing the yaml code before
- implementation in the main adsorption software packages developed by Austin Ladshaw at the Georgia Institute of Technology.
+			TestDoc1: &hat \n
+			--- \n
+			- scenario: \n
+			  numvar: 25 \n
+			  act_fun: DAVIES \n
+			  steadystate: FALSE \n
+			  t_out: 1 \n
+			  pH: 0 \n
  
- The YAML Library (LibYAML) was written by Kirill Simonov and is released under the MIT license. For more information on YAML, go to
- pyyaml.org/wiki/LibYAML. The MIT License is provided below...
+			- testblock: \n
+			  another: block \n
+			  - subblock: \n
+			    sub: block \n
+			... \n
  
+			TestDoc2: *hat \n
+			--- \n
+			- masterspecies: \n
+			  "Cl - (aq)": 0 \n
+			  "Na + (aq)": 1 \n
+			  "H2O (l)": 2 \n
+			  3: NaCl (aq) \n
+			... \n
+ 
+			TestDoc3: \n
+			--- \n
+			apple: red \n
+			pear: green \n
+ 
+			- array: \#Block \n
+			  banana: yellow \n
+			  \#List 1 in array \n
+			  - list1: \&a \#also a block \n
+			    a: 1 \#key : value \n
+			    b: 2 \n
+			    c: 3 \n
+			\#List 2 in array
+			  - list2: *a \n
+			    a: 4 \n
+			    b: 5 \n
+			    c: 6 \n
+			... \n
+ 
+			TestDoc4: \n
+			--- \n
+			- anchor: \&anchor \n
+			  stuff: to do \n
+			- alias: *anchor \n
+			  add: to stuff \n
+ 
+			- list: \n
+			  - anchored: \&list_anchor \n
+			    info: blah \n
+			    atta: boy \n
+			  - aliased: *list_anchor \n
+			    info: bruh \n
+			    atta: ber \n
+			... \n
+ 
+			\#WARNING: MAKE SURE FILE DOES NOT CONTAIN TABS!!!
+ 
+			TestDoc5: \n
+			--- \n
+ 
+			- grab: *anchor \n
+			  add2: more adds \n
+			  - listcopy: *a \n
+ 
+			- block: {1: 2, 3: 4} \n
+			  still: in block \n
+			... \n
+ 
+ *  \note You can view the actual yaml example file in the input_files/SHARK/test_input.yml sub-directory of the project folder.
+ *  \author Austin Ladshaw
+ *	\date 07/29/2015
+ *	\copyright This software was designed and built at the Georgia Institute
+ *             of Technology by Austin Ladshaw for PhD research in the area
+ *             of adsorption and surface science. Copyright (c) 2015, all
+ *             rights reserved. This copyright only applies to yaml_wrapper.h
+ *			   and yaml_wrapper.cpp. \n
+ *				
+ *				DISCLAIMER: 
+				----------
+				Niether Austin Ladshaw, nor the Georgia Institute of Technology, is the author or owner of any C-YAML
+				Library or source code. Only the files labeld "yaml_wrapper" were created by Austin Ladshaw. Therefore, any C-YAML
+				files distributed will be given a portions copyright under the MIT License (see below). For more information on YAML, 
+				go to pyyaml.org/wiki/LibYAML.\n
+ 
+ 				Portions copyright 2006 Kirill Simonov \n
+ 
+				The MIT License (MIT) \n
+ 
+				Permission is hereby granted, free of charge, to any person obtaining a copy
+				of this software and associated documentation files (the "Software"), to deal
+				in the Software without restriction, including without limitation the rights
+				to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+				copies of the Software, and to permit persons to whom the Software is
+				furnished to do so, subject to the following conditions: \n
+ 
+				The above copyright notice and this permission notice shall be included in
+				all copies or substantial portions of the Software. \n
+ 
+				THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+				IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+				FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+				AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+				LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+				OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+				THE SOFTWARE. \n
  */
 
-/*
- 
- The MIT License (MIT)
- 
- Copyright (c) 2015 Austin Ladshaw
- Portions copyright 2006 Kirill Simonov
- 
- Permission is hereby granted, free of charge, to any person obtaining a copy
- of this software and associated documentation files (the "Software"), to deal
- in the Software without restriction, including without limitation the rights
- to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- copies of the Software, and to permit persons to whom the Software is
- furnished to do so, subject to the following conditions:
- 
- The above copyright notice and this permission notice shall be included in
- all copies or substantial portions of the Software.
- 
- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- THE SOFTWARE.
- 
- */
 
 #include "yaml.h"
 #include "error.h"
@@ -55,43 +141,53 @@
 #define YAML_WRAPPER_HPP_
 
 typedef enum data_type
-{ STRING, BOOLEAN, DOUBLE, INT, UNKNOWN } data_type;			//Data type for ValueType
+{ STRING, BOOLEAN, DOUBLE, INT, UNKNOWN } data_type;			///< Enum for valid data types in ValueTypePair
 
-typedef enum header_state { ANCHOR, ALIAS, NONE } header_state;	//State of the Header
+typedef enum header_state { ANCHOR, ALIAS, NONE } header_state;	///< Enum for state of the headers in the yaml_wrapper
 
+/// Value-Type Pair object to recognize data type of a string that was read
+/** C++ Object that creates a pair between a read in value as a string and an enum denoting
+	what the data type of that string is. This object is primarily used in the other yaml_wrapper
+	objects, but can also be used for any string that you want to parse to identify it's type.
+	The supported types are denoted in the data_type enum and can be determined automatically 
+	by the findType() function or can be specified by the assertType() function. */
 class ValueTypePair
 {
 public:
-	ValueTypePair();										//Default constructor
-	~ValueTypePair();										//Default destructor
-	ValueTypePair(const std::pair<std::string,int> &vt);	//Constructor by pair
-	ValueTypePair(std::string value, int type);				//Construction by string and int
-	ValueTypePair(const ValueTypePair &vt);					//Copy constructor
+	ValueTypePair();										///< Default constructor
+	~ValueTypePair();										///< Default destructor
+	ValueTypePair(const std::pair<std::string,int> &vt);	///< Constructor by pair
+	ValueTypePair(std::string value, int type);				///< Construction by string and int
+	ValueTypePair(const ValueTypePair &vt);					///< Copy constructor
 	
-	ValueTypePair& operator=(const ValueTypePair &vt);			//Equals operator overload
+	ValueTypePair& operator=(const ValueTypePair &vt);		///< Equals operator overload
 	
-	void editValue(std::string value);					//Edits value to pair with UNKOWN type
-	void editPair(std::string value, int type);			//Creates a paired Value type
-	void findType();									//Determines the data type
-	void assertType(int type);							//Forces a specific data type
-	void DisplayPair();									//Display the pair
+	void editValue(std::string value);					///< Edits value to pair with UNKOWN type
+	void editPair(std::string value, int type);			///< Creates a paired Value-Type from the given args
+	void findType();									///< Determines the data type of the object
+	void assertType(int type);							///< Forces a specific data type
+	void DisplayPair();									///< Display the pair information
 	
-	std::string getString();							//Returns the value of the pair as a string
-	bool getBool();										//Returns the value of the pair as a bool
-	double getDouble();									//Returns the value of the pair as a double
-	int getInt();										//Returns the value of the pair as an int
-	std::string getValue();								//Returns the value of the pair as it was given
-	int getType();										//Returns the type of the pair
-	std::pair<std::string,int> &getPair();				//Returns the pair
+	std::string getString();							///< Returns the value of the pair as a string
+	bool getBool();										///< Returns the value of the pair as a bool
+	double getDouble();									///< Returns the value of the pair as a double
+	int getInt();										///< Returns the value of the pair as an int
+	std::string getValue();								///< Returns the value of the pair as it was given
+	int getType();										///< Returns the type of the pair
+	std::pair<std::string,int> &getPair();				///< Returns reference to the actual pair object
 	
 protected:
 	
 private:
-	std::pair<std::string,int> Value_Type;				//Holds the Value and Type info
-	int type;											//Type of the value
+	std::pair<std::string,int> Value_Type;				///< pair object holding the Value and Type info
+	int type;											///< Type of the value
 	
 };
 
+/// Key-Value-Type Map object creating a map of the KeyValuePair objects
+/** C++ Object that creates a map of the KeyValuePair objects. Functions defined here allow the user to
+	iterate through this map, access specific keys in the map, edit values associated with those keys,
+	find the data types for the values in those keys, ect. */
 class KeyValueMap
 {
 public:

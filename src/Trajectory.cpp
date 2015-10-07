@@ -1,5 +1,13 @@
-//  main.cpp
-//  AdsorptionToolBox
+/*!
+ *  \file Trajectory.cpp Trajectory.h
+ *	\brief Single Particle Trajectory Analysis for Magnetic Filtration
+ *  \author Alex Wiechert
+ *	\date 08/25/2015
+ *	\copyright This software was designed and built at the Georgia Institute
+ *             of Technology by Alex Wiechert for PhD research in the area
+ *             of environmental surface science. Copyright (c) 2015, all
+ *             rights reserved.
+ */
 
 #include "Trajectory.h"
 
