@@ -217,7 +217,8 @@ double MasterSpeciesList::Eval_ChargeResidual(const Matrix<double> &x)
 	//Loop for all species in list
 	for (int i=0; i<this->list_size(); i++)
 	{
-		res = res + (this->charge(i) * pow(10.0, x(i,0)));
+		if (this->get_species(i).MoleculePhaseID() == AQUEOUS || this->get_species(i).MoleculePhaseID() == LIQUID)
+			res = res + (this->charge(i) * pow(10.0, x(i,0)));
 	}
 	res = res + this->alkalinity();
 	
@@ -637,7 +638,8 @@ double MassBalance::Eval_Residual(const Matrix<double> &x)
 	//Loop for all species in list
 	for (int i=0; i<this->List->list_size(); i++)
 	{
-		res = res + ( this->Delta[i] * pow(10.0, x(i,0)) );
+		if (this->List->get_species(i).MoleculePhaseID() == AQUEOUS || this->List->get_species(i).MoleculePhaseID() == LIQUID)
+			res = res + ( this->Delta[i] * pow(10.0, x(i,0)) );
 	}
 	if (this->Get_TotalConcentration() <= DBL_MIN)
 		res = (res - this->Get_TotalConcentration())/pow(DBL_EPSILON, 2.0);
@@ -1370,10 +1372,38 @@ void print2file_shark_header(SHARK_DATA *shark_dat)
 	fprintf(shark_dat->OutputFile, "\n-----------------END SOLVER OPTIONS-------------------\n\n");
 	
 	fprintf(shark_dat->OutputFile, "-----------------SHARK SIMULATION RESULTS-------------------\n\n");
-	fprintf(shark_dat->OutputFile, "Time\tT(K)\tpH");
+	fprintf(shark_dat->OutputFile, "Time\tT\tpH");
 	for (int i=0; i<shark_dat->MasterList.list_size(); i++)
 		fprintf(shark_dat->OutputFile, "\t[ %s ]", shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
 	fprintf(shark_dat->OutputFile, "\tConverged?\tE.Norm\tNL_iter\tL_iter");
+	fprintf(shark_dat->OutputFile, "\n");
+	fprintf(shark_dat->OutputFile, "(hr)\t(K)\t(-)");
+	for (int i=0; i<shark_dat->MasterList.list_size(); i++)
+	{
+		switch (shark_dat->MasterList.get_species(i).MoleculePhaseID())
+		{
+			case AQUEOUS:
+				fprintf(shark_dat->OutputFile, "\t(mol/L)");
+				break;
+				
+			case LIQUID:
+				fprintf(shark_dat->OutputFile, "\t(mol/L)");
+				break;
+				
+			case GAS:
+				fprintf(shark_dat->OutputFile, "\t(kPa)");
+				break;
+				
+			case SOLID:
+				fprintf(shark_dat->OutputFile, "\t(mol/kg)");
+				break;
+				
+			default:
+				fprintf(shark_dat->OutputFile, "\t(-)");
+				break;
+		}
+	}
+	fprintf(shark_dat->OutputFile, "\t(-)\t(-)\t(-)\t(-)");
 	fprintf(shark_dat->OutputFile, "\n");
 }
 
@@ -1453,11 +1483,11 @@ int Davies_equation (const Matrix<double>& x, Matrix<double> &F, const void *dat
 		ionic_strength = DBL_MAX_10_EXP;
 		
 	//Calculate log10(activity) from ionic_strength and variable A
-	double A = 1.82E+6 * pow((dat->dielectric_const*dat->temperature), (-3.0/2.0));
+	double a = 1.82E+6 * pow((dat->dielectric_const*dat->temperature), (-3.0/2.0));
 	double log_gama = 0.0;
 	for (int i=0; i<dat->numvar; i++)
 	{
-		log_gama = -A * dat->MasterList.charge(i) * dat->MasterList.charge(i) * ( (sqrt(ionic_strength)/(1.0+sqrt(ionic_strength))) - (0.2*ionic_strength));
+		log_gama = -a * dat->MasterList.charge(i) * dat->MasterList.charge(i) * ( (sqrt(ionic_strength)/(1.0+sqrt(ionic_strength))) - (0.2*ionic_strength));
 		F.edit(i, 0, pow(10.0, log_gama));
 		if (isinf(F(i,0)) || isnan(F(i,0)))
 			F.edit(i, 0, DBL_MAX);
@@ -1483,11 +1513,11 @@ int DebyeHuckel_equation (const Matrix<double> &x, Matrix<double> &F, const void
 		ionic_strength = DBL_MAX_10_EXP;
 	
 	//Calculate log10(activity) from ionic_strength and variable A
-	double A = 1.82E+6 * pow((dat->dielectric_const*dat->temperature), (-3.0/2.0));
+	double a = 1.82E+6 * pow((dat->dielectric_const*dat->temperature), (-3.0/2.0));
 	double log_gama = 0.0;
 	for (int i=0; i<dat->numvar; i++)
 	{
-		log_gama = -A * dat->MasterList.charge(i) * dat->MasterList.charge(i) * sqrt(ionic_strength);
+		log_gama = -a * dat->MasterList.charge(i) * dat->MasterList.charge(i) * sqrt(ionic_strength);
 		F.edit(i, 0, pow(10.0, log_gama));
 		if (isinf(F(i,0)) || isnan(F(i,0)))
 			F.edit(i, 0, DBL_MAX);
@@ -1682,6 +1712,14 @@ int read_scenario(SHARK_DATA *shark_dat)
 	} catch (std::out_of_range)
 	{
 		shark_dat->act_fun = IDEAL;
+	}
+	
+	try
+	{
+		shark_dat->volume = shark_dat->yaml_object.getYamlWrapper()("Scenario")("sys_data")["volume"].getDouble();
+	} catch (std::out_of_range)
+	{
+		shark_dat->volume = 1.0;
 	}
 	
 	//Now read in the run_time Header

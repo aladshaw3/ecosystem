@@ -89,6 +89,8 @@
 #include <ctype.h>
 #include "eel.h"
 
+typedef enum {SOLID, LIQUID, AQUEOUS, GAS, PLASMA, OTHER} valid_phase;
+
 /// C++ Molecule Object built from Atom Objects (click Molecule to go to function definitions)
 /** C++ Class Object that stores information and certain operations associated with molecules.
 	Registered molecules are built up from their respective atoms so that the molecule can keep
@@ -218,6 +220,7 @@ public:
 	std::string MoleculeName();				///< Return the common name of the molecule
 	std::string MolecularFormula();			///< Return the molecular formula of the molecule
 	std::string MoleculePhase();			///< Return the phase of the molecule
+	int MoleculePhaseID();					///< Return the enum phase ID of the molecule
 	
 	void DisplayInfo();						///< Function to display molecule information
 	
@@ -229,6 +232,7 @@ protected:
 	double formation_energy;				///< Gibb's energy of formation (J/mol) - given
 	
 	std::string Phase;						///< Phase of the molecule (i.e. Solid, Liquid, Aqueous, Gas...)
+	int PhaseID;							///< Phase ID of the molecule (from the enum)
 	std::vector<Atom> atoms;				///< Atoms which make up the molecule - based on Formula
 	
 private:

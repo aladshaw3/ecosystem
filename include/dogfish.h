@@ -29,8 +29,8 @@ typedef struct
 	//Default parameters to go with default functions
 	double intraparticle_diffusion;						///< Units: um^2/hr
 	double film_transfer_coeff;							///< Units: um/hr
-	double surface_concentration;						///< Units: mg/g
-	double initial_sorption;							///< Units: mg/g
+	double surface_concentration;						///< Units: mol/kg
+	double initial_sorption;							///< Units: mol/kg
 	
 	//Additional info
 	double sorbed_molefraction;							///< Molefraction of sorbed species
@@ -60,6 +60,7 @@ typedef struct
 	double total_sorption;					///< Per mass or volume of single fiber
 	double fiber_length;					///< Units: um
 	double fiber_diameter;					///< Units: um
+	double fiber_specific_area;				///< Units: m^2/kg
 	
 	FILE *OutputFile;						///< Output file pointer to the output file for postprocesses and results
 	

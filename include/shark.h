@@ -34,6 +34,7 @@
 #include "macaw.h"
 #include "lark.h"
 #include "yaml_wrapper.h"
+#include "dogfish.h"
 
 #ifndef SHARK_HPP_
 #define SHARK_HPP_
@@ -42,6 +43,20 @@
 #define Rstd 8.3144621						///< Gas Law Constant in J/K/mol (or) L*kPa/K/mol (Standard Units)
 #endif
 
+/*
+#ifndef	Z
+#define Z 10.0					///< Surface coordination number used for adsorption
+#endif
+
+#ifndef	A
+#define A 3.13E+09				///< Corresponding van der Waals standard area for our coordination number (cm^2/mol)
+#endif
+
+#ifndef	V
+#define V 18.92					///< Corresponding van der Waals standard volume for our coordination number (cm^3/mol)
+#endif
+*/
+ 
 /// Master Species List Object
 /** C++ style object that holds data and function associated with solving multi-species problems. This
 	object contains a vector of Molecule objects from mola.h and uses those objects to help setup speciation
@@ -466,6 +481,27 @@ private:
 	
 };
 
+/// Adsorption Reaction Object
+/** C++ Object to handle data and functions associated with forumlating adsorption equilibrium reactions
+	in a aqueous mixture. Each unique surface in a system will require an instance of this structure. */
+class AdsorptionReaction
+{
+public:
+	AdsorptionReaction();									///< Default Constructor
+	~AdsorptionReaction();									///< Default Destructor
+	
+protected:
+	MasterSpeciesList *List;						///< Pointer to the MasterSpeciesList object
+	std::vector<Reaction> ads_rxn;					///< List of reactions involved with adsorption
+	std::vector<double> area_factors;				///< List of area factors associated with surface species (m^2/mol)
+	std::vector<double> volume_factors;				///< List of the van der Waals volumes of each surface species (cm^3/mol)
+	double specific_area;							///< Specific surface area of the adsorbent (m^2/kg)
+	int num_rxns;									///< Number of reactions involved in the adsorption equilibria
+	
+private:
+	
+};
+
 /// \cond
 
 //Reaction Mechanism Object
@@ -563,6 +599,7 @@ typedef struct SHARK_DATA
 	double time = 0.0;								///< Current value of time (starts from t = 0.0 hrs)
 	double time_old = 0.0;							///< Previous value of time (start from t = 0.0 hrs)
 	double pH = 7.0;								///< Value of pH if needed (default = 7)
+	double volume = 1.0;							///< Volume of the domain in liters (default = 1 L)
 	double Norm = 0.0;								///< Current value of euclidean norm in solution
 	
 	double dielectric_const = 78.325;				///< Dielectric constant used in many activity models (default: water = 78.325 (1/K))
@@ -886,6 +923,7 @@ int SHARK(SHARK_DATA *shark_dat);
 	  temp: 298.15       \#Units must be in Kelvin \n
 	  dielec: 78.325     \#Units must be in (1/Kelvin) \n
 	  res_alk: 0         \#Units must be in mol/L (Residual Alkalinity) \n
+	  volume: 1.0		 \#Units must be in L \n
  
 	- run_time: \n
       steady: false         \#NOTE: All time must be represented in hours \n
