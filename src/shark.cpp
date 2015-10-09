@@ -1122,6 +1122,41 @@ double UnsteadyReaction::Explicit_Eval(const Matrix<double> &x, const Matrix<dou
 	return conc;
 }
 
+//Default Constructor for Adsorption Reaction
+AdsorptionReaction::AdsorptionReaction()
+:
+ads_rxn(0),
+area_factors(0),
+volume_factors(0)
+{
+	specific_area = 1.0;
+	total_mass = 0.0;
+	total_volume = 1.0;
+	num_rxns = 0;
+}
+
+//Default destructor for Adsorption Reaction
+AdsorptionReaction::~AdsorptionReaction()
+{
+	ads_rxn.clear();
+	area_factors.clear();
+	volume_factors.clear();
+}
+
+//Initialize the MasterSpeciesList Object
+void AdsorptionReaction::Initialize_List(MasterSpeciesList &List)
+{
+	this->List = &List;
+	this->area_factors.resize(this->List->list_size());
+	this->volume_factors.resize(this->List->list_size());
+	for (int i=0; i<this->List->list_size(); i++)
+	{
+		this->area_factors[i] = 0.0;
+		this->volume_factors[i] = 0.0;
+	}
+		
+}
+
 //Print SHARK info to output file
 void print2file_shark_info(SHARK_DATA *shark_dat)
 {

@@ -483,12 +483,28 @@ private:
 
 /// Adsorption Reaction Object
 /** C++ Object to handle data and functions associated with forumlating adsorption equilibrium reactions
-	in a aqueous mixture. Each unique surface in a system will require an instance of this structure. */
+	in a aqueous mixture. Each unique surface in a system will require an instance of this structure. 
+ 
+	\warning THIS OBJECT IS NOT YET FUNCTIONAL!*/
 class AdsorptionReaction
 {
 public:
-	AdsorptionReaction();									///< Default Constructor
-	~AdsorptionReaction();									///< Default Destructor
+	AdsorptionReaction();								///< Default Constructor
+	~AdsorptionReaction();								///< Default Destructor
+	
+	void Initialize_List(MasterSpeciesList &List);		///< Function to initialize the AdsorptionReaction object from the MasterSpeciesList
+	void Initialize_Reactions(int i);					///< Function to setup working space for all reaction objects
+	void Initialize_Object(MasterSpeciesList &List, int i); ///< Function to call the initialization of objects sequentially 
+	void Display_Info();								///< Display the adsorption reaction information
+	
+	Reaction& getReaction(int i);						///< Return reference to the ith reaction object in the adsorption object
+	double getVolumeFactor(int i);						///< Get the ith volume factor (species not involved return zeros)
+	double getAreaFactor(int i);						///< Get the ith area factor (species not involved return zeros)
+	double getSpecificArea();							///< Get the specific area of the adsorbent (m^2/kg)
+	double getBulkDensity();							///< Calculate and return bulk density of adsorbent in system (kg/L)
+	double getTotalMass();								///< Get the total mass of adsorbent in the system (kg)
+	double getTotalVolume();							///< Get the total volume of the system (L)
+	int getNumberRxn();									///< Get the number of reactions involved in the adsorption object
 	
 protected:
 	MasterSpeciesList *List;						///< Pointer to the MasterSpeciesList object
@@ -496,6 +512,8 @@ protected:
 	std::vector<double> area_factors;				///< List of area factors associated with surface species (m^2/mol)
 	std::vector<double> volume_factors;				///< List of the van der Waals volumes of each surface species (cm^3/mol)
 	double specific_area;							///< Specific surface area of the adsorbent (m^2/kg)
+	double total_mass;								///< Total mass of the adsorbent in the system (kg)
+	double total_volume;							///< Total volume of the system (L)
 	int num_rxns;									///< Number of reactions involved in the adsorption equilibria
 	
 private:
