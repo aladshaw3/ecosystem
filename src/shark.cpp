@@ -12,6 +12,11 @@
 
 #include "shark.h"
 
+/*
+ *								Start: MasterSpeciesList
+ *	-------------------------------------------------------------------------------------
+ */
+
 //Default constructor
 MasterSpeciesList::MasterSpeciesList()
 :
@@ -228,6 +233,16 @@ double MasterSpeciesList::Eval_ChargeResidual(const Matrix<double> &x)
 	return res;
 }
 
+/*
+ *	-------------------------------------------------------------------------------------
+ *								End: MasterSpeciesList
+ */
+
+/*
+ *								Start: Reaction
+ *	-------------------------------------------------------------------------------------
+ */
+
 //Default constructor
 Reaction::Reaction()
 :
@@ -251,7 +266,7 @@ Reaction::~Reaction()
 }
 
 //Function to initialize the object from the master species list
-void Reaction::Initialize_List (MasterSpeciesList &List)
+void Reaction::Initialize_Object(MasterSpeciesList &List)
 {
 	this->List = &List;
 	this->Stoichiometric.resize(this->List->list_size());
@@ -507,6 +522,16 @@ double Reaction::Eval_Residual(const Matrix<double> &x, const Matrix<double> &ga
 	return res;
 }
 
+/*
+ *	-------------------------------------------------------------------------------------
+ *								End: Reaction
+ */
+
+/*
+ *								Start: MassBalance
+ *	-------------------------------------------------------------------------------------
+ */
+
 //Default constructor
 MassBalance::MassBalance()
 :
@@ -522,7 +547,7 @@ MassBalance::~MassBalance()
 }
 
 //Function to initialize the object from the master species list
-void MassBalance::Initialize_List (MasterSpeciesList &List)
+void MassBalance::Initialize_Object(MasterSpeciesList &List)
 {
 	this->List = &List;
 	this->Delta.resize(this->List->list_size());
@@ -638,8 +663,7 @@ double MassBalance::Eval_Residual(const Matrix<double> &x)
 	//Loop for all species in list
 	for (int i=0; i<this->List->list_size(); i++)
 	{
-		if (this->List->get_species(i).MoleculePhaseID() == AQUEOUS || this->List->get_species(i).MoleculePhaseID() == LIQUID)
-			res = res + ( this->Delta[i] * pow(10.0, x(i,0)) );
+		res = res + ( this->Delta[i] * pow(10.0, x(i,0)) );
 	}
 	if (this->Get_TotalConcentration() <= DBL_MIN)
 		res = (res - this->Get_TotalConcentration())/pow(DBL_EPSILON, 2.0);
@@ -651,6 +675,16 @@ double MassBalance::Eval_Residual(const Matrix<double> &x)
 	
 	return res;
 }
+
+/*
+ *	-------------------------------------------------------------------------------------
+ *								End: MassBalance
+ */
+
+/*
+ *								Start: UnsteadyReaction
+ *	-------------------------------------------------------------------------------------
+ */
 
 //Default constructor
 UnsteadyReaction::UnsteadyReaction()
@@ -687,7 +721,7 @@ UnsteadyReaction::~UnsteadyReaction()
 }
 
 //Function to initialize the object from the master species list
-void UnsteadyReaction::Initialize_List (MasterSpeciesList &List)
+void UnsteadyReaction::Initialize_Object(MasterSpeciesList &List)
 {
 	this->List = &List;
 	this->Stoichiometric.resize(this->List->list_size());
@@ -1122,13 +1156,27 @@ double UnsteadyReaction::Explicit_Eval(const Matrix<double> &x, const Matrix<dou
 	return conc;
 }
 
+/*
+ *	-------------------------------------------------------------------------------------
+ *								End: UnsteadyReaction
+ */
+
+/*
+ *								Start: AdsorptionReaction
+ *	-------------------------------------------------------------------------------------
+ */
+
 //Default Constructor for Adsorption Reaction
 AdsorptionReaction::AdsorptionReaction()
 :
 ads_rxn(0),
 area_factors(0),
-volume_factors(0)
+volume_factors(0),
+adsorb_index(0),
+activities()
 {
+	surface_activity = &ideal_solution;
+	activity_data = nullptr;
 	specific_area = 1.0;
 	total_mass = 0.0;
 	total_volume = 1.0;
@@ -1141,21 +1189,241 @@ AdsorptionReaction::~AdsorptionReaction()
 	ads_rxn.clear();
 	area_factors.clear();
 	volume_factors.clear();
+	adsorb_index.clear();
 }
 
-//Initialize the MasterSpeciesList Object
-void AdsorptionReaction::Initialize_List(MasterSpeciesList &List)
+//Initialization of the object
+void AdsorptionReaction::Initialize_Object(MasterSpeciesList &List, int n)
 {
 	this->List = &List;
+	this->num_rxns = n;
 	this->area_factors.resize(this->List->list_size());
 	this->volume_factors.resize(this->List->list_size());
+	this->activities.set_size(this->List->list_size(),1);
 	for (int i=0; i<this->List->list_size(); i++)
 	{
 		this->area_factors[i] = 0.0;
 		this->volume_factors[i] = 0.0;
+		this->activities(i,0) = 1.0;
 	}
-		
+	
+	this->ads_rxn.resize(this->num_rxns);
+	this->adsorb_index.resize(this->num_rxns);
+	this->aqueous_index.resize(this->num_rxns);
+	for (int i=0; i<this->num_rxns; i++)
+	{
+		this->ads_rxn[i].Initialize_Object(List);
+		this->adsorb_index[i] = -1;
+		this->aqueous_index[i] = -1;
+	}
 }
+
+//Display info about the AdsorptionReaction Object
+void AdsorptionReaction::Display_Info()
+{
+	for (int i=0; i<this->ads_rxn.size(); i++)
+		this->ads_rxn[i].Display_Info();
+}
+
+//Find and set the adsorption indices
+int AdsorptionReaction::setAdsorbIndices()
+{
+	int success = 0;
+	for (int i=0; i<this->num_rxns; i++)
+	{
+		for (int n=0; n<this->List->list_size(); n++)
+		{
+			if (this->ads_rxn[i].Get_Stoichiometric(n) != 0.0 && this->List->get_species(n).MoleculePhaseID() == SOLID)
+			{
+				this->adsorb_index[i] = n;
+				break;
+			}
+		}
+		if (this->adsorb_index[i] < 0)
+		{
+			mError(invalid_species);
+			return -1;
+		}
+	}
+	return success;
+}
+
+//Modify the deltas in the given mass balance
+void AdsorptionReaction::modifyDeltas(MassBalance &mbo)
+{
+	for (int i=0; i<this->List->list_size(); i++)
+	{
+		if (this->List->get_species(i).MoleculePhaseID() == SOLID)
+		{
+			mbo.Set_Delta(i, (mbo.Get_Delta(i) * this->getBulkDensity()) );
+		}
+	}
+}
+
+//Calculation and initialization of the area factors
+void AdsorptionReaction::calculateAreaFactors()
+{
+	for (int i=0; i<this->List->list_size(); i++)
+	{
+		if (this->volume_factors[i] == 0.0 || this->List->get_species(i).MoleculePhaseID() != SOLID)
+			this->area_factors[i] = 0.0;
+		else
+		{
+			this->area_factors[i] = (this->volume_factors[i] * ( (8.0*3.13E+9) / (10.0*18.92) )) + ( (2.0*3.13E+9)/10.0);
+			this->area_factors[i] = this->area_factors[i] / 10000.0;
+		}
+	}
+}
+
+//Call the activity model passing the logx concentrations of species
+int AdsorptionReaction::callSurfaceActivity(const Matrix<double> &x)
+{
+	int success = this->surface_activity(x,this->activities,this->activity_data);
+	return success;
+}
+
+//Calculation of the active fraction of the surface area
+double AdsorptionReaction::calculateActiveFraction(const Matrix<double> &x)
+{
+	double phi = 0.0, sum = 0.0;
+	for (int i=0; i<this->List->list_size(); i++)
+	{
+		sum = sum + (this->area_factors[i] * pow(10.0, x(i,0)));
+	}
+	if (sum > this->specific_area)
+		sum = this->specific_area;
+	phi = 1.0 - (sum / this->specific_area);
+	if (phi < DBL_MIN)
+		phi = DBL_MIN;
+	return phi;
+}
+
+//Calculation of maximum capacity for adsorption (may vary with concentrations)
+double AdsorptionReaction::calculateLangmuirMaxCapacity(const Matrix<double> &x, const Matrix<double> &gama, int i)
+{
+	if (i < 0 || i >= this->num_rxns)
+	{
+		mError(out_of_bounds);
+		return 0.0;
+	}
+	double qmax = 0.0;
+	double react = 1.0, prod = 1.0;
+	for (int n=0; n<this->List->list_size(); n++)
+	{
+		if (this->List->get_species(n).MoleculePhaseID() == AQUEOUS || this->List->get_species(n).MoleculePhaseID() == LIQUID)
+		{
+			// Products
+			if (this->ads_rxn[i].Get_Stoichiometric(n) > 0.0 && this->aqueous_index[i] != n)
+			{
+				prod = prod * (gama(n,0) * pow(10.0, fabs(this->ads_rxn[i].Get_Stoichiometric(n))*x(n,0)));
+			}
+			// Reactants
+			else if (this->ads_rxn[i].Get_Stoichiometric(n) < 0.0 && this->aqueous_index[i] != n)
+			{
+				react = react * (gama(n,0) * pow(10.0, fabs(this->ads_rxn[i].Get_Stoichiometric(n))*x(n,0)));
+			}
+			else
+			{
+				// No Action
+			}
+		}
+	}
+	qmax = (this->specific_area / (this->area_factors[this->adsorb_index[i]]*this->activities(this->adsorb_index[i],0))) * (react/prod);
+	return qmax;
+}
+
+//Calculation of the effective Langmuir parameter for the ith adsorption reaction
+double AdsorptionReaction::calculateLangmuirEquParam(const Matrix<double> &gama, double T, int i)
+{
+	if (i < 0 || i >= this->num_rxns)
+	{
+		mError(out_of_bounds);
+		return 1.0;
+	}
+	this->ads_rxn[i].calculateEquilibrium(T);
+	double K = pow(10.0,this->ads_rxn[i].Get_Equilibrium());
+	K = K * this->area_factors[this->adsorb_index[i]] * gama(this->adsorb_index[i],0);
+	return K;
+}
+
+//Return reference to the ith reaction object
+Reaction& AdsorptionReaction::getReaction(int i)
+{
+	if (i >= this->num_rxns || i < 0)
+	{
+		mError(out_of_bounds);
+		i = 0;
+	}
+	return this->ads_rxn[i];
+}
+
+//Return the ith volume factor
+double AdsorptionReaction::getVolumeFactor(int i)
+{
+	if (i >= this->List->list_size() || i < 0)
+	{
+		mError(out_of_bounds);
+		i = 0;
+	}
+	return this->volume_factors[i];
+}
+
+//Return the ith area factor
+double AdsorptionReaction::getAreaFactor(int i)
+{
+	if (i >= this->List->list_size() || i < 0)
+	{
+		mError(out_of_bounds);
+		i = 0;
+	}
+	return this->area_factors[i];
+}
+
+//Return the ith activity coefficient
+double AdsorptionReaction::getActivity(int i)
+{
+	if (i >= this->List->list_size() || i < 0)
+	{
+		mError(out_of_bounds);
+		i = 0;
+	}
+	return this->activities(i,0);
+}
+
+//Return the specific area
+double AdsorptionReaction::getSpecificArea()
+{
+	return this->specific_area;
+}
+
+//Calculate and return the bulk density of the adsorbent in the system
+double AdsorptionReaction::getBulkDensity()
+{
+	return this->total_mass / this->total_volume;
+}
+
+//Return the total mass
+double AdsorptionReaction::getTotalMass()
+{
+	return this->total_mass;
+}
+
+//Return the total system volume
+double AdsorptionReaction::getTotalVolume()
+{
+	return this->total_volume;
+}
+
+//Return the number of reactions
+int AdsorptionReaction::getNumberRxns()
+{
+	return this->num_rxns;
+}
+
+/*
+ *	-------------------------------------------------------------------------------------
+ *								End: AdsorptionReaction
+ */
 
 //Print SHARK info to output file
 void print2file_shark_info(SHARK_DATA *shark_dat)
@@ -2628,17 +2896,17 @@ int setup_SHARK_DATA( FILE *file, int (*residual) (const Matrix<double> &x, Matr
 	
 	for (int i=0; i<dat->ReactionList.size(); i++)
 	{
-		dat->ReactionList[i].Initialize_List(dat->MasterList);
+		dat->ReactionList[i].Initialize_Object(dat->MasterList);
 	}
 	
 	for (int i=0; i<dat->MassBalanceList.size(); i++)
 	{
-		dat->MassBalanceList[i].Initialize_List(dat->MasterList);
+		dat->MassBalanceList[i].Initialize_Object(dat->MasterList);
 	}
 	
 	for (int i=0; i<dat->UnsteadyList.size(); i++)
 	{
-		dat->UnsteadyList[i].Initialize_List(dat->MasterList);
+		dat->UnsteadyList[i].Initialize_Object(dat->MasterList);
 	}
 	
 	return success;
