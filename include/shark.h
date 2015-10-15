@@ -479,7 +479,7 @@ public:
 	~AdsorptionReaction();								///< Default Destructor
 	
 	void Initialize_Object(MasterSpeciesList &List, int i); ///< Function to call the initialization of objects sequentially
-	void Display_Info();								///< Display the adsorption reaction information
+	void Display_Info();								///< Display the adsorption reaction information (PLACE HOLDER)
 	
 	/// Modify the Deltas in the MassBalance Object
 	/** This function will take a mass balance object as an argument and modify the deltas in that object to
@@ -496,9 +496,22 @@ public:
 		type expression. Function will return 0 if successful and -1 on a failure.*/
 	int setAdsorbIndices();
 	
-	// ADD MORE SET FUNCTIONS FOR INFORMATION HERE
+	int checkAqueousIndices();							///< Function to check and report errors in the aqueous species indices
+	
+	/// Function to set the surface activity model and data pointer
+	/** This function will setup the surface activity model based on the given pointer arguments. If no arguments
+		are given, or are given as NULL, then the activity model will default to ideal solution assumption.*/
+	void setActivityModelInfo( int (*act) (const Matrix<double>& logq, Matrix<double> &activity, const void *data),
+							  const void *act_data);
+	
+	void setAqueousIndex(int rxn_i, int species_i);		///< Set the primary aqueous species index for the ith reaction
+	void setVolumeFactor(int i, double v);				///< Set the ith volume factor for the species list
+	void setSpecificArea(double a);						///< Set the specific area for the adsorbent
+	void setTotalMass(double m);						///< Set the total mass of the adsorbent
+	void setTotalVolume(double v);						///< Set the total volume of the system
 	
 	void calculateAreaFactors();						///< Calculates the area factors used from the van der Waals volumes
+	void calculateEquilibria(double T);					///< Calculates all equilibrium parameters as a function of temperature
 	int callSurfaceActivity(const Matrix<double> &x);	///< Calls the activity model and returns an int flag for success or failure
 	double calculateActiveFraction(const Matrix<double> &x);	///< Calculates the fraction of the surface that is active and available
 	
@@ -519,9 +532,28 @@ public:
 		uses the system temperature as well to calculate equilibrium.
 	 
 		\param gama matrix of activity coefficients for each species at the current non-linear step
-		\param T system temperature in Kelvin used to calculate equilibrium
 		\param i index of the reaction of interest for the adsorption object*/
-	double calculateLangmuirEquParam(const Matrix<double> &gama, double T, int i);
+	double calculateLangmuirEquParam(const Matrix<double> &gama, int i);
+	
+	/// Calculates the equivalent Langmuir adsorption by forming the Langmuir-like parameters
+	/** This function will use the calculateLangmuirMaxCapacity and calculateLangmuirEquParam functions to
+		approximate the adsorption of the ith reaction given the concentration of aqueous species, activities,
+		and temperature.
+	 
+		\param x matrix of the log(C) concentration values at the current non-linear step
+		\param gama matrix of activity coefficients for each species at the current non-linear step
+		\param i index of the reaction of interest for the adsorption object*/
+	double calculateLangmuirAdsorption(const Matrix<double> &x, const Matrix<double> &gama, int i);
+	
+	/// Calculates the residual for the ith reaction in the system
+	/** This function will provide a system residual for the ith reaction object involved in the Adsorption
+		Reaction. The residual is fed into the SHARK solver to find the solution to solid and aqueous phase
+		concentrations simultaneously. 
+	 
+		\param x matrix of the log(C) concentration values at the current non-linear step
+		\param gama matrix of activity coefficients for each species at the current non-linear step
+		\param i index of the reaction of interest for the adsorption object*/
+	double Eval_Residual(const Matrix<double> &x, const Matrix<double> &gama, int i);
 	
 	Reaction& getReaction(int i);						///< Return reference to the ith reaction object in the adsorption object
 	double getVolumeFactor(int i);						///< Get the ith volume factor (species not involved return zeros)
@@ -532,6 +564,8 @@ public:
 	double getTotalMass();								///< Get the total mass of adsorbent in the system (kg)
 	double getTotalVolume();							///< Get the total volume of the system (L)
 	int getNumberRxns();								///< Get the number of reactions involved in the adsorption object
+	int getAdsorbIndex(int i);							///< Get the index of the adsorbed species in the ith reaction
+	int getAqueousIndex(int i);							///< Get the index of the primary aqueous species in the ith reaction
 	
 protected:
 	MasterSpeciesList *List;						///< Pointer to the MasterSpeciesList object
@@ -625,6 +659,7 @@ typedef struct SHARK_DATA
 	std::vector<Reaction> ReactionList;				///< Equilibrium reaction objects
 	std::vector<MassBalance> MassBalanceList;		///< Mass balance objects
 	std::vector<UnsteadyReaction> UnsteadyList;		///< Unsteady Reaction objects
+	std::vector<AdsorptionReaction> AdsorptionList;	///< Equilibrium Adsorption Reaction Objects
 	
 	/// Array of Other Residual functions to be defined by user
 	/** This list of function pointers can be declared and set up by the user in order to add to or change
@@ -643,7 +678,9 @@ typedef struct SHARK_DATA
 	int numvar;										///< Total number of functions and species
 	int num_ssr;									///< Number of steady-state reactions
 	int num_mbe;									///< Number of mass balance equations
-	int num_usr;									///< Number of unsteady-state reactions
+	int num_usr = 0;								///< Number of unsteady-state reactions
+	int num_ssao = 0;								///< Number of steady-state adsorption objects
+	std::vector<int> num_ssar;						///< List of the numbers of reactions in each adsorption object
 	int num_other = 0;								///< Number of other functions to be used (default is always 0)
 	int act_fun = IDEAL;							///< Flag denoting the activity function to use (default is IDEAL)
 	int totalsteps = 0;								///< Number of iterations and function calls
