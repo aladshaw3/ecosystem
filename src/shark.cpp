@@ -1259,6 +1259,11 @@ int AdsorptionReaction::checkAqueousIndices()
 			mError(indexing_error);
 			return -1;
 		}
+		if (this->getReaction(i).Get_Stoichiometric(this->aqueous_index[i]) > 0.0)
+		{
+			mError(indexing_error);
+			return -1;
+		}
 	}
 	return success;
 }
