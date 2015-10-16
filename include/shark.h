@@ -42,6 +42,10 @@
 #ifndef Rstd
 #define Rstd 8.3144621						///< Gas Law Constant in J/K/mol (or) L*kPa/K/mol (Standard Units)
 #endif
+
+#ifndef	Na
+#define Na 6.0221413E+23					///< Avagadro's Number - Units: molecules/mol
+#endif
  
 /// Master Species List Object
 /** C++ style object that holds data and function associated with solving multi-species problems. This
@@ -519,26 +523,27 @@ public:
 	/** This function is used to calculate the current maximum capacity of a species for a given
 		adsorption reaction using the concentrations and activities of other species in the system.
 		You must pass the index of the reaction of interest. The index of the species of interest
-		is determined from the adsorb_index object. 
+		is determined from the adsorb_index object. Note: This is only true if the stoicheometry for 
+		the adsorbed species is 1.
 	 
-		\param x matrix of the log(C) concentration values at the current non-linear step
-		\param gama matrix of activity coefficients for each species at the current non-linear step
 		\param i index of the reaction of interest for the adsorption object*/
-	double calculateLangmuirMaxCapacity(const Matrix<double> &x, const Matrix<double> &gama, int i);
+	double calculateLangmuirMaxCapacity(int i);
 	
 	/// Calculates the equivalent Langmuir isotherm equilibrium parameter
 	/** This function will take in the current aqueous activities and calculate an effective
 		Langmuir adsorption parameter for use in determining the adsorption in the system. It
-		uses the system temperature as well to calculate equilibrium.
+		uses the system temperature as well to calculate equilibrium. Note: This is only true
+		if the stoicheometry for the adsorbed species is 1.
 	 
+		\param x matrix of the log(C) concentration values at the current non-linear step
 		\param gama matrix of activity coefficients for each species at the current non-linear step
 		\param i index of the reaction of interest for the adsorption object*/
-	double calculateLangmuirEquParam(const Matrix<double> &gama, int i);
+	double calculateLangmuirEquParam(const Matrix<double> &x, const Matrix<double> &gama, int i);
 	
 	/// Calculates the equivalent Langmuir adsorption by forming the Langmuir-like parameters
 	/** This function will use the calculateLangmuirMaxCapacity and calculateLangmuirEquParam functions to
 		approximate the adsorption of the ith reaction given the concentration of aqueous species, activities,
-		and temperature.
+		and temperature. Note: This is only true if the stoicheometry for the adsorbed species is 1.
 	 
 		\param x matrix of the log(C) concentration values at the current non-linear step
 		\param gama matrix of activity coefficients for each species at the current non-linear step

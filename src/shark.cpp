@@ -1077,21 +1077,21 @@ double UnsteadyReaction::Eval_ReactionRate(const Matrix<double> &x, const Matrix
 		{
 			if (first_prod == true)
 			{
-				products = (gama(i,0) * pow(10.0,(fabs(this->Stoichiometric[i])*x(i,0)) ) );
+				products = ( pow(gama(i,0),fabs(this->Stoichiometric[i])) * pow(10.0,(fabs(this->Stoichiometric[i])*x(i,0)) ) );
 				first_prod = false;
 			}
 			else
-				products = products * (gama(i,0) * pow(10.0,(fabs(this->Stoichiometric[i])*x(i,0)) ) );
+				products = products * ( pow(gama(i,0),fabs(this->Stoichiometric[i])) * pow(10.0,(fabs(this->Stoichiometric[i])*x(i,0)) ) );
 		}
 		else if (this->Stoichiometric[i] < 0.0)
 		{
 			if (first_reac == true)
 			{
-				reactants = (gama(i,0) * pow(10.0,(fabs(this->Stoichiometric[i])*x(i,0)) ) );
+				reactants = ( pow(gama(i,0),fabs(this->Stoichiometric[i])) * pow(10.0,(fabs(this->Stoichiometric[i])*x(i,0)) ) );
 				first_reac = false;
 			}
 			else
-				reactants = reactants * (gama(i,0) * pow(10.0,(fabs(this->Stoichiometric[i])*x(i,0)) ) );
+				reactants = reactants * ( pow(gama(i,0),fabs(this->Stoichiometric[i])) * pow(10.0,(fabs(this->Stoichiometric[i])*x(i,0)) ) );
 		}
 		else
 		{
@@ -1239,6 +1239,11 @@ int AdsorptionReaction::setAdsorbIndices()
 				break;
 			}
 		}
+		double normal_factor = this->ads_rxn[i].Get_Stoichiometric(this->adsorb_index[i]);
+		for (int n=0; n<this->List->list_size(); n++)
+		{
+			this->ads_rxn[i].Set_Stoichiometric(n, this->ads_rxn[i].Get_Stoichiometric(n)/normal_factor);
+		}
 		if (this->adsorb_index[i] < 0)
 		{
 			mError(invalid_species);
@@ -1361,8 +1366,9 @@ void AdsorptionReaction::calculateAreaFactors()
 			this->area_factors[i] = 0.0;
 		else
 		{
-			this->area_factors[i] = (this->getVolumeFactor(i) * ( (8.0*3.13E+9) / (10.0*18.92) )) + ( (2.0*3.13E+9)/10.0);
-			this->area_factors[i] = this->getAreaFactor(i) / 10000.0;
+			//this->area_factors[i] = (this->getVolumeFactor(i) * ( (8.0*3.13E+9) / (10.0*18.92) )) + ( (2.0*3.13E+9)/10.0);
+			//this->area_factors[i] = this->getAreaFactor(i) / (10000.0);
+			this->area_factors[i] = M_PI * pow((3.0/(4.0*M_PI))*(this->volume_factors[i]/Na), (2.0/3.0)) * Na / 10000.0;
 		}
 	}
 }
@@ -1398,41 +1404,18 @@ double AdsorptionReaction::calculateActiveFraction(const Matrix<double> &x)
 }
 
 //Calculation of maximum capacity for adsorption (may vary with concentrations)
-double AdsorptionReaction::calculateLangmuirMaxCapacity(const Matrix<double> &x, const Matrix<double> &gama, int i)
+double AdsorptionReaction::calculateLangmuirMaxCapacity(int i)
 {
 	if (i < 0 || i >= this->num_rxns)
 	{
 		mError(out_of_bounds);
 		return 0.0;
 	}
-	double qmax = 0.0;
-	double react = 1.0, prod = 1.0;
-	for (int n=0; n<this->List->list_size(); n++)
-	{
-		if (this->List->get_species(n).MoleculePhaseID() == AQUEOUS || this->List->get_species(n).MoleculePhaseID() == LIQUID)
-		{
-			// Products
-			if (this->getReaction(i).Get_Stoichiometric(n) > 0.0 && this->getAqueousIndex(i) != n)
-			{
-				prod = prod * (gama(n,0) * pow(10.0, fabs(this->getReaction(i).Get_Stoichiometric(n))*x(n,0)));
-			}
-			// Reactants
-			else if (this->getReaction(i).Get_Stoichiometric(n) < 0.0 && this->getAqueousIndex(i) != n)
-			{
-				react = react * (gama(n,0) * pow(10.0, fabs(this->getReaction(i).Get_Stoichiometric(n))*x(n,0)));
-			}
-			else
-			{
-				// No Action
-			}
-		}
-	}
-	qmax = (this->specific_area / (this->getAreaFactor(this->getAdsorbIndex(i))*pow(this->getActivity(this->getAdsorbIndex(i)),fabs(1.0/this->getReaction(i).Get_Stoichiometric(this->getAdsorbIndex(i)))))) * (react/prod);
-	return qmax;
+	return (this->specific_area / (this->getAreaFactor(this->getAdsorbIndex(i))));
 }
 
 //Calculation of the effective Langmuir parameter for the ith adsorption reaction
-double AdsorptionReaction::calculateLangmuirEquParam(const Matrix<double> &gama, int i)
+double AdsorptionReaction::calculateLangmuirEquParam(const Matrix<double> &x, const Matrix<double> &gama, int i)
 {
 	if (i < 0 || i >= this->num_rxns)
 	{
@@ -1440,10 +1423,38 @@ double AdsorptionReaction::calculateLangmuirEquParam(const Matrix<double> &gama,
 		return 1.0;
 	}
 	double K = pow(10.0,this->getReaction(i).Get_Equilibrium());
+	double prod = 1.0, react = 1.0;
+	
+	for (int n=0; n<this->List->list_size(); n++)
+	{
+		if (n != this->getAqueousIndex(i) && this->List->get_species(n).MoleculePhaseID() != SOLID)
+		{
+			if (this->getReaction(i).Get_Stoichiometric(n) > 0.0)
+			{
+				//Products
+				prod = prod * ( pow(gama(n,0),fabs(this->getReaction(i).Get_Stoichiometric(n))) * pow(10.0, fabs(this->getReaction(i).Get_Stoichiometric(n))*x(n,0)));
+			}
+			else if (this->getReaction(i).Get_Stoichiometric(n) < 0.0)
+			{
+				//Reactants
+				react = react * ( pow(gama(n,0),fabs(this->getReaction(i).Get_Stoichiometric(n))) * pow(10.0, fabs(this->getReaction(i).Get_Stoichiometric(n))*x(n,0)));
+			}
+			else
+			{
+				//No Action
+			}
+		}
+	}
+	
 	if (this->getReaction(i).Get_Stoichiometric(this->getAdsorbIndex(i)) > 0.0)
-		K = K * this->getAreaFactor(this->getAdsorbIndex(i)) * gama(this->getAqueousIndex(i),0);
+	{
+		K = K * this->getAreaFactor(this->getAdsorbIndex(i)) * pow(gama(this->getAqueousIndex(i),0),fabs(this->getReaction(i).Get_Stoichiometric(this->getAqueousIndex(i))) ) * (react/prod);
+	}
 	else
-		K = 1.0 / (K * this->getAreaFactor(this->getAdsorbIndex(i)) * gama(this->getAqueousIndex(i),0));
+	{
+		K = 1.0 / (K * this->getAreaFactor(this->getAdsorbIndex(i)) * pow(gama(this->getAqueousIndex(i),0),fabs(this->getReaction(i).Get_Stoichiometric(this->getAqueousIndex(i))) ) * (react/prod));
+	}
+	
 	return K;
 }
 
@@ -1452,13 +1463,13 @@ double AdsorptionReaction::calculateLangmuirAdsorption(const Matrix<double> &x, 
 {
 	double q = 0.0;
 	double qmax, top, bot = 1.0;
-	qmax = this->calculateLangmuirMaxCapacity(x, gama, i);
-	top = this->calculateLangmuirEquParam(gama, i) * pow(10.0, fabs(this->getReaction(i).Get_Stoichiometric(this->getAqueousIndex(i))*x(this->getAqueousIndex(i),0)));
+	qmax = this->calculateLangmuirMaxCapacity(i);
+	top = this->calculateLangmuirEquParam(x, gama, i) * pow(10.0, fabs(this->getReaction(i).Get_Stoichiometric(this->getAqueousIndex(i)))*x(this->getAqueousIndex(i),0));
 	for (int n=0; n<this->num_rxns; n++)
 	{
-		bot = bot + ( this->calculateLangmuirEquParam(gama, n) * pow(10.0, fabs(this->getReaction(n).Get_Stoichiometric(this->getAqueousIndex(n))*x(this->getAqueousIndex(n),0))) );
+		bot = bot + ( this->calculateLangmuirEquParam(x, gama, n) * pow(10.0, fabs(this->getReaction(n).Get_Stoichiometric(this->getAqueousIndex(n)))*x(this->getAqueousIndex(n),0)));
 	}
-	q = pow((qmax * (top / bot)),fabs(1.0/this->getReaction(i).Get_Stoichiometric(this->getAdsorbIndex(i))));
+	q = (qmax * (top / bot));
 	return q;
 }
 
@@ -3637,6 +3648,10 @@ int shark_solver(SHARK_DATA *shark_dat)
 			for (int i=0; i<shark_dat->AdsorptionList.size(); i++)
 			{
 				std::cout << "Active Surface Fraction " << i << " = " << shark_dat->AdsorptionList[i].calculateActiveFraction(shark_dat->X_new) << std::endl;
+				for (int n=0; n<shark_dat->AdsorptionList[i].getNumberRxns(); i++)
+				{
+					std::cout << "Area Factor for Species " << shark_dat->AdsorptionList[i].getAdsorbIndex(n) << " = " << shark_dat->AdsorptionList[i].getAreaFactor(shark_dat->AdsorptionList[i].getAdsorbIndex(n)) << std::endl;
+				}
 			}
 			std::cout << "\n";
 				
@@ -3956,13 +3971,13 @@ int SHARK_TESTS()
 	shark_dat.num_ssao = 1;
 	shark_dat.num_usr = 0;
 	shark_dat.num_other = 0;
-	shark_dat.act_fun = IDEAL;
+	shark_dat.act_fun = DAVIES;
 	shark_dat.steadystate = true;
 	shark_dat.simulationtime = 96.0;
 	shark_dat.dt = 0.1;
 	shark_dat.t_out = shark_dat.simulationtime / 1000.0;
 	shark_dat.const_pH = false;
-	shark_dat.SpeciationCurve = true;
+	shark_dat.SpeciationCurve = false;
 	shark_dat.TimeAdaptivity = true;
 	shark_dat.pH = 7.80;
 	shark_dat.dielectric_const = 78.325;
@@ -3990,27 +4005,33 @@ int SHARK_TESTS()
 	NaCl = 0.43;	  // 25.155 g/L
 	NaHCO3 = 0.00233; // 140 ppm
 	UO2 = 1.386E-8;   // ~3.3 ppb
+	//UO2 = 2.521E-5;		// ~6 ppm
 	ads_area = 45000.0; // m^2/kg
 	ads_mass = 1.5E-5;  // kg
 	volume = 1.0;       // L
 	shark_dat.simulationtime = 96.0; //hours
 	
 	logK_UO2CO3 = 3.45;					// change
-	logK_UO2 = -1.35;					// change
+	logK_UO2 = -8.35;					// change
 	
 	
 	shark_dat.dt = 0.001;			 //hours
 	shark_dat.t_out = shark_dat.simulationtime / 1000.0;
+	shark_dat.volume = volume;
 	
 	//Call the setup function
 	success = setup_SHARK_DATA(TestOutput,NULL, NULL, NULL, &shark_dat, NULL, NULL, NULL, NULL);
 	if (success != 0) {mError(simulation_fail); return -1;}
 	
-	shark_dat.Newton_data.linear_solver = FOM;
-	shark_dat.Newton_data.Bounce = true;
-	shark_dat.Newton_data.nl_maxit = 100;
-	shark_dat.Newton_data.gmresrp_dat.restart = 50;
-	shark_dat.Newton_data.L_Output = false;
+	//shark_dat.Newton_data.linear_solver = FOM;
+	//shark_dat.Newton_data.Bounce = false;
+	//shark_dat.Newton_data.LineSearch = true;
+	//shark_dat.Newton_data.nl_maxit = 100;
+	//shark_dat.Newton_data.gmresrp_dat.restart = 50;
+	//shark_dat.Newton_data.L_Output = false;
+	//shark_dat.Newton_data.backtrack_dat.lambdaMin = DBL_EPSILON;
+	//shark_dat.Newton_data.nl_tol_abs = 1e-10;
+	//shark_dat.Newton_data.nl_tol_rel = 1e-10;
 	
 	//Read problem specific info here --------------------------------------------------------
 	shark_dat.MasterList.set_species(0, "NaHCO3 (aq)");
@@ -4623,7 +4644,7 @@ int SHARK_TESTS()
 	shark_dat.AdsorptionList[0].setVolumeFactor(19, 0);
 	shark_dat.AdsorptionList[0].setVolumeFactor(20, 0);
 	shark_dat.AdsorptionList[0].setVolumeFactor(21, 0);
-	shark_dat.AdsorptionList[0].setVolumeFactor(22, 18.0); //MADE UP NUMBER
+	shark_dat.AdsorptionList[0].setVolumeFactor(22, 5.0); //MADE UP NUMBER
 	
 	//END problem specific info here --------------------------------------------------------
 	
@@ -4633,6 +4654,9 @@ int SHARK_TESTS()
 	
 	//TEst of Langmuir
 	std::cout << "Langmuir Test = \t" << shark_dat.AdsorptionList[0].calculateLangmuirAdsorption(shark_dat.X_new, shark_dat.activity_new, 0) << std::endl;
+	std::cout << "Compare = \t" << pow(10.0, shark_dat.X_new(22,0)) << std::endl;
+	std::cout << "qmax = \t" << shark_dat.AdsorptionList[0].calculateLangmuirMaxCapacity(0) << std::endl;
+	std::cout << "K = \t" << shark_dat.AdsorptionList[0].calculateLangmuirEquParam(shark_dat.X_new, shark_dat.activity_new, 0) << std::endl;
 	
 	//Close files and display end messages
 	fclose(TestOutput);
