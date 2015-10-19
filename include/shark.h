@@ -509,6 +509,13 @@ public:
 							  const void *act_data);
 	
 	void setAqueousIndex(int rxn_i, int species_i);		///< Set the primary aqueous species index for the ith reaction
+	
+	/// Automatically sets the primary aqueous species index based on reactions
+	/** This function will go through all species and all reactions in the adsorption object and automatically set the
+		primary aqueous species index based on the stoicheometry of the reaction. It will also check and make sure that
+		the primary aqueous index species appears opposite of the adsorbed species in the reactions. Note: This function
+		assumes that the adsorbed indices have already been set. */
+	int setAqueousIndexAuto();
 	void setVolumeFactor(int i, double v);				///< Set the ith volume factor for the species list
 	void setSpecificArea(double a);						///< Set the specific area for the adsorbent
 	void setTotalMass(double m);						///< Set the total mass of the adsorbent
@@ -650,6 +657,11 @@ private:
 /** \note The SIT and PITZER models are not currently supported. */
 typedef enum {IDEAL, DAVIES, DEBYE_HUCKEL, SIT, PITZER} valid_act;
 
+/// Enumeration for the list of valid surface activity models for non-ideal adsorption
+/** \note We had to create an IDEAL_ADS option to replace the IDEAL enum already in use for non-ideal solution
+	or aqueous phases. (ADS => adsorption) */
+typedef enum {IDEAL_ADS, FLORY_HUGGINS} valid_surf_act;
+
 /// Data structure for SHARK simulations
 /** C-style object holding data and function pointers associated with solving aqueous speciation and reaction
 	kinetics. This object couples all other objects available in shark.h in order to provide residual calculations
@@ -688,7 +700,8 @@ typedef struct SHARK_DATA
 	std::vector<int> num_ssar;						///< List of the numbers of reactions in each adsorption object
 	int num_other = 0;								///< Number of other functions to be used (default is always 0)
 	int act_fun = IDEAL;							///< Flag denoting the activity function to use (default is IDEAL)
-	int totalsteps = 0;								///< Number of iterations and function calls
+	int totalsteps = 0;								///< Total number of iterations
+	int totalcalls = 0;								///< Total number of residual function calls
 	int timesteps = 0;								///< Number of time steps taken to complete simulation
 	int pH_index = -1;								///< Contains the index of the pH variable (set internally)
 	int pOH_index = -1;								///< Contains the index of the pOH variable (set internally)
@@ -776,6 +789,17 @@ void print2file_shark_results_new(SHARK_DATA *shark_dat);
 
 /// Function to print out the simulation results for the previous time step
 void print2file_shark_results_old(SHARK_DATA *shark_dat);
+
+///Surface Activity function for simple non-ideal adsorption
+/** This is a simple surface activity model to be used with the Adsorption objects to evaluate the non-ideal
+	behavoir of the surface phase. The model's only parameters are the shape factors in adsorption and the
+	relative concentrations of each surface species. Therefore, we will pass the Adsorption Object itself
+	as the const void *data structure. 
+ 
+	\param x matrix of the log(C) concentration values at the current non-linear step
+	\param F matrix of activity coefficients that are to be altered by this function
+	\param data pointer to the AdsorptionReaction object holding parameter information*/
+int FloryHuggins(const Matrix<double> &x, Matrix<double> &F, const void *data);
 
 /// Activity function for Ideal Solution
 /** This is one of the default activity models available. It assumes the system behaves ideally and sets the

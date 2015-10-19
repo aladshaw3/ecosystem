@@ -2810,6 +2810,7 @@ int backtrackLineSearch( int (*feval) (const Matrix<double>& x, Matrix<double> &
 	{
 		backtrack_dat->lambdaMin = DBL_EPSILON;
 	}
+	backtrack_dat->fun_call = 0;
 	
 	//Start the backtracking algorithm
 	backtrack_dat->xk = xkp1;
@@ -2842,6 +2843,7 @@ int backtrackLineSearch( int (*feval) (const Matrix<double>& x, Matrix<double> &
 	{
 		xkp1 = backtrack_dat->xk - (pk*lambda);
 		success = (*feval) (xkp1,Fkp1,feval_data);
+		backtrack_dat->fun_call++;
 		if (success != 0) {mError(simulation_fail); return -1;}
 		backtrack_dat->normFkp1 = Fkp1.norm();
 		norm_old = backtrack_dat->normFkp1;
@@ -2881,6 +2883,7 @@ int backtrackLineSearch( int (*feval) (const Matrix<double>& x, Matrix<double> &
 		{
 			xkp1 = backtrack_dat->xk - (pk*lambda);
 			success = (*feval) (xkp1,Fkp1,feval_data);
+			backtrack_dat->fun_call++;
 			if (success != 0) {mError(simulation_fail); return -1;}
 			backtrack_dat->normFkp1 = Fkp1.norm();
 			
@@ -2936,6 +2939,7 @@ int backtrackLineSearch( int (*feval) (const Matrix<double>& x, Matrix<double> &
 				lambda = backtrack_dat->lambdaMin;
 				xkp1 = backtrack_dat->xk - (pk*lambda);
 				success = (*feval) (xkp1,Fkp1,feval_data);
+				backtrack_dat->fun_call++;
 				if (success != 0) {mError(simulation_fail); return -1;}
 				backtrack_dat->normFkp1 = Fkp1.norm();
 				success = 1;
@@ -2945,6 +2949,7 @@ int backtrackLineSearch( int (*feval) (const Matrix<double>& x, Matrix<double> &
 			//Form new solution and norm
 			xkp1 = backtrack_dat->xk - (pk*lambda);
 			success = (*feval) (xkp1,Fkp1,feval_data);
+			backtrack_dat->fun_call++;
 			if (success != 0) {mError(simulation_fail); return -1;}
 			backtrack_dat->normFkp1 = Fkp1.norm();
 		}
@@ -2986,6 +2991,7 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 	pjfnk_dat->precon_data = precon_data;
 	pjfnk_dat->nl_iter = 0;
 	pjfnk_dat->l_iter = 0;
+	pjfnk_dat->fun_call = 0;
 	
 	//Check and initialize all PJFNK data
 	if (pjfnk_dat->F.rows() != x.rows())
@@ -3046,6 +3052,7 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 		
 	//Start the method by calling the users F(x) function to form an initial residual
 	success = (*pjfnk_dat->funeval) (pjfnk_dat->x,pjfnk_dat->F,pjfnk_dat->res_data);
+	pjfnk_dat->fun_call++;
 	if (success != 0) {mError(simulation_fail); return -1;}
 	pjfnk_dat->nl_res = pjfnk_dat->F.norm();
 	pjfnk_dat->nl_bestres = pjfnk_dat->nl_res;
@@ -3096,8 +3103,9 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 			pjfnk_dat->gmreslp_dat.tol_rel = pjfnk_dat->lin_tol_rel;
 			pjfnk_dat->gmreslp_dat.maxit = x.rows();
 			success = gmresLeftPreconditioned(jacvec, pjfnk_dat->precon, pjfnk_dat->F, &pjfnk_dat->gmreslp_dat, pjfnk_dat, pjfnk_dat->precon_data);
-			if (success != 0) {mError(simulation_fail); success = -1; break;}
 			pjfnk_dat->l_iter = pjfnk_dat->l_iter + pjfnk_dat->gmreslp_dat.steps;
+			pjfnk_dat->fun_call = pjfnk_dat->fun_call + pjfnk_dat->gmreslp_dat.steps;
+			if (success != 0) {mError(simulation_fail); success = -1; break;}
 			
 			//Form new solution
 			if (pjfnk_dat->LineSearch == false)
@@ -3112,6 +3120,7 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 			else
 			{
 				success	= backtrackLineSearch(pjfnk_dat->funeval, pjfnk_dat->F, x, pjfnk_dat->gmreslp_dat.x, pjfnk_dat->nl_res, &pjfnk_dat->backtrack_dat, pjfnk_dat->res_data);
+				pjfnk_dat->fun_call = pjfnk_dat->fun_call + pjfnk_dat->backtrack_dat.fun_call;
 				if (success < 0) {mError(simulation_fail); success = -1; break;}
 				//Form new solution
 				for (int i=0; i<x.rows(); i++)
@@ -3131,8 +3140,9 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 			pjfnk_dat->pcg_dat.tol_rel = pjfnk_dat->lin_tol_rel;
 			pjfnk_dat->pcg_dat.maxit = 2*x.rows();
 			success = pcg(jacvec, pjfnk_dat->precon, pjfnk_dat->F, &pjfnk_dat->pcg_dat, pjfnk_dat, pjfnk_dat->precon_data);
-			if (success != 0) {mError(simulation_fail); success = -1; break;}
 			pjfnk_dat->l_iter = pjfnk_dat->l_iter + pjfnk_dat->pcg_dat.iter;
+			pjfnk_dat->fun_call = pjfnk_dat->fun_call + pjfnk_dat->pcg_dat.iter;
+			if (success != 0) {mError(simulation_fail); success = -1; break;}
 			
 			//Form new solution
 			if (pjfnk_dat->LineSearch == false)
@@ -3146,6 +3156,7 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 			else
 			{
 				success	= backtrackLineSearch(pjfnk_dat->funeval, pjfnk_dat->F, x, pjfnk_dat->pcg_dat.x, pjfnk_dat->nl_res, &pjfnk_dat->backtrack_dat, pjfnk_dat->res_data);
+				pjfnk_dat->fun_call = pjfnk_dat->fun_call + pjfnk_dat->backtrack_dat.fun_call;
 				if (success < 0) {mError(simulation_fail); success = -1; break;}
 				//Form new solution
 				for (int i=0; i<x.rows(); i++)
@@ -3165,8 +3176,9 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 			pjfnk_dat->bicgstab_dat.tol_rel = pjfnk_dat->lin_tol_rel;
 			pjfnk_dat->bicgstab_dat.maxit = 2*x.rows();
 			success = bicgstab(jacvec, pjfnk_dat->precon, pjfnk_dat->F, &pjfnk_dat->bicgstab_dat, pjfnk_dat, pjfnk_dat->precon_data);
-			if (success != 0) {mError(simulation_fail); success = -1; break;}
 			pjfnk_dat->l_iter = pjfnk_dat->l_iter + pjfnk_dat->bicgstab_dat.iter;
+			pjfnk_dat->fun_call = pjfnk_dat->fun_call + pjfnk_dat->bicgstab_dat.iter;
+			if (success != 0) {mError(simulation_fail); success = -1; break;}
 			
 			if (pjfnk_dat->LineSearch == false)
 			{
@@ -3180,6 +3192,7 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 			else
 			{
 				success	= backtrackLineSearch(pjfnk_dat->funeval, pjfnk_dat->F, x, pjfnk_dat->bicgstab_dat.x, pjfnk_dat->nl_res, &pjfnk_dat->backtrack_dat, pjfnk_dat->res_data);
+				pjfnk_dat->fun_call = pjfnk_dat->fun_call + pjfnk_dat->backtrack_dat.fun_call;
 				if (success < 0) {mError(simulation_fail); success = -1; break;}
 				//Form new solution
 				for (int i=0; i<x.rows(); i++)
@@ -3199,8 +3212,9 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 			pjfnk_dat->cgs_dat.tol_rel = pjfnk_dat->lin_tol_rel;
 			pjfnk_dat->cgs_dat.maxit = 2*x.rows();
 			success = cgs(jacvec, pjfnk_dat->precon, pjfnk_dat->F, &pjfnk_dat->cgs_dat, pjfnk_dat, pjfnk_dat->precon_data);
-			if (success != 0) {mError(simulation_fail); success = -1; break;}
 			pjfnk_dat->l_iter = pjfnk_dat->l_iter + pjfnk_dat->cgs_dat.iter;
+			pjfnk_dat->fun_call = pjfnk_dat->fun_call + pjfnk_dat->cgs_dat.iter;
+			if (success != 0) {mError(simulation_fail); success = -1; break;}
 			
 			if (pjfnk_dat->LineSearch == false)
 			{
@@ -3214,6 +3228,7 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 			else
 			{
 				success	= backtrackLineSearch(pjfnk_dat->funeval, pjfnk_dat->F, x, pjfnk_dat->cgs_dat.x, pjfnk_dat->nl_res, &pjfnk_dat->backtrack_dat, pjfnk_dat->res_data);
+				pjfnk_dat->fun_call = pjfnk_dat->fun_call + pjfnk_dat->backtrack_dat.fun_call;
 				if (success < 0) {mError(simulation_fail); success = -1; break;}
 				//Form new solution
 				for (int i=0; i<x.rows(); i++)
@@ -3225,15 +3240,16 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 			}
 		}
 		
-		//Unrestarted GMRES with Left Preconditioning - Basically Equivalent to an Exact Newton Step
+		//Unrestarted GMRES with Left Preconditioning (i.e. Full Orthogonalization) - Basically Equivalent to an Exact Newton Step
 		else if (pjfnk_dat->linear_solver == FOM)
 		{
 			pjfnk_dat->gmreslp_dat.Output = pjfnk_dat->L_Output;
 			pjfnk_dat->gmreslp_dat.tol_abs = pjfnk_dat->lin_tol_abs;
 			pjfnk_dat->gmreslp_dat.tol_rel = pjfnk_dat->lin_tol_rel;
 			success = fom(jacvec, pjfnk_dat->precon, pjfnk_dat->F, &pjfnk_dat->gmreslp_dat, pjfnk_dat, pjfnk_dat->precon_data);
-			if (success != 0) {mError(simulation_fail); success = -1; break;}
 			pjfnk_dat->l_iter = pjfnk_dat->l_iter + pjfnk_dat->gmreslp_dat.steps;
+			pjfnk_dat->fun_call = pjfnk_dat->fun_call + pjfnk_dat->gmreslp_dat.steps;
+			if (success != 0) {mError(simulation_fail); success = -1; break;}
 			
 			if (pjfnk_dat->LineSearch == false)
 			{
@@ -3247,6 +3263,7 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 			else
 			{
 				success	= backtrackLineSearch(pjfnk_dat->funeval, pjfnk_dat->F, x, pjfnk_dat->gmreslp_dat.x, pjfnk_dat->nl_res, &pjfnk_dat->backtrack_dat, pjfnk_dat->res_data);
+				pjfnk_dat->fun_call = pjfnk_dat->fun_call + pjfnk_dat->backtrack_dat.fun_call;
 				if (success < 0) {mError(simulation_fail); success = -1; break;}
 				//Form new solution
 				for (int i=0; i<x.rows(); i++)
@@ -3265,9 +3282,10 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 			pjfnk_dat->gmresrp_dat.tol_abs = pjfnk_dat->lin_tol_abs;
 			pjfnk_dat->gmresrp_dat.tol_rel = pjfnk_dat->lin_tol_rel;
 			pjfnk_dat->gmresrp_dat.maxit = x.rows();
-			success = gmresRightPreconditioned(jacvec, pjfnk_dat->precon, pjfnk_dat->F, &pjfnk_dat->gmresrp_dat, pjfnk_dat, pjfnk_dat->precon_data);
-			if (success != 0) {mError(simulation_fail); success = -1; break;}
+			success=gmresRightPreconditioned(jacvec, pjfnk_dat->precon, pjfnk_dat->F, &pjfnk_dat->gmresrp_dat, pjfnk_dat, pjfnk_dat->precon_data);
 			pjfnk_dat->l_iter = pjfnk_dat->l_iter + pjfnk_dat->gmresrp_dat.iter_total;
+			pjfnk_dat->fun_call = pjfnk_dat->fun_call + pjfnk_dat->gmresrp_dat.iter_total;
+			if (success != 0) {mError(simulation_fail); success = -1; break;}
 			
 			if (pjfnk_dat->LineSearch == false)
 			{
@@ -3281,6 +3299,7 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 			else
 			{
 				success	= backtrackLineSearch(pjfnk_dat->funeval, pjfnk_dat->F, x, pjfnk_dat->gmresrp_dat.x, pjfnk_dat->nl_res, &pjfnk_dat->backtrack_dat, pjfnk_dat->res_data);
+				pjfnk_dat->fun_call = pjfnk_dat->fun_call + pjfnk_dat->backtrack_dat.fun_call;
 				if (success < 0) {mError(simulation_fail); success = -1; break;}
 				//Form new solution
 				for (int i=0; i<x.rows(); i++)
@@ -3300,8 +3319,9 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 			pjfnk_dat->gcr_dat.tol_rel = pjfnk_dat->lin_tol_rel;
 			pjfnk_dat->gcr_dat.maxit = x.rows();
 			success = gcr(jacvec, pjfnk_dat->precon, pjfnk_dat->F, &pjfnk_dat->gcr_dat, pjfnk_dat, pjfnk_dat->precon_data);
-			if (success != 0) {mError(simulation_fail); success = -1; break;}
 			pjfnk_dat->l_iter = pjfnk_dat->l_iter + pjfnk_dat->gcr_dat.total_iter;
+			pjfnk_dat->fun_call = pjfnk_dat->fun_call + pjfnk_dat->gcr_dat.total_iter;
+			if (success != 0) {mError(simulation_fail); success = -1; break;}
 			
 			if (pjfnk_dat->LineSearch == false)
 			{
@@ -3315,6 +3335,7 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 			else
 			{
 				success	= backtrackLineSearch(pjfnk_dat->funeval, pjfnk_dat->F, x, pjfnk_dat->gcr_dat.x, pjfnk_dat->nl_res, &pjfnk_dat->backtrack_dat, pjfnk_dat->res_data);
+				pjfnk_dat->fun_call = pjfnk_dat->fun_call + pjfnk_dat->backtrack_dat.fun_call;
 				if (success < 0) {mError(simulation_fail); success = -1; break;}
 				//Form new solution
 				for (int i=0; i<x.rows(); i++)
@@ -3336,8 +3357,9 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 			pjfnk_dat->gmresr_dat.gmres_tol = pjfnk_dat->lin_tol_rel;
 			pjfnk_dat->gmresr_dat.gcr_maxit = x.rows();
 			success = gmresr(jacvec, pjfnk_dat->precon, pjfnk_dat->F, &pjfnk_dat->gmresr_dat, pjfnk_dat, pjfnk_dat->precon_data);
-			if (success != 0) {mError(simulation_fail); success = -1; break;}
 			pjfnk_dat->l_iter = pjfnk_dat->l_iter + pjfnk_dat->gmresr_dat.total_iter;
+			pjfnk_dat->fun_call = pjfnk_dat->fun_call + pjfnk_dat->gmresr_dat.total_iter;
+			if (success != 0) {mError(simulation_fail); success = -1; break;}
 			
 			if (pjfnk_dat->LineSearch == false)
 			{
@@ -3351,6 +3373,7 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 			else
 			{
 				success	= backtrackLineSearch(pjfnk_dat->funeval, pjfnk_dat->F, x, pjfnk_dat->gmresr_dat.gcr_dat.x, pjfnk_dat->nl_res, &pjfnk_dat->backtrack_dat, pjfnk_dat->res_data);
+				pjfnk_dat->fun_call = pjfnk_dat->fun_call + pjfnk_dat->backtrack_dat.fun_call;
 				if (success < 0) {mError(simulation_fail); success = -1; break;}
 				//Form new solution
 				for (int i=0; i<x.rows(); i++)
@@ -3373,6 +3396,7 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 		if (pjfnk_dat->LineSearch == false)
 		{
 			success = (*pjfnk_dat->funeval) (pjfnk_dat->x,pjfnk_dat->F,pjfnk_dat->res_data);
+			pjfnk_dat->fun_call++;
 			if (success != 0) {mError(simulation_fail); return -1;}
 			pjfnk_dat->nl_res = pjfnk_dat->F.norm();
 			
