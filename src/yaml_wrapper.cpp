@@ -2472,6 +2472,15 @@ YamlWrapper& yaml_cpp_class::getYamlWrapper()
  =========================================== END yaml_cpp_class ==============================================
  */
 
+// Convert input to all lower case
+std::string allLower(const std::string &input)
+{
+	std::string copy = input;
+	for (int i=0; i<copy.size(); i++)
+		copy[i] = tolower(copy[i]);
+	return copy;
+}
+
 int YAML_WRAPPER_TESTS()
 {
 	int success = 0;

@@ -1181,6 +1181,7 @@ activities()
 	total_mass = 0.0;
 	total_volume = 1.0;
 	num_rxns = 0;
+	AreaBasis = true;
 }
 
 //Default destructor for Adsorption Reaction
@@ -1362,7 +1363,27 @@ int AdsorptionReaction::setAqueousIndexAuto()
 //Set the ith volume factor for the species
 void AdsorptionReaction::setVolumeFactor(int i, double v)
 {
+	if (i >= this->List->list_size() || i < 0)
+	{
+		mError(out_of_bounds);
+		return;
+	}
+	if (v < 0)
+		v = DBL_MIN;
 	this->volume_factors[i] = v;
+}
+
+//Set the ith area factor for the species
+void AdsorptionReaction::setAreaFactor(int i, double a)
+{
+	if (i >= this->List->list_size() || i < 0)
+	{
+		mError(out_of_bounds);
+		return;
+	}
+	if (a < 0)
+		a = DBL_MIN;
+	this->area_factors[i] = a;
 }
 
 //Set the specific area for the adsorbent
@@ -1389,6 +1410,31 @@ void AdsorptionReaction::setTotalVolume(double v)
 	this->total_volume = v;
 }
 
+//Directly set the area basis boolean
+void AdsorptionReaction::setAreaBasisBool(bool opt)
+{
+	this->AreaBasis = opt;
+}
+
+//Set the area basis from the string argument
+void AdsorptionReaction::setBasis(std::string option)
+{
+	option = allLower(option);
+	if (option == "area")
+	{
+		this->setAreaBasisBool(true);
+	}
+	else if (option == "ligand")
+	{
+		this->setAreaBasisBool(false);
+	}
+	else
+	{
+		mError(invalid_type);
+		this->setAreaBasisBool(true);
+	}
+}
+
 //Modify the deltas in the given mass balance
 void AdsorptionReaction::modifyDeltas(MassBalance &mbo)
 {
@@ -1410,9 +1456,10 @@ void AdsorptionReaction::calculateAreaFactors()
 			this->area_factors[i] = 0.0;
 		else
 		{
-			//this->area_factors[i] = (this->getVolumeFactor(i) * ( (8.0*3.13E+9) / (10.0*18.92) )) + ( (2.0*3.13E+9)/10.0);
-			//this->area_factors[i] = this->getAreaFactor(i) / (10000.0);
-			this->area_factors[i] = M_PI * pow((3.0/(4.0*M_PI))*(this->volume_factors[i]/Na), (2.0/3.0)) * Na / 10000.0;
+			if (this->AreaBasis == true)
+				this->area_factors[i] = M_PI * pow((3.0/(4.0*M_PI))*(this->volume_factors[i]/Na), (2.0/3.0)) * Na / 10000.0;
+			else
+				this->area_factors[i] = this->volume_factors[i];
 		}
 	}
 }
@@ -4705,6 +4752,7 @@ int SHARK_TESTS()
 	shark_dat.AdsorptionList[0].setSpecificArea(ads_area);
 	shark_dat.AdsorptionList[0].setTotalMass(ads_mass);
 	shark_dat.AdsorptionList[0].setActivityModelInfo(FloryHuggins, &shark_dat.AdsorptionList[0]);
+	shark_dat.AdsorptionList[0].setBasis("area");
 	
 	shark_dat.AdsorptionList[0].getReaction(0).Set_Equilibrium(logK_UO2);
 	shark_dat.AdsorptionList[0].getReaction(0).Set_Stoichiometric(0, 0);

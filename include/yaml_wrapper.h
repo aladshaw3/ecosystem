@@ -510,6 +510,14 @@ private:
 	
 };
 
+/// Function to return an all lower case string based on the passed argument
+/** This function will copy the input paramter and convert that copy to
+	all lower case. The copy is then returned and can be checked against valid
+	or allowed strings.
+ 
+ \param input string to copy and convert to lower case */
+std::string allLower(const std::string &input);
+
 /// Function to run tests on all the objects that yaml_cpp_class
 /** This test function is currently NOT callable from the UI.*/
 int YAML_WRAPPER_TESTS();

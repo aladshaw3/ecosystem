@@ -158,15 +158,6 @@ void bui_help()
 	puts("\tThis algorithm requires one input files: (i) a yaml file detailing all system parameters, the species of interest, the reactions and mass balances, as well as some solver options. NOTE: These routines are still under development and will have new features and functions available to the user as they come available.\n");
 }
 
-// Convert input to all lower case
-std::string allLower(const std::string &input)
-{
-	std::string copy = input;
-	for (int i=0; i<copy.size(); i++)
-		copy[i] = tolower(copy[i]);
-	return copy;
-}
-
 //Check user string input for keyword "exit"
 bool exit(const std::string &input)
 {

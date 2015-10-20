@@ -516,10 +516,13 @@ public:
 		the primary aqueous index species appears opposite of the adsorbed species in the reactions. Note: This function
 		assumes that the adsorbed indices have already been set. */
 	int setAqueousIndexAuto();
-	void setVolumeFactor(int i, double v);				///< Set the ith volume factor for the species list
-	void setSpecificArea(double a);						///< Set the specific area for the adsorbent
-	void setTotalMass(double m);						///< Set the total mass of the adsorbent
-	void setTotalVolume(double v);						///< Set the total volume of the system
+	void setVolumeFactor(int i, double v);				///< Set the ith volume factor for the species list (cm^3/mol) or (mol/mol)
+	void setAreaFactor(int i, double a);				///< Set the ith area factor for the species list (m^2/mol) or (mol/mol)
+	void setSpecificArea(double a);						///< Set the specific area for the adsorbent (m^2/kg) or (mol/kg)
+	void setTotalMass(double m);						///< Set the total mass of the adsorbent (kg)
+	void setTotalVolume(double v);						///< Set the total volume of the system (L)
+	void setAreaBasisBool(bool opt);					///< Set the basis boolean directly
+	void setBasis(std::string option);					///< Set the basis of the adsorption problem from the given string arg
 	
 	void calculateAreaFactors();						///< Calculates the area factors used from the van der Waals volumes
 	void calculateEquilibria(double T);					///< Calculates all equilibrium parameters as a function of temperature
@@ -567,20 +570,20 @@ public:
 		\param i index of the reaction of interest for the adsorption object*/
 	double Eval_Residual(const Matrix<double> &x, const Matrix<double> &gama, int i);
 	
-	Reaction& getReaction(int i);						///< Return reference to the ith reaction object in the adsorption object
-	double getVolumeFactor(int i);						///< Get the ith volume factor (species not involved return zeros)
-	double getAreaFactor(int i);						///< Get the ith area factor (species not involved return zeros)
-	double getActivity(int i);							///< Get the ith activity factor for the surface species
-	double getSpecificArea();							///< Get the specific area of the adsorbent (m^2/kg)
-	double getBulkDensity();							///< Calculate and return bulk density of adsorbent in system (kg/L)
-	double getTotalMass();								///< Get the total mass of adsorbent in the system (kg)
-	double getTotalVolume();							///< Get the total volume of the system (L)
-	int getNumberRxns();								///< Get the number of reactions involved in the adsorption object
-	int getAdsorbIndex(int i);							///< Get the index of the adsorbed species in the ith reaction
-	int getAqueousIndex(int i);							///< Get the index of the primary aqueous species in the ith reaction
+	Reaction& getReaction(int i);				///< Return reference to the ith reaction object in the adsorption object
+	double getVolumeFactor(int i);				///< Get the ith volume factor (species not involved return zeros) (cm^3/mol) or (mol/mol)
+	double getAreaFactor(int i);				///< Get the ith area factor (species not involved return zeros) (m^2/mol) or (mol/mol)
+	double getActivity(int i);					///< Get the ith activity factor for the surface species
+	double getSpecificArea();					///< Get the specific area of the adsorbent (m^2/kg) or (mol/kg)
+	double getBulkDensity();					///< Calculate and return bulk density of adsorbent in system (kg/L)
+	double getTotalMass();						///< Get the total mass of adsorbent in the system (kg)
+	double getTotalVolume();					///< Get the total volume of the system (L)
+	int getNumberRxns();						///< Get the number of reactions involved in the adsorption object
+	int getAdsorbIndex(int i);					///< Get the index of the adsorbed species in the ith reaction
+	int getAqueousIndex(int i);					///< Get the index of the primary aqueous species in the ith reaction
 	
 protected:
-	MasterSpeciesList *List;						///< Pointer to the MasterSpeciesList object
+	MasterSpeciesList *List;					///< Pointer to the MasterSpeciesList object
 	
 	/// Pointer to a surface activity model
 	/** This is a function pointer for a surface activity model. The function must accept the log of the
@@ -592,19 +595,20 @@ protected:
 		\param data pointer to a data structure needed to calculate activities*/
 	int (*surface_activity) (const Matrix<double>& logq, Matrix<double> &activity, const void *data);
 	
-	const void *activity_data;						///< Pointer to the data structure needed for surface activities.
-	std::vector<double> area_factors;				///< List of area factors associated with surface species (m^2/mol)
-	std::vector<double> volume_factors;				///< List of the van der Waals volumes of each surface species (cm^3/mol)
-	std::vector<int> adsorb_index;					///< List of the indices for the adsorbed species in the reactions
-	std::vector<int> aqueous_index;					///< List of the indices for the primary aqueous species in the reactions
-	Matrix<double> activities;						///< List of the activities calculated by the activity model
-	double specific_area;							///< Specific surface area of the adsorbent (m^2/kg)
-	double total_mass;								///< Total mass of the adsorbent in the system (kg)
-	double total_volume;							///< Total volume of the system (L)
-	int num_rxns;									///< Number of reactions involved in the adsorption equilibria
+	const void *activity_data;					///< Pointer to the data structure needed for surface activities.
+	std::vector<double> area_factors;			///< List of area factors associated with surface species (m^2/mol) or (mol/mol)
+	std::vector<double> volume_factors;			///< List of the van der Waals volumes of each surface species (cm^3/mol) or (mol/mol)
+	std::vector<int> adsorb_index;				///< List of the indices for the adsorbed species in the reactions
+	std::vector<int> aqueous_index;				///< List of the indices for the primary aqueous species in the reactions
+	Matrix<double> activities;					///< List of the activities calculated by the activity model
+	double specific_area;						///< Specific surface area of the adsorbent (m^2/kg) or (mol/kg)
+	double total_mass;							///< Total mass of the adsorbent in the system (kg)
+	double total_volume;						///< Total volume of the system (L)
+	int num_rxns;								///< Number of reactions involved in the adsorption equilibria
+	bool AreaBasis;								///< True = Adsorption on an area basis, False = Adsorption on a ligand basis
 	
 private:
-	std::vector<Reaction> ads_rxn;					///< List of reactions involved with adsorption
+	std::vector<Reaction> ads_rxn;				///< List of reactions involved with adsorption
 	
 };
 
