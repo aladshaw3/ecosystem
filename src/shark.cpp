@@ -1098,7 +1098,7 @@ double UnsteadyReaction::Eval_ReactionRate(const Matrix<double> &x, const Matrix
 			//No action
 		}
 	}
-	R = (this->Get_Forward() * reactants) - (this->Get_Reverse() * products);
+	R = fabs(this->Get_Stoichiometric(this->Get_Species_Index())) * (this->Get_Forward() * reactants) - (this->Get_Reverse() * products);
 	
 	return R;
 }
@@ -1720,7 +1720,7 @@ void print2file_shark_info(SHARK_DATA *shark_dat)
 				if (i == 0 || first == true)
 				{
 					if (fabs(shark_dat->ReactionList[j].Get_Stoichiometric(i)) > 1.0)
-						fprintf(shark_dat->OutputFile, "%i x { %s }",(int)fabs(shark_dat->ReactionList[j].Get_Stoichiometric(i)),shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
+						fprintf(shark_dat->OutputFile, "%g x { %s }",fabs(shark_dat->ReactionList[j].Get_Stoichiometric(i)),shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
 					else
 						fprintf(shark_dat->OutputFile, "{ %s }",shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
 					first = false;
@@ -1728,7 +1728,7 @@ void print2file_shark_info(SHARK_DATA *shark_dat)
 				else
 				{
 					if (fabs(shark_dat->ReactionList[j].Get_Stoichiometric(i)) > 1.0)
-						fprintf(shark_dat->OutputFile, " + %i x { %s }",(int)fabs(shark_dat->ReactionList[j].Get_Stoichiometric(i)),shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
+						fprintf(shark_dat->OutputFile, " + %g x { %s }",fabs(shark_dat->ReactionList[j].Get_Stoichiometric(i)),shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
 					else
 						fprintf(shark_dat->OutputFile, " + { %s }",shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
 				}
@@ -1745,7 +1745,7 @@ void print2file_shark_info(SHARK_DATA *shark_dat)
 				if (i == 0 || first == true)
 				{
 					if (fabs(shark_dat->ReactionList[j].Get_Stoichiometric(i)) > 1.0)
-						fprintf(shark_dat->OutputFile, "%i x { %s }",(int)fabs(shark_dat->ReactionList[j].Get_Stoichiometric(i)),shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
+						fprintf(shark_dat->OutputFile, "%g x { %s }",fabs(shark_dat->ReactionList[j].Get_Stoichiometric(i)),shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
 					else
 						fprintf(shark_dat->OutputFile, "{ %s }",shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
 					first = false;
@@ -1753,7 +1753,7 @@ void print2file_shark_info(SHARK_DATA *shark_dat)
 				else
 				{
 					if (fabs(shark_dat->ReactionList[j].Get_Stoichiometric(i)) > 1.0)
-						fprintf(shark_dat->OutputFile, " + %i x { %s }",(int)fabs(shark_dat->ReactionList[j].Get_Stoichiometric(i)),shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
+						fprintf(shark_dat->OutputFile, " + %g x { %s }",fabs(shark_dat->ReactionList[j].Get_Stoichiometric(i)),shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
 					else
 						fprintf(shark_dat->OutputFile, " + { %s }",shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
 				}
@@ -1768,6 +1768,8 @@ void print2file_shark_info(SHARK_DATA *shark_dat)
 		fprintf(shark_dat->OutputFile, "Unsteady Reactions\n-----------------------------------------------------\n");
 	for (int j=0; j<shark_dat->num_usr; j++)
 	{
+		if (shark_dat->UnsteadyList[j].Get_Stoichiometric(shark_dat->UnsteadyList[j].Get_Species_Index()) != 1.0)
+			fprintf(shark_dat->OutputFile, "(1 / %g) x ", fabs(shark_dat->UnsteadyList[j].Get_Stoichiometric(shark_dat->UnsteadyList[j].Get_Species_Index())));
 		fprintf(shark_dat->OutputFile, "d { %s } / dt\nk_reverse =\t%.6g\t:\tk_forward =\t%.6g\n", shark_dat->MasterList.get_species(shark_dat->UnsteadyList[j].Get_Species_Index()).MolecularFormula().c_str(), shark_dat->UnsteadyList[j].Get_Reverse(), shark_dat->UnsteadyList[j].Get_Forward());
 		fprintf(shark_dat->OutputFile, "logK = \t%.6g\t:\t",shark_dat->UnsteadyList[j].Get_Equilibrium());
 		bool first = true;
@@ -1778,7 +1780,7 @@ void print2file_shark_info(SHARK_DATA *shark_dat)
 				if (i == 0 || first == true)
 				{
 					if (fabs(shark_dat->UnsteadyList[j].Get_Stoichiometric(i)) > 1.0)
-						fprintf(shark_dat->OutputFile, "%i x { %s }",(int)fabs(shark_dat->UnsteadyList[j].Get_Stoichiometric(i)),shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
+						fprintf(shark_dat->OutputFile, "%g x { %s }",fabs(shark_dat->UnsteadyList[j].Get_Stoichiometric(i)),shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
 					else
 						fprintf(shark_dat->OutputFile, "{ %s }",shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
 					first = false;
@@ -1786,7 +1788,7 @@ void print2file_shark_info(SHARK_DATA *shark_dat)
 				else
 				{
 					if (fabs(shark_dat->UnsteadyList[j].Get_Stoichiometric(i)) > 1.0)
-						fprintf(shark_dat->OutputFile, " + %i x { %s }",(int)fabs(shark_dat->UnsteadyList[j].Get_Stoichiometric(i)),shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
+						fprintf(shark_dat->OutputFile, " + %g x { %s }",fabs(shark_dat->UnsteadyList[j].Get_Stoichiometric(i)),shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
 					else
 						fprintf(shark_dat->OutputFile, " + { %s }",shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
 				}
@@ -1803,7 +1805,7 @@ void print2file_shark_info(SHARK_DATA *shark_dat)
 				if (i == 0 || first == true)
 				{
 					if (fabs(shark_dat->UnsteadyList[j].Get_Stoichiometric(i)) > 1.0)
-						fprintf(shark_dat->OutputFile, "%i x { %s }",(int)fabs(shark_dat->UnsteadyList[j].Get_Stoichiometric(i)),shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
+						fprintf(shark_dat->OutputFile, "%g x { %s }",fabs(shark_dat->UnsteadyList[j].Get_Stoichiometric(i)),shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
 					else
 						fprintf(shark_dat->OutputFile, "{ %s }",shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
 					first = false;
@@ -1811,7 +1813,7 @@ void print2file_shark_info(SHARK_DATA *shark_dat)
 				else
 				{
 					if (fabs(shark_dat->UnsteadyList[j].Get_Stoichiometric(i)) > 1.0)
-						fprintf(shark_dat->OutputFile, " + %i x { %s }",(int)fabs(shark_dat->UnsteadyList[j].Get_Stoichiometric(i)),shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
+						fprintf(shark_dat->OutputFile, " + %g x { %s }",fabs(shark_dat->UnsteadyList[j].Get_Stoichiometric(i)),shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
 					else
 						fprintf(shark_dat->OutputFile, " + { %s }",shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
 				}
@@ -1842,7 +1844,7 @@ void print2file_shark_info(SHARK_DATA *shark_dat)
 						if (i == 0 || first == true)
 						{
 							if (fabs(shark_dat->AdsorptionList[n].getReaction(j).Get_Stoichiometric(i)) > 1.0)
-								fprintf(shark_dat->OutputFile, "%i x { %s }",(int)fabs(shark_dat->AdsorptionList[n].getReaction(j).Get_Stoichiometric(i)),shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
+								fprintf(shark_dat->OutputFile, "%g x { %s }",fabs(shark_dat->AdsorptionList[n].getReaction(j).Get_Stoichiometric(i)),shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
 							else
 								fprintf(shark_dat->OutputFile, "{ %s }",shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
 							first = false;
@@ -1850,7 +1852,7 @@ void print2file_shark_info(SHARK_DATA *shark_dat)
 						else
 						{
 							if (fabs(shark_dat->AdsorptionList[n].getReaction(j).Get_Stoichiometric(i)) > 1.0)
-								fprintf(shark_dat->OutputFile, " + %i x { %s }",(int)fabs(shark_dat->AdsorptionList[n].getReaction(j).Get_Stoichiometric(i)),shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
+								fprintf(shark_dat->OutputFile, " + %g x { %s }",fabs(shark_dat->AdsorptionList[n].getReaction(j).Get_Stoichiometric(i)),shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
 							else
 								fprintf(shark_dat->OutputFile, " + { %s }",shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
 						}
@@ -1867,7 +1869,7 @@ void print2file_shark_info(SHARK_DATA *shark_dat)
 						if (i == 0 || first == true)
 						{
 							if (fabs(shark_dat->AdsorptionList[n].getReaction(j).Get_Stoichiometric(i)) > 1.0)
-								fprintf(shark_dat->OutputFile, "%i x { %s }",(int)fabs(shark_dat->AdsorptionList[n].getReaction(j).Get_Stoichiometric(i)),shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
+								fprintf(shark_dat->OutputFile, "%g x { %s }",fabs(shark_dat->AdsorptionList[n].getReaction(j).Get_Stoichiometric(i)),shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
 							else
 								fprintf(shark_dat->OutputFile, "{ %s }",shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
 							first = false;
@@ -1875,7 +1877,7 @@ void print2file_shark_info(SHARK_DATA *shark_dat)
 						else
 						{
 							if (fabs(shark_dat->AdsorptionList[n].getReaction(j).Get_Stoichiometric(i)) > 1.0)
-								fprintf(shark_dat->OutputFile, " + %i x { %s }",(int)fabs(shark_dat->AdsorptionList[n].getReaction(j).Get_Stoichiometric(i)),shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
+								fprintf(shark_dat->OutputFile, " + %g x { %s }",fabs(shark_dat->AdsorptionList[n].getReaction(j).Get_Stoichiometric(i)),shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
 							else
 								fprintf(shark_dat->OutputFile, " + { %s }",shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
 						}
