@@ -1420,11 +1420,11 @@ void AdsorptionReaction::setAreaBasisBool(bool opt)
 void AdsorptionReaction::setBasis(std::string option)
 {
 	option = allLower(option);
-	if (option == "area")
+	if (option == "area" || option == "surface")
 	{
 		this->setAreaBasisBool(true);
 	}
-	else if (option == "ligand")
+	else if (option == "ligand" || option == "molar" || option == "mole")
 	{
 		this->setAreaBasisBool(false);
 	}
@@ -1570,9 +1570,19 @@ double AdsorptionReaction::Eval_Residual(const Matrix<double> &x, const Matrix<d
 	double res = this->getReaction(i).Get_Stoichiometric(this->getAdsorbIndex(i)) * ( log10(this->getActivity(this->getAdsorbIndex(i))) + x(this->getAdsorbIndex(i),0) );
 	
 	if (this->getReaction(i).Get_Stoichiometric(this->getAdsorbIndex(i)) > 0.0)
-		res = res - log10(this->getSpecificArea()*this->calculateActiveFraction(x));
+	{
+		if (this->isAreaBasis() == true)
+			res = res - log10(this->getSpecificArea()*this->calculateActiveFraction(x));
+		else
+			res = res - (this->getAreaFactor(this->getAdsorbIndex(i)) * log10(this->getSpecificArea()*this->calculateActiveFraction(x)));
+	}
 	else
-		res = res + log10(this->getSpecificArea()*this->calculateActiveFraction(x));
+	{
+		if (this->isAreaBasis() == true)
+			res = res + log10(this->getSpecificArea()*this->calculateActiveFraction(x));
+		else
+			res = res + (this->getAreaFactor(this->getAdsorbIndex(i)) * log10(this->getSpecificArea()*this->calculateActiveFraction(x)));
+	}
 	
 	for (int n=0; n<this->List->list_size(); n++)
 	{
@@ -1688,6 +1698,12 @@ int AdsorptionReaction::getAqueousIndex(int i)
 		return 0;
 	}
 	return this->aqueous_index[i];
+}
+
+//Return true is in Area basis
+bool AdsorptionReaction::isAreaBasis()
+{
+	return this->AreaBasis;
 }
 
 /*

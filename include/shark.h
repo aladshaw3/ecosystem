@@ -46,6 +46,14 @@
 #ifndef	Na
 #define Na 6.0221413E+23					///< Avagadro's Number - Units: molecules/mol
 #endif
+
+#ifndef	kB
+#define kB 1.3806488E-23					///< Boltzmann's Constant - Units: J/K or C*V/K
+#endif
+
+#ifndef e
+#define e 1.6021766208E-19					///< Elementary Electric Charge - Units: C
+#endif
  
 /// Master Species List Object
 /** C++ style object that holds data and function associated with solving multi-species problems. This
@@ -581,6 +589,7 @@ public:
 	int getNumberRxns();						///< Get the number of reactions involved in the adsorption object
 	int getAdsorbIndex(int i);					///< Get the index of the adsorbed species in the ith reaction
 	int getAqueousIndex(int i);					///< Get the index of the primary aqueous species in the ith reaction
+	bool isAreaBasis();							///< Returns true if we are in the Area Basis, False if in Molar Basis
 	
 protected:
 	MasterSpeciesList *List;					///< Pointer to the MasterSpeciesList object
