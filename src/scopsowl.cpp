@@ -1212,8 +1212,8 @@ int LARGE_CYCLE_TEST01(SCOPSOWL_DATA *owl_dat)
 	owl_dat->total_pressure = 101.35;//kPa
 	owl_dat->gas_temperature = 313.15;//K
 	owl_dat->gas_velocity = 0.36;//cm/s
-	owl_dat->sim_time = 50.0;//hr
-	owl_dat->t_print = 0.05;
+	owl_dat->sim_time = 530.0;//hr
+	owl_dat->t_print = 0.5;
 	owl_dat->y[0] = 0.779736;
 	owl_dat->y[1] = 0.20736;
 	owl_dat->y[2] = 0.00934;
@@ -1282,7 +1282,244 @@ int LARGE_CYCLE_TEST01(SCOPSOWL_DATA *owl_dat)
 			double m = (8.2E-6 - 2.0E-5) / (97.1 - 42.1);
 			owl_dat->y[4] = (m * (owl_dat->t - 42.1)) + 2.0E-5;
 		}
-		
+		if (owl_dat->t > 97.1)
+		{
+			owl_dat->y[4] = 8.2E-6;
+			
+			double m = (6.7E-6 - 8.2E-6) / (114.6 - 97.1);
+			owl_dat->y[4] = (m * (owl_dat->t - 97.1)) + 8.2E-6;
+		}
+		if (owl_dat->t > 114.6)
+		{
+			owl_dat->y[4] = 6.7E-6;
+			
+			double m = (7.7E-6 - 6.7E-6) / (121.5 - 114.6);
+			owl_dat->y[4] = (m * (owl_dat->t - 114.6)) + 6.7E-6;
+		}
+		if (owl_dat->t > 121.5)
+		{
+			owl_dat->y[4] = 7.7E-6;
+			
+			double m = (6.3E-6 - 7.7E-6) / (137.5 - 121.5);
+			owl_dat->y[4] = (m * (owl_dat->t - 121.5)) + 7.7E-6;
+		}
+		if (owl_dat->t > 137.5)
+		{
+			owl_dat->y[4] = 6.3E-6;
+			
+			double m = (1.34E-5 - 6.3E-6) / (189.4 - 137.5);
+			owl_dat->y[4] = (m * (owl_dat->t - 137.5)) + 6.3E-6;
+		}
+		if (owl_dat->t > 189.4)
+		{
+			owl_dat->y[4] = 1.34E-5;
+			
+			double m = (7.99E-6 - 1.34E-5) / (209.4 - 189.4);
+			owl_dat->y[4] = (m * (owl_dat->t - 189.4)) + 1.34E-5;
+		}
+		if (owl_dat->t > 209.4)
+		{
+			owl_dat->y[4] = 7.99E-6;
+			
+			double m = (1.159E-5 - 7.99E-6) / (216.4 - 209.4);
+			owl_dat->y[4] = (m * (owl_dat->t - 209.4)) + 7.99E-6;
+		}
+		if (owl_dat->t > 216.4)
+		{
+			owl_dat->y[4] = 1.159E-5;
+			
+			double m = (7.89E-6 - 1.159E-5) / (281.4 - 216.4);
+			owl_dat->y[4] = (m * (owl_dat->t - 216.4)) + 1.159E-5;
+		}
+		if (owl_dat->t > 281.4)
+		{
+			owl_dat->y[4] = 7.89E-6;
+			
+			double m = (8.78E-6 - 7.89E-6) / (286.6 - 281.4);
+			owl_dat->y[4] = (m * (owl_dat->t - 281.4)) + 7.89E-6;
+		}
+		if (owl_dat->t > 286.6)
+		{
+			owl_dat->y[4] = 8.78E-6;
+			
+			double m = (9.77E-6 - 8.78E-6) / (306.6 - 286.6);
+			owl_dat->y[4] = (m * (owl_dat->t - 286.6)) + 8.78E-6;
+		}
+		if (owl_dat->t > 306.6)
+		{
+			owl_dat->y[4] = 9.77E-6;
+			
+			double m = (9.26E-6 - 9.77E-6) / (331.6 - 306.6);
+			owl_dat->y[4] = (m * (owl_dat->t - 306.6)) + 9.77E-6;
+		}
+		if (owl_dat->t > 331.6)
+		{
+			owl_dat->y[4] = 9.26E-6;
+			
+			double m = (1.253E-5 - 9.26E-6) / (353.4 - 331.6);
+			owl_dat->y[4] = (m * (owl_dat->t - 331.6)) + 9.26E-6;
+		}
+		if (owl_dat->t > 353.4)
+		{
+			owl_dat->y[4] = 1.253E-5;
+			
+			double m = (7.5299E-4 - 1.253E-5) / (353.8 - 353.4);
+			owl_dat->y[4] = (m * (owl_dat->t - 353.4)) + 1.253E-5;
+		}
+		if (owl_dat->t > 353.8)
+		{
+			owl_dat->y[4] = 7.5299E-4;
+			
+			double m = (1.85358E-3 - 7.5299E-4) / (353.9 - 353.8);
+			owl_dat->y[4] = (m * (owl_dat->t - 353.8)) + 7.5299E-4;
+		}
+		if (owl_dat->t > 353.9)
+		{
+			owl_dat->y[4] = 1.85358E-3;
+			
+			double m = (3.03265E-3 - 1.85358E-3) / (355.3 - 353.9);
+			owl_dat->y[4] = (m * (owl_dat->t - 353.9)) + 1.85358E-3;
+		}
+		if (owl_dat->t > 355.3)
+		{
+			owl_dat->y[4] = 3.03265E-3;
+			
+			double m = (2.98526E-3 - 3.03265E-3) / (359.1 - 355.3);
+			owl_dat->y[4] = (m * (owl_dat->t - 355.3)) + 3.03265E-3;
+		}
+		if (owl_dat->t > 359.1)
+		{
+			owl_dat->y[4] = 2.98526E-3;
+			
+			double m = (2.89248E-3 - 2.98526E-3) / (378.2 - 359.1);
+			owl_dat->y[4] = (m * (owl_dat->t - 359.1)) + 2.98526E-3;
+		}
+		if (owl_dat->t > 378.2)
+		{
+			owl_dat->y[4] = 2.89248E-3;
+			
+			double m = (3.09567E-4 - 2.89248E-3) / (378.4 - 378.2);
+			owl_dat->y[4] = (m * (owl_dat->t - 378.2)) + 2.89248E-3;
+		}
+		if (owl_dat->t > 378.4)
+		{
+			owl_dat->y[4] = 3.09567E-4;
+			
+			double m = (1.77397E-4 - 3.09567E-4) / (378.7 - 378.4);
+			owl_dat->y[4] = (m * (owl_dat->t - 378.4)) + 3.09567E-4;
+		}
+		if (owl_dat->t > 378.7)
+		{
+			owl_dat->y[4] = 1.77397E-4;
+			
+			double m = (5.13752E-5 - 1.77397E-4) / (380.2 - 378.7);
+			owl_dat->y[4] = (m * (owl_dat->t - 378.7)) + 1.77397E-4;
+		}
+		if (owl_dat->t > 380.2)
+		{
+			owl_dat->y[4] = 5.13752E-5;
+			
+			double m = (3.24215E-5 - 5.13752E-5) / (382.0 - 380.2);
+			owl_dat->y[4] = (m * (owl_dat->t - 380.2)) + 5.13752E-5;
+		}
+		if (owl_dat->t > 382.0)
+		{
+			owl_dat->y[4] = 3.24215E-5;
+			
+			double m = (2.57389E-5 - 3.24215E-5) / (384.9 - 382.0);
+			owl_dat->y[4] = (m * (owl_dat->t - 382.0)) + 3.24215E-5;
+		}
+		if (owl_dat->t > 384.9)
+		{
+			owl_dat->y[4] = 2.57389E-5;
+			
+			double m = (9.14E-6 - 2.57389E-5) / (450.0 - 384.9);
+			owl_dat->y[4] = (m * (owl_dat->t - 384.9)) + 2.57389E-5;
+		}
+		if (owl_dat->t > 450.0)
+		{
+			owl_dat->y[4] = 9.14E-6;
+			
+			double m = (1.60E-5 - 9.14E-6) / (478.2 - 450.0);
+			owl_dat->y[4] = (m * (owl_dat->t - 450.0)) + 9.14E-6;
+		}
+		if (owl_dat->t > 478.2)
+		{
+			owl_dat->y[4] = 1.60E-5;
+			
+			double m = (1.372E-5 - 1.60E-5) / (498.1 - 478.2);
+			owl_dat->y[4] = (m * (owl_dat->t - 478.2)) + 1.60E-5;
+		}
+		if (owl_dat->t > 498.1)
+		{
+			owl_dat->y[4] = 1.372E-5;
+			
+			double m = (9.934E-4 - 1.372E-5) / (498.2 - 498.1);
+			owl_dat->y[4] = (m * (owl_dat->t - 498.1)) + 1.372E-5;
+		}
+		if (owl_dat->t > 498.2)
+		{
+			owl_dat->y[4] = 9.934E-4;
+			
+			double m = (2.331E-3 - 9.934E-4) / (498.3 - 498.2);
+			owl_dat->y[4] = (m * (owl_dat->t - 498.2)) + 9.934E-4;
+		}
+		if (owl_dat->t > 498.3)
+		{
+			owl_dat->y[4] = 2.331E-3;
+			
+			double m = (2.8925E-3 - 2.331E-3) / (498.7 - 498.3);
+			owl_dat->y[4] = (m * (owl_dat->t - 498.3)) + 2.331E-3;
+		}
+		if (owl_dat->t > 498.7)
+		{
+			owl_dat->y[4] = 2.8925E-3;
+			
+			double m = (2.9385E-3 - 2.8925E-3) / (499.7 - 498.7);
+			owl_dat->y[4] = (m * (owl_dat->t - 498.7)) + 2.8925E-3;
+		}
+		if (owl_dat->t > 499.7)
+		{
+			owl_dat->y[4] = 2.9385E-3;
+			
+			double m = (2.8697E-3 - 2.9385E-3) / (503.0 - 499.7);
+			owl_dat->y[4] = (m * (owl_dat->t - 499.7)) + 2.9385E-3;
+		}
+		if (owl_dat->t > 503.0)
+		{
+			owl_dat->y[4] = 2.8697E-3;
+			
+			double m = (2.9385E-3 - 2.8697E-3) / (522.1 - 503.0);
+			owl_dat->y[4] = (m * (owl_dat->t - 503.0)) + 2.8697E-3;
+		}
+		if (owl_dat->t > 522.1)
+		{
+			owl_dat->y[4] = 2.9385E-3;
+			
+			double m = (3.551E-4 - 2.9385E-3) / (522.3 - 522.1);
+			owl_dat->y[4] = (m * (owl_dat->t - 522.1)) + 2.9385E-3;
+		}
+		if (owl_dat->t > 522.3)
+		{
+			owl_dat->y[4] = 3.551E-4;
+			
+			double m = (2.1572E-4 - 3.551E-4) / (522.5 - 522.3);
+			owl_dat->y[4] = (m * (owl_dat->t - 522.3)) + 3.551E-4;
+		}
+		if (owl_dat->t > 522.5)
+		{
+			owl_dat->y[4] = 2.1572E-4;
+			
+			double m = (3.321E-5 - 2.1572E-4) / (525.8 - 522.5);
+			owl_dat->y[4] = (m * (owl_dat->t - 522.5)) + 2.1572E-4;
+		}
+		if (owl_dat->t > 525.8)
+		{
+			owl_dat->y[4] = 3.321E-5;
+			
+			double m = (2.943E-5 - 3.321E-5) / (527.0 - 525.8);
+			owl_dat->y[4] = (m * (owl_dat->t - 525.8)) + 3.321E-5;
+		}
 		
 		success = SCOPSOWL_Executioner(owl_dat);
 		if (success == 0)
@@ -1957,8 +2194,8 @@ int SCOPSOWL_TESTS()
 	if (success != 0) {mError(simulation_fail); return -1;}
 		
 	//Call Routine
-	success = SCOPSOWL(&dat);
-	//success = LARGE_CYCLE_TEST01(&dat);
+	//success = SCOPSOWL(&dat);
+	success = LARGE_CYCLE_TEST01(&dat);
 	//success = SMALL_CYCLE_TEST02(&dat);
 	//success = CURVE_TEST03(&dat);
 	//success = CURVE_TEST04(&dat);
