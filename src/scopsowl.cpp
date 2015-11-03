@@ -1218,7 +1218,7 @@ int LARGE_CYCLE_TEST01(SCOPSOWL_DATA *owl_dat)
 	owl_dat->y[1] = 0.20736;
 	owl_dat->y[2] = 0.00934;
 	owl_dat->y[3] = 0.000314;
-	owl_dat->y[4] = 0.003325;
+	owl_dat->y[4] = 0.0030325;
 	
 	//Set Initial Conditions
 	success = set_SCOPSOWL_ICs(owl_dat);
@@ -1286,85 +1286,19 @@ int LARGE_CYCLE_TEST01(SCOPSOWL_DATA *owl_dat)
 		{
 			owl_dat->y[4] = 8.2E-6;
 			
-			double m = (6.7E-6 - 8.2E-6) / (114.6 - 97.1);
+			double m = (6.7E-6 - 8.2E-6) / (150.0 - 97.1);
 			owl_dat->y[4] = (m * (owl_dat->t - 97.1)) + 8.2E-6;
 		}
-		if (owl_dat->t > 114.6)
+		if (owl_dat->t > 150.0)
 		{
 			owl_dat->y[4] = 6.7E-6;
-			
-			double m = (7.7E-6 - 6.7E-6) / (121.5 - 114.6);
-			owl_dat->y[4] = (m * (owl_dat->t - 114.6)) + 6.7E-6;
-		}
-		if (owl_dat->t > 121.5)
-		{
-			owl_dat->y[4] = 7.7E-6;
-			
-			double m = (6.3E-6 - 7.7E-6) / (137.5 - 121.5);
-			owl_dat->y[4] = (m * (owl_dat->t - 121.5)) + 7.7E-6;
-		}
-		if (owl_dat->t > 137.5)
-		{
-			owl_dat->y[4] = 6.3E-6;
-			
-			double m = (1.34E-5 - 6.3E-6) / (189.4 - 137.5);
-			owl_dat->y[4] = (m * (owl_dat->t - 137.5)) + 6.3E-6;
-		}
-		if (owl_dat->t > 189.4)
-		{
-			owl_dat->y[4] = 1.34E-5;
-			
-			double m = (7.99E-6 - 1.34E-5) / (209.4 - 189.4);
-			owl_dat->y[4] = (m * (owl_dat->t - 189.4)) + 1.34E-5;
-		}
-		if (owl_dat->t > 209.4)
-		{
-			owl_dat->y[4] = 7.99E-6;
-			
-			double m = (1.159E-5 - 7.99E-6) / (216.4 - 209.4);
-			owl_dat->y[4] = (m * (owl_dat->t - 209.4)) + 7.99E-6;
-		}
-		if (owl_dat->t > 216.4)
-		{
-			owl_dat->y[4] = 1.159E-5;
-			
-			double m = (7.89E-6 - 1.159E-5) / (281.4 - 216.4);
-			owl_dat->y[4] = (m * (owl_dat->t - 216.4)) + 1.159E-5;
-		}
-		if (owl_dat->t > 281.4)
-		{
-			owl_dat->y[4] = 7.89E-6;
-			
-			double m = (8.78E-6 - 7.89E-6) / (286.6 - 281.4);
-			owl_dat->y[4] = (m * (owl_dat->t - 281.4)) + 7.89E-6;
-		}
-		if (owl_dat->t > 286.6)
-		{
-			owl_dat->y[4] = 8.78E-6;
-			
-			double m = (9.77E-6 - 8.78E-6) / (306.6 - 286.6);
-			owl_dat->y[4] = (m * (owl_dat->t - 286.6)) + 8.78E-6;
-		}
-		if (owl_dat->t > 306.6)
-		{
-			owl_dat->y[4] = 9.77E-6;
-			
-			double m = (9.26E-6 - 9.77E-6) / (331.6 - 306.6);
-			owl_dat->y[4] = (m * (owl_dat->t - 306.6)) + 9.77E-6;
-		}
-		if (owl_dat->t > 331.6)
-		{
-			owl_dat->y[4] = 9.26E-6;
-			
-			double m = (1.253E-5 - 9.26E-6) / (353.4 - 331.6);
-			owl_dat->y[4] = (m * (owl_dat->t - 331.6)) + 9.26E-6;
 		}
 		if (owl_dat->t > 353.4)
 		{
-			owl_dat->y[4] = 1.253E-5;
+			owl_dat->y[4] = 6.7E-6;
 			
-			double m = (7.5299E-4 - 1.253E-5) / (353.8 - 353.4);
-			owl_dat->y[4] = (m * (owl_dat->t - 353.4)) + 1.253E-5;
+			double m = (7.5299E-4 - 6.7E-6) / (353.8 - 353.4);
+			owl_dat->y[4] = (m * (owl_dat->t - 353.4)) + 6.7E-6;
 		}
 		if (owl_dat->t > 353.8)
 		{
@@ -1433,29 +1367,26 @@ int LARGE_CYCLE_TEST01(SCOPSOWL_DATA *owl_dat)
 		{
 			owl_dat->y[4] = 2.57389E-5;
 			
-			double m = (9.14E-6 - 2.57389E-5) / (450.0 - 384.9);
+			double m = (1.60E-5 - 2.57389E-5) / (450.0 - 384.9);
 			owl_dat->y[4] = (m * (owl_dat->t - 384.9)) + 2.57389E-5;
 		}
 		if (owl_dat->t > 450.0)
 		{
-			owl_dat->y[4] = 9.14E-6;
+			owl_dat->y[4] = 1.60E-5;
 			
-			double m = (1.60E-5 - 9.14E-6) / (478.2 - 450.0);
-			owl_dat->y[4] = (m * (owl_dat->t - 450.0)) + 9.14E-6;
+			double m = (1.2E-5 - 1.60E-5) / (478.2 - 450.0);
+			owl_dat->y[4] = (m * (owl_dat->t - 450.0)) + 1.60E-5;
 		}
 		if (owl_dat->t > 478.2)
 		{
-			owl_dat->y[4] = 1.60E-5;
-			
-			double m = (1.372E-5 - 1.60E-5) / (498.1 - 478.2);
-			owl_dat->y[4] = (m * (owl_dat->t - 478.2)) + 1.60E-5;
+			owl_dat->y[4] = 1.2E-5;
 		}
 		if (owl_dat->t > 498.1)
 		{
-			owl_dat->y[4] = 1.372E-5;
+			owl_dat->y[4] = 1.2E-5;
 			
-			double m = (9.934E-4 - 1.372E-5) / (498.2 - 498.1);
-			owl_dat->y[4] = (m * (owl_dat->t - 498.1)) + 1.372E-5;
+			double m = (9.934E-4 - 1.0E-5) / (498.2 - 498.1);
+			owl_dat->y[4] = (m * (owl_dat->t - 498.1)) + 1.2E-5;
 		}
 		if (owl_dat->t > 498.2)
 		{
@@ -2194,8 +2125,8 @@ int SCOPSOWL_TESTS()
 	if (success != 0) {mError(simulation_fail); return -1;}
 		
 	//Call Routine
-	//success = SCOPSOWL(&dat);
-	success = LARGE_CYCLE_TEST01(&dat);
+	success = SCOPSOWL(&dat);
+	//success = LARGE_CYCLE_TEST01(&dat);
 	//success = SMALL_CYCLE_TEST02(&dat);
 	//success = CURVE_TEST03(&dat);
 	//success = CURVE_TEST04(&dat);
