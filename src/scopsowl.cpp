@@ -1279,26 +1279,26 @@ int LARGE_CYCLE_TEST01(SCOPSOWL_DATA *owl_dat)
 			owl_dat->y[1] = 0.21;					//-
 			owl_dat->y[4] = 2.0E-5;					//-
 			
-			double m = (8.2E-6 - 2.0E-5) / (97.1 - 42.1);
+			double m = (1.0E-5 - 2.0E-5) / (97.1 - 42.1);
 			owl_dat->y[4] = (m * (owl_dat->t - 42.1)) + 2.0E-5;
 		}
 		if (owl_dat->t > 97.1)
 		{
-			owl_dat->y[4] = 8.2E-6;
+			owl_dat->y[4] = 1.0E-5;
 			
-			double m = (6.7E-6 - 8.2E-6) / (150.0 - 97.1);
-			owl_dat->y[4] = (m * (owl_dat->t - 97.1)) + 8.2E-6;
+			double m = (7.2E-6 - 1.0E-5) / (150.0 - 97.1);
+			owl_dat->y[4] = (m * (owl_dat->t - 97.1)) + 1.0E-5;
 		}
 		if (owl_dat->t > 150.0)
 		{
-			owl_dat->y[4] = 6.7E-6;
+			owl_dat->y[4] = 7.2E-6;
 		}
 		if (owl_dat->t > 353.4)
 		{
-			owl_dat->y[4] = 6.7E-6;
+			owl_dat->y[4] = 7.2E-6;
 			
-			double m = (7.5299E-4 - 6.7E-6) / (353.8 - 353.4);
-			owl_dat->y[4] = (m * (owl_dat->t - 353.4)) + 6.7E-6;
+			double m = (7.5299E-4 - 7.2E-6) / (353.8 - 353.4);
+			owl_dat->y[4] = (m * (owl_dat->t - 353.4)) + 7.2E-6;
 		}
 		if (owl_dat->t > 353.8)
 		{
@@ -1367,26 +1367,26 @@ int LARGE_CYCLE_TEST01(SCOPSOWL_DATA *owl_dat)
 		{
 			owl_dat->y[4] = 2.57389E-5;
 			
-			double m = (1.60E-5 - 2.57389E-5) / (450.0 - 384.9);
+			double m = (1.20E-5 - 2.57389E-5) / (450.0 - 384.9);
 			owl_dat->y[4] = (m * (owl_dat->t - 384.9)) + 2.57389E-5;
 		}
 		if (owl_dat->t > 450.0)
 		{
-			owl_dat->y[4] = 1.60E-5;
+			owl_dat->y[4] = 1.20E-5;
 			
-			double m = (1.2E-5 - 1.60E-5) / (478.2 - 450.0);
-			owl_dat->y[4] = (m * (owl_dat->t - 450.0)) + 1.60E-5;
+			double m = (9.8E-6 - 1.20E-5) / (478.2 - 450.0);
+			owl_dat->y[4] = (m * (owl_dat->t - 450.0)) + 1.20E-5;
 		}
 		if (owl_dat->t > 478.2)
 		{
-			owl_dat->y[4] = 1.2E-5;
+			owl_dat->y[4] = 9.8E-6;
 		}
 		if (owl_dat->t > 498.1)
 		{
-			owl_dat->y[4] = 1.2E-5;
+			owl_dat->y[4] = 9.8E-6;
 			
-			double m = (9.934E-4 - 1.0E-5) / (498.2 - 498.1);
-			owl_dat->y[4] = (m * (owl_dat->t - 498.1)) + 1.2E-5;
+			double m = (9.934E-4 - 9.8E-6) / (498.2 - 498.1);
+			owl_dat->y[4] = (m * (owl_dat->t - 498.1)) + 9.8E-6;
 		}
 		if (owl_dat->t > 498.2)
 		{
