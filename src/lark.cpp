@@ -2550,6 +2550,7 @@ int krylovMultiSpace( int (*matvec) (const Matrix<double>& x, Matrix<double> &Ax
 		kms_dat->max_level = 5;
 	kms_dat->gmres_out.restart = kms_dat->restart;
 	kms_dat->gmres_out.maxit = kms_dat->maxit;
+	kms_dat->level = 0;
 	kms_dat->total_iter = 0;
 	kms_dat->inner_iter = 0;
 	kms_dat->outer_iter = 0;
