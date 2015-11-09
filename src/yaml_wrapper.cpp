@@ -2481,6 +2481,15 @@ std::string allLower(const std::string &input)
 	return copy;
 }
 
+//Return true if arg is even
+bool isEven(int n)
+{
+	if (n%2 == 0)
+		return true;
+	else
+		return false;
+}
+
 int YAML_WRAPPER_TESTS()
 {
 	int success = 0;

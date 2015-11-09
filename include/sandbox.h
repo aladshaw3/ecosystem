@@ -50,6 +50,28 @@ int Speciation_Test01_Guess(const void *user_data);
 
 int Speciation_Test01_MatVec(const Matrix<double> &x, Matrix<double> &Ax, const void *matvec_data);
 
+double symmetric_1D_Bounded_OrthoNormalBasis_Func(int i, double bound, double x);
+
+double ParticleNBox_1D_MatrixElements_symBound1D_ONB(int i, int j, double bound, double mass, double h_bar);
+
+typedef struct
+{
+	int m;							//Number of basis functions
+	int N;							//Size of H and number of total functions in the residual
+	Matrix<double> c;				//Vector of coefficients for wavefunction
+	Matrix<double> x;				//Solution Vector for non-linear formulation of problem x(0,0) = Eo and x(i,0) = c(i-1,0) for i>0
+	double Eo;						//Approximation to the ground-state energy
+	Matrix<double> H;				//Hamiltonian Matrix in the basis set
+	double mass;					//Mass of the particle
+	double h_bar;					//Reduced Planck's Constant
+	double box_size;				//Size of the box ( = 2*bounds )
+	
+}PIB_1D_DATA;
+
+int Form_H_Matrix_1DPIB_SymBound1DBasis(PIB_1D_DATA *dat);
+
+int Eval_1DPIB_Residuals(const Matrix<double> &x, Matrix<double> &F, const void *data);
+
 /// \endcond
 
 /// Function to run the methods implemented in the Sandbox

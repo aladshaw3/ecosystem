@@ -518,6 +518,9 @@ private:
  \param input string to copy and convert to lower case */
 std::string allLower(const std::string &input);
 
+/// Function to return true if the given argument is an even number
+bool isEven(int n);
+
 /// Function to run tests on all the objects that yaml_cpp_class
 /** This test function is currently NOT callable from the UI.*/
 int YAML_WRAPPER_TESTS();

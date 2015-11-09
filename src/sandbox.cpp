@@ -75,6 +75,90 @@ int Speciation_Test01_MatVec(const Matrix<double> &x, Matrix<double> &Ax, const 
 	return success;
 }
 
+//Evaluation of a symmetric 1D set of orthonormal basis functions
+double symmetric_1D_Bounded_OrthoNormalBasis_Func(int i, double bound, double x)
+{
+	/*
+	if (i < 1)
+		return 0.0;
+	else
+		return pow( ((2.0*(double)i)-1.0)/(2.0* pow(bound,((2.0*(double)i)-1.0))) , 0.5) * pow(x, (double)i-1.0);
+	 */
+	return pow(1.0/bound, 0.5) * sin( (((double)i+1.0)*M_PI*x)/bound );
+}
+
+//Matrix elements for particle in a box with the above basis functions
+double ParticleNBox_1D_MatrixElements_symBound1D_ONB(int i, int j, double bound, double mass, double h_bar)
+{
+	/*
+	if (j == 1 || j == 2)
+		return 0.0;
+	else if (j < 1 || i < 1)
+		return 0.0;
+	else if (isEven(i+j-3) == true)
+		return 0.0;
+	else
+	{
+		double hij = 0.0;
+		double exp_ij3 = (double) (i+j-3.0);
+		double f_i = symmetric_1D_Bounded_OrthoNormalBasis_Func(i, bound, 1.0);
+		double f_j = symmetric_1D_Bounded_OrthoNormalBasis_Func(j, bound, 1.0);
+		double j_1 = (double)j - 1.0;
+		double j_2 = (double)j - 2.0;
+		
+		hij = -((h_bar*h_bar)/mass) * pow(bound, exp_ij3) * ((j_1*j_2)/exp_ij3) * f_i * f_j;
+		
+		return hij;
+	}
+	 */
+	if ( i == j)
+		return (h_bar*h_bar)*(M_PI*M_PI)*((double)i+1.0)*((double)i+1.0)/mass/bound/bound/2.0;
+	else
+		return 0.0;
+}
+
+//Form the Hamiltonian matrix in the basis
+int Form_H_Matrix_1DPIB_SymBound1DBasis(PIB_1D_DATA *dat)
+{
+	int success = 0;
+	
+	for (int i=0; i<dat->m; i++)
+	{
+		for (int j=0; j<dat->m; j++)
+		{
+			dat->H.edit(i, j, ParticleNBox_1D_MatrixElements_symBound1D_ONB(i, j, (dat->box_size/2.0), dat->mass, dat->h_bar));
+		}
+	}
+	
+	return success;
+}
+
+//Evaluate residuals
+int Eval_1DPIB_Residuals(const Matrix<double> &x, Matrix<double> &F, const void *data)
+{
+	int success = 0;
+	PIB_1D_DATA *dat = (PIB_1D_DATA *) data;
+	
+	double sum_sqs = 0.0;
+	for (int k=0; k<dat->m; k++)
+	{
+		sum_sqs	= sum_sqs + (x(k+1,0)*x(k+1,0));
+	}
+	F.edit(0, 0, sum_sqs - 1.0);
+	
+	for (int i=1; i<dat->m; i++)
+	{
+		double sum_hij_cj = 0.0;
+		for (int j=1; j<dat->m; j++)
+		{
+			sum_hij_cj = sum_hij_cj + (dat->H(i-1,j-1)*x(j,0));
+		}
+		F.edit(i, 0, sum_hij_cj - (x(0,0)*x(i,0)));
+	}
+	
+	return success;
+}
+
 //Run the sandbox tests
 int RUN_SANDBOX()
 {
@@ -156,7 +240,49 @@ int RUN_SANDBOX()
 	success = Convert2Concentration(dat01.logC, dat01.C);
 	dat01.C.Display("C_final");
 	
+	// ------------- Quantum Mechanics Example: Particle in a Box with Variational Method --------------------------
 	
+	std::cout << isEven(6) << "\t" << isEven(5) << std::endl;
+	
+	std::cout << "Solving the Schrodinger Equations for Particle in a Box, with Variational Method\n" << std::endl;
+	
+	PIB_1D_DATA pib_dat;
+	pib_dat.m = 10;
+	pib_dat.mass = 1.0;
+	pib_dat.h_bar = 1.0;
+	pib_dat.box_size = 2.0;     // i.e. bounds = +/- 1.0
+	pib_dat.N = pib_dat.m + 1;
+	pib_dat.x.set_size(pib_dat.N, 1);
+	pib_dat.c.set_size(pib_dat.m, 1);
+	pib_dat.H.set_size(pib_dat.m, pib_dat.m);
+	
+	success = Form_H_Matrix_1DPIB_SymBound1DBasis(&pib_dat);
+	pib_dat.H.Display("H");
+	
+	pib_dat.x.edit(0, 0, 1.0);
+	pib_dat.x.edit(1, 0, 1.0);
+	
+	PJFNK_DATA QM_dat;
+	QM_dat.linear_solver = GMRESRP;
+	QM_dat.LineSearch = true;
+	//QM_dat.L_Output = true;
+	
+	success = pjfnk(Eval_1DPIB_Residuals, NULL, pib_dat.x, &QM_dat, (void *)&pib_dat, NULL);
+	
+	for (int i=1; i<pib_dat.m; i++)
+	{
+		pib_dat.c.edit(i-1, 0, pib_dat.x(i,0));
+	}
+	
+	pib_dat.c.Display("c");
+	
+	std::cout << "Approximate Eo = " << pib_dat.x(0,0) << std::endl;
+	std::cout << "Exact Eo = " << ((M_PI*M_PI)*(pib_dat.h_bar*pib_dat.h_bar))/(2.0*pib_dat.mass*(pib_dat.box_size/2.0)*(pib_dat.box_size/2.0)) << std::endl;
+	
+	std::cout << "\nThis demonstrates that the variational method will always approximate the lowest energy state of the system\n\n";
+	
+	
+	// -------------------------------------- End Quantum Mechanics Example ----------------------------------------
 	
 	std::cout << "\nEnd SANDBOX\n\n";
 	
