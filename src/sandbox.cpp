@@ -247,6 +247,7 @@ int Eval_VPA_Test_Residuals(const Matrix<double> &x, Matrix<double> &F, const vo
 	{
 		res0 = res0 + (x(i+2,0)*Eval_PolyBasisFunc(i, 0.0));
 		res1 = res1 + (x(i+2,0)*Eval_1stDerivative_PolyBasisFunc(i, dat->L));
+		//res1 = res1 + (x(i+2,0)*Eval_PolyBasisFunc(i, dat->L));
 	}
 	F.edit(0, 0, res0 - dat->uo);
 	F.edit(1, 0, res1);
@@ -258,8 +259,8 @@ int Eval_VPA_Test_Residuals(const Matrix<double> &x, Matrix<double> &F, const vo
 		Over_sum = 0.0;
 		for (int j=0; j<dat->m; j++)
 		{
-			Lap_sum = Lap_sum + (x(j+2,0)*(Laplacian_Integral_PolyBasis(i, j, 0.0, dat->L)+Laplacian_Integral_PolyBasis(j, i, 0.0, dat->L)));
-			Over_sum = Over_sum + (x(j+2,0)*(Overlap_Integral_PolyBasis(i, j, 0.0, dat->L)+Overlap_Integral_PolyBasis(j, i, 0.0, dat->L)));
+			Lap_sum = Lap_sum + (x(j+2,0)*Laplacian_Integral_PolyBasis(i, j, 0.0, dat->L));
+			Over_sum = Over_sum + (x(j+2,0)*Overlap_Integral_PolyBasis(i, j, 0.0, dat->L));
 		}
 		F.edit(i+2, 0, Lap_sum - ((dat->k/dat->D)*Over_sum) + (x(0,0)*Eval_PolyBasisFunc(i, 0.0)) + (x(1,0)*Eval_1stDerivative_PolyBasisFunc(i, dat->L)));
 	}
@@ -444,13 +445,15 @@ int RUN_SANDBOX()
 	vpa_newton.linear_solver = GMRESRP;
 	vpa_newton.gmresrp_dat.restart = vpa_dat.N;
 	vpa_newton.LineSearch = true;
+	vpa_newton.nl_tol_abs = 1e-6;
+	vpa_newton.nl_tol_rel = 1e-6;
 	//vpa_newton.L_Output = true;
 	
-	vpa_dat.x.edit(0, 0, 0);
-	vpa_dat.x.edit(1, 0, 0);
-	vpa_dat.x.edit(2, 0, 1.0);
-	vpa_dat.x.edit(3, 0, -1.35);
-	vpa_dat.x.edit(4, 0, 0.67);
+	//vpa_dat.x.edit(0, 0, 0);
+	//vpa_dat.x.edit(1, 0, 0);
+	//vpa_dat.x.edit(2, 0, 1.0);
+	//vpa_dat.x.edit(3, 0, -1.35);
+	//vpa_dat.x.edit(4, 0, 0.67);
 	
 	/*
 	for (int i=0; i<vpa_dat.m; i++)
@@ -495,7 +498,7 @@ int RUN_SANDBOX()
 	}
 	ux.Display("u_x");
 	
-	std::cout << "Test was a failure :< \n\n";
+	std::cout << "Test was a HUGE SUCCESS!!! ^_^ \n\n";
 	
 	// --------------------------------------------- END VPA Example -----------------------------------------------
 	
