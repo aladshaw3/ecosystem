@@ -77,6 +77,32 @@ int Form_PHI_Matrix_1DPIB_Bound1DBasis(PIB_1D_DATA *dat);
 
 int Eval_1DPIB_Residuals(const Matrix<double> &x, Matrix<double> &F, const void *data);
 
+double Eval_PolyBasisFunc(int i, double x);
+
+double Eval_1stDerivative_PolyBasisFunc(int i, double x);
+
+double Eval_2ndDerivative_PolyBasisFunc(int i, double x);
+
+double Eval_ApproximatePolySolution(Matrix<double> &c, double x);
+
+double Laplacian_Integral_PolyBasis(int i, int j, double lower, double upper);
+
+double Overlap_Integral_PolyBasis(int i, int j, double lower, double upper);
+
+typedef struct
+{
+	int m;						//Size of the basis
+	int N;						//Size of the problem
+	double D;					//Diffusivity parameter
+	double L;					//Length of the domain
+	double k;					//Reaction coefficient
+	double uo;					//Boundary value
+	Matrix<double> c;			//Coefficient Matrix (size = m)
+	Matrix<double> x;			//Non-linear variable matrix (size = N) (x(0) = lambda_0 && x(1) = lambda_1)
+} VPA_Test_DATA;
+
+int Eval_VPA_Test_Residuals(const Matrix<double> &x, Matrix<double> &F, const void *data);
+
 /// \endcond
 
 /// Function to run the methods implemented in the Sandbox

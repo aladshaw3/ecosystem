@@ -165,6 +165,108 @@ int Eval_1DPIB_Residuals(const Matrix<double> &x, Matrix<double> &F, const void 
 	return success;
 }
 
+//Evaluation the polynomial basis function at x
+double Eval_PolyBasisFunc(int i, double x)
+{
+	if (i < 1)
+		return 1.0;
+	else
+		return pow(x, (double)i);
+}
+
+//Evaluation of the 1st derivative of the basis
+double Eval_1stDerivative_PolyBasisFunc(int i, double x)
+{
+	if (i < 1)
+		return 0.0;
+	else if (i == 1)
+		return 1.0;
+	else
+		return (double)i * pow(x, (double)i-1.0);
+}
+
+//Evaluation of 2nd derivative of basis
+double Eval_2ndDerivative_PolyBasisFunc(int i, double x)
+{
+	if (i < 2)
+		return 0.0;
+	else if (i == 2)
+		return 2.0;
+	else
+		return (double)i * ((double)i - 1.0) * pow(x, (double)i - 2.0);
+}
+
+//Evaluate the poly function
+double Eval_ApproximatePolySolution(Matrix<double> &c, double x)
+{
+	double sum = 0.0;
+	for (int i=0; i<c.rows(); i++)
+	{
+		sum = sum + (c(i,0)*Eval_PolyBasisFunc(i, x));
+	}
+	return sum;
+}
+
+//Laplacian integration
+double Laplacian_Integral_PolyBasis(int i, int j, double lower, double upper)
+{
+	double Aij = 0.0;
+	
+	if (j==0 || j==1)
+		return Aij;
+	else
+	{
+		double exp = (double)(i+j)-1.0;
+		double pre = (double)(j*(j-1));
+		Aij = pre * ((pow(upper, exp)/exp) - (pow(lower, exp)/exp));
+	}
+	
+	return Aij;
+}
+
+//Overlap integrals
+double Overlap_Integral_PolyBasis(int i, int j, double lower, double upper)
+{
+	double Oij = 0.0;
+	
+	double exp = (double)(i+j+1);
+	Oij = ((pow(upper, exp)/exp) - (pow(lower, exp)/exp));
+	
+	return Oij;
+}
+
+//Residuals for Variational Polynomial Approximation method
+int Eval_VPA_Test_Residuals(const Matrix<double> &x, Matrix<double> &F, const void *data)
+{
+	int success = 0;
+	VPA_Test_DATA *dat = (VPA_Test_DATA *) data;
+	
+	//First two residuals are derivative of lambda for constraints
+	double res0 = 0.0, res1 = 0.0;
+	for (int i=0; i<dat->m; i++)
+	{
+		res0 = res0 + (x(i+2,0)*Eval_PolyBasisFunc(i, 0.0));
+		res1 = res1 + (x(i+2,0)*Eval_1stDerivative_PolyBasisFunc(i, dat->L));
+	}
+	F.edit(0, 0, res0 - dat->uo);
+	F.edit(1, 0, res1);
+	
+	double Lap_sum = 0.0, Over_sum = 0.0;
+	for (int i=0; i<dat->m; i++)
+	{
+		Lap_sum = 0.0;
+		Over_sum = 0.0;
+		for (int j=0; j<dat->m; j++)
+		{
+			Lap_sum = Lap_sum + (x(j+2,0)*(Laplacian_Integral_PolyBasis(i, j, 0.0, dat->L)+Laplacian_Integral_PolyBasis(j, i, 0.0, dat->L)));
+			Over_sum = Over_sum + (x(j+2,0)*(Overlap_Integral_PolyBasis(i, j, 0.0, dat->L)+Overlap_Integral_PolyBasis(j, i, 0.0, dat->L)));
+		}
+		F.edit(i+2, 0, Lap_sum - ((dat->k/dat->D)*Over_sum) + (x(0,0)*Eval_PolyBasisFunc(i, 0.0)) + (x(1,0)*Eval_1stDerivative_PolyBasisFunc(i, dat->L)));
+	}
+	
+	return success;
+}
+
 //Run the sandbox tests
 int RUN_SANDBOX()
 {
@@ -321,6 +423,81 @@ int RUN_SANDBOX()
 	
 	
 	// -------------------------------------- End Quantum Mechanics Example ----------------------------------------
+	
+	
+	// ----------------------------- Example of Varitational Polynomial Approximation ------------------------------
+	
+	std::cout << "Solve d^2/dx^2 (u) = (k/D) * u Approximately with a constrained variational method...\n\n";
+	
+	VPA_Test_DATA vpa_dat;
+	vpa_dat.m = 3;
+	vpa_dat.N = vpa_dat.m + 2;
+	vpa_dat.L = 1.0;
+	vpa_dat.k = 3.0;
+	vpa_dat.D = 1.0;
+	vpa_dat.uo = 1.0;
+	vpa_dat.c.set_size(vpa_dat.m, 1);
+	vpa_dat.x.set_size(vpa_dat.N, 1);
+	Matrix<double> testb(vpa_dat.N,1);
+	
+	PJFNK_DATA vpa_newton;
+	vpa_newton.linear_solver = GMRESRP;
+	vpa_newton.gmresrp_dat.restart = vpa_dat.N;
+	vpa_newton.LineSearch = true;
+	//vpa_newton.L_Output = true;
+	
+	vpa_dat.x.edit(0, 0, 0);
+	vpa_dat.x.edit(1, 0, 0);
+	vpa_dat.x.edit(2, 0, 1.0);
+	vpa_dat.x.edit(3, 0, -1.35);
+	vpa_dat.x.edit(4, 0, 0.67);
+	
+	/*
+	for (int i=0; i<vpa_dat.m; i++)
+	{
+		for (int j=0; j<vpa_dat.m; j++)
+		{
+			std::cout << "A(" << i << ")(" << j << ") = \t" << Laplacian_Integral_PolyBasis(i, j, 0.0, vpa_dat.L) << "\t";
+		}
+		std::cout << std::endl;
+	}
+	std::cout << std::endl;
+	for (int i=0; i<vpa_dat.m; i++)
+	{
+		for (int j=0; j<vpa_dat.m; j++)
+		{
+			std::cout << "B(" << i << ")(" << j << ") = \t" << Overlap_Integral_PolyBasis(i, j, 0.0, vpa_dat.L) << "\t";
+		}
+		std::cout << std::endl;
+	}
+	std::cout << std::endl;
+	*/
+	 
+	success = pjfnk(Eval_VPA_Test_Residuals, NULL, vpa_dat.x, &vpa_newton, &vpa_dat, &vpa_dat);
+	//success = gmresRightPreconditioned(Eval_VPA_Test_Residuals, NULL, testb, &vpa_newton.gmresrp_dat, &vpa_dat, NULL);
+	vpa_dat.x.Display("Variables");
+	
+	for (int i=0; i<vpa_dat.m; i++)
+	{
+		vpa_dat.c.edit(i, 0, vpa_dat.x(i+2,0));
+	}
+	//vpa_dat.c.edit(0, 0, 1);
+	//vpa_dat.c.edit(1, 0, -1.35);
+	//vpa_dat.c.edit(2, 0, 0.67);
+	
+	double x = 0.0;
+	double dx = vpa_dat.L/20.0;
+	Matrix<double> ux(21,1);
+	for (int i=0; i<21; i++)
+	{
+		x = ((double)i*dx);
+		ux.edit(i, 0, Eval_ApproximatePolySolution(vpa_dat.c,x));
+	}
+	ux.Display("u_x");
+	
+	std::cout << "Test was a failure :< \n\n";
+	
+	// --------------------------------------------- END VPA Example -----------------------------------------------
 	
 	std::cout << "\nEnd SANDBOX\n\n";
 	
