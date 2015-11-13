@@ -54,6 +54,22 @@
 #ifndef e
 #define e 1.6021766208E-19					///< Elementary Electric Charge - Units: C
 #endif
+
+#ifndef Faraday
+#define Faraday 96485.33289					///< Faraday's Constant - C/mol
+#endif
+
+#ifndef VacuumPermittivity
+#define VacuumPermittivity 8.8541878176E-12	///< Vacuum Permittivity Constant - F/m or C/V/m
+#endif
+
+#ifndef WaterRelPerm
+#define WaterRelPerm 80.1					///< Approximate Relative Permittivity for water - Unitless
+#endif
+
+#ifndef AbsPerm
+#define AbsPerm(Rel) (Rel*VacuumPermittivity)	///< Calculation of Absolute Permittivity of a medium - F/m or C/V/m
+#endif
  
 /// Master Species List Object
 /** C++ style object that holds data and function associated with solving multi-species problems. This
@@ -568,6 +584,39 @@ public:
 		\param i index of the reaction of interest for the adsorption object*/
 	double calculateLangmuirAdsorption(const Matrix<double> &x, const Matrix<double> &gama, int i);
 	
+	/// Function calculates the Psi (electric surface potential) given a set of arguments
+	/** This function will approximate the electric surface potential of the adsorbent under the current
+		conditions of charge density, temperature, ionic strength, and relative permittivity. Approximations
+		are made via the cubic representations of the hyberbolic sine function. As a result, this approximation
+		is fourth order accurate and is a faster approximation then solving with derivatives of the function.
+	 
+		\param sigma charge density of the surface (C/m^2)
+		\param T temperature of the system in question (K)
+		\param I ionic strength of the medium the surface is in (mol/L)
+		\param rel_epsilon relative permittivity of the medium (Unitless) */
+	double calculateCubicPsiApprox(double sigma, double T, double I, double rel_epsilon);
+	
+	/// Function to calculate the net exchange of charges of the aqeous species involved in a given reaction
+	/** This function will look at all aqueous species involved in the ith adsorption reaction and sum up 
+		their stoicheometries and charges to see what the net change in charge is caused by the adsorption
+		of charged species in solution. It is then used to adjust or correct the equilibrium constant for
+		the given adsorption reaction. 
+	 
+		\param i index of the reaction of interest for the adsorption object*/
+	double calculateAqueousChargeExchange(int i);
+	
+	/// Function to calculate the correction term for the equilibrium parameter
+	/** This function calculates the correction term that gets applied to the equilibrium parameter to 
+		correct for surface charge and charge accumulation/depletion effects. It will call the psi approximation
+		and charge exchange functions, therefore it needs to have those functions arguments passed to it as well.
+	 
+		\param sigma charge density of the surface (C/m^2)
+		\param T temperature of the system in question (K)
+		\param I ionic strength of the medium the surface is in (mol/L)
+		\param rel_epsilon relative permittivity of the medium (Unitless)
+		\param i index of the reaction of interest for the adsorption object*/
+	double calculateEquilibriumCorrection(double sigma, double T, double I, double rel_epsilon, int i);
+	
 	/// Calculates the residual for the ith reaction in the system
 	/** This function will provide a system residual for the ith reaction object involved in the Adsorption
 		Reaction. The residual is fed into the SHARK solver to find the solution to solid and aqueous phase
@@ -610,7 +659,7 @@ protected:
 	std::vector<int> adsorb_index;				///< List of the indices for the adsorbed species in the reactions
 	std::vector<int> aqueous_index;				///< List of the indices for the primary aqueous species in the reactions
 	Matrix<double> activities;					///< List of the activities calculated by the activity model
-	double specific_area;						///< Specific surface area of the adsorbent (m^2/kg) or (mol/kg)
+	double specific_area;						///< Specific surface area of the adsorbent (m^2/kg) or (mol/kg) !!! MAY NEED TO CHANGE!!!
 	double total_mass;							///< Total mass of the adsorbent in the system (kg)
 	double total_volume;						///< Total volume of the system (L)
 	int num_rxns;								///< Number of reactions involved in the adsorption equilibria

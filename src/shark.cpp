@@ -1564,6 +1564,43 @@ double AdsorptionReaction::calculateLangmuirAdsorption(const Matrix<double> &x, 
 	return q;
 }
 
+//Approximation of the electric potential of the surface
+double AdsorptionReaction::calculateCubicPsiApprox(double sigma, double T, double I, double rel_epsilon)
+{
+	double psi = 0.0;
+	
+	I = I * 1000.0;//First, convert ionic strength to mol/m^3
+	double f = (2.0 * sigma) / sqrt(8.0*AbsPerm(rel_epsilon)*Rstd*T*I);
+	double C = pow((((81.0*f) + sqrt(pow((81.0*f), 2.0) + 23328.0))/2.0),(1.0/3.0));
+	double x = (18.0 - pow(C, 2.0))/(3.0*C);
+	psi = (2.0 * kB * T * x) / e;
+	
+	return psi;
+}
+
+//Calculation of charge exchange in given reaction
+double AdsorptionReaction::calculateAqueousChargeExchange(int i)
+{
+	double n = 0.0;
+	
+	//Reactants have negative stiocheometry and products have positive stiocheometry, so change sign of n on return
+	for (int j = 0; j<this->List->list_size(); j++)
+	{
+		if (this->List->get_species(j).MoleculePhaseID() == AQUEOUS || this->List->get_species(j).MoleculePhaseID() == LIQUID)
+		{
+			n = n + (this->getReaction(i).Get_Stoichiometric(j)*this->List->charge(j));
+		}
+	}
+	
+	return -n;
+}
+
+//Calculation of equilibrium correct term
+double AdsorptionReaction::calculateEquilibriumCorrection(double sigma, double T, double I, double rel_epsilon, int i)
+{	
+	return exp(-(this->calculateAqueousChargeExchange(i)*e*calculateCubicPsiApprox(sigma, T, I, rel_epsilon))/(kB*T));
+}
+
 //Calculation of residual of ith reaction for the solver to work on
 double AdsorptionReaction::Eval_Residual(const Matrix<double> &x, const Matrix<double> &gama, int i)
 {
