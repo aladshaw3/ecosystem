@@ -103,6 +103,45 @@ typedef struct
 
 int Eval_VPA_Test_Residuals(const Matrix<double> &x, Matrix<double> &F, const void *data);
 
+double PolyBasis_2D(int i, int j, double x, double y);
+
+double PolyBasis_2D_dx(int i, int j, double x, double y);
+
+double PolyBasis_2D_dx2(int i, int j, double x, double y);
+
+double PolyBasis_2D_dy(int i, int j, double x, double y);
+
+double PolyBasis_2D_dy2(int i, int j, double x, double y);
+
+double PolyBasis_2D_dxdy(int i, int j, double x, double y);
+
+double PolyBasis_2D_LinearComboAppox(Matrix<double> &c, double x, double y);
+
+double Laplacian_Integral_PolyBasis_2D(int i, int j, int l, int m, double x_low, double x_high, double y_low, double y_high);
+
+double Overlap_Integral_PolyBasis_2D(int i, int j, int l, int m, double x_low, double x_high, double y_low, double y_high);
+
+double DirichletBC_Const_Integral_PolyBasis_2D(int i, int j, double x_low, double x_high, double y_low, double y_high, double boundary);
+
+typedef struct
+{
+	int m;					//Number of basis functions (m = highest order in x or y)
+	int N;					//Number of adjustable parameters (=s+m^2, where s is the number of boundary conditions)
+	double h_bar;			//Reduced Planck's constant
+	double mass;			//Mass of particle
+	double E;				//Energy of the system
+	double x0;				//Lower x bound
+	double x1;				//Upper x bound
+	double y0;				//Lower y bound
+	double y1;				//Upper y bound
+	double bc;				//Boundary condition
+	Matrix<double> c;		//Matrix of coefficients for approximation
+	Matrix<double> x;		//Matrix of variables solved for
+	
+} VPA_2D_TEST_DATA;
+
+int Eval_2D_VPA_TEST_Residuals(const Matrix<double> &x, Matrix<double> &F, const void *data);
+
 /// \endcond
 
 /// Function to run the methods implemented in the Sandbox

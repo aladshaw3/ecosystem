@@ -268,6 +268,184 @@ int Eval_VPA_Test_Residuals(const Matrix<double> &x, Matrix<double> &F, const vo
 	return success;
 }
 
+//Evaluation of 2D poly basis functions
+double PolyBasis_2D(int i, int j, double x, double y)
+{
+	double xpart = 0.0, ypart = 0.0;
+	if (i < 1)
+		xpart = 1.0;
+	else
+		xpart = pow(x, (double)i);
+	
+	if (j < 1)
+		ypart = 1.0;
+	else
+		ypart = pow(y, (double)j);
+	return xpart*ypart;
+}
+
+//First derivative in x
+double PolyBasis_2D_dx(int i, int j, double x, double y)
+{
+	return (double)i*PolyBasis_2D(i-1, j, x, y);
+}
+
+//Second derivative in x
+double PolyBasis_2D_dx2(int i, int j, double x, double y)
+{
+	return (double)i*((double)i-1.0)*PolyBasis_2D(i-2, j, x, y);
+}
+
+//First derivative in y
+double PolyBasis_2D_dy(int i, int j, double x, double y)
+{
+	return (double)j*PolyBasis_2D(i, j-1, x, y);
+}
+
+//Second derivative in y
+double PolyBasis_2D_dy2(int i, int j, double x, double y)
+{
+	return (double)j*((double)j-1.0)*PolyBasis_2D(i, j-2, x, y);
+}
+
+//First derivative in x and y
+double PolyBasis_2D_dxdy(int i, int j, double x, double y)
+{
+	return (double)i*(double)j*PolyBasis_2D(i-1, j-1, x, y);
+}
+
+//Evaluate the 2D polynomial approximation
+double PolyBasis_2D_LinearComboAppox(Matrix<double> &c, double x, double y)
+{
+	double sum = 0.0;
+	
+	for (int i=0; i<c.rows(); i++)
+	{
+		for (int j=0; j<c.columns(); j++)
+		{
+			sum = sum + (c(i,j)*PolyBasis_2D(i,j, x, y));
+		}
+	}
+	
+	return sum;
+}
+
+//Evaluation of the 2D Laplacian integrals
+double Laplacian_Integral_PolyBasis_2D(int i, int j, int l, int m, double x_low, double x_high, double y_low, double y_high)
+{
+	double Aij_lm = 0.0;
+	double yx_exp = (double)j+m+1;
+	double xx_exp = (double)i+l-1;
+	double yy_exp = (double)j+m-1;
+	double xy_exp = (double)i+l+1;
+	
+	double xpiece = 0.0;
+	if (l == 0 || l == 1)
+		xpiece = 0.0;
+	else
+		xpiece = (double)l*((double)l-1.0)*(pow(y_high, yx_exp) - pow(y_low, yx_exp))*(pow(x_high, xx_exp) - pow(x_low, xx_exp))/(yx_exp*xx_exp);
+	
+	double ypiece = 0.0;
+	if (m == 0 || m == 1)
+		ypiece = 0.0;
+	else
+		ypiece = (double)m*((double)m-1.0)*(pow(y_high, yy_exp) - pow(y_low, yy_exp))*(pow(x_high, xy_exp) - pow(x_low, xy_exp))/(yy_exp*xy_exp);
+	
+	Aij_lm = xpiece + ypiece;
+	
+	
+	return Aij_lm;
+}
+
+//Evaluation of overlap integrals in 2D poly basis
+double Overlap_Integral_PolyBasis_2D(int i, int j, int l, int m, double x_low, double x_high, double y_low, double y_high)
+{
+	double Oij_lm = 0.0;
+	double y_exp = (double)j+m+1;
+	double x_exp = (double)i+l+1;
+	
+	Oij_lm = (pow(y_high, y_exp)-pow(y_low, y_exp))*(pow(x_high, x_exp)-pow(x_low, x_exp))/(y_exp*x_exp);
+	
+	return Oij_lm;
+}
+
+//Evaluation of constant BC integral
+double DirichletBC_Const_Integral_PolyBasis_2D(int i, int j, double x_low, double x_high, double y_low, double y_high, double boundary)
+{
+	double Cij = 0.0;
+	double y_exp = (double)(j+1);
+	double x_exp = (double)(i+1);
+	
+	Cij = (boundary/(y_exp*x_exp))*(pow(y_high, y_exp)-pow(y_low, y_exp))*(pow(x_high, x_exp)-pow(x_low, x_exp));
+	
+	return Cij;
+}
+
+//Residuals for the 2D vpa test
+int Eval_2D_VPA_TEST_Residuals(const Matrix<double> &x, Matrix<double> &F, const void *data)
+{
+	int success = 0;
+	VPA_2D_TEST_DATA *dat = (VPA_2D_TEST_DATA *) data;
+	
+	//First, create an ij loop
+	int ij_element = 0;
+	int lm_element = 0;
+	double Oij_lm_sum = 0.0;
+	double bound_integral_sum = 0.0;
+	for (int i=0; i<dat->m; i++)
+	{//START i Loop
+		
+		for (int j=0; j<dat->m; j++)
+		{//START j Loop
+			
+			ij_element = (i*dat->m)+j+4;
+			
+			double bound_integral_x0 = DirichletBC_Const_Integral_PolyBasis_2D(i, j, dat->x0, dat->x1, dat->y0, dat->y1, dat->bc);
+			double Alm_sum = 0.0;
+			double Olm_sum = 0.0;
+			
+			for (int l=0; l<dat->m; l++)
+			{//START l Loop
+				
+				for (int m=0; m<dat->m; m++)
+				{//START m Loop
+					
+					lm_element = (l*dat->m)+m+4;
+					
+					Alm_sum = Alm_sum + (x(lm_element,0)*Laplacian_Integral_PolyBasis_2D(i, j, l, m, dat->x0, dat->x1, dat->y0, dat->y1));
+					Olm_sum = Olm_sum + (x(lm_element,0)*Overlap_Integral_PolyBasis_2D(i, j, l, m, dat->x0, dat->x1, dat->y0, dat->y1));
+					
+				}//END m Loop
+				
+			}//END l Loop
+			
+			Oij_lm_sum = Oij_lm_sum + (x(ij_element,0)*Olm_sum);
+			
+			double bound_sum = 0.0;
+			for (int s=0; s<4; s++)
+			{//START s Loop
+				
+				bound_sum = bound_sum + (x(s,0)*(Olm_sum - bound_integral_x0)); // INCORRECT!!!
+				
+			}//END s Loop
+			
+			double Fij = (((dat->h_bar*dat->h_bar)/(2.0*dat->mass))*Alm_sum) + (dat->E*Olm_sum) + bound_sum;
+			F.edit(ij_element, 0, Fij);
+			
+			bound_integral_sum = bound_integral_sum + (x(ij_element,0)*bound_integral_x0); // INCORRECT!!!
+			
+		}//END j Loop
+		
+	}//END i Loop
+	
+	for (int s=0; s<4; s++)
+	{
+		F.edit(s, 0, Oij_lm_sum - bound_integral_sum);
+	}
+	
+	return success;
+}
+
 //Run the sandbox tests
 int RUN_SANDBOX()
 {
@@ -501,6 +679,74 @@ int RUN_SANDBOX()
 	std::cout << "Test was a HUGE SUCCESS!!! ^_^ \n\n";
 	
 	// --------------------------------------------- END VPA Example -----------------------------------------------
+	
+	// ----------------------------- Example of VPA in 2D particle in a box ------------------------------
+	
+	std::cout << "Solving a 2D problem with VPA...\n\n";
+	
+	VPA_2D_TEST_DATA vpa2d;
+	vpa2d.m = 5;
+	vpa2d.N = 4 + (vpa2d.m*vpa2d.m);
+	vpa2d.h_bar = 1.0;
+	vpa2d.mass = 1.0;
+	vpa2d.x0 = 0.0;
+	vpa2d.x1 = 1.0;
+	vpa2d.y0 = 0.0;
+	vpa2d.y1 = 1.0;
+	vpa2d.bc = 0.0;
+	double yL = vpa2d.y1 - vpa2d.y0;
+	double xL = vpa2d.x1 - vpa2d.x0;
+	vpa2d.E = ((M_PI*M_PI*vpa2d.h_bar*vpa2d.h_bar)/(2.0*vpa2d.mass*xL)) + ((M_PI*M_PI*vpa2d.h_bar*vpa2d.h_bar)/(2.0*vpa2d.mass*yL));
+	vpa2d.c.set_size(vpa2d.m, vpa2d.m);
+	vpa2d.x.set_size(vpa2d.N, 1);
+	
+	PJFNK_DATA newton2d;
+	newton2d.linear_solver = FOM;
+	newton2d.gmresrp_dat.restart = vpa2d.N;
+	newton2d.nl_maxit = 100;
+	newton2d.nl_tol_abs = 1e-6;
+	newton2d.nl_tol_rel = 1e-8;
+	newton2d.LineSearch = true;
+	
+	for (int i=0; i<vpa2d.N; i++)
+	{
+		vpa2d.x.edit(i, 0, 1.0/(1.0+(double)i));
+	}
+	
+	success = pjfnk(Eval_2D_VPA_TEST_Residuals, NULL, vpa2d.x, &newton2d, (void *)&vpa2d, (void *)&vpa2d);
+	//vpa2d.x.Display("x");
+	
+	int ij_elem = 0;
+	for (int i=0; i<vpa2d.m; i++)
+	{
+		for (int j=0; j<vpa2d.m; j++)
+		{
+			ij_elem = (i*vpa2d.m)+j+4;
+			vpa2d.c.edit(i, j, vpa2d.x(ij_elem,0));
+		}
+	}
+	vpa2d.c.Display("c");
+	
+	dx = vpa2d.x1 / 20.0;
+	double dy = vpa2d.y1 / 20.0;
+	x = 0.0;
+	double y = 0.0;
+	
+	Matrix<double> uxy(21,21);
+	for (int i=0; i<21; i++)
+	{
+		for (int j=0; j<21; j++)
+		{
+			uxy.edit(i, j, PolyBasis_2D_LinearComboAppox(vpa2d.c, x, y));
+			y = y + dy;
+		}
+		x = x + dx;
+	}
+	uxy.Display("U(x,y)");
+	
+	
+	
+	// ------------------------------------- END 2nd VPA Example -----------------------------------------
 	
 	std::cout << "\nEnd SANDBOX\n\n";
 	
