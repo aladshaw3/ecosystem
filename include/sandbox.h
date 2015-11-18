@@ -121,22 +121,22 @@ double Laplacian_Integral_PolyBasis_2D(int i, int j, int l, int m, double x_low,
 
 double Overlap_Integral_PolyBasis_2D(int i, int j, int l, int m, double x_low, double x_high, double y_low, double y_high);
 
-double DirichletBC_Const_Integral_PolyBasis_2D(int i, int j, double x_low, double x_high, double y_low, double y_high, double boundary);
+double AverageEdgeValue_PolyBasis_2D(int i, int j, int const_dim, double const_val, double high, double low);
+
+double AverageEdgeSlope_PolyBasis_2D(int i, int j, int const_dim, double const_val, double high, double low);
 
 typedef struct
 {
-	int m;					//Number of basis functions (m = highest order in x or y)
-	int N;					//Number of adjustable parameters (=s+m^2, where s is the number of boundary conditions)
-	double h_bar;			//Reduced Planck's constant
-	double mass;			//Mass of particle
-	double E;				//Energy of the system
-	double x0;				//Lower x bound
-	double x1;				//Upper x bound
-	double y0;				//Lower y bound
-	double y1;				//Upper y bound
-	double bc;				//Boundary condition
-	Matrix<double> c;		//Matrix of coefficients for approximation
-	Matrix<double> x;		//Matrix of variables solved for
+	int bcs;				//number of bcs
+	int m;					//polynomial order
+	int N;					//problem size
+	double D;				//diffusivity
+	double k;				//reaction
+	double Lx;				//distance in x
+	double Ly;				//distance in y
+	double uo;				//boundary value at (0,0)
+	Matrix<double> c;		//Coefficient matrix
+	Matrix<double> x;		//variable matrix
 	
 } VPA_2D_TEST_DATA;
 

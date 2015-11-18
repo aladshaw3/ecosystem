@@ -321,7 +321,10 @@ int update_arnoldi_solution(Matrix<double>& x, Matrix<double>& x0, ARNOLDI_DATA 
       	sum = 0.0;
       	for (int k=0; k<arnoldi_dat->Vk.size(); k++)
       	{
-          	sum = sum + (arnoldi_dat->Vk[k](i,0) * arnoldi_dat->yk(k,0));
+			if (i >= arnoldi_dat->Vk[k].rows())
+				sum = sum + 0.0;
+			else
+				sum = sum + (arnoldi_dat->Vk[k](i,0) * arnoldi_dat->yk(k,0));
       	}
       	x.edit(i, 0, sum + x0(i,0));
   	}

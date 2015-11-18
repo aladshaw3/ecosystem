@@ -369,78 +369,142 @@ double Overlap_Integral_PolyBasis_2D(int i, int j, int l, int m, double x_low, d
 	return Oij_lm;
 }
 
-//Evaluation of constant BC integral
-double DirichletBC_Const_Integral_PolyBasis_2D(int i, int j, double x_low, double x_high, double y_low, double y_high, double boundary)
+double AverageEdgeValue_PolyBasis_2D(int i, int j, int const_dim, double const_val, double high, double low)
 {
-	double Cij = 0.0;
-	double y_exp = (double)(j+1);
-	double x_exp = (double)(i+1);
+	double avg = 0.0;
+	double exp = 1.0;
 	
-	Cij = (boundary/(y_exp*x_exp))*(pow(y_high, y_exp)-pow(y_low, y_exp))*(pow(x_high, x_exp)-pow(x_low, x_exp));
+	//x-const, integrate over y
+	if (const_dim == 0)
+	{
+		exp = (double)j+1;
+		avg = (PolyBasis_2D(i, j, const_val, 1.0)/(exp*(high-low)))*(pow(high, exp)-pow(low, exp));
+	}
+	//y-const, integrate over x
+	else if (const_dim == 0)
+	{
+		exp = (double)i+1;
+		avg = (PolyBasis_2D(i, j, 1.0, const_val)/(exp*(high-low)))*(pow(high, exp)-pow(low, exp));
+	}
+	else
+	{
+		return avg;
+	}
 	
-	return Cij;
+	return avg;
 }
 
-//Residuals for the 2D vpa test
+double AverageEdgeSlope_PolyBasis_2D(int i, int j, int const_dim, double const_val, double high, double low)
+{
+	double avg = 0.0;
+	double exp = 1.0;
+	
+	//x-const, integrate over y, use dx
+	if (const_dim == 0)
+	{
+		exp = (double)j+1;
+		avg = (PolyBasis_2D_dx(i, j, const_val, 1.0)/(exp/**(high-low)*/))*(pow(high, exp)-pow(low, exp));
+	}
+	//y-const, integrate over x, use dy
+	else if (const_dim == 0)
+	{
+		exp = (double)i+1;
+		avg = (PolyBasis_2D_dy(i, j, 1.0, const_val)/(exp/**(high-low)*/))*(pow(high, exp)-pow(low, exp));
+	}
+	else
+	{
+		return avg;
+	}
+	
+	return avg;
+}
+
 int Eval_2D_VPA_TEST_Residuals(const Matrix<double> &x, Matrix<double> &F, const void *data)
 {
 	int success = 0;
 	VPA_2D_TEST_DATA *dat = (VPA_2D_TEST_DATA *) data;
 	
-	//First, create an ij loop
-	int ij_element = 0;
-	int lm_element = 0;
-	double Oij_lm_sum = 0.0;
-	double bound_integral_sum = 0.0;
+	double Dij_sum = 0.0;
+	double l1[dat->m]; //in x
+	double l2[dat->m]; // in y
+	double l1_sum[dat->m];
+	double l2_sum[dat->m];
+	
 	for (int i=0; i<dat->m; i++)
-	{//START i Loop
+	{
+		l1_sum[i] = 0.0;
+		l2_sum[i] = 0.0;
+	}
+	
+	int ij = 0;
+	for (int i=0; i<dat->m; i++)
+	{// i loop
 		
 		for (int j=0; j<dat->m; j++)
-		{//START j Loop
+		{// j loop
 			
-			ij_element = (i*dat->m)+j+4;
-			
-			double bound_integral_x0 = DirichletBC_Const_Integral_PolyBasis_2D(i, j, dat->x0, dat->x1, dat->y0, dat->y1, dat->bc);
+			ij = (i*dat->m)+j+dat->bcs;
 			double Alm_sum = 0.0;
 			double Olm_sum = 0.0;
 			
+			int lm = 0;
 			for (int l=0; l<dat->m; l++)
-			{//START l Loop
+			{// l loop
 				
 				for (int m=0; m<dat->m; m++)
-				{//START m Loop
+				{// m loop
 					
-					lm_element = (l*dat->m)+m+4;
+					lm = (l*dat->m)+m+dat->bcs;
+					Alm_sum = Alm_sum + (x(lm,0)*Laplacian_Integral_PolyBasis_2D(i, j, l, m, 0.0, dat->Lx, 0.0, dat->Ly));
+					Olm_sum = Olm_sum + (x(lm,0)*Overlap_Integral_PolyBasis_2D(i, j, l, m, 0.0, dat->Lx, 0.0, dat->Ly));
 					
-					Alm_sum = Alm_sum + (x(lm_element,0)*Laplacian_Integral_PolyBasis_2D(i, j, l, m, dat->x0, dat->x1, dat->y0, dat->y1));
-					Olm_sum = Olm_sum + (x(lm_element,0)*Overlap_Integral_PolyBasis_2D(i, j, l, m, dat->x0, dat->x1, dat->y0, dat->y1));
-					
-				}//END m Loop
+				}// end m loop
 				
-			}//END l Loop
+			}// end l loop
 			
-			Oij_lm_sum = Oij_lm_sum + (x(ij_element,0)*Olm_sum);
+			double l0 = PolyBasis_2D(i, j, 0, 0);
 			
-			double bound_sum = 0.0;
-			for (int s=0; s<4; s++)
-			{//START s Loop
-				
-				bound_sum = bound_sum + (x(s,0)*(Olm_sum - bound_integral_x0)); // INCORRECT!!!
-				
-			}//END s Loop
+			Dij_sum = Dij_sum + (x(ij,0)*l0);
 			
-			double Fij = (((dat->h_bar*dat->h_bar)/(2.0*dat->mass))*Alm_sum) + (dat->E*Olm_sum) + bound_sum;
-			F.edit(ij_element, 0, Fij);
+			for (int J=0; J<dat->m; J++)
+				l1[J] = x(1+J,0)*PolyBasis_2D_dx(i, J, dat->Lx, 1.0);
 			
-			bound_integral_sum = bound_integral_sum + (x(ij_element,0)*bound_integral_x0); // INCORRECT!!!
+			F.edit(ij, 0, (dat->D*Alm_sum)-(dat->k*Olm_sum)+(x(0,0)*l0));
 			
-		}//END j Loop
+			for (int J=0; J<dat->m; J++)
+				F.edit(ij, 0, F(ij,0)+l1[J]);
+			
+			for (int I=0; I<dat->m; I++)
+				l2[I] = x(1+dat->m+I,0)*PolyBasis_2D_dy(I, j, 1.0, dat->Ly);
+			
+			for (int I=0; I<dat->m; I++)
+				F.edit(ij, 0, F(ij,0)+l2[I]);
+			
+			//l1_sum = l1_sum + (x(ij,0)*PolyBasis_2D_dx(i, j, dat->Lx, 1.0));
+			//l2_sum = l2_sum + (x(ij,0)*PolyBasis_2D_dy(i, j, 1.0, dat->Ly));
+			
+			for (int I=0; I<dat->m; I++)
+			{
+				int dex = (I*dat->m)+j+dat->bcs;
+				l1_sum[j] = l1_sum[j] + (x(dex,0)*PolyBasis_2D_dx(I, j, dat->Lx, 1.0));
+			}
+			
+		}// end j loop
 		
-	}//END i Loop
+		for (int J=0; J<dat->m; J++)
+		{
+			int dex = (i*dat->m)+J+dat->bcs;
+			l2_sum[i] = l2_sum[i] + (x(dex,0)*PolyBasis_2D_dy(i, J, 1.0, dat->Ly));
+		}
+		
+	}// end i loop
 	
-	for (int s=0; s<4; s++)
+	F.edit(0, 0, Dij_sum - dat->uo);
+	
+	for (int k=0; k<dat->m; k++)
 	{
-		F.edit(s, 0, Oij_lm_sum - bound_integral_sum);
+		F.edit(1+k, 0, l1_sum[k]);
+		F.edit(1+dat->m+k, 0, l2_sum[k]);
 	}
 	
 	return success;
@@ -682,70 +746,61 @@ int RUN_SANDBOX()
 	
 	// ----------------------------- Example of VPA in 2D particle in a box ------------------------------
 	
+	/*
 	std::cout << "Solving a 2D problem with VPA...\n\n";
 	
-	VPA_2D_TEST_DATA vpa2d;
-	vpa2d.m = 5;
-	vpa2d.N = 4 + (vpa2d.m*vpa2d.m);
-	vpa2d.h_bar = 1.0;
-	vpa2d.mass = 1.0;
-	vpa2d.x0 = 0.0;
-	vpa2d.x1 = 1.0;
-	vpa2d.y0 = 0.0;
-	vpa2d.y1 = 1.0;
-	vpa2d.bc = 0.0;
-	double yL = vpa2d.y1 - vpa2d.y0;
-	double xL = vpa2d.x1 - vpa2d.x0;
-	vpa2d.E = ((M_PI*M_PI*vpa2d.h_bar*vpa2d.h_bar)/(2.0*vpa2d.mass*xL)) + ((M_PI*M_PI*vpa2d.h_bar*vpa2d.h_bar)/(2.0*vpa2d.mass*yL));
-	vpa2d.c.set_size(vpa2d.m, vpa2d.m);
-	vpa2d.x.set_size(vpa2d.N, 1);
+	VPA_2D_TEST_DATA test2d;
+	test2d.m = 4;
+	test2d.bcs = 1 + (2*test2d.m);
+	test2d.N = test2d.bcs + (test2d.m*test2d.m);
+	test2d.D = 1.0;
+	test2d.k = 2.0;
+	test2d.uo = 9.0;
+	test2d.Lx = 1.0;
+	test2d.Ly = 2.0;
+	test2d.c.set_size(test2d.m, test2d.m);
+	test2d.x.set_size(test2d.N, 1);
+	Matrix<double> res2d(test2d.N,1);
 	
 	PJFNK_DATA newton2d;
-	newton2d.linear_solver = FOM;
-	newton2d.gmresrp_dat.restart = vpa2d.N;
-	newton2d.nl_maxit = 100;
-	newton2d.nl_tol_abs = 1e-6;
-	newton2d.nl_tol_rel = 1e-8;
+	newton2d.linear_solver = GMRESRP;
+	newton2d.gmresrp_dat.restart = test2d.N;
 	newton2d.LineSearch = true;
 	
-	for (int i=0; i<vpa2d.N; i++)
-	{
-		vpa2d.x.edit(i, 0, 1.0/(1.0+(double)i));
-	}
+	success = pjfnk(Eval_2D_VPA_TEST_Residuals, NULL, test2d.x, &newton2d, (void *)&test2d, (void *)&test2d);
+	test2d.x.Display("x");
 	
-	success = pjfnk(Eval_2D_VPA_TEST_Residuals, NULL, vpa2d.x, &newton2d, (void *)&vpa2d, (void *)&vpa2d);
-	//vpa2d.x.Display("x");
+	success = Eval_2D_VPA_TEST_Residuals(test2d.x, res2d, (void *)&test2d);
 	
-	int ij_elem = 0;
-	for (int i=0; i<vpa2d.m; i++)
+	int ij = 0;
+	for (int i=0; i<test2d.m; i++)
 	{
-		for (int j=0; j<vpa2d.m; j++)
+		for (int j=0; j<test2d.m; j++)
 		{
-			ij_elem = (i*vpa2d.m)+j+4;
-			vpa2d.c.edit(i, j, vpa2d.x(ij_elem,0));
+			ij = (i*test2d.m)+j+test2d.bcs;
+			test2d.c.edit(i, j, test2d.x(ij,0));
 		}
 	}
-	vpa2d.c.Display("c");
 	
-	dx = vpa2d.x1 / 20.0;
-	double dy = vpa2d.y1 / 20.0;
 	x = 0.0;
+	dx = test2d.Lx / 20.0;
 	double y = 0.0;
+	double dy = test2d.Ly / 20.0;
+	Matrix<double> Uxy(21,21);
 	
-	Matrix<double> uxy(21,21);
 	for (int i=0; i<21; i++)
 	{
+		y = 0.0;
 		for (int j=0; j<21; j++)
 		{
-			uxy.edit(i, j, PolyBasis_2D_LinearComboAppox(vpa2d.c, x, y));
+			Uxy.edit(i, j, PolyBasis_2D_LinearComboAppox(test2d.c, x, y));
 			y = y + dy;
 		}
 		x = x + dx;
 	}
-	uxy.Display("U(x,y)");
 	
-	
-	
+	Uxy.Display("U(x,y)");
+	*/
 	// ------------------------------------- END 2nd VPA Example -----------------------------------------
 	
 	std::cout << "\nEnd SANDBOX\n\n";
