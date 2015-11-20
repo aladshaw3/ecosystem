@@ -369,72 +369,13 @@ double Overlap_Integral_PolyBasis_2D(int i, int j, int l, int m, double x_low, d
 	return Oij_lm;
 }
 
-double AverageEdgeValue_PolyBasis_2D(int i, int j, int const_dim, double const_val, double high, double low)
-{
-	double avg = 0.0;
-	double exp = 1.0;
-	
-	//x-const, integrate over y
-	if (const_dim == 0)
-	{
-		exp = (double)j+1;
-		avg = (PolyBasis_2D(i, j, const_val, 1.0)/(exp*(high-low)))*(pow(high, exp)-pow(low, exp));
-	}
-	//y-const, integrate over x
-	else if (const_dim == 0)
-	{
-		exp = (double)i+1;
-		avg = (PolyBasis_2D(i, j, 1.0, const_val)/(exp*(high-low)))*(pow(high, exp)-pow(low, exp));
-	}
-	else
-	{
-		return avg;
-	}
-	
-	return avg;
-}
-
-double AverageEdgeSlope_PolyBasis_2D(int i, int j, int const_dim, double const_val, double high, double low)
-{
-	double avg = 0.0;
-	double exp = 1.0;
-	
-	//x-const, integrate over y, use dx
-	if (const_dim == 0)
-	{
-		exp = (double)j+1;
-		avg = (PolyBasis_2D_dx(i, j, const_val, 1.0)/(exp/**(high-low)*/))*(pow(high, exp)-pow(low, exp));
-	}
-	//y-const, integrate over x, use dy
-	else if (const_dim == 0)
-	{
-		exp = (double)i+1;
-		avg = (PolyBasis_2D_dy(i, j, 1.0, const_val)/(exp/**(high-low)*/))*(pow(high, exp)-pow(low, exp));
-	}
-	else
-	{
-		return avg;
-	}
-	
-	return avg;
-}
-
 int Eval_2D_VPA_TEST_Residuals(const Matrix<double> &x, Matrix<double> &F, const void *data)
 {
 	int success = 0;
+	/*
 	VPA_2D_TEST_DATA *dat = (VPA_2D_TEST_DATA *) data;
 	
 	double Dij_sum = 0.0;
-	double l1[dat->m]; //in x
-	double l2[dat->m]; // in y
-	double l1_sum[dat->m];
-	double l2_sum[dat->m];
-	
-	for (int i=0; i<dat->m; i++)
-	{
-		l1_sum[i] = 0.0;
-		l2_sum[i] = 0.0;
-	}
 	
 	int ij = 0;
 	for (int i=0; i<dat->m; i++)
@@ -466,47 +407,14 @@ int Eval_2D_VPA_TEST_Residuals(const Matrix<double> &x, Matrix<double> &F, const
 			
 			Dij_sum = Dij_sum + (x(ij,0)*l0);
 			
-			for (int J=0; J<dat->m; J++)
-				l1[J] = x(1+J,0)*PolyBasis_2D_dx(i, J, dat->Lx, 1.0);
-			
 			F.edit(ij, 0, (dat->D*Alm_sum)-(dat->k*Olm_sum)+(x(0,0)*l0));
-			
-			for (int J=0; J<dat->m; J++)
-				F.edit(ij, 0, F(ij,0)+l1[J]);
-			
-			for (int I=0; I<dat->m; I++)
-				l2[I] = x(1+dat->m+I,0)*PolyBasis_2D_dy(I, j, 1.0, dat->Ly);
-			
-			for (int I=0; I<dat->m; I++)
-				F.edit(ij, 0, F(ij,0)+l2[I]);
-			
-			//l1_sum = l1_sum + (x(ij,0)*PolyBasis_2D_dx(i, j, dat->Lx, 1.0));
-			//l2_sum = l2_sum + (x(ij,0)*PolyBasis_2D_dy(i, j, 1.0, dat->Ly));
-			
-			for (int I=0; I<dat->m; I++)
-			{
-				int dex = (I*dat->m)+j+dat->bcs;
-				l1_sum[j] = l1_sum[j] + (x(dex,0)*PolyBasis_2D_dx(I, j, dat->Lx, 1.0));
-			}
-			
-		}// end j loop
-		
-		for (int J=0; J<dat->m; J++)
-		{
-			int dex = (i*dat->m)+J+dat->bcs;
-			l2_sum[i] = l2_sum[i] + (x(dex,0)*PolyBasis_2D_dy(i, J, 1.0, dat->Ly));
-		}
+	 
 		
 	}// end i loop
 	
 	F.edit(0, 0, Dij_sum - dat->uo);
 	
-	for (int k=0; k<dat->m; k++)
-	{
-		F.edit(1+k, 0, l1_sum[k]);
-		F.edit(1+dat->m+k, 0, l2_sum[k]);
-	}
-	
+	*/
 	return success;
 }
 

@@ -121,10 +121,6 @@ double Laplacian_Integral_PolyBasis_2D(int i, int j, int l, int m, double x_low,
 
 double Overlap_Integral_PolyBasis_2D(int i, int j, int l, int m, double x_low, double x_high, double y_low, double y_high);
 
-double AverageEdgeValue_PolyBasis_2D(int i, int j, int const_dim, double const_val, double high, double low);
-
-double AverageEdgeSlope_PolyBasis_2D(int i, int j, int const_dim, double const_val, double high, double low);
-
 typedef struct
 {
 	int bcs;				//number of bcs
