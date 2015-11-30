@@ -34,6 +34,7 @@
 #include "macaw.h"
 #include "lark.h"
 #include "yaml_wrapper.h"
+#include "dogfish.h"
 
 #ifndef SHARK_HPP_
 #define SHARK_HPP_
@@ -42,6 +43,34 @@
 #define Rstd 8.3144621						///< Gas Law Constant in J/K/mol (or) L*kPa/K/mol (Standard Units)
 #endif
 
+#ifndef	Na
+#define Na 6.0221413E+23					///< Avagadro's Number - Units: molecules/mol
+#endif
+
+#ifndef	kB
+#define kB 1.3806488E-23					///< Boltzmann's Constant - Units: J/K or C*V/K
+#endif
+
+#ifndef e
+#define e 1.6021766208E-19					///< Elementary Electric Charge - Units: C
+#endif
+
+#ifndef Faraday
+#define Faraday 96485.33289					///< Faraday's Constant - C/mol
+#endif
+
+#ifndef VacuumPermittivity
+#define VacuumPermittivity 8.8541878176E-12	///< Vacuum Permittivity Constant - F/m or C/V/m
+#endif
+
+#ifndef WaterRelPerm
+#define WaterRelPerm 80.1					///< Approximate Relative Permittivity for water - Unitless
+#endif
+
+#ifndef AbsPerm
+#define AbsPerm(Rel) (Rel*VacuumPermittivity)	///< Calculation of Absolute Permittivity of a medium - F/m or C/V/m
+#endif
+ 
 /// Master Species List Object
 /** C++ style object that holds data and function associated with solving multi-species problems. This
 	object contains a vector of Molecule objects from mola.h and uses those objects to help setup speciation
@@ -153,8 +182,8 @@ public:
 	Reaction();											///< Default constructor
 	~Reaction();										///< Default destructor
 	
-	void Initialize_List (MasterSpeciesList &List);		///< Function to initialize the Reaction object from the MasterSpeciesList
-	void Display_Info ();								///< Display the reaction information
+	void Initialize_Object(MasterSpeciesList &List);	///< Function to initialize the Reaction object from the MasterSpeciesList
+	void Display_Info();								///< Display the reaction information
 	
 	/// Set the ith stoichiometric value
 	/** This function will set the stoichiometric constant of the ith species in the master list to 
@@ -162,12 +191,12 @@ public:
 	 
 		\param i index of the species in the MasterSpeciesList
 		\param v value of the stoichiometric constant for that species in the reaction*/
-	void Set_Stoichiometric (int i, double v);
-	void Set_Equilibrium (double logK);					///< Set the equilibrium constant in log(K) units
-	void Set_Enthalpy (double H);						///< Set the enthalpy of the reaction (J/mol)
-	void Set_Entropy (double S);						///< Set the entropy of the reaction (J/K/mol)
+	void Set_Stoichiometric(int i, double v);
+	void Set_Equilibrium(double logK);					///< Set the equilibrium constant in log(K) units
+	void Set_Enthalpy(double H);						///< Set the enthalpy of the reaction (J/mol)
+	void Set_Entropy(double S);							///< Set the entropy of the reaction (J/K/mol)
 	void Set_EnthalpyANDEntropy (double H, double S);	///< Set both the enthalpy and entropy (J/mol) & (J/K/mol)
-	void Set_Energy (double G);							///< Set the Gibb's free energy of reaction (J/mol)
+	void Set_Energy(double G);							///< Set the Gibb's free energy of reaction (J/mol)
 	
 	/// Function to check MasterList Reference for species energy info
 	/** This function will go through the stoichiometry of this reaction and check the molecules
@@ -188,8 +217,8 @@ public:
 	
 	bool haveEquilibrium();								///< Function to return true if equilibrium constant is given or can be calculated
 	
-	double Get_Stoichiometric (int i);					///< Fetch the ith stoichiometric value
-	double Get_Equilibrium ();							///< Fetch the equilibrium constant (logK)
+	double Get_Stoichiometric(int i);					///< Fetch the ith stoichiometric value
+	double Get_Equilibrium();							///< Fetch the equilibrium constant (logK)
 	double Get_Enthalpy();								///< Fetch the enthalpy of the reaction (J/mol)
 	double Get_Entropy();								///< Fetch the entropy of the reaction (J/K/mol)
 	double Get_Energy();								///< Fetch the energy of the reaction (J/mol)
@@ -232,8 +261,8 @@ public:
 	MassBalance();										///< Default Constructor
 	~MassBalance();										///< Default Destructor
 	
-	void Initialize_List (MasterSpeciesList &List);		///< Function to initialize the MassBalance object from the MasterSpeciesList
-	void Display_Info ();								///< Display the mass balance information
+	void Initialize_Object(MasterSpeciesList &List);	///< Function to initialize the MassBalance object from the MasterSpeciesList
+	void Display_Info();								///< Display the mass balance information
 	
 	/// Function to set the ith weight (delta) for the mass balance
 	/** This function sets the weight (i.e., delta value) of the ith species in the list
@@ -242,16 +271,16 @@ public:
 	 
 		\param i index of the species in the MasterSpeciesList
 		\param v value of the weigth (or delta) applied to the mass balance*/
-	void Set_Delta (int i, double v);
+	void Set_Delta(int i, double v);
 	
-	void Set_TotalConcentration (double v);				///< Set the total concentration of the mass balance to v (mol/L)
+	void Set_TotalConcentration(double v);				///< Set the total concentration of the mass balance to v (mol/L)
 	
-	void Set_Name (std::string name);					///< Set the name of the mass balance (i.e., Uranium, Carbonate, etc.)
+	void Set_Name(std::string name);					///< Set the name of the mass balance (i.e., Uranium, Carbonate, etc.)
 	
-	double Get_Delta (int i);							///< Fetch the ith weight (i.e., delta) value
-	double Sum_Delta ();								///< Sums up the delta values and returns the total (should never be zero)
-	double Get_TotalConcentration ();					///< Fetch the total concentration (mol/L)
-	std::string Get_Name ();							///< Return name of mass balance object
+	double Get_Delta(int i);							///< Fetch the ith weight (i.e., delta) value
+	double Sum_Delta();									///< Sums up the delta values and returns the total (should never be zero)
+	double Get_TotalConcentration();					///< Fetch the total concentration (mol/L)
+	std::string Get_Name();								///< Return name of mass balance object
 	
 	/// Evaluate the residual for the mass balance object given the log(C) concentrations
 	/** This function calculates and provides the residual for this mass balance object based on the total
@@ -288,8 +317,8 @@ public:
 	UnsteadyReaction();									///< Default Constructor
 	~UnsteadyReaction();								///< Default Destructor
 	
-	void Initialize_List (MasterSpeciesList &List);		///< Function to initialize the UnsteadyReaction object from the MasterSpeciesList
-	void Display_Info ();								///< Display the unsteady reaction information
+	void Initialize_Object(MasterSpeciesList &List);	///< Function to initialize the UnsteadyReaction object from the MasterSpeciesList
+	void Display_Info();								///< Display the unsteady reaction information
 	
 	/// Set the Unsteady species index by number
 	/** This function will set the unsteady species index by the index i given. That
@@ -307,12 +336,12 @@ public:
 		\param formula molecular formula of the unsteady species (see mola.h for standard formatting) */
 	void Set_Species_Index(std::string formula);
 	
-	void Set_Stoichiometric (int i, double v);			///< Set the ith stoichiometric value (see Reaction object)
-	void Set_Equilibrium (double v);					///< Set the equilibrium constant (logK) (see Reaction object)
-	void Set_Enthalpy (double H);						///< Set the enthalpy of the reaction (J/mol) (see Reaction object)
-	void Set_Entropy (double S);						///< Set the entropy of the reaction (J/K/mol) (see Reaction object)
-	void Set_EnthalpyANDEntropy (double H, double S);	///< Set both the enthalpy and entropy (J/mol) & (J/K/mol) (see Reaction object)
-	void Set_Energy (double G);							///< Set the Gibb's free energy of reaction (J/mol) (see Reaction object)
+	void Set_Stoichiometric(int i, double v);			///< Set the ith stoichiometric value (see Reaction object)
+	void Set_Equilibrium(double v);						///< Set the equilibrium constant (logK) (see Reaction object)
+	void Set_Enthalpy(double H);						///< Set the enthalpy of the reaction (J/mol) (see Reaction object)
+	void Set_Entropy(double S);							///< Set the entropy of the reaction (J/K/mol) (see Reaction object)
+	void Set_EnthalpyANDEntropy(double H, double S);	///< Set both the enthalpy and entropy (J/mol) & (J/K/mol) (see Reaction object)
+	void Set_Energy(double G);							///< Set the Gibb's free energy of reaction (J/mol) (see Reaction object)
 	
 	/// Set the initial value of the unsteady variable
 	/** This function sets the initial concentration value for the unsteady species to the given value ic
@@ -321,7 +350,7 @@ public:
 		variables constant at their respective initial values. 
 	 
 		\param ic initial concentration value for the unsteady object (mol/L)*/
-	void Set_InitialValue (double ic);
+	void Set_InitialValue(double ic);
 	
 	/// Set the maximum value of the unsteady variable to a given value max (mol/L)
 	/** This function will be called internally to help bound the unsteady variable to reasonable
@@ -329,7 +358,7 @@ public:
 		iteration. 
 	 
 		\param max maximum allowable value for the unsteady variable (mol/L)*/
-	void Set_MaximumValue (double max);
+	void Set_MaximumValue(double max);
 	
 	void Set_Forward(double forward);					///< Set the forward rate for the reaction (mol/L/hr)
 	void Set_Reverse(double reverse);					///< Set the reverse rate for the reaction (mol/L/hr)
@@ -370,7 +399,7 @@ public:
 		\param b temperature affinity for the forward or reverse rate, depending on which was given*/
 	void Set_Affinity(double b);
 	
-	void Set_TimeStep (double dt);						///< Set the time step for the current simulation
+	void Set_TimeStep(double dt);						///< Set the time step for the current simulation
 	
 	void checkSpeciesEnergies();						///< Function to check MasterSpeciesList for species energy info (see Reaction object)
 	void calculateEnergies();							///< Function to calculate the energy of the reaction (see Reaction object)
@@ -388,8 +417,8 @@ public:
 	bool haveRate();									///< Function to return true if you have the forward or reverse rate calculated
 	
 	int Get_Species_Index();							///< Fetch the index of the Unsteady species
-	double Get_Stoichiometric (int i);					///< Fetch the ith stoichiometric value
-	double Get_Equilibrium ();							///< Fetch the equilibrium constant (logK)
+	double Get_Stoichiometric(int i);					///< Fetch the ith stoichiometric value
+	double Get_Equilibrium();							///< Fetch the equilibrium constant (logK)
 	double Get_Enthalpy();								///< Fetch the enthalpy of the reaction
 	double Get_Entropy();								///< Fetch the entropy of the reaction
 	double Get_Energy();								///< Fetch the energy of the reaction
@@ -466,6 +495,181 @@ private:
 	
 };
 
+/// Adsorption Reaction Object
+/** C++ Object to handle data and functions associated with forumlating adsorption equilibrium reactions
+	in a aqueous mixture. Each unique surface in a system will require an instance of this structure. 
+ 
+	\warning THIS OBJECT IS NOT YET FUNCTIONAL!*/
+class AdsorptionReaction
+{
+public:
+	AdsorptionReaction();								///< Default Constructor
+	~AdsorptionReaction();								///< Default Destructor
+	
+	void Initialize_Object(MasterSpeciesList &List, int i); ///< Function to call the initialization of objects sequentially
+	void Display_Info();								///< Display the adsorption reaction information (PLACE HOLDER)
+	
+	/// Modify the Deltas in the MassBalance Object
+	/** This function will take a mass balance object as an argument and modify the deltas in that object to
+		correct for how adsorption affects that particular mass balance. Since adsorption can effect multiple
+		mass balances, this function must be called for each mass balance in the system.
+	 
+		\param mbo reference to the MassBalance Object the adsorption is acting on*/
+	void modifyDeltas(MassBalance &mbo);
+	
+	/// Find and set the adsorbed species indices for each reaction object
+	/** This function searches through the Reaction objects in AdsorptionReaction to find the solid species
+		and their indices to set that information in the adsorb_index structure. That information will be used
+		later to approximate maximum capacities and equilibrium parameters for use in a modified extended Langmuir
+		type expression. Function will return 0 if successful and -1 on a failure.*/
+	int setAdsorbIndices();
+	
+	int checkAqueousIndices();							///< Function to check and report errors in the aqueous species indices
+	
+	/// Function to set the surface activity model and data pointer
+	/** This function will setup the surface activity model based on the given pointer arguments. If no arguments
+		are given, or are given as NULL, then the activity model will default to ideal solution assumption.*/
+	void setActivityModelInfo( int (*act) (const Matrix<double>& logq, Matrix<double> &activity, const void *data),
+							  const void *act_data);
+	
+	void setAqueousIndex(int rxn_i, int species_i);		///< Set the primary aqueous species index for the ith reaction
+	
+	/// Automatically sets the primary aqueous species index based on reactions
+	/** This function will go through all species and all reactions in the adsorption object and automatically set the
+		primary aqueous species index based on the stoicheometry of the reaction. It will also check and make sure that
+		the primary aqueous index species appears opposite of the adsorbed species in the reactions. Note: This function
+		assumes that the adsorbed indices have already been set. */
+	int setAqueousIndexAuto();
+	void setVolumeFactor(int i, double v);				///< Set the ith volume factor for the species list (cm^3/mol) or (mol/mol)
+	void setAreaFactor(int i, double a);				///< Set the ith area factor for the species list (m^2/mol) or (mol/mol)
+	void setSpecificArea(double a);						///< Set the specific area for the adsorbent (m^2/kg) or (mol/kg)
+	void setTotalMass(double m);						///< Set the total mass of the adsorbent (kg)
+	void setTotalVolume(double v);						///< Set the total volume of the system (L)
+	void setAreaBasisBool(bool opt);					///< Set the basis boolean directly
+	void setBasis(std::string option);					///< Set the basis of the adsorption problem from the given string arg
+	
+	void calculateAreaFactors();						///< Calculates the area factors used from the van der Waals volumes
+	void calculateEquilibria(double T);					///< Calculates all equilibrium parameters as a function of temperature
+	int callSurfaceActivity(const Matrix<double> &x);	///< Calls the activity model and returns an int flag for success or failure
+	double calculateActiveFraction(const Matrix<double> &x);	///< Calculates the fraction of the surface that is active and available
+	
+	/// Calculates the theoretical maximum capacity for adsorption  in reaction i
+	/** This function is used to calculate the current maximum capacity of a species for a given
+		adsorption reaction using the concentrations and activities of other species in the system.
+		You must pass the index of the reaction of interest. The index of the species of interest
+		is determined from the adsorb_index object. Note: This is only true if the stoicheometry for 
+		the adsorbed species is 1.
+	 
+		\param i index of the reaction of interest for the adsorption object*/
+	double calculateLangmuirMaxCapacity(int i);
+	
+	/// Calculates the equivalent Langmuir isotherm equilibrium parameter
+	/** This function will take in the current aqueous activities and calculate an effective
+		Langmuir adsorption parameter for use in determining the adsorption in the system. It
+		uses the system temperature as well to calculate equilibrium. Note: This is only true
+		if the stoicheometry for the adsorbed species is 1.
+	 
+		\param x matrix of the log(C) concentration values at the current non-linear step
+		\param gama matrix of activity coefficients for each species at the current non-linear step
+		\param i index of the reaction of interest for the adsorption object*/
+	double calculateLangmuirEquParam(const Matrix<double> &x, const Matrix<double> &gama, int i);
+	
+	/// Calculates the equivalent Langmuir adsorption by forming the Langmuir-like parameters
+	/** This function will use the calculateLangmuirMaxCapacity and calculateLangmuirEquParam functions to
+		approximate the adsorption of the ith reaction given the concentration of aqueous species, activities,
+		and temperature. Note: This is only true if the stoicheometry for the adsorbed species is 1.
+	 
+		\param x matrix of the log(C) concentration values at the current non-linear step
+		\param gama matrix of activity coefficients for each species at the current non-linear step
+		\param i index of the reaction of interest for the adsorption object*/
+	double calculateLangmuirAdsorption(const Matrix<double> &x, const Matrix<double> &gama, int i);
+	
+	/// Function calculates the Psi (electric surface potential) given a set of arguments
+	/** This function will approximate the electric surface potential of the adsorbent under the current
+		conditions of charge density, temperature, ionic strength, and relative permittivity. Approximations
+		are made via the cubic representations of the hyberbolic sine function. As a result, this approximation
+		is fourth order accurate and is a faster approximation then solving with derivatives of the function.
+	 
+		\param sigma charge density of the surface (C/m^2)
+		\param T temperature of the system in question (K)
+		\param I ionic strength of the medium the surface is in (mol/L)
+		\param rel_epsilon relative permittivity of the medium (Unitless) */
+	double calculateCubicPsiApprox(double sigma, double T, double I, double rel_epsilon);
+	
+	/// Function to calculate the net exchange of charges of the aqeous species involved in a given reaction
+	/** This function will look at all aqueous species involved in the ith adsorption reaction and sum up 
+		their stoicheometries and charges to see what the net change in charge is caused by the adsorption
+		of charged species in solution. It is then used to adjust or correct the equilibrium constant for
+		the given adsorption reaction. 
+	 
+		\param i index of the reaction of interest for the adsorption object*/
+	double calculateAqueousChargeExchange(int i);
+	
+	/// Function to calculate the correction term for the equilibrium parameter
+	/** This function calculates the correction term that gets applied to the equilibrium parameter to 
+		correct for surface charge and charge accumulation/depletion effects. It will call the psi approximation
+		and charge exchange functions, therefore it needs to have those functions arguments passed to it as well.
+	 
+		\param sigma charge density of the surface (C/m^2)
+		\param T temperature of the system in question (K)
+		\param I ionic strength of the medium the surface is in (mol/L)
+		\param rel_epsilon relative permittivity of the medium (Unitless)
+		\param i index of the reaction of interest for the adsorption object*/
+	double calculateEquilibriumCorrection(double sigma, double T, double I, double rel_epsilon, int i);
+	
+	/// Calculates the residual for the ith reaction in the system
+	/** This function will provide a system residual for the ith reaction object involved in the Adsorption
+		Reaction. The residual is fed into the SHARK solver to find the solution to solid and aqueous phase
+		concentrations simultaneously. 
+	 
+		\param x matrix of the log(C) concentration values at the current non-linear step
+		\param gama matrix of activity coefficients for each species at the current non-linear step
+		\param i index of the reaction of interest for the adsorption object*/
+	double Eval_Residual(const Matrix<double> &x, const Matrix<double> &gama, int i);
+	
+	Reaction& getReaction(int i);				///< Return reference to the ith reaction object in the adsorption object
+	double getVolumeFactor(int i);				///< Get the ith volume factor (species not involved return zeros) (cm^3/mol) or (mol/mol)
+	double getAreaFactor(int i);				///< Get the ith area factor (species not involved return zeros) (m^2/mol) or (mol/mol)
+	double getActivity(int i);					///< Get the ith activity factor for the surface species
+	double getSpecificArea();					///< Get the specific area of the adsorbent (m^2/kg) or (mol/kg)
+	double getBulkDensity();					///< Calculate and return bulk density of adsorbent in system (kg/L)
+	double getTotalMass();						///< Get the total mass of adsorbent in the system (kg)
+	double getTotalVolume();					///< Get the total volume of the system (L)
+	int getNumberRxns();						///< Get the number of reactions involved in the adsorption object
+	int getAdsorbIndex(int i);					///< Get the index of the adsorbed species in the ith reaction
+	int getAqueousIndex(int i);					///< Get the index of the primary aqueous species in the ith reaction
+	bool isAreaBasis();							///< Returns true if we are in the Area Basis, False if in Molar Basis
+	
+protected:
+	MasterSpeciesList *List;					///< Pointer to the MasterSpeciesList object
+	
+	/// Pointer to a surface activity model
+	/** This is a function pointer for a surface activity model. The function must accept the log of the
+		surface concentrations as an argument (logq) and provide the activities for each species (activity).
+		The pointer data is used to pass any additional arguments needed.
+	 
+		\param logq matrix of the log (base 10) of surface concentrations of all species
+		\param activity matrix of activity coefficients for all surface species (must be overriden)
+		\param data pointer to a data structure needed to calculate activities*/
+	int (*surface_activity) (const Matrix<double>& logq, Matrix<double> &activity, const void *data);
+	
+	const void *activity_data;					///< Pointer to the data structure needed for surface activities.
+	std::vector<double> area_factors;			///< List of area factors associated with surface species (m^2/mol) or (mol/mol)
+	std::vector<double> volume_factors;			///< List of the van der Waals volumes of each surface species (cm^3/mol) or (mol/mol)
+	std::vector<int> adsorb_index;				///< List of the indices for the adsorbed species in the reactions
+	std::vector<int> aqueous_index;				///< List of the indices for the primary aqueous species in the reactions
+	Matrix<double> activities;					///< List of the activities calculated by the activity model
+	double specific_area;						///< Specific surface area of the adsorbent (m^2/kg) or (mol/kg) !!! MAY NEED TO CHANGE!!!
+	double total_mass;							///< Total mass of the adsorbent in the system (kg)
+	double total_volume;						///< Total volume of the system (L)
+	int num_rxns;								///< Number of reactions involved in the adsorption equilibria
+	bool AreaBasis;								///< True = Adsorption on an area basis, False = Adsorption on a ligand basis
+	
+private:
+	std::vector<Reaction> ads_rxn;				///< List of reactions involved with adsorption
+	
+};
+
 /// \cond
 
 //Reaction Mechanism Object
@@ -515,6 +719,11 @@ private:
 /** \note The SIT and PITZER models are not currently supported. */
 typedef enum {IDEAL, DAVIES, DEBYE_HUCKEL, SIT, PITZER} valid_act;
 
+/// Enumeration for the list of valid surface activity models for non-ideal adsorption
+/** \note We had to create an IDEAL_ADS option to replace the IDEAL enum already in use for non-ideal solution
+	or aqueous phases. (ADS => adsorption) */
+typedef enum {IDEAL_ADS, FLORY_HUGGINS} valid_surf_act;
+
 /// Data structure for SHARK simulations
 /** C-style object holding data and function pointers associated with solving aqueous speciation and reaction
 	kinetics. This object couples all other objects available in shark.h in order to provide residual calculations
@@ -529,6 +738,7 @@ typedef struct SHARK_DATA
 	std::vector<Reaction> ReactionList;				///< Equilibrium reaction objects
 	std::vector<MassBalance> MassBalanceList;		///< Mass balance objects
 	std::vector<UnsteadyReaction> UnsteadyList;		///< Unsteady Reaction objects
+	std::vector<AdsorptionReaction> AdsorptionList;	///< Equilibrium Adsorption Reaction Objects
 	
 	/// Array of Other Residual functions to be defined by user
 	/** This list of function pointers can be declared and set up by the user in order to add to or change
@@ -547,10 +757,13 @@ typedef struct SHARK_DATA
 	int numvar;										///< Total number of functions and species
 	int num_ssr;									///< Number of steady-state reactions
 	int num_mbe;									///< Number of mass balance equations
-	int num_usr;									///< Number of unsteady-state reactions
+	int num_usr = 0;								///< Number of unsteady-state reactions
+	int num_ssao = 0;								///< Number of steady-state adsorption objects
+	std::vector<int> num_ssar;						///< List of the numbers of reactions in each adsorption object
 	int num_other = 0;								///< Number of other functions to be used (default is always 0)
 	int act_fun = IDEAL;							///< Flag denoting the activity function to use (default is IDEAL)
-	int totalsteps = 0;								///< Number of iterations and function calls
+	int totalsteps = 0;								///< Total number of iterations
+	int totalcalls = 0;								///< Total number of residual function calls
 	int timesteps = 0;								///< Number of time steps taken to complete simulation
 	int pH_index = -1;								///< Contains the index of the pH variable (set internally)
 	int pOH_index = -1;								///< Contains the index of the pOH variable (set internally)
@@ -563,6 +776,7 @@ typedef struct SHARK_DATA
 	double time = 0.0;								///< Current value of time (starts from t = 0.0 hrs)
 	double time_old = 0.0;							///< Previous value of time (start from t = 0.0 hrs)
 	double pH = 7.0;								///< Value of pH if needed (default = 7)
+	double volume = 1.0;							///< Volume of the domain in liters (default = 1 L)
 	double Norm = 0.0;								///< Current value of euclidean norm in solution
 	
 	double dielectric_const = 78.325;				///< Dielectric constant used in many activity models (default: water = 78.325 (1/K))
@@ -637,6 +851,17 @@ void print2file_shark_results_new(SHARK_DATA *shark_dat);
 
 /// Function to print out the simulation results for the previous time step
 void print2file_shark_results_old(SHARK_DATA *shark_dat);
+
+///Surface Activity function for simple non-ideal adsorption
+/** This is a simple surface activity model to be used with the Adsorption objects to evaluate the non-ideal
+	behavoir of the surface phase. The model's only parameters are the shape factors in adsorption and the
+	relative concentrations of each surface species. Therefore, we will pass the Adsorption Object itself
+	as the const void *data structure. 
+ 
+	\param x matrix of the log(C) concentration values at the current non-linear step
+	\param F matrix of activity coefficients that are to be altered by this function
+	\param data pointer to the AdsorptionReaction object holding parameter information*/
+int FloryHuggins(const Matrix<double> &x, Matrix<double> &F, const void *data);
 
 /// Activity function for Ideal Solution
 /** This is one of the default activity models available. It assumes the system behaves ideally and sets the
@@ -886,6 +1111,7 @@ int SHARK(SHARK_DATA *shark_dat);
 	  temp: 298.15       \#Units must be in Kelvin \n
 	  dielec: 78.325     \#Units must be in (1/Kelvin) \n
 	  res_alk: 0         \#Units must be in mol/L (Residual Alkalinity) \n
+	  volume: 1.0		 \#Units must be in L \n
  
 	- run_time: \n
       steady: false         \#NOTE: All time must be represented in hours \n

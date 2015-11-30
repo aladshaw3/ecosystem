@@ -27,6 +27,7 @@ atoms(0)
 	formation_energy = 0;
 	formation_enthalpy = 0;
 	formation_entropy = 0;
+	PhaseID = OTHER;
 }
 
 //Default destructor
@@ -54,6 +55,20 @@ Molecule::Molecule(int c,
 	haveHS = HS;
 	haveG = G;
 	Phase = phase;
+	for (int i=0; i<phase.size(); i++)
+		phase[i] = tolower(phase[i]);
+	if (phase == "aqueous")
+		PhaseID = AQUEOUS;
+	else if (phase == "solid")
+		PhaseID = SOLID;
+	else if (phase == "liquid")
+		PhaseID = LIQUID;
+	else if (phase == "gas")
+		PhaseID = GAS;
+	else if (phase == "plasma")
+		PhaseID = PLASMA;
+	else
+		PhaseID = OTHER;
 	Name = name;
 	Formula = formula;
 	molar_weight = 0.0;
@@ -129,6 +144,20 @@ void Molecule::Register(int c,
 	this->haveHS = HS;
 	this->haveG = G;
 	this->Phase = phase;
+	for (int i=0; i<phase.size(); i++)
+		phase[i] = tolower(phase[i]);
+	if (phase == "aqueous")
+		this->PhaseID = AQUEOUS;
+	else if (phase == "solid")
+		this->PhaseID = SOLID;
+	else if (phase == "liquid")
+		this->PhaseID = LIQUID;
+	else if (phase == "gas")
+		this->PhaseID = GAS;
+	else if (phase == "plasma")
+		this->PhaseID = PLASMA;
+	else
+		this->PhaseID = OTHER;
 	this->Name = name;
 	this->Formula = formula;
 	this->molar_weight = 0.0;
@@ -707,6 +736,12 @@ std::string Molecule::MolecularFormula()
 std::string Molecule::MoleculePhase()
 {
 	return this->Phase;
+}
+
+//Return the enum flag of the phase
+int Molecule::MoleculePhaseID()
+{
+	return this->PhaseID;
 }
 
 //Display molecule information

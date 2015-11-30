@@ -50,6 +50,94 @@ int Speciation_Test01_Guess(const void *user_data);
 
 int Speciation_Test01_MatVec(const Matrix<double> &x, Matrix<double> &Ax, const void *matvec_data);
 
+double Bounded_1D_NormalBasis_Func(int i, double bound, double x);
+
+double ParticleNBox_1D_H_MatrixElements_Bound1D_ONB(int i, int j, double bound, double mass, double h_bar);
+
+double ParticleNBox_1D_PHI_MatrixElements_Bound1D_ONB(int i, int j, double bound);
+
+typedef struct
+{
+	int m;							//Number of basis functions
+	int N;							//Size of H and number of total functions in the residual
+	Matrix<double> c;				//Vector of coefficients for wavefunction
+	Matrix<double> x;				//Solution Vector for non-linear formulation of problem x(0,0) = Eo and x(i,0) = c(i-1,0) for i>0
+	double Eo;						//Approximation to the ground-state energy
+	Matrix<double> H;				//Hamiltonian Matrix in the basis set
+	Matrix<double> PHI;				//Matrix of overlap of basis set
+	double mass;					//Mass of the particle
+	double h_bar;					//Reduced Planck's Constant
+	double box_size;				//Size of the box ( = 2*bounds )
+	
+}PIB_1D_DATA;
+
+int Form_H_Matrix_1DPIB_Bound1DBasis(PIB_1D_DATA *dat);
+
+int Form_PHI_Matrix_1DPIB_Bound1DBasis(PIB_1D_DATA *dat);
+
+int Eval_1DPIB_Residuals(const Matrix<double> &x, Matrix<double> &F, const void *data);
+
+double Eval_PolyBasisFunc(int i, double x);
+
+double Eval_1stDerivative_PolyBasisFunc(int i, double x);
+
+double Eval_2ndDerivative_PolyBasisFunc(int i, double x);
+
+double Eval_ApproximatePolySolution(Matrix<double> &c, double x);
+
+double Laplacian_Integral_PolyBasis(int i, int j, double lower, double upper);
+
+double Overlap_Integral_PolyBasis(int i, int j, double lower, double upper);
+
+typedef struct
+{
+	int m;						//Size of the basis
+	int N;						//Size of the problem
+	double D;					//Diffusivity parameter
+	double L;					//Length of the domain
+	double k;					//Reaction coefficient
+	double uo;					//Boundary value
+	Matrix<double> c;			//Coefficient Matrix (size = m)
+	Matrix<double> x;			//Non-linear variable matrix (size = N) (x(0) = lambda_0 && x(1) = lambda_1)
+} VPA_Test_DATA;
+
+int Eval_VPA_Test_Residuals(const Matrix<double> &x, Matrix<double> &F, const void *data);
+
+double PolyBasis_2D(int i, int j, double x, double y);
+
+double PolyBasis_2D_dx(int i, int j, double x, double y);
+
+double PolyBasis_2D_dx2(int i, int j, double x, double y);
+
+double PolyBasis_2D_dy(int i, int j, double x, double y);
+
+double PolyBasis_2D_dy2(int i, int j, double x, double y);
+
+double PolyBasis_2D_dxdy(int i, int j, double x, double y);
+
+double PolyBasis_2D_LinearComboAppox(Matrix<double> &c, double x, double y);
+
+double Laplacian_Integral_PolyBasis_2D(int i, int j, int l, int m, double x_low, double x_high, double y_low, double y_high);
+
+double Overlap_Integral_PolyBasis_2D(int i, int j, int l, int m, double x_low, double x_high, double y_low, double y_high);
+
+typedef struct
+{
+	int bcs;				//number of bcs
+	int m;					//polynomial order
+	int N;					//problem size
+	double D;				//diffusivity
+	double k;				//reaction
+	double Lx;				//distance in x
+	double Ly;				//distance in y
+	double uo;				//boundary value at (0,0)
+	Matrix<double> c;		//Coefficient matrix
+	Matrix<double> x;		//variable matrix
+	
+} VPA_2D_TEST_DATA;
+
+int Eval_2D_VPA_TEST_Residuals(const Matrix<double> &x, Matrix<double> &F, const void *data);
+
 /// \endcond
 
 /// Function to run the methods implemented in the Sandbox

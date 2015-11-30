@@ -473,6 +473,7 @@ typedef struct
 	being developed. */
 typedef struct
 {
+	int fun_call = 0;					///< Number of function calls made during line search
 	double alpha = 1e-4;				///< Scaling parameter for determination of search step size
 	double rho = 0.1;					///< Scaling parameter for to change step size by
 	double lambdaMin=DBL_EPSILON;		///< Smallest allowable step length
@@ -511,6 +512,7 @@ typedef struct
 {
 	int nl_iter = 0;         	///< Number of non-linear iterations
 	int l_iter = 0;				///< Number of linear iterations
+	int fun_call = 0;			///< Actual number of function calls made
 	int nl_maxit = 0;			///< Maximum allowable non-linear steps
 	int linear_solver = -1;		///< Flag to denote which linear solver to use - default = PJFNK Chooses
 	

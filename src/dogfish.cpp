@@ -441,9 +441,9 @@ int DOGFISH_TESTS()
 		dog_dat.param_dat[i].sorbed_molefraction = 1.0/dog_dat.NumComp;
 		dog_dat.param_dat[i].intraparticle_diffusion = 2.148;				//um^2/hr
 		dog_dat.param_dat[i].film_transfer_coeff = 1.0;						//um/hr
-		dog_dat.param_dat[i].surface_concentration = 1.0;					//mg/g
+		dog_dat.param_dat[i].surface_concentration = 1.0;					//mol/kg
 		check+=dog_dat.param_dat[i].sorbed_molefraction;					//-
-		dog_dat.param_dat[i].initial_sorption = 0.0;						//mg/g (individual IC)
+		dog_dat.param_dat[i].initial_sorption = 0.0;						//mol/kg (individual IC)
 	}
 	if (check > 1.0+1e-6 || check < 1.0-1e-6)
 	{

@@ -4,7 +4,7 @@
 IDIR=include
 CC=gcc
 CXX=g++
-CFLAGS=-I$(IDIR) -Wno-discarded-qualifiers
+CFLAGS=-I$(IDIR) -Wno-ignored-qualifiers
 CXXFLAGS= -I$(IDIR) -Wwrite-strings -Wconversion-null -std=c++11 -fpermissive
 
 ODIR=src/obj
