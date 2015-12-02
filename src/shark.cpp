@@ -2294,7 +2294,6 @@ int DebyeHuckel_equation (const Matrix<double> &x, Matrix<double> &F, const void
 int Sit_equation (const Matrix<double>& x, Matrix<double> &F, const void *data)
 {
 	int success = 0;
-    std::cout << "Here I am\n";
 	double ionic_strength = 0.0;
 	double K=0.0;
 	SHARK_DATA *dat = (SHARK_DATA *) data;
@@ -5043,7 +5042,7 @@ int SHARK_TESTS()
 	shark_dat.num_ssao = 1;
 	shark_dat.num_usr = 0;
 	shark_dat.num_other = 0;
-	shark_dat.act_fun = PITZER;
+	shark_dat.act_fun = DAVIES;
 	shark_dat.steadystate = true;
 	shark_dat.simulationtime = 96.0;
 	shark_dat.dt = 0.1;
