@@ -76,7 +76,7 @@ void MasterSpeciesList::set_species(int i, std::string formula)
 		mError(out_of_bounds);
 		return;
 	}
-	
+
 	this->species[i].Register(formula);
 }
 
@@ -180,16 +180,16 @@ int MasterSpeciesList::get_index(std::string name)
 double MasterSpeciesList::charge(int i)
 {
 	double charge = 0.0;
-	
+
 	//Check args
 	if (i >= this->size)
 	{
 		mError(out_of_bounds);
 		return 0.0;
 	}
-	
+
 	charge = (double) this->species[i].Charge();
-	
+
 	return charge;
 }
 
@@ -218,7 +218,7 @@ std::string MasterSpeciesList::speciesName(int i)
 double MasterSpeciesList::Eval_ChargeResidual(const Matrix<double> &x)
 {
 	double res = 0.0;
-	
+
 	//Loop for all species in list
 	for (int i=0; i<this->list_size(); i++)
 	{
@@ -226,10 +226,10 @@ double MasterSpeciesList::Eval_ChargeResidual(const Matrix<double> &x)
 			res = res + (this->charge(i) * pow(10.0, x(i,0)));
 	}
 	res = res + this->alkalinity();
-	
+
 	if (isnan(res) || isinf(res))
 		res = sqrt(DBL_MAX)/this->list_size();
-	
+
 	return res;
 }
 
@@ -277,7 +277,7 @@ void Reaction::Initialize_Object(MasterSpeciesList &List)
 //Function to display all objects in the list
 void Reaction::Display_Info()
 {
-	
+
 	//Loop over all species to display reactants
 	bool first = true;
 	for (int i=0; i<this->List->list_size(); i++)
@@ -299,7 +299,7 @@ void Reaction::Display_Info()
 				else
 					std::cout << " + { " << this->List->get_species(i).MolecularFormula() << " }";
 			}
-				
+
 		}
 		if (i == this->List->list_size() - 1)
 			std::cout << " = ";
@@ -340,7 +340,7 @@ void Reaction::Set_Stoichiometric (int i, double v)
 		mError(out_of_bounds);
 		return;
 	}
-	
+
 	this->Stoichiometric[i] = v;
 }
 
@@ -384,7 +384,7 @@ void Reaction::Set_Energy(double G)
 void Reaction::checkSpeciesEnergies()
 {
 	bool HS = true, G = true;
-	
+
 	for (int i=0; i<this->List->list_size(); i++)
 	{
 		//Check if species is involved in reaction
@@ -425,7 +425,7 @@ void Reaction::calculateEnergies()
 	{
 		this->energy = 0.0;
 	}
-	
+
 	for (int i=0; i<this->Stoichiometric.size(); i++)
 	{
 		if (this->CanCalcHS == true)
@@ -511,14 +511,14 @@ double Reaction::Get_Energy()
 double Reaction::Eval_Residual(const Matrix<double> &x, const Matrix<double> &gama)
 {
 	double res = 0.0;
-	
+
 	//Loop for all species in master list
 	for (int i=0; i<this->List->list_size(); i++)
 	{
 		res = res + ( this->Stoichiometric[i] * (log10(gama(i,0)) + x(i,0)) );
 	}
 	res = res - this->Get_Equilibrium();
-	
+
 	return res;
 }
 
@@ -597,7 +597,7 @@ void MassBalance::Set_Delta (int i, double v)
 		mError(out_of_bounds);
 		return;
 	}
-	
+
 	this->Delta[i] = v;
 }
 
@@ -619,14 +619,14 @@ void MassBalance::Set_Name(std::string name)
 double MassBalance::Get_Delta (int i)
 {
 	double d = 0.0;
-	
+
 	//Check args
 	if (i >= this->Delta.size())
 	{
 		mError(out_of_bounds);
 		return 0.0;
 	}
-	
+
 	d = this->Delta[i];
 	return d;
 }
@@ -640,7 +640,7 @@ double MassBalance::Sum_Delta()
 	return sum;
 }
 
-//Get the total concentration 
+//Get the total concentration
 double MassBalance::Get_TotalConcentration ()
 {
 	if (this->TotalConcentration <= 0.0)
@@ -659,7 +659,7 @@ std::string MassBalance::Get_Name()
 double MassBalance::Eval_Residual(const Matrix<double> &x)
 {
 	double res = 0.0;
-	
+
 	//Loop for all species in list
 	for (int i=0; i<this->List->list_size(); i++)
 	{
@@ -669,10 +669,10 @@ double MassBalance::Eval_Residual(const Matrix<double> &x)
 		res = (res - this->Get_TotalConcentration())/pow(DBL_EPSILON, 2.0);
 	else
 		res = (res / this->Get_TotalConcentration()) - 1.0;
-	
+
 	if (isnan(res) || isinf(res))
 		res = sqrt(DBL_MAX)/this->List->list_size();
-	
+
 	return res;
 }
 
@@ -755,7 +755,7 @@ void UnsteadyReaction::Set_Species_Index(std::string formula)
 			break;
 		}
 	}
-	
+
 	//Check for error
 	if (foundit == false)
 	{
@@ -773,7 +773,7 @@ void UnsteadyReaction::Set_Stoichiometric (int i, double v)
 		mError(out_of_bounds);
 		return;
 	}
-	
+
 	this->Stoichiometric[i] = v;
 }
 
@@ -973,14 +973,14 @@ int UnsteadyReaction::Get_Species_Index()
 double UnsteadyReaction::Get_Stoichiometric (int i)
 {
 	double Sto = 0.0;
-	
+
 	//Check args
 	if (i >= this->Stoichiometric.size())
 	{
 		mError(out_of_bounds);
 		return 0.0;
 	}
-	
+
 	Sto = this->Stoichiometric[i];
 	return Sto;
 }
@@ -1067,7 +1067,7 @@ double UnsteadyReaction::Get_TimeStep()
 double UnsteadyReaction::Eval_ReactionRate(const Matrix<double> &x, const Matrix<double> &gama)
 {
 	double R = 0.0;
-	
+
 	//Loop over all species in list
 	double reactants = 0.0, products = 0.0;
 	bool first_prod = true, first_reac = true;
@@ -1099,7 +1099,7 @@ double UnsteadyReaction::Eval_ReactionRate(const Matrix<double> &x, const Matrix
 		}
 	}
 	R = fabs(this->Get_Stoichiometric(this->Get_Species_Index())) * (this->Get_Forward() * reactants) - (this->Get_Reverse() * products);
-	
+
 	return R;
 }
 
@@ -1108,11 +1108,11 @@ double UnsteadyReaction::Eval_Residual(const Matrix<double> &x_new, const Matrix
 {
 	double res = 0.0, rate;
 	double step, log_step;
-	
+
 	//Take full implicit time step
 	rate = this->Eval_ReactionRate(x_new, gama_new);
 	step = ( (gama_old(this->species_index,0) * pow(10.0, x_old(this->species_index,0))) + (this->time_step * rate) );
-	
+
 	if (step <= 0.0)
 		step = DBL_MIN;
 	log_step = log10(step);
@@ -1120,10 +1120,10 @@ double UnsteadyReaction::Eval_Residual(const Matrix<double> &x_new, const Matrix
 		res = this->Reaction::Eval_Residual(x_new, gama_new);
 	else
 		res = log10(gama_new(this->species_index,0)) + x_new(this->species_index,0) - log_step;
-	
+
 	if (isnan(res) || isinf(res))
 		res = sqrt(DBL_MAX)/this->List->list_size();
-	
+
 	return res;
 }
 
@@ -1141,7 +1141,7 @@ double UnsteadyReaction::Eval_IC_Residual(const Matrix<double> &x)
 		ic = -DBL_MAX;
 	else
 		ic = log10(this->Get_InitialValue());
-	
+
 	return x(this->Get_Species_Index(),0) - ic;
 }
 
@@ -1209,7 +1209,7 @@ void AdsorptionReaction::Initialize_Object(MasterSpeciesList &List, int n)
 		this->volume_factors[i] = 0.0;
 		this->activities(i,0) = 1.0;
 	}
-	
+
 	this->ads_rxn.resize(this->num_rxns);
 	this->adsorb_index.resize(this->num_rxns);
 	this->aqueous_index.resize(this->num_rxns);
@@ -1531,7 +1531,7 @@ double AdsorptionReaction::calculateLangmuirEquParam(const Matrix<double> &x, co
 	}
 	double K = pow(10.0,this->getReaction(i).Get_Equilibrium());
 	double prod = 1.0, react = 1.0;
-	
+
 	for (int n=0; n<this->List->list_size(); n++)
 	{
 		if (n != this->getAqueousIndex(i) && this->List->get_species(n).MoleculePhaseID() != SOLID)
@@ -1552,7 +1552,7 @@ double AdsorptionReaction::calculateLangmuirEquParam(const Matrix<double> &x, co
 			}
 		}
 	}
-	
+
 	if (this->getReaction(i).Get_Stoichiometric(this->getAdsorbIndex(i)) > 0.0)
 	{
 		K = K * this->getAreaFactor(this->getAdsorbIndex(i)) * pow(gama(this->getAqueousIndex(i),0),fabs(this->getReaction(i).Get_Stoichiometric(this->getAqueousIndex(i))) ) * (react/prod) / this->getActivity(this->getAdsorbIndex(i));
@@ -1561,7 +1561,7 @@ double AdsorptionReaction::calculateLangmuirEquParam(const Matrix<double> &x, co
 	{
 		K = 1.0 / (K * this->getAreaFactor(this->getAdsorbIndex(i)) * pow(gama(this->getAqueousIndex(i),0),fabs(this->getReaction(i).Get_Stoichiometric(this->getAqueousIndex(i))) ) * (react/prod) / this->getActivity(this->getAdsorbIndex(i)) );
 	}
-	
+
 	return K;
 }
 
@@ -1584,13 +1584,13 @@ double AdsorptionReaction::calculateLangmuirAdsorption(const Matrix<double> &x, 
 double AdsorptionReaction::calculateCubicPsiApprox(double sigma, double T, double I, double rel_epsilon)
 {
 	double psi = 0.0;
-	
+
 	I = I * 1000.0;//First, convert ionic strength to mol/m^3
 	double f = (2.0 * sigma) / sqrt(8.0*AbsPerm(rel_epsilon)*Rstd*T*I);
 	double C = pow((((81.0*f) + sqrt(pow((81.0*f), 2.0) + 23328.0))/2.0),(1.0/3.0));
 	double x = (18.0 - pow(C, 2.0))/(3.0*C);
 	psi = (2.0 * kB * T * x) / e;
-	
+
 	return psi;
 }
 
@@ -1598,7 +1598,7 @@ double AdsorptionReaction::calculateCubicPsiApprox(double sigma, double T, doubl
 double AdsorptionReaction::calculateAqueousChargeExchange(int i)
 {
 	double n = 0.0;
-	
+
 	//Reactants have negative stiocheometry and products have positive stiocheometry, so change sign of n on return
 	for (int j = 0; j<this->List->list_size(); j++)
 	{
@@ -1607,13 +1607,13 @@ double AdsorptionReaction::calculateAqueousChargeExchange(int i)
 			n = n + (this->getReaction(i).Get_Stoichiometric(j)*this->List->charge(j));
 		}
 	}
-	
+
 	return -n;
 }
 
 //Calculation of equilibrium correct term
 double AdsorptionReaction::calculateEquilibriumCorrection(double sigma, double T, double I, double rel_epsilon, int i)
-{	
+{
 	return exp(-(this->calculateAqueousChargeExchange(i)*e*calculateCubicPsiApprox(sigma, T, I, rel_epsilon))/(kB*T));
 }
 
@@ -1621,7 +1621,7 @@ double AdsorptionReaction::calculateEquilibriumCorrection(double sigma, double T
 double AdsorptionReaction::Eval_Residual(const Matrix<double> &x, const Matrix<double> &gama, int i)
 {
 	double res = this->getReaction(i).Get_Stoichiometric(this->getAdsorbIndex(i)) * ( log10(this->getActivity(this->getAdsorbIndex(i))) + x(this->getAdsorbIndex(i),0) );
-	
+
 	if (this->getReaction(i).Get_Stoichiometric(this->getAdsorbIndex(i)) > 0.0)
 	{
 		if (this->isAreaBasis() == true)
@@ -1636,14 +1636,14 @@ double AdsorptionReaction::Eval_Residual(const Matrix<double> &x, const Matrix<d
 		else
 			res = res + (this->getAreaFactor(this->getAdsorbIndex(i)) * log10(this->getSpecificArea()*this->calculateActiveFraction(x)));
 	}
-	
+
 	for (int n=0; n<this->List->list_size(); n++)
 	{
 		if (this->List->get_species(n).MoleculePhaseID() == AQUEOUS || this->List->get_species(n).MoleculePhaseID() == LIQUID)
 			res = res + ( this->getReaction(i).Get_Stoichiometric(n)*( log10(gama(n,0))+x(n,0) ) );
 	}
 	res = res - this->getReaction(i).Get_Equilibrium();
-	
+
 	return res;
 }
 
@@ -1786,7 +1786,7 @@ void print2file_shark_info(SHARK_DATA *shark_dat)
 		mError(nullptr_error);
 		return;
 	}
-	
+
 	//Loop for all Reactions
 	fprintf(shark_dat->OutputFile, "---------------SHARK SIMULATION: SOLUTION HEADER-----------------\n\n");
 	fprintf(shark_dat->OutputFile, "Steady-State Reactions\n-----------------------------------------------------\n");
@@ -1817,7 +1817,7 @@ void print2file_shark_info(SHARK_DATA *shark_dat)
 			if (i == shark_dat->numvar-1)
 				fprintf(shark_dat->OutputFile, " = ");
 		}
-		
+
 		first = true;
 		for (int i=0; i<shark_dat->numvar; i++)
 		{
@@ -1843,7 +1843,7 @@ void print2file_shark_info(SHARK_DATA *shark_dat)
 				fprintf(shark_dat->OutputFile, "\n\n");
 		}
 	}
-	
+
 	//Loop for all Unsteady Reactions
 	if (shark_dat->UnsteadyList.size() > 0)
 		fprintf(shark_dat->OutputFile, "Unsteady Reactions\n-----------------------------------------------------\n");
@@ -1877,7 +1877,7 @@ void print2file_shark_info(SHARK_DATA *shark_dat)
 			if (i == shark_dat->numvar-1)
 				fprintf(shark_dat->OutputFile, "  <-- reverse : forward -->  ");
 		}
-		
+
 		first = true;
 		for (int i=0; i<shark_dat->numvar; i++)
 		{
@@ -1903,7 +1903,7 @@ void print2file_shark_info(SHARK_DATA *shark_dat)
 				fprintf(shark_dat->OutputFile, "\n\n");
 		}
 	}
-	
+
 	//Loop for all AdsorptionReaction Objects (steady-state)
 	if (shark_dat->AdsorptionList.size() > 0)
 	{
@@ -1941,7 +1941,7 @@ void print2file_shark_info(SHARK_DATA *shark_dat)
 					if (i == shark_dat->numvar-1)
 						fprintf(shark_dat->OutputFile, " + { A * phi }_%i = ",n+1);
 				}
-				
+
 				first = true;
 				for (int i=0; i<shark_dat->numvar; i++)
 				{
@@ -1966,12 +1966,12 @@ void print2file_shark_info(SHARK_DATA *shark_dat)
 					if (i == shark_dat->numvar-1)
 						fprintf(shark_dat->OutputFile, "\n\n");
 				}
-				
+
 			}//END RXN LOOP
 		}
 	}
-	
-	
+
+
 	//Loop for all Mass Balances
 	fprintf(shark_dat->OutputFile, "Mass Balances\n-----------------------------------------------------\n");
 	for (int j=0; j<shark_dat->num_mbe; j++)
@@ -2018,7 +2018,7 @@ void print2file_shark_header(SHARK_DATA *shark_dat)
 		mError(nullptr_error);
 		return;
 	}
-	
+
 	fprintf(shark_dat->OutputFile, "-----------------SHARK SIMULATION CONDITIONS----------------\n\n");
 	fprintf(shark_dat->OutputFile, "Total Volume (L) = \t%.6g\n", shark_dat->volume);
 	if (shark_dat->steadystate == true)
@@ -2053,7 +2053,7 @@ void print2file_shark_header(SHARK_DATA *shark_dat)
 		fprintf(shark_dat->OutputFile, "pH Not Registered!\n");
 	fprintf(shark_dat->OutputFile, "Residual Alkalinity = %.6g (M)\n",shark_dat->MasterList.alkalinity());
 	fprintf(shark_dat->OutputFile, "\n-----------------END OF SIMULATION CONDITIONS----------------\n");
-	
+
 	fprintf(shark_dat->OutputFile, "\n----------------PJFNK SOLVER OPTIONS----------------\n\n");
 	if (shark_dat->Newton_data.Bounce == true)
 	{
@@ -2096,7 +2096,7 @@ void print2file_shark_header(SHARK_DATA *shark_dat)
 	fprintf(shark_dat->OutputFile, "Absolute Linear Tolerance = %.6g\n", shark_dat->Newton_data.lin_tol_abs);
 	fprintf(shark_dat->OutputFile, "Relative Linear Tolerance = %.6g\n", shark_dat->Newton_data.lin_tol_rel);
 	fprintf(shark_dat->OutputFile, "\n-----------------END SOLVER OPTIONS-------------------\n\n");
-	
+
 	fprintf(shark_dat->OutputFile, "-----------------SHARK SIMULATION RESULTS-------------------\n\n");
 	fprintf(shark_dat->OutputFile, "Time\tT\tpH");
 	for (int i=0; i<shark_dat->MasterList.list_size(); i++)
@@ -2111,19 +2111,19 @@ void print2file_shark_header(SHARK_DATA *shark_dat)
 			case AQUEOUS:
 				fprintf(shark_dat->OutputFile, "\t(mol/L)");
 				break;
-				
+
 			case LIQUID:
 				fprintf(shark_dat->OutputFile, "\t(mol/L)");
 				break;
-				
+
 			case GAS:
 				fprintf(shark_dat->OutputFile, "\t(kPa)");
 				break;
-				
+
 			case SOLID:
 				fprintf(shark_dat->OutputFile, "\t(mol/kg)");
 				break;
-				
+
 			default:
 				fprintf(shark_dat->OutputFile, "\t(-)");
 				break;
@@ -2143,7 +2143,7 @@ void print2file_shark_results_new(SHARK_DATA *shark_dat)
 		mError(nullptr_error);
 		return;
 	}
-	
+
 	if (shark_dat->time < 0.0)
 		fprintf(shark_dat->OutputFile, "inf\t%.6g\t%.6g", shark_dat->temperature, shark_dat->pH);
 	else
@@ -2167,7 +2167,7 @@ void print2file_shark_results_old(SHARK_DATA *shark_dat)
 		mError(nullptr_error);
 		return;
 	}
-	
+
 	if (shark_dat->time < 0.0)
 		fprintf(shark_dat->OutputFile, "inf\t%.6g\t%.6g", shark_dat->temperature, shark_dat->pH);
 	else
@@ -2188,15 +2188,15 @@ int FloryHuggins(const Matrix<double> &x, Matrix<double> &F, const void *data)
 	AdsorptionReaction *dat = (AdsorptionReaction *) data;
 	double logp = 0.0, invp = 0.0;
 	double total = 0.0, lnact = 0.0;
-	
+
 	for (int i=0; i<F.rows(); i++)
 		F.edit(i, 0, 1.0);
-	
+
 	for (int i=0; i<dat->getNumberRxns(); i++)
 	{
 		total = total + pow(10.0, x(dat->getAdsorbIndex(i),0));
 	}
-	
+
 	for (int i=0; i<dat->getNumberRxns(); i++)
 	{
 		logp = 0.0;
@@ -2214,7 +2214,7 @@ int FloryHuggins(const Matrix<double> &x, Matrix<double> &F, const void *data)
 		if (isinf(F(dat->getAdsorbIndex(i),0)) || isnan(F(dat->getAdsorbIndex(i),0)))
 			F.edit(dat->getAdsorbIndex(i), 0, DBL_MAX);
 	}
-	
+
 	return success;
 }
 
@@ -2235,7 +2235,7 @@ int Davies_equation (const Matrix<double>& x, Matrix<double> &F, const void *dat
 	int success = 0;
 	double ionic_strength = 0.0;
 	SHARK_DATA *dat = (SHARK_DATA *) data;
-	
+
 	//Loop to calculate ionic strength
 	for (int i=0; i<dat->numvar; i++)
 	{
@@ -2245,7 +2245,7 @@ int Davies_equation (const Matrix<double>& x, Matrix<double> &F, const void *dat
 	ionic_strength = ionic_strength / 2.0;
 	if (isinf(ionic_strength) || isnan(ionic_strength))
 		ionic_strength = DBL_MAX_10_EXP;
-		
+
 	//Calculate log10(activity) from ionic_strength and variable A
 	double a = 1.82E+6 * pow((dat->dielectric_const*dat->temperature), (-3.0/2.0));
 	double log_gama = 0.0;
@@ -2256,7 +2256,7 @@ int Davies_equation (const Matrix<double>& x, Matrix<double> &F, const void *dat
 		if (isinf(F(i,0)) || isnan(F(i,0)))
 			F.edit(i, 0, DBL_MAX);
 	}
-		
+
 	return success;
 }
 
@@ -2266,7 +2266,7 @@ int DebyeHuckel_equation (const Matrix<double> &x, Matrix<double> &F, const void
 	int success = 0;
 	double ionic_strength = 0.0;
 	SHARK_DATA *dat = (SHARK_DATA *) data;
-	
+
 	//Loop to calculate ionic strength
 	for (int i=0; i<dat->numvar; i++)
 	{
@@ -2276,7 +2276,7 @@ int DebyeHuckel_equation (const Matrix<double> &x, Matrix<double> &F, const void
 	ionic_strength = ionic_strength / 2.0;
 	if (isinf(ionic_strength) || isnan(ionic_strength))
 		ionic_strength = DBL_MAX_10_EXP;
-	
+
 	//Calculate log10(activity) from ionic_strength and variable A
 	double a = 1.82E+6 * pow((dat->dielectric_const*dat->temperature), (-3.0/2.0));
 	double log_gama = 0.0;
@@ -2287,19 +2287,873 @@ int DebyeHuckel_equation (const Matrix<double> &x, Matrix<double> &F, const void
 		if (isinf(F(i,0)) || isnan(F(i,0)))
 			F.edit(i, 0, DBL_MAX);
 	}
-	
+
 	return success;
 }
+
+int Sit_equation (const Matrix<double>& x, Matrix<double> &F, const void *data)
+{
+	int success = 0;
+    std::cout << "Here I am\n";
+	double ionic_strength = 0.0;
+	double K=0.0;
+	SHARK_DATA *dat = (SHARK_DATA *) data;
+
+	//Loop to calculate ionic strength
+	for (int i=0; i<dat->numvar; i++)
+	{
+		ionic_strength = ionic_strength + (pow(10.0,x(i,0)) * dat->MasterList.charge(i) * dat->MasterList.charge(i));
+	}
+	ionic_strength = ionic_strength / 2.0;
+	if (isinf(ionic_strength) || isnan(ionic_strength))
+		ionic_strength = DBL_MAX_10_EXP;
+
+	//Calculate log10(activity) from ionic_strength and interaction coefficient
+
+	double b[dat->numvar][dat->numvar], log_gama[dat->numvar];
+
+	for(int i=0; i<dat->numvar; i++)
+    {
+        for(int j=0; j<dat->numvar; j++)
+        {
+            b[i][j]=0.0;
+        }
+
+    }
+
+	b[0][1]=0.0;
+	b[0][2]=0.0;
+	b[0][3]=0.038;
+	b[0][4]=0.0;
+	b[0][5]=0.0;
+	b[0][6]=0.0;
+	b[0][7]=0.0;
+	b[0][8]=0.0;
+	b[0][9]=0.0;
+	b[0][10]=0.0;
+	b[0][11]=0.0;
+	b[0][12]=0.0;
+	b[0][13]=0.0;
+	b[0][14]=0.0;
+	b[0][15]=0.0;
+	b[0][16]=0.0;
+	b[0][17]=0.0;
+	b[0][18]=0.0;
+	b[0][19]=0.0;
+	b[0][20]=0.0;
+	b[0][21]=0.125;
+	b[0][22]=0.0;
+	b[0][23]=0.0;
+	b[0][24]=0.0;
+	b[0][25]=0.0;
+	b[3][4]=0.0;
+	b[3][5]=0.0;
+	b[3][6]=0.0;
+	b[3][7]=0.0;
+	b[3][8]=-0.08;
+	b[3][9]=0.0;
+	b[3][10]=0.0;
+	b[3][11]=0.0;
+	b[3][12]=0.0;
+	b[3][13]=-0.09;
+	b[3][14]=0.0;
+	b[3][15]=0.0;
+	b[3][16]=0.0;
+	b[3][17]=-0.02;
+	b[3][18]=-0.01;
+	b[3][19]=0.0;
+	b[3][20]=0.0;
+	b[3][21]=0.0;
+	b[3][22]=0.0;
+	b[3][23]=0.0;
+	b[3][24]=0.0;
+	b[3][25]=0.0;
+
+
+
+
+	for (int i=0; i<dat->numvar; i++)
+    {
+        for (int j=0; j<dat->numvar; j++)
+        {
+            if (i==j)
+               break;
+            b[i][j]=b[j][i];
+        }
+    }
+
+
+	for (int i=0; i<dat->numvar; i++)
+	{
+        if (dat->MasterList.charge(i)==0)
+            log_gama[i]=K*ionic_strength;
+        else
+        {
+	    double log_gama0=0.0;
+		log_gama0 = -dat->MasterList.charge(i)*dat->MasterList.charge(i) * 0.51 * sqrt(ionic_strength)/(1+1.5*sqrt(ionic_strength));
+
+		//Species sum for molefractions
+		double sum = 0.0;
+		for (int j=0; j<dat->numvar; j++)
+		{
+			sum = sum + b[i][j]*pow(10,x(i,0));
+		}
+		log_gama[i] = log_gama0 + sum;
+
+		F.edit(i, 0, pow(10.0, log_gama[i]));
+		if (isinf(F(i,0)) || isnan(F(i,0)))
+			F.edit(i, 0, DBL_MAX);
+        }
+	}
+
+	return success;
+}
+
+int pitzer_equation (const Matrix<double>& x, Matrix<double> &F, const void *data)
+{
+	int success = 0;
+
+	double ionic_strength = 0.0;
+	SHARK_DATA *dat = (SHARK_DATA *) data;
+
+	//Loop to calculate ionic strength
+	for (int i=0; i<dat->numvar; i++)
+	{
+		ionic_strength = ionic_strength + (pow(10.0,x(i,0)) * dat->MasterList.charge(i) * dat->MasterList.charge(i));
+	}
+	ionic_strength = ionic_strength / 2.0;
+	if (isinf(ionic_strength) || isnan(ionic_strength))
+		ionic_strength = DBL_MAX_10_EXP;
+
+	//Calculate log10(activity) from ionic_strength and interaction coefficient
+	double log_gama[dat->numvar], Z=0, p0=0.0, p1=0.0, p2=0.0, p3=0.0, p4=0.0, p5=0.0, p6=0.0, F0=0.0, F1=0.0, F2=0.0;
+	double F3=0.0, Fa=0.0, alpha=0.0, alpha1=0.0, alpha2=0.0, G1=0.0, G2=0.0, Gminus1=0.0, Gminus2=0.0;
+	double minx1=0.0, minx2=0.0, minx3=0.0;
+	int minum1=0, minum2=0, minum3=0;
+	double beta0[dat->numvar][dat->numvar], beta1[dat->numvar][dat->numvar],beta2[dat->numvar][dat->numvar], Cphi[dat->numvar][dat->numvar],C[dat->numvar][dat->numvar],B[dat->numvar][dat->numvar],Bminus[dat->numvar][dat->numvar];
+	double xMN[dat->numvar][dat->numvar],xMM[dat->numvar][dat->numvar],xNN[dat->numvar][dat->numvar],zeta[dat->numvar][dat->numvar], phi[dat->numvar][dat->numvar],phiminus[dat->numvar][dat->numvar], ezeta[dat->numvar][dat->numvar], ezetaminus[dat->numvar][dat->numvar];
+	double xminus1[dat->numvar][64],xminus2[dat->numvar][64], xminus3[dat->numvar][64], jf[64],jminus[64];
+	double psi[dat->numvar][dat->numvar][dat->numvar];
+
+    for(int i=0; i<dat->numvar; i++)
+    {
+        for(int j=0; j<dat->numvar; j++)
+        {
+            beta0[i][j]=0.0;
+            beta1[i][j]=0.0;
+            beta2[i][j]=0.0;
+            Cphi[i][j]=0.0;
+            zeta[i][j]=0.0;
+
+        }
+    }
+
+
+    for(int i=0; i<dat->numvar; i++)
+    {
+        for(int j=0; j<dat->numvar; j++)
+        {
+            beta0[i][j]=beta0[j][i];
+            beta1[i][j]=beta1[j][i];
+            beta2[i][j]=beta2[j][i];
+            Cphi[i][j]=Cphi[j][i];
+            zeta[i][j]=zeta[j][i];
+        }
+    }
+
+    for(int i=0; i<dat->numvar; i++)
+    {
+        for(int j=0; j<dat->numvar; j++)
+        {
+            for(int k=0; k<dat->numvar; k++)
+            {
+                psi[i][j][k]=0.0;
+            }
+
+        }
+    }
+
+    for(int i=0; i<dat->numvar; i++)
+    {
+        for(int j=0; j<dat->numvar; j++)
+        {
+            for(int k=0; k<dat->numvar; k++)
+            {
+                psi[i][j][k]=psi[j][i][k];
+                psi[i][j][k]=psi[i][k][j];
+                psi[i][j][k]=psi[j][k][i];
+                psi[i][j][k]=psi[k][i][j];
+                psi[i][j][k]=psi[k][j][i];
+
+
+            }
+        }
+    }
+
+
+
+
+    jf[0]=0.0000706;
+    jminus[0]=0.0127;
+    jf[1]=0.0002387;
+    jminus[1]=0.0207;
+    jf[2]=0.0004806;
+    jminus[2]=0.0275;
+    jf[3]=0.0007850;
+    jminus[3]=0.0333;
+    jf[4]=0.0011443;
+    jminus[4]=0.0385;
+    jf[5]=0.0015529;
+    jminus[5]=0.0432;
+    jf[6]=0.0020063;
+    jminus[6]=0.0475;
+    jf[7]=0.0025010;
+    jminus[7]=0.0514;
+    jf[8]=0.0030340;
+    jminus[8]=0.0551;
+    jf[9]=0.0039028;
+    jminus[9]=0.0586;
+    jf[10]=0.0048393;
+    jminus[10]=0.0649;
+    jf[11]=0.0061961;
+    jminus[11]=0.0706;
+    jf[12]=0.0076615;
+    jminus[12]=0.0758;
+    jf[13]=0.0092260;
+    jminus[13]=0.0806;
+    jf[14]=0.010882;
+    jminus[14]=0.0850;
+    jf[15]=0.014441;
+    jminus[15]=0.0928;
+    jf[16]=0.018295;
+    jminus[16]=0.0997;
+    jf[17]=0.022409;
+    jminus[17]=0.1059;
+    jf[18]=0.026775;
+    jminus[18]=0.1114;
+    jf[19]=0.031313;
+    jminus[19]=0.1164;
+    jf[20]=0.036061;
+    jminus[20]=0.1210;
+    jf[21]=0.040985;
+    jminus[21]=0.1252;
+    jf[22]=0.046070;
+    jminus[22]=0.1297;
+    jf[23]=0.051306;
+    jminus[23]=0.1327;
+    jf[24]=0.056680;
+    jminus[24]=0.1360;
+    jf[25]=0.085346;
+    jminus[25]=0.1499;
+    jf[26]=0.11644;
+    jminus[26]=0.1605;
+    jf[27]=0.14941;
+    jminus[27]=0.1689;
+    jf[28]=0.18390;
+    jminus[28]=0.1758;
+    jf[29]=0.21965;
+    jminus[29]=0.1815;
+    jf[30]=0.25645;
+    jminus[30]=0.1864;
+    jf[31]=0.29416;
+    jminus[31]=0.1906;
+    jf[32]=0.49283;
+    jminus[32]=0.2053;
+    jf[33]=0.70293;
+    jminus[33]=0.2142;
+    jf[34]=0.92035;
+    jminus[34]=0.2202;
+    jf[35]=1.14288;
+    jminus[35]=0.2246;
+    jf[36]=1.36918;
+    jminus[36]=0.2279;
+    jf[37]=1.59839;
+    jminus[37]=0.2304;
+    jf[38]=1.82990;
+    jminus[38]=0.2325;
+    jf[39]=2.06328;
+    jminus[39]=0.2342;
+    jf[40]=2.53446;
+    jminus[40]=0.2368;
+    jf[41]=3.48916;
+    jminus[41]=0.2402;
+    jf[42]=4.45453;
+    jminus[42]=0.2423;
+    jf[43]=5.57865;
+    jminus[43]=0.2374;
+    jf[44]=6.40378;
+    jminus[44]=0.2447;
+    jf[45]=7.38429;
+    jminus[45]=0.2455;
+    jf[46]=8.36745;
+    jminus[46]=0.2461;
+    jf[47]=9.35270;
+    jminus[47]=0.2465;
+    jf[48]=11.82248;
+    jminus[48]=0.2474;
+    jf[49]=14.29890;
+    jminus[49]=0.2479;
+    jf[50]=16.77979;
+    jminus[50]=0.2483;
+    jf[51]=19.26387;
+    jminus[51]=0.2485;
+    jf[52]=21.75033;
+    jminus[52]=0.2487;
+    jf[53]=24.23861;
+    jminus[53]=0.2489;
+    jf[54]=49.17099;
+    jminus[54]=0.2496;
+    jf[55]=99.11907;
+    jminus[55]=0.2498;
+    jf[56]=149.9520;
+    jminus[56]=0.2499;
+    jf[57]=199.08083;
+    jminus[57]=0.2499;
+    jf[58]=249.07101;
+    jminus[58]=0.2500;
+    jf[59]=499.04682;
+    jminus[59]=0.2500;
+    jf[60]=999.03028;
+    jminus[60]=0.2500;
+    jf[61]=1499.03028;
+    jminus[61]=0.2500;
+    jf[62]=1999.01925;
+    jminus[62]=0.2500;
+    jf[63]=2499.01659;
+    jminus[63]=0.2500;
+
+    for(int i=0; i<dat->numvar; i++)
+    {
+        for(int j=0; j<dat->numvar; j++)
+        {
+            if (dat->MasterList.charge(i)==0 || dat->MasterList.charge(j)==0)
+            {
+                ezeta[i][j]=0.0;
+                ezetaminus[i][j]=0.0;
+                phi[i][j]=0.0;
+                phiminus[i][j]=0.0;
+                break;
+            }
+
+            xMN[i][j]=abs(6*dat->MasterList.charge(i)*dat->MasterList.charge(j)*0.392*sqrt(ionic_strength));
+            xMM[i][j]=6*dat->MasterList.charge(i)*dat->MasterList.charge(i)*0.392*sqrt(ionic_strength);
+            xNN[i][j]=6*dat->MasterList.charge(i)*dat->MasterList.charge(i)*0.392*sqrt(ionic_strength);
+
+                xminus1[i][0]=abs(xMN[i][j]-0.01);
+                xminus1[i][1]=abs(xMN[i][j]-0.02);
+                xminus1[i][2]=abs(xMN[i][j]-0.03);
+                xminus1[i][3]=abs(xMN[i][j]-0.04);
+                xminus1[i][4]=abs(xMN[i][j]-0.05);
+                xminus1[i][5]=abs(xMN[i][j]-0.06);
+                xminus1[i][6]=abs(xMN[i][j]-0.07);
+                xminus1[i][7]=abs(xMN[i][j]-0.08);
+                xminus1[i][8]=abs(xMN[i][j]-0.09);
+                xminus1[i][9]=abs(xMN[i][j]-0.10);
+                xminus1[i][10]=abs(xMN[i][j]-0.12);
+                xminus1[i][11]=abs(xMN[i][j]-0.14);
+                xminus1[i][12]=abs(xMN[i][j]-0.16);
+                xminus1[i][13]=abs(xMN[i][j]-0.18);
+                xminus1[i][14]=abs(xMN[i][j]-0.20);
+                xminus1[i][15]=abs(xMN[i][j]-0.24);
+                xminus1[i][16]=abs(xMN[i][j]-0.28);
+                xminus1[i][17]=abs(xMN[i][j]-0.32);
+                xminus1[i][18]=abs(xMN[i][j]-0.36);
+                xminus1[i][19]=abs(xMN[i][j]-0.40);
+                xminus1[i][20]=abs(xMN[i][j]-0.44);
+                xminus1[i][21]=abs(xMN[i][j]-0.48);
+                xminus1[i][22]=abs(xMN[i][j]-0.52);
+                xminus1[i][23]=abs(xMN[i][j]-0.56);
+                xminus1[i][24]=abs(xMN[i][j]-0.60);
+                xminus1[i][25]=abs(xMN[i][j]-0.80);
+                xminus1[i][26]=abs(xMN[i][j]-1.00);
+                xminus1[i][27]=abs(xMN[i][j]-1.20);
+                xminus1[i][28]=abs(xMN[i][j]-1.40);
+                xminus1[i][29]=abs(xMN[i][j]-1.60);
+                xminus1[i][30]=abs(xMN[i][j]-1.80);
+                xminus1[i][31]=abs(xMN[i][j]-2.00);
+                xminus1[i][32]=abs(xMN[i][j]-3.00);
+                xminus1[i][33]=abs(xMN[i][j]-4.00);
+                xminus1[i][34]=abs(xMN[i][j]-5.00);
+                xminus1[i][35]=abs(xMN[i][j]-6.00);
+                xminus1[i][36]=abs(xMN[i][j]-7.00);
+                xminus1[i][37]=abs(xMN[i][j]-8.00);
+                xminus1[i][38]=abs(xMN[i][j]-9.00);
+                xminus1[i][39]=abs(xMN[i][j]-10.00);
+                xminus1[i][40]=abs(xMN[i][j]-12.00);
+                xminus1[i][41]=abs(xMN[i][j]-16.00);
+                xminus1[i][42]=abs(xMN[i][j]-20.00);
+                xminus1[i][43]=abs(xMN[i][j]-24.00);
+                xminus1[i][44]=abs(xMN[i][j]-28.00);
+                xminus1[i][45]=abs(xMN[i][j]-32.00);
+                xminus1[i][46]=abs(xMN[i][j]-36.00);
+                xminus1[i][47]=abs(xMN[i][j]-40.00);
+                xminus1[i][48]=abs(xMN[i][j]-50.00);
+                xminus1[i][49]=abs(xMN[i][j]-60.00);
+                xminus1[i][50]=abs(xMN[i][j]-70.00);
+                xminus1[i][51]=abs(xMN[i][j]-80.00);
+                xminus1[i][52]=abs(xMN[i][j]-90.00);
+                xminus1[i][53]=abs(xMN[i][j]-100.00);
+                xminus1[i][54]=abs(xMN[i][j]-200.00);
+                xminus1[i][55]=abs(xMN[i][j]-400.00);
+                xminus1[i][56]=abs(xMN[i][j]-600.00);
+                xminus1[i][57]=abs(xMN[i][j]-800.00);
+                xminus1[i][58]=abs(xMN[i][j]-1000.00);
+                xminus1[i][59]=abs(xMN[i][j]-2000.00);
+                xminus1[i][60]=abs(xMN[i][j]-4000.00);
+                xminus1[i][61]=abs(xMN[i][j]-6000.00);
+                xminus1[i][62]=abs(xMN[i][j]-8000.00);
+                xminus1[i][63]=abs(xMN[i][j]-10000.00);
+                minx1=xminus1[i][0];
+                minum1=0;
+                for(int k=0; k<64; k++)
+                {
+                    if (xminus1[i][k]<minx1)
+                    {
+                        minx1=xminus1[i][k];
+                        minum1=k;
+                    }
+                    else
+                        break;
+                }
+
+                xminus2[i][0]=abs(xMM[i][j]-0.01);
+                xminus2[i][1]=abs(xMM[i][j]-0.02);
+                xminus2[i][2]=abs(xMM[i][j]-0.05);
+                xminus2[i][5]=abs(xMM[i][j]-0.06);
+                xminus2[i][6]=abs(xMM[i][j]-0.07);
+                xminus2[i][7]=abs(xMM[i][j]-0.08);
+                xminus2[i][8]=abs(xMM[i][j]-0.09);
+                xminus2[i][9]=abs(xMM[i][j]-0.10);
+                xminus2[i][10]=abs(xMM[i][j]-0.12);
+                xminus2[i][11]=abs(xMM[i][j]-0.14);
+                xminus2[i][12]=abs(xMM[i][j]-0.16);
+                xminus2[i][13]=abs(xMM[i][j]-0.18);
+                xminus2[i][14]=abs(xMM[i][j]-0.20);
+                xminus2[i][15]=abs(xMM[i][j]-0.24);
+                xminus2[i][16]=abs(xMM[i][j]-0.28);
+                xminus2[i][17]=abs(xMM[i][j]-0.32);
+                xminus2[i][18]=abs(xMM[i][j]-0.36);
+                xminus2[i][19]=abs(xMM[i][j]-0.40);
+                xminus2[i][20]=abs(xMM[i][j]-0.44);
+                xminus2[i][21]=abs(xMM[i][j]-0.48);
+                xminus2[i][22]=abs(xMM[i][j]-0.52);
+                xminus2[i][23]=abs(xMM[i][j]-0.56);
+                xminus2[i][24]=abs(xMM[i][j]-0.60);
+                xminus2[i][25]=abs(xMM[i][j]-0.80);
+                xminus2[i][26]=abs(xMM[i][j]-1.00);
+                xminus2[i][27]=abs(xMM[i][j]-1.20);
+                xminus2[i][28]=abs(xMM[i][j]-1.40);
+                xminus2[i][29]=abs(xMM[i][j]-1.60);
+                xminus2[i][30]=abs(xMM[i][j]-1.80);
+                xminus2[i][31]=abs(xMM[i][j]-2.00);
+                xminus2[i][32]=abs(xMM[i][j]-3.00);
+                xminus2[i][33]=abs(xMM[i][j]-4.00);
+                xminus2[i][34]=abs(xMM[i][j]-5.00);
+                xminus2[i][35]=abs(xMM[i][j]-6.00);
+                xminus2[i][36]=abs(xMM[i][j]-7.00);
+                xminus2[i][37]=abs(xMM[i][j]-8.00);
+                xminus2[i][38]=abs(xMM[i][j]-9.00);
+                xminus2[i][39]=abs(xMM[i][j]-10.00);
+                xminus2[i][40]=abs(xMM[i][j]-12.00);
+                xminus2[i][41]=abs(xMM[i][j]-16.00);
+                xminus2[i][42]=abs(xMM[i][j]-20.00);
+                xminus2[i][43]=abs(xMM[i][j]-24.00);
+                xminus2[i][44]=abs(xMM[i][j]-28.00);
+                xminus2[i][45]=abs(xMM[i][j]-32.00);
+                xminus2[i][46]=abs(xMM[i][j]-36.00);
+                xminus2[i][47]=abs(xMM[i][j]-40.00);
+                xminus2[i][48]=abs(xMM[i][j]-50.00);
+                xminus2[i][49]=abs(xMM[i][j]-60.00);
+                xminus2[i][50]=abs(xMM[i][j]-70.00);
+                xminus2[i][51]=abs(xMM[i][j]-80.00);
+                xminus2[i][52]=abs(xMM[i][j]-90.00);
+                xminus2[i][53]=abs(xMM[i][j]-100.00);
+                xminus2[i][54]=abs(xMM[i][j]-200.00);
+                xminus2[i][55]=abs(xMM[i][j]-400.00);
+                xminus2[i][56]=abs(xMM[i][j]-600.00);
+                xminus2[i][57]=abs(xMM[i][j]-800.00);
+                xminus2[i][58]=abs(xMM[i][j]-1000.00);
+                xminus2[i][59]=abs(xMM[i][j]-2000.00);
+                xminus2[i][60]=abs(xMM[i][j]-4000.00);
+                xminus2[i][61]=abs(xMM[i][j]-6000.00);
+                xminus2[i][62]=abs(xMM[i][j]-8000.00);
+                xminus2[i][63]=abs(xMM[i][j]-10000.00);
+                minx2=xminus2[i][0];
+                minum2=0;
+                for(int k=0; k<64; k++)
+                {
+                    if (xminus2[i][k]<minx2)
+                    {
+                        minx2=xminus2[i][k];
+                        minum2=k;
+                    }
+                    else
+                        break;
+                }
+
+                xminus3[i][0]=abs(xNN[i][j]-0.01);
+                xminus3[i][1]=abs(xNN[i][j]-0.02);
+                xminus3[i][2]=abs(xNN[i][j]-0.03);
+                xminus3[i][3]=abs(xNN[i][j]-0.04);
+                xminus3[i][4]=abs(xNN[i][j]-0.05);
+                xminus3[i][5]=abs(xNN[i][j]-0.06);
+                xminus3[i][6]=abs(xNN[i][j]-0.07);
+                xminus3[i][7]=abs(xNN[i][j]-0.08);
+                xminus3[i][8]=abs(xNN[i][j]-0.09);
+                xminus3[i][9]=abs(xNN[i][j]-0.10);
+                xminus3[i][10]=abs(xNN[i][j]-0.12);
+                xminus3[i][11]=abs(xNN[i][j]-0.14);
+                xminus3[i][12]=abs(xNN[i][j]-0.16);
+                xminus3[i][13]=abs(xNN[i][j]-0.18);
+                xminus3[i][14]=abs(xNN[i][j]-0.20);
+                xminus3[i][15]=abs(xNN[i][j]-0.24);
+                xminus3[i][16]=abs(xNN[i][j]-0.28);
+                xminus3[i][17]=abs(xNN[i][j]-0.32);
+                xminus3[i][18]=abs(xNN[i][j]-0.36);
+                xminus3[i][19]=abs(xNN[i][j]-0.40);
+                xminus3[i][20]=abs(xNN[i][j]-0.44);
+                xminus3[i][21]=abs(xNN[i][j]-0.48);
+                xminus3[i][22]=abs(xNN[i][j]-0.52);
+                xminus3[i][23]=abs(xNN[i][j]-0.56);
+                xminus3[i][24]=abs(xNN[i][j]-0.60);
+                xminus3[i][25]=abs(xNN[i][j]-0.80);
+                xminus3[i][26]=abs(xNN[i][j]-1.00);
+                xminus3[i][27]=abs(xNN[i][j]-1.20);
+                xminus3[i][28]=abs(xNN[i][j]-1.40);
+                xminus3[i][29]=abs(xNN[i][j]-1.60);
+                xminus3[i][30]=abs(xNN[i][j]-1.80);
+                xminus3[i][31]=abs(xNN[i][j]-2.00);
+                xminus3[i][32]=abs(xNN[i][j]-3.00);
+                xminus3[i][33]=abs(xNN[i][j]-4.00);
+                xminus3[i][34]=abs(xNN[i][j]-5.00);
+                xminus3[i][35]=abs(xNN[i][j]-6.00);
+                xminus3[i][36]=abs(xNN[i][j]-7.00);
+                xminus3[i][37]=abs(xNN[i][j]-8.00);
+                xminus3[i][38]=abs(xNN[i][j]-9.00);
+                xminus3[i][39]=abs(xNN[i][j]-10.00);
+                xminus3[i][40]=abs(xNN[i][j]-12.00);
+                xminus3[i][41]=abs(xNN[i][j]-16.00);
+                xminus3[i][42]=abs(xNN[i][j]-20.00);
+                xminus3[i][43]=abs(xNN[i][j]-24.00);
+                xminus3[i][44]=abs(xNN[i][j]-28.00);
+                xminus3[i][45]=abs(xNN[i][j]-32.00);
+                xminus3[i][46]=abs(xNN[i][j]-36.00);
+                xminus3[i][47]=abs(xNN[i][j]-40.00);
+                xminus3[i][48]=abs(xNN[i][j]-50.00);
+                xminus3[i][49]=abs(xNN[i][j]-60.00);
+                xminus3[i][50]=abs(xNN[i][j]-70.00);
+                xminus3[i][51]=abs(xNN[i][j]-80.00);
+                xminus3[i][52]=abs(xNN[i][j]-90.00);
+                xminus3[i][53]=abs(xNN[i][j]-100.00);
+                xminus3[i][54]=abs(xNN[i][j]-200.00);
+                xminus3[i][55]=abs(xNN[i][j]-400.00);
+                xminus3[i][56]=abs(xNN[i][j]-600.00);
+                xminus3[i][57]=abs(xNN[i][j]-800.00);
+                xminus3[i][58]=abs(xNN[i][j]-1000.00);
+                xminus3[i][59]=abs(xNN[i][j]-2000.00);
+                xminus3[i][60]=abs(xNN[i][j]-4000.00);
+                xminus3[i][61]=abs(xNN[i][j]-6000.00);
+                xminus3[i][62]=abs(xNN[i][j]-8000.00);
+                xminus3[i][63]=abs(xNN[i][j]-10000.00);
+                minx3=xminus3[i][0];
+                minum3=0;
+                for(int k=0; k<64; k++)
+                {
+                    if (xminus3[i][k]<minx3)
+                    {
+                        minx3=xminus3[i][k];
+                        minum3=k;
+                    }
+                    else
+                        break;
+                }
+
+                ezeta[i][j]=((dat->MasterList.charge(i))*(dat->MasterList.charge(j))/(4*ionic_strength))*(jf[minum1]-0.5*jf[minum2]-0.5*jf[minum3]);
+                ezetaminus[i][j]=-(ezeta[i][j]/ionic_strength)+(dat->MasterList.charge(i))*(dat->MasterList.charge(j))/(8*ionic_strength*ionic_strength)*(xMN[i][j]*jminus[minum1]-0.5*xMM[i][j]*jminus[minum2]-0.5*xNN[i][j]*jminus[minum3]);
+                phi[i][j]=zeta[i][j]+ezeta[i][j];
+                phiminus[i][j]=ezetaminus[i][j];
+
+        }
+    }
+
+
+
+	for(int i=0; i<dat->numvar; i++)
+	{
+	    Z=pow(10.0,x(i,0))*abs(dat->MasterList.charge(i));
+	}
+
+    F0=-0.392*(sqrt(ionic_strength)/(1.0+(1.2*sqrt(ionic_strength)))+(2/1.2)*log(1+(1.2*sqrt(ionic_strength))));
+
+    for (int i=0; i<dat->numvar; i++)
+        {
+            if (dat->MasterList.charge(i)<0)
+            {
+              for(int j=0; j<dat->numvar; j++)
+              {
+                 if ((dat->MasterList.charge(i)<0) || (i==j))
+                    break;
+                 F1=F1+pow(10.0,x(i,0))*pow(10.0,x(j,0))*Bminus[i][j];
+              }
+            }
+            else if (dat->MasterList.charge(i)==0)
+               break;
+            else
+             for (int k=0; k<dat->numvar; k++)
+             {
+                 if ((dat->MasterList.charge(i)>0) || (i==k))
+                    break;
+                 F1=F1+pow(10.0,x(i,0))*pow(10.0,x(k,0))*Bminus[i][k];
+             }
+        }
+
+    for (int i=0; i<dat->numvar; i++)
+        {
+            if (dat->MasterList.charge(i)<0)
+               break;
+               for (int j=0; j<dat->numvar; j++)
+               {
+                   if ((dat->MasterList.charge(i)<0) || i==j)
+                    break;
+                   F2=F2+pow(10.0,x(i,0))*pow(10.0,x(j,0))*phiminus[i][j];
+               }
+        }
+
+    for (int i=0; i<dat->numvar; i++)
+        {
+            if (dat->MasterList.charge(i)>0)
+               break;
+               for (int j=0; j<dat->numvar; j++)
+               {
+                   if ((dat->MasterList.charge(i)<0) || i==j)
+                    break;
+                   F3=F3+pow(10.0,x(i,0))*pow(10.0,x(j,0))*phiminus[i][j];
+               }
+        }
+
+    Fa=F0+F1+F2+F3;
+    F1=0.0;
+    F2=0.0;
+    F3=0.0;
+
+
+    for(int i=0; i<dat->numvar; i++)
+    {
+        for(int j=0; j<dat->numvar; j++)
+        {
+            if ((abs(dat->MasterList.charge(i))==1) || (abs(dat->MasterList.charge(j))==1))
+            {
+                alpha=2;
+                G1=2*(1-(1+alpha*sqrt(ionic_strength))*exp(-alpha*sqrt(ionic_strength)))/(alpha*alpha*ionic_strength);
+                Gminus1=-2*(1-(1+alpha*sqrt(ionic_strength)+0.5*alpha*alpha*ionic_strength)*exp(-alpha*sqrt(ionic_strength)))/(alpha*alpha*ionic_strength);
+                B[i][j]=beta0[i][j]+beta1[i][j]*G1;
+                Bminus[i][j]=beta1[i][j]*Gminus1/ionic_strength;
+                alpha=0.0;
+                G1=0.0;
+                Gminus1=0.0;
+            }
+            else if ((abs(dat->MasterList.charge(i))==2) && (abs(dat->MasterList.charge(j))==2))
+            {
+                alpha1=1.4;
+                alpha2=12;
+                G1=2*(1-(1+alpha1*sqrt(ionic_strength))*exp(-alpha1*sqrt(ionic_strength)))/(alpha1*alpha1*ionic_strength);
+                Gminus1=-2*(1-(1+alpha1*sqrt(ionic_strength)+0.5*alpha1*alpha1*ionic_strength)*exp(-alpha1*sqrt(ionic_strength)))/(alpha1*alpha1*ionic_strength);
+                G2=2*(1-(1+alpha2*sqrt(ionic_strength))*exp(-alpha2*sqrt(ionic_strength)))/(alpha2*alpha2*ionic_strength);
+                Gminus2=-2*(1-(1+alpha2*sqrt(ionic_strength)+0.5*alpha2*alpha2*ionic_strength)*exp(-alpha2*sqrt(ionic_strength)))/(alpha2*alpha2*ionic_strength);
+                B[i][j]=beta0[i][j]+beta1[i][j]*G1+beta2[i][j]*G2;
+                Bminus[i][j]=beta1[i][j]*Gminus1/ionic_strength+beta2[i][j]*Gminus2/ionic_strength;
+                alpha1=0.0;
+                alpha2=0.0;
+                G1=0.0;
+                Gminus1=0.0;
+                G2=0.0;
+                Gminus2=0.0;
+
+            }
+            else
+            {
+                alpha1=2.0;
+                alpha2=50.0;
+                G1=2*(1-(1+alpha1*sqrt(ionic_strength))*exp(-alpha1*sqrt(ionic_strength)))/(alpha1*alpha1*ionic_strength);
+                Gminus1=-2*(1-(1+alpha1*sqrt(ionic_strength)+0.5*alpha1*alpha1*ionic_strength)*exp(-alpha1*sqrt(ionic_strength)))/(alpha1*alpha1*ionic_strength);
+                G2=2*(1-(1+alpha2*sqrt(ionic_strength))*exp(-alpha2*sqrt(ionic_strength)))/(alpha2*alpha2*ionic_strength);
+                Gminus2=-2*(1-(1+alpha2*sqrt(ionic_strength)+0.5*alpha2*alpha2*ionic_strength)*exp(-alpha2*sqrt(ionic_strength)))/(alpha2*alpha2*ionic_strength);
+                B[i][j]=beta0[i][j]+beta1[i][j]*G1+beta2[i][j]*G2;
+                Bminus[i][j]=beta1[i][j]*Gminus1/ionic_strength+beta2[i][j]*Gminus2/ionic_strength;
+                alpha1=0.0;
+                alpha2=0.0;
+                G1=0.0;
+                Gminus1=0.0;
+                G2=0.0;
+                Gminus2=0.0;
+            }
+
+        }
+    }
+
+    for(int i=0; i<dat->numvar; i++)
+    {
+        for(int j=0; j<dat->numvar; j++)
+        {
+            if (dat->MasterList.charge(i)==0 || dat->MasterList.charge(j)==0)
+                break;
+            C[i][j]=Cphi[i][j]/(2*sqrt(abs(dat->MasterList.charge(i)*dat->MasterList.charge(j))));
+        }
+    }
+
+	for(int n=0; n<dat->numvar; n++)
+    {
+        p0=dat->MasterList.charge(n)*dat->MasterList.charge(n)*Fa;
+        if (dat->MasterList.charge(n)<0)
+        {
+        for (int i=0; i<dat->numvar; i++)
+        {
+            if (dat->MasterList.charge(i)<0)
+              for(int j=0; j<dat->numvar; j++)
+              {
+                 if ((dat->MasterList.charge(i)<0) || (i==j))
+                    break;
+                 p4=p4+pow(10.0,x(i,0))*pow(10.0,x(j,0))*C[i][j];
+              }
+            else if (dat->MasterList.charge(i)==0)
+               break;
+            else
+             for (int k=0; k<dat->numvar; k++)
+             {
+                 if ((dat->MasterList.charge(i)>0) || (i==k))
+                    break;
+                 p4=p4+pow(10.0,x(i,0))*pow(10.0,x(k,0))*C[i][k];
+             }
+        }
+
+
+        for (int i=0; i<dat->numvar; i++)
+        {
+            if (dat->MasterList.charge(i)<0)
+               break;
+               for (int j=0; j<dat->numvar; j++)
+               {
+                   if ((dat->MasterList.charge(i)<0) || i==j)
+                    break;
+                   p3=p3+pow(10.0,x(i,0))*pow(10.0,x(j,0))*psi[i][j][n];
+               }
+        }
+
+        for (int i=0; i<dat->numvar; i++)
+        {
+           if (dat->MasterList.charge(i)>0)
+            break;
+            for (int j=0; j<dat->numvar; j++)
+            {
+               if (dat->MasterList.charge(i)<0)
+                break;
+               p5=p5+pow(10.0,x(j,0))*psi[n][i][j];
+            }
+           p2=p2+pow(10.0,x(i,0))*(2*phi[n][i]+p5);
+        }
+
+        for (int i=0; i<dat->numvar; i++)
+        {
+            p6=2*B[i][n]+Z*C[i][n];
+            if (dat->MasterList.charge(i)<0)
+                break;
+            p1=p1+pow(10.0,x(i,0))*p6;
+        }
+        log_gama[n]=0.43*(p0+p1+p2+p3+abs(dat->MasterList.charge(n))*p4);
+        p1=0.0;
+        p2=0.0;
+        p3=0.0;
+        p4=0.0;
+        p5=0.0;
+        p6=0.0;
+        }
+        else if (dat->MasterList.charge(n)>0)
+        {
+            for (int i=0; i<dat->numvar; i++)
+        {
+            if (dat->MasterList.charge(i)<0)
+              for(int j=0; j<dat->numvar; j++)
+              {
+                 if ((dat->MasterList.charge(i)<0) || (i==j))
+                    break;
+                 p4=p4+pow(10.0,x(i,0))*pow(10.0,x(j,0))*C[i][j];
+              }
+            else if (dat->MasterList.charge(i)==0)
+               break;
+            else
+             for (int k=0; k<dat->numvar; k++)
+             {
+                 if ((dat->MasterList.charge(i)>0) || (i==k))
+                    break;
+                 p4=p4+pow(10.0,x(i,0))*pow(10.0,x(k,0))*C[i][k];
+             }
+        }
+
+        for (int i=0; i<dat->numvar; i++)
+        {
+            if (dat->MasterList.charge(i)>0)
+               break;
+               for (int j=0; j<dat->numvar; j++)
+               {
+                   if ((dat->MasterList.charge(i)<0) || i==j)
+                    break;
+                   p3=p3+pow(10.0,x(i,0))*pow(10.0,x(j,0))*psi[i][j][n];
+               }
+        }
+        for (int i=0; i<dat->numvar; i++)
+        {
+           if (dat->MasterList.charge(i)<0)
+            break;
+            for (int j=0; j<dat->numvar; j++)
+            {
+               if (dat->MasterList.charge(i)>0)
+                break;
+               p5=p5+pow(10.0,x(j,0))*psi[n][i][j];
+            }
+           p2=p2+pow(10.0,x(i,0))*(2*phi[n][i]+p5);
+        }
+
+         for (int i=0; i<dat->numvar; i++)
+        {
+            p6=2*B[n][i]+Z*C[n][i];
+            if (dat->MasterList.charge(i)<0)
+                break;
+            p1=p1+pow(10.0,x(i,0))*p6;
+        }
+
+        log_gama[n]=0.43*(p0+p1+p2+p3+abs(dat->MasterList.charge(n))*p4);
+        p1=0.0;
+        p2=0.0;
+        p3=0.0;
+        p4=0.0;
+        p5=0.0;
+        p6=0.0;
+        //std::cout << "n = " << n << "\tlog_gama = " << log_gama[n] << std::endl;
+        }
+        else
+            log_gama[n]=0.0;
+        p0=0.0;
+        F.edit(n, 0, pow(10.0, log_gama[n]));
+        //F.edit(n, 0, pow(10.0, 0.0));
+		if (isinf(F(n,0)) || isnan(F(n,0)))
+			F.edit(n, 0, DBL_MAX);
+    }
+
+
+
+	return success;
+}
+
 
 //Determine the activity function choosen by user
 int act_choice(const std::string &input)
 {
 	int act = IDEAL;
-	
+
 	std::string copy = input;
 	for (int i=0; i<copy.size(); i++)
 		copy[i] = tolower(copy[i]);
-	
+
 	if (copy == "davies")
 		act = DAVIES;
 	else if (copy == "ideal")
@@ -2312,7 +3166,7 @@ int act_choice(const std::string &input)
 		act = SIT;
 	else
 		act = IDEAL;
-	
+
 	return act;
 }
 
@@ -2320,18 +3174,18 @@ int act_choice(const std::string &input)
 bool linesearch_choice(const std::string &input)
 {
 	bool Bounce = false;
-	
+
 	std::string copy = input;
 	for (int i=0; i<copy.size(); i++)
 		copy[i] = tolower(copy[i]);
-	
+
 	if (copy == "standard")
 		Bounce = false;
 	else if (copy == "bounce" || copy == "bouncing")
 		Bounce = true;
 	else
 		Bounce = false;
-	
+
 	return Bounce;
 }
 
@@ -2339,11 +3193,11 @@ bool linesearch_choice(const std::string &input)
 int linearsolve_choice(const std::string &input)
 {
 	int choice = GMRESRP;
-	
+
 	std::string copy = input;
 	for (int i=0; i<copy.size(); i++)
 		copy[i] = tolower(copy[i]);
-	
+
 	if (copy == "gmreslp")
 		choice = GMRESLP;
 	else if (copy == "pcg")
@@ -2362,7 +3216,7 @@ int linearsolve_choice(const std::string &input)
 		choice = GMRESR;
 	else
 		choice = GMRESRP;
-	
+
 	return choice;
 }
 
@@ -2400,7 +3254,7 @@ int Convert2Concentration(const Matrix<double> &logx, Matrix<double> &x)
 int read_scenario(SHARK_DATA *shark_dat)
 {
 	int success = 0;
-	
+
 	//Find all required info from Scenario Document in Header vars_fun
 	try
 	{
@@ -2422,7 +3276,7 @@ int read_scenario(SHARK_DATA *shark_dat)
 	{
 		shark_dat->num_other = 0;
 	}
-	
+
 	//All sys_data is optional, missing info will be replaced with defaults
 	try
 	{
@@ -2431,7 +3285,7 @@ int read_scenario(SHARK_DATA *shark_dat)
 	{
 		shark_dat->const_pH = false;
 	}
-	
+
 	if (shark_dat->const_pH == true)
 	{
 		try
@@ -2444,7 +3298,7 @@ int read_scenario(SHARK_DATA *shark_dat)
 			return -1;
 		}
 	}
-	
+
 	try
 	{
 		shark_dat->temperature = shark_dat->yaml_object.getYamlWrapper()("Scenario")("sys_data")["temp"].getDouble();
@@ -2452,7 +3306,7 @@ int read_scenario(SHARK_DATA *shark_dat)
 	{
 		shark_dat->temperature = 298.15;
 	}
-	
+
 	try
 	{
 		shark_dat->dielectric_const = shark_dat->yaml_object.getYamlWrapper()("Scenario")("sys_data")["dielec"].getDouble();
@@ -2460,7 +3314,7 @@ int read_scenario(SHARK_DATA *shark_dat)
 	{
 		shark_dat->dielectric_const = 78.325;
 	}
-	
+
 	try
 	{
 		shark_dat->MasterList.set_alkalinity(shark_dat->yaml_object.getYamlWrapper()("Scenario")("sys_data")["res_alk"].getDouble());
@@ -2469,7 +3323,7 @@ int read_scenario(SHARK_DATA *shark_dat)
 	{
 		shark_dat->MasterList.set_alkalinity(0.0);
 	}
-	
+
 	try
 	{
 		std::string act = shark_dat->yaml_object.getYamlWrapper()("Scenario")("sys_data")["act_fun"].getString();
@@ -2478,7 +3332,7 @@ int read_scenario(SHARK_DATA *shark_dat)
 	{
 		shark_dat->act_fun = IDEAL;
 	}
-	
+
 	try
 	{
 		shark_dat->volume = shark_dat->yaml_object.getYamlWrapper()("Scenario")("sys_data")["volume"].getDouble();
@@ -2486,7 +3340,7 @@ int read_scenario(SHARK_DATA *shark_dat)
 	{
 		shark_dat->volume = 1.0;
 	}
-	
+
 	//Now read in the run_time Header
 	try
 	{
@@ -2497,10 +3351,10 @@ int read_scenario(SHARK_DATA *shark_dat)
 		mError(missing_information);
 		return -1;
 	}
-	
+
 	if (shark_dat->num_usr == 0)
 		shark_dat->steadystate = true;
-	
+
 	if (shark_dat->steadystate == true)
 	{
 		try
@@ -2525,7 +3379,7 @@ int read_scenario(SHARK_DATA *shark_dat)
 			mError(missing_information);
 			return -1;
 		}
-		
+
 		try
 		{
 			shark_dat->TimeAdaptivity = shark_dat->yaml_object.getYamlWrapper()("Scenario")("run_time")["time_adapt"].getBool();
@@ -2536,7 +3390,7 @@ int read_scenario(SHARK_DATA *shark_dat)
 		}
 	}
 
-	
+
 	return success;
 }
 
@@ -2544,7 +3398,7 @@ int read_scenario(SHARK_DATA *shark_dat)
 int read_options(SHARK_DATA *shark_dat)
 {
 	int success = 0;
-	
+
 	try
 	{
 		shark_dat->Newton_data.LineSearch = shark_dat->yaml_object.getYamlWrapper()("SolverOptions")["line_search"].getBool();
@@ -2553,7 +3407,7 @@ int read_options(SHARK_DATA *shark_dat)
 	{
 		shark_dat->Newton_data.LineSearch = true;
 	}
-	
+
 	if (shark_dat->Newton_data.LineSearch == true)
 	{
 		try
@@ -2565,7 +3419,7 @@ int read_options(SHARK_DATA *shark_dat)
 			shark_dat->Newton_data.Bounce =false;
 		}
 	}
-	
+
 	try
 	{
 		shark_dat->Newton_data.NL_Output = shark_dat->yaml_object.getYamlWrapper()("SolverOptions")["nl_print"].getBool();
@@ -2577,7 +3431,7 @@ int read_options(SHARK_DATA *shark_dat)
 		else
 			shark_dat->Newton_data.NL_Output = false;
 	}
-	
+
 	try
 	{
 		shark_dat->Newton_data.L_Output = shark_dat->yaml_object.getYamlWrapper()("SolverOptions")["l_print"].getBool();
@@ -2586,7 +3440,7 @@ int read_options(SHARK_DATA *shark_dat)
 	{
 		shark_dat->Newton_data.L_Output = false;
 	}
-	
+
 	try
 	{
 		shark_dat->Newton_data.linear_solver = linearsolve_choice(shark_dat->yaml_object.getYamlWrapper()("SolverOptions")["linear_solve"].getString());
@@ -2602,7 +3456,7 @@ int read_options(SHARK_DATA *shark_dat)
 			shark_dat->Newton_data.linear_solver = FOM;
 		}
 	}
-	
+
 	if (shark_dat->Newton_data.linear_solver == GMRESRP || shark_dat->Newton_data.linear_solver == GMRESLP || shark_dat->Newton_data.linear_solver == GCR || shark_dat->Newton_data.linear_solver == GMRESR)
 	{
 		int restart;
@@ -2616,34 +3470,34 @@ int read_options(SHARK_DATA *shark_dat)
 				restart = shark_dat->numvar;
 			else
 				restart = 100;
-			
+
 			if (restart > shark_dat->numvar)
 				restart = shark_dat->numvar;
 		}
-		
+
 		switch (shark_dat->Newton_data.linear_solver)
 		{
 			case GMRESRP:
 				shark_dat->Newton_data.gmresrp_dat.restart = restart;
 				break;
-			
+
 			case GMRESLP:
 				shark_dat->Newton_data.gmreslp_dat.restart = restart;
 				break;
-				
+
 			case GMRESR:
 				shark_dat->Newton_data.gmresr_dat.gcr_restart = restart;
 				break;
-				
+
 			case GCR:
 				shark_dat->Newton_data.gcr_dat.restart = restart;
 				break;
-				
+
 			default:
 				break;
 		}
 	}
-	
+
 	try
 	{
 		shark_dat->Newton_data.nl_maxit = shark_dat->yaml_object.getYamlWrapper()("SolverOptions")["nl_maxit"].getInt();
@@ -2655,7 +3509,7 @@ int read_options(SHARK_DATA *shark_dat)
 		else
 			shark_dat->Newton_data.nl_maxit = shark_dat->numvar;
 	}
-	
+
 	try
 	{
 		shark_dat->Newton_data.nl_tol_abs = shark_dat->yaml_object.getYamlWrapper()("SolverOptions")["nl_abstol"].getDouble();
@@ -2664,7 +3518,7 @@ int read_options(SHARK_DATA *shark_dat)
 	{
 		shark_dat->Newton_data.nl_tol_abs = 1e-5;
 	}
-	
+
 	try
 	{
 		shark_dat->Newton_data.nl_tol_rel = shark_dat->yaml_object.getYamlWrapper()("SolverOptions")["nl_reltol"].getDouble();
@@ -2673,7 +3527,7 @@ int read_options(SHARK_DATA *shark_dat)
 	{
 		shark_dat->Newton_data.nl_tol_rel = 1e-8;
 	}
-	
+
 	try
 	{
 		shark_dat->Newton_data.lin_tol_rel = shark_dat->yaml_object.getYamlWrapper()("SolverOptions")["lin_reltol"].getDouble();
@@ -2682,7 +3536,7 @@ int read_options(SHARK_DATA *shark_dat)
 	{
 		shark_dat->Newton_data.lin_tol_rel = 1e-6;
 	}
-	
+
 	try
 	{
 		shark_dat->Newton_data.lin_tol_abs = shark_dat->yaml_object.getYamlWrapper()("SolverOptions")["lin_abstol"].getDouble();
@@ -2691,7 +3545,7 @@ int read_options(SHARK_DATA *shark_dat)
 	{
 		shark_dat->Newton_data.lin_tol_abs = 1e-6;
 	}
-	
+
 	return success;
 }
 
@@ -2699,7 +3553,7 @@ int read_options(SHARK_DATA *shark_dat)
 int read_species(SHARK_DATA *shark_dat)
 {
 	int success = 0;
-	
+
 	//Start reading in the registered species from the reg Header
 	int reg_species;
 	try
@@ -2711,7 +3565,7 @@ int read_species(SHARK_DATA *shark_dat)
 		mError(missing_information);
 		return -1;
 	}
-	
+
 	try
 	{
 		for (auto &x: shark_dat->yaml_object.getYamlWrapper()("MasterSpecies")("reg").getDataMap().getMap())
@@ -2725,7 +3579,7 @@ int read_species(SHARK_DATA *shark_dat)
 		mError(missing_information);
 		return -1;
 	}
-	
+
 	//Now read in the unregistered species and their corresponding information
 	if (reg_species < shark_dat->numvar)
 	{
@@ -2739,7 +3593,7 @@ int read_species(SHARK_DATA *shark_dat)
 			mError(missing_information);
 			return -1;
 		}
-		
+
 		if ((unreg_species+reg_species) != shark_dat->numvar)
 		{
 			mError(missing_information);
@@ -2750,7 +3604,7 @@ int read_species(SHARK_DATA *shark_dat)
 			std::string formula, phase, name, lin_form;
 			double charge, enthalpy, entropy, energy;
 			bool haveHS, haveG;
-			
+
 			for (auto &x: shark_dat->yaml_object.getYamlWrapper()("MasterSpecies")("unreg").getSubMap())
 			{
 				int index = atoi(x.first.c_str());
@@ -2773,7 +3627,7 @@ int read_species(SHARK_DATA *shark_dat)
 			return -1;
 		}
 	}
-	
+
 	//Lastly, check the newly registered objects in MasterSpecies list to ensure that no register errors occured
 	bool reg_error = false;
 	for (int i=0; i<shark_dat->numvar; i++)
@@ -2789,7 +3643,7 @@ int read_species(SHARK_DATA *shark_dat)
 		mError(missing_information);
 		return -1;
 	}
-	
+
 	return success;
 }
 
@@ -2797,7 +3651,7 @@ int read_species(SHARK_DATA *shark_dat)
 int read_massbalance(SHARK_DATA *shark_dat)
 {
 	int success = 0;
-	
+
 	//Check the number of headers in MassBalance Doc and make sure it matches number of equations specified earlier
 	int mbes;
 	try
@@ -2809,7 +3663,7 @@ int read_massbalance(SHARK_DATA *shark_dat)
 		mError(missing_information);
 		return -1;
 	}
-	
+
 	if (mbes != shark_dat->num_mbe)
 	{
 		mError(missing_information);
@@ -2830,7 +3684,7 @@ int read_massbalance(SHARK_DATA *shark_dat)
 				mError(missing_information);
 				return -1;
 			}
-			
+
 			int species;
 			try
 			{
@@ -2846,7 +3700,7 @@ int read_massbalance(SHARK_DATA *shark_dat)
 				mError(missing_information);
 				return -1;
 			}
-			
+
 			for (auto &y: shark_dat->yaml_object.getYamlWrapper()("MassBalance")(x.first)("delta").getMap())
 			{
 				int index = shark_dat->MasterList.get_index(y.first);
@@ -2868,11 +3722,11 @@ int read_massbalance(SHARK_DATA *shark_dat)
 					}
 				}
 			}
-			
+
 			i++;
 		}
 	}
-	
+
 	return success;
 }
 
@@ -2880,7 +3734,7 @@ int read_massbalance(SHARK_DATA *shark_dat)
 int read_equilrxn(SHARK_DATA *shark_dat)
 {
 	int success = 0;
-	
+
 	//Check the number of headers to make sure it matches the expected number of reaction objects
 	if (shark_dat->num_ssr > 0)
 	{
@@ -2899,7 +3753,7 @@ int read_equilrxn(SHARK_DATA *shark_dat)
 			mError(missing_information);
 			return -1;
 		}
-		
+
 		int i=0;
 		for (auto &x: shark_dat->yaml_object.getYamlWrapper()("EquilRxn").getHeadMap())
 		{
@@ -2912,7 +3766,7 @@ int read_equilrxn(SHARK_DATA *shark_dat)
 				//At this point, it is unknown as to whether or not this is an actual error
 				//It will be checked later whether or not this causes a problem
 			}
-			
+
 			int count = 0;
 			double dH, dS;
 			try
@@ -2926,7 +3780,7 @@ int read_equilrxn(SHARK_DATA *shark_dat)
 				//At this point, it is unknown as to whether or not this is an actual error
 				//It will be checked later whether or not this causes a problem
 			}
-			
+
 			try
 			{
 				dS = shark_dat->yaml_object.getYamlWrapper()("EquilRxn")(x.first)["entropy"].getDouble();
@@ -2940,7 +3794,7 @@ int read_equilrxn(SHARK_DATA *shark_dat)
 			}
 			if (count == 2)
 				shark_dat->ReactionList[i].Set_EnthalpyANDEntropy(dH, dS);
-			
+
 			try
 			{
 				shark_dat->ReactionList[i].Set_Energy(shark_dat->yaml_object.getYamlWrapper()("EquilRxn")(x.first)["energy"].getDouble());
@@ -2950,7 +3804,7 @@ int read_equilrxn(SHARK_DATA *shark_dat)
 				//At this point, it is unknown as to whether or not this is an actual error
 				//It will be checked later whether or not this causes a problem
 			}
-			
+
 			int stoich;
 			try
 			{
@@ -2966,7 +3820,7 @@ int read_equilrxn(SHARK_DATA *shark_dat)
 				mError(missing_information);
 				return -1;
 			}
-			
+
 			for (auto &y: shark_dat->yaml_object.getYamlWrapper()("EquilRxn")(x.first)("stoichiometry").getMap())
 			{
 				int index = shark_dat->MasterList.get_index(y.first);
@@ -2988,11 +3842,11 @@ int read_equilrxn(SHARK_DATA *shark_dat)
 					}
 				}
 			}
-			
+
 			i++;
 		}
 	}
-	
+
 	return success;
 }
 
@@ -3000,7 +3854,7 @@ int read_equilrxn(SHARK_DATA *shark_dat)
 int read_unsteadyrxn(SHARK_DATA *shark_dat)
 {
 	int success = 0;
-	
+
 	//Check the number of headers to make sure it matches the expected number of reaction objects
 	if (shark_dat->num_usr > 0)
 	{
@@ -3019,7 +3873,7 @@ int read_unsteadyrxn(SHARK_DATA *shark_dat)
 			mError(missing_information);
 			return -1;
 		}
-		
+
 		int i=0;
 		for (auto &x: shark_dat->yaml_object.getYamlWrapper()("UnsteadyRxn").getHeadMap())
 		{
@@ -3039,7 +3893,7 @@ int read_unsteadyrxn(SHARK_DATA *shark_dat)
 				return -1;
 			}
 			shark_dat->UnsteadyList[i].Set_Species_Index(var_index);
-			
+
 			try
 			{
 				shark_dat->UnsteadyList[i].Set_InitialValue(shark_dat->yaml_object.getYamlWrapper()("UnsteadyRxn")(x.first)["initial_condition"].getDouble());
@@ -3049,7 +3903,7 @@ int read_unsteadyrxn(SHARK_DATA *shark_dat)
 				mError(missing_information);
 				return -1;
 			}
-			
+
 			try
 			{
 				shark_dat->UnsteadyList[i].Set_Equilibrium(shark_dat->yaml_object.getYamlWrapper()("UnsteadyRxn")(x.first)["logK"].getDouble());
@@ -3059,7 +3913,7 @@ int read_unsteadyrxn(SHARK_DATA *shark_dat)
 				//At this point, it is unknown as to whether or not this is an actual error
 				//It will be checked later whether or not this causes a problem
 			}
-			
+
 			try
 			{
 				shark_dat->UnsteadyList[i].Set_Forward(shark_dat->yaml_object.getYamlWrapper()("UnsteadyRxn")(x.first)["forward"].getDouble());
@@ -3069,7 +3923,7 @@ int read_unsteadyrxn(SHARK_DATA *shark_dat)
 				//At this point, it is unknown as to whether or not this is an actual error
 				//It will be checked later whether or not this causes a problem
 			}
-			
+
 			try
 			{
 				shark_dat->UnsteadyList[i].Set_Reverse(shark_dat->yaml_object.getYamlWrapper()("UnsteadyRxn")(x.first)["reverse"].getDouble());
@@ -3079,7 +3933,7 @@ int read_unsteadyrxn(SHARK_DATA *shark_dat)
 				//At this point, it is unknown as to whether or not this is an actual error
 				//It will be checked later whether or not this causes a problem
 			}
-			
+
 			try
 			{
 				shark_dat->UnsteadyList[i].Set_ReverseRef(shark_dat->yaml_object.getYamlWrapper()("UnsteadyRxn")(x.first)["reverse_ref"].getDouble());
@@ -3089,7 +3943,7 @@ int read_unsteadyrxn(SHARK_DATA *shark_dat)
 				//At this point, it is unknown as to whether or not this is an actual error
 				//It will be checked later whether or not this causes a problem
 			}
-			
+
 			try
 			{
 				shark_dat->UnsteadyList[i].Set_ForwardRef(shark_dat->yaml_object.getYamlWrapper()("UnsteadyRxn")(x.first)["forward_ref"].getDouble());
@@ -3099,7 +3953,7 @@ int read_unsteadyrxn(SHARK_DATA *shark_dat)
 				//At this point, it is unknown as to whether or not this is an actual error
 				//It will be checked later whether or not this causes a problem
 			}
-			
+
 			try
 			{
 				shark_dat->UnsteadyList[i].Set_ActivationEnergy(shark_dat->yaml_object.getYamlWrapper()("UnsteadyRxn")(x.first)["activation_energy"].getDouble());
@@ -3109,7 +3963,7 @@ int read_unsteadyrxn(SHARK_DATA *shark_dat)
 				//At this point, it is unknown as to whether or not this is an actual error
 				//It will be checked later whether or not this causes a problem
 			}
-			
+
 			try
 			{
 				shark_dat->UnsteadyList[i].Set_Affinity(shark_dat->yaml_object.getYamlWrapper()("UnsteadyRxn")(x.first)["temp_affinity"].getDouble());
@@ -3119,7 +3973,7 @@ int read_unsteadyrxn(SHARK_DATA *shark_dat)
 				//At this point, it is unknown as to whether or not this is an actual error
 				//It will be checked later whether or not this causes a problem
 			}
-			
+
 			int count = 0;
 			double dH, dS;
 			try
@@ -3133,7 +3987,7 @@ int read_unsteadyrxn(SHARK_DATA *shark_dat)
 				//At this point, it is unknown as to whether or not this is an actual error
 				//It will be checked later whether or not this causes a problem
 			}
-			
+
 			try
 			{
 				dS = shark_dat->yaml_object.getYamlWrapper()("UnsteadyRxn")(x.first)["entropy"].getDouble();
@@ -3147,7 +4001,7 @@ int read_unsteadyrxn(SHARK_DATA *shark_dat)
 			}
 			if (count == 2)
 				shark_dat->UnsteadyList[i].Set_EnthalpyANDEntropy(dH, dS);
-			
+
 			try
 			{
 				shark_dat->UnsteadyList[i].Set_Energy(shark_dat->yaml_object.getYamlWrapper()("UnsteadyRxn")(x.first)["energy"].getDouble());
@@ -3157,7 +4011,7 @@ int read_unsteadyrxn(SHARK_DATA *shark_dat)
 				//At this point, it is unknown as to whether or not this is an actual error
 				//It will be checked later whether or not this causes a problem
 			}
-			
+
 			int stoich;
 			try
 			{
@@ -3173,7 +4027,7 @@ int read_unsteadyrxn(SHARK_DATA *shark_dat)
 				mError(missing_information);
 				return -1;
 			}
-			
+
 			for (auto &y: shark_dat->yaml_object.getYamlWrapper()("UnsteadyRxn")(x.first)("stoichiometry").getMap())
 			{
 				int index = shark_dat->MasterList.get_index(y.first);
@@ -3195,12 +4049,12 @@ int read_unsteadyrxn(SHARK_DATA *shark_dat)
 					}
 				}
 			}
-			
+
 			i++;
 		}
 	}
 
-	
+
 	return success;
 }
 
@@ -3212,7 +4066,7 @@ int setup_SHARK_DATA( FILE *file, int (*residual) (const Matrix<double> &x, Matr
 					 const void *precon_data, const void *other_data)
 {
 	int success = 0;
-	
+
 	//Check input args
 	if ( file == NULL)
 		dat->File_Output = false;
@@ -3294,7 +4148,7 @@ int setup_SHARK_DATA( FILE *file, int (*residual) (const Matrix<double> &x, Matr
 	dat->time = 0.0;
 	dat->t_count = 0.0;
 	dat->dt_min = sqrt(DBL_EPSILON);
-	
+
 	//Edit the activity function if necessary
 	if (dat->act_fun == IDEAL)
 	{
@@ -3314,12 +4168,12 @@ int setup_SHARK_DATA( FILE *file, int (*residual) (const Matrix<double> &x, Matr
 	//NOTE: The below lines of code will change after we define the PITZER and SIT models and what data structures they need
 	else if (dat->act_fun == PITZER)
 	{
-		dat->EvalActivity = ideal_solution;
+		dat->EvalActivity = pitzer_equation;
 		dat->activity_data = dat;
 	}
 	else if (dat->act_fun == SIT)
 	{
-		dat->EvalActivity = ideal_solution;
+		dat->EvalActivity = Sit_equation;
 		dat->activity_data = dat;
 	}
 	else
@@ -3329,7 +4183,7 @@ int setup_SHARK_DATA( FILE *file, int (*residual) (const Matrix<double> &x, Matr
 		dat->act_fun = IDEAL;
 		dat->EvalActivity = ideal_solution;
 	}
-	
+
 	//Setup PJFNK Solver options (May edit after calling setup function if desired)
 	dat->Newton_data.LineSearch = true;
 	dat->Newton_data.Bounce = false;
@@ -3352,7 +4206,7 @@ int setup_SHARK_DATA( FILE *file, int (*residual) (const Matrix<double> &x, Matr
 	{
 		dat->Newton_data.linear_solver = FOM;
 	}
-	
+
 	//Setup the memory working space for the problem
 	dat->MasterList.set_list_size(dat->numvar);
 	dat->X_old.set_size(dat->numvar, 1);
@@ -3361,33 +4215,33 @@ int setup_SHARK_DATA( FILE *file, int (*residual) (const Matrix<double> &x, Matr
 	dat->Conc_new.set_size(dat->numvar, 1);
 	dat->activity_new.set_size(dat->numvar, 1);
 	dat->activity_old.set_size(dat->numvar, 1);
-	
+
 	dat->ReactionList.resize(dat->num_ssr);
 	dat->MassBalanceList.resize(dat->num_mbe);
 	dat->UnsteadyList.resize(dat->num_usr);
 	dat->AdsorptionList.resize(dat->num_ssao);
 	dat->OtherList.resize(dat->num_other);
-	
+
 	for (int i=0; i<dat->ReactionList.size(); i++)
 	{
 		dat->ReactionList[i].Initialize_Object(dat->MasterList);
 	}
-	
+
 	for (int i=0; i<dat->MassBalanceList.size(); i++)
 	{
 		dat->MassBalanceList[i].Initialize_Object(dat->MasterList);
 	}
-	
+
 	for (int i=0; i<dat->UnsteadyList.size(); i++)
 	{
 		dat->UnsteadyList[i].Initialize_Object(dat->MasterList);
 	}
-	
+
 	for (int i=0; i<dat->AdsorptionList.size(); i++)
 	{
 		dat->AdsorptionList[i].Initialize_Object(dat->MasterList, dat->num_ssar[i]);
 	}
-	
+
 	return success;
 }
 
@@ -3396,7 +4250,7 @@ int shark_add_customResidual(int i, double (*other_res) (const Matrix<double> &x
 							 SHARK_DATA *shark_dat)
 {
 	int success = 0;
-	
+
 	if (i >= shark_dat->num_other || i < 0)
 	{
 		mError(out_of_bounds);
@@ -3411,7 +4265,7 @@ int shark_add_customResidual(int i, double (*other_res) (const Matrix<double> &x
 	{
 		shark_dat->OtherList[i] = other_res;
 	}
-	
+
 	return success;
 }
 
@@ -3419,7 +4273,7 @@ int shark_add_customResidual(int i, double (*other_res) (const Matrix<double> &x
 int shark_parameter_check(SHARK_DATA *shark_dat)
 {
 	int success = 0;
-	
+
 	for (int i=0; i<shark_dat->ReactionList.size(); i++)
 	{
 		shark_dat->ReactionList[i].checkSpeciesEnergies();
@@ -3462,7 +4316,7 @@ int shark_parameter_check(SHARK_DATA *shark_dat)
 		success = shark_dat->AdsorptionList[i].checkAqueousIndices();
 		if (success != 0) {mError(missing_information); return -1;}
 	}
-	
+
 	return success;
 }
 
@@ -3470,7 +4324,7 @@ int shark_parameter_check(SHARK_DATA *shark_dat)
 int shark_energy_calculations(SHARK_DATA *shark_dat)
 {
 	int success = 0;
-	
+
 	for (int i=0; i<shark_dat->ReactionList.size(); i++)
 	{
 		shark_dat->ReactionList[i].calculateEnergies();
@@ -3486,7 +4340,7 @@ int shark_energy_calculations(SHARK_DATA *shark_dat)
 			shark_dat->AdsorptionList[i].getReaction(n).calculateEnergies();
 		}
 	}
-	
+
 	return success;
 }
 
@@ -3494,7 +4348,7 @@ int shark_energy_calculations(SHARK_DATA *shark_dat)
 int shark_temperature_calculations(SHARK_DATA *shark_dat)
 {
 	int success = 0;
-	
+
 	for (int i=0; i<shark_dat->ReactionList.size(); i++)
 	{
 		shark_dat->ReactionList[i].calculateEquilibrium(shark_dat->temperature);
@@ -3507,7 +4361,7 @@ int shark_temperature_calculations(SHARK_DATA *shark_dat)
 	{
 		shark_dat->AdsorptionList[i].calculateEquilibria(shark_dat->temperature);
 	}
-	
+
 	return success;
 }
 
@@ -3515,7 +4369,7 @@ int shark_temperature_calculations(SHARK_DATA *shark_dat)
 int shark_pH_finder(SHARK_DATA *shark_dat)
 {
 	int success = 0;
-	
+
 	bool found_pH = false, found_pOH = false;
 	for (int i=0; i<shark_dat->MasterList.list_size(); i++)
 	{
@@ -3542,9 +4396,9 @@ int shark_pH_finder(SHARK_DATA *shark_dat)
 			found_pOH = true;
 		}
 		else {/*No Action*/}
-		
+
 	}
-	
+
 	return success;
 }
 
@@ -3552,7 +4406,7 @@ int shark_pH_finder(SHARK_DATA *shark_dat)
 int shark_guess(SHARK_DATA *shark_dat)
 {
 	int success = 0;
-	
+
 	shark_dat->Conc_new.ConstantICFill(0.0);
 	shark_dat->activity_new.ConstantICFill(1.0);
 
@@ -3575,14 +4429,14 @@ int shark_guess(SHARK_DATA *shark_dat)
 			}
 		}
 	}
-	
+
 	if (shark_dat->steadystate == false)
 	{
 		for (int i=0; i<shark_dat->UnsteadyList.size(); i++)
 		{
 			double max = 0.0, current = 0.0;
 			shark_dat->Conc_new.edit(shark_dat->UnsteadyList[i].Get_Species_Index(),0,shark_dat->UnsteadyList[i].Get_InitialValue());
-			
+
 			//Loop through MassBalanceList and MasterList to find max value for unsteady species
 			for (int j=0; j<shark_dat->MassBalanceList.size(); j++)
 			{
@@ -3598,7 +4452,7 @@ int shark_guess(SHARK_DATA *shark_dat)
 			shark_dat->UnsteadyList[i].Set_MaximumValue(max);
 		}
 	}
-	
+
 	//Set pH information if needed
 	if (shark_dat->Contains_pH == true)
 	{
@@ -3624,10 +4478,10 @@ int shark_guess(SHARK_DATA *shark_dat)
 int shark_initial_conditions(SHARK_DATA *shark_dat)
 {
 	int success = 0;
-	
+
 	//Printout the header for simulation info
 	print2file_shark_header(shark_dat);
-	
+
 	if (shark_dat->Console_Output == true)
 	{
 		if (shark_dat->steadystate == false)
@@ -3635,17 +4489,17 @@ int shark_initial_conditions(SHARK_DATA *shark_dat)
 		else
 			std::cout << "------------Establishing Initial Guess for SHARK Simulations--------------\n";
 	}
-	
+
 	//Make initial guess for the system
 	if (shark_dat->steadystate == true)
 	{
 		success = shark_guess(shark_dat);
 		if (success != 0) {mError(simulation_fail); return -1;}
-		
+
 		shark_dat->activity_old = shark_dat->activity_new;
 		shark_dat->Conc_old = shark_dat->Conc_new;
 		shark_dat->X_old = shark_dat->X_new;
-		
+
 	}
 	//Make an initial guess and solve the initial speciation
 	else
@@ -3653,29 +4507,29 @@ int shark_initial_conditions(SHARK_DATA *shark_dat)
 		shark_dat->time = 0.0;
 		success = shark_guess(shark_dat);
 		if (success != 0) {mError(simulation_fail); return -1;}
-		
+
 		success = pjfnk(shark_dat->Residual,shark_dat->lin_precon,shark_dat->X_new,&shark_dat->Newton_data,shark_dat->residual_data,shark_dat->precon_data);
 		shark_dat->totalsteps = shark_dat->totalsteps + shark_dat->Newton_data.nl_iter + shark_dat->Newton_data.l_iter;
 		shark_dat->totalcalls = shark_dat->totalcalls + shark_dat->Newton_data.fun_call;
 		if (success != 0) {mError(simulation_fail); return -1;}
-		
+
 		shark_dat->Norm = shark_dat->Newton_data.nl_res;
 		if (shark_dat->Norm <= shark_dat->Newton_data.nl_tol_abs || shark_dat->Newton_data.nl_relres <= shark_dat->Newton_data.nl_tol_rel)
 			shark_dat->Converged = true;
 		else
 			shark_dat->Converged = false;
-		
+
 		success = Convert2Concentration(shark_dat->X_new, shark_dat->Conc_new);
 		if (success != 0) {mError(simulation_fail); return -1;}
-		
+
 		shark_dat->activity_old = shark_dat->activity_new;
 		shark_dat->Conc_old = shark_dat->Conc_new;
 		shark_dat->X_old = shark_dat->X_new;
-		
+
 		//Printout ICs for Unsteady case
 		print2file_shark_results_new(shark_dat);
 	}
-	
+
 	if (shark_dat->Console_Output == true)
 	{
 		shark_dat->MasterList.DisplayConcentrations(shark_dat->Conc_new);
@@ -3685,7 +4539,7 @@ int shark_initial_conditions(SHARK_DATA *shark_dat)
 		else
 			std::cout << "\n-------------Initial Guess Set!-------------\n\n";
 	}
-	
+
 	return success;
 }
 
@@ -3693,31 +4547,31 @@ int shark_initial_conditions(SHARK_DATA *shark_dat)
 int shark_executioner(SHARK_DATA *shark_dat)
 {
 	int success = 0;
-	
+
 	//Loop the solver till solution is obtained or dt_min is reached
 	do
 	{
 		//Call the preprocess function
 		success = shark_preprocesses(shark_dat);
 		if (success != 0) {mError(simulation_fail); return -1;}
-		
+
 		//Call the solver function
 		success = shark_solver(shark_dat);
 		if (success != 0) {mError(simulation_fail); return -1;}
-		
+
 	} while (shark_dat->dt > shark_dat->dt_min && shark_dat->Converged == false && shark_dat->steadystate == false);
-			 
+
 	//Call the postprocess function
 	success = shark_postprocesses(shark_dat);
 	if (success != 0) {mError(simulation_fail); return -1;}
-	
+
 	//Check for failure
 	if (shark_dat->Converged == false)
 	{
 		if (shark_dat->Console_Output == true)
 			std::cout << "\nSHARK CONVERGENCE FAILURE!\n\n";
 	}
-	
+
 	return success;
 }
 
@@ -3725,7 +4579,7 @@ int shark_executioner(SHARK_DATA *shark_dat)
 int shark_timestep_const(SHARK_DATA *shark_dat)
 {
 	int success = 0;
-	
+
 	if (shark_dat->steadystate == false)
 	{
 		shark_dat->time = shark_dat->time_old + shark_dat->dt;
@@ -3739,7 +4593,7 @@ int shark_timestep_const(SHARK_DATA *shark_dat)
 	{
 		shark_dat->UnsteadyList[i].Set_TimeStep(shark_dat->dt);
 	}
-	
+
 	return success;
 }
 
@@ -3747,7 +4601,7 @@ int shark_timestep_const(SHARK_DATA *shark_dat)
 int shark_timestep_adapt(SHARK_DATA *shark_dat)
 {
 	int success = 0;
-	
+
 	if (shark_dat->steadystate == false)
 	{
 		if (shark_dat->Converged == true)
@@ -3771,7 +4625,7 @@ int shark_timestep_adapt(SHARK_DATA *shark_dat)
 	{
 		shark_dat->UnsteadyList[i].Set_TimeStep(shark_dat->dt);
 	}
-	
+
 	return success;
 }
 
@@ -3779,7 +4633,7 @@ int shark_timestep_adapt(SHARK_DATA *shark_dat)
 int shark_preprocesses(SHARK_DATA *shark_dat)
 {
 	int success = 0;
-	
+
 	//Call the timestep function
 	if ((shark_dat->TimeAdaptivity == false && shark_dat->Converged == true) || shark_dat->time == 0.0)
 	{
@@ -3791,11 +4645,11 @@ int shark_preprocesses(SHARK_DATA *shark_dat)
 		success = shark_timestep_adapt(shark_dat);
 		if (success != 0) {mError(simulation_fail); return -1;}
 	}
-	
+
 	//Function to calculate equilibrium and rate constants as a function of temperature
 	success = shark_temperature_calculations(shark_dat);
 	if (success != 0) {mError(simulation_fail); return -1;}
-	
+
 	return success;
 }
 
@@ -3803,7 +4657,7 @@ int shark_preprocesses(SHARK_DATA *shark_dat)
 int shark_solver(SHARK_DATA *shark_dat)
 {
 	int success = 0;
-	
+
 	if (shark_dat->steadystate == false)
 	{
 		if (shark_dat->Console_Output == true)
@@ -3811,7 +4665,7 @@ int shark_solver(SHARK_DATA *shark_dat)
 		for (int i=0; i<shark_dat->num_usr; i++)
 		{
 			shark_dat->Conc_new.edit(shark_dat->UnsteadyList[i].Get_Species_Index(), 0, shark_dat->UnsteadyList[i].Explicit_Eval(shark_dat->X_old, shark_dat->activity_old));
-			
+
 			if (shark_dat->Console_Output == true)
 			{
 				std::cout << "[ " << shark_dat->MasterList.get_species(shark_dat->UnsteadyList[i].Get_Species_Index()).MolecularFormula() << " ] =\t" << shark_dat->Conc_new(shark_dat->UnsteadyList[i].Get_Species_Index(),0) << std::endl;
@@ -3827,13 +4681,13 @@ int shark_solver(SHARK_DATA *shark_dat)
 	shark_dat->totalsteps = shark_dat->totalsteps + shark_dat->Newton_data.nl_iter + shark_dat->Newton_data.l_iter;
 	shark_dat->totalcalls = shark_dat->totalcalls + shark_dat->Newton_data.fun_call;
 	if (success != 0) {mError(simulation_fail); return -1;}
-	
+
 	shark_dat->Norm = shark_dat->Newton_data.nl_res;
 	if (shark_dat->Norm <= shark_dat->Newton_data.nl_tol_abs || shark_dat->Newton_data.nl_relres <= shark_dat->Newton_data.nl_tol_rel)
 		shark_dat->Converged = true;
 	else
 		shark_dat->Converged = false;
-	
+
 	if (shark_dat->Console_Output == true)
 	{
 		std::cout << "Evaluation Information...\n-------------------------\n";
@@ -3856,7 +4710,7 @@ int shark_solver(SHARK_DATA *shark_dat)
 			}
 			shark_dat->Newton_data.F.Display("Residual Vector");
 			shark_dat->Newton_data.x.Display("Solution Vector");
-			
+
 			//Conversion to concentration units
 			success = Convert2Concentration(shark_dat->X_new, shark_dat->Conc_new);
 			if (success != 0) {mError(simulation_fail); return -1;}
@@ -3870,7 +4724,8 @@ int shark_solver(SHARK_DATA *shark_dat)
 				}
 			}
 			std::cout << "\n";
-				
+			shark_dat->activity_new.Display("activities");
+
 			//Form a Numerical Jacobian and print out
 			if (shark_dat->numvar <= 100)
 			{
@@ -3879,12 +4734,12 @@ int shark_solver(SHARK_DATA *shark_dat)
 				success = NumericalJacobian(shark_dat->Residual, shark_dat->X_new, J, shark_dat->numvar, shark_dat->numvar, &num_jac, shark_dat->residual_data);
 				J.Display("Numerical Jacobian");
 			}
-				
+
 			mError(simulation_fail);
 			return -1;
 		}
 	}
-	
+
 	return success;
 }
 
@@ -3892,11 +4747,11 @@ int shark_solver(SHARK_DATA *shark_dat)
 int shark_postprocesses(SHARK_DATA *shark_dat)
 {
 	int success = 0;
-	
+
 	//Conversion to concentration units
 	success = Convert2Concentration(shark_dat->X_new, shark_dat->Conc_new);
 	if (success != 0) {mError(simulation_fail); return -1;}
-	
+
 	//Print to file
 	if (shark_dat->steadystate == true)
 		print2file_shark_results_new(shark_dat);
@@ -3912,7 +4767,7 @@ int shark_postprocesses(SHARK_DATA *shark_dat)
 			shark_dat->t_count = 0.0;
 		}
 	}
-	
+
 	return success;
 }
 
@@ -3920,12 +4775,12 @@ int shark_postprocesses(SHARK_DATA *shark_dat)
 int shark_reset(SHARK_DATA *shark_dat)
 {
 	int success = 0;
-	
+
 	shark_dat->Conc_old = shark_dat->Conc_new;
 	shark_dat->X_old = shark_dat->X_new;
 	shark_dat->activity_old = shark_dat->activity_new;
 	shark_dat->time_old = shark_dat->time;
-	
+
 	return success;
 }
 
@@ -3934,11 +4789,11 @@ int shark_residual(const Matrix<double> &x, Matrix<double> &F, const void *data)
 {
 	int success = 0;
 	SHARK_DATA *dat = (SHARK_DATA *) data;
-	
+
 	//Call activity function
 	success = dat->EvalActivity(x,dat->activity_new,dat->activity_data);
 	if (success != 0) {mError(simulation_fail); return -1;}
-	
+
 	//Form all residuals
 	int index = 0;
 	for (int i=0; i<dat->ReactionList.size(); i++)
@@ -3952,7 +4807,7 @@ int shark_residual(const Matrix<double> &x, Matrix<double> &F, const void *data)
 		{
 			if (dat->time == 0.0)
 				F(index,0) = dat->UnsteadyList[i].Eval_IC_Residual(x);
-			else	
+			else
 				F(index,0) = dat->UnsteadyList[i].Eval_Residual(x, dat->X_old, dat->activity_new, dat->activity_old);
 		}
 		else
@@ -4000,7 +4855,7 @@ int shark_residual(const Matrix<double> &x, Matrix<double> &F, const void *data)
 			return -1;
 		}
 	}
-	
+
 	return success;
 }
 
@@ -4008,34 +4863,34 @@ int shark_residual(const Matrix<double> &x, Matrix<double> &F, const void *data)
 int SHARK(SHARK_DATA *shark_dat)
 {
 	int success = 0;
-	
+
 	//Function to check for missing information
 	success = shark_parameter_check(shark_dat);
 	if (success != 0) {mError(simulation_fail); return -1;}
-	
+
 	//Function to establish temperature independent constants
 	success = shark_energy_calculations(shark_dat);
 	if (success != 0) {mError(simulation_fail); return -1;}
-	
+
 	//Function to calculate equilibrium and rate constants as a function of temperature
 	success = shark_temperature_calculations(shark_dat);
 	if (success != 0) {mError(simulation_fail); return -1;}
-	
+
 	//Print out the header
 	print2file_shark_info(shark_dat);
-	
+
 	//Find the indices of pH and pOH if they exist
 	success = shark_pH_finder(shark_dat);
 	if (success != 0) {mError(simulation_fail); return -1;}
-	
+
 	//Setup the problem to be solved
 	success = shark_initial_conditions(shark_dat);
 	if (success != 0) {mError(simulation_fail); return -1;}
-	
+
 	//Iteratively run the simulation cases
 	do
 	{
-		
+
 		//Start console messages
 		if (shark_dat->Console_Output == true)
 		{
@@ -4044,19 +4899,19 @@ int SHARK(SHARK_DATA *shark_dat)
 			else
 				std::cout << "---------------- Performing Simulation with Electro-Neutrality-Equation ------------------\n\n";
 		}
-		
+
 		//Call the executioner function
 		success = shark_executioner(shark_dat);
 		if (success != 0) {mError(simulation_fail); return -1;}
-		
+
 		//Call the reset function
 		success = shark_reset(shark_dat);
 		if (success != 0) {mError(simulation_fail); return -1;}
-		
+
 		//Conditionally change options
 		if (shark_dat->SpeciationCurve == true)
 			shark_dat->pH = shark_dat->pH + 0.5;
-		
+
 		//End console messages
 		if (shark_dat->Console_Output == true)
 		{
@@ -4065,32 +4920,32 @@ int SHARK(SHARK_DATA *shark_dat)
 			else
 				std::cout << "\n---------------- End of Simulation -----------------\n\n";
 		}
-		
+
 	} while ((shark_dat->steadystate == false && shark_dat->simulationtime > shark_dat->time)
 			    || (shark_dat->SpeciationCurve == true && shark_dat->pH <= 14.0));
-	
+
 	//Call solver one last time to establish the steady-state solution
 	if (shark_dat->steadystate == false)
 	{
 		//Console ouput
 		if (shark_dat->Console_Output == true)
 			std::cout << "---------------- Establishing the Steady-State Solution ------------------\n\n";
-		
+
 		shark_dat->steadystate = true;
 		shark_dat->Newton_data.nl_maxit = 2 * shark_dat->numvar;
 		shark_dat->time = -1;
-		
+
 		//Call the executioner function
 		success = shark_executioner(shark_dat);
 		if (success != 0) {mError(simulation_fail); return -1;}
-		
+
 		shark_dat->steadystate = false;
 		shark_dat->time = shark_dat->time_old;
-		
+
 		if (shark_dat->Console_Output == true)
 			std::cout << "\n---------------- End of Steady-State Simulation -----------------\n\n";
 	}
-	
+
 	return success;
 }
 
@@ -4098,13 +4953,13 @@ int SHARK(SHARK_DATA *shark_dat)
 int SHARK_SCENARIO(const char *yaml_input)
 {
 	int success = 0;
-	
+
 	//Declarations
 	//NOTE: we may have to declare objects for the pitzer and sit models here
 	double time;
 	SHARK_DATA shark_dat;
 	FILE *Output;
-	
+
 	//Initializations
 	time = clock();
 	Output = fopen("output/SHARK_Output.txt","w+");
@@ -4113,46 +4968,46 @@ int SHARK_SCENARIO(const char *yaml_input)
 		system("mkdir output");
 		Output = fopen("output/SHARK_Output.txt", "w+");
 	}
-	
+
 	//Read the input file
 	success = shark_dat.yaml_object.executeYamlRead(yaml_input);
 	if (success != 0) {mError(file_dne); return -1;}
-	
+
 	//Read and check Scenario document
 	success = read_scenario(&shark_dat);
 	if (success != 0) {mError(read_error); return -1;}
-	
+
 	//NOTE: we may have to build a custom read option for pitzer and sit models to establish their structures here
-	
+
 	//Call the setup function
 	//NOTE: The NULL option between &shark_dat and (void *)&shark_dat needs to reflect the data structure for the PITZER model
 	success = setup_SHARK_DATA(Output,shark_residual, NULL, NULL, &shark_dat, NULL, (void *)&shark_dat, NULL, NULL);
 	if (success != 0) {mError(initial_error); return -1;}
-	
+
 	//Read options
 	success = read_options(&shark_dat);
 	if (success != 0) {mError(read_error); return -1;}
-	
+
 	//Read and check the MasterSpeciesList
 	success = read_species(&shark_dat);
 	if (success != 0) {mError(read_error); return -1;}
-	
+
 	//Read and check the MassBalance
 	success = read_massbalance(&shark_dat);
 	if (success != 0) {mError(read_error); return -1;}
-	
+
 	//Read and check the EquilRxn
 	success = read_equilrxn(&shark_dat);
 	if (success != 0) {mError(read_error); return -1;}
-	
+
 	//Read and check the UnsteadyRxn
 	success = read_unsteadyrxn(&shark_dat);
 	if (success != 0) {mError(read_error); return -1;}
-	
+
 	//Call the SHARK routine
 	success = SHARK(&shark_dat);
 	if (success != 0) {mError(simulation_fail); return -1;}
-		
+
 	//Close files and display end messages
 	fclose(Output);
 	time = clock() - time;
@@ -4161,7 +5016,7 @@ int SHARK_SCENARIO(const char *yaml_input)
 	std::cout << "Total Iterations: " << shark_dat.totalsteps << "\n";
 	std::cout << "Total Function Calls: " << shark_dat.totalcalls << "\n";
 	std::cout << "Evaluations/sec: " << shark_dat.totalcalls/(time / CLOCKS_PER_SEC) << "\n";
-	
+
 	return success;
 }
 
@@ -4170,11 +5025,11 @@ int SHARK_TESTS()
 {
 	int success = 0;
 	double time;
-	
+
 	SHARK_DATA shark_dat;
 	FILE *TestOutput;
 	time = clock();
-	
+
 	//Read problem size info here
 	TestOutput = fopen("output/SHARK_Test.txt", "w+");
 	if (TestOutput == nullptr)
@@ -4188,7 +5043,7 @@ int SHARK_TESTS()
 	shark_dat.num_ssao = 1;
 	shark_dat.num_usr = 0;
 	shark_dat.num_other = 0;
-	shark_dat.act_fun = IDEAL;
+	shark_dat.act_fun = PITZER;
 	shark_dat.steadystate = true;
 	shark_dat.simulationtime = 96.0;
 	shark_dat.dt = 0.1;
@@ -4200,10 +5055,10 @@ int SHARK_TESTS()
 	shark_dat.dielectric_const = 78.325;
 	shark_dat.temperature = 298.15;
 	shark_dat.volume = 1.0;							//SHOULD BE REQUIRED IF WE HAVE ADSORPTION OBJECTS!!!
-	
+
 	shark_dat.num_ssar.resize(shark_dat.num_ssao);	//Required to set this up PRIOR to calling the setup function for shark
 	shark_dat.num_ssar[0] = 2;						//Required to set this up PRIOR to calling the setup function for shark
-	
+
 	//Temporary Variables to modify test case
 	double NaHCO3 = 1.786E-1;
 	double UO2 = 1.079E-6;
@@ -4215,7 +5070,7 @@ int SHARK_TESTS()
 	double ads_area = 45000.0; // m^2/kg
 	double ads_mass = 1.5E-5;  // kg
 	double volume = 1.0;       // L
-	
+
 	// ------------------ 1-L Various Carbonate Concentrations -------------------------
 	NaOH = 0.0;
 	HCl = 0.0;
@@ -4228,19 +5083,19 @@ int SHARK_TESTS()
 	volume = 1.0;       // L
 	//volume = 0.75;       // L
 	shark_dat.simulationtime = 96.0; //hours
-	
+
 	logK_UO2CO3 = -3.45;				// change
 	logK_UO2 = -8.35;					// change
-	
-	
+
+
 	shark_dat.dt = 0.001;			 //hours
 	shark_dat.t_out = shark_dat.simulationtime / 1000.0;
 	shark_dat.volume = volume;
-	
+
 	//Call the setup function
 	success = setup_SHARK_DATA(TestOutput,NULL, NULL, NULL, &shark_dat, NULL, NULL, NULL, NULL);
 	if (success != 0) {mError(simulation_fail); return -1;}
-	
+
 	//shark_dat.Newton_data.linear_solver = FOM;
 	//shark_dat.Newton_data.Bounce = false;
 	//shark_dat.Newton_data.LineSearch = true;
@@ -4250,7 +5105,7 @@ int SHARK_TESTS()
 	//shark_dat.Newton_data.backtrack_dat.lambdaMin = DBL_EPSILON;
 	//shark_dat.Newton_data.nl_tol_abs = 1e-10;
 	//shark_dat.Newton_data.nl_tol_rel = 1e-10;
-	
+
 	//Read problem specific info here --------------------------------------------------------
 	shark_dat.MasterList.set_species(0, "NaHCO3 (aq)");
 	shark_dat.MasterList.set_species(1, "NaCO3 - (aq)");
@@ -4274,10 +5129,10 @@ int SHARK_TESTS()
 	shark_dat.MasterList.set_species(19, "OH - (aq)");
 	shark_dat.MasterList.set_species(20, "H + (aq)");
 	shark_dat.MasterList.set_species(21, "Cl - (aq)");
-	
+
 	shark_dat.MasterList.set_species(22, 0, 0, 0, 0, false, false, "Solid", "Uranyl-amidoxime", "UO2AO2 (s)", " ");
 	shark_dat.MasterList.set_species(23, -2, 0, 0, 0, false, false, "Solid", "Uranyl-carbonate-amidoxime", "UO2CO3AO2 2- (s)", " ");
-	
+
 	shark_dat.ReactionList[0].Set_Equilibrium(-14.0);
 	shark_dat.ReactionList[0].Set_Stoichiometric(0, 0);
 	shark_dat.ReactionList[0].Set_Stoichiometric(1, 0);
@@ -4303,7 +5158,7 @@ int SHARK_TESTS()
 	shark_dat.ReactionList[0].Set_Stoichiometric(21, 0);
 	shark_dat.ReactionList[0].Set_Stoichiometric(22, 0);
 	shark_dat.ReactionList[0].Set_Stoichiometric(23, 0);
-	
+
 	shark_dat.ReactionList[1].Set_Equilibrium(-6.35);
 	shark_dat.ReactionList[1].Set_Stoichiometric(0, 0);
 	shark_dat.ReactionList[1].Set_Stoichiometric(1, 0);
@@ -4329,7 +5184,7 @@ int SHARK_TESTS()
 	shark_dat.ReactionList[1].Set_Stoichiometric(21, 0);
 	shark_dat.ReactionList[1].Set_Stoichiometric(22, 0);
 	shark_dat.ReactionList[1].Set_Stoichiometric(23, 0);
-	
+
 	shark_dat.ReactionList[2].Set_Equilibrium(-10.33);
 	shark_dat.ReactionList[2].Set_Stoichiometric(0, 0);
 	shark_dat.ReactionList[2].Set_Stoichiometric(1, 0);
@@ -4355,7 +5210,7 @@ int SHARK_TESTS()
 	shark_dat.ReactionList[2].Set_Stoichiometric(21, 0);
 	shark_dat.ReactionList[2].Set_Stoichiometric(22, 0);
 	shark_dat.ReactionList[2].Set_Stoichiometric(23, 0);
-	
+
 	shark_dat.ReactionList[3].Set_Equilibrium(-10.14);
 	shark_dat.ReactionList[3].Set_Stoichiometric(0, -1);
 	shark_dat.ReactionList[3].Set_Stoichiometric(1, 0);
@@ -4381,7 +5236,7 @@ int SHARK_TESTS()
 	shark_dat.ReactionList[3].Set_Stoichiometric(21, 0);
 	shark_dat.ReactionList[3].Set_Stoichiometric(22, 0);
 	shark_dat.ReactionList[3].Set_Stoichiometric(23, 0);
-	
+
 	shark_dat.ReactionList[4].Set_Equilibrium(-1.02);
 	shark_dat.ReactionList[4].Set_Stoichiometric(0, 0);
 	shark_dat.ReactionList[4].Set_Stoichiometric(1, -1);
@@ -4407,7 +5262,7 @@ int SHARK_TESTS()
 	shark_dat.ReactionList[4].Set_Stoichiometric(21, 0);
 	shark_dat.ReactionList[4].Set_Stoichiometric(22, 0);
 	shark_dat.ReactionList[4].Set_Stoichiometric(23, 0);
-	
+
 	shark_dat.ReactionList[5].Set_Equilibrium(1.4);
 	shark_dat.ReactionList[5].Set_Stoichiometric(0, 0);
 	shark_dat.ReactionList[5].Set_Stoichiometric(1, 0);
@@ -4433,7 +5288,7 @@ int SHARK_TESTS()
 	shark_dat.ReactionList[5].Set_Stoichiometric(21, 0);
 	shark_dat.ReactionList[5].Set_Stoichiometric(22, 0);
 	shark_dat.ReactionList[5].Set_Stoichiometric(23, 0);
-	
+
 	shark_dat.ReactionList[6].Set_Equilibrium(-0.3);
 	shark_dat.ReactionList[6].Set_Stoichiometric(0, 0);
 	shark_dat.ReactionList[6].Set_Stoichiometric(1, 0);
@@ -4459,7 +5314,7 @@ int SHARK_TESTS()
 	shark_dat.ReactionList[6].Set_Stoichiometric(21, 0);
 	shark_dat.ReactionList[6].Set_Stoichiometric(22, 0);
 	shark_dat.ReactionList[6].Set_Stoichiometric(23, 0);
-	
+
 	shark_dat.ReactionList[7].Set_Equilibrium(-12.15);
 	shark_dat.ReactionList[7].Set_Stoichiometric(0, 0);
 	shark_dat.ReactionList[7].Set_Stoichiometric(1, 0);
@@ -4485,7 +5340,7 @@ int SHARK_TESTS()
 	shark_dat.ReactionList[7].Set_Stoichiometric(21, 0);
 	shark_dat.ReactionList[7].Set_Stoichiometric(22, 0);
 	shark_dat.ReactionList[7].Set_Stoichiometric(23, 0);
-	
+
 	shark_dat.ReactionList[8].Set_Equilibrium(-6.2);
 	shark_dat.ReactionList[8].Set_Stoichiometric(0, 0);
 	shark_dat.ReactionList[8].Set_Stoichiometric(1, 0);
@@ -4511,7 +5366,7 @@ int SHARK_TESTS()
 	shark_dat.ReactionList[8].Set_Stoichiometric(21, 0);
 	shark_dat.ReactionList[8].Set_Stoichiometric(22, 0);
 	shark_dat.ReactionList[8].Set_Stoichiometric(23, 0);
-	
+
 	shark_dat.ReactionList[9].Set_Equilibrium(-20.2);
 	shark_dat.ReactionList[9].Set_Stoichiometric(0, 0);
 	shark_dat.ReactionList[9].Set_Stoichiometric(1, 0);
@@ -4537,7 +5392,7 @@ int SHARK_TESTS()
 	shark_dat.ReactionList[9].Set_Stoichiometric(21, 0);
 	shark_dat.ReactionList[9].Set_Stoichiometric(22, 0);
 	shark_dat.ReactionList[9].Set_Stoichiometric(23, 0);
-	
+
 	shark_dat.ReactionList[10].Set_Equilibrium(-5.87);
 	shark_dat.ReactionList[10].Set_Stoichiometric(0, 0);
 	shark_dat.ReactionList[10].Set_Stoichiometric(1, 0);
@@ -4563,7 +5418,7 @@ int SHARK_TESTS()
 	shark_dat.ReactionList[10].Set_Stoichiometric(21, 0);
 	shark_dat.ReactionList[10].Set_Stoichiometric(22, 0);
 	shark_dat.ReactionList[10].Set_Stoichiometric(23, 0);
-	
+
 	shark_dat.ReactionList[11].Set_Equilibrium(-16.5);
 	shark_dat.ReactionList[11].Set_Stoichiometric(0, 0);
 	shark_dat.ReactionList[11].Set_Stoichiometric(1, 0);
@@ -4589,7 +5444,7 @@ int SHARK_TESTS()
 	shark_dat.ReactionList[11].Set_Stoichiometric(21, 0);
 	shark_dat.ReactionList[11].Set_Stoichiometric(22, 0);
 	shark_dat.ReactionList[11].Set_Stoichiometric(23, 0);
-	
+
 	shark_dat.ReactionList[12].Set_Equilibrium(8.4);
 	shark_dat.ReactionList[12].Set_Stoichiometric(0, 0);
 	shark_dat.ReactionList[12].Set_Stoichiometric(1, 0);
@@ -4615,7 +5470,7 @@ int SHARK_TESTS()
 	shark_dat.ReactionList[12].Set_Stoichiometric(21, 0);
 	shark_dat.ReactionList[12].Set_Stoichiometric(22, 0);
 	shark_dat.ReactionList[12].Set_Stoichiometric(23, 0);
-	
+
 	shark_dat.ReactionList[13].Set_Equilibrium(15.7);
 	shark_dat.ReactionList[13].Set_Stoichiometric(0, 0);
 	shark_dat.ReactionList[13].Set_Stoichiometric(1, 0);
@@ -4641,7 +5496,7 @@ int SHARK_TESTS()
 	shark_dat.ReactionList[13].Set_Stoichiometric(21, 0);
 	shark_dat.ReactionList[13].Set_Stoichiometric(22, 0);
 	shark_dat.ReactionList[13].Set_Stoichiometric(23, 0);
-	
+
 	shark_dat.ReactionList[14].Set_Equilibrium(21.6);
 	shark_dat.ReactionList[14].Set_Stoichiometric(0, 0);
 	shark_dat.ReactionList[14].Set_Stoichiometric(1, 0);
@@ -4667,7 +5522,7 @@ int SHARK_TESTS()
 	shark_dat.ReactionList[14].Set_Stoichiometric(21, 0);
 	shark_dat.ReactionList[14].Set_Stoichiometric(22, 0);
 	shark_dat.ReactionList[14].Set_Stoichiometric(23, 0);
-	
+
 	shark_dat.MassBalanceList[0].Set_Name("Water Balance");
 	shark_dat.MassBalanceList[0].Set_TotalConcentration(1.0);
 	shark_dat.MassBalanceList[0].Set_Delta(0, 0);
@@ -4694,7 +5549,7 @@ int SHARK_TESTS()
 	shark_dat.MassBalanceList[0].Set_Delta(21, 0);
 	shark_dat.MassBalanceList[0].Set_Delta(22, 0);
 	shark_dat.MassBalanceList[0].Set_Delta(23, 0);
-	
+
 	shark_dat.MassBalanceList[1].Set_Name("Carbonate Balance");
 	shark_dat.MassBalanceList[1].Set_TotalConcentration(NaHCO3);
 	shark_dat.MassBalanceList[1].Set_Delta(0, 1);
@@ -4721,7 +5576,7 @@ int SHARK_TESTS()
 	shark_dat.MassBalanceList[1].Set_Delta(21, 0);
 	shark_dat.MassBalanceList[1].Set_Delta(22, 0);
 	shark_dat.MassBalanceList[1].Set_Delta(23, 1);
-	
+
 	shark_dat.MassBalanceList[2].Set_Name("Nitrate Balance");
 	shark_dat.MassBalanceList[2].Set_TotalConcentration(2.0 * UO2);
 	shark_dat.MassBalanceList[2].Set_Delta(0, 0);
@@ -4748,7 +5603,7 @@ int SHARK_TESTS()
 	shark_dat.MassBalanceList[2].Set_Delta(21, 0);
 	shark_dat.MassBalanceList[2].Set_Delta(22, 0);
 	shark_dat.MassBalanceList[2].Set_Delta(23, 0);
-	
+
 	shark_dat.MassBalanceList[3].Set_Name("Sodium Balance");
 	shark_dat.MassBalanceList[3].Set_TotalConcentration(NaHCO3+NaCl+NaOH);
 	shark_dat.MassBalanceList[3].Set_Delta(0, 1);
@@ -4775,7 +5630,7 @@ int SHARK_TESTS()
 	shark_dat.MassBalanceList[3].Set_Delta(21, 0);
 	shark_dat.MassBalanceList[3].Set_Delta(22, 0);
 	shark_dat.MassBalanceList[3].Set_Delta(23, 0);
-	
+
 	shark_dat.MassBalanceList[4].Set_Name("Uranium Balance");
 	shark_dat.MassBalanceList[4].Set_TotalConcentration(UO2);
 	shark_dat.MassBalanceList[4].Set_Delta(0, 0);
@@ -4802,7 +5657,7 @@ int SHARK_TESTS()
 	shark_dat.MassBalanceList[4].Set_Delta(21, 0);
 	shark_dat.MassBalanceList[4].Set_Delta(22, 1);
 	shark_dat.MassBalanceList[4].Set_Delta(23, 1);
-	
+
 	shark_dat.MassBalanceList[5].Set_Name("Chlorine Balance");
 	shark_dat.MassBalanceList[5].Set_TotalConcentration(NaCl+HCl);
 	shark_dat.MassBalanceList[5].Set_Delta(0, 0);
@@ -4829,14 +5684,14 @@ int SHARK_TESTS()
 	shark_dat.MassBalanceList[5].Set_Delta(21, 1);
 	shark_dat.MassBalanceList[5].Set_Delta(22, 0);
 	shark_dat.MassBalanceList[5].Set_Delta(23, 0);
-	
-	
-	
+
+
+
 	shark_dat.AdsorptionList[0].setSpecificArea(ads_area);
 	shark_dat.AdsorptionList[0].setTotalMass(ads_mass);
 	shark_dat.AdsorptionList[0].setActivityModelInfo(FloryHuggins, &shark_dat.AdsorptionList[0]);
 	shark_dat.AdsorptionList[0].setBasis("area");
-	
+
 	shark_dat.AdsorptionList[0].getReaction(0).Set_Equilibrium(logK_UO2);
 	shark_dat.AdsorptionList[0].getReaction(0).Set_Stoichiometric(0, 0);
 	shark_dat.AdsorptionList[0].getReaction(0).Set_Stoichiometric(1, 0);
@@ -4862,8 +5717,8 @@ int SHARK_TESTS()
 	shark_dat.AdsorptionList[0].getReaction(0).Set_Stoichiometric(21, 0);
 	shark_dat.AdsorptionList[0].getReaction(0).Set_Stoichiometric(22, 1);
 	shark_dat.AdsorptionList[0].getReaction(0).Set_Stoichiometric(23, 0);
-	
-	
+
+
 	shark_dat.AdsorptionList[0].getReaction(1).Set_Equilibrium(logK_UO2CO3);
 	shark_dat.AdsorptionList[0].getReaction(1).Set_Stoichiometric(0, 0);
 	shark_dat.AdsorptionList[0].getReaction(1).Set_Stoichiometric(1, 0);
@@ -4889,7 +5744,7 @@ int SHARK_TESTS()
 	shark_dat.AdsorptionList[0].getReaction(1).Set_Stoichiometric(21, 0);
 	shark_dat.AdsorptionList[0].getReaction(1).Set_Stoichiometric(22, 0);
 	shark_dat.AdsorptionList[0].getReaction(1).Set_Stoichiometric(23, 1);
-	
+
 	shark_dat.AdsorptionList[0].setVolumeFactor(0, 0);
 	shark_dat.AdsorptionList[0].setVolumeFactor(1, 0);
 	shark_dat.AdsorptionList[0].setVolumeFactor(2, 0);
@@ -4914,28 +5769,29 @@ int SHARK_TESTS()
 	shark_dat.AdsorptionList[0].setVolumeFactor(21, 0);
 	shark_dat.AdsorptionList[0].setVolumeFactor(22, 5.0); //MADE UP NUMBER
 	shark_dat.AdsorptionList[0].setVolumeFactor(23, 8.0); //MADE UP NUMBER
-	
+
 	//END problem specific info here --------------------------------------------------------
-	
+
+    shark_dat.Newton_data.nl_maxit = 50;
 	//Call the SHARK routine
 	success = SHARK(&shark_dat);
 	if (success != 0) {mError(simulation_fail); return -1;}
-	
+
 	//TEst of Langmuir
 	std::cout << "Langmuir Test 1 = \t" << shark_dat.AdsorptionList[0].calculateLangmuirAdsorption(shark_dat.X_new, shark_dat.activity_new, 0) << std::endl;
 	std::cout << "Compare 1 = \t" << pow(10.0, shark_dat.X_new(22,0)) << std::endl;
 	std::cout << "qmax 1 = \t" << shark_dat.AdsorptionList[0].calculateLangmuirMaxCapacity(0) << std::endl;
 	std::cout << "K 1 = \t" << shark_dat.AdsorptionList[0].calculateLangmuirEquParam(shark_dat.X_new, shark_dat.activity_new, 0) << std::endl;
 	std::cout << "act 1 = \t" << shark_dat.AdsorptionList[0].getActivity(22) << std::endl;
-	
+
 	std::cout << std::endl;
-	
+
 	std::cout << "Langmuir Test 2 = \t" << shark_dat.AdsorptionList[0].calculateLangmuirAdsorption(shark_dat.X_new, shark_dat.activity_new, 1) << std::endl;
 	std::cout << "Compare 2 = \t" << pow(10.0, shark_dat.X_new(23,0)) << std::endl;
 	std::cout << "qmax 2 = \t" << shark_dat.AdsorptionList[0].calculateLangmuirMaxCapacity(1) << std::endl;
 	std::cout << "K 2 = \t" << shark_dat.AdsorptionList[0].calculateLangmuirEquParam(shark_dat.X_new, shark_dat.activity_new, 1) << std::endl;
 	std::cout << "act 2 = \t" << shark_dat.AdsorptionList[0].getActivity(23) << std::endl;
-	
+
 	//Close files and display end messages
 	fclose(TestOutput);
 	time = clock() - time;
