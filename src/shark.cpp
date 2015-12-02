@@ -2967,7 +2967,7 @@ int pitzer_equation (const Matrix<double>& x, Matrix<double> &F, const void *dat
     {
         for(int j=0; j<dat->numvar; j++)
         {
-            if (dat->MasterList.charge(i)==0 || dat->MasterList.charge(j))
+            if (dat->MasterList.charge(i)==0 || dat->MasterList.charge(j)==0)
                 break;
             C[i][j]=Cphi[i][j]/(2*sqrt(abs(dat->MasterList.charge(i)*dat->MasterList.charge(j))));
         }
@@ -3100,7 +3100,7 @@ int pitzer_equation (const Matrix<double>& x, Matrix<double> &F, const void *dat
         p4=0.0;
         p5=0.0;
         p6=0.0;
-        std::cout << "n = " << n << "\tlog_gama = " << log_gama[n] << std::endl;
+        //std::cout << "n = " << n << "\tlog_gama = " << log_gama[n] << std::endl;
         }
         else
             log_gama[n]=0.0;
