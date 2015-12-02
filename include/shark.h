@@ -543,6 +543,8 @@ public:
 	void setVolumeFactor(int i, double v);				///< Set the ith volume factor for the species list (cm^3/mol) or (mol/mol)
 	void setAreaFactor(int i, double a);				///< Set the ith area factor for the species list (m^2/mol) or (mol/mol)
 	void setSpecificArea(double a);						///< Set the specific area for the adsorbent (m^2/kg) or (mol/kg)
+	void setSpecificMolality(double a);					///< Set the specific molality for the adsorbent (mol/kg)
+	void setSurfaceCharge(double c);					///< Set the surface charge of the uncomplexed ligands
 	void setTotalMass(double m);						///< Set the total mass of the adsorbent (kg)
 	void setTotalVolume(double v);						///< Set the total volume of the system (L)
 	void setAreaBasisBool(bool opt);					///< Set the basis boolean directly
@@ -632,6 +634,8 @@ public:
 	double getAreaFactor(int i);				///< Get the ith area factor (species not involved return zeros) (m^2/mol) or (mol/mol)
 	double getActivity(int i);					///< Get the ith activity factor for the surface species
 	double getSpecificArea();					///< Get the specific area of the adsorbent (m^2/kg) or (mol/kg)
+	double getSpecificMolality();				///< Get the specific molality of the adsorbent (mol/kg)
+	double getSurfaceCharge();					///< Get the surface charge of the adsorbent
 	double getBulkDensity();					///< Calculate and return bulk density of adsorbent in system (kg/L)
 	double getTotalMass();						///< Get the total mass of adsorbent in the system (kg)
 	double getTotalVolume();					///< Get the total volume of the system (L)
@@ -660,6 +664,8 @@ protected:
 	std::vector<int> aqueous_index;				///< List of the indices for the primary aqueous species in the reactions
 	Matrix<double> activities;					///< List of the activities calculated by the activity model
 	double specific_area;						///< Specific surface area of the adsorbent (m^2/kg) or (mol/kg) !!! MAY NEED TO CHANGE!!!
+	double specific_molality;					///< Specific molality of the adsorbent - moles of ligand per kg sorbent (mol/kg)
+	double surface_charge;						///< Charge of the uncomplexed surface ligand species
 	double total_mass;							///< Total mass of the adsorbent in the system (kg)
 	double total_volume;						///< Total volume of the system (L)
 	int num_rxns;								///< Number of reactions involved in the adsorption equilibria

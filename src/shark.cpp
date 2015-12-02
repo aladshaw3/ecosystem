@@ -1178,6 +1178,8 @@ activities()
 	surface_activity = (*ideal_solution);
 	activity_data = nullptr;
 	specific_area = 1.0;
+	specific_molality = 1.0;
+	surface_charge = 0.0;
 	total_mass = 0.0;
 	total_volume = 1.0;
 	num_rxns = 0;
@@ -1392,6 +1394,20 @@ void AdsorptionReaction::setSpecificArea(double a)
 	if (a < 0)
 		a = DBL_MIN;
 	this->specific_area = a;
+}
+
+//Set the specific molality for the adsorbent
+void AdsorptionReaction::setSpecificMolality(double a)
+{
+	if (a < 0)
+		a = DBL_MIN;
+	this->specific_molality = a;
+}
+
+//Set the surface charge
+void AdsorptionReaction::setSurfaceCharge(double c)
+{
+	this->surface_charge = c;
 }
 
 //Set the total mass of adsorbent in system
@@ -1675,10 +1691,22 @@ double AdsorptionReaction::getActivity(int i)
 	return this->activities(i,0);
 }
 
+//Return the specific molality
+double AdsorptionReaction::getSpecificMolality()
+{
+	return this->specific_molality;
+}
+
 //Return the specific area
 double AdsorptionReaction::getSpecificArea()
 {
 	return this->specific_area;
+}
+
+//Return the surface charge
+double AdsorptionReaction::getSurfaceCharge()
+{
+	return this->surface_charge;
 }
 
 //Calculate and return the bulk density of the adsorbent in the system
@@ -4160,7 +4188,7 @@ int SHARK_TESTS()
 	shark_dat.num_ssao = 1;
 	shark_dat.num_usr = 0;
 	shark_dat.num_other = 0;
-	shark_dat.act_fun = DAVIES;
+	shark_dat.act_fun = IDEAL;
 	shark_dat.steadystate = true;
 	shark_dat.simulationtime = 96.0;
 	shark_dat.dt = 0.1;
