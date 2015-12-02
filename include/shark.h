@@ -540,9 +540,10 @@ public:
 		the primary aqueous index species appears opposite of the adsorbed species in the reactions. Note: This function
 		assumes that the adsorbed indices have already been set. */
 	int setAqueousIndexAuto();
-	void setVolumeFactor(int i, double v);				///< Set the ith volume factor for the species list (cm^3/mol) or (mol/mol)
-	void setAreaFactor(int i, double a);				///< Set the ith area factor for the species list (m^2/mol) or (mol/mol)
-	void setSpecificArea(double a);						///< Set the specific area for the adsorbent (m^2/kg) or (mol/kg)
+	void setMolarFactor(int rxn_i, double m);			///< Set the molar factor for the ith reaction (mol/mol)
+	void setVolumeFactor(int i, double v);				///< Set the ith volume factor for the species list (cm^3/mol)
+	void setAreaFactor(int i, double a);				///< Set the ith area factor for the species list (m^2/mol)
+	void setSpecificArea(double a);						///< Set the specific area for the adsorbent (m^2/kg)
 	void setSpecificMolality(double a);					///< Set the specific molality for the adsorbent (mol/kg)
 	void setSurfaceCharge(double c);					///< Set the surface charge of the uncomplexed ligands
 	void setTotalMass(double m);						///< Set the total mass of the adsorbent (kg)
@@ -554,6 +555,16 @@ public:
 	void calculateEquilibria(double T);					///< Calculates all equilibrium parameters as a function of temperature
 	int callSurfaceActivity(const Matrix<double> &x);	///< Calls the activity model and returns an int flag for success or failure
 	double calculateActiveFraction(const Matrix<double> &x);	///< Calculates the fraction of the surface that is active and available
+	
+	/// Function to calculate the surface charge density based on concentrations
+	/** This function is used to calculate the surface charge density of the adsorbed species based on
+		the charges and concentrations of the adsorbed species. The calculation is used to correct the
+		adsorption equilibria constant based on a localized surface charge balance. This requires that 
+		you know the molality of the uncomplexed ligand species on the surface, as well as the specific
+		surface area for the adsorbent. 
+	 
+		\param x matrix of the log(C) concentration values at the current non-linear step*/
+	double calculateSurfaceChargeDensity( const Matrix<double> &x);
 
 	/// Calculates the theoretical maximum capacity for adsorption  in reaction i
 	/** This function is used to calculate the current maximum capacity of a species for a given
@@ -630,8 +641,9 @@ public:
 	double Eval_Residual(const Matrix<double> &x, const Matrix<double> &gama, int i);
 
 	Reaction& getReaction(int i);				///< Return reference to the ith reaction object in the adsorption object
-	double getVolumeFactor(int i);				///< Get the ith volume factor (species not involved return zeros) (cm^3/mol) or (mol/mol)
-	double getAreaFactor(int i);				///< Get the ith area factor (species not involved return zeros) (m^2/mol) or (mol/mol)
+	double getMolarFactor(int i);				///< Get the ith reaction's molar factor for adsorption (mol/mol)
+	double getVolumeFactor(int i);				///< Get the ith volume factor (species not involved return zeros) (cm^3/mol)
+	double getAreaFactor(int i);				///< Get the ith area factor (species not involved return zeros) (m^2/mol)
 	double getActivity(int i);					///< Get the ith activity factor for the surface species
 	double getSpecificArea();					///< Get the specific area of the adsorbent (m^2/kg) or (mol/kg)
 	double getSpecificMolality();				///< Get the specific molality of the adsorbent (mol/kg)
@@ -658,12 +670,13 @@ protected:
 	int (*surface_activity) (const Matrix<double>& logq, Matrix<double> &activity, const void *data);
 
 	const void *activity_data;					///< Pointer to the data structure needed for surface activities.
-	std::vector<double> area_factors;			///< List of area factors associated with surface species (m^2/mol) or (mol/mol)
-	std::vector<double> volume_factors;			///< List of the van der Waals volumes of each surface species (cm^3/mol) or (mol/mol)
+	std::vector<double> area_factors;			///< List of area factors associated with surface species (m^2/mol)
+	std::vector<double> volume_factors;			///< List of the van der Waals volumes of each surface species (cm^3/mol)
 	std::vector<int> adsorb_index;				///< List of the indices for the adsorbed species in the reactions
 	std::vector<int> aqueous_index;				///< List of the indices for the primary aqueous species in the reactions
+	std::vector<double> molar_factor;			///< List of the number of ligands needed to form one mole of adsorption in each reaction
 	Matrix<double> activities;					///< List of the activities calculated by the activity model
-	double specific_area;						///< Specific surface area of the adsorbent (m^2/kg) or (mol/kg) !!! MAY NEED TO CHANGE!!!
+	double specific_area;						///< Specific surface area of the adsorbent (m^2/kg)
 	double specific_molality;					///< Specific molality of the adsorbent - moles of ligand per kg sorbent (mol/kg)
 	double surface_charge;						///< Charge of the uncomplexed surface ligand species
 	double total_mass;							///< Total mass of the adsorbent in the system (kg)
@@ -857,6 +870,14 @@ void print2file_shark_results_new(SHARK_DATA *shark_dat);
 
 /// Function to print out the simulation results for the previous time step
 void print2file_shark_results_old(SHARK_DATA *shark_dat);
+
+/// Function to calculate the ionic strength of the solution
+/** This function calculates the ionic strength of a system given the concentrations of the species present
+	in solution, as well as any other relavent information from SHARK_DATA such as charge. 
+ 
+	\param x matrix of the log(C) concentration values at the current non-linear step
+	\param MasterList reference to the MasterSpeciesList object holding species information*/
+double calculate_ionic_strength(const Matrix<double> &x, MasterSpeciesList &MasterList);
 
 ///Surface Activity function for simple non-ideal adsorption
 /** This is a simple surface activity model to be used with the Adsorption objects to evaluate the non-ideal
