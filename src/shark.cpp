@@ -1486,6 +1486,8 @@ void AdsorptionReaction::calculateAreaFactors()
 	{
 		if (this->volume_factors[i] == 0.0 || this->List->get_species(i).MoleculePhaseID() != SOLID)
 			this->area_factors[i] = 0.0;
+		else if (this->volume_factors[i] == 0.0 && this->List->get_species(i).MoleculePhaseID() == SOLID)
+			this->area_factors[i] = M_PI * pow((3.0/(4.0*M_PI))*(1.892/Na), (2.0/3.0)) * Na / 10000.0;
 		else
 		{
 			this->area_factors[i] = M_PI * pow((3.0/(4.0*M_PI))*(this->volume_factors[i]/Na), (2.0/3.0)) * Na / 10000.0;
@@ -2005,12 +2007,12 @@ void print2file_shark_info(SHARK_DATA *shark_dat)
 			fprintf(shark_dat->OutputFile, "Reactions for Adsorbent %i \n-----------------------------------------------------\n", n+1);
 			if (shark_dat->AdsorptionList[n].isAreaBasis() == true)
 			{
-				fprintf(shark_dat->OutputFile, "Adsorption Basis = Area\n");
+				fprintf(shark_dat->OutputFile, "Adsorption Basis =\tArea\n");
 				fprintf(shark_dat->OutputFile, "Specific Area (m^2/kg) = \t%.6g\n", shark_dat->AdsorptionList[n].getSpecificArea());
 			}
 			else
 			{
-				fprintf(shark_dat->OutputFile, "Adsorption Basis = Molar\n");
+				fprintf(shark_dat->OutputFile, "Adsorption Basis =\tMolar\n");
 				fprintf(shark_dat->OutputFile, "Specific Molality (mol/kg) = \t%.6g\n", shark_dat->AdsorptionList[n].getSpecificMolality());
 			}
 			fprintf(shark_dat->OutputFile, "Total Mass (kg) = \t%.6g\n", shark_dat->AdsorptionList[n].getTotalMass());
@@ -5188,17 +5190,17 @@ int SHARK_TESTS()
 	UO2 = 1.386E-8;   // ~3.3 ppb
 	//UO2 = 2.521E-5;		// ~6 ppm
 	ads_area = 45000.0; // m^2/kg
-	ads_mol = 350.0;     // mol/kg
+	ads_mol = 1.9;     // mol/kg
 	ads_mass = 1.5E-5;  // kg
 	volume = 1.0;       // L
 	//volume = 0.75;       // L
 	shark_dat.simulationtime = 96.0; //hours
 
-	//logK_UO2CO3 = -3.45;				// change
-	//logK_UO2 = -8.35;					// change
+	//logK_UO2CO3 = 0.45;				// area basis - simulated seawater
+	//logK_UO2 = -6.35;					// area basis - simulated seawater
 	
-	logK_UO2CO3 = -3.5;				// change
-	logK_UO2 = -8.35;					// change
+	logK_UO2CO3 = 4.75;				// molar basis - simulated seawater
+	logK_UO2 = -2.75;					// molar basis - simulated seawater
 
 
 	shark_dat.dt = 0.001;			 //hours
@@ -5895,12 +5897,12 @@ int SHARK_TESTS()
 	if (success != 0) {mError(simulation_fail); return -1;}
 
 	//Test of Langmuir - No Longer always a valid test
-	/*
 	std::cout << "Langmuir Test 1 = \t" << shark_dat.AdsorptionList[0].calculateLangmuirAdsorption(shark_dat.X_new, shark_dat.activity_new, 0) << std::endl;
 	std::cout << "Newton Test 1 = \t" << pow(10.0, shark_dat.X_new(22,0)) << std::endl;
 	std::cout << "qmax 1 = \t" << shark_dat.AdsorptionList[0].calculateLangmuirMaxCapacity(0) << std::endl;
 	std::cout << "K 1 = \t" << shark_dat.AdsorptionList[0].calculateLangmuirEquParam(shark_dat.X_new, shark_dat.activity_new, 0) << std::endl;
 	std::cout << "act 1 = \t" << shark_dat.AdsorptionList[0].getActivity(22) << std::endl;
+	std::cout << "area_factor 1 = " << shark_dat.AdsorptionList[0].getAreaFactor(22) << std::endl;
 
 	std::cout << std::endl;
 
@@ -5909,7 +5911,10 @@ int SHARK_TESTS()
 	std::cout << "qmax 2 = \t" << shark_dat.AdsorptionList[0].calculateLangmuirMaxCapacity(1) << std::endl;
 	std::cout << "K 2 = \t" << shark_dat.AdsorptionList[0].calculateLangmuirEquParam(shark_dat.X_new, shark_dat.activity_new, 1) << std::endl;
 	std::cout << "act 2 = \t" << shark_dat.AdsorptionList[0].getActivity(23) << std::endl;
-	 */
+	std::cout << "area_factor 2 = " << shark_dat.AdsorptionList[0].getAreaFactor(23) << std::endl;
+	
+	std::cout << std::endl;
+	
 	std::cout << "Surface Charge Density (C/m^2) = " << shark_dat.AdsorptionList[0].getChargeDensity() << std::endl;
 
 	//Close files and display end messages
