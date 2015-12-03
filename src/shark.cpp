@@ -1531,7 +1531,7 @@ double AdsorptionReaction::calculateSurfaceChargeDensity( const Matrix<double> &
 	sum = sum + (this->getSurfaceCharge() * this->getSpecificMolality());
 	sigma = sum * (Faraday/this->getSpecificArea());
 	
-	return -sigma;
+	return sigma;
 }
 
 //Calculation of the active fraction of the surface area
@@ -1665,7 +1665,6 @@ double AdsorptionReaction::calculateAqueousChargeExchange(int i)
 {
 	double n = 0.0;
 
-	//Reactants have negative stiocheometry and products have positive stiocheometry, so change sign of n on return
 	for (int j = 0; j<this->List->list_size(); j++)
 	{
 		if (this->List->get_species(j).MoleculePhaseID() == AQUEOUS || this->List->get_species(j).MoleculePhaseID() == LIQUID)
@@ -1674,7 +1673,7 @@ double AdsorptionReaction::calculateAqueousChargeExchange(int i)
 		}
 	}
 
-	return -n;
+	return n;
 }
 
 //Calculation of equilibrium correct term
@@ -5802,6 +5801,7 @@ int SHARK_TESTS()
 	shark_dat.AdsorptionList[0].setSpecificArea(ads_area);
 	shark_dat.AdsorptionList[0].setSpecificMolality(ads_mol);
 	shark_dat.AdsorptionList[0].setTotalMass(ads_mass);
+	shark_dat.AdsorptionList[0].setSurfaceCharge(0.0);
 	shark_dat.AdsorptionList[0].setActivityModelInfo(FloryHuggins, &shark_dat.AdsorptionList[0]);
 	//shark_dat.AdsorptionList[0].setBasis("area");
 	shark_dat.AdsorptionList[0].setBasis("molar");
@@ -5910,6 +5910,7 @@ int SHARK_TESTS()
 	std::cout << "K 2 = \t" << shark_dat.AdsorptionList[0].calculateLangmuirEquParam(shark_dat.X_new, shark_dat.activity_new, 1) << std::endl;
 	std::cout << "act 2 = \t" << shark_dat.AdsorptionList[0].getActivity(23) << std::endl;
 	 */
+	std::cout << "Surface Charge Density (C/m^2) = " << shark_dat.AdsorptionList[0].getChargeDensity() << std::endl;
 
 	//Close files and display end messages
 	fclose(TestOutput);
