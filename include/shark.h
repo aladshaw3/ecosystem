@@ -553,6 +553,8 @@ public:
 
 	void calculateAreaFactors();						///< Calculates the area factors used from the van der Waals volumes
 	void calculateEquilibria(double T);					///< Calculates all equilibrium parameters as a function of temperature
+	void setChargeDensity(const Matrix<double> &x);		///< Calculates and sets the current value of charge density
+	void setIonicStrength(const Matrix<double> &x);		///< Calculates and sets the current value of ionic strength
 	int callSurfaceActivity(const Matrix<double> &x);	///< Calls the activity model and returns an int flag for success or failure
 	double calculateActiveFraction(const Matrix<double> &x);	///< Calculates the fraction of the surface that is active and available
 	
@@ -633,12 +635,13 @@ public:
 	/// Calculates the residual for the ith reaction in the system
 	/** This function will provide a system residual for the ith reaction object involved in the Adsorption
 		Reaction. The residual is fed into the SHARK solver to find the solution to solid and aqueous phase
-		concentrations simultaneously.
+		concentrations simultaneously. This function will also adjust the equilibrium parameter for the reaction
+		
 
 		\param x matrix of the log(C) concentration values at the current non-linear step
 		\param gama matrix of activity coefficients for each species at the current non-linear step
 		\param i index of the reaction of interest for the adsorption object*/
-	double Eval_Residual(const Matrix<double> &x, const Matrix<double> &gama, int i);
+	double Eval_Residual(const Matrix<double> &x, const Matrix<double> &gama, double T, double rel_perm, int i);
 
 	Reaction& getReaction(int i);				///< Return reference to the ith reaction object in the adsorption object
 	double getMolarFactor(int i);				///< Get the ith reaction's molar factor for adsorption (mol/mol)
@@ -651,6 +654,8 @@ public:
 	double getBulkDensity();					///< Calculate and return bulk density of adsorbent in system (kg/L)
 	double getTotalMass();						///< Get the total mass of adsorbent in the system (kg)
 	double getTotalVolume();					///< Get the total volume of the system (L)
+	double getChargeDensity();					///< Get the value of the surface charge density (C/m^2)
+	double getIonicStrength();					///< Get the value of the ionic strength of solution (mol/L)
 	int getNumberRxns();						///< Get the number of reactions involved in the adsorption object
 	int getAdsorbIndex(int i);					///< Get the index of the adsorbed species in the ith reaction
 	int getAqueousIndex(int i);					///< Get the index of the primary aqueous species in the ith reaction
@@ -681,6 +686,8 @@ protected:
 	double surface_charge;						///< Charge of the uncomplexed surface ligand species
 	double total_mass;							///< Total mass of the adsorbent in the system (kg)
 	double total_volume;						///< Total volume of the system (L)
+	double ionic_strength;						///< Ionic Strength of the system used to adjust equilibria constants (mol/L)
+	double charge_density;						///< Surface charge density of the adsorbent used to adjust equilbria (C/m^2)
 	int num_rxns;								///< Number of reactions involved in the adsorption equilibria
 	bool AreaBasis;								///< True = Adsorption on an area basis, False = Adsorption on a ligand basis
 
@@ -799,6 +806,7 @@ typedef struct SHARK_DATA
 	double Norm = 0.0;								///< Current value of euclidean norm in solution
 
 	double dielectric_const = 78.325;				///< Dielectric constant used in many activity models (default: water = 78.325 (1/K))
+	double relative_permittivity = 80.1;			///< Relative permittivity of the medium (default: water = 80.1 (-))
 	double temperature = 298.15;					///< Solution temperature (default = 25 oC or 298.15 K)
 
 	bool steadystate = true;						///< True = solve steady problem; False = solve transient problem
@@ -1140,6 +1148,7 @@ int SHARK(SHARK_DATA *shark_dat);
 	  pH: 7              \#Only required if we are specifying a const_pH \n
 	  temp: 298.15       \#Units must be in Kelvin \n
 	  dielec: 78.325     \#Units must be in (1/Kelvin) \n
+	  rel_perm: 80.1     \#Unitless number \n
 	  res_alk: 0         \#Units must be in mol/L (Residual Alkalinity) \n
 	  volume: 1.0		 \#Units must be in L \n
 

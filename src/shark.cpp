@@ -1183,6 +1183,8 @@ activities()
 	surface_charge = 0.0;
 	total_mass = 0.0;
 	total_volume = 1.0;
+	charge_density = 0.0;
+	ionic_strength = 0.0;
 	num_rxns = 0;
 	AreaBasis = true;
 }
@@ -1220,6 +1222,7 @@ void AdsorptionReaction::Initialize_Object(MasterSpeciesList &List, int n)
 		this->ads_rxn[i].Initialize_Object(List);
 		this->adsorb_index[i] = -1;
 		this->aqueous_index[i] = -1;
+		this->molar_factor[i] = 1.0;
 	}
 }
 
@@ -1497,6 +1500,18 @@ void AdsorptionReaction::calculateEquilibria(double T)
 		this->getReaction(i).calculateEquilibrium(T);
 }
 
+//Set the charge density
+void AdsorptionReaction::setChargeDensity(const Matrix<double> &x)
+{
+	this->charge_density = this->calculateSurfaceChargeDensity(x);
+}
+
+//Set the Ionic strength of the solution
+void AdsorptionReaction::setIonicStrength(const Matrix<double> &x)
+{
+	this->ionic_strength = calculate_ionic_strength(x, *this->List);
+}
+
 //Call the activity model passing the logx concentrations of species
 int AdsorptionReaction::callSurfaceActivity(const Matrix<double> &x)
 {
@@ -1516,7 +1531,7 @@ double AdsorptionReaction::calculateSurfaceChargeDensity( const Matrix<double> &
 	sum = sum + (this->getSurfaceCharge() * this->getSpecificMolality());
 	sigma = sum * (Faraday/this->getSpecificArea());
 	
-	return sigma;
+	return -sigma;
 }
 
 //Calculation of the active fraction of the surface area
@@ -1669,7 +1684,7 @@ double AdsorptionReaction::calculateEquilibriumCorrection(double sigma, double T
 }
 
 //Calculation of residual of ith reaction for the solver to work on
-double AdsorptionReaction::Eval_Residual(const Matrix<double> &x, const Matrix<double> &gama, int i)
+double AdsorptionReaction::Eval_Residual(const Matrix<double> &x, const Matrix<double> &gama, double T, double rel_perm, int i)
 {
 	double res = this->getReaction(i).Get_Stoichiometric(this->getAdsorbIndex(i)) * ( log10(this->getActivity(this->getAdsorbIndex(i))) + x(this->getAdsorbIndex(i),0) );
 
@@ -1693,8 +1708,11 @@ double AdsorptionReaction::Eval_Residual(const Matrix<double> &x, const Matrix<d
 		if (this->List->get_species(n).MoleculePhaseID() == AQUEOUS || this->List->get_species(n).MoleculePhaseID() == LIQUID)
 			res = res + ( this->getReaction(i).Get_Stoichiometric(n)*( log10(gama(n,0))+x(n,0) ) );
 	}
-	res = res - this->getReaction(i).Get_Equilibrium();
-
+	
+	double logK = this->getReaction(i).Get_Equilibrium();
+	logK = log10( pow(10.0, logK)*this->calculateEquilibriumCorrection(this->getChargeDensity(), T, this->getIonicStrength(), rel_perm, i) );
+	res = res - logK;
+	
 	return res;
 }
 
@@ -1787,6 +1805,18 @@ double AdsorptionReaction::getTotalMass()
 double AdsorptionReaction::getTotalVolume()
 {
 	return this->total_volume;
+}
+
+//Return charge density
+double AdsorptionReaction::getChargeDensity()
+{
+	return this->charge_density;
+}
+
+//Return the ionic strength
+double AdsorptionReaction::getIonicStrength()
+{
+	return this->ionic_strength;
 }
 
 //Return the number of reactions
@@ -1974,7 +2004,16 @@ void print2file_shark_info(SHARK_DATA *shark_dat)
 		for (int n=0; n<shark_dat->AdsorptionList.size(); n++)
 		{
 			fprintf(shark_dat->OutputFile, "Reactions for Adsorbent %i \n-----------------------------------------------------\n", n+1);
-			fprintf(shark_dat->OutputFile, "Specific Area (m^2/kg) = \t%.6g\n", shark_dat->AdsorptionList[n].getSpecificArea());
+			if (shark_dat->AdsorptionList[n].isAreaBasis() == true)
+			{
+				fprintf(shark_dat->OutputFile, "Adsorption Basis = Area\n");
+				fprintf(shark_dat->OutputFile, "Specific Area (m^2/kg) = \t%.6g\n", shark_dat->AdsorptionList[n].getSpecificArea());
+			}
+			else
+			{
+				fprintf(shark_dat->OutputFile, "Adsorption Basis = Molar\n");
+				fprintf(shark_dat->OutputFile, "Specific Molality (mol/kg) = \t%.6g\n", shark_dat->AdsorptionList[n].getSpecificMolality());
+			}
 			fprintf(shark_dat->OutputFile, "Total Mass (kg) = \t%.6g\n", shark_dat->AdsorptionList[n].getTotalMass());
 			for (int j=0; j<shark_dat->AdsorptionList[n].getNumberRxns(); j++)
 			{
@@ -2001,7 +2040,12 @@ void print2file_shark_info(SHARK_DATA *shark_dat)
 						}
 					}
 					if (i == shark_dat->numvar-1)
-						fprintf(shark_dat->OutputFile, " + { A * phi }_%i = ",n+1);
+					{
+						if (shark_dat->AdsorptionList[n].isAreaBasis() == true || shark_dat->AdsorptionList[n].getMolarFactor(j) == 1.0)
+							fprintf(shark_dat->OutputFile, " + { A * phi }_%i = ",n+1);
+						else
+							fprintf(shark_dat->OutputFile, " + %g x { A * phi }_%i = ",shark_dat->AdsorptionList[n].getMolarFactor(j),n+1);
+					}
 				}
 
 				first = true;
@@ -2096,6 +2140,10 @@ void print2file_shark_header(SHARK_DATA *shark_dat)
 		fprintf(shark_dat->OutputFile, "Activity Function = DAVIES\n");
 	else if (shark_dat->act_fun == DEBYE_HUCKEL)
 		fprintf(shark_dat->OutputFile, "Activity Function = DEBYE_HUCKEL\n");
+	else if (shark_dat->act_fun == SIT)
+		fprintf(shark_dat->OutputFile, "Activity Function = SIT\n");
+	else if (shark_dat->act_fun == PITZER)
+		fprintf(shark_dat->OutputFile, "Activity Function = PITZER\n");
 	else
 		fprintf(shark_dat->OutputFile, "Activity Function = UNREGISTERED\n");
 	if (shark_dat->Contains_pH == true)
@@ -2175,7 +2223,7 @@ void print2file_shark_header(SHARK_DATA *shark_dat)
 				break;
 
 			case LIQUID:
-				fprintf(shark_dat->OutputFile, "\t(mol/L)");
+				fprintf(shark_dat->OutputFile, "\t(-)");
 				break;
 
 			case GAS:
@@ -3354,6 +3402,14 @@ int read_scenario(SHARK_DATA *shark_dat)
 	} catch (std::out_of_range)
 	{
 		shark_dat->dielectric_const = 78.325;
+	}
+	
+	try
+	{
+		shark_dat->relative_permittivity = shark_dat->yaml_object.getYamlWrapper()("Scenario")("sys_data")["rel_perm"].getDouble();
+	} catch (std::out_of_range)
+	{
+		shark_dat->relative_permittivity = WaterRelPerm;
 	}
 
 	try
@@ -4756,12 +4812,20 @@ int shark_solver(SHARK_DATA *shark_dat)
 			success = Convert2Concentration(shark_dat->X_new, shark_dat->Conc_new);
 			if (success != 0) {mError(simulation_fail); return -1;}
 			shark_dat->MasterList.DisplayConcentrations(shark_dat->Conc_new);
+			
+			std::cout << "Ionic Strength (M) = " << calculate_ionic_strength(shark_dat->X_new, shark_dat->MasterList) << std::endl;
+			
 			for (int i=0; i<shark_dat->AdsorptionList.size(); i++)
 			{
 				std::cout << "Active Surface Fraction " << i << " = " << shark_dat->AdsorptionList[i].calculateActiveFraction(shark_dat->X_new) << std::endl;
-				for (int n=0; n<shark_dat->AdsorptionList[i].getNumberRxns(); i++)
+				std::cout << "Surface Charge Density (C/m^2) " << i << " = " << shark_dat->AdsorptionList[i].getChargeDensity() << std::endl;
+				for (int n=0; n<shark_dat->AdsorptionList[i].getNumberRxns(); n++)
 				{
 					std::cout << "Area Factor for Species " << shark_dat->AdsorptionList[i].getAdsorbIndex(n) << " = " << shark_dat->AdsorptionList[i].getAreaFactor(shark_dat->AdsorptionList[i].getAdsorbIndex(n)) << std::endl;
+				}
+				for (int n=0; n<shark_dat->AdsorptionList[i].getNumberRxns(); n++)
+				{
+					std::cout << "logK for Reaction " << n << " = " << shark_dat->AdsorptionList[i].getReaction(n).Get_Equilibrium() << std::endl;
 				}
 			}
 			std::cout << "\n";
@@ -4861,9 +4925,13 @@ int shark_residual(const Matrix<double> &x, Matrix<double> &F, const void *data)
 	{
 		success = dat->AdsorptionList[i].callSurfaceActivity(x);
 		if (success != 0) {mError(simulation_fail); return -1;}
+		
+		dat->AdsorptionList[i].setIonicStrength(x);
+		dat->AdsorptionList[i].setChargeDensity(x);
+		
 		for (int n=0; n<dat->AdsorptionList[i].getNumberRxns(); n++)
 		{
-			F(index,0) = dat->AdsorptionList[i].Eval_Residual(x, dat->activity_new, n);
+			F(index,0) = dat->AdsorptionList[i].Eval_Residual(x, dat->activity_new, dat->temperature, dat->relative_permittivity, n);
 			index++;
 		}
 	}
@@ -5121,12 +5189,16 @@ int SHARK_TESTS()
 	UO2 = 1.386E-8;   // ~3.3 ppb
 	//UO2 = 2.521E-5;		// ~6 ppm
 	ads_area = 45000.0; // m^2/kg
+	ads_mol = 350.0;     // mol/kg
 	ads_mass = 1.5E-5;  // kg
 	volume = 1.0;       // L
 	//volume = 0.75;       // L
 	shark_dat.simulationtime = 96.0; //hours
 
-	logK_UO2CO3 = -3.45;				// change
+	//logK_UO2CO3 = -3.45;				// change
+	//logK_UO2 = -8.35;					// change
+	
+	logK_UO2CO3 = -3.5;				// change
 	logK_UO2 = -8.35;					// change
 
 
@@ -5138,12 +5210,12 @@ int SHARK_TESTS()
 	success = setup_SHARK_DATA(TestOutput,NULL, NULL, NULL, &shark_dat, NULL, NULL, NULL, NULL);
 	if (success != 0) {mError(simulation_fail); return -1;}
 
-	//shark_dat.Newton_data.linear_solver = FOM;
+	//shark_dat.Newton_data.linear_solver = GMRESRP;
 	//shark_dat.Newton_data.Bounce = false;
 	//shark_dat.Newton_data.LineSearch = true;
 	//shark_dat.Newton_data.nl_maxit = 100;
 	//shark_dat.Newton_data.gmresrp_dat.restart = 50;
-	//shark_dat.Newton_data.L_Output = false;
+	//shark_dat.Newton_data.L_Output = true;
 	//shark_dat.Newton_data.backtrack_dat.lambdaMin = DBL_EPSILON;
 	//shark_dat.Newton_data.nl_tol_abs = 1e-10;
 	//shark_dat.Newton_data.nl_tol_rel = 1e-10;
@@ -5731,9 +5803,10 @@ int SHARK_TESTS()
 	shark_dat.AdsorptionList[0].setSpecificMolality(ads_mol);
 	shark_dat.AdsorptionList[0].setTotalMass(ads_mass);
 	shark_dat.AdsorptionList[0].setActivityModelInfo(FloryHuggins, &shark_dat.AdsorptionList[0]);
-	shark_dat.AdsorptionList[0].setBasis("area");
+	//shark_dat.AdsorptionList[0].setBasis("area");
+	shark_dat.AdsorptionList[0].setBasis("molar");
 
-	shark_dat.AdsorptionList[0].setMolarFactor(0, 1.0);
+	shark_dat.AdsorptionList[0].setMolarFactor(0, 2.0);
 	shark_dat.AdsorptionList[0].getReaction(0).Set_Equilibrium(logK_UO2);
 	shark_dat.AdsorptionList[0].getReaction(0).Set_Stoichiometric(0, 0);
 	shark_dat.AdsorptionList[0].getReaction(0).Set_Stoichiometric(1, 0);
@@ -5760,7 +5833,7 @@ int SHARK_TESTS()
 	shark_dat.AdsorptionList[0].getReaction(0).Set_Stoichiometric(22, 1);
 	shark_dat.AdsorptionList[0].getReaction(0).Set_Stoichiometric(23, 0);
 
-	shark_dat.AdsorptionList[0].setMolarFactor(1, 1.0);
+	shark_dat.AdsorptionList[0].setMolarFactor(1, 2.0);
 	shark_dat.AdsorptionList[0].getReaction(1).Set_Equilibrium(logK_UO2CO3);
 	shark_dat.AdsorptionList[0].getReaction(1).Set_Stoichiometric(0, 0);
 	shark_dat.AdsorptionList[0].getReaction(1).Set_Stoichiometric(1, 0);
@@ -5821,7 +5894,8 @@ int SHARK_TESTS()
 	success = SHARK(&shark_dat);
 	if (success != 0) {mError(simulation_fail); return -1;}
 
-	//TEst of Langmuir
+	//Test of Langmuir - No Longer always a valid test
+	/*
 	std::cout << "Langmuir Test 1 = \t" << shark_dat.AdsorptionList[0].calculateLangmuirAdsorption(shark_dat.X_new, shark_dat.activity_new, 0) << std::endl;
 	std::cout << "Newton Test 1 = \t" << pow(10.0, shark_dat.X_new(22,0)) << std::endl;
 	std::cout << "qmax 1 = \t" << shark_dat.AdsorptionList[0].calculateLangmuirMaxCapacity(0) << std::endl;
@@ -5835,6 +5909,7 @@ int SHARK_TESTS()
 	std::cout << "qmax 2 = \t" << shark_dat.AdsorptionList[0].calculateLangmuirMaxCapacity(1) << std::endl;
 	std::cout << "K 2 = \t" << shark_dat.AdsorptionList[0].calculateLangmuirEquParam(shark_dat.X_new, shark_dat.activity_new, 1) << std::endl;
 	std::cout << "act 2 = \t" << shark_dat.AdsorptionList[0].getActivity(23) << std::endl;
+	 */
 
 	//Close files and display end messages
 	fclose(TestOutput);
