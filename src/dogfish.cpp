@@ -295,6 +295,8 @@ int set_DOGFISH_params(const void *user_data)
 	
 	for (int i=0; i<dog_dat->NumComp; i++)
 	{
+		dog_dat->finch_dat[i].CN = false;
+		dog_dat->finch_dat[i].beta = 1.0;
 		for (int l=0; l<dog_dat->finch_dat[i].LN; l++)
 		{
 			dog_dat->finch_dat[i].Rnp1(l,0) = (*dog_dat->eval_R) (i, l, user_data);
@@ -426,22 +428,22 @@ int DOGFISH_TESTS()
 	
 	//This is where some input file would be read
 	dog_dat.NumComp = 1;
-	dog_dat.DirichletBC = true;
+	dog_dat.DirichletBC = false;
 	dog_dat.NonLinear = true;
 	dog_dat.param_dat.resize(dog_dat.NumComp);
 	dog_dat.finch_dat.resize(dog_dat.NumComp);
-	dog_dat.end_time = 1500.0;												//hours
+	dog_dat.end_time = 1500.0;												//hours  - make it 56 days (1344 hrs)
 	dog_dat.t_print = dog_dat.end_time / 1000.0;
-	dog_dat.total_sorption_old = 0.0;										//mg/g (Total IC)
+	dog_dat.total_sorption_old = 0.0;										//mol/kg (Total IC)
 	dog_dat.fiber_length = 1000.0;											//um
 	dog_dat.fiber_diameter = 76.5 * 2.0;									//um
 	double check = 0.0;
 	for (int i=0; i<dog_dat.NumComp; i++)
 	{
 		dog_dat.param_dat[i].sorbed_molefraction = 1.0/dog_dat.NumComp;
-		dog_dat.param_dat[i].intraparticle_diffusion = 2.148;				//um^2/hr
+		dog_dat.param_dat[i].intraparticle_diffusion = 19166.67;				//um^2/hr  -  use 0.46E-6 m^2/day
 		dog_dat.param_dat[i].film_transfer_coeff = 1.0;						//um/hr
-		dog_dat.param_dat[i].surface_concentration = 1.0;					//mol/kg
+		dog_dat.param_dat[i].surface_concentration = 9.5;					//mol/kg (Take 9.5 ug/g as average)
 		check+=dog_dat.param_dat[i].sorbed_molefraction;					//-
 		dog_dat.param_dat[i].initial_sorption = 0.0;						//mol/kg (individual IC)
 	}

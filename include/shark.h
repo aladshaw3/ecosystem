@@ -550,6 +550,7 @@ public:
 	void setTotalVolume(double v);						///< Set the total volume of the system (L)
 	void setAreaBasisBool(bool opt);					///< Set the basis boolean directly
 	void setBasis(std::string option);					///< Set the basis of the adsorption problem from the given string arg
+	void setAdsorbentName(std::string name);			///< Set the name of the adsorbent to the given string
 
 	void calculateAreaFactors();						///< Calculates the area factors used from the van der Waals volumes
 	void calculateEquilibria(double T);					///< Calculates all equilibrium parameters as a function of temperature
@@ -660,6 +661,7 @@ public:
 	int getAdsorbIndex(int i);					///< Get the index of the adsorbed species in the ith reaction
 	int getAqueousIndex(int i);					///< Get the index of the primary aqueous species in the ith reaction
 	bool isAreaBasis();							///< Returns true if we are in the Area Basis, False if in Molar Basis
+	std::string getAdsorbentName();				///< Returns the name of the adsorbent as a string 
 
 protected:
 	MasterSpeciesList *List;					///< Pointer to the MasterSpeciesList object
@@ -690,6 +692,7 @@ protected:
 	double charge_density;						///< Surface charge density of the adsorbent used to adjust equilbria (C/m^2)
 	int num_rxns;								///< Number of reactions involved in the adsorption equilibria
 	bool AreaBasis;								///< True = Adsorption on an area basis, False = Adsorption on a ligand basis
+	std::string adsorbent_name;					///< Name of the adsorbent for this object
 
 private:
 	std::vector<Reaction> ads_rxn;				///< List of reactions involved with adsorption

@@ -1187,6 +1187,7 @@ activities()
 	ionic_strength = 0.0;
 	num_rxns = 0;
 	AreaBasis = true;
+	adsorbent_name = "AX";
 }
 
 //Default destructor for Adsorption Reaction
@@ -1465,6 +1466,12 @@ void AdsorptionReaction::setBasis(std::string option)
 		mError(invalid_type);
 		this->setAreaBasisBool(true);
 	}
+}
+
+//Set the name of the adsorbent
+void AdsorptionReaction::setAdsorbentName(std::string name)
+{
+	this->adsorbent_name = name;
 }
 
 //Modify the deltas in the given mass balance
@@ -1864,6 +1871,12 @@ bool AdsorptionReaction::isAreaBasis()
 	return this->AreaBasis;
 }
 
+//Return the name of the adsorbent
+std::string AdsorptionReaction::getAdsorbentName()
+{
+	return this->adsorbent_name;
+}
+
 /*
  *	-------------------------------------------------------------------------------------
  *								End: AdsorptionReaction
@@ -2043,9 +2056,9 @@ void print2file_shark_info(SHARK_DATA *shark_dat)
 					if (i == shark_dat->numvar-1)
 					{
 						if (shark_dat->AdsorptionList[n].isAreaBasis() == true || shark_dat->AdsorptionList[n].getMolarFactor(j) == 1.0)
-							fprintf(shark_dat->OutputFile, " + { A * phi }_%i = ",n+1);
+							fprintf(shark_dat->OutputFile, " + { %s }_%i = ",shark_dat->AdsorptionList[n].getAdsorbentName().c_str(),n+1);
 						else
-							fprintf(shark_dat->OutputFile, " + %g x { A * phi }_%i = ",shark_dat->AdsorptionList[n].getMolarFactor(j),n+1);
+							fprintf(shark_dat->OutputFile, " + %g x { %s }_%i = ",shark_dat->AdsorptionList[n].getMolarFactor(j),shark_dat->AdsorptionList[n].getAdsorbentName().c_str(),n+1);
 					}
 				}
 
@@ -5804,11 +5817,12 @@ int SHARK_TESTS()
 	shark_dat.AdsorptionList[0].setSpecificMolality(ads_mol);
 	shark_dat.AdsorptionList[0].setTotalMass(ads_mass);
 	shark_dat.AdsorptionList[0].setSurfaceCharge(0.0);
+	shark_dat.AdsorptionList[0].setAdsorbentName("A(OH)2");
 	shark_dat.AdsorptionList[0].setActivityModelInfo(FloryHuggins, &shark_dat.AdsorptionList[0]);
 	//shark_dat.AdsorptionList[0].setBasis("area");
 	shark_dat.AdsorptionList[0].setBasis("molar");
 
-	shark_dat.AdsorptionList[0].setMolarFactor(0, 2.0);
+	shark_dat.AdsorptionList[0].setMolarFactor(0, 1.0);
 	shark_dat.AdsorptionList[0].getReaction(0).Set_Equilibrium(logK_UO2);
 	shark_dat.AdsorptionList[0].getReaction(0).Set_Stoichiometric(0, 0);
 	shark_dat.AdsorptionList[0].getReaction(0).Set_Stoichiometric(1, 0);
@@ -5835,7 +5849,7 @@ int SHARK_TESTS()
 	shark_dat.AdsorptionList[0].getReaction(0).Set_Stoichiometric(22, 1);
 	shark_dat.AdsorptionList[0].getReaction(0).Set_Stoichiometric(23, 0);
 
-	shark_dat.AdsorptionList[0].setMolarFactor(1, 2.0);
+	shark_dat.AdsorptionList[0].setMolarFactor(1, 1.0);
 	shark_dat.AdsorptionList[0].getReaction(1).Set_Equilibrium(logK_UO2CO3);
 	shark_dat.AdsorptionList[0].getReaction(1).Set_Stoichiometric(0, 0);
 	shark_dat.AdsorptionList[0].getReaction(1).Set_Stoichiometric(1, 0);
