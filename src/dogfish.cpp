@@ -98,6 +98,20 @@ double default_SurfaceConcentration(int i, const void *data)
 	return dat->param_dat[i].surface_concentration;
 }
 
+// Evaluation of Langmuir based surface concentration
+double LangmuirSurfaceConcentration(int i, const void *data)
+{
+	double qs = 0.0;
+	DOGFISH_DATA *dat = (DOGFISH_DATA *) data;
+	double a, b;
+	double kf = 9.18E+6;
+	a = 1.17647E-8 * dat->param_dat[i].surface_concentration * kf;
+	b = (1.17647E-8 * kf) + (kf/372159687.4);
+	qs = (a/b) * (1.0 - exp(-b*dat->time));
+	
+	return qs;
+}
+
 //Setup function
 int setup_DOGFISH_DATA(FILE *file, double (*eval_R) (int i, int l, const void *user_data),
 					   double (*eval_DI) (int i, int l, const void *user_data),
@@ -442,8 +456,8 @@ int DOGFISH_TESTS()
 	{
 		dog_dat.param_dat[i].sorbed_molefraction = 1.0/dog_dat.NumComp;
 		dog_dat.param_dat[i].intraparticle_diffusion = 19166.67;				//um^2/hr  -  use 0.46E-6 m^2/day
-		dog_dat.param_dat[i].film_transfer_coeff = 1.0;						//um/hr
-		dog_dat.param_dat[i].surface_concentration = 9.5;					//mol/kg (Take 9.5 ug/g as average)
+		dog_dat.param_dat[i].film_transfer_coeff = 0.022;						//um/hr
+		dog_dat.param_dat[i].surface_concentration = 5.60;					//mol/kg (Take 5.60 g/kg as average)
 		check+=dog_dat.param_dat[i].sorbed_molefraction;					//-
 		dog_dat.param_dat[i].initial_sorption = 0.0;						//mol/kg (individual IC)
 	}
@@ -458,7 +472,8 @@ int DOGFISH_TESTS()
 	dog_dat.param_dat[0].species.Register("UO2 2+ (aq)");
 	
 	//Call the setup function
-	success = setup_DOGFISH_DATA(TestOutput, default_Retardation, default_IntraDiffusion, default_FilmMTCoeff, default_SurfaceConcentration, (void *)&dog_dat, &dog_dat);
+	//success = setup_DOGFISH_DATA(TestOutput, default_Retardation, default_IntraDiffusion, default_FilmMTCoeff, default_SurfaceConcentration, (void *)&dog_dat, &dog_dat);
+	success = setup_DOGFISH_DATA(TestOutput, default_Retardation, default_IntraDiffusion, default_FilmMTCoeff, LangmuirSurfaceConcentration, (void *)&dog_dat, &dog_dat);
 	if (success != 0) {mError(simulation_fail); return -1;}
 	
 	//Call the routine

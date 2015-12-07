@@ -128,6 +128,10 @@ double default_FilmMTCoeff(int i, const void *data);
 double default_SurfaceConcentration(int i, const void *data);
 //----- END Default function definitions -------------
 
+/// \cond
+double LangmuirSurfaceConcentration(int i, const void *data);
+/// \endcond
+
 /// Function will set up the memory and pointers for use in the DOGFISH simulations
 /** The pointers to the output file, parameter functions, and data structures are passed into
 	this function to setup the problem in memory. This function must always be called prior to
