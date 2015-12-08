@@ -489,12 +489,12 @@ int setup_FINCH_DATA( int (*user_callroutine) (const void *user_data),
 //Function to print out the space header for the output file
 void print2file_dim_header(FILE *Output, FINCH_DATA *dat)
 {
-	fprintf(Output,"z_dim\t%.6g\t",0.0);
+	fprintf(Output,"z_dim\t%.6g",0.0);
 	for (int l=0; l<dat->LN; l++)
 	{
         if (dat->Dirichlet == false && l == dat->LN-1)
             break;
-		fprintf(Output,"%.6g\t",(l+1)*dat->dz);
+		fprintf(Output,"\t%.6g",(l+1)*dat->dz);
 	}
 }
 
@@ -509,7 +509,7 @@ void print2file_time_header(FILE *Output, FINCH_DATA *dat)
           	break;
       	fprintf(Output,"u[%i]\t",l+1);
   	}
-  	fprintf(Output,"uTotal\tuAverage\t");
+  	fprintf(Output,"uTotal\tuAverage");
 }
 
 //Function to print out the previous time step results to a file
@@ -525,7 +525,7 @@ void print2file_result_old(FILE *Output, FINCH_DATA *dat)
     	{
       		fprintf(Output,"%.6g\t",dat->un(l,0));
     	}
-    	fprintf(Output,"%.6g\t%.6g\t",dat->uT,dat->uAvg);
+    	fprintf(Output,"%.6g\t%.6g",dat->uT,dat->uAvg);
   	}
   	else
   	{
@@ -536,7 +536,7 @@ void print2file_result_old(FILE *Output, FINCH_DATA *dat)
     	}
     	if (dat->Dirichlet == true)
       		fprintf(Output,"%.6g\t",dat->uo);
-    	fprintf(Output,"%.6g\t%.6g\t",dat->uT,dat->uAvg);
+    	fprintf(Output,"%.6g\t%.6g",dat->uT,dat->uAvg);
   	}
 	
 }
@@ -554,7 +554,7 @@ void print2file_result_new(FILE *Output, FINCH_DATA *dat)
 		{
 			fprintf(Output,"%.6g\t",dat->unp1(l,0));
 		}
-		fprintf(Output,"%.6g\t%.6g\t",dat->uT,dat->uAvg);
+		fprintf(Output,"%.6g\t%.6g",dat->uT,dat->uAvg);
 	}
 	else
 	{
@@ -565,7 +565,7 @@ void print2file_result_new(FILE *Output, FINCH_DATA *dat)
 		}
 		if (dat->Dirichlet == true)
 			fprintf(Output,"%.6g\t",dat->uo);
-		fprintf(Output,"%.6g\t%.6g\t",dat->uT,dat->uAvg);
+		fprintf(Output,"%.6g\t%.6g",dat->uT,dat->uAvg);
 	}
 	
 }

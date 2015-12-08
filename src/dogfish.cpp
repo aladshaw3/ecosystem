@@ -15,12 +15,12 @@
 void print2file_species_header(FILE *Output, DOGFISH_DATA *dog_dat, int i)
 {
 	const char *name = dog_dat->param_dat[i].species.MolecularFormula().c_str();
-	fprintf(Output, "%s\t", name);
+	fprintf(Output, "%s", name);
 	if (dog_dat->finch_dat[i].Dirichlet == true)
-		fprintf(Output,"-\t");
+		fprintf(Output,"\t-");
 	for (int l=0; l<dog_dat->finch_dat[i].LN+2; l++)
 	{
-		fprintf(Output,"-\t");
+		fprintf(Output,"\t-");
 	}
 }
 
@@ -30,7 +30,6 @@ void print2file_DOGFISH_header(DOGFISH_DATA *dog_dat)
 	for (int i=0; i<dog_dat->NumComp; i++)
 	{
 		print2file_species_header(dog_dat->OutputFile, dog_dat, i);
-		print2file_tab(dog_dat->OutputFile, &dog_dat->finch_dat[i]);
 	}
 	print2file_newline(dog_dat->OutputFile, NULL);
 	for (int i=0; i<dog_dat->NumComp; i++)
@@ -38,13 +37,11 @@ void print2file_DOGFISH_header(DOGFISH_DATA *dog_dat)
 		print2file_dim_header(dog_dat->OutputFile, &dog_dat->finch_dat[i]);
 		print2file_tab(dog_dat->OutputFile, &dog_dat->finch_dat[i]);
 		print2file_tab(dog_dat->OutputFile, &dog_dat->finch_dat[i]);
-		print2file_tab(dog_dat->OutputFile, &dog_dat->finch_dat[i]);
 	}
 	print2file_newline(dog_dat->OutputFile, NULL);
 	for (int i=0; i<dog_dat->NumComp; i++)
 	{
 		print2file_time_header(dog_dat->OutputFile, &dog_dat->finch_dat[i]);
-		print2file_tab(dog_dat->OutputFile, &dog_dat->finch_dat[i]);
 	}
 	print2file_newline(dog_dat->OutputFile, NULL);
 }
@@ -55,7 +52,6 @@ void print2file_DOGFISH_result_old(DOGFISH_DATA *dog_dat)
 	for (int i=0; i<dog_dat->NumComp; i++)
 	{
 		print2file_result_old(dog_dat->OutputFile, &dog_dat->finch_dat[i]);
-		print2file_tab(dog_dat->OutputFile, &dog_dat->finch_dat[i]);
 	}
 	print2file_newline(dog_dat->OutputFile, NULL);
 }
@@ -66,7 +62,6 @@ void print2file_DOGFISH_result_new(DOGFISH_DATA *dog_dat)
 	for (int i=0; i<dog_dat->NumComp; i++)
 	{
 		print2file_result_new(dog_dat->OutputFile, &dog_dat->finch_dat[i]);
-		print2file_tab(dog_dat->OutputFile, &dog_dat->finch_dat[i]);
 	}
 	print2file_newline(dog_dat->OutputFile, NULL);
 }
@@ -104,9 +99,10 @@ double LangmuirSurfaceConcentration(int i, const void *data)
 	double qs = 0.0;
 	DOGFISH_DATA *dat = (DOGFISH_DATA *) data;
 	double a, b;
-	double kf = 9.18E+6;
+	double kf = 4.5E+7;
+	double Ke = 332159687.4;
 	a = 1.17647E-8 * dat->param_dat[i].surface_concentration * kf;
-	b = (1.17647E-8 * kf) + (kf/372159687.4);
+	b = (1.17647E-8 * kf) + (kf/Ke);
 	qs = (a/b) * (1.0 - exp(-b*dat->time));
 	
 	return qs;
@@ -456,7 +452,7 @@ int DOGFISH_TESTS()
 	{
 		dog_dat.param_dat[i].sorbed_molefraction = 1.0/dog_dat.NumComp;
 		dog_dat.param_dat[i].intraparticle_diffusion = 19166.67;				//um^2/hr  -  use 0.46E-6 m^2/day
-		dog_dat.param_dat[i].film_transfer_coeff = 0.022;						//um/hr
+		dog_dat.param_dat[i].film_transfer_coeff = 0.035;						//um/hr
 		dog_dat.param_dat[i].surface_concentration = 5.60;					//mol/kg (Take 5.60 g/kg as average)
 		check+=dog_dat.param_dat[i].sorbed_molefraction;					//-
 		dog_dat.param_dat[i].initial_sorption = 0.0;						//mol/kg (individual IC)
