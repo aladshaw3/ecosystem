@@ -99,8 +99,8 @@ double LangmuirSurfaceConcentration(int i, const void *data)
 	double qs = 0.0;
 	DOGFISH_DATA *dat = (DOGFISH_DATA *) data;
 	double a, b;
-	double kf = 4.5E+7;
-	double Ke = 332159687.4;
+	double kf = 8.12E+07;
+	double Ke = 3.8E+08;
 	a = 1.17647E-8 * dat->param_dat[i].surface_concentration * kf;
 	b = (1.17647E-8 * kf) + (kf/Ke);
 	qs = (a/b) * (1.0 - exp(-b*dat->time));
@@ -452,8 +452,9 @@ int DOGFISH_TESTS()
 	{
 		dog_dat.param_dat[i].sorbed_molefraction = 1.0/dog_dat.NumComp;
 		dog_dat.param_dat[i].intraparticle_diffusion = 19166.67;				//um^2/hr  -  use 0.46E-6 m^2/day
-		dog_dat.param_dat[i].film_transfer_coeff = 0.035;						//um/hr
+		dog_dat.param_dat[i].film_transfer_coeff = 0.0555;						//um/hr
 		dog_dat.param_dat[i].surface_concentration = 5.60;					//mol/kg (Take 5.60 g/kg as average)
+		//dog_dat.param_dat[i].surface_concentration = 4.089;
 		check+=dog_dat.param_dat[i].sorbed_molefraction;					//-
 		dog_dat.param_dat[i].initial_sorption = 0.0;						//mol/kg (individual IC)
 	}
