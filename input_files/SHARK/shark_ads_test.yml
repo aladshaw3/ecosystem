@@ -31,14 +31,11 @@ SolverOptions:
 line_search: true      #Default = true, and is recommended to be true
 search_type: standard
 linear_solve: fom      #Note: FOM will be fastest for small problems
-restart: 25            #Note: restart only used if using GMRES or GCR type solvers
 nl_maxit: 50
 nl_abstol: 1e-5
 nl_reltol: 1e-8
-lin_reltol: 1e-10 	#Min Tol = 1e-15
-lin_abstol: 1e-10		#Min Tol = 1e-15
-nl_print: false
-l_print: false
+lin_reltol: 1e-6 	
+lin_abstol: 1e-6		
 
 ...
 
@@ -112,7 +109,7 @@ MassBalance:
     "H2O (l)": 1
 
 - carbonate:
-  total_conc: 0.0004175
+  total_conc: 0.00233
   - delta: 
     "NaHCO3 (aq)": 1
     "NaCO3 - (aq)": 1 
@@ -125,7 +122,7 @@ MassBalance:
     "UO2CO3AO2 2- (s)": 1
 
 - nitrate:
-  total_conc: 6.302E-7
+  total_conc: 2.77E-08
   - delta:
     "HNO3 (aq)": 1
     "NO3 - (aq)": 1
@@ -133,14 +130,14 @@ MassBalance:
     "UO2(NO3)2 (aq)": 2
 
 - sodium: 
-  total_conc: 0.430418
+  total_conc: 0.43233
   - delta:
     "NaHCO3 (aq)": 1
     "NaCO3 - (aq)": 1
     "Na + (aq)": 1
 
 - uranyl:
-  total_conc: 3.151E-7
+  total_conc: 1.39E-08
   - delta:
     "UO2AO2 (s)": 1
     "UO2CO3AO2 2- (s)": 1
