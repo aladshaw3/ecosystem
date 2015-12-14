@@ -789,6 +789,7 @@ typedef struct SHARK_DATA
 	int num_usr = 0;								///< Number of unsteady-state reactions
 	int num_ssao = 0;								///< Number of steady-state adsorption objects
 	std::vector<int> num_ssar;						///< List of the numbers of reactions in each adsorption object
+	std::vector<std::string> ads_names;				///< List of the adsorbent object names
 	int num_other = 0;								///< Number of other functions to be used (default is always 0)
 	int act_fun = IDEAL;							///< Flag denoting the activity function to use (default is IDEAL)
 	int totalsteps = 0;								///< Total number of iterations
@@ -933,6 +934,13 @@ int DebyeHuckel_equation (const Matrix<double> &x, Matrix<double> &F, const void
 /// First test of SIT Model
 int Sit_equation (const Matrix<double>& x, Matrix<double> &F, const void *data);
 
+/// Function takes a given string and returns a flag denoting which surface activity model was choosen
+/** This function returns an integer flag that will be one of the valid surface activity model flags from the
+	valid_surf_act enum. If the input string was not recognized, then it defaults to returning the IDEAL_ADS flag.
+ 
+	\param input string for the name of the surface activity model*/
+int surf_act_choice(const std::string &input);
+
 /// Function takes a given string and returns a flag denoting which activity model was choosen
 /** This function returns an integer flag that will be one of the valid activity model flags from the
 	valid_act enum. If the input string was not recognized, then it defaults to returning the IDEAL flag.
@@ -1001,6 +1009,13 @@ int read_equilrxn(SHARK_DATA *shark_dat);
 /** This function checks the yaml object for the expected keys and values of the unsteady reaction document
 	to setup the shark simulation for the input given in the input file. */
 int read_unsteadyrxn(SHARK_DATA *shark_dat);
+
+/// Function to go through the yaml object for each Adsorption Object
+/** This function checks the yaml object for the expected keys and values of the adsorption object documents
+	to setup the shark simulation for the input given in the input file.
+	
+	\note Each adsorption object will have its own document header by the name of that object*/
+int read_adsorbobjects(SHARK_DATA *shark_dat);
 
 /// Function to setup the memory and pointers for the SHARK_DATA structure for the current simulation
 /** This function will be called after reading the scenario file and is used to setup the memory and other pointers

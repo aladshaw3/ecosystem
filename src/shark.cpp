@@ -3247,6 +3247,24 @@ int pitzer_equation (const Matrix<double>& x, Matrix<double> &F, const void *dat
 	return success;
 }
 
+//Determine the surface activity function choosen by user
+int surf_act_choice(const std::string &input)
+{
+	int act = IDEAL_ADS;
+	
+	std::string copy = input;
+	for (int i=0; i<copy.size(); i++)
+		copy[i] = tolower(copy[i]);
+	
+	if (copy == "ideal")
+		act = IDEAL_ADS;
+	else if (copy == "floryhuggins" || copy == "flory-huggins")
+		act = FLORY_HUGGINS;
+	else
+		act = IDEAL_ADS;
+	
+	return act;
+}
 
 //Determine the activity function choosen by user
 int act_choice(const std::string &input)
@@ -3364,7 +3382,6 @@ int read_scenario(SHARK_DATA *shark_dat)
 		shark_dat->numvar = shark_dat->yaml_object.getYamlWrapper()("Scenario")("vars_fun")["numvar"].getInt();
 		shark_dat->num_ssr = shark_dat->yaml_object.getYamlWrapper()("Scenario")("vars_fun")["num_ssr"].getInt();
 		shark_dat->num_mbe = shark_dat->yaml_object.getYamlWrapper()("Scenario")("vars_fun")["num_mbe"].getInt();
-		shark_dat->num_usr = shark_dat->yaml_object.getYamlWrapper()("Scenario")("vars_fun")["num_usr"].getInt();
 	}
 	catch (std::out_of_range)
 	{
@@ -3374,10 +3391,65 @@ int read_scenario(SHARK_DATA *shark_dat)
 	//Find all optional info from Scenario Document in Header vars_fun
 	try
 	{
+		shark_dat->num_usr = shark_dat->yaml_object.getYamlWrapper()("Scenario")("vars_fun")["num_usr"].getInt();
+	}
+	catch (std::out_of_range)
+	{
+		shark_dat->num_usr = 0;
+	}
+	try
+	{
+		shark_dat->num_ssao = shark_dat->yaml_object.getYamlWrapper()("Scenario")("vars_fun")["num_ssao"].getInt();
+	}
+	catch (std::out_of_range)
+	{
+		shark_dat->num_ssao = 0;
+	}
+	shark_dat->num_ssar.resize(shark_dat->num_ssao);
+	shark_dat->ads_names.resize(shark_dat->num_ssao);
+	try
+	{
 		shark_dat->num_other = shark_dat->yaml_object.getYamlWrapper()("Scenario")("vars_fun")["num_other"].getInt();
-	} catch (std::out_of_range)
+	}
+	catch (std::out_of_range)
 	{
 		shark_dat->num_other = 0;
+	}
+	
+	//Read through adsorption objects for all adsorption reactions
+	if (shark_dat->num_ssao > 0)
+	{
+		int object_check;
+		try
+		{
+			object_check = (int)shark_dat->yaml_object.getYamlWrapper()("Scenario")("ss_ads_objs").getSubMap().size();
+		}
+		catch (std::out_of_range)
+		{
+			mError(missing_information);
+			return -1;
+		}
+		if (object_check != shark_dat->num_ssao)
+		{
+			mError(missing_information);
+			return -1;
+		}
+		
+		int obj = 0;
+		for (auto &x: shark_dat->yaml_object.getYamlWrapper()("Scenario")("ss_ads_objs").getSubMap())
+		{
+			try
+			{
+				shark_dat->num_ssar[obj] = x.second.getMap().getInt("num_rxns");
+				shark_dat->ads_names[obj] = x.second.getMap().getString("name");
+			}
+			catch (std::out_of_range)
+			{
+				mError(missing_information);
+				return -1;
+			}
+			obj++;
+		}
 	}
 
 	//All sys_data is optional, missing info will be replaced with defaults
@@ -4166,6 +4238,148 @@ int read_unsteadyrxn(SHARK_DATA *shark_dat)
 	}
 
 
+	return success;
+}
+
+//Read the adsorption objects
+int read_adsorbobjects(SHARK_DATA *shark_dat)
+{
+	int success = 0;
+	
+	if (shark_dat->num_ssao > 0)
+	{
+		for (int i=0; i<shark_dat->num_ssao; i++)
+		{
+			//Check for existance of the necessary object and quit if necessary
+			try
+			{
+				shark_dat->AdsorptionList[i].setAdsorbentName( shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i]).getName() );
+			}
+			catch (std::out_of_range)
+			{
+				mError(missing_information);
+				return -1;
+			}
+			
+			// Other required pieces of information
+			try
+			{
+				shark_dat->AdsorptionList[i].setBasis(shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i]).getDataMap().getString("basis"));
+			}
+			catch (std::out_of_range)
+			{
+				mError(missing_information);
+				return -1;
+			}
+			try
+			{
+				shark_dat->AdsorptionList[i].setTotalMass(shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i]).getDataMap().getDouble("total_mass"));
+			}
+			catch (std::out_of_range)
+			{
+				mError(missing_information);
+				return -1;
+			}
+			try
+			{
+				shark_dat->AdsorptionList[i].setSpecificArea(shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i]).getDataMap().getDouble("spec_area"));
+			}
+			catch (std::out_of_range)
+			{
+				mError(missing_information);
+				return -1;
+			}
+			
+			// Some optional pieces of information
+			try
+			{
+				shark_dat->AdsorptionList[i].setSpecificMolality(shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i]).getDataMap().getDouble("spec_mole"));
+			}
+			catch (std::out_of_range)
+			{
+				shark_dat->AdsorptionList[i].setSpecificMolality(1.0);
+			}
+			try
+			{
+				shark_dat->AdsorptionList[i].setSurfaceCharge(shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i]).getDataMap().getDouble("surf_charge"));
+			}
+			catch (std::out_of_range)
+			{
+				shark_dat->AdsorptionList[i].setSurfaceCharge(0.0);
+			}
+			int surf_act;
+			try
+			{
+				surf_act = surf_act_choice( shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i]).getDataMap().getString("surf_activity") );
+				
+				switch (surf_act)
+				{
+					case IDEAL_ADS:
+						shark_dat->AdsorptionList[i].setActivityModelInfo(ideal_solution, NULL);
+						break;
+						
+					case FLORY_HUGGINS:
+						shark_dat->AdsorptionList[i].setActivityModelInfo(FloryHuggins, &shark_dat->AdsorptionList[i]);
+						break;
+						
+					default:
+						shark_dat->AdsorptionList[i].setActivityModelInfo(ideal_solution, NULL);
+						break;
+				}
+			} catch (std::out_of_range)
+			{
+				shark_dat->AdsorptionList[i].setActivityModelInfo(ideal_solution, NULL);
+				surf_act = IDEAL_ADS;
+			}
+			
+			// Read volume factors and check for errors
+			if (surf_act != IDEAL_ADS || shark_dat->AdsorptionList[i].isAreaBasis() == true)
+			{
+				int num_fact = 0;
+				try
+				{
+					num_fact = shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i])("volume_factors").getDataMap().size();
+				}
+				catch (std::out_of_range)
+				{
+					mError(missing_information);
+					return -1;
+				}
+				if (num_fact != shark_dat->num_ssar[i])
+				{
+					mError(missing_information);
+					return -1;
+				}
+				
+				//Loop overall volume_factors
+				for (auto &x: shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i])("volume_factors").getDataMap().getMap())
+				{
+					int index = shark_dat->MasterList.get_index(x.first);
+					if (index < 0 || index > (shark_dat->numvar-1))
+					{
+						mError(read_error);
+						return -1;
+					}
+					else
+					{
+						try
+						{
+							shark_dat->AdsorptionList[i].setVolumeFactor(index, x.second.getDouble());
+						}
+						catch (std::out_of_range)
+						{
+							mError(read_error);
+							return -1;
+						}
+					}
+					
+				}
+			}
+			
+			//Read in all reaction information
+		}
+	}
+	
 	return success;
 }
 
@@ -5126,6 +5340,10 @@ int SHARK_SCENARIO(const char *yaml_input)
 	//Read and check the UnsteadyRxn
 	success = read_unsteadyrxn(&shark_dat);
 	if (success != 0) {mError(read_error); return -1;}
+	
+	//Read and check the steady adsorption objects
+	success = read_adsorbobjects(&shark_dat);
+	if (success != 0) {mError(read_error); return -1;}
 
 	//Call the SHARK routine
 	success = SHARK(&shark_dat);
@@ -5180,6 +5398,7 @@ int SHARK_TESTS()
 	shark_dat.volume = 1.0;							//SHOULD BE REQUIRED IF WE HAVE ADSORPTION OBJECTS!!!
 
 	shark_dat.num_ssar.resize(shark_dat.num_ssao);	//Required to set this up PRIOR to calling the setup function for shark
+	shark_dat.ads_names.resize(shark_dat.num_ssao);
 	shark_dat.num_ssar[0] = 2;						//Required to set this up PRIOR to calling the setup function for shark
 
 	//Temporary Variables to modify test case
@@ -5203,7 +5422,7 @@ int SHARK_TESTS()
 	UO2 = 1.386E-8;   // ~3.3 ppb
 	//UO2 = 2.521E-5;		// ~6 ppm
 	ads_area = 45000.0; // m^2/kg
-	ads_mol = 1.9;     // mol/kg
+	ads_mol = 1.471;     // mol/kg
 	ads_mass = 1.5E-5;  // kg
 	volume = 1.0;       // L
 	//volume = 0.75;       // L
