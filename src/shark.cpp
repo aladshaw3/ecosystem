@@ -4377,6 +4377,144 @@ int read_adsorbobjects(SHARK_DATA *shark_dat)
 			}
 			
 			//Read in all reaction information
+			bool ContainsVolumeFactors;
+			std::string vol_check;
+			try
+			{
+				vol_check = shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i])("volume_factors").getName();
+				ContainsVolumeFactors = true;
+			}
+			catch (std::out_of_range)
+			{
+				ContainsVolumeFactors = false;
+			}
+			int num_head;
+			try
+			{
+				num_head = (int)shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i]).getHeadMap().size();
+			}
+			catch (std::out_of_range)
+			{
+				mError(missing_information);
+				return -1;
+			}
+			if (ContainsVolumeFactors == true)
+			{
+				if (num_head != shark_dat->num_ssar[i]+1)
+				{
+					mError(missing_information);
+					return -1;
+				}
+			}
+			else
+			{
+				if (num_head != shark_dat->num_ssar[i])
+				{
+					mError(missing_information);
+					return -1;
+				}
+			}
+			
+			//Loop over all headers
+			int rxn = 0;
+			for (auto &x: shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i]).getHeadMap())
+			{
+				if (x.second.getName() != "volume_factors")
+				{
+					try
+					{
+						shark_dat->AdsorptionList[i].getReaction(rxn).Set_Equilibrium(shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i])(x.first)["logK"].getDouble());
+					}
+					catch (std::out_of_range)
+					{
+						//At this point, it is unknown as to whether or not this is an actual error
+						//It will be checked later whether or not this causes a problem
+					}
+					
+					int count = 0;
+					double dH, dS;
+					try
+					{
+						dH = shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i])(x.first)["enthalpy"].getDouble();
+						shark_dat->AdsorptionList[i].getReaction(rxn).Set_Enthalpy(dH);
+						count++;
+					}
+					catch (std::out_of_range)
+					{
+						//At this point, it is unknown as to whether or not this is an actual error
+						//It will be checked later whether or not this causes a problem
+					}
+					
+					try
+					{
+						dS = shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i])(x.first)["entropy"].getDouble();
+						shark_dat->AdsorptionList[i].getReaction(rxn).Set_Entropy(dS);
+						count++;
+					}
+					catch (std::out_of_range)
+					{
+						//At this point, it is unknown as to whether or not this is an actual error
+						//It will be checked later whether or not this causes a problem
+					}
+					if (count == 2)
+						shark_dat->AdsorptionList[i].getReaction(rxn).Set_EnthalpyANDEntropy(dH, dS);
+					
+					try
+					{
+						shark_dat->AdsorptionList[i].getReaction(rxn).Set_Energy(shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i])(x.first)["energy"].getDouble());
+					}
+					catch (std::out_of_range)
+					{
+						//At this point, it is unknown as to whether or not this is an actual error
+						//It will be checked later whether or not this causes a problem
+					}
+					
+					int stoich;
+					try
+					{
+						stoich = shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i])(x.first)("stoichiometry").getMap().size();
+					}
+					catch (std::out_of_range)
+					{
+						mError(missing_information);
+						return -1;
+					}
+					if (stoich < 2)
+					{
+						mError(missing_information);
+						return -1;
+					}
+					
+					for (auto &y: shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i])(x.first)("stoichiometry").getMap())
+					{
+						int index = shark_dat->MasterList.get_index(y.first);
+						if (index < 0 || index > (shark_dat->numvar-1))
+						{
+							mError(read_error);
+							return -1;
+						}
+						else
+						{
+							try
+							{
+								shark_dat->AdsorptionList[i].getReaction(rxn).Set_Stoichiometric(index, y.second.getDouble());
+							}
+							catch (std::out_of_range)
+							{
+								mError(read_error);
+								return -1;
+							}
+						}
+					}
+					
+					rxn++;
+				}
+				else
+				{
+					//No Action
+				}
+			}
+			
 		}
 	}
 	
@@ -6038,8 +6176,8 @@ int SHARK_TESTS()
 	shark_dat.AdsorptionList[0].setSurfaceCharge(0.0);
 	shark_dat.AdsorptionList[0].setAdsorbentName("A(OH)2");
 	shark_dat.AdsorptionList[0].setActivityModelInfo(FloryHuggins, &shark_dat.AdsorptionList[0]);
-	//shark_dat.AdsorptionList[0].setBasis("area");
-	shark_dat.AdsorptionList[0].setBasis("molar");
+	shark_dat.AdsorptionList[0].setBasis("area");
+	//shark_dat.AdsorptionList[0].setBasis("molar");
 
 	shark_dat.AdsorptionList[0].setMolarFactor(0, 1.0);
 	shark_dat.AdsorptionList[0].getReaction(0).Set_Equilibrium(logK_UO2);
@@ -6130,6 +6268,7 @@ int SHARK_TESTS()
 	if (success != 0) {mError(simulation_fail); return -1;}
 
 	//Test of Langmuir - No Longer always a valid test
+	/*
 	std::cout << "Langmuir Test 1 = \t" << shark_dat.AdsorptionList[0].calculateLangmuirAdsorption(shark_dat.X_new, shark_dat.activity_new, 0) << std::endl;
 	std::cout << "Newton Test 1 = \t" << pow(10.0, shark_dat.X_new(22,0)) << std::endl;
 	std::cout << "qmax 1 = \t" << shark_dat.AdsorptionList[0].calculateLangmuirMaxCapacity(0) << std::endl;
@@ -6149,6 +6288,7 @@ int SHARK_TESTS()
 	std::cout << std::endl;
 	
 	std::cout << "Surface Charge Density (C/m^2) = " << shark_dat.AdsorptionList[0].getChargeDensity() << std::endl;
+	 */
 
 	//Close files and display end messages
 	fclose(TestOutput);

@@ -287,7 +287,7 @@ EquilRxn:
 #Adsorbent objects are referenced by their names given in the Scenario doc
 "A(OH)2 (s)":
 ---
-basis: Molar
+basis: molar
 spec_area: 45000.0     #Units: m^2/kg
 spec_mole: 1.471       #Units: mol/kg
 total_mass: 1.5e-5     #Units: kg
