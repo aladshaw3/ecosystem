@@ -4421,6 +4421,19 @@ int read_adsorbobjects(SHARK_DATA *shark_dat)
 			{
 				if (x.second.getName() != "volume_factors")
 				{
+					if (shark_dat->AdsorptionList[i].isAreaBasis() == false)
+					{
+						try
+						{
+							shark_dat->AdsorptionList[i].setMolarFactor(rxn, shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i])(x.first)["mole_factor"].getDouble());
+						}
+						catch (std::out_of_range)
+						{
+							mError(missing_information);
+							return -1;
+						}
+					}
+				
 					try
 					{
 						shark_dat->AdsorptionList[i].getReaction(rxn).Set_Equilibrium(shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i])(x.first)["logK"].getDouble());

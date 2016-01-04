@@ -10,7 +10,7 @@ Scenario:
 
 - ss_ads_objs:
   - obj01:
-    name: A(OH)2 (s)
+    name: AOH (s)
     num_rxns: 2       
 
 - sys_data:
@@ -32,7 +32,7 @@ line_search: true      #Default = true, and is recommended to be true
 search_type: standard
 linear_solve: fom      #Note: FOM will be fastest for small problems
 nl_maxit: 50
-nl_abstol: 1e-5
+nl_abstol: 5e-5
 nl_reltol: 1e-8
 lin_reltol: 1e-6 	
 lin_abstol: 1e-6		
@@ -74,7 +74,7 @@ MasterSpecies:
 - unreg:
 
   - 22: 
-    formula: UO2AO2 (s)
+    formula: UO2(AO)2 (s)
     charge: 0
     enthalpy: 0
     entropy: 0
@@ -86,7 +86,7 @@ MasterSpecies:
     lin_form: none
 
   - 23: 
-    formula: UO2CO3AO2 2- (s)
+    formula: UO2CO3(AO)2 2- (s)
     charge: -2
     enthalpy: 0
     entropy: 0
@@ -119,7 +119,7 @@ MassBalance:
     "UO2CO3 (aq)": 1
     "UO2(CO3)2 2- (aq)": 2
     "UO2(CO3)3 4- (aq)": 3
-    "UO2CO3AO2 2- (s)": 1
+    "UO2CO3(AO)2 2- (s)": 1
 
 - nitrate:
   total_conc: 6.50336E-05
@@ -139,8 +139,8 @@ MassBalance:
 - uranyl:
   total_conc: 3.25168E-05
   - delta:
-    "UO2AO2 (s)": 1
-    "UO2CO3AO2 2- (s)": 1
+    "UO2(AO)2 (s)": 1
+    "UO2CO3(AO)2 2- (s)": 1
     "UO2 2+ (aq)": 1
     "UO2NO3 + (aq)": 1
     "UO2(NO3)2 (aq)": 1
@@ -285,34 +285,34 @@ EquilRxn:
 
 
 #Adsorbent objects are referenced by their names given in the Scenario doc
-"A(OH)2 (s)":
+"AOH (s)":
 ---
 basis: molar
 spec_area: 45000.0     #Units: m^2/kg
-spec_mole: 1.471       #Units: mol/kg
+spec_mole: 1.471       #Units: mol/kg (1.471 at 1 molar)
 total_mass: 1.51095e-5     #Units: kg
 surf_charge: 0.0
-surf_activity: ideal
+surf_activity: floryhuggins
 
 - volume_factors:
-  "UO2AO2 (s)": 5
-  "UO2CO3AO2 2- (s)": 8
+  "UO2(AO)2 (s)": 5
+  "UO2CO3(AO)2 2- (s)": 8
 
 - rxn01:
-  logK: -4.00
+  logK: -3.75
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
     "H + (aq)": 2
-    "UO2AO2 (s)": 1
+    "UO2(AO)2 (s)": 1
 
 - rxn02:
-  logK: 9.00
+  logK: 10.75
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
     "H + (aq)": 2
     "CO3 2- (aq)": -1
-    "UO2CO3AO2 2- (s)": 1
+    "UO2CO3(AO)2 2- (s)": 1
 
 ...
