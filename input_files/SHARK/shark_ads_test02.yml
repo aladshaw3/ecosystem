@@ -289,7 +289,7 @@ EquilRxn:
 ---
 basis: molar
 spec_area: 45000.0     #Units: m^2/kg
-spec_mole: 1.471       #Units: mol/kg (1.471 at 1 molar)
+spec_mole: 2.731       #Units: mol/kg (1.471 at 1 molar)
 total_mass: 1.51095e-5     #Units: kg
 surf_charge: 0.0
 surf_activity: floryhuggins
@@ -299,16 +299,16 @@ surf_activity: floryhuggins
   "UO2CO3(AO)2 2- (s)": 8
 
 - rxn01:
-  logK: -3.75
-  mole_factor: 1.0
+  logK: -3.35
+  mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
     "H + (aq)": 2
     "UO2(AO)2 (s)": 1
 
 - rxn02:
-  logK: 10.75
-  mole_factor: 1.0
+  logK: 9.25
+  mole_factor: 4.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
     "H + (aq)": 2
