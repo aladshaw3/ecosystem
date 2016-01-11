@@ -339,9 +339,12 @@ double grad_mSPD(const double *par, const void *data, int i)
 		lnact_ph = lnact_mSPD(par, dat, i, xph);
 		lnact_mh = lnact_mSPD(par, dat, i, xmh);
 	}
-
+		
 	dx = xph - xmh;
-	grad = (lnact_ph - lnact_mh) / dx;
+	if (dx == 0.0)
+		grad = 0.0;
+	else
+		grad = (lnact_ph - lnact_mh) / dx;
 	return grad;
 }
 
@@ -829,7 +832,10 @@ int MAGPIE(const void *data)
 		if (dat->sys_dat.Carrier == false)
 			n_par = 1+dat->sys_dat.N;
 		else
-			n_par = 2+dat->sys_dat.N;
+			n_par = 1+dat->sys_dat.N;
+		
+		if (dat->sys_dat.Carrier == true && dat->sys_dat.Recover == true)
+			n_par++;
 
 		if (dat->sys_dat.Recover == false)
 			m_dat = 1+dat->sys_dat.N;
