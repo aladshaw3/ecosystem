@@ -424,8 +424,8 @@ typedef struct
 	double outer_abstol = 1e-6;		///< Absolute residual tolerance for outer steps (Default = 1e-6)
 	double inner_reltol = 0.1;		///< Residual tolerance for inner steps made relative to outer steps (Default = 0.1)
 	
-	bool Output_out = true;			///< True = Print the outer steps residuals
-	bool Output_in = false;			///< True = Print the inner steps residuals
+	bool Output_outer = true;			///< True = Print the outer steps residuals
+	bool Output_inner = false;			///< True = Print the inner steps residuals
 	
 	GMRESRP_DATA gmres_out;					///< Data structure for the outer steps
 	std::vector<GMRESRP_DATA> gmres_in;		///< Data structures for each recursion level
@@ -499,6 +499,7 @@ typedef enum
 	GMRESRP,
 	GCR,
 	GMRESR,
+	KMS
 } krylov_method;
 
 /// Data structure for the implementation of the PJFNK algorithm for non-linear systems
@@ -545,6 +546,7 @@ typedef struct
 	GMRESRP_DATA gmresrp_dat;		///< Data structure for the GMRESRP method
 	GCR_DATA gcr_dat;				///< Data structure for the GCR method
 	GMRESR_DATA gmresr_dat;			///< Data structure for the GMRESR method
+	KMS_DATA kms_dat;				///< Data structure for the KMS method
 	
 	
 	BACKTRACK_DATA backtrack_dat;	///< Data structure for the Backtracking Linesearch algorithm

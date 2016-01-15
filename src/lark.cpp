@@ -2410,7 +2410,7 @@ int kmsPreconditioner( const Matrix<double>& r, Matrix<double> &Mr, const void *
 		return -1;
 	}
 	kms_dat->level++;
-	kms_dat->gmres_in[kms_dat->level-1].Output = kms_dat->Output_in;
+	kms_dat->gmres_in[kms_dat->level-1].Output = kms_dat->Output_inner;
 
 	//Formulate the best number of inner and outer preconditioning iterates based on current status
 	double inner_par = 0;
@@ -2498,7 +2498,7 @@ int krylovMultiSpace( int (*matvec) (const Matrix<double>& x, Matrix<double> &Ax
 		mError(matrix_too_small);
 		return success;
 	}
-	kms_dat->gmres_out.Output = kms_dat->Output_out;
+	kms_dat->gmres_out.Output = kms_dat->Output_outer;
 	
 	//Preconditioner Tolerances
 	if (kms_dat->inner_reltol >= 0.5)
@@ -3015,7 +3015,7 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 	}
 	if (pjfnk_dat->nl_maxit <= 0)
 		pjfnk_dat->nl_maxit = std::min(3*x.rows(),1000);
-	if (pjfnk_dat->linear_solver < GMRESLP || pjfnk_dat->linear_solver > GMRESR)
+	if (pjfnk_dat->linear_solver < GMRESLP || pjfnk_dat->linear_solver > KMS)
 	{
 		//Choose the best linear solver based on problem size and availability of preconditioning
 		if (x.rows() >= 100 && (*precon) == NULL)
@@ -3083,6 +3083,8 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 			std::cout << "GCR linear solver";
 		else if (pjfnk_dat->linear_solver == GMRESR)
 			std::cout << "GMRESR linear solver";
+		else if (pjfnk_dat->linear_solver == KMS)
+			std::cout << "KMS linear solver";
 		else
 			return -1;
 		if (pjfnk_dat->LineSearch == true)
@@ -3358,7 +3360,6 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 			pjfnk_dat->gmresr_dat.GMRES_Output = false;
 			pjfnk_dat->gmresr_dat.gcr_abs_tol = pjfnk_dat->lin_tol_abs;
 			pjfnk_dat->gmresr_dat.gcr_rel_tol = pjfnk_dat->lin_tol_rel;
-			pjfnk_dat->gmresr_dat.gmres_tol = pjfnk_dat->lin_tol_rel;
 			pjfnk_dat->gmresr_dat.gcr_maxit = x.rows();
 			success = gmresr(jacvec, pjfnk_dat->precon, pjfnk_dat->F, &pjfnk_dat->gmresr_dat, pjfnk_dat, pjfnk_dat->precon_data);
 			pjfnk_dat->l_iter = pjfnk_dat->l_iter + pjfnk_dat->gmresr_dat.total_iter;
@@ -3377,6 +3378,43 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 			else
 			{
 				success	= backtrackLineSearch(pjfnk_dat->funeval, pjfnk_dat->F, x, pjfnk_dat->gmresr_dat.gcr_dat.x, pjfnk_dat->nl_res, &pjfnk_dat->backtrack_dat, pjfnk_dat->res_data);
+				pjfnk_dat->fun_call = pjfnk_dat->fun_call + pjfnk_dat->backtrack_dat.fun_call;
+				if (success < 0) {mError(simulation_fail); success = -1; break;}
+				//Form new solution
+				for (int i=0; i<x.rows(); i++)
+				{
+					pjfnk_dat->x.edit(i, 0, x(i,0));
+				}
+				if (pjfnk_dat->Bounce == true)
+					LS_Flag = false;
+			}
+		}
+		
+		//KMS iterative solver with restarting
+		else if (pjfnk_dat->linear_solver == KMS)
+		{
+			pjfnk_dat->kms_dat.Output_outer = pjfnk_dat->L_Output;
+			pjfnk_dat->kms_dat.Output_inner = false;
+			pjfnk_dat->kms_dat.outer_abstol = pjfnk_dat->lin_tol_abs;
+			pjfnk_dat->kms_dat.outer_reltol = pjfnk_dat->lin_tol_rel;
+			pjfnk_dat->kms_dat.maxit = x.rows();
+			success = krylovMultiSpace(jacvec,pjfnk_dat->precon, pjfnk_dat->F, &pjfnk_dat->kms_dat, pjfnk_dat, pjfnk_dat->precon_data);
+			pjfnk_dat->l_iter = pjfnk_dat->l_iter + pjfnk_dat->gmresr_dat.total_iter;
+			pjfnk_dat->fun_call = pjfnk_dat->fun_call + pjfnk_dat->kms_dat.total_iter;
+			if (success != 0) {mError(simulation_fail); success = -1; break;}
+			
+			if (pjfnk_dat->LineSearch == false)
+			{
+				//Form new solution
+				for (int i=0; i<x.rows(); i++)
+				{
+					pjfnk_dat->x.edit(i, 0, pjfnk_dat->x(i,0) - pjfnk_dat->kms_dat.gmres_out.x(i,0));
+					x.edit(i, 0, pjfnk_dat->x(i,0));
+				}
+			}
+			else
+			{
+				success	= backtrackLineSearch(pjfnk_dat->funeval, pjfnk_dat->F, x, pjfnk_dat->kms_dat.gmres_out.x, pjfnk_dat->nl_res, &pjfnk_dat->backtrack_dat, pjfnk_dat->res_data);
 				pjfnk_dat->fun_call = pjfnk_dat->fun_call + pjfnk_dat->backtrack_dat.fun_call;
 				if (success < 0) {mError(simulation_fail); success = -1; break;}
 				//Form new solution
@@ -4131,11 +4169,15 @@ int LARK_TESTS()
 	PJFNK_DATA pjfnk_dat14;
 	
 	//NOTE: You do not have to set these, they will be automatically set when PJFNK is called
-	//pjfnk_dat14.L_Output = true;
-	pjfnk_dat14.linear_solver = GMRESR; //Choice 1 (PCG) and 4 (GMRES_FULL) are not choosen by PJFNK
+	pjfnk_dat14.L_Output = true;
+	pjfnk_dat14.linear_solver = KMS; //Choice 1 (PCG) and 4 (GMRES_FULL) are not choosen by PJFNK
 	pjfnk_dat14.LineSearch = true;
 	//pjfnk_dat14.Bounce = true;
 	//pjfnk_dat14.backtrack_dat.constRho = true;
+	
+	//KMS Options
+	pjfnk_dat14.kms_dat.max_level = 2;
+	pjfnk_dat14.kms_dat.inner_reltol = 0.001;
 	
 	time = clock();
 	success = pjfnk(funeval_ex10, precon_ex10, ex09_dat.x, &pjfnk_dat14, (void *)&ex09_dat, (void *)&ex09_dat);
@@ -4274,7 +4316,7 @@ int LARK_TESTS()
 	std::cout << "\n------------------START KMS-------------------" << std::endl;
 	
 	KMS_DATA kms15;
-	kms15.Output_in = false;
+	kms15.Output_inner = false;
 	kms15.max_level = 2;
 	kms15.inner_reltol = 0.001;
 	
