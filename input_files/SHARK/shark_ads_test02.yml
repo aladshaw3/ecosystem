@@ -32,10 +32,11 @@ line_search: true      #Default = true, and is recommended to be true
 search_type: standard
 linear_solve: fom      #Note: FOM will be fastest for small problems
 nl_maxit: 50
-nl_abstol: 1e-4
+nl_abstol: 1e-6
 nl_reltol: 1e-8
 lin_reltol: 1e-6 	
-lin_abstol: 1e-6		
+lin_abstol: 1e-6
+local_min: true		
 
 ...
 

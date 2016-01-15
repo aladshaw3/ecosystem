@@ -665,6 +665,7 @@ double MassBalance::Eval_Residual(const Matrix<double> &x)
 	{
 		res = res + ( this->Delta[i] * pow(10.0, x(i,0)) );
 	}
+	
 	if (this->Get_TotalConcentration() <= DBL_MIN)
 		res = (res - this->Get_TotalConcentration())/pow(DBL_EPSILON, 2.0);
 	else
@@ -672,7 +673,7 @@ double MassBalance::Eval_Residual(const Matrix<double> &x)
 
 	if (isnan(res) || isinf(res))
 		res = sqrt(DBL_MAX)/this->List->list_size();
-
+	
 	return res;
 }
 
@@ -2277,7 +2278,12 @@ void print2file_shark_results_new(SHARK_DATA *shark_dat)
 	if (shark_dat->Converged == true)
 		fprintf(shark_dat->OutputFile, "\tTRUE");
 	else
-		fprintf(shark_dat->OutputFile, "\tFALSE");
+	{
+		if (shark_dat->LocalMin == true)
+			fprintf(shark_dat->OutputFile, "\tLOCAL_MIN");
+		else
+			fprintf(shark_dat->OutputFile, "\tFALSE");
+	}
 	fprintf(shark_dat->OutputFile, "\t%.6g\t%i\t%i\n",shark_dat->Norm,shark_dat->Newton_data.nl_iter, shark_dat->Newton_data.l_iter);
 }
 
@@ -3590,6 +3596,15 @@ int read_options(SHARK_DATA *shark_dat)
 	{
 		shark_dat->Newton_data.LineSearch = true;
 	}
+	
+	try
+	{
+		shark_dat->LocalMin = shark_dat->yaml_object.getYamlWrapper()("SolverOptions")["local_min"].getBool();
+	}
+	catch (std::out_of_range)
+	{
+		shark_dat->LocalMin = true;
+	}
 
 	if (shark_dat->Newton_data.LineSearch == true)
 	{
@@ -4254,6 +4269,7 @@ int read_adsorbobjects(SHARK_DATA *shark_dat)
 			try
 			{
 				shark_dat->AdsorptionList[i].setAdsorbentName( shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i]).getName() );
+				shark_dat->AdsorptionList[i].setTotalVolume(shark_dat->volume);
 			}
 			catch (std::out_of_range)
 			{
@@ -4888,10 +4904,6 @@ int shark_guess(SHARK_DATA *shark_dat)
 
 	for (int i=0; i<shark_dat->MassBalanceList.size(); i++)
 	{
-		for (int n=0; n<shark_dat->AdsorptionList.size(); n++)
-		{
-			shark_dat->AdsorptionList[n].modifyDeltas(shark_dat->MassBalanceList[i]);
-		}
 		double delta_sum = shark_dat->MassBalanceList[i].Sum_Delta();
 		double distribution = shark_dat->MassBalanceList[i].Get_TotalConcentration() / delta_sum;
 		for (int j=0; j<shark_dat->MasterList.list_size(); j++)
@@ -5041,13 +5053,6 @@ int shark_executioner(SHARK_DATA *shark_dat)
 	success = shark_postprocesses(shark_dat);
 	if (success != 0) {mError(simulation_fail); return -1;}
 
-	//Check for failure
-	if (shark_dat->Converged == false)
-	{
-		if (shark_dat->Console_Output == true)
-			std::cout << "\nSHARK CONVERGENCE FAILURE!\n\n";
-	}
-
 	return success;
 }
 
@@ -5182,45 +5187,57 @@ int shark_solver(SHARK_DATA *shark_dat)
 			}
 			else
 			{
-				std::cout << "Time step cannot be reduced further! Force Quit SHARK...\n\n";
+				std::cout << "Time step cannot be reduced further!";
 			}
-			shark_dat->Newton_data.F.Display("Residual Vector");
-			shark_dat->Newton_data.x.Display("Solution Vector");
-
-			//Conversion to concentration units
-			success = Convert2Concentration(shark_dat->X_new, shark_dat->Conc_new);
-			if (success != 0) {mError(simulation_fail); return -1;}
-			shark_dat->MasterList.DisplayConcentrations(shark_dat->Conc_new);
 			
-			std::cout << "Ionic Strength (M) = " << calculate_ionic_strength(shark_dat->X_new, shark_dat->MasterList) << std::endl;
+			if (shark_dat->LocalMin == false)
+			{
+				std::cout << "\n--------------Force Quiting SHARK----------------\n\n";
+				shark_dat->Newton_data.F.Display("Residual Vector");
+				shark_dat->Newton_data.x.Display("Solution Vector");
+
+				//Conversion to concentration units
+				success = Convert2Concentration(shark_dat->X_new, shark_dat->Conc_new);
+				if (success != 0) {mError(simulation_fail); return -1;}
+				shark_dat->MasterList.DisplayConcentrations(shark_dat->Conc_new);
 			
-			for (int i=0; i<shark_dat->AdsorptionList.size(); i++)
-			{
-				std::cout << "Active Surface Fraction " << i << " = " << shark_dat->AdsorptionList[i].calculateActiveFraction(shark_dat->X_new) << std::endl;
-				std::cout << "Surface Charge Density (C/m^2) " << i << " = " << shark_dat->AdsorptionList[i].getChargeDensity() << std::endl;
-				for (int n=0; n<shark_dat->AdsorptionList[i].getNumberRxns(); n++)
+				std::cout << "Ionic Strength (M) = " << calculate_ionic_strength(shark_dat->X_new, shark_dat->MasterList) << std::endl;
+			
+				for (int i=0; i<shark_dat->AdsorptionList.size(); i++)
 				{
-					std::cout << "Area Factor for Species " << shark_dat->AdsorptionList[i].getAdsorbIndex(n) << " = " << shark_dat->AdsorptionList[i].getAreaFactor(shark_dat->AdsorptionList[i].getAdsorbIndex(n)) << std::endl;
+					std::cout << "Active Surface Fraction " << i << " = " << shark_dat->AdsorptionList[i].calculateActiveFraction(shark_dat->X_new) << std::endl;
+					std::cout << "Surface Charge Density (C/m^2) " << i << " = " << shark_dat->AdsorptionList[i].getChargeDensity() << std::endl;
+					for (int n=0; n<shark_dat->AdsorptionList[i].getNumberRxns(); n++)
+					{
+						std::cout << "Area Factor for Species " << shark_dat->AdsorptionList[i].getAdsorbIndex(n) << " = " << shark_dat->AdsorptionList[i].getAreaFactor(shark_dat->AdsorptionList[i].getAdsorbIndex(n)) << std::endl;
+					}
+					for (int n=0; n<shark_dat->AdsorptionList[i].getNumberRxns(); n++)
+					{
+						std::cout << "logK for Reaction " << n << " = " << shark_dat->AdsorptionList[i].getReaction(n).Get_Equilibrium() << std::endl;
+					}
 				}
-				for (int n=0; n<shark_dat->AdsorptionList[i].getNumberRxns(); n++)
+				std::cout << "\n";
+				shark_dat->activity_new.Display("activities");
+
+				//Form a Numerical Jacobian and print out
+				if (shark_dat->numvar <= 100)
 				{
-					std::cout << "logK for Reaction " << n << " = " << shark_dat->AdsorptionList[i].getReaction(n).Get_Equilibrium() << std::endl;
+					Matrix<double> J(shark_dat->numvar,shark_dat->numvar);
+					NUM_JAC_DATA num_jac;
+					success = NumericalJacobian(shark_dat->Residual, shark_dat->X_new, J, shark_dat->numvar, shark_dat->numvar, &num_jac, shark_dat->residual_data);
+					J.Display("Numerical Jacobian");
 				}
-			}
-			std::cout << "\n";
-			shark_dat->activity_new.Display("activities");
 
-			//Form a Numerical Jacobian and print out
-			if (shark_dat->numvar <= 100)
+				mError(simulation_fail);
+				return -1;
+				
+			}
+			else
 			{
-				Matrix<double> J(shark_dat->numvar,shark_dat->numvar);
-				NUM_JAC_DATA num_jac;
-				success = NumericalJacobian(shark_dat->Residual, shark_dat->X_new, J, shark_dat->numvar, shark_dat->numvar, &num_jac, shark_dat->residual_data);
-				J.Display("Numerical Jacobian");
+				std::cout << "\nLocal minimum was found. Continue simulations...\n\n";
+				success = 0;
+				
 			}
-
-			mError(simulation_fail);
-			return -1;
 		}
 	}
 
@@ -5235,6 +5252,22 @@ int shark_postprocesses(SHARK_DATA *shark_dat)
 	//Conversion to concentration units
 	success = Convert2Concentration(shark_dat->X_new, shark_dat->Conc_new);
 	if (success != 0) {mError(simulation_fail); return -1;}
+	
+	//Check for failure
+	if (shark_dat->Converged == false && shark_dat->Console_Output == true)
+	{
+		if (shark_dat->LocalMin == false)
+			std::cout << "\nSHARK CONVERGENCE FAILURE!\n\n";
+		else
+		{
+			if ((shark_dat->Newton_data.nl_res/10.0) <= shark_dat->Newton_data.nl_tol_abs)
+				std::cout << "\nLOCAL MINIMUM ACCEPTED AS SUCCESS!\n\n";
+			else
+			{
+				std::cout << "\nWARNING! BAD LOCAL MINIMUM!\n\n";
+			}
+		}
+	}
 
 	//Print to file
 	if (shark_dat->steadystate == true)

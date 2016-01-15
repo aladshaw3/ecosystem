@@ -822,6 +822,7 @@ typedef struct SHARK_DATA
 	bool Contains_pH = false;						///< True = system contains pH as a variable (set internally)
 	bool Contains_pOH = false;						///< True = system contains pOH as a variable (set internally)
 	bool Converged = false;							///< True = system converged within tolerance
+	bool LocalMin = true;							///< True = allow the system to settle for a local minimum if tolerance not reached
 
 	Matrix<double> X_old;							///< Solution vector for old time step - log(C)
 	Matrix<double> X_new;							///< Solution vector for current time step - log(C)
