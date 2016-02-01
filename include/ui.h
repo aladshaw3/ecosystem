@@ -10,6 +10,33 @@
  *             rights reserved.
  */
 
+/*!	\mainpage Introduction
+ *
+ *	\section copyright Copyright Statement
+ *	\copyright This software was designed and built at the Georgia Institute
+ *             of Technology by Austin Ladshaw for PhD research in the area
+ *             of adsorption and surface science. Copyright (c) 2015, all
+ *             rights reserved.
+ *
+ *	\section info General Information
+ *
+ *	The source code contained within the ecosystem project was designed as a
+ *	standalone tool set for performing numerical modeling and data analyses
+ *	associated with adsorption phenomena in both gaseous and aqueous systems.
+ *	Many of the lower level tools are general enough to be applied to any 
+ *	system you desire to be modeled. Such algorithms included are Krylov
+ *	subspace methods for linear systems and a Jacobian-Free Newton-Krylov
+ *	method for non-linear systems. There is also a templated matrix object
+ *	for generic matrix construction and modification. For specific information
+ *	on each individual kernel, navigate through the class and file indices or
+ *	table of contents.
+ *
+ *	\warning Many of these algorithms may still be under development. This library is 
+ *	distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without 
+ *	even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ */
+
 #include <fstream>
 #include <string>
 #include <iostream>
