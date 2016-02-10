@@ -250,6 +250,10 @@ void Molecule::Register(std::string formula)
 		{
 			this->Register(-1, -167200.0, 56.5, -131300.0, true, true, "Aqueous", "Chlorine", formula, "Cl");
 		}
+		else if (formula == "CaCl2 (aq)")
+		{
+			this->Register(0, -795420.0, 108.4, -816050.0, true, true, "Aqueous", "Calcium-chloride", formula, "CaCl2");
+		}
 		else
 		{
 			mError(unregistered_name); return;
@@ -331,7 +335,14 @@ void Molecule::Register(std::string formula)
 	else if (first == 'M')
 	{
 		//List of molecules starting with M
-		mError(unregistered_name); return;
+		if (formula == "Mg(OH)2 (aq)")
+		{
+			this->Register(0, -744700.0, 64.0, -769400.0, true, true, "Aqueous", "Magnesium-hydroxide", formula, "MgO2H2");
+		}
+		else
+		{
+			mError(unregistered_name); return;
+		}
 	}
 	else if (first == 'N')
 	{
@@ -343,6 +354,10 @@ void Molecule::Register(std::string formula)
 		else if (formula == "NaCO3 - (aq)")
 		{
 			this->Register(-1,-937550.0,-41.85,-797049.0,true,true,"Aqueous","Sodium-Carbonate",formula,"NaCO3");
+		}
+		else if (formula == "Na2CO3 (aq)")
+		{
+			this->Register(0,0.0,0.0,-1051600.0,false,true,"Aqueous","DiSodium-Carbonate",formula,"Na2CO3");
 		}
 		else if (formula == "Na + (aq)")
 		{
@@ -356,9 +371,17 @@ void Molecule::Register(std::string formula)
 		{
 			this->Register(0,-470110.0,48.1,-419200.0,true,true,"Aqueous","Sodium-Hydroxide",formula,"NaOH");
 		}
+		else if (formula == "NaNO3 (aq)")
+		{
+			this->Register(0,0.0,0.0,-373210.0,false,true,"Aqueous","Sodium-Nitrate",formula,"NaNO3");
+		}
 		else if (formula == "NO3 - (aq)")
 		{
 			this->Register(-1,-207300.0,146.4,-111300.0,true,true,"Aqueous","Nitrate",formula,"NO3");
+		}
+		else if (formula == "NH3 (aq)")
+		{
+			this->Register(0,0.0,193.0,-26570.0,false,true,"Aqueous","Ammonia",formula,"NH3");
 		}
 		else
 		{
