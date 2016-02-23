@@ -231,13 +231,150 @@ void Molecule::Register(std::string formula)
 	if (first == 'A')
 	{
 		//List of molecules starting with A
-		std::cout << formula << " Not Found!\n";
-		mError(unregistered_name); return;
+		if (formula == "Ag (s)")
+		{
+			this->Register(0, 0.0, 42.6, 0.0, true, true, "Solid", "Silver", formula, "Ag");
+		}
+		else if (formula == "Ag + (aq)")
+		{
+			this->Register(1, 105600.0, 73.4, 77120.0, true, true, "Aqueous", "Silver", formula, "Ag");
+		}
+		else if (formula == "AgBr (s)")
+		{
+			this->Register(0, -100600.0, 107.0, -96900.0, true, true, "Solid", "Silver-bromide", formula, "AgBr");
+		}
+		else if (formula == "AgCl (s)")
+		{
+			this->Register(0, -127100.0, 96.0, -109800.0, true, true, "Solid", "Silver-chloride", formula, "AgCl");
+		}
+		else if (formula == "AgI (s)")
+		{
+			this->Register(0, -61840.0, 115.0, -66200.0, true, true, "Solid", "Silver-iodide", formula, "AgI");
+		}
+		else if (formula == "Ag2S (s)")
+		{
+			this->Register(0, -29400.0, 14.0, -40700.0, true, true, "Solid", "DiSilver-sulfide", formula, "Ag2S");
+		}
+		else if (formula == "AgOH (aq)")
+		{
+			this->Register(0, 0.0, 0.0, -92000.0, false, true, "Aqueous", "Silver-hydroxide", formula, "AgOH");
+		}
+		else if (formula == "Ag(OH)2 - (aq)")
+		{
+			this->Register(-1, 0.0, 0.0, -260200.0, false, true, "Aqueous", "Silver-dihydroxide", formula, "AgO2H2");
+		}
+		else if (formula == "AgCl (aq)")
+		{
+			this->Register(0, -72800.0, 154.0, -72800.0, true, true, "Aqueous", "Silver-chloride", formula, "AgCl");
+		}
+		else if (formula == "AgCl2 - (aq)")
+		{
+			this->Register(-1, -245200.0, 231.0, -215500.0, true, true, "Aqueous", "Silver-dichloride", formula, "AgCl2");
+		}
+		else if (formula == "Al (s)")
+		{
+			this->Register(0, 0.0, 28.3, 0.0, true, true, "Solid", "Aluminum", formula, "Al");
+		}
+		else if (formula == "Al 3+ (aq)")
+		{
+			this->Register(3, -531000.0, -308.0, -489400.0, true, true, "Aqueous", "Aluminum", formula, "Al");
+		}
+		else if (formula == "AlOH 2+ (aq)")
+		{
+			this->Register(2, 0.0, 0.0, -698000.0, false, true, "Aqueous", "Aluminum-hydroxide", formula, "AlOH");
+		}
+		else if (formula == "Al(OH)2 + (aq)")
+		{
+			this->Register(1, 0.0, 0.0, -911000.0, false, true, "Aqueous", "Aluminum-dihydroxide", formula, "AlO2H2");
+		}
+		else if (formula == "Al(OH)3 (aq)")
+		{
+			this->Register(0, 0.0, 0.0, -1115000.0, false, true, "Aqueous", "Aluminum-trihydroxide", formula, "AlO3H3");
+		}
+		else if (formula == "Al(OH)4 - (aq)")
+		{
+			this->Register(-1, 0.0, 0.0, -1325000.0, false, true, "Aqueous", "Aluminum-tetrahydroxide", formula, "AlO4H4");
+		}
+		else if (formula == "Al2O3 (s)")
+		{
+			this->Register(0, -1676000.0, 50.9, -1582000.0, true, true, "Solid", "Corundum", formula, "Al2O3");
+		}
+		else if (formula == "AlOOH (s)")
+		{
+			this->Register(0, -1000000.0, 17.8, -922000.0, true, true, "Solid", "Boehmite", formula, "AlOOH");
+		}
+		else if (formula == "Al(OH)3 (s)")
+		{
+			this->Register(0, -1293000.0, 68.4, -1155000.0, true, true, "Solid", "Gibbsite", formula, "AlO3H3");
+		}
+		else if (formula == "Al2Si2(OH)4 (s)")
+		{
+			this->Register(0, -4120000.0, 203.0, -3799000.0, true, true, "Solid", "Kaolinite", formula, "Al2Si2O4H4");
+		}
+		else if (formula == "As (s)")
+		{
+			this->Register(0, 0.0, 35.1, 0.0, true, true, "Solid", "Arsenic", formula, "As");
+		}
+		else if (formula == "AsO4 3- (aq)")
+		{
+			this->Register(-3, -870300.0, -145.0, -636000.0, true, true, "Aqueous", "Arsenate", formula, "AsO4");
+		}
+		else
+		{
+			mError(unregistered_name); return;
+		}
 	}
 	else if (first == 'B')
 	{
 		//List of molecules starting with B
-		mError(unregistered_name); return;
+		if (formula == "Ba 2+ (aq)")
+		{
+			this->Register(2, -537600.0, 9.6, -560700.0, true, true, "Aqueous", "Barium", formula, "Ba");
+		}
+		else if (formula == "BaSO4 (s)")
+		{
+			this->Register(0, -1473000.0, 132.0, -1362000.0, true, true, "Solid", "Barite", formula, "BaSO4");
+		}
+		else if (formula == "BaCO3 (s)")
+		{
+			this->Register(0, -1211000.0, 112.0, -1132000.0, true, true, "Solid", "Witherite", formula, "BaCO3");
+		}
+		else if (formula == "Be 2+ (aq)")
+		{
+			this->Register(2, -382000.0, -130.0, -380000.0, true, true, "Aqueous", "Beryllium", formula, "Be");
+		}
+		else if (formula == "Be(OH)2 (s)")
+		{
+			this->Register(0, -902000.0, 51.9, -815000.0, true, true, "Solid", "Beryllium-dihydroxide", formula, "BeO2H2");
+		}
+		else if (formula == "Be3(OH)3 3+ (aq)")
+		{
+			this->Register(3, 0.0, 0.0, -1802000.0, false, true, "Aqueous", "TriBeryllium-trihydroxide", formula, "Be3O3H3");
+		}
+		else if (formula == "B(OH)4 - (aq)")
+		{
+			this->Register(-1, -1344000.0, 102.0, -1153300.0, true, true, "Aqueous", "Tetrahydroxy-borate", formula, "BO4H4");
+		}
+		else if (formula == "Br2 (l)")
+		{
+			this->Register(0, 0.0, 152.0, 0.0, true, true, "Liquid", "Bromide", formula, "Br2");
+		}
+		else if (formula == "Br2 (aq)")
+		{
+			this->Register(0, -2590.0, 130.5, 3930.0, true, true, "Aqueous", "Bromide", formula, "Br2");
+		}
+		else if (formula == "Br - (aq)")
+		{
+			this->Register(0, -121500.0, 82.4, -104000.0, true, true, "Aqueous", "Bromine", formula, "Br");
+		}
+		else if (formula == "BrO - (aq)")
+		{
+			this->Register(0, -94100.0, 42.0, -33500.0, true, true, "Aqueous", "Hypobromite", formula, "BrO");
+		}
+		else
+		{
+			mError(unregistered_name); return;
+		}
 	}
 	else if (first == 'C')
 	{
@@ -253,6 +390,46 @@ void Molecule::Register(std::string formula)
 		else if (formula == "CaCl2 (aq)")
 		{
 			this->Register(0, -795420.0, 108.4, -816050.0, true, true, "Aqueous", "Calcium-chloride", formula, "CaCl2");
+		}
+		else if (formula == "CaAl2Si2O8 (s)")
+		{
+			this->Register(0, -4243000, 199.0, -4017300.0, true, true, "Solid", "Anorthite", formula, "CaAl2Si2O8");
+		}
+		else if (formula == "C (s)")
+		{
+			this->Register(0, 0.0, 152.0, 0.0, true, true, "Solid", "Graphite", formula, "C");
+		}
+		else if (formula == "CO2 (g)")
+		{
+			this->Register(0, -393500.0, 213.6, -394370.0, true, true, "Gas", "Carbon-dioxide", formula, "CO2");
+		}
+		else if (formula == "CH4 (g)")
+		{
+			this->Register(0, -74800.0, 186.0, -50750.0, true, true, "Gas", "Methane", formula, "CH4");
+		}
+		else if (formula == "CH4 (aq)")
+		{
+			this->Register(0, -89040.0, 83.7, -34390.0, true, true, "Aqueous", "Methane", formula, "CH4");
+		}
+		else if (formula == "CH3OH (aq)")
+		{
+			this->Register(0, -245900.0, 133.0, -175400.0, true, true, "Aqueous", "Methanol", formula, "CH3OH");
+		}
+		else if (formula == "CN - (aq)")
+		{
+			this->Register(-1, 150600.0, 94.1, 172400.0, true, true, "Aqueous", "Cyanide", formula, "CN");
+		}
+		else if (formula == "CH3COOH (aq)")
+		{
+			this->Register(0, -485800.0, 179.0, -396600.0, true, true, "Aqueous", "Acetic-Acid", formula, "CH3COOH");
+		}
+		else if (formula == "CH3COO - (aq)")
+		{
+			this->Register(-1, -486000.0, 86.6, -369400.0, true, true, "Aqueous", "Acetate", formula, "CH3COO");
+		}
+		else if (formula == "C2H5OH (aq)")
+		{
+			this->Register(0, -288300.0, 149.0, -181800.0, true, true, "Aqueous", "Ethanol", formula, "C2H5OH");
 		}
 		else
 		{
@@ -306,6 +483,42 @@ void Molecule::Register(std::string formula)
 		{
 			this->Register(0,-167160.0,56.48,-131300.0,true,true,"Aqueous","Hydrochloric-Acid","HCl (aq)","HCl");
 		}
+		else if (formula == "H3AsO4 (aq)")
+		{
+			this->Register(0, -898700.0, 206.0, -766000.0, true, true, "Aqueous", "Arsenic-Acid", formula, "H3AsO4");
+		}
+		else if (formula == "H2AsO4 - (aq)")
+		{
+			this->Register(-1, -904500.0, 117.0, -748500.0, true, true, "Aqueous", "Dihydrogen-arsenate", formula, "H2AsO4");
+		}
+		else if (formula == "HAsO4 2- (aq)")
+		{
+			this->Register(-2, -898700.0, 3.8, -707100.0, true, true, "Aqueous", "Hydrogen-arsenate", formula, "HAsO4");
+		}
+		else if (formula == "H2AsO3 - (aq)")
+		{
+			this->Register(-1, 0.0, 0.0, -587400.0, false, true, "Aqueous", "Dihydrogen-arsenite", formula, "H2AsO3");
+		}
+		else if (formula == "H3BO3 (aq)")
+		{
+			this->Register(0, -1072000.0, 162.0, -968700.0, true, true, "Aqueous", "Boric-Acid", formula, "H3BO3");
+		}
+		else if (formula == "HBrO (aq)")
+		{
+			this->Register(0, -113000.0, 147.0, -82200.0, true, true, "Aqueous", "Hypobromous-Acid", formula, "HBrO");
+		}
+		else if (formula == "HCOOH (aq)")
+		{
+			this->Register(0, -425400.0, 163.0, -372300.0, true, true, "Aqueous", "Formic-Acid", formula, "HCOOH");
+		}
+		else if (formula == "HCOO - (aq)")
+		{
+			this->Register(-1, -425600.0, 92.0, -351000.0, true, true, "Aqueous", "Formate", formula, "HCOO");
+		}
+		else if (formula == "HCN (aq)")
+		{
+			this->Register(0, 107100.0, 124.6, 119700.0, true, true, "Aqueous", "Hydrogen-cyanide", formula, "HCN");
+		}
 		else
 		{
 			mError(unregistered_name); return;
@@ -325,7 +538,14 @@ void Molecule::Register(std::string formula)
 	else if (first == 'K')
 	{
 		//List of molecules starting with K
-		mError(unregistered_name); return;
+		if (formula == "KAl3Si3O10(OH)2 (s)")
+		{
+			this->Register(0, 0.0, 0.0, -1341000.0, false, true, "Solid", "Muscovite", formula, "KAl3Si3O12H2");
+		}
+		else
+		{
+			mError(unregistered_name); return;
+		}
 	}
 	else if (first == 'L')
 	{
@@ -338,6 +558,10 @@ void Molecule::Register(std::string formula)
 		if (formula == "Mg(OH)2 (aq)")
 		{
 			this->Register(0, -744700.0, 64.0, -769400.0, true, true, "Aqueous", "Magnesium-hydroxide", formula, "MgO2H2");
+		}
+		else if (formula == "Mg5Al2Si3O10(OH)8 (s)")
+		{
+			this->Register(0, 0.0, 0.0, -1962000.0, false, true, "Solid", "Chlorite", formula, "Mg5Al2Si3O18H8");
 		}
 		else
 		{
@@ -382,6 +606,18 @@ void Molecule::Register(std::string formula)
 		else if (formula == "NH3 (aq)")
 		{
 			this->Register(0,0.0,193.0,-26570.0,false,true,"Aqueous","Ammonia",formula,"NH3");
+		}
+		else if (formula == "NaAlSiO3O8 (s)")
+		{
+			this->Register(0, -3935100, -749.7, -3711700.0, true, true, "Solid", "Albite", formula, "NaAlSiO3O8");
+		}
+		else if (formula == "NH2CH2COOH (aq)")
+		{
+			this->Register(0, -514000.0, 158.0, -370800.0, true, true, "Aqueous", "Glycine", formula, "NH2CH2COOH");
+		}
+		else if (formula == "NH2CH2COO - (aq)")
+		{
+			this->Register(-1, -469800.0, 119.0, -315000.0, true, true, "Aqueous", "Glycinate", formula, "NH2CH2COO");
 		}
 		else
 		{
@@ -826,6 +1062,10 @@ int MOLA_TESTS()
 	Molecule NaHCO3;
 	NaHCO3.Register("NaHCO3 (aq)");
 	NaHCO3.DisplayInfo();
+	
+	Molecule Mus;
+	Mus.Register("KAl3Si3O10(OH)2 (s)");
+	Mus.DisplayInfo();
 	
 	time = clock() - time;
 	std::cout << "\nRuntime (s): " << (time/CLOCKS_PER_SEC) << std::endl;
