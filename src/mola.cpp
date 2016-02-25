@@ -898,6 +898,74 @@ void Molecule::Register(std::string formula)
 		{
 			this->Register(-1, 0.0, 0.0, -190300.0, false, true, "Aqueous", "Mercury(II)-dioxide", formula, "HgO2");
 		}
+		else if (formula == "HIO (aq)")
+		{
+			this->Register(0, -138000.0, 95.4, -99200.0, true, true, "Aqueous", "Hypoiodous-Acid", formula, "HIO");
+		}
+		else if (formula == "HIO3 (aq)")
+		{
+			this->Register(0, -211300.0, 167.0, -132600.0, true, true, "Aqueous", "Iodic-Acid", formula, "HIO3");
+		}
+		else if (formula == "HNO2 (aq)")
+		{
+			this->Register(0, -119200.0, 153.0, -42970.0, true, true, "Aqueous", "Nitrous-Acid", formula, "HNO2");
+		}
+		else if (formula == "HPO4 2- (aq)")
+		{
+			this->Register(-2, -1292100.0, -33.4, -1089300.0, true, true, "Aqueous", "Hydrogen-phosphate", formula, "HPO4");
+		}
+		else if (formula == "H2PO4 - (aq)")
+		{
+			this->Register(-1, -1296300.0, 90.4, -1130400.0, true, true, "Aqueous", "DiHydrogen-phosphate", formula, "H2PO4");
+		}
+		else if (formula == "H3PO4 (aq)")
+		{
+			this->Register(0, -1288300.0, 158.0, -1142600.0, true, true, "Aqueous", "Phosphoric-Acid", formula, "H3PO4");
+		}
+		else if (formula == "H2S (g)")
+		{
+			this->Register(0, -20630.0, 205.7, -33560.0, true, true, "Gas", "Hydrogen-sulfide", formula, "H2S");
+		}
+		else if (formula == "H2S (aq)")
+		{
+			this->Register(0, -39750.0, 121.3, -27870.0, true, true, "Aqueous", "Hydrogen-sulfide", formula, "H2S");
+		}
+		else if (formula == "HS - (aq)")
+		{
+			this->Register(-1, -17600.0, 62.8, 12050.0, true, true, "Aqueous", "Bisulfide", formula, "HS");
+		}
+		else if (formula == "HSO3 - (aq)")
+		{
+			this->Register(-1, -626200.0, 140.0, -527800.0, true, true, "Aqueous", "Hydrogen-sulfite", formula, "HSO3");
+		}
+		else if (formula == "H2SO3 (aq)")
+		{
+			this->Register(0, -608800.0, 232.0, -537900.0, true, true, "Aqueous", "Sulfurous-Acid", formula, "H2SO3");
+		}
+		else if (formula == "HSO4 - (aq)")
+		{
+			this->Register(-1, -887300.0, 132.0, -756000.0, true, true, "Aqueous", "Hydrogen-sulfate", formula, "HSO4");
+		}
+		else if (formula == "H2SO4 (aq)")
+		{
+			this->Register(0, -814000.0, 157.0, 0.0, true, false, "Aqueous", "Sulfuric-Acid", formula, "H2SO4");
+		}
+		else if (formula == "HSeO3 - (aq)")
+		{
+			this->Register(-1, -514500.0, 135.0, -431500.0, true, true, "Aqueous", "Hydrogen-selenite", formula, "HSeO3");
+		}
+		else if (formula == "H2SeO3 (aq)")
+		{
+			this->Register(0, -507500.0, 208.0, -426200.0, true, true, "Aqueous", "Selenous-Acid", formula, "H2SeO3");
+		}
+		else if (formula == "HSeO4 - (aq)")
+		{
+			this->Register(-1, -581600.0, 149.0, -452300.0, true, true, "Aqueous", "Hydrogen-selenate", formula, "HSeO4");
+		}
+		else if (formula == "H4SiO4 (aq)")
+		{
+			this->Register(0, -1468600.0, 180.0, -1316700.0, true, true, "Aqueous", "Silicic-Acid", formula, "H4SiO4");
+		}
 		else
 		{
 			mError(unregistered_name); return;
@@ -907,7 +975,34 @@ void Molecule::Register(std::string formula)
 	else if (first == 'I')
 	{
 		//List of molecules starting with I
-		mError(unregistered_name); return;
+		if (formula == "I2 (s)")
+		{
+			this->Register(0, 0.0, 116.0, 0.0, true, true, "Solid", "Iodine", formula, "I2");
+		}
+		else if (formula == "I2 (aq)")
+		{
+			this->Register(0, 22600.0, 137.0, 16400.0, true, true, "Aqueous", "Iodine", formula, "I2");
+		}
+		else if (formula == "I - (aq)")
+		{
+			this->Register(-1, -55190.0, 111.0, -51590.0, true, true, "Aqueous", "Iodide", formula, "I");
+		}
+		else if (formula == "I3 - (aq)")
+		{
+			this->Register(-1, -51500.0, 239.0, -51500.0, true, true, "Aqueous", "TriIodide", formula, "I3");
+		}
+		else if (formula == "IO - (aq)")
+		{
+			this->Register(-1, -107500.0, -5.4, -38500.0, true, true, "Aqueous", "Hypoiodite", formula, "IO");
+		}
+		else if (formula == "IO3 - (aq)")
+		{
+			this->Register(-1, -221300.0, 118.0, -128000.0, true, true, "Aqueous", "Iodite", formula, "IO3");
+		}
+		else
+		{
+			mError(unregistered_name); return;
+		}
 	}
 	else if (first == 'J')
 	{
@@ -936,11 +1031,63 @@ void Molecule::Register(std::string formula)
 		//List of molecules starting with M
 		if (formula == "Mg(OH)2 (aq)")
 		{
-			this->Register(0, -744700.0, 64.0, -769400.0, true, true, "Aqueous", "Magnesium-hydroxide", formula, "MgO2H2");
+			this->Register(0, -962800.0, -149.0, -769400.0, true, true, "Aqueous", "Magnesium-dihydroxide", formula, "MgO2H2");
 		}
 		else if (formula == "Mg5Al2Si3O10(OH)8 (s)")
 		{
 			this->Register(0, 0.0, 0.0, -1962000.0, false, true, "Solid", "Chlorite", formula, "Mg5Al2Si3O18H8");
+		}
+		else if (formula == "Mg (s)")
+		{
+			this->Register(0, 0.0, 32.7, 0.0, true, true, "Solid", "Magnesium", formula, "Mg");
+		}
+		else if (formula == "Mg 2+ (aq)")
+		{
+			this->Register(2, -466800.0, -138.0, -454800.0, true, true, "Aqueous", "Magnesium", formula, "Mg");
+		}
+		else if (formula == "MgOH + (aq)")
+		{
+			this->Register(1, 0.0, 0.0, -626800.0, false, true, "Aqueous", "Magnesium-hydroxide", formula, "MgOH");
+		}
+		else if (formula == "Mg(OH)2 (s)")
+		{
+			this->Register(0, -924500.0, 63.2, -833500.0, true, true, "Solid", "Brucite", formula, "MgO2H2");
+		}
+		else if (formula == "Mn (s)")
+		{
+			this->Register(0, 0.0, 32.0, 0.0, true, true, "Solid", "Manganese", formula, "Mn");
+		}
+		else if (formula == "Mn 2+ (aq)")
+		{
+			this->Register(2, -220700.0, -73.6, -228000.0, true, true, "Aqueous", "Manganese", formula, "Mn");
+		}
+		else if (formula == "Mn(OH)2 (s)")
+		{
+			this->Register(0, 0.0, 0.0, -616000.0, false, true, "Solid", "Manganese-dihydroxide", formula, "MnO2H2");
+		}
+		else if (formula == "Mn3O4 (s)")
+		{
+			this->Register(0, 0.0, 0.0, -1281000.0, false, true, "Solid", "Hausmannite", formula, "Mn3O4");
+		}
+		else if (formula == "MnOOH (s)")
+		{
+			this->Register(0, 0.0, 0.0, -557700.0, false, true, "Solid", "Manganite", formula, "MnOOH");
+		}
+		else if (formula == "MnO2 (s)")
+		{
+			this->Register(0, -520000.0, 53.0, -465100.0, true, true, "Solid", "Pyrolusite", formula, "MnO2");
+		}
+		else if (formula == "MnCO3 (s)")
+		{
+			this->Register(0, -889300.0, 100.0, -816000.0, true, true, "Solid", "Rhodochrosite", formula, "MnCO3");
+		}
+		else if (formula == "MnS (s)")
+		{
+			this->Register(0, -213800.0, 87.0, -218100.0, true, true, "Solid", "Albandite", formula, "MnS");
+		}
+		else if (formula == "MnSiO3 (s)")
+		{
+			this->Register(0, -1319000.0, 131.0, -1243000.0, true, true, "Solid", "Rhodonite", formula, "MnSiO3");
 		}
 		else
 		{
@@ -984,7 +1131,7 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "NH3 (aq)")
 		{
-			this->Register(0,0.0,193.0,-26570.0,false,true,"Aqueous","Ammonia",formula,"NH3");
+			this->Register(0, -80290.0, 111.0, -26570.0, true, true, "Aqueous", "Ammonia", formula, "NH3");
 		}
 		else if (formula == "NaAlSiO3O8 (s)")
 		{
@@ -998,6 +1145,38 @@ void Molecule::Register(std::string formula)
 		{
 			this->Register(-1, -469800.0, 119.0, -315000.0, true, true, "Aqueous", "Glycinate", formula, "NH2CH2COO");
 		}
+		else if (formula == "N2 (g)")
+		{
+			this->Register(0, 0.0, 191.5, 0.0, true, true, "Gas", "Nitrogen", formula, "N2");
+		}
+		else if (formula == "N2O (g)")
+		{
+			this->Register(0, 82000.0, 220.0, 104200.0, true, true, "Gas", "Nitrous-oxide", formula, "N2O");
+		}
+		else if (formula == "NH3 (g)")
+		{
+			this->Register(0, -46100.0, 192.0, -16480.0, true, true, "Gas", "Ammonia", formula, "NH3");
+		}
+		else if (formula == "NH4 + (aq)")
+		{
+			this->Register(1, -132500.0, 113.4, -79370.0, true, true, "Aqueous", "Ammonium", formula, "NH4");
+		}
+		else if (formula == "NO2 - (aq)")
+		{
+			this->Register(-1, -104600.0, 140.0, -37200.0, true, true, "Aqueous", "Nitrite", formula, "NO2");
+		}
+		else if (formula == "Ni 2+ (aq)")
+		{
+			this->Register(2, -54000.0, -129.0, -45600.0, true, true, "Aqueous", "Nickel", formula, "Ni");
+		}
+		else if (formula == "NiO (s)")
+		{
+			this->Register(0, -239700.0, 38.0, -211600.0, true, true, "Solid", "Bunsenite", formula, "NiO");
+		}
+		else if (formula == "NiS (s)")
+		{
+			this->Register(0, -84900.0, 66.0, -86200.0, true, true, "Solid", "Millerite", formula, "NiS");
+		}
 		else
 		{
 			mError(unregistered_name); return;
@@ -1010,6 +1189,18 @@ void Molecule::Register(std::string formula)
 		{
 			this->Register(-1,-230000.0,-10.75,-157300.0,true,true,"Aqueous","Hydroxide","OH - (aq)","OH");
 		}
+		else if (formula == "O2 (g)")
+		{
+			this->Register(0, 0.0, 205.0, -86200.0, true, true, "Gas", "Oxygen", formula, "O2");
+		}
+		else if (formula == "O2 (aq)")
+		{
+			this->Register(0, -11710.0, 111.0, 16320.0, true, true, "Aqueous", "Oxygen", formula, "O2");
+		}
+		else if (formula == "O3 (g)")
+		{
+			this->Register(0, 142700.0, 239.0, 163200.0, true, true, "Gas", "Ozone", formula, "O3");
+		}
 		else
 		{
 			mError(unregistered_name); return;
@@ -1018,7 +1209,62 @@ void Molecule::Register(std::string formula)
 	else if (first == 'P')
 	{
 		//List of molecules starting with P
-		mError(unregistered_name); return;
+		if (formula == "P (s)")
+		{
+			this->Register(0, 0.0, 41.1, 0.0, true, true, "Solid", "Phosphorus", formula, "P");
+		}
+		else if (formula == "PO4 3- (aq)")
+		{
+			this->Register(-3, -1277400.0, -222.0, -1018800.0, true, true, "Aqueous", "Phosphate", formula, "PO4");
+		}
+		else if (formula == "Pb (s)")
+		{
+			this->Register(0, 0.0, 64.8, 0.0, true, true, "Solid", "Lead", formula, "Pb");
+		}
+		else if (formula == "Pb 2+ (aq)")
+		{
+			this->Register(2, -1670.0, 10.5, -24390.0, true, true, "Aqueous", "Lead", formula, "Pb");
+		}
+		else if (formula == "PbOH + (aq)")
+		{
+			this->Register(1, 0.0, 0.0, -226300.0, false, true, "Aqueous", "Lead-hydroxide", formula, "PbOH");
+		}
+		else if (formula == "Pb(OH)3 - (aq)")
+		{
+			this->Register(-1, 0.0, 0.0, -575700.0, false, true, "Aqueous", "Lead-trihydroxide", formula, "PbO3H3");
+		}
+		else if (formula == "Pb(OH)2 (s)")
+		{
+			this->Register(0, 0.0, 0.0, -452200.0, false, true, "Solid", "Lead-dihydroxide", formula, "PbO2H2");
+		}
+		else if (formula == "PbO (s)")
+		{
+			this->Register(0, -217300.0, 68.7, -187900.0, true, true, "Solid", "Lead-oxide", formula, "PbO");
+		}
+		else if (formula == "PbO2 (s)")
+		{
+			this->Register(0, -277400.0, 68.6, -217400.0, true, true, "Solid", "Lead-dioxide", formula, "PbO2");
+		}
+		else if (formula == "Pb3O4 (s)")
+		{
+			this->Register(0, -718400.0, 211.0, -601200.0, true, true, "Solid", "Lead-oxide", formula, "Pb3O4");
+		}
+		else if (formula == "PbS (s)")
+		{
+			this->Register(0, -100400.0, 91.2, -98700.0, true, true, "Solid", "Lead-sulfide", formula, "PbS");
+		}
+		else if (formula == "PbSO4 (s)")
+		{
+			this->Register(0, -920000.0, 149.0, -813200.0, true, true, "Solid", "Lead-sulfate", formula, "PbSO4");
+		}
+		else if (formula == "PbCO3 (s)")
+		{
+			this->Register(0, -699100.0, 131.0, -625500.0, true, true, "Solid", "Cerussite", formula, "PbCO3");
+		}
+		else
+		{
+			mError(unregistered_name); return;
+		}
 	}
 	else if (first == 'Q')
 	{
@@ -1033,7 +1279,70 @@ void Molecule::Register(std::string formula)
 	else if (first == 'S')
 	{
 		//List of molecules starting with S
-		mError(unregistered_name); return;
+		if (formula == "S (s)")
+		{
+			this->Register(0, 0.0, 31.8, 0.0, true, true, "Solid", "Sulfur", formula, "S");
+		}
+		else if (formula == "SO2 (g)")
+		{
+			this->Register(0, -296800.0, 248.0, -300200.0, true, true, "Gas", "Sulfur-dioxide", formula, "SO2");
+		}
+		else if (formula == "SO3 (g)")
+		{
+			this->Register(0, -395700.0, 257.0, -371100.0, true, true, "Gas", "Sulfur-trioxide", formula, "SO3");
+		}
+		else if (formula == "S 2- (aq)")
+		{
+			this->Register(-2, 33000.0, -14.6, 85800.0, true, true, "Aqueous", "Sulfide", formula, "S");
+		}
+		else if (formula == "SO3 2- (aq)")
+		{
+			this->Register(-2, -635500.0, -29.0, -486600.0, true, true, "Aqueous", "Sulfite", formula, "SO3");
+		}
+		else if (formula == "SO4 2- (aq)")
+		{
+			this->Register(-2, -909200.0, 20.1, -744600.0, true, true, "Aqueous", "Sulfate", formula, "SO3");
+		}
+		else if (formula == "Se (s)")
+		{
+			this->Register(0, 0.0, 42.4, 0.0, true, true, "Solid", "Selenium", formula, "Se");
+		}
+		else if (formula == "SeO3 2- (aq)")
+		{
+			this->Register(-2, -509200.0, 12.6, -369900.0, true, true, "Aqueous", "Selenite", formula, "SeO3");
+		}
+		else if (formula == "SeO4 2- (aq)")
+		{
+			this->Register(-2, -599100.0, 54.0, -441400.0, true, true, "Aqueous", "Selenate", formula, "SeO4");
+		}
+		else if (formula == "Si (s)")
+		{
+			this->Register(0, 0.0, 18.8, 0.0, true, true, "Solid", "Silicon", formula, "Si");
+		}
+		else if (formula == "SiO2 (s)")
+		{
+			this->Register(0, -903490.0, 46.9, -850730.0, true, true, "Solid", "Silicon-dioxide", formula, "SiO2");
+		}
+		else if (formula == "Sr 2+ (aq)")
+		{
+			this->Register(2, -545800.0, -33.0, -559400.0, true, true, "Aqueous", "Strontium", formula, "Sr");
+		}
+		else if (formula == "SrOH + (aq)")
+		{
+			this->Register(1, 0.0, 0.0, -721000.0, false, true, "Aqueous", "Strontium-hydroxide", formula, "SrOH");
+		}
+		else if (formula == "SrCO3 (s)")
+		{
+			this->Register(0, -1218700.0, 97.0, -1137600.0, true, true, "Solid", "Strontianite", formula, "SrCO3");
+		}
+		else if (formula == "SrSO4 (s)")
+		{
+			this->Register(0, -1453200.0, 118.0, -1341000.0, true, true, "Solid", "Celestite", formula, "SrSO4");
+		}
+		else
+		{
+			mError(unregistered_name); return;
+		}
 	}
 	else if (first == 'T')
 	{
