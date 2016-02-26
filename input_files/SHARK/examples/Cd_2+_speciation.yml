@@ -1,0 +1,97 @@
+# This will serve as a test input file for shark to demo how to structure the document
+
+Scenario:
+---
+- vars_fun:
+  numvar: 8
+  num_ssr: 5
+  num_mbe: 2
+
+- sys_data:
+  act_fun: davies    
+  const_pH: false	
+  temp: 298.15      
+
+- run_time:
+  steady: true         
+  specs_curve: true    
+...
+
+SolverOptions:
+---
+line_search: true      
+search_type: standard
+linear_solve: fom      
+nl_print: true
+
+...
+
+MasterSpecies:
+---
+- reg:
+  0: Cd 2+ (aq)
+  1: Cd(OH) + (aq)
+  2: Cd(OH)2 (aq)
+  3: Cd(OH)3 - (aq)
+  4: Cd(OH)4 2- (aq)
+  5: H2O (l)
+  6: H + (aq)
+  7: OH - (aq)
+
+...
+
+MassBalance:
+---
+- water:
+  total_conc: 1
+  - delta: 
+    "H2O (l)": 1
+
+- cadmium:
+  total_conc: 1e-4
+  - delta: 
+    "Cd 2+ (aq)": 1
+    "Cd(OH) + (aq)": 1 
+    "Cd(OH)2 (aq)": 1 
+    "Cd(OH)3 - (aq)": 1
+    "Cd(OH)4 2- (aq)": 1
+
+...
+
+EquilRxn:
+---
+- rxn00:
+  - stoichiometry:
+    "H2O (l)": -1
+    "OH - (aq)": 1
+    "H + (aq)": 1
+
+- rxn01:
+  - stoichiometry:
+    "Cd 2+ (aq)": -1
+    "H2O (l)": -1
+    "Cd(OH) + (aq)": 1
+    "H + (aq)": 1
+
+- rxn02:
+  - stoichiometry:
+    "Cd(OH) + (aq)": -1
+    "H2O (l)": -1
+    "Cd(OH)2 (aq)": 1
+    "H + (aq)": 1
+
+- rxn03:
+  - stoichiometry:
+    "Cd(OH)2 (aq)": -1
+    "H2O (l)": -1
+    "Cd(OH)3 - (aq)": 1
+    "H + (aq)": 1
+
+- rxn04:
+  - stoichiometry:
+    "Cd(OH)3 - (aq)": -1
+    "H2O (l)": -1
+    "Cd(OH)4 2- (aq)": 1
+    "H + (aq)": 1
+
+...
