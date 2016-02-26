@@ -477,19 +477,19 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "Cd(OH) + (aq)")
 		{
-			this->Register(1, 0.0, 0.0, -284500.0, false, true, "Aqueous", "Cadmium-hydroxide", formula, "CdOH");
+			this->Register(1, 0.0, 0.0, -44450.0, false, true, "Aqueous", "Cadmium-hydroxide", formula, "CdOH"); // --- FALSE ----
 		}
 		else if (formula == "Cd(OH)3 - (aq)")
 		{
-			this->Register(-1, 0.0, 0.0, -600800.0, false, true, "Aqueous", "Cadmium-trihydroxide", formula, "CdO3H3");
+			this->Register(-1, 0.0, 0.0, -7008.0, false, true, "Aqueous", "Cadmium-trihydroxide", formula, "CdO3H3"); // --- FALSE ----
 		}
 		else if (formula == "Cd(OH)4 2- (aq)")
 		{
-			this->Register(-2, 0.0, 0.0, -758500.0, false, true, "Aqueous", "Cadmium-tetrahydroxide", formula, "CdO4H4");
+			this->Register(-2, 0.0, 0.0, 7585.0, false, true, "Aqueous", "Cadmium-tetrahydroxide", formula, "CdO4H4"); // --- FALSE ----
 		}
 		else if (formula == "Cd(OH)2 (aq)")
 		{
-			this->Register(0, 0.0, 0.0, -392200.0, false, true, "Aqueous", "Cadmium-dihydroxide", formula, "CdO2H2");
+			this->Register(0, 0.0, 0.0, 3922.0, false, true, "Aqueous", "Cadmium-dihydroxide", formula, "CdO2H2"); // --- FALSE ----
 		}
 		else if (formula == "CdO (s)")
 		{
