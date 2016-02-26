@@ -1354,82 +1354,66 @@ void Molecule::Register(std::string formula)
 		//List of molecules starting with U
 		if (formula == "UO2 2+ (aq)")
 		{
-			//Note: Information is incomplete
 			this->Register(2,-1019000.0,-98.2,-952551.0,true,true,"Aqueous","Uranyl","UO2 2+ (aq)","UO2");
 		}
 		else if (formula == "UO2NO3 + (aq)")
 		{
-			//Note: Information is incomplete
-			this->Register(1,0.0,0.0,-1065557.0,false,true,"Aqueous","Uranyl-nitrate",formula,"UO2NO3");//-----------
+			this->Register(1,0.0,0.0,-1065557.0,false,true,"Aqueous","Uranyl-nitrate",formula,"UO2NO3");
 		}
 		else if (formula == "UO2(NO3)2 (aq)")
 		{
-			//Note: Information is incomplete
 			this->Register(0,0.0,0.0,-1105803.0,false,true,"Aqueous","Uranyl-dinitrate",formula,"UO2N2O6");
 		}
 		else if (formula == "UO2OH + (aq)")
 		{
-			//Note: Information is incomplete
 			this->Register(1,-1261371.0,17.0,-1159724.0,true,true,"Aqueous","Uranyl-hydroxide",formula,"UO2OH");
 		}
 		else if (formula == "UO2(OH)2 (aq)")
 		{
-			//Note: Information is incomplete
 			this->Register(0,0,0,-1357479.0,false,true,"Aqueous","Uranyl-dihydroxide",formula,"UO2O2H2");
 		}
 		else if (formula == "UO2(OH)3 - (aq)")
 		{
-			//Note: Information is incomplete
 			this->Register(-1,0.0,0.0,-908303.0,false,true,"Aqueous","Uranyl-trihydroxide",formula,"UO2O3H3");
 		}
 		else if (formula == "UO2(OH)4 2- (aq)")
 		{
-			//Note: Information is incomplete
 			this->Register(-2,0.0,0.0,-1716171.0,false,true,"Aqueous","Uranyl-tetrahydroxide",formula,"UO2O4H4");
 		}
 		else if (formula == "(UO2)2OH 3+ (aq)")
 		{
-			//Note: Information is incomplete
 			this->Register(3,0.0,0.0,-2126830.0,false,true,"Aqueous","Diuranyl-hydroxide",formula,"U2O4OH");
 		}
 		else if (formula == "(UO2)2(OH)2 2+ (aq)")
 		{
-			//Note: Information is incomplete
 			this->Register(2,-2572065.0,-38.0,-2347303.0,true,true,"Aqueous","Diuranyl-dihydroxide",formula,"U2O4O2H2");
 		}
 		else if (formula == "(UO2)3(OH)4 2+ (aq)")
 		{
-			//Note: Information is incomplete
 			this->Register(2,0.0,0.0,-3738288.0,false,true,"Aqueous","Triuranyl-tetrahydroxide",formula,"U3O6O4H4");
 		}
 		else if (formula == "(UO2)3(OH)5 + (aq)")
 		{
-			//Note: Information is incomplete
 			this->Register(1,-4389086.0,83.0,-3954594.0,true,true,"Aqueous","Triuranyl-pentahydroxide",formula,"U3O6O5H5");
 		}
 		else if (formula == "(UO2)3(OH)7 - (aq)")
 		{
-			//Note: Information is incomplete
 			this->Register(-1,0,0,-4333835.0,false,true,"Aqueous","Triuranyl-heptahydroxide",formula,"U3O6O7H7");
 		}
 		else if (formula == "(UO2)4(OH)7 + (aq)")
 		{
-			//Note: Information is incomplete
 			this->Register(1,0,0,-5345179.0,false,true,"Aqueous","Tetrauranyl-heptahydroxide",formula,"U4O8O7H7");
 		}
 		else if (formula == "UO2CO3 (aq)")
 		{
-			//Note: Information is incomplete
 			this->Register(0,-1689230.0,58.870,-1537188.0,true,true,"Aqueous","Uranyl-carbonate",formula,"UO2CO3");
 		}
 		else if (formula == "UO2(CO3)2 2- (aq)")
 		{
-			//Note: Information is incomplete
 			this->Register(-2,-2350960.0,181.846,-2103161.0,true,true,"Aqueous","Uranyl-dicarbonate",formula,"UO2C2O6");
 		}
 		else if (formula == "UO2(CO3)3 4- (aq)")
 		{
-			//Note: Information is incomplete
 			this->Register(-4,-3083890.0,38.446,-2660914.0,true,true,"Aqueous","Uranyl-tricarbonate","UO2(CO3)3 4- (aq)","UO2C3O9");
 		}
 		else
@@ -1460,7 +1444,58 @@ void Molecule::Register(std::string formula)
 	else if (first == 'Z')
 	{
 		//List of molecules starting with Z
-		mError(unregistered_name); return;
+		if (formula == "Zn (s)")
+		{
+			this->Register(0, 0.0, 29.3, 0.0, true, true, "Solid", "Zinc", formula, "Zn");
+		}
+		else if (formula == "Zn 2+ (aq)")
+		{
+			this->Register(2, -153900.0, 112.0, -147000.0, true, true, "Aqueous", "Zinc", formula, "Zn");
+		}
+		else if (formula == "ZnOH + (aq)")
+		{
+			this->Register(1, 0.0, 0.0, -330100.0, false, true, "Aqueous", "Zinc-hydroxide", formula, "ZnOH");
+		}
+		else if (formula == "Zn(OH)2 (aq)")
+		{
+			this->Register(0, 0.0, 0.0, -522300.0, false, true, "Aqueous", "Zinc-dihydroxide", formula, "ZnO2H2");
+		}
+		else if (formula == "Zn(OH)3 - (aq)")
+		{
+			this->Register(-1, 0.0, 0.0, -694300.0, false, true, "Aqueous", "Zinc-trihydroxide", formula, "ZnO3H3");
+		}
+		else if (formula == "Zn(OH)4 2- (aq)")
+		{
+			this->Register(-2, 0.0, 0.0, -858700.0, false, true, "Aqueous", "Zinc-tetrahydroxide", formula, "ZnO4H4");
+		}
+		else if (formula == "Zn(OH)2 (s)")
+		{
+			this->Register(0, -641900.0, 81.2, -553200.0, true, true, "Solid", "Zinc-dihydroxide", formula, "ZnO2H2");
+		}
+		else if (formula == "ZnCl + (aq)")
+		{
+			this->Register(1, 0.0, 0.0, -275300.0, false, true, "Aqueous", "Zinc-chloride", formula, "ZnCl");
+		}
+		else if (formula == "ZnCl2 (aq)")
+		{
+			this->Register(0, 0.0, 0.0, -403800.0, false, true, "Aqueous", "Zinc-dichloride", formula, "ZnCl2");
+		}
+		else if (formula == "ZnCl3 - (aq)")
+		{
+			this->Register(-1, 0.0, 0.0, -540600.0, false, true, "Aqueous", "Zinc-trichloride", formula, "ZnCl3");
+		}
+		else if (formula == "ZnCl4 2- (aq)")
+		{
+			this->Register(-2, 0.0, 0.0, -666100.0, false, true, "Aqueous", "Zinc-tetrachloride", formula, "ZnCl4");
+		}
+		else if (formula == "ZnCO3 (s)")
+		{
+			this->Register(0, -812800.0, 82.4, -731600.0, true, true, "Solid", "Smithsonite", formula, "ZnCO3");
+		}
+		else
+		{
+			mError(unregistered_name); return;
+		}
 	}
 	else {mError(unregistered_name); return;}
 	this->registered = true;

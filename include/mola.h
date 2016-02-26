@@ -26,21 +26,262 @@
  *
  *			List of Currently Registered Molecules
  *			--------------------------------------
+ *			Ag (s) \n
+ *			Ag + (aq) \n
+ *			AgBr (s) \n
+ *			AgCl (s) \n
+ *			AgI (s) \n
+ *			Ag2S (s) \n
+ *			AgOH (aq) \n
+ *			Ag(OH)2 - (aq) \n
+ *			AgCl (aq) \n
+ *			AgCl2 - (aq) \n
+ *			Al (s) \n
+ *			Al 3+ (aq) \n
+ *			AlOH 2+ (aq) \n
+ *			Al(OH)2 + (aq) \n
+ *			Al(OH)3 (aq) \n
+ *			Al(OH)4 - (aq) \n
+ *			Al2O3 (s) \n
+ *			AlOOH (s) \n
+ *			Al(OH)3 (s) \n
+ *			Al2Si2(OH)4 (s) \n
+ *			As (s) \n
+ *			AsO4 3- (aq) \n
+ *			
+ *			Ba 2+ (aq) \n
+ *			BaSO4 (s) \n
+ *			BaCO3 (s) \n
+ *			Be 2+ (aq) \n
+ *			Be(OH)2 (s) \n
+ *			Be3(OH)3 3+ (aq) \n
+ *			B(OH)4 - (aq) \n
+ *			Br2 (l) \n
+ *			Br2 (aq) \n
+ *			Br - (aq) \n
+ *			BrO - (aq) \n
+ *
  *			CO3 2- (aq) \n
  *			Cl - (aq) \n
+ *			CaCl2 (aq) \n
+ *			CaAl2Si2O8 (s) \n
+ *			C (s) \n
+ *			CO2 (g) \n
+ *			CH4 (g) \n
+ *			CH4 (aq) \n
+ *			CH3OH (aq) \n
+ *			CN - (aq) \n
+ *			CH3COOH (aq) \n
+ *			CH3COO - (aq) \n
+ *			C2H5OH (aq) \n
+ *			Ca 2+ (aq) \n
+ *			CaOH + (aq) \n
+ *			Ca(OH)2 (aq) \n
+ *			Ca(OH)2 (s) \n
+ *			CaCO3 (s) \n
+ *			CaMg(CO3)2 (s) \n
+ *			CaSiO3 (s) \n
+ *			CaSO4 (s) \n
+ *			CaSO4(H2O)2 (s) \n
+ *			Ca5(PO4)3OH (s) \n
+ *			Cd 2+ (aq) \n
+ *			Cd(OH) + (aq) \n
+ *			Cd(OH)3 - (aq) \n
+ *			Cd(OH)4 2- (aq) \n
+ *			Cd(OH)2 (aq) \n
+ *			CdO (s) \n
+ *			Cd(OH)2 (s) \n
+ *			CdCl + (aq) \n
+ *			CdCl2 (aq) \n
+ *			CdCl3 - (aq) \n
+ *			CdCO3 (s) \n
+ *			Cl2 (g) \n
+ *			Cl2 (aq) \n
+ *			ClO - (aq) \n
+ *			ClO2 (aq) \n
+ *			ClO2 - (aq) \n
+ *			ClO3 - (aq) \n
+ *			ClO4 (aq) \n
+ *			Co (s) \n
+ *			Co 2+ (aq) \n
+ *			Co 3+ (aq) \n
+ *			Co(OH)2 (aq) \n
+ *			Co(OH)2 (s) \n
+ *			CoO (s) \n
+ *			Co3O4 (s) \n
+ *			Cr (s) \n
+ *			Cr 2+ (aq) \n
+ *			Cr 3+ (aq) \n
+ *			Cr2O3 (s) \n
+ *			CrO4 2- (aq) \n
+ *			Cr2O7 2- (aq) \n
+ *			Cu (s) \n
+ *			Cu + (aq) \n
+ *			Cu 2+ (aq) \n
+ *			Cu(OH)2 (aq) \n
+ *			CuS (s) \n
+ *			Cu2S (s) \n
+ *			CuO (s) \n
+ *			CuCO3Cu(OH)2 (s) \n
+ *			(CuCO3)2Cu(OH)2 (s) \n
+ *			
+ *			F2 (g) \n
+ *			F - (aq) \n
+ *			Fe (s) \n
+ *			Fe 2+ (aq) \n
+ *			FeOH + (aq) \n
+ *			Fe 3+ (aq) \n
+ *			FeOH 2+ (aq) \n
+ *			Fe(OH)2 + (aq) \n
+ *			Fe(OH)4 - (aq) \n
+ *			Fe2(OH)2 4+ (aq) \n
+ *			FeS2 (s) \n
+ *			FeO (s) \n
+ *			Fe(OH)2 (s) \n
+ *			Fe2O3 (s) \n
+ *			Fe3O4 (s) \n
+ *			FeOOH (s) \n
+ *			Fe(OH)3 (s) \n
+ *			FeCO3 (s) \n
+ *			Fe2SiO4 (s) \n
+ *
  *			H2O (l) \n
  *			H + (aq) \n
  *			H2CO3 (aq) \n
  *			HCO3 - (aq) \n
  *			HNO3 (aq) \n
  *			HCl (aq) \n
+ *			H3AsO4 (aq) \n
+ *			H2AsO4 - (aq) \n
+ *			HAsO4 2- (aq) \n
+ *			H2AsO3 - (aq) \n
+ *			H3BO3 (aq) \n
+ *			HBrO (aq) \n
+ *			HCOOH (aq) \n
+ *			HCOO - (aq) \n
+ *			HCN (aq) \n
+ *			HClO (aq) \n
+ *			HCoO2 - (aq) \n
+ *			HCrO4 - (aq) \n
+ *			HCuO2 - (aq) \n
+ *			HF (aq) \n
+ *			HF2 - (aq) \n
+ *			H2 (g) \n
+ *			H2 (aq) \n
+ *			H2O2 (aq) \n
+ *			HO2 - (aq) \n
+ *			H2O (g) \n
+ *			Hg (l) \n
+ *			Hg2 2+ (aq) \n
+ *			Hg 2+ (aq) \n
+ *			Hg2Cl2 (s) \n
+ *			HgO (s) \n
+ *			HgS (s) \n
+ *			HgI2 (s) \n
+ *			HgCl + (aq) \n
+ *			HgCl2 (aq) \n
+ *			HgCl3 - (aq) \n
+ *			HgCl4 2- (aq) \n
+ *			HgOH + (aq) \n
+ *			Hg(OH)2 (aq) \n
+ *			HgO2 - (aq) \n
+ *			HIO (aq) \n
+ *			HIO3 (aq) \n
+ *			HNO2 (aq) \n
+ *			HPO4 2- (aq) \n
+ *			H2PO4 - (aq) \n
+ *			H3PO4 (aq) \n
+ *			H2S (g) \n
+ *			H2S (aq) \n
+ *			HS - (aq) \n
+ *			HSO3 - (aq) \n
+ *			H2SO3 (aq) \n
+ *			HSO4 - (aq) \n
+ *			H2SO4 (aq) \n
+ *			HSeO3 - (aq) \n
+ *			H2SeO3 (aq) \n
+ *			HSeO4 - (aq) \n
+ *			H4SiO4 (aq) \n
+ *			
+ *			I2 (s) \n
+ *			I2 (aq) \n
+ *			I - (aq) \n
+ *			I3 - (aq) \n
+ *			IO - (aq) \n
+ *			IO3 - (aq) \n
+ *
+ *			KAl3Si3O10(OH)2 (s) \n
+ *
+ *			Mg(OH)2 (aq) \n
+ *			Mg5Al2Si3O10(OH)8 (s) \n
+ *			Mg (s) \n
+ *			Mg 2+ (aq) \n
+ *			MgOH + (aq) \n
+ *			Mg(OH)2 (s) \n
+ *			Mn (s) \n
+ *			Mn 2+ (aq) \n
+ *			Mn(OH)2 (s) \n
+ *			Mn3O4 (s) \n
+ *			MnOOH (s) \n
+ *			MnO2 (s) \n
+ *			MnCO3 (s) \n
+ *			MnS (s) \n
+ *			MnSiO3 (s) \n
+ *
  *			NaHCO3 (aq) \n
  *			NaCO3 - (aq) \n
  *			Na + (aq) \n
  *			NaCl (aq) \n
  *			NaOH (aq) \n
  *			NO3 - (aq) \n
+ *			NH3 (aq) \n
+ *			NaAlSiO3O8 (s) \n
+ *			NH2CH2COOH (aq) \n
+ *			NH2CH2COO - (aq) \n
+ *			N2 (g) \n
+ *			N2O (g) \n
+ *			NH3 (g) \n
+ *			NH4 + (aq) \n
+ *			NO2 - (aq) \n
+ *			Ni 2+ (aq) \n
+ *			NiO (s) \n
+ *			NiS (s) \n
+ *
  *			OH - (aq) \n
+ *			O2 (g) \n
+ *			O2 (aq) \n
+ *			O3 (g) \n
+ *
+ *			P (s) \n
+ *			PO4 3- (aq) \n
+ *			Pb (s) \n
+ *			Pb 2+ (aq) \n
+ *			PbOH + (aq) \n
+ *			Pb(OH)3 - (aq) \n
+ *			Pb(OH)2 (s) \n
+ *			PbO (s) \n
+ *			PbO2 (s) \n
+ *			Pb3O4 (s) \n
+ *			PbS (s) \n
+ *			PbSO4 (s) \n
+ *			PbCO3 (s) \n
+ *			
+ *			S (s) \n
+ *			SO2 (g) \n
+ *			SO3 (g) \n
+ *			S 2- (aq) \n
+ *			SO3 2- (aq) \n
+ *			SO4 2- (aq) \n
+ *			Se (s) \n
+ *			SeO3 2- (aq) \n
+ *			SeO4 2- (aq) \n
+ *			Si (s) \n
+ *			SiO2 (s) \n
+ *			Sr 2+ (aq) \n
+ *			SrOH + (aq) \n
+ *			SrCO3 (s) \n
+ *			SrSO4 (s) \n
+ *
  *			UO2 2+ (aq) \n
  *			UO2NO3 + (aq) \n
  *			UO2(NO3)2 (aq) \n
@@ -57,6 +298,19 @@
  *			UO2CO3 (aq) \n
  *			UO2(CO3)2 2- (aq) \n
  *			UO2(CO3)3 4- (aq) \n
+ *
+ *			Zn (s) \n
+ *			Zn 2+ (aq) \n
+ *			ZnOH + (aq) \n
+ *			Zn(OH)2 (aq) \n
+ *			Zn(OH)3 - (aq) \n
+ *			Zn(OH)4 2- (aq) \n
+ *			Zn(OH)2 (s) \n
+ *			ZnCl + (aq) \n
+ *			ZnCl2 (aq) \n
+ *			ZnCl3 - (aq) \n
+ *			ZnCl4 2- (aq) \n
+ *			ZnCO3 (s) \n
  *
  *			Those registered molecules follow a strict naming convention by which they
  *			can be recognized (see below)...

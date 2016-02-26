@@ -641,6 +641,8 @@ public:
 
 		\param x matrix of the log(C) concentration values at the current non-linear step
 		\param gama matrix of activity coefficients for each species at the current non-linear step
+		\param T temperature of the system in question (K)
+		\param rel_perm relative permittivity of the media (unitless)
 		\param i index of the reaction of interest for the adsorption object*/
 	double Eval_Residual(const Matrix<double> &x, const Matrix<double> &gama, double T, double rel_perm, int i);
 
