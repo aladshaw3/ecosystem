@@ -395,20 +395,30 @@ void Reaction::checkSpeciesEnergies()
 			{
 				HS = this->List->get_species(i).HaveHS();
 			}
-			//Check if species i has G
-			if (G == true)
-			{
-				G = this->List->get_species(i).HaveEnergy();
-			}
-			//Exit early if both are false
-			if (G == false && HS == false)
+			if (HS == false)
 				break;
 		}
 	}
 	this->HaveHS = HS;
 	this->CanCalcHS = HS;
+	
+	for (int i=0; i<this->List->list_size(); i++)
+	{
+		//Check if species is involved in reaction
+		if (this->Stoichiometric[i] != 0.0)
+		{
+			//Check if species i has G
+			if (G == true)
+			{
+				G = this->List->get_species(i).HaveEnergy();
+			}
+			if (G == false)
+				break;
+		}
+	}
 	this->HaveG = G;
 	this->CanCalcG = G;
+	
 	if (this->CanCalcHS == true || this->CanCalcG == true)
 		this->HaveEquil = true;
 }
@@ -436,8 +446,10 @@ void Reaction::calculateEnergies()
 		if (this->CanCalcG == true)
 		{
 			this->energy = this->energy + (this->Stoichiometric[i] * this->List->get_species(i).Energy());
+			std::cout << i << "\t" << this->Stoichiometric[i] << "\t" << this->List->get_species(i).Energy() << std::endl;
 		}
 	}
+	std::cout << this->energy << std::endl;
 }
 
 //Function to calculate equilibrium constant
