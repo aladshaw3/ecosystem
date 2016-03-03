@@ -1,0 +1,69 @@
+# This will serve as a test input file for shark to demo how to structure the document
+
+Scenario:
+---
+- vars_fun:
+  numvar: 5
+  num_ssr: 2
+  num_mbe: 2
+
+- sys_data:
+  act_fun: davies    
+  const_pH: false	
+  temp: 298.15      
+
+- run_time:
+  steady: true         
+  specs_curve: true    
+...
+
+SolverOptions:
+---
+line_search: true      
+search_type: standard
+linear_solve: fom      
+nl_print: true
+
+...
+
+MasterSpecies:
+---
+- reg:
+  0: B(OH)3 (aq)
+  1: B(OH)4 - (aq)
+  2: H2O (l)
+  3: H + (aq)
+  4: OH - (aq)
+
+...
+
+MassBalance:
+---
+- water:
+  total_conc: 1
+  - delta: 
+    "H2O (l)": 1
+
+- borate:
+  total_conc: 1e-4
+  - delta: 
+    "B(OH)3 (aq)": 1
+    "B(OH)4 - (aq)": 1 
+
+...
+
+EquilRxn:
+---
+- rxn00:
+  - stoichiometry:
+    "H2O (l)": -1
+    "OH - (aq)": 1
+    "H + (aq)": 1
+
+- rxn01:
+  - stoichiometry:
+    "B(OH)3 (aq)": -1
+    "OH - (aq)": -1
+    "B(OH)4 - (aq)": 1
+
+...

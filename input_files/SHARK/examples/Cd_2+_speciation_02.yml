@@ -69,29 +69,25 @@ EquilRxn:
 - rxn01:
   - stoichiometry:
     "Cd 2+ (aq)": -1
-    "H2O (l)": -1
+    "OH - (aq)": -1
     "CdOH + (aq)": 1
-    "H + (aq)": 1
 
 - rxn02:
   - stoichiometry:
-    "CdOH + (aq)": -1
-    "H2O (l)": -1
+    "Cd 2+ (aq)": -1
+    "OH - (aq)": -2
     "Cd(OH)2 (aq)": 1
-    "H + (aq)": 1
 
 - rxn03:
   - stoichiometry:
-    "Cd(OH)2 (aq)": -1
-    "H2O (l)": -1
+    "Cd 2+ (aq)": -1
+    "OH - (aq)": -3
     "Cd(OH)3 - (aq)": 1
-    "H + (aq)": 1
 
 - rxn04:
   - stoichiometry:
-    "Cd(OH)3 - (aq)": -1
-    "H2O (l)": -1
+    "Cd 2+ (aq)": -1
+    "OH - (aq)": -4
     "Cd(OH)4 2- (aq)": 1
-    "H + (aq)": 1
 
 ...

@@ -237,7 +237,7 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "Ag + (aq)")
 		{
-			this->Register(1, 105600.0, 73.4, 77120.0, true, true, "Aqueous", "Silver", formula, "Ag");
+			this->Register(1, 105600.0, 73.4, 77120.0, true, true, "Aqueous", "Silver", formula, "Ag"); //Correct
 		}
 		else if (formula == "AgBr (s)")
 		{
@@ -257,11 +257,11 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "AgOH (aq)")
 		{
-			this->Register(0, 0.0, 0.0, -92000.0, false, true, "Aqueous", "Silver-hydroxide", formula, "AgOH");
+			this->Register(0, 0.0, 0.0, -92000.0, false, true, "Aqueous", "Silver-hydroxide", formula, "AgOH"); //Correct
 		}
 		else if (formula == "Ag(OH)2 - (aq)")
 		{
-			this->Register(-1, 0.0, 0.0, -260200.0, false, true, "Aqueous", "Silver-dihydroxide", formula, "AgO2H2");
+			this->Register(-1, 0.0, 0.0, -260200.0, false, true, "Aqueous", "Silver-dihydroxide", formula, "AgO2H2"); //Correct
 		}
 		else if (formula == "AgCl (aq)")
 		{
@@ -277,23 +277,23 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "Al 3+ (aq)")
 		{
-			this->Register(3, -531000.0, -308.0, -489400.0, true, true, "Aqueous", "Aluminum", formula, "Al");
+			this->Register(3, -531000.0, -308.0, -489400.0, true, true, "Aqueous", "Aluminum", formula, "Al"); //Correct
 		}
 		else if (formula == "AlOH 2+ (aq)")
 		{
-			this->Register(2, 0.0, 0.0, -698000.0, false, true, "Aqueous", "Aluminum-hydroxide", formula, "AlOH");
+			this->Register(2, 0.0, 0.0, -698000.0, false, true, "Aqueous", "Aluminum-hydroxide", formula, "AlOH"); //Correct
 		}
 		else if (formula == "Al(OH)2 + (aq)")
 		{
-			this->Register(1, 0.0, 0.0, -911000.0, false, true, "Aqueous", "Aluminum-dihydroxide", formula, "AlO2H2");
+			this->Register(1, 0.0, 0.0, -906116.0, false, true, "Aqueous", "Aluminum-dihydroxide", formula, "AlO2H2"); //Correct
 		}
 		else if (formula == "Al(OH)3 (aq)")
 		{
-			this->Register(0, 0.0, 0.0, -1115000.0, false, true, "Aqueous", "Aluminum-trihydroxide", formula, "AlO3H3");
+			this->Register(0, 0.0, 0.0, -1109625.0, false, true, "Aqueous", "Aluminum-trihydroxide", formula, "AlO3H3"); //Correct
 		}
 		else if (formula == "Al(OH)4 - (aq)")
 		{
-			this->Register(-1, 0.0, 0.0, -1325000.0, false, true, "Aqueous", "Aluminum-tetrahydroxide", formula, "AlO4H4");
+			this->Register(-1, 0.0, 0.0, -1306859.0, false, true, "Aqueous", "Aluminum-tetrahydroxide", formula, "AlO4H4"); //Correct
 		}
 		else if (formula == "Al2O3 (s)")
 		{
@@ -329,7 +329,7 @@ void Molecule::Register(std::string formula)
 		//List of molecules starting with B
 		if (formula == "Ba 2+ (aq)")
 		{
-			this->Register(2, -537600.0, 9.6, -560700.0, true, true, "Aqueous", "Barium", formula, "Ba");
+			this->Register(2, -537600.0, 9.6, -560700.0, true, true, "Aqueous", "Barium", formula, "Ba"); //Correct
 		}
 		else if (formula == "BaSO4 (s)")
 		{
@@ -353,7 +353,11 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "B(OH)4 - (aq)")
 		{
-			this->Register(-1, -1344000.0, 102.0, -1153300.0, true, true, "Aqueous", "Tetrahydroxy-borate", formula, "BO4H4");
+			this->Register(-1, -1344000.0, 102.0, -1153300.0, true, true, "Aqueous", "Tetrahydroxy-borate", formula, "BO4H4"); //Correct
+		}
+		else if (formula == "B(OH)3 (aq)")
+		{
+			this->Register(0, -1072000.0, 162.0, -968700.0, true, true, "Aqueous", "Boric-Acid", formula, "H3BO3"); //Correct
 		}
 		else if (formula == "Br2 (l)")
 		{
@@ -365,11 +369,11 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "Br - (aq)")
 		{
-			this->Register(0, -121500.0, 82.4, -104000.0, true, true, "Aqueous", "Bromine", formula, "Br");
+			this->Register(0, -121500.0, 82.4, -104000.0, true, true, "Aqueous", "Bromine", formula, "Br"); //Correct
 		}
 		else if (formula == "BrO - (aq)")
 		{
-			this->Register(0, -94100.0, 42.0, -33500.0, true, true, "Aqueous", "Hypobromite", formula, "BrO");
+			this->Register(0, -94100.0, 42.0, -33500.0, true, true, "Aqueous", "Hypobromite", formula, "BrO"); //Correct
 		}
 		else
 		{
@@ -381,11 +385,11 @@ void Molecule::Register(std::string formula)
 		//List of molecules starting with C
 		if (formula == "CO3 2- (aq)")
 		{
-			this->Register(-2, -677100.0, -56.9, -527900.0, true, true, "Aqueous", "Carbonate", "CO3 2- (aq)", "CO3");
+			this->Register(-2, -677100.0, -56.9, -527900.0, true, true, "Aqueous", "Carbonate", "CO3 2- (aq)", "CO3"); //Correct
 		}
 		else if (formula == "Cl - (aq)")
 		{
-			this->Register(-1, -167200.0, 56.5, -131300.0, true, true, "Aqueous", "Chloride", formula, "Cl");
+			this->Register(-1, -167200.0, 56.5, -131300.0, true, true, "Aqueous", "Chloride", formula, "Cl"); //Correct
 		}
 		else if (formula == "CaCl2 (aq)")
 		{
@@ -433,15 +437,15 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "Ca 2+ (aq)")
 		{
-			this->Register(2, -542830.0, -53.0, -553540.0, true, true, "Aqueous", "Calcium", formula, "Ca");
+			this->Register(2, -542830.0, -53.0, -553540.0, true, true, "Aqueous", "Calcium", formula, "Ca"); //Correct
 		}
 		else if (formula == "CaOH + (aq)")
 		{
-			this->Register(1, 0.0, 0.0, -718400.0, false, true, "Aqueous", "Calcium-hydroxide", formula, "CaOH");
+			this->Register(1, 0.0, 0.0, -718400.0, false, true, "Aqueous", "Calcium-hydroxide", formula, "CaOH"); //Correct
 		}
 		else if (formula == "Ca(OH)2 (aq)")
 		{
-			this->Register(0, -1003000.0, -74.5, -868100.0, true, true, "Aqueous", "Calcium-dihydroxide", formula, "CaO2H2");
+			this->Register(0, -1003000.0, -74.5, -868310.0, true, true, "Aqueous", "Calcium-dihydroxide", formula, "CaO2H2"); //Correct
 		}
 		else if (formula == "Ca(OH)2 (s)")
 		{
@@ -473,23 +477,23 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "Cd 2+ (aq)")
 		{
-			this->Register(2, -75900.0, -73.2, -77580.0, true, true, "Aqueous", "Cadmium", formula, "Cd");
+			this->Register(2, -75900.0, -73.2, -77580.0, true, true, "Aqueous", "Cadmium", formula, "Cd"); //Correct
 		}
-		else if (formula == "Cd(OH) + (aq)")
+		else if (formula == "CdOH + (aq)")
 		{
-			this->Register(1, 0.0, 0.0, -257255.0, false, true, "Aqueous", "Cadmium-hydroxide", formula, "CdOH");
+			this->Register(1, 0.0, 0.0, -257255.0, false, true, "Aqueous", "Cadmium-hydroxide", formula, "CdOH"); //Correct
 		}
 		else if (formula == "Cd(OH)3 - (aq)")
 		{
-			this->Register(-1, 0.0, 0.0, -600800.0, false, true, "Aqueous", "Cadmium-trihydroxide", formula, "CdO3H3"); //Error
+			this->Register(-1, 0.0, 0.0, -599149.0, false, true, "Aqueous", "Cadmium-trihydroxide", formula, "CdO3H3"); //Correct
 		}
 		else if (formula == "Cd(OH)4 2- (aq)")
 		{
-			this->Register(-2, 0.0, 0.0, -758500.0, false, true, "Aqueous", "Cadmium-tetrahydroxide", formula, "CdO4H4"); //Error
+			this->Register(-2, 0.0, 0.0, -756176.0, false, true, "Aqueous", "Cadmium-tetrahydroxide", formula, "CdO4H4"); //Correct
 		}
 		else if (formula == "Cd(OH)2 (aq)")
 		{
-			this->Register(0, 0.0, 0.0, -392200.0, false, true, "Aqueous", "Cadmium-dihydroxide", formula, "CdO2H2"); //Error
+			this->Register(0, 0.0, 0.0, -435846.0, false, true, "Aqueous", "Cadmium-dihydroxide", formula, "CdO2H2"); //Correct
 		}
 		else if (formula == "CdO (s)")
 		{
@@ -655,7 +659,7 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "F - (aq)")
 		{
-			this->Register(-1, -332600.0, -13.8, -278800.0, true, true, "Aqueous", "Fluoride", formula, "F");
+			this->Register(-1, -332600.0, -13.8, -278800.0, true, true, "Aqueous", "Fluoride", formula, "F"); //Correct
 		}
 		else if (formula == "Fe (s)")
 		{
@@ -740,27 +744,27 @@ void Molecule::Register(std::string formula)
 		//List of molecules starting with H
 		if (formula == "H2O (l)")
 		{
-			this->Register(0,-285830.0,69.95,-237180.0,true,true,"Liquid","Water","H2O (l)","H2O");
+			this->Register(0,-285830.0,69.95,-237180.0,true,true,"Liquid","Water","H2O (l)","H2O"); //Correct
 		}
 		else if (formula == "H + (aq)")
 		{
-			this->Register(1,0.0,0.0,0.0,true,true,"Aqueous","Proton","H + (aq)","H");
+			this->Register(1,0.0,0.0,0.0,true,true,"Aqueous","Proton","H + (aq)","H"); //Correct
 		}
 		else if (formula == "H2CO3 (aq)")
 		{
-			this->Register(0, -699700.0, 187.0, -623200.0, true, true, "Aqueous", "Carbonic-Acid", "H2CO3 (aq)", "H2CO3");
+			this->Register(0, -699700.0, 187.0, -623200.0, true, true, "Aqueous", "Carbonic-Acid", "H2CO3 (aq)", "H2CO3"); //Correct
 		}
 		else if (formula == "HCO3 - (aq)")
 		{
-			this->Register(-1, -692000.0, 91.2, -586800.0, true, true, "Aqueous", "Bicarbonate", "HCO3 - (aq)", "HCO3");
+			this->Register(-1, -692000.0, 91.2, -586800.0, true, true, "Aqueous", "Bicarbonate", "HCO3 - (aq)", "HCO3"); //Correct
 		}
 		else if (formula == "HNO3 (aq)")
 		{
-			this->Register(0, -207300.0, 146.0, -111300.0, true, true, "Aqueous", "Nitric-Acid", formula, "HNO3");
+			this->Register(0, -207300.0, 146.0, -111300.0, true, true, "Aqueous", "Nitric-Acid", formula, "HNO3"); //Correct
 		}
 		else if (formula == "HCl (aq)")
 		{
-			this->Register(0,-167160.0,56.48,-131300.0,true,true,"Aqueous","Hydrochloric-Acid","HCl (aq)","HCl");
+			this->Register(0,-167160.0,56.48,-131300.0,true,true,"Aqueous","Hydrochloric-Acid","HCl (aq)","HCl"); //Correct
 		}
 		else if (formula == "H3AsO4 (aq)")
 		{
@@ -778,13 +782,9 @@ void Molecule::Register(std::string formula)
 		{
 			this->Register(-1, 0.0, 0.0, -587400.0, false, true, "Aqueous", "Dihydrogen-arsenite", formula, "H2AsO3");
 		}
-		else if (formula == "H3BO3 (aq)")
-		{
-			this->Register(0, -1072000.0, 162.0, -968700.0, true, true, "Aqueous", "Boric-Acid", formula, "H3BO3");
-		}
 		else if (formula == "HBrO (aq)")
 		{
-			this->Register(0, -113000.0, 147.0, -82200.0, true, true, "Aqueous", "Hypobromous-Acid", formula, "HBrO");
+			this->Register(0, -113000.0, 147.0, -82200.0, true, true, "Aqueous", "Hypobromous-Acid", formula, "HBrO"); //Correct
 		}
 		else if (formula == "HCOOH (aq)")
 		{
@@ -816,11 +816,11 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "HF (aq)")
 		{
-			this->Register(0, 320000.0, 88.7, -296800.0, true, true, "Aqueous", "Hydrofluoric-Acid", formula, "HF");
+			this->Register(0, -320000.0, 88.7, -296800.0, true, true, "Aqueous", "Hydrofluoric-Acid", formula, "HF"); //Correct
 		}
 		else if (formula == "HF2 - (aq)")
 		{
-			this->Register(-1, -650000.0, 92.5, -578100.0, true, true, "Aqueous", "BiFluoride", formula, "HFF");
+			this->Register(-1, -650000.0, 92.5, -578100.0, true, true, "Aqueous", "BiFluoride", formula, "HFF"); //Correct
 		}
 		else if (formula == "H2 (g)")
 		{
@@ -944,11 +944,11 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "HSO4 - (aq)")
 		{
-			this->Register(-1, -887300.0, 132.0, -756000.0, true, true, "Aqueous", "Hydrogen-sulfate", formula, "HSO4");
+			this->Register(-1, -887300.0, 132.0, -756000.0, true, true, "Aqueous", "Hydrogen-sulfate", formula, "HSO4"); //Correct
 		}
 		else if (formula == "H2SO4 (aq)")
 		{
-			this->Register(0, -814000.0, 157.0, 0.0, true, false, "Aqueous", "Sulfuric-Acid", formula, "H2SO4");
+			this->Register(0, -814000.0, 157.0, -690394.0, true, true, "Aqueous", "Sulfuric-Acid", formula, "H2SO4"); //Correct
 		}
 		else if (formula == "HSeO3 - (aq)")
 		{
@@ -1016,6 +1016,10 @@ void Molecule::Register(std::string formula)
 		{
 			this->Register(0, 0.0, 0.0, -1341000.0, false, true, "Solid", "Muscovite", formula, "KAl3Si3O12H2");
 		}
+		else if (formula == "K + (aq)")
+		{
+			this->Register(0, -252140.0, 102.5, 0.0, true, false, "Aqueous", "Potassium", formula, "K"); //Correct
+		}
 		else
 		{
 			mError(unregistered_name); return;
@@ -1031,7 +1035,7 @@ void Molecule::Register(std::string formula)
 		//List of molecules starting with M
 		if (formula == "Mg(OH)2 (aq)")
 		{
-			this->Register(0, -962800.0, -149.0, -769400.0, true, true, "Aqueous", "Magnesium-dihydroxide", formula, "MgO2H2");
+			this->Register(0, -923671.0, -149.0, -769400.0, true, true, "Aqueous", "Magnesium-dihydroxide", formula, "MgO2H2"); //Correct
 		}
 		else if (formula == "Mg5Al2Si3O10(OH)8 (s)")
 		{
@@ -1043,11 +1047,11 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "Mg 2+ (aq)")
 		{
-			this->Register(2, -466800.0, -138.0, -454800.0, true, true, "Aqueous", "Magnesium", formula, "Mg");
+			this->Register(2, -466800.0, -138.0, -454800.0, true, true, "Aqueous", "Magnesium", formula, "Mg"); //Correct
 		}
 		else if (formula == "MgOH + (aq)")
 		{
-			this->Register(1, 0.0, 0.0, -626800.0, false, true, "Aqueous", "Magnesium-hydroxide", formula, "MgOH");
+			this->Register(1, 0.0, 0.0, -626800.0, false, true, "Aqueous", "Magnesium-hydroxide", formula, "MgOH"); //Correct
 		}
 		else if (formula == "Mg(OH)2 (s)")
 		{
@@ -1059,7 +1063,7 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "Mn 2+ (aq)")
 		{
-			this->Register(2, -220700.0, -73.6, -228000.0, true, true, "Aqueous", "Manganese", formula, "Mn");
+			this->Register(2, -220700.0, -73.6, -228000.0, true, true, "Aqueous", "Manganese", formula, "Mn"); //Correct
 		}
 		else if (formula == "Mn(OH)2 (s)")
 		{
@@ -1099,35 +1103,35 @@ void Molecule::Register(std::string formula)
 		//List of molecules starting with N
 		if (formula == "NaHCO3 (aq)")
 		{
-			this->Register(0,-945530.0,100.0,-847328.0,true,true,"Aqueous","Sodium-Bicarbonate",formula,"NaHCO3");
+			this->Register(0,-945530.0,100.0,-847328.0,true,true,"Aqueous","Sodium-Bicarbonate",formula,"NaHCO3"); //Correct
 		}
 		else if (formula == "NaCO3 - (aq)")
 		{
-			this->Register(-1,-937550.0,-41.85,-797049.0,true,true,"Aqueous","Sodium-Carbonate",formula,"NaCO3");
+			this->Register(-1,-937550.0,-41.85,-797049.0,true,true,"Aqueous","Sodium-Carbonate",formula,"NaCO3"); //Correct
 		}
 		else if (formula == "Na2CO3 (aq)")
 		{
-			this->Register(0,0.0,0.0,-1051600.0,false,true,"Aqueous","DiSodium-Carbonate",formula,"Na2CO3");
+			this->Register(0,0.0,0.0,-1051600.0,false,true,"Aqueous","DiSodium-Carbonate",formula,"Na2CO3"); //Correct
 		}
 		else if (formula == "Na + (aq)")
 		{
-			this->Register(1,-240100.0,59.0,-261900.0,true,true,"Aqueous","Sodium",formula,"Na");
+			this->Register(1,-240100.0,59.0,-261900.0,true,true,"Aqueous","Sodium",formula,"Na"); //Correct
 		}
 		else if (formula == "NaCl (aq)")
 		{
-			this->Register(0,-407300.0,115.5,-393170.0,true,true,"Aqueous","Sodium-Chloride",formula,"NaCl");
+			this->Register(0,-407300.0,115.5,-393170.0,true,true,"Aqueous","Sodium-Chloride",formula,"NaCl"); //Correct
 		}
 		else if (formula == "NaOH (aq)")
 		{
-			this->Register(0,-470110.0,48.1,-419200.0,true,true,"Aqueous","Sodium-Hydroxide",formula,"NaOH");
+			this->Register(0,-470110.0,48.1,-419200.0,true,true,"Aqueous","Sodium-Hydroxide",formula,"NaOH");  //Correct
 		}
 		else if (formula == "NaNO3 (aq)")
 		{
-			this->Register(0,0.0,0.0,-373210.0,false,true,"Aqueous","Sodium-Nitrate",formula,"NaNO3");
+			this->Register(0,0.0,0.0,-373210.0,false,true,"Aqueous","Sodium-Nitrate",formula,"NaNO3"); //Correct
 		}
 		else if (formula == "NO3 - (aq)")
 		{
-			this->Register(-1,-207300.0,146.4,-111300.0,true,true,"Aqueous","Nitrate",formula,"NO3");
+			this->Register(-1,-207300.0,146.4,-111300.0,true,true,"Aqueous","Nitrate",formula,"NO3"); //Correct
 		}
 		else if (formula == "NH3 (aq)")
 		{
@@ -1187,7 +1191,7 @@ void Molecule::Register(std::string formula)
 		//List of molecules starting with O
 		if (formula == "OH - (aq)")
 		{
-			this->Register(-1,-230000.0,-10.75,-157300.0,true,true,"Aqueous","Hydroxide","OH - (aq)","OH");
+			this->Register(-1,-230000.0,-10.75,-157300.0,true,true,"Aqueous","Hydroxide","OH - (aq)","OH"); //Correct
 		}
 		else if (formula == "O2 (g)")
 		{
@@ -1301,7 +1305,7 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "SO4 2- (aq)")
 		{
-			this->Register(-2, -909200.0, 20.1, -744600.0, true, true, "Aqueous", "Sulfate", formula, "SO3");
+			this->Register(-2, -909200.0, 20.1, -744600.0, true, true, "Aqueous", "Sulfate", formula, "SO4"); //Correct
 		}
 		else if (formula == "Se (s)")
 		{
@@ -1325,11 +1329,11 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "Sr 2+ (aq)")
 		{
-			this->Register(2, -545800.0, -33.0, -559400.0, true, true, "Aqueous", "Strontium", formula, "Sr");
+			this->Register(2, -545800.0, -33.0, -559400.0, true, true, "Aqueous", "Strontium", formula, "Sr"); //Correct
 		}
 		else if (formula == "SrOH + (aq)")
 		{
-			this->Register(1, 0.0, 0.0, -721000.0, false, true, "Aqueous", "Strontium-hydroxide", formula, "SrOH");
+			this->Register(1, 0.0, 0.0, -721000.0, false, true, "Aqueous", "Strontium-hydroxide", formula, "SrOH"); //Correct
 		}
 		else if (formula == "SrCO3 (s)")
 		{
@@ -1354,67 +1358,67 @@ void Molecule::Register(std::string formula)
 		//List of molecules starting with U
 		if (formula == "UO2 2+ (aq)")
 		{
-			this->Register(2,-1019000.0,-98.2,-952551.0,true,true,"Aqueous","Uranyl","UO2 2+ (aq)","UO2");
+			this->Register(2,-1019000.0,-98.2,-952551.0,true,true,"Aqueous","Uranyl","UO2 2+ (aq)","UO2"); //Correct
 		}
 		else if (formula == "UO2NO3 + (aq)")
 		{
-			this->Register(1,0.0,0.0,-1065557.0,false,true,"Aqueous","Uranyl-nitrate",formula,"UO2NO3");
+			this->Register(1,0.0,0.0,-1065557.0,false,true,"Aqueous","Uranyl-nitrate",formula,"UO2NO3"); //Correct
 		}
 		else if (formula == "UO2(NO3)2 (aq)")
 		{
-			this->Register(0,0.0,0.0,-1105803.0,false,true,"Aqueous","Uranyl-dinitrate",formula,"UO2N2O6");
+			this->Register(0,0.0,0.0,-1105803.0,false,true,"Aqueous","Uranyl-dinitrate",formula,"UO2N2O6"); //Correct
 		}
 		else if (formula == "UO2OH + (aq)")
 		{
-			this->Register(1,-1261371.0,17.0,-1159724.0,true,true,"Aqueous","Uranyl-hydroxide",formula,"UO2OH");
+			this->Register(1,-1261371.0,17.0,-1159724.0,true,true,"Aqueous","Uranyl-hydroxide",formula,"UO2OH"); //Correct
 		}
 		else if (formula == "UO2(OH)2 (aq)")
 		{
-			this->Register(0,0,0,-1357479.0,false,true,"Aqueous","Uranyl-dihydroxide",formula,"UO2O2H2");
+			this->Register(0,0,0,-1357479.0,false,true,"Aqueous","Uranyl-dihydroxide",formula,"UO2O2H2"); //Correct
 		}
 		else if (formula == "UO2(OH)3 - (aq)")
 		{
-			this->Register(-1,0.0,0.0,-908303.0,false,true,"Aqueous","Uranyl-trihydroxide",formula,"UO2O3H3");
+			this->Register(-1,0.0,0.0,-908303.0,false,true,"Aqueous","Uranyl-trihydroxide",formula,"UO2O3H3"); //Correct
 		}
 		else if (formula == "UO2(OH)4 2- (aq)")
 		{
-			this->Register(-2,0.0,0.0,-1716171.0,false,true,"Aqueous","Uranyl-tetrahydroxide",formula,"UO2O4H4");
+			this->Register(-2,0.0,0.0,-1716171.0,false,true,"Aqueous","Uranyl-tetrahydroxide",formula,"UO2O4H4"); //Correct
 		}
 		else if (formula == "(UO2)2OH 3+ (aq)")
 		{
-			this->Register(3,0.0,0.0,-2126830.0,false,true,"Aqueous","Diuranyl-hydroxide",formula,"U2O4OH");
+			this->Register(3,0.0,0.0,-2126830.0,false,true,"Aqueous","Diuranyl-hydroxide",formula,"U2O4OH"); //Correct
 		}
 		else if (formula == "(UO2)2(OH)2 2+ (aq)")
 		{
-			this->Register(2,-2572065.0,-38.0,-2347303.0,true,true,"Aqueous","Diuranyl-dihydroxide",formula,"U2O4O2H2");
+			this->Register(2,-2572065.0,-38.0,-2347303.0,true,true,"Aqueous","Diuranyl-dihydroxide",formula,"U2O4O2H2"); //Correct
 		}
 		else if (formula == "(UO2)3(OH)4 2+ (aq)")
 		{
-			this->Register(2,0.0,0.0,-3738288.0,false,true,"Aqueous","Triuranyl-tetrahydroxide",formula,"U3O6O4H4");
+			this->Register(2,0.0,0.0,-3738288.0,false,true,"Aqueous","Triuranyl-tetrahydroxide",formula,"U3O6O4H4"); //Correct
 		}
 		else if (formula == "(UO2)3(OH)5 + (aq)")
 		{
-			this->Register(1,-4389086.0,83.0,-3954594.0,true,true,"Aqueous","Triuranyl-pentahydroxide",formula,"U3O6O5H5");
+			this->Register(1,-4389086.0,83.0,-3954594.0,true,true,"Aqueous","Triuranyl-pentahydroxide",formula,"U3O6O5H5"); //Correct
 		}
 		else if (formula == "(UO2)3(OH)7 - (aq)")
 		{
-			this->Register(-1,0,0,-4333835.0,false,true,"Aqueous","Triuranyl-heptahydroxide",formula,"U3O6O7H7");
+			this->Register(-1,0,0,-4333835.0,false,true,"Aqueous","Triuranyl-heptahydroxide",formula,"U3O6O7H7"); //Correct
 		}
 		else if (formula == "(UO2)4(OH)7 + (aq)")
 		{
-			this->Register(1,0,0,-5345179.0,false,true,"Aqueous","Tetrauranyl-heptahydroxide",formula,"U4O8O7H7");
+			this->Register(1,0,0,-5345179.0,false,true,"Aqueous","Tetrauranyl-heptahydroxide",formula,"U4O8O7H7"); //Correct
 		}
 		else if (formula == "UO2CO3 (aq)")
 		{
-			this->Register(0,-1689230.0,58.870,-1537188.0,true,true,"Aqueous","Uranyl-carbonate",formula,"UO2CO3");
+			this->Register(0,-1689230.0,58.870,-1537188.0,true,true,"Aqueous","Uranyl-carbonate",formula,"UO2CO3"); //Correct
 		}
 		else if (formula == "UO2(CO3)2 2- (aq)")
 		{
-			this->Register(-2,-2350960.0,181.846,-2103161.0,true,true,"Aqueous","Uranyl-dicarbonate",formula,"UO2C2O6");
+			this->Register(-2,-2350960.0,181.846,-2103161.0,true,true,"Aqueous","Uranyl-dicarbonate",formula,"UO2C2O6"); //Correct
 		}
 		else if (formula == "UO2(CO3)3 4- (aq)")
 		{
-			this->Register(-4,-3083890.0,38.446,-2660914.0,true,true,"Aqueous","Uranyl-tricarbonate","UO2(CO3)3 4- (aq)","UO2C3O9");
+			this->Register(-4,-3083890.0,38.446,-2660914.0,true,true,"Aqueous","Uranyl-tricarbonate","UO2(CO3)3 4- (aq)","UO2C3O9"); //Correct
 		}
 		else
 		{

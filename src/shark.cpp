@@ -446,10 +446,8 @@ void Reaction::calculateEnergies()
 		if (this->CanCalcG == true)
 		{
 			this->energy = this->energy + (this->Stoichiometric[i] * this->List->get_species(i).Energy());
-			std::cout << i << "\t" << this->Stoichiometric[i] << "\t" << this->List->get_species(i).Energy() << std::endl;
 		}
 	}
-	std::cout << this->energy << std::endl;
 }
 
 //Function to calculate equilibrium constant

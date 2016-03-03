@@ -3,8 +3,8 @@
 Scenario:
 ---
 - vars_fun:
-  numvar: 8
-  num_ssr: 5
+  numvar: 6
+  num_ssr: 3
   num_mbe: 2
 
 - sys_data:
@@ -29,14 +29,12 @@ nl_print: true
 MasterSpecies:
 ---
 - reg:
-  0: Cd 2+ (aq)
-  1: CdOH + (aq)
-  2: Cd(OH)2 (aq)
-  3: Cd(OH)3 - (aq)
-  4: Cd(OH)4 2- (aq)
-  5: H2O (l)
-  6: H + (aq)
-  7: OH - (aq)
+  0: Ca 2+ (aq)
+  1: CaOH + (aq)
+  2: Ca(OH)2 (aq)
+  3: H2O (l)
+  4: H + (aq)
+  5: OH - (aq)
 
 ...
 
@@ -47,14 +45,12 @@ MassBalance:
   - delta: 
     "H2O (l)": 1
 
-- cadmium:
+- calcium:
   total_conc: 1e-4
   - delta: 
-    "Cd 2+ (aq)": 1
-    "CdOH + (aq)": 1 
-    "Cd(OH)2 (aq)": 1 
-    "Cd(OH)3 - (aq)": 1
-    "Cd(OH)4 2- (aq)": 1
+    "Ca 2+ (aq)": 1
+    "CaOH + (aq)": 1 
+    "Ca(OH)2 (aq)": 1 
 
 ...
 
@@ -68,30 +64,14 @@ EquilRxn:
 
 - rxn01:
   - stoichiometry:
-    "Cd 2+ (aq)": -1
-    "H2O (l)": -1
-    "CdOH + (aq)": 1
-    "H + (aq)": 1
+    "Ca 2+ (aq)": -1
+    "OH - (aq)": -1
+    "CaOH + (aq)": 1
 
 - rxn02:
   - stoichiometry:
-    "CdOH + (aq)": -1
-    "H2O (l)": -1
-    "Cd(OH)2 (aq)": 1
-    "H + (aq)": 1
-
-- rxn03:
-  - stoichiometry:
-    "Cd(OH)2 (aq)": -1
-    "H2O (l)": -1
-    "Cd(OH)3 - (aq)": 1
-    "H + (aq)": 1
-
-- rxn04:
-  - stoichiometry:
-    "Cd(OH)3 - (aq)": -1
-    "H2O (l)": -1
-    "Cd(OH)4 2- (aq)": 1
-    "H + (aq)": 1
+    "Ca 2+ (aq)": -1
+    "OH - (aq)": -2
+    "Ca(OH)2 (aq)": 1
 
 ...
