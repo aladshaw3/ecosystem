@@ -105,20 +105,29 @@
  *			Co (s) \n
  *			Co 2+ (aq) \n
  *			Co 3+ (aq) \n
+ *			CoOH + (aq) \n
  *			Co(OH)2 (aq) \n
+ *			Co(OH)3 - (aq) \n
  *			Co(OH)2 (s) \n
  *			CoO (s) \n
  *			Co3O4 (s) \n
  *			Cr (s) \n
  *			Cr 2+ (aq) \n
  *			Cr 3+ (aq) \n
+ *			CrOH 2+ (aq) \n
+ *			Cr(OH)2 + (aq) \n
+ *			Cr(OH)3 (aq) \n
+ *			Cr(OH)4 - (aq) \n
  *			Cr2O3 (s) \n
  *			CrO4 2- (aq) \n
  *			Cr2O7 2- (aq) \n
  *			Cu (s) \n
  *			Cu + (aq) \n
  *			Cu 2+ (aq) \n
+ *			CuOH + (aq) \n
  *			Cu(OH)2 (aq) \n
+ *			Cu(OH)3 - (aq) \n
+ *			Cu(OH)4 2- (aq) \n
  *			CuS (s) \n
  *			Cu2S (s) \n
  *			CuO (s) \n
@@ -130,9 +139,12 @@
  *			Fe (s) \n
  *			Fe 2+ (aq) \n
  *			FeOH + (aq) \n
+ *			Fe(OH)2 (aq) \n
+ *			Fe(OH)3 - (aq) \n
  *			Fe 3+ (aq) \n
  *			FeOH 2+ (aq) \n
  *			Fe(OH)2 + (aq) \n
+ *			Fe(OH)3 (aq) \n
  *			Fe(OH)4 - (aq) \n
  *			Fe2(OH)2 4+ (aq) \n
  *			FeS2 (s) \n
@@ -174,6 +186,9 @@
  *			Hg (l) \n
  *			Hg2 2+ (aq) \n
  *			Hg 2+ (aq) \n
+ *			HgOH + (aq) \n
+ *			Hg(OH)2 (aq) \n
+ *			Hg(OH)3 - (aq) \n
  *			Hg2Cl2 (s) \n
  *			HgO (s) \n
  *			HgS (s) \n
@@ -211,6 +226,7 @@
  *			IO3 - (aq) \n
  *
  *			KAl3Si3O10(OH)2 (s) \n
+ *			K + (aq) \n
  *
  *			Mg(OH)2 (aq) \n
  *			Mg5Al2Si3O10(OH)8 (s) \n
@@ -244,6 +260,9 @@
  *			NH4 + (aq) \n
  *			NO2 - (aq) \n
  *			Ni 2+ (aq) \n
+ *			NiOH + (aq) \n
+ *			Ni(OH)2 (aq) \n
+ *			Ni(OH)3 - (aq) \n
  *			NiO (s) \n
  *			NiS (s) \n
  *
@@ -257,7 +276,9 @@
  *			Pb (s) \n
  *			Pb 2+ (aq) \n
  *			PbOH + (aq) \n
+ *			Pb(OH)2 (aq) \n
  *			Pb(OH)3 - (aq) \n
+ *			Pb(OH)4 2- (aq) \n
  *			Pb(OH)2 (s) \n
  *			PbO (s) \n
  *			PbO2 (s) \n

@@ -3,8 +3,8 @@
 Scenario:
 ---
 - vars_fun:
-  numvar: 6
-  num_ssr: 3
+  numvar: 7
+  num_ssr: 4
   num_mbe: 2
 
 - sys_data:
@@ -29,12 +29,13 @@ nl_print: true
 MasterSpecies:
 ---
 - reg:
-  0: SO4 2- (aq)
-  1: HSO4 - (aq)
-  2: H2SO4 (aq)
-  3: H2O (l)
-  4: H + (aq)
-  5: OH - (aq)
+  0: Ni 2+ (aq)
+  1: NiOH + (aq)
+  2: Ni(OH)2 (aq)
+  3: Ni(OH)3 - (aq)
+  4: H2O (l)
+  5: H + (aq)
+  6: OH - (aq)
 
 ...
 
@@ -45,12 +46,13 @@ MassBalance:
   - delta: 
     "H2O (l)": 1
 
-- sulfate:
+- nickel:
   total_conc: 1e-4
   - delta: 
-    "SO4 2- (aq)": 1
-    "HSO4 - (aq)": 1 
-    "H2SO4 (aq)": 1 
+    "Ni 2+ (aq)": 1
+    "NiOH + (aq)": 1 
+    "Ni(OH)2 (aq)": 1 
+    "Ni(OH)3 - (aq)": 1 
 
 ...
 
@@ -64,14 +66,20 @@ EquilRxn:
 
 - rxn01:
   - stoichiometry:
-    "H2SO4 (aq)": -1
-    "H + (aq)": 1
-    "HSO4 - (aq)": 1
+    "Ni 2+ (aq)": -1
+    "OH - (aq)": -1
+    "NiOH + (aq)": 1
 
 - rxn02:
   - stoichiometry:
-    "HSO4 - (aq)": -1
-    "H + (aq)": 1
-    "SO4 2- (aq)": 1
+    "Ni 2+ (aq)": -1
+    "OH - (aq)": -2
+    "Ni(OH)2 (aq)": 1
+
+- rxn03:
+  - stoichiometry:
+    "Ni 2+ (aq)": -1
+    "OH - (aq)": -3
+    "Ni(OH)3 - (aq)": 1
 
 ...

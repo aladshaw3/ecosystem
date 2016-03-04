@@ -1,0 +1,101 @@
+# This will serve as a test input file for shark to demo how to structure the document
+
+Scenario:
+---
+- vars_fun:
+  numvar: 9
+  num_ssr: 6
+  num_mbe: 2
+
+- sys_data:
+  act_fun: davies    
+  const_pH: false	
+  temp: 298.15      
+
+- run_time:
+  steady: true         
+  specs_curve: true    
+...
+
+SolverOptions:
+---
+line_search: true      
+search_type: standard
+linear_solve: fom      
+nl_print: true
+
+...
+
+MasterSpecies:
+---
+- reg:
+  0: Fe 3+ (aq)
+  1: FeOH 2+ (aq)
+  2: Fe(OH)2 + (aq)
+  3: Fe(OH)3 (aq)
+  4: Fe(OH)4 - (aq)
+  5: Fe2(OH)2 4+ (aq)
+  6: H2O (l)
+  7: H + (aq)
+  8: OH - (aq)
+
+...
+
+MassBalance:
+---
+- water:
+  total_conc: 1
+  - delta: 
+    "H2O (l)": 1
+
+- iron:
+  total_conc: 1e-4
+  - delta: 
+    "Fe 3+ (aq)": 1
+    "FeOH 2+ (aq)": 1 
+    "Fe(OH)2 + (aq)": 1 
+    "Fe(OH)3 (aq)": 1 
+    "Fe(OH)4 - (aq)": 1
+    "Fe2(OH)2 4+ (aq)": 2
+
+...
+
+EquilRxn:
+---
+- rxn00:
+  - stoichiometry:
+    "H2O (l)": -1
+    "OH - (aq)": 1
+    "H + (aq)": 1
+
+- rxn01:
+  - stoichiometry:
+    "Fe 3+ (aq)": -1
+    "OH - (aq)": -1
+    "FeOH 2+ (aq)": 1
+
+- rxn02:
+  - stoichiometry:
+    "Fe 3+ (aq)": -1
+    "OH - (aq)": -2
+    "Fe(OH)2 + (aq)": 1
+
+- rxn03:
+  - stoichiometry:
+    "Fe 3+ (aq)": -1
+    "OH - (aq)": -3
+    "Fe(OH)3 (aq)": 1
+
+- rxn04:
+  - stoichiometry:
+    "Fe 3+ (aq)": -1
+    "OH - (aq)": -4
+    "Fe(OH)4 - (aq)": 1
+
+- rxn05:
+  - stoichiometry:
+    "Fe 3+ (aq)": -2
+    "OH - (aq)": -2
+    "Fe2(OH)2 4+ (aq)": 1
+
+...

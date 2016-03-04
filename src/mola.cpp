@@ -421,7 +421,7 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "CN - (aq)")
 		{
-			this->Register(-1, 150600.0, 94.1, 172400.0, true, true, "Aqueous", "Cyanide", formula, "CN");
+			this->Register(-1, 150600.0, 94.1, 172400.0, true, true, "Aqueous", "Cyanide", formula, "CN"); //Correct
 		}
 		else if (formula == "CH3COOH (aq)")
 		{
@@ -446,6 +446,14 @@ void Molecule::Register(std::string formula)
 		else if (formula == "Ca(OH)2 (aq)")
 		{
 			this->Register(0, -1003000.0, -74.5, -868310.0, true, true, "Aqueous", "Calcium-dihydroxide", formula, "CaO2H2"); //Correct
+		}
+		else if (formula == "CaUO2(CO3)3 2- (aq)")
+		{
+			this->Register(-2, 0.0, 0.0, -3244677.0, false, true, "Aqueous", "Calcium-uranyl-tricarbonate", formula, "CaUO2C3O9");
+		}
+		else if (formula == "Ca2UO2(CO3)3 (aq)")
+		{
+			this->Register(0, 0.0, 0.0, -3816643.0, false, true, "Aqueous", "DiCalcium-uranyl-tricarbonate", formula, "Ca2UO2C3O9");
 		}
 		else if (formula == "Ca(OH)2 (s)")
 		{
@@ -553,15 +561,23 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "Co 2+ (aq)")
 		{
-			this->Register(2, -58200.0, -113.0, -54400.0, true, true, "Aqueous", "Cobalt(II)", formula, "Co");
+			this->Register(2, -58200.0, -113.0, -54400.0, true, true, "Aqueous", "Cobalt(II)", formula, "Co"); //Correct
 		}
 		else if (formula == "Co 3+ (aq)")
 		{
-			this->Register(3, -92000.0, -305.0, -134000.0, true, true, "Aqueous", "Cobalt(III)", formula, "Co");
+			this->Register(3, -92000.0, -305.0, -134000.0, true, true, "Aqueous", "Cobalt(III)", formula, "Co"); //Correct
+		}
+		else if (formula == "CoOH + (aq)")
+		{
+			this->Register(1, 0.0, 0.0, -239000.0, false, true, "Aqueous", "Cobalt(II)-hydroxide", formula, "CoOH"); //Correct
 		}
 		else if (formula == "Co(OH)2 (aq)")
 		{
-			this->Register(0, -518000.0, 134.0, -369000.0, true, true, "Aqueous", "Cobalt(II)-hydroxide", formula, "CoO2H2");
+			this->Register(0, 0.0, 0.0, -424337.0, false, true, "Aqueous", "Cobalt(II)-dihydroxide", formula, "CoO2H2"); //Correct
+		}
+		else if (formula == "Co(OH)3 - (aq)")
+		{
+			this->Register(-1, 0.0, 0.0, -587912.0, false, true, "Aqueous", "Cobalt(II)-trihydroxide", formula, "CoO3H3"); //Correct
 		}
 		else if (formula == "Co(OH)2 (s)")
 		{
@@ -585,7 +601,23 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "Cr 3+ (aq)")
 		{
-			this->Register(3, -256000.0, 308.0, -215500.0, true, true, "Aqueous", "Chromium(III)", formula, "Cr");
+			this->Register(3, -256000.0, 308.0, -215500.0, true, true, "Aqueous", "Chromium(III)", formula, "Cr"); //Correct
+		}
+		else if (formula == "CrOH 2+ (aq)")
+		{
+			this->Register(2, 0.0, 0.0, -429848.0, false, true, "Aqueous", "Chromium(III)-hydroxide", formula, "CrOH"); //Correct
+		}
+		else if (formula == "Cr(OH)2 + (aq)")
+		{
+			this->Register(1, 0.0, 0.0, -634955.0, false, true, "Aqueous", "Chromium(III)-dihydroxide", formula, "CrO2H2"); //Correct
+		}
+		else if (formula == "Cr(OH)3 (aq)")
+		{
+			this->Register(0, 0.0, 0.0, -831447.0, false, true, "Aqueous", "Chromium(III)-trihydroxide", formula, "CrO3H3"); //Correct
+		}
+		else if (formula == "Cr(OH)4 - (aq)")
+		{
+			this->Register(-1, 0.0, 0.0, -1005747.0, false, true, "Aqueous", "Chromium(III)-tetrahydroxide", formula, "CrO4H4"); //Correct
 		}
 		else if (formula == "Cr2O3 (s)")
 		{
@@ -609,11 +641,23 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "Cu 2+ (aq)")
 		{
-			this->Register(2, 64800.0, -99.6, 65500.0, true, true, "Aqueous", "Copper(II)", formula, "Cu");
+			this->Register(2, 64800.0, -99.6, 65500.0, true, true, "Aqueous", "Copper(II)", formula, "Cu"); //Correct
+		}
+		else if (formula == "CuOH + (aq)")
+		{
+			this->Register(1, 0.0, 0.0, -126029.0, false, true, "Aqueous", "Copper(II)-hydroxide", formula, "CuOH"); //Correct
 		}
 		else if (formula == "Cu(OH)2 (aq)")
 		{
-			this->Register(0, -395200.0, -121.0, -249100.0, true, true, "Aqueous", "Copper(II)-hydroxide", formula, "Cu");
+			this->Register(0, 0.0, 0.0, -330793.0, false, true, "Aqueous", "Copper(II)-dihydroxide", formula, "CuO2H2"); //Correct
+		}
+		else if (formula == "Cu(OH)3 - (aq)")
+		{
+			this->Register(-1, 0.0, 0.0, -492543.0, false, true, "Aqueous", "Copper(II)-trihydroxide", formula, "CuO3H3"); //Correct
+		}
+		else if (formula == "Cu(OH)4 2- (aq)")
+		{
+			this->Register(-2, 0.0, 0.0, -657259.0, false, true, "Aqueous", "Copper(II)-tetrahydroxide", formula, "CuO4H4"); //Correct
 		}
 		else if (formula == "CuS (s)")
 		{
@@ -667,31 +711,43 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "Fe 2+ (aq)")
 		{
-			this->Register(2, -89100.0, -138.0, -78870.0, true, true, "Aqueous", "Iron(II)", formula, "Fe");
+			this->Register(2, -89100.0, -138.0, -78870.0, true, true, "Aqueous", "Iron(II)", formula, "Fe"); //Correct
 		}
 		else if (formula == "FeOH + (aq)")
 		{
-			this->Register(1, 0.0, 0.0, -277300.0, false, true, "Aqueous", "Iron(II)-hydroxide", formula, "FeOH");
+			this->Register(1, 0.0, 0.0, -261842.0, false, true, "Aqueous", "Iron(II)-hydroxide", formula, "FeOH"); //Correct
+		}
+		else if (formula == "Fe(OH)2 (aq)")
+		{
+			this->Register(0, 0.0, 0.0, -436998.0, false, true, "Aqueous", "Iron(II)-dihydroxide", formula, "FeO2H2"); //Correct
+		}
+		else if (formula == "Fe(OH)3 - (aq)")
+		{
+			this->Register(-1, 0.0, 0.0, -613523.0, false, true, "Aqueous", "Iron(II)-trihydroxide", formula, "FeO3H3"); //Correct
 		}
 		else if (formula == "Fe 3+ (aq)")
 		{
-			this->Register(3, -48500.0, -316.0, -4600.0, true, true, "Aqueous", "Iron(III)", formula, "Fe");
+			this->Register(3, -48500.0, -316.0, -4600.0, true, true, "Aqueous", "Iron(III)", formula, "Fe"); //Correct
 		}
 		else if (formula == "FeOH 2+ (aq)")
 		{
-			this->Register(2, -324700.0, -29.2, -229400.0, true, true, "Aqueous", "Iron(III)-hydroxide", formula, "FeOH");
+			this->Register(2, 0.0, 0.0, -229400.0, false, true, "Aqueous", "Iron(III)-hydroxide", formula, "FeOH"); //Correct
 		}
 		else if (formula == "Fe(OH)2 + (aq)")
 		{
-			this->Register(1, 0.0, 0.0, -438000.0, false, true, "Aqueous", "Iron(III)-dihydroxide", formula, "FeO2H2");
+			this->Register(1, 0.0, 0.0, -446700.0, false, true, "Aqueous", "Iron(III)-dihydroxide", formula, "FeO2H2"); //Correct
+		}
+		else if (formula == "Fe(OH)3 (aq)")
+		{
+			this->Register(0, 0.0, 0.0, -638517.0, false, true, "Aqueous", "Iron(III)-trihydroxide", formula, "FeO3H3"); //Correct
 		}
 		else if (formula == "Fe(OH)4 - (aq)")
 		{
-			this->Register(-1, 0.0, 0.0, -659000.0, false, true, "Aqueous", "Iron(III)-tetrahydroxide", formula, "FeO4H4");
+			this->Register(-1, 0.0, 0.0, -830046.0, false, true, "Aqueous", "Iron(III)-tetrahydroxide", formula, "FeO4H4"); //Correct
 		}
 		else if (formula == "Fe2(OH)2 4+ (aq)")
 		{
-			this->Register(4, 0.0, 0.0, -467300.0, false, true, "Aqueous", "DiIron(III)-dihydroxide", formula, "Fe2O2H2");
+			this->Register(4, 0.0, 0.0, -467300.0, false, true, "Aqueous", "DiIron(III)-dihydroxide", formula, "Fe2O2H2"); //Correct
 		}
 		else if (formula == "FeS2 (s)")
 		{
@@ -796,7 +852,7 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "HCN (aq)")
 		{
-			this->Register(0, 107100.0, 124.6, 119700.0, true, true, "Aqueous", "Hydrogen-cyanide", formula, "HCN");
+			this->Register(0, 107100.0, 124.6, 119700.0, true, true, "Aqueous", "Hydrogen-cyanide", formula, "HCN"); //Correct
 		}
 		else if (formula == "HClO (aq)")
 		{
@@ -852,7 +908,19 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "Hg 2+ (aq)")
 		{
-			this->Register(2, 171000.0, -32.2, 164400.0, true, true, "Aqueous", "Mercury(II)", formula, "Hg");
+			this->Register(2, 171000.0, -32.2, 164400.0, true, true, "Aqueous", "Mercury(II)", formula, "Hg"); //Correct
+		}
+		else if (formula == "HgOH + (aq)")
+		{
+			this->Register(1, 0.0, 0.0, -53371.0, false, true, "Aqueous", "Mercury(II)-hydroxide", formula, "HgOH"); //Correct
+		}
+		else if (formula == "Hg(OH)2 (aq)")
+		{
+			this->Register(0, 0.0, 0.0, -275136.0, false, true, "Aqueous", "Mercury(II)-dihydroxide", formula, "HgO2H2"); //Correct
+		}
+		else if (formula == "Hg(OH)3 - (aq)")
+		{
+			this->Register(-1, 0.0, 0.0, -490967.0, false, true, "Aqueous", "Mercury(II)-trihydroxide", formula, "HgO3H3"); //Correct
 		}
 		else if (formula == "Hg2Cl2 (s)")
 		{
@@ -912,15 +980,15 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "HPO4 2- (aq)")
 		{
-			this->Register(-2, -1292100.0, -33.4, -1089300.0, true, true, "Aqueous", "Hydrogen-phosphate", formula, "HPO4");
+			this->Register(-2, -1292100.0, -33.4, -1089300.0, true, true, "Aqueous", "Hydrogen-phosphate", formula, "HPO4"); //Correct
 		}
 		else if (formula == "H2PO4 - (aq)")
 		{
-			this->Register(-1, -1296300.0, 90.4, -1130400.0, true, true, "Aqueous", "DiHydrogen-phosphate", formula, "H2PO4");
+			this->Register(-1, -1296300.0, 90.4, -1130400.0, true, true, "Aqueous", "DiHydrogen-phosphate", formula, "H2PO4"); //Correct
 		}
 		else if (formula == "H3PO4 (aq)")
 		{
-			this->Register(0, -1288300.0, 158.0, -1142600.0, true, true, "Aqueous", "Phosphoric-Acid", formula, "H3PO4");
+			this->Register(0, -1288300.0, 158.0, -1142600.0, true, true, "Aqueous", "Phosphoric-Acid", formula, "H3PO4"); //Correct
 		}
 		else if (formula == "H2S (g)")
 		{
@@ -928,11 +996,11 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "H2S (aq)")
 		{
-			this->Register(0, -39750.0, 121.3, -27870.0, true, true, "Aqueous", "Hydrogen-sulfide", formula, "H2S");
+			this->Register(0, -39750.0, 121.3, -27870.0, true, true, "Aqueous", "Hydrogen-sulfide", formula, "H2S"); //Correct
 		}
 		else if (formula == "HS - (aq)")
 		{
-			this->Register(-1, -17600.0, 62.8, 12050.0, true, true, "Aqueous", "Bisulfide", formula, "HS");
+			this->Register(-1, -17600.0, 62.8, 12050.0, true, true, "Aqueous", "Bisulfide", formula, "HS"); //Correct
 		}
 		else if (formula == "HSO3 - (aq)")
 		{
@@ -1053,6 +1121,10 @@ void Molecule::Register(std::string formula)
 		{
 			this->Register(1, 0.0, 0.0, -626800.0, false, true, "Aqueous", "Magnesium-hydroxide", formula, "MgOH"); //Correct
 		}
+		else if (formula == "MgUO2(CO3)3 2- (aq)")
+		{
+			this->Register(-2, 0.0, 0.0, -3140517.0, false, true, "Aqueous", "Magnesium-uranyl-tricarbonate", formula, "MgUO2C3O9");
+		}
 		else if (formula == "Mg(OH)2 (s)")
 		{
 			this->Register(0, -924500.0, 63.2, -833500.0, true, true, "Solid", "Brucite", formula, "MgO2H2");
@@ -1135,7 +1207,7 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "NH3 (aq)")
 		{
-			this->Register(0, -80290.0, 111.0, -26570.0, true, true, "Aqueous", "Ammonia", formula, "NH3");
+			this->Register(0, -80290.0, 111.0, -26570.0, true, true, "Aqueous", "Ammonia", formula, "NH3"); //Correct
 		}
 		else if (formula == "NaAlSiO3O8 (s)")
 		{
@@ -1163,7 +1235,7 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "NH4 + (aq)")
 		{
-			this->Register(1, -132500.0, 113.4, -79370.0, true, true, "Aqueous", "Ammonium", formula, "NH4");
+			this->Register(1, -132500.0, 113.4, -79370.0, true, true, "Aqueous", "Ammonium", formula, "NH4"); //Correct
 		}
 		else if (formula == "NO2 - (aq)")
 		{
@@ -1171,7 +1243,19 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "Ni 2+ (aq)")
 		{
-			this->Register(2, -54000.0, -129.0, -45600.0, true, true, "Aqueous", "Nickel", formula, "Ni");
+			this->Register(2, -54000.0, -129.0, -45600.0, true, true, "Aqueous", "Nickel", formula, "Ni"); //Correct
+		}
+		else if (formula == "NiOH + (aq)")
+		{
+			this->Register(1, 0.0, 0.0, -226518.0, false, true, "Aqueous", "Nickel-hydroxide", formula, "NiOH"); //Correct
+		}
+		else if (formula == "Ni(OH)2 (aq)")
+		{
+			this->Register(0, 0.0, 0.0, -411543.0, false, true, "Aqueous", "Nickel-dihydroxide", formula, "NiO2H2"); //Correct
+		}
+		else if (formula == "Ni(OH)3 - (aq)")
+		{
+			this->Register(-1, 0.0, 0.0, -585958.0, false, true, "Aqueous", "Nickel-trihydroxide", formula, "NiO3H3"); //Correct
 		}
 		else if (formula == "NiO (s)")
 		{
@@ -1219,7 +1303,7 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "PO4 3- (aq)")
 		{
-			this->Register(-3, -1277400.0, -222.0, -1018800.0, true, true, "Aqueous", "Phosphate", formula, "PO4");
+			this->Register(-3, -1277400.0, -222.0, -1018800.0, true, true, "Aqueous", "Phosphate", formula, "PO4"); //Correct
 		}
 		else if (formula == "Pb (s)")
 		{
@@ -1227,15 +1311,23 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "Pb 2+ (aq)")
 		{
-			this->Register(2, -1670.0, 10.5, -24390.0, true, true, "Aqueous", "Lead", formula, "Pb");
+			this->Register(2, -1670.0, 10.5, -24390.0, true, true, "Aqueous", "Lead", formula, "Pb"); //Correct
 		}
 		else if (formula == "PbOH + (aq)")
 		{
-			this->Register(1, 0.0, 0.0, -226300.0, false, true, "Aqueous", "Lead-hydroxide", formula, "PbOH");
+			this->Register(1, 0.0, 0.0, -216300.0, false, true, "Aqueous", "Lead-hydroxide", formula, "PbOH"); //Correct
+		}
+		else if (formula == "Pb(OH)2 (aq)")
+		{
+			this->Register(0, 0.0, 0.0, -401058.0, false, true, "Aqueous", "Lead-dihydroxide", formula, "PbO2H2"); //Correct
 		}
 		else if (formula == "Pb(OH)3 - (aq)")
 		{
-			this->Register(-1, 0.0, 0.0, -575700.0, false, true, "Aqueous", "Lead-trihydroxide", formula, "PbO3H3");
+			this->Register(-1, 0.0, 0.0, -575700.0, false, true, "Aqueous", "Lead-trihydroxide", formula, "PbO3H3"); //Correct
+		}
+		else if (formula == "Pb(OH)4 2- (aq)")
+		{
+			this->Register(-2, 0.0, 0.0, -746579.0, false, true, "Aqueous", "Lead-tetrahydroxide", formula, "PbO4H4"); //Correct
 		}
 		else if (formula == "Pb(OH)2 (s)")
 		{
@@ -1297,7 +1389,7 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "S 2- (aq)")
 		{
-			this->Register(-2, 33000.0, -14.6, 85800.0, true, true, "Aqueous", "Sulfide", formula, "S");
+			this->Register(-2, 33000.0, -14.6, 85800.0, true, true, "Aqueous", "Sulfide", formula, "S"); //Correct
 		}
 		else if (formula == "SO3 2- (aq)")
 		{
@@ -1454,23 +1546,23 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "Zn 2+ (aq)")
 		{
-			this->Register(2, -153900.0, 112.0, -147000.0, true, true, "Aqueous", "Zinc", formula, "Zn");
+			this->Register(2, -153900.0, 112.0, -147000.0, true, true, "Aqueous", "Zinc", formula, "Zn"); //Correct
 		}
 		else if (formula == "ZnOH + (aq)")
 		{
-			this->Register(1, 0.0, 0.0, -330100.0, false, true, "Aqueous", "Zinc-hydroxide", formula, "ZnOH");
+			this->Register(1, 0.0, 0.0, -330100.0, false, true, "Aqueous", "Zinc-hydroxide", formula, "ZnOH"); //Correct
 		}
 		else if (formula == "Zn(OH)2 (aq)")
 		{
-			this->Register(0, 0.0, 0.0, -522300.0, false, true, "Aqueous", "Zinc-dihydroxide", formula, "ZnO2H2");
+			this->Register(0, 0.0, 0.0, -522300.0, false, true, "Aqueous", "Zinc-dihydroxide", formula, "ZnO2H2"); //Correct
 		}
 		else if (formula == "Zn(OH)3 - (aq)")
 		{
-			this->Register(-1, 0.0, 0.0, -694300.0, false, true, "Aqueous", "Zinc-trihydroxide", formula, "ZnO3H3");
+			this->Register(-1, 0.0, 0.0, -694300.0, false, true, "Aqueous", "Zinc-trihydroxide", formula, "ZnO3H3"); //Correct
 		}
 		else if (formula == "Zn(OH)4 2- (aq)")
 		{
-			this->Register(-2, 0.0, 0.0, -858700.0, false, true, "Aqueous", "Zinc-tetrahydroxide", formula, "ZnO4H4");
+			this->Register(-2, 0.0, 0.0, -858700.0, false, true, "Aqueous", "Zinc-tetrahydroxide", formula, "ZnO4H4"); //Correct
 		}
 		else if (formula == "Zn(OH)2 (s)")
 		{

@@ -29,9 +29,9 @@ nl_print: true
 MasterSpecies:
 ---
 - reg:
-  0: SO4 2- (aq)
-  1: HSO4 - (aq)
-  2: H2SO4 (aq)
+  0: S 2- (aq)
+  1: HS - (aq)
+  2: H2S (aq)
   3: H2O (l)
   4: H + (aq)
   5: OH - (aq)
@@ -45,12 +45,12 @@ MassBalance:
   - delta: 
     "H2O (l)": 1
 
-- sulfate:
+- sulfur:
   total_conc: 1e-4
   - delta: 
-    "SO4 2- (aq)": 1
-    "HSO4 - (aq)": 1 
-    "H2SO4 (aq)": 1 
+    "S 2- (aq)": 1
+    "HS - (aq)": 1 
+    "H2S (aq)": 1 
 
 ...
 
@@ -64,14 +64,14 @@ EquilRxn:
 
 - rxn01:
   - stoichiometry:
-    "H2SO4 (aq)": -1
+    "H2S (aq)": -1
     "H + (aq)": 1
-    "HSO4 - (aq)": 1
+    "HS - (aq)": 1
 
 - rxn02:
   - stoichiometry:
-    "HSO4 - (aq)": -1
+    "HS - (aq)": -1
     "H + (aq)": 1
-    "SO4 2- (aq)": 1
+    "S 2- (aq)": 1
 
 ...
