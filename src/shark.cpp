@@ -3914,6 +3914,7 @@ int read_massbalance(SHARK_DATA *shark_dat)
 				int index = shark_dat->MasterList.get_index(y.first);
 				if (index < 0 || index > (shark_dat->numvar-1))
 				{
+					std::cout << "\nInvalid Name in List: " << y.first << std::endl;
 					mError(read_error);
 					return -1;
 				}

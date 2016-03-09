@@ -393,7 +393,7 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "CaCl2 (aq)")
 		{
-			this->Register(0, -795420.0, 108.4, -816050.0, true, true, "Aqueous", "Calcium-chloride", formula, "CaCl2");
+			this->Register(0, -795420.0, 108.4, -816050.0, true, true, "Aqueous", "Calcium-chloride", formula, "CaCl2"); //Correct
 		}
 		else if (formula == "CaAl2Si2O8 (s)")
 		{
@@ -449,11 +449,11 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "CaUO2(CO3)3 2- (aq)")
 		{
-			this->Register(-2, 0.0, 0.0, -3244677.0, false, true, "Aqueous", "Calcium-uranyl-tricarbonate", formula, "CaUO2C3O9");
+			this->Register(-2, 0.0, 0.0, -3244677.0, false, true, "Aqueous", "Calcium-uranyl-tricarbonate", formula, "CaUO2C3O9"); //Correct
 		}
 		else if (formula == "Ca2UO2(CO3)3 (aq)")
 		{
-			this->Register(0, 0.0, 0.0, -3816643.0, false, true, "Aqueous", "DiCalcium-uranyl-tricarbonate", formula, "Ca2UO2C3O9");
+			this->Register(0, 0.0, 0.0, -3816643.0, false, true, "Aqueous", "DiCalcium-uranyl-tricarbonate", formula, "Ca2UO2C3O9"); //Correct
 		}
 		else if (formula == "Ca(OH)2 (s)")
 		{
@@ -533,7 +533,7 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "Cl2 (aq)")
 		{
-			this->Register(0, -23400.0, 121.0, 6900.0, true, true, "Aqueous", "Chlorine", formula, "Cl2");
+			this->Register(0, -23400.0, 121.0, 6900.0, true, true, "Aqueous", "Chlorine", formula, "Cl2"); //Correct
 		}
 		else if (formula == "ClO - (aq)")
 		{
@@ -1123,7 +1123,7 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "MgUO2(CO3)3 2- (aq)")
 		{
-			this->Register(-2, 0.0, 0.0, -3140517.0, false, true, "Aqueous", "Magnesium-uranyl-tricarbonate", formula, "MgUO2C3O9");
+			this->Register(-2, 0.0, 0.0, -3140517.0, false, true, "Aqueous", "Magnesium-uranyl-tricarbonate", formula, "MgUO2C3O9"); //Correct
 		}
 		else if (formula == "Mg(OH)2 (s)")
 		{
@@ -1470,7 +1470,7 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "UO2(OH)3 - (aq)")
 		{
-			this->Register(-1,0.0,0.0,-908303.0,false,true,"Aqueous","Uranyl-trihydroxide",formula,"UO2O3H3"); //Correct
+			this->Register(-1,0.0,0.0,-1546571.0,false,true,"Aqueous","Uranyl-trihydroxide",formula,"UO2O3H3"); //Correct
 		}
 		else if (formula == "UO2(OH)4 2- (aq)")
 		{

@@ -93,7 +93,6 @@ MassBalance:
     "UO2CO3 (aq)": 1
     "UO2(CO3)2 2- (aq)": 2
     "UO2(CO3)3 4- (aq)": 3
-    "UO2CO3AO2 2- (aq)": 1
     "CaUO2(CO3)3 2- (aq)": 3
     "Ca2UO2(CO3)3 (aq)": 3
     "MgUO2(CO3)3 2- (aq)": 3
@@ -262,5 +261,121 @@ EquilRxn:
     "UO2 2+ (aq)": -1
     "CO3 2- (aq)": -3
     "UO2(CO3)3 4- (aq)": 1
+
+- rxn15:
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "H2O (l)": -2
+    "UO2(OH)2 (aq)": 1
+    "H + (aq)": 2
+
+- rxn16:
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "H2O (l)": -4
+    "UO2(OH)4 2- (aq)": 1
+    "H + (aq)": 4
+
+- rxn17:
+  - stoichiometry:
+    "UO2 2+ (aq)": -2
+    "H2O (l)": -1
+    "(UO2)2OH 3+ (aq)": 1
+    "H + (aq)": 1
+
+- rxn18:
+  - stoichiometry:
+    "UO2 2+ (aq)": -3
+    "H2O (l)": -4
+    "(UO2)3(OH)4 2+ (aq)": 1
+    "H + (aq)": 4
+
+- rxn19:
+  - stoichiometry:
+    "UO2 2+ (aq)": -3
+    "H2O (l)": -7
+    "(UO2)3(OH)7 - (aq)": 1
+    "H + (aq)": 7
+
+- rxn20:
+  - stoichiometry:
+    "UO2 2+ (aq)": -4
+    "H2O (l)": -7
+    "(UO2)4(OH)7 + (aq)": 1
+    "H + (aq)": 7
+
+- rxn21:
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "Ca 2+ (aq)": -1
+    "CO3 2- (aq)": -3
+    "CaUO2(CO3)3 2- (aq)": 1
+
+- rxn22:
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "Ca 2+ (aq)": -2
+    "CO3 2- (aq)": -3
+    "Ca2UO2(CO3)3 (aq)": 1
+
+- rxn23:
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "Mg 2+ (aq)": -1
+    "CO3 2- (aq)": -3
+    "MgUO2(CO3)3 2- (aq)": 1
+
+- rxn24:
+  - stoichiometry:
+    "Cl - (aq)": -2
+    "Cl2 (aq)": 1
+
+- rxn25:
+  - stoichiometry:
+    "Cl - (aq)": -2
+    "Ca 2+ (aq)": -1
+    "CaCl2 (aq)": 1
+
+- rxn26:
+  - stoichiometry:
+    "OH - (aq)": -1
+    "Ca 2+ (aq)": -1
+    "CaOH + (aq)": 1
+
+- rxn27:
+  - stoichiometry:
+    "OH - (aq)": -2
+    "Ca 2+ (aq)": -1
+    "Ca(OH)2 (aq)": 1
+
+- rxn28:
+  - stoichiometry:
+    "OH - (aq)": -1
+    "Mg 2+ (aq)": -1
+    "MgOH + (aq)": 1
+
+- rxn29:
+  - stoichiometry:
+    "OH - (aq)": -2
+    "Mg 2+ (aq)": -1
+    "Mg(OH)2 (aq)": 1
+
+- rxn30:
+  - stoichiometry:
+    "Na2CO3 (aq)": -1
+    "Na + (aq)": 2
+    "CO3 2- (aq)": 1
+
+- rxn31:
+  - stoichiometry:
+    "HCl (aq)": -1 
+    "H + (aq)": 1
+    "Cl - (aq)": 1
+
+- rxn32:
+  - stoichiometry:
+    "NaOH (aq)": -1 
+    "Na + (aq)": 1
+    "OH - (aq)": 1
 
 ...
