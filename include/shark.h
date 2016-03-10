@@ -808,6 +808,7 @@ typedef struct SHARK_DATA
 	double time = 0.0;								///< Current value of time (starts from t = 0.0 hrs)
 	double time_old = 0.0;							///< Previous value of time (start from t = 0.0 hrs)
 	double pH = 7.0;								///< Value of pH if needed (default = 7)
+	double pH_step = 0.5;							///< Value by which to increment pH when doing a speciation curve (default = 0.5)
 	double volume = 1.0;							///< Volume of the domain in liters (default = 1 L)
 	double Norm = 0.0;								///< Current value of euclidean norm in solution
 

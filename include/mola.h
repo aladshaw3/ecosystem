@@ -217,6 +217,16 @@
  *			H2SeO3 (aq) \n
  *			HSeO4 - (aq) \n
  *			H4SiO4 (aq) \n
+ *			HV2O5 - (aq) \n
+ *			H4VO4 + (aq) \n
+ *			H3VO4 (aq) \n
+ *			H2VO4 - (aq) \n
+ *			HVO4 2- (aq) \n
+ *			H4VO4(C2O4)2 3- (aq) \n
+ *			H4VO4C2O4 - (aq) \n
+ *			H2V10O28 4- (aq) \n
+ *			HV10O28 5- (aq) \n
+ *			HV2O7 3- (aq) \n
  *			
  *			I2 (s) \n
  *			I2 (aq) \n
@@ -319,6 +329,37 @@
  *			UO2CO3 (aq) \n
  *			UO2(CO3)2 2- (aq) \n
  *			UO2(CO3)3 4- (aq) \n
+ *			UO2Cl + (aq) \n
+ *			UO2Cl2 (aq) \n
+ *			UO2Cl3 - (aq) \n
+ *			UO2SO4 (aq) \n
+ *			UO2(SO4)2 2- (aq) \n
+ *
+ *			VO 2+ (aq) \n
+ *			VOOH + (aq) \n
+ *			VO(OH)2 (s) \n
+ *			V2O4 (s) \n
+ *			(VO)2(OH)2 + (aq) \n
+ *			VOF + (aq) \n
+ *			VOF2 (aq) \n
+ *			VOF3 - (aq) \n
+ *			VOF4 2- (aq) \n
+ *			VOCl + (aq) \n
+ *			VOSO4 (aq) \n
+ *			VO(C2O4)2 2- (aq) \n
+ *			VOOHC2O4 - (aq) \n
+ *			VOCH3COO + (aq) \n
+ *			VO(CH3COO)2 (aq) \n
+ *			VOCO3 (aq) \n
+ *			VOOHCO3 - (aq) \n
+ *			V4O9 2- (aq) \n
+ *			VO2 + (aq) \n
+ *			VO4 3- (aq) \n
+ *			V2O5 (s) \n
+ *			V10O28 6- (aq) \n
+ *			V2O7 4- (aq) \n
+ *			V4O12 4- (aq) \n
+ *			VO2SO4 - (aq) \n
  *
  *			Zn (s) \n
  *			Zn 2+ (aq) \n

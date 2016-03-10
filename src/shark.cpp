@@ -3564,6 +3564,22 @@ int read_scenario(SHARK_DATA *shark_dat)
 		{
 			shark_dat->SpeciationCurve = false;
 		}
+		
+		if (shark_dat->SpeciationCurve == true)
+		{
+			try
+			{
+				shark_dat->pH_step = shark_dat->yaml_object.getYamlWrapper()("Scenario")("run_time")["pH_step"].getDouble();
+				if (shark_dat->pH_step < 0.01)
+					shark_dat->pH_step = 0.01;
+				if (shark_dat->pH_step > 1.0)
+					shark_dat->pH_step = 1.0;
+			}
+			catch (std::out_of_range)
+			{
+				shark_dat->pH_step = 0.5;
+			}
+		}
 	}
 	else
 	{
@@ -5422,7 +5438,6 @@ int SHARK(SHARK_DATA *shark_dat)
 	//Iteratively run the simulation cases
 	do
 	{
-
 		//Start console messages
 		if (shark_dat->Console_Output == true)
 		{
@@ -5442,7 +5457,7 @@ int SHARK(SHARK_DATA *shark_dat)
 
 		//Conditionally change options
 		if (shark_dat->SpeciationCurve == true)
-			shark_dat->pH = shark_dat->pH + 0.5;
+			shark_dat->pH = shark_dat->pH + shark_dat->pH_step;
 
 		//End console messages
 		if (shark_dat->Console_Output == true)

@@ -1034,6 +1034,46 @@ void Molecule::Register(std::string formula)
 		{
 			this->Register(0, -1468600.0, 180.0, -1316700.0, true, true, "Aqueous", "Silicic-Acid", formula, "H4SiO4");
 		}
+		else if (formula == "HV2O5 - (aq)")
+		{
+			this->Register(-1, 0.0, 0.0, -1508960.0, true, true, "Aqueous", "Vanadium(IV)-oxide-Acid", formula, "HV2O5");
+		}
+		else if (formula == "H4VO4 + (aq)")
+		{
+			this->Register(1, -1220000.0, 97.5, -1060000.0, true, true, "Aqueous", "Vanadium(V)-oxide-Acid", formula, "H4VO4");
+		}
+		else if (formula == "H3VO4 (aq)")
+		{
+			this->Register(0, -1210000.0, 184.0, -1040000.0, true, true, "Aqueous", "Trihydro-Vanadium(V)-oxide", formula, "H3VO4");
+		}
+		else if (formula == "H2VO4 - (aq)")
+		{
+			this->Register(-1, -1170000.0, 121.0, -1020000.0, true, true, "Aqueous", "Dihydro-Vanadium(V)-oxide", formula, "H2VO4");
+		}
+		else if (formula == "HVO4 2- (aq)")
+		{
+			this->Register(-2, -1160000.0, 16.7, -975000.0, true, true, "Aqueous", "Hydro-Vanadium(V)-oxide", formula, "HVO4");
+		}
+		else if (formula == "H4VO4(C2O4)2 3- (aq)")
+		{
+			this->Register(-3, 0.0, 0.0, -2467000.0, false, true, "Aqueous", "Vanadium(V)-oxide-dioxalate", formula, "H4VO4C4O8");
+		}
+		else if (formula == "H4VO4C2O4 - (aq)")
+		{
+			this->Register(-1, 0.0, 0.0, -1774000.0, false, true, "Aqueous", "Vanadium(V)-oxide-oxalate", formula, "H4VO4C2O4");
+		}
+		else if (formula == "H2V10O28 4- (aq)")
+		{
+			this->Register(-4, 0.0, 0.0, -7729000.0, false, true, "Aqueous", "Vanadium(V)-oxide-Acid", formula, "H2V10O28");
+		}
+		else if (formula == "HV10O28 5- (aq)")
+		{
+			this->Register(-5, 0.0, 0.0, -7708000.0, false, true, "Aqueous", "Hydro-Vanadium(V)-oxide", formula, "HV10O28");
+		}
+		else if (formula == "HV2O7 3- (aq)")
+		{
+			this->Register(-3, 0.0, 0.0, -1792000.0, false, true, "Aqueous", "Hydro-Vanadium(V)-oxide", formula, "HV2O7");
+		}
 		else
 		{
 			mError(unregistered_name); return;
@@ -1512,6 +1552,26 @@ void Molecule::Register(std::string formula)
 		{
 			this->Register(-4,-3083890.0,38.446,-2660914.0,true,true,"Aqueous","Uranyl-tricarbonate","UO2(CO3)3 4- (aq)","UO2C3O9"); //Correct
 		}
+		else if (formula == "UO2Cl + (aq)")
+		{
+			this->Register(1, 0.0, 0.0, -1084821.0, false, true, "Aqueous", "Uranyl-chloride", formula, "UO2Cl"); //Correct
+		}
+		else if (formula == "UO2Cl2 (aq)")
+		{
+			this->Register(0, 0.0, 0.0, -1208876.0, false, true, "Aqueous", "Uranyl-dichloride", formula, "UO2Cl2"); //Correct
+		}
+		else if (formula == "UO2Cl3 - (aq)")
+		{
+			this->Register(-1, 0.0, 0.0, -1331618.0, false, true, "Aqueous", "Uranyl-trichloride", formula, "UO2Cl3"); //Correct
+		}
+		else if (formula == "UO2SO4 (aq)")
+		{
+			this->Register(0, 0.0, 0.0, -1706849.0, false, true, "Aqueous", "Uranyl-sulfate", formula, "UO2SO4"); //Correct
+		}
+		else if (formula == "UO2(SO4)2 2- (aq)")
+		{
+			this->Register(-2, 0.0, 0.0, -2456241.0, false, true, "Aqueous", "Uranyl-disulfate", formula, "UO2S2O8"); //Correct
+		}
 		else
 		{
 			mError(unregistered_name); return;
@@ -1520,7 +1580,110 @@ void Molecule::Register(std::string formula)
 	else if (first == 'V')
 	{
 		//List of molecules starting with V
-		mError(unregistered_name); return;
+		if (formula == "VO 2+ (aq)")
+		{
+			this->Register(2, -486600.0, -133.9, -446400.0, true, true, "Aqueous", "Vanadyl(IV)", formula, "VO");
+		}
+		else if (formula == "VOOH + (aq)")
+		{
+			this->Register(1, -717400.0, 12.0, -651200.0, true, true, "Aqueous", "Vanadyl(IV)-hydroxide", formula, "VOOH");
+		}
+		else if (formula == "VO(OH)2 (s)")
+		{
+			this->Register(0, 0.0, 0.0, -885800.0, false, true, "Solid", "Vanadyl(IV)-dihydroxide", formula, "VOO2H2");
+		}
+		else if (formula == "V2O4 (s)")
+		{
+			this->Register(0, 0.0, 0.0, -1318600.0, false, true, "Solid", "Vanadium(IV)-oxide", formula, "V2O4");
+		}
+		else if (formula == "(VO)2(OH)2 + (aq)")
+		{
+			this->Register(2, -1434000.0, 115.9, -1329000.0, true, true, "Aqueous", "DiVanadyl(IV)-dihydroxide", formula, "V2O2O2H2");
+		}
+		else if (formula == "VOF + (aq)")
+		{
+			this->Register(1, 0.0, 0.0, -745000.0, false, true, "Aqueous", "Vanadyl(IV)-fluoride", formula, "VOF");
+		}
+		else if (formula == "VOF2 (aq)")
+		{
+			this->Register(0, 0.0, 0.0, -1033000.0, false, true, "Aqueous", "Vanadyl(IV)-difluoride", formula, "VOF2");
+		}
+		else if (formula == "VOF3 - (aq)")
+		{
+			this->Register(-1, 0.0, 0.0, -1322000.0, false, true, "Aqueous", "Vanadyl(IV)-trifluoride", formula, "VOF3");
+		}
+		else if (formula == "VOF4 2- (aq)")
+		{
+			this->Register(-2, 0.0, 0.0, -1604000.0, false, true, "Aqueous", "Vanadyl(IV)-tetrafluoride", formula, "VOF4");
+		}
+		else if (formula == "VOCl + (aq)")
+		{
+			this->Register(1, 0.0, 0.0, -577000.0, false, true, "Aqueous", "Vanadyl(IV)-chloride", formula, "VOCl");
+		}
+		else if (formula == "VOSO4 (aq)")
+		{
+			this->Register(0, -1380000.0, -13.4, -1205000.0, true, true, "Aqueous", "Vanadyl(IV)-sulfate", formula, "VOSO4");
+		}
+		else if (formula == "VO(C2O4)2 2- (aq)")
+		{
+			this->Register(-2, 0.0, 0.0, -1868000.0, false, true, "Aqueous", "Vanadyl(IV)-dioxalate", formula, "VOC4O8");
+		}
+		else if (formula == "VOOHC2O4 - (aq)")
+		{
+			this->Register(-1, 0.0, 0.0, -1365000.0, false, true, "Aqueous", "Vanadyl(IV)-hydroxide-oxalate", formula, "VOOHC2O4");
+		}
+		else if (formula == "VOCH3COO + (aq)")
+		{
+			this->Register(1, 0.0, 0.0, -826400.0, false, true, "Aqueous", "Vanadyl(IV)-acetate", formula, "VOCH3COO");
+		}
+		else if (formula == "VO(CH3COO)2 (aq)")
+		{
+			this->Register(0, 0.0, 0.0, -1200000.0, false, true, "Aqueous", "Vanadyl(IV)-diacetate", formula, "VOC2H6C2O2O2");
+		}
+		else if (formula == "VOCO3 (aq)")
+		{
+			this->Register(0, -1150000.0, -65.9, -994000.0, true, true, "Aqueous", "Vanadyl(IV)-carbonate", formula, "VOCO3");
+		}
+		else if (formula == "VOOHCO3 - (aq)")
+		{
+			this->Register(-1, 0.0, 0.0, -1220000.0, false, true, "Aqueous", "Vanadyl(IV)-hydroxide-carbonate", formula, "VOOHCO3");
+		}
+		else if (formula == "V4O9 2- (aq)")
+		{
+			this->Register(-2, 0.0, 0.0, -2784000.0, false, true, "Aqueous", "Vanadium(IV)-oxide", formula, "V4O9");
+		}
+		else if (formula == "VO2 + (aq)")
+		{
+			this->Register(1, 0.0, 0.0, -587000.0, false, true, "Aqueous", "Vanadyl(V)", formula, "VO2");
+		}
+		else if (formula == "VO4 3- (aq)")
+		{
+			this->Register(-3, -1070000.0, -172.0, -899000.0, true, true, "Aqueous", "Vanadium(V)-oxide", formula, "VO4");
+		}
+		else if (formula == "V2O5 (s)")
+		{
+			this->Register(0, 0.0, 0.0, -1419400.0, false, true, "Solid", "Vanadium(V)-oxide", formula, "V2O5");
+		}
+		else if (formula == "V10O28 6- (aq)")
+		{
+			this->Register(-6, 0.0, 0.0, -7675000.0, false, true, "Aqueous", "Vanadium(V)-oxide", formula, "V10O28");
+		}
+		else if (formula == "V2O7 4- (aq)")
+		{
+			this->Register(-4, 0.0, 0.0, -1720000.0, false, true, "Aqueous", "Vanadium(V)-oxide", formula, "V2O7");
+		}
+		else if (formula == "V4O12 4- (aq)")
+		{
+			this->Register(-4, 0.0, 0.0, -3202000.0, false, true, "Aqueous", "Vanadium(V)-oxide", formula, "V4O12");
+		}
+		else if (formula == "VO2SO4 - (aq)")
+		{
+			this->Register(-1, 0.0, 0.0, -1337000.0, false, true, "Aqueous", "Vanadyl(V)-sulfate", formula, "VO2SO4");
+		}
+		else
+		{
+			mError(unregistered_name); return;
+		}
 	}
 	else if (first == 'W')
 	{
