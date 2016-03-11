@@ -1040,19 +1040,19 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "H4VO4 + (aq)")
 		{
-			this->Register(1, -1220000.0, 97.5, -1060000.0, true, true, "Aqueous", "Vanadium(V)-oxide-Acid", formula, "H4VO4");
+			this->Register(1, 0.0, 0.0, -1025000.0, false, true, "Aqueous", "Vanadium(V)-oxide-Acid", formula, "H4VO4"); //Correct
 		}
 		else if (formula == "H3VO4 (aq)")
 		{
-			this->Register(0, -1210000.0, 184.0, -1040000.0, true, true, "Aqueous", "Trihydro-Vanadium(V)-oxide", formula, "H3VO4");
+			this->Register(0, 0.0, 0.0, -1040000.0, false, true, "Aqueous", "Trihydro-Vanadium(V)-oxide", formula, "H3VO4"); //Correct
 		}
 		else if (formula == "H2VO4 - (aq)")
 		{
-			this->Register(-1, -1170000.0, 121.0, -1020000.0, true, true, "Aqueous", "Dihydro-Vanadium(V)-oxide", formula, "H2VO4");
+			this->Register(-1, 0.0, 0.0, -1020000.0, false, true, "Aqueous", "Dihydro-Vanadium(V)-oxide", formula, "H2VO4"); //Correct
 		}
 		else if (formula == "HVO4 2- (aq)")
 		{
-			this->Register(-2, -1160000.0, 16.7, -975000.0, true, true, "Aqueous", "Hydro-Vanadium(V)-oxide", formula, "HVO4");
+			this->Register(-2, 0.0, 0.0, -975000.0, false, true, "Aqueous", "Hydro-Vanadium(V)-oxide", formula, "HVO4"); //Correct
 		}
 		else if (formula == "H4VO4(C2O4)2 3- (aq)")
 		{
@@ -1072,7 +1072,7 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "HV2O7 3- (aq)")
 		{
-			this->Register(-3, 0.0, 0.0, -1792000.0, false, true, "Aqueous", "Hydro-Vanadium(V)-oxide", formula, "HV2O7");
+			this->Register(-3, 0.0, 0.0, -1792000.0, false, true, "Aqueous", "Hydro-Vanadium(V)-oxide", formula, "HV2O7"); //Correct
 		}
 		else
 		{
@@ -1582,7 +1582,7 @@ void Molecule::Register(std::string formula)
 		//List of molecules starting with V
 		if (formula == "VO 2+ (aq)")
 		{
-			this->Register(2, -486600.0, -133.9, -446400.0, true, true, "Aqueous", "Vanadyl(IV)", formula, "VO");
+			this->Register(2, -486600.0, -133.9, -446400.0, true, true, "Aqueous", "Vanadyl(IV)", formula, "VO"); //Correct
 		}
 		else if (formula == "VOOH + (aq)")
 		{
@@ -1654,11 +1654,11 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "VO2 + (aq)")
 		{
-			this->Register(1, 0.0, 0.0, -587000.0, false, true, "Aqueous", "Vanadyl(V)", formula, "VO2");
+			this->Register(1, 0.0, 0.0, -587000.0, false, true, "Aqueous", "Vanadyl(V)", formula, "VO2"); //Correct
 		}
 		else if (formula == "VO4 3- (aq)")
 		{
-			this->Register(-3, -1070000.0, -172.0, -899000.0, true, true, "Aqueous", "Vanadium(V)-oxide", formula, "VO4");
+			this->Register(-3, 0.0, 0.0, -899000.0, false, true, "Aqueous", "Vanadium(V)-oxide", formula, "VO4"); //Correct
 		}
 		else if (formula == "V2O5 (s)")
 		{
@@ -1670,7 +1670,7 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "V2O7 4- (aq)")
 		{
-			this->Register(-4, 0.0, 0.0, -1720000.0, false, true, "Aqueous", "Vanadium(V)-oxide", formula, "V2O7");
+			this->Register(-4, 0.0, 0.0, -1720000.0, false, true, "Aqueous", "Vanadium(V)-oxide", formula, "V2O7"); //Correct
 		}
 		else if (formula == "V4O12 4- (aq)")
 		{
@@ -1678,7 +1678,15 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "VO2SO4 - (aq)")
 		{
-			this->Register(-1, 0.0, 0.0, -1337000.0, false, true, "Aqueous", "Vanadyl(V)-sulfate", formula, "VO2SO4");
+			this->Register(-1, 0.0, 0.0, -1337000.0, false, true, "Aqueous", "Vanadyl(V)-sulfate", formula, "VO2SO4"); //Correct
+		}
+		else if (formula == "VO2OHCO3 2- (aq)")
+		{
+			this->Register(-2, 0.0, 0.0, -1375869.0, false, true, "Aqueous", "Vanadyl(V)-hydroxide-carbonate", formula, "VO2OHCO3"); //Correct
+		}
+		else if (formula == "VO2(CO3)2 3- (aq)")
+		{
+			this->Register(-3, 0.0, 0.0, -1720271.0, false, true, "Aqueous", "Vanadyl(V)-dicarbonate", formula, "VO2C2O6"); //Correct
 		}
 		else
 		{

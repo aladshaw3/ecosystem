@@ -360,6 +360,8 @@
  *			V2O7 4- (aq) \n
  *			V4O12 4- (aq) \n
  *			VO2SO4 - (aq) \n
+ *			VO2OHCO3 2- (aq) \n
+ *			VO2(CO3)2 3- (aq) \n
  *
  *			Zn (s) \n
  *			Zn 2+ (aq) \n

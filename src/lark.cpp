@@ -3399,7 +3399,7 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 			pjfnk_dat->kms_dat.outer_reltol = pjfnk_dat->lin_tol_rel;
 			pjfnk_dat->kms_dat.maxit = x.rows();
 			success = krylovMultiSpace(jacvec,pjfnk_dat->precon, pjfnk_dat->F, &pjfnk_dat->kms_dat, pjfnk_dat, pjfnk_dat->precon_data);
-			pjfnk_dat->l_iter = pjfnk_dat->l_iter + pjfnk_dat->gmresr_dat.total_iter;
+			pjfnk_dat->l_iter = pjfnk_dat->l_iter + pjfnk_dat->kms_dat.total_iter;
 			pjfnk_dat->fun_call = pjfnk_dat->fun_call + pjfnk_dat->kms_dat.total_iter;
 			if (success != 0) {mError(simulation_fail); success = -1; break;}
 			

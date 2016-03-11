@@ -1,0 +1,200 @@
+# This will serve as a test input file for shark to demo how to structure the document
+
+Scenario:
+---
+- vars_fun:
+  numvar: 20
+  num_ssr: 15
+  num_mbe: 4
+
+- sys_data:
+  act_fun: davies    
+  const_pH: false	
+  temp: 298.15      
+
+- run_time:
+  steady: true         
+  specs_curve: true    
+...
+
+SolverOptions:
+---
+line_search: true      
+search_type: standard
+linear_solve: fom
+nl_print: true
+l_print: false
+
+- kms_options:
+  inner_tol: 0.1
+  max_level: 0
+
+...
+
+MasterSpecies:
+---
+- reg:
+  0: VO2 + (aq)
+  1: H4VO4 + (aq)
+  2: H3VO4 (aq)
+  3: H2VO4 - (aq)
+  4: HVO4 2- (aq)
+  5: VO4 3- (aq)
+  6: HV2O7 3- (aq)
+  7: V2O7 4- (aq)
+  8: VO2SO4 - (aq)
+  9: VO2OHCO3 2- (aq)
+  10: VO2(CO3)2 3- (aq)
+  11: H2SO4 (aq)
+  12: HSO4 - (aq)
+  13: SO4 2- (aq)
+  14: H2CO3 (aq)
+  15: HCO3 - (aq)
+  16: CO3 2- (aq)
+  17: H2O (l)
+  18: H + (aq)
+  19: OH - (aq)
+
+...
+
+MassBalance:
+---
+- water:
+  total_conc: 1
+  - delta: 
+    "H2O (l)": 1
+
+- sulfate:
+  total_conc: 1.0
+  - delta: 
+    "SO4 2- (aq)": 1
+    "HSO4 - (aq)": 1
+    "H2SO4 (aq)": 1 
+    "VO2SO4 - (aq)": 1
+
+- carbonate:
+  total_conc: 1.0
+  - delta: 
+    "H2CO3 (aq)": 1
+    "HCO3 - (aq)": 1
+    "CO3 2- (aq)": 1 
+    "VO2OHCO3 2- (aq)": 1
+    "VO2(CO3)2 3- (aq)": 2
+
+- vanadium(v):
+  total_conc: 1e-4
+  - delta: 
+    "VO2 + (aq)": 1
+    "H4VO4 + (aq)": 1 
+    "H3VO4 (aq)": 1 
+    "H2VO4 - (aq)": 1 
+    "HVO4 2- (aq)": 1
+    "VO4 3- (aq)": 1
+    "HV2O7 3- (aq)": 2
+    "V2O7 4- (aq)": 2
+    "VO2SO4 - (aq)": 1
+    "VO2OHCO3 2- (aq)": 1
+    "VO2(CO3)2 3- (aq)": 1
+
+...
+
+EquilRxn:
+---
+- rxn00:
+  - stoichiometry:
+    "H2O (l)": -1
+    "OH - (aq)": 1
+    "H + (aq)": 1
+
+- rxn01:
+  - stoichiometry:
+    "VO2 + (aq)": -1
+    "H2O (l)": -2
+    "VO4 3- (aq)": 1
+    "H + (aq)": 4
+
+- rxn02:
+  - stoichiometry:
+    "VO2 + (aq)": -2
+    "H2O (l)": -3
+    "V2O7 4- (aq)": 1
+    "H + (aq)": 6
+
+- rxn03:
+  - stoichiometry:
+    "H4VO4 + (aq)": -1
+    "H + (aq)": 1
+    "H3VO4 (aq)": 1
+
+- rxn04:
+  - stoichiometry:
+    "H3VO4 (aq)": -1
+    "H + (aq)": 1
+    "H2VO4 - (aq)": 1
+
+- rxn05:
+  - stoichiometry:
+    "H2VO4 - (aq)": -1
+    "H + (aq)": 1
+    "HVO4 2- (aq)": 1
+
+- rxn06:
+  - stoichiometry:
+    "HVO4 2- (aq)": -1
+    "H + (aq)": 1
+    "VO4 3- (aq)": 1
+
+- rxn07:
+  - stoichiometry:
+    "HV2O7 3- (aq)": -1
+    "H + (aq)": 1
+    "V2O7 4- (aq)": 1
+
+- rxn08:
+  - stoichiometry:
+    "H2SO4 (aq)": -1
+    "H + (aq)": 1
+    "HSO4 - (aq)": 1
+
+- rxn09:
+  - stoichiometry:
+    "HSO4 - (aq)": -1
+    "H + (aq)": 1
+    "SO4 2- (aq)": 1
+
+- rxn10:
+  - stoichiometry:
+    "VO2SO4 - (aq)": -1
+    "H + (aq)": -1
+    "VO2 + (aq)": 1
+    "HSO4 - (aq)": 1
+
+- rxn11:
+  - stoichiometry:
+    "H2CO3 (aq)": -1
+    "H + (aq)": 1
+    "HCO3 - (aq)": 1
+
+- rxn12:
+  - stoichiometry:
+    "HCO3 - (aq)": -1
+    "H + (aq)": 1
+    "CO3 2- (aq)": 1
+
+- rxn13:
+  - stoichiometry:
+    "H2VO4 - (aq)": -1
+    "H + (aq)": -1
+    "CO3 2- (aq)": -1
+    "H2O (l)": 1
+    "VO2OHCO3 2- (aq)": 1
+
+- rxn14:
+  - stoichiometry:
+    "H2VO4 - (aq)": -1
+    "H + (aq)": -2
+    "CO3 2- (aq)": -2
+    "H2O (l)": 2
+    "VO2(CO3)2 3- (aq)": 1
+
+...

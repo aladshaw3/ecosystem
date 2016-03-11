@@ -2223,8 +2223,20 @@ void print2file_shark_header(SHARK_DATA *shark_dat)
 		fprintf(shark_dat->OutputFile, "GCR\n");
 	else if (shark_dat->Newton_data.linear_solver == GMRESR)
 		fprintf(shark_dat->OutputFile, "GMRESR\n");
+	else if (shark_dat->Newton_data.linear_solver == KMS)
+		fprintf(shark_dat->OutputFile, "KMS\n");
 	else
 		fprintf(shark_dat->OutputFile, "UNDEFINED!\n");
+	if (shark_dat->Newton_data.linear_solver == GMRESR)
+	{
+		fprintf(shark_dat->OutputFile, "\tgmres_tol = %.6g\n",shark_dat->Newton_data.gmresr_dat.gmres_tol);
+		fprintf(shark_dat->OutputFile, "\tgmres_restart = %i\n",shark_dat->Newton_data.gmresr_dat.gmres_restart);
+	}
+	if (shark_dat->Newton_data.linear_solver == KMS)
+	{
+		fprintf(shark_dat->OutputFile, "\tinner_tol = %.6g\n",shark_dat->Newton_data.kms_dat.inner_reltol);
+		fprintf(shark_dat->OutputFile, "\tmax_level = %i\n",shark_dat->Newton_data.kms_dat.max_level);
+	}
 	fprintf(shark_dat->OutputFile, "Maximum Non-Linear Iterations = %i\n", shark_dat->Newton_data.nl_maxit);
 	fprintf(shark_dat->OutputFile, "Absolute Non-Linear Tolerance = %.6g\n", shark_dat->Newton_data.nl_tol_abs);
 	fprintf(shark_dat->OutputFile, "Relative Non-Linear Tolerance = %.6g\n", shark_dat->Newton_data.nl_tol_rel);
@@ -2233,11 +2245,7 @@ void print2file_shark_header(SHARK_DATA *shark_dat)
 	fprintf(shark_dat->OutputFile, "\n-----------------END SOLVER OPTIONS-------------------\n\n");
 
 	fprintf(shark_dat->OutputFile, "-----------------SHARK SIMULATION RESULTS-------------------\n\n");
-	fprintf(shark_dat->OutputFile, "Time\tT\tpH");
-	for (int i=0; i<shark_dat->MasterList.list_size(); i++)
-		fprintf(shark_dat->OutputFile, "\t[ %s ]", shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
-	fprintf(shark_dat->OutputFile, "\tConverged?\tE.Norm\tNL_iter\tL_iter");
-	fprintf(shark_dat->OutputFile, "\n");
+	
 	fprintf(shark_dat->OutputFile, "(hr)\t(K)\t(-)");
 	for (int i=0; i<shark_dat->MasterList.list_size(); i++)
 	{
@@ -2265,6 +2273,12 @@ void print2file_shark_header(SHARK_DATA *shark_dat)
 		}
 	}
 	fprintf(shark_dat->OutputFile, "\t(-)\t(-)\t(-)\t(-)");
+	fprintf(shark_dat->OutputFile, "\n");
+	
+	fprintf(shark_dat->OutputFile, "Time\tT\tpH");
+	for (int i=0; i<shark_dat->MasterList.list_size(); i++)
+		fprintf(shark_dat->OutputFile, "\t[ %s ]", shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
+	fprintf(shark_dat->OutputFile, "\tConverged?\tE.Norm\tNL_iter\tL_iter");
 	fprintf(shark_dat->OutputFile, "\n");
 }
 
@@ -3351,6 +3365,8 @@ int linearsolve_choice(const std::string &input)
 		choice = GCR;
 	else if (copy == "gmresr")
 		choice = GMRESR;
+	else if (copy == "kms")
+		choice = KMS;
 	else
 		choice = GMRESRP;
 
@@ -3681,12 +3697,12 @@ int read_options(SHARK_DATA *shark_dat)
 		}
 	}
 
-	if (shark_dat->Newton_data.linear_solver == GMRESRP || shark_dat->Newton_data.linear_solver == GMRESLP || shark_dat->Newton_data.linear_solver == GCR || shark_dat->Newton_data.linear_solver == GMRESR)
+	if (shark_dat->Newton_data.linear_solver == GMRESRP || shark_dat->Newton_data.linear_solver == GMRESLP || shark_dat->Newton_data.linear_solver == GCR || shark_dat->Newton_data.linear_solver == GMRESR || shark_dat->Newton_data.linear_solver == KMS)
 	{
 		int restart;
 		try
 		{
-			restart = shark_dat->yaml_object.getYamlWrapper()("SolverOptions")["restart"].getDouble();
+			restart = shark_dat->yaml_object.getYamlWrapper()("SolverOptions")["restart"].getInt();
 		}
 		catch (std::out_of_range)
 		{
@@ -3716,9 +3732,55 @@ int read_options(SHARK_DATA *shark_dat)
 			case GCR:
 				shark_dat->Newton_data.gcr_dat.restart = restart;
 				break;
+				
+			case KMS:
+				shark_dat->Newton_data.kms_dat.restart = restart;
+				break;
 
 			default:
 				break;
+		}
+	}
+	
+	if (shark_dat->Newton_data.linear_solver == GMRESR)
+	{
+		try
+		{
+			shark_dat->Newton_data.gmresr_dat.gmres_tol = shark_dat->yaml_object.getYamlWrapper()("SolverOptions")("gmresr_options")["inner_tol"].getDouble();
+		}
+		catch (std::out_of_range)
+		{
+			shark_dat->Newton_data.gmresr_dat.gmres_tol = 0.1;
+		}
+		
+		try
+		{
+			shark_dat->Newton_data.gmresr_dat.gmres_restart = shark_dat->yaml_object.getYamlWrapper()("SolverOptions")("gmresr_options")["inner_restart"].getInt();
+		}
+		catch (std::out_of_range)
+		{
+			shark_dat->Newton_data.gmresr_dat.gmres_restart = -1;
+		}
+	}
+	
+	if (shark_dat->Newton_data.linear_solver == KMS)
+	{
+		try
+		{
+			shark_dat->Newton_data.kms_dat.max_level = shark_dat->yaml_object.getYamlWrapper()("SolverOptions")("kms_options")["max_level"].getInt();
+		}
+		catch (std::out_of_range)
+		{
+			shark_dat->Newton_data.kms_dat.max_level = 0;
+		}
+		
+		try
+		{
+			shark_dat->Newton_data.kms_dat.inner_reltol = shark_dat->yaml_object.getYamlWrapper()("SolverOptions")("kms_options")["inner_tol"].getDouble();
+		}
+		catch (std::out_of_range)
+		{
+			shark_dat->Newton_data.kms_dat.inner_reltol = 0.1;
 		}
 	}
 
