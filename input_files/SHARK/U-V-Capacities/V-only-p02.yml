@@ -8,7 +8,7 @@ Scenario:
 
 - ss_ads_objs:
   - obj01:
-    name: AOH (s)
+    name: AH(OH)2 (s)
     num_rxns: 2       
 
 - sys_data:
@@ -64,20 +64,8 @@ MasterSpecies:
 
 - unreg:
   - 25: 
-    formula: VO(AO)2 + (s)
-    charge: 1
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: Solid
-    name: Vanadyl-diamidoximate
-    lin_form: none
-
-  - 26: 
-    formula: VO2AO (s)
-    charge: 0
+    formula: VO2AHOO - (s)
+    charge: -1
     enthalpy: 0
     entropy: 0
     have_HS: false
@@ -85,6 +73,18 @@ MasterSpecies:
     have_G: false
     phase: Solid
     name: Vanadyl-amidoximate
+    lin_form: none
+
+  - 26: 
+    formula: V(AOO)2 - (s)
+    charge: -1
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: Solid
+    name: Vanadium-diamidoximate
     lin_form: none
 
 ...
@@ -131,8 +131,8 @@ MassBalance:
     "V2O7 4- (aq)": 2
     "VO2OHCO3 2- (aq)": 1
     "VO2(CO3)2 3- (aq)": 1
-    "VO(AO)2 + (s)": 1
-    "VO2AO (s)": 1
+    "VO2AHOO - (s)": 1
+    "V(AOO)2 - (s)": 1
 
 - chlorine:
   total_conc: 0.43
@@ -268,28 +268,29 @@ EquilRxn:
 
 ...
 
-"AOH (s)":
+"AH(OH)2 (s)":
 ---
 basis: molar
 spec_area: 45000.0     #Units: m^2/kg
-spec_mole: 1.6       #Units: mol/kg
+spec_mole: 1.65       #Units: mol/kg
 total_mass: 1.51e-5     #Units: kg
 surf_charge: 0.0
 
 - rxn01:
-  logK: 10
-  mole_factor: 2.0
-  - stoichiometry:
-    "VO2 + (aq)": -1
-    "H2O (l)": 1
-    "VO(AO)2 + (s)": 1
-
-- rxn02:
-  logK: -10
+  logK: 5.47
   mole_factor: 1.0
   - stoichiometry:
     "VO2 + (aq)": -1
-    "H + (aq)": 1
-    "VO2AO (s)": 1
+    "H + (aq)": 2
+    "VO2AHOO - (s)": 1
+
+- rxn02:
+  logK: 4.81
+  mole_factor: 2.0
+  - stoichiometry:
+    "VO2 + (aq)": -1
+    "H + (aq)": 2
+    "H2O (l)": 2
+    "V(AOO)2 - (s)": 1
 
 ...
