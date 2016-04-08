@@ -815,6 +815,7 @@ typedef struct SHARK_DATA
 	double dielectric_const = 78.325;				///< Dielectric constant used in many activity models (default: water = 78.325 (1/K))
 	double relative_permittivity = 80.1;			///< Relative permittivity of the medium (default: water = 80.1 (-))
 	double temperature = 298.15;					///< Solution temperature (default = 25 oC or 298.15 K)
+	double ionic_strength = 0.0;					///< Solution ionic strength in Molar (calculated internally)
 
 	bool steadystate = true;						///< True = solve steady problem; False = solve transient problem
 	bool TimeAdaptivity = false;					///< True = solve using variable time step

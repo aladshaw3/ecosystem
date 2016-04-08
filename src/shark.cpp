@@ -2246,7 +2246,11 @@ void print2file_shark_header(SHARK_DATA *shark_dat)
 
 	fprintf(shark_dat->OutputFile, "-----------------SHARK SIMULATION RESULTS-------------------\n\n");
 	
-	fprintf(shark_dat->OutputFile, "(hr)\t(K)\t(-)");
+	if (shark_dat->steadystate == false)
+		fprintf(shark_dat->OutputFile, "(hr)");
+	else
+		fprintf(shark_dat->OutputFile, "(M)");
+	fprintf(shark_dat->OutputFile, "\t(K)\t(-)");
 	for (int i=0; i<shark_dat->MasterList.list_size(); i++)
 	{
 		switch (shark_dat->MasterList.get_species(i).MoleculePhaseID())
@@ -2275,7 +2279,11 @@ void print2file_shark_header(SHARK_DATA *shark_dat)
 	fprintf(shark_dat->OutputFile, "\t(-)\t(-)\t(-)\t(-)");
 	fprintf(shark_dat->OutputFile, "\n");
 	
-	fprintf(shark_dat->OutputFile, "Time\tT\tpH");
+	if (shark_dat->steadystate == false)
+		fprintf(shark_dat->OutputFile, "Time");
+	else
+		fprintf(shark_dat->OutputFile, "Ionic-Strength");
+	fprintf(shark_dat->OutputFile, "\tT\tpH");
 	for (int i=0; i<shark_dat->MasterList.list_size(); i++)
 		fprintf(shark_dat->OutputFile, "\t[ %s ]", shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
 	fprintf(shark_dat->OutputFile, "\tConverged?\tE.Norm\tNL_iter\tL_iter");
@@ -2296,7 +2304,12 @@ void print2file_shark_results_new(SHARK_DATA *shark_dat)
 	if (shark_dat->time < 0.0)
 		fprintf(shark_dat->OutputFile, "inf\t%.6g\t%.6g", shark_dat->temperature, shark_dat->pH);
 	else
-		fprintf(shark_dat->OutputFile, "%.6g\t%.6g\t%.6g", shark_dat->time, shark_dat->temperature, shark_dat->pH);
+	{
+		if (shark_dat->steadystate == false)
+			fprintf(shark_dat->OutputFile, "%.6g\t%.6g\t%.6g", shark_dat->time, shark_dat->temperature, shark_dat->pH);
+		else
+			fprintf(shark_dat->OutputFile, "%.6g\t%.6g\t%.6g", shark_dat->ionic_strength, shark_dat->temperature, shark_dat->pH);
+	}
 	for (int i=0; i<shark_dat->MasterList.list_size(); i++)
 		fprintf(shark_dat->OutputFile, "\t%.6g",shark_dat->Conc_new(i,0));
 	if (shark_dat->Converged == true)
@@ -2325,7 +2338,12 @@ void print2file_shark_results_old(SHARK_DATA *shark_dat)
 	if (shark_dat->time < 0.0)
 		fprintf(shark_dat->OutputFile, "inf\t%.6g\t%.6g", shark_dat->temperature, shark_dat->pH);
 	else
-		fprintf(shark_dat->OutputFile, "%.6g\t%.6g\t%.6g", shark_dat->time, shark_dat->temperature, shark_dat->pH);
+	{
+		if (shark_dat->steadystate == false)
+			fprintf(shark_dat->OutputFile, "%.6g\t%.6g\t%.6g", shark_dat->time, shark_dat->temperature, shark_dat->pH);
+		else
+			fprintf(shark_dat->OutputFile, "%.6g\t%.6g\t%.6g", shark_dat->ionic_strength, shark_dat->temperature, shark_dat->pH);
+	}
 	for (int i=0; i<shark_dat->MasterList.list_size(); i++)
 		fprintf(shark_dat->OutputFile, "\t%.6g",shark_dat->Conc_old(i,0));
 	if (shark_dat->Converged == true)
@@ -5248,6 +5266,7 @@ int shark_solver(SHARK_DATA *shark_dat)
 	}
 
 	success = pjfnk(shark_dat->Residual,shark_dat->lin_precon,shark_dat->X_new,&shark_dat->Newton_data,shark_dat->residual_data,shark_dat->precon_data);
+	shark_dat->ionic_strength = calculate_ionic_strength(shark_dat->X_new, shark_dat->MasterList);
 	shark_dat->totalsteps = shark_dat->totalsteps + shark_dat->Newton_data.nl_iter + shark_dat->Newton_data.l_iter;
 	shark_dat->totalcalls = shark_dat->totalcalls + shark_dat->Newton_data.fun_call;
 	if (success != 0) {mError(simulation_fail); return -1;}
@@ -5264,6 +5283,7 @@ int shark_solver(SHARK_DATA *shark_dat)
 		if (shark_dat->steadystate == false)
 			std::cout << "dt =\t" << shark_dat->dt << std::endl;
 		std::cout << "E. Norm =\t" << shark_dat->Norm << "\nIterations =\t" << shark_dat->Newton_data.nl_iter << std::endl;
+		
 		if (shark_dat->Converged == false)
 		{
 			if (shark_dat->dt > shark_dat->dt_min)
