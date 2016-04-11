@@ -30,7 +30,7 @@ SolverOptions:
 line_search: true      
 search_type: standard
 linear_solve: fom 
-nl_abstol: 1e-4     		
+nl_abstol: 1e-6     		
 
 ...
 

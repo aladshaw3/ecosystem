@@ -29,7 +29,8 @@ SolverOptions:
 ---
 line_search: true      
 search_type: standard
-linear_solve: fom      		
+linear_solve: fom  
+nl_abstol: 1e-4    		
 
 ...
 
@@ -184,7 +185,7 @@ MassBalance:
     "VO2(CO3)2 3- (aq)": 2
 
 - nitrate:
-  total_conc: 6.454E-05
+  total_conc: 6.292E-05
   - delta:
     "HNO3 (aq)": 1
     "NO3 - (aq)": 1
@@ -192,7 +193,7 @@ MassBalance:
     "UO2(NO3)2 (aq)": 2
 
 - sodium: 
-  total_conc: 0.432290951
+  total_conc: 0.432465656
   - delta:
     "NaHCO3 (aq)": 1
     "NaCO3 - (aq)": 1
@@ -509,12 +510,12 @@ EquilRxn:
 ---
 basis: molar
 spec_area: 45000.0     #Units: m^2/kg
-spec_mole: 1.65       #Units: mol/kg
+spec_mole: 3.75       #Units: mol/kg
 total_mass: 1.51e-5     #Units: kg
 surf_charge: 0.0
 
 - rxn01:
-  logK: 3.44
+  logK: -3
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -522,7 +523,7 @@ surf_charge: 0.0
     "UO2AHOOH + (s)": 1
 
 - rxn02:
-  logK: -1.69
+  logK: -4
   mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -530,7 +531,7 @@ surf_charge: 0.0
     "UO2(AHOOH)2 (s)": 1
 
 - rxn03:
-  logK: 10.47
+  logK: 11
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -539,7 +540,7 @@ surf_charge: 0.0
     "UO2CO3AHOOH - (s)": 1
 
 - rxn04:
-  logK: 5.52
+  logK: 10
   mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -548,7 +549,7 @@ surf_charge: 0.0
     "UO2CO3(AHOOH)2 2- (s)": 1
 
 - rxn05:
-  logK: 5.47
+  logK: 2.75
   mole_factor: 1.0
   - stoichiometry:
     "VO2 + (aq)": -1
@@ -556,7 +557,7 @@ surf_charge: 0.0
     "VO2AHOO - (s)": 1
 
 - rxn06:
-  logK: 4.81
+  logK: 4.75
   mole_factor: 2.0
   - stoichiometry:
     "VO2 + (aq)": -1
