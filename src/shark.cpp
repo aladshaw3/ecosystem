@@ -1699,7 +1699,7 @@ double AdsorptionReaction::calculateAqueousChargeExchange(int i)
 //Calculation of equilibrium correct term
 double AdsorptionReaction::calculateEquilibriumCorrection(double sigma, double T, double I, double rel_epsilon, int i)
 {
-	return exp(-(this->calculateAqueousChargeExchange(i)*e*calculateCubicPsiApprox(sigma, T, I, rel_epsilon))/(kB*T));
+	return -(this->calculateAqueousChargeExchange(i)*e*calculateCubicPsiApprox(sigma, T, I, rel_epsilon))/(kB*T);
 }
 
 //Calculation of residual of ith reaction for the solver to work on
@@ -1729,7 +1729,7 @@ double AdsorptionReaction::Eval_Residual(const Matrix<double> &x, const Matrix<d
 	}
 	
 	double logK = this->getReaction(i).Get_Equilibrium();
-	logK = log10( pow(10.0, logK)*this->calculateEquilibriumCorrection(this->getChargeDensity(), T, this->getIonicStrength(), rel_perm, i) );
+	logK = logK + (this->calculateEquilibriumCorrection(this->getChargeDensity(), T, this->getIonicStrength(), rel_perm, i)/log(10.0));
 	res = res - logK;
 	
 	return res;
