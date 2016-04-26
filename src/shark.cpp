@@ -1198,6 +1198,7 @@ activities()
 	ionic_strength = 0.0;
 	num_rxns = 0;
 	AreaBasis = true;
+	IncludeSurfCharge = true;
 	adsorbent_name = "AX";
 }
 
@@ -1460,6 +1461,12 @@ void AdsorptionReaction::setAreaBasisBool(bool opt)
 	this->AreaBasis = opt;
 }
 
+//Directly set the surface charging boolean
+void AdsorptionReaction::setSurfaceChargeBool(bool opt)
+{
+	this->IncludeSurfCharge = opt;
+}
+
 //Set the area basis from the string argument
 void AdsorptionReaction::setBasis(std::string option)
 {
@@ -1699,7 +1706,10 @@ double AdsorptionReaction::calculateAqueousChargeExchange(int i)
 //Calculation of equilibrium correct term
 double AdsorptionReaction::calculateEquilibriumCorrection(double sigma, double T, double I, double rel_epsilon, int i)
 {
-	return -(this->calculateAqueousChargeExchange(i)*e*calculateCubicPsiApprox(sigma, T, I, rel_epsilon))/(kB*T);
+	if (this->includeSurfaceCharge() == true)
+		return -(this->calculateAqueousChargeExchange(i)*e*calculateCubicPsiApprox(sigma, T, I, rel_epsilon))/(kB*T);
+	else
+		return 0.0;
 }
 
 //Calculation of residual of ith reaction for the solver to work on
@@ -1882,6 +1892,12 @@ bool AdsorptionReaction::isAreaBasis()
 	return this->AreaBasis;
 }
 
+//Return state of surface charge inclusion
+bool AdsorptionReaction::includeSurfaceCharge()
+{
+	return this->IncludeSurfCharge;
+}
+
 //Return the name of the adsorbent
 std::string AdsorptionReaction::getAdsorbentName()
 {
@@ -2040,6 +2056,10 @@ void print2file_shark_info(SHARK_DATA *shark_dat)
 				fprintf(shark_dat->OutputFile, "Specific Molality (mol/kg) = \t%.6g\n", shark_dat->AdsorptionList[n].getSpecificMolality());
 			}
 			fprintf(shark_dat->OutputFile, "Total Mass (kg) = \t%.6g\n", shark_dat->AdsorptionList[n].getTotalMass());
+			if (shark_dat->AdsorptionList[n].includeSurfaceCharge() == false)
+				fprintf(shark_dat->OutputFile, "Include Surface Charging =\t FALSE\n");
+			else
+				fprintf(shark_dat->OutputFile, "Include Surface Charging =\t TRUE\n");
 			for (int j=0; j<shark_dat->AdsorptionList[n].getNumberRxns(); j++)
 			{
 				fprintf(shark_dat->OutputFile, "logK = \t%.6g\t:\t",shark_dat->AdsorptionList[n].getReaction(j).Get_Equilibrium());
@@ -4429,6 +4449,14 @@ int read_adsorbobjects(SHARK_DATA *shark_dat)
 			catch (std::out_of_range)
 			{
 				shark_dat->AdsorptionList[i].setSurfaceCharge(0.0);
+			}
+			try
+			{
+				shark_dat->AdsorptionList[i].setSurfaceChargeBool(shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i]).getDataMap().getBool("include_surfcharge"));
+			}
+			catch (std::out_of_range)
+			{
+				shark_dat->AdsorptionList[i].setSurfaceChargeBool(true);
 			}
 			int surf_act;
 			try

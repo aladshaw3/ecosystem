@@ -499,7 +499,7 @@ private:
 /** C++ Object to handle data and functions associated with forumlating adsorption equilibrium reactions
 	in a aqueous mixture. Each unique surface in a system will require an instance of this structure.
 
-	\warning THIS OBJECT IS NOT YET FUNCTIONAL!*/
+*/
 class AdsorptionReaction
 {
 public:
@@ -549,6 +549,7 @@ public:
 	void setTotalMass(double m);						///< Set the total mass of the adsorbent (kg)
 	void setTotalVolume(double v);						///< Set the total volume of the system (L)
 	void setAreaBasisBool(bool opt);					///< Set the basis boolean directly
+	void setSurfaceChargeBool(bool opt);				///< Set the boolean for inclusion of surface charging 
 	void setBasis(std::string option);					///< Set the basis of the adsorption problem from the given string arg
 	void setAdsorbentName(std::string name);			///< Set the name of the adsorbent to the given string
 
@@ -663,6 +664,7 @@ public:
 	int getAdsorbIndex(int i);					///< Get the index of the adsorbed species in the ith reaction
 	int getAqueousIndex(int i);					///< Get the index of the primary aqueous species in the ith reaction
 	bool isAreaBasis();							///< Returns true if we are in the Area Basis, False if in Molar Basis
+	bool includeSurfaceCharge();				///< Returns true if we are considering surface charging during adsorption
 	std::string getAdsorbentName();				///< Returns the name of the adsorbent as a string 
 
 protected:
@@ -694,6 +696,7 @@ protected:
 	double charge_density;						///< Surface charge density of the adsorbent used to adjust equilbria (C/m^2)
 	int num_rxns;								///< Number of reactions involved in the adsorption equilibria
 	bool AreaBasis;								///< True = Adsorption on an area basis, False = Adsorption on a ligand basis
+	bool IncludeSurfCharge;						///< True = Includes surface charging corrections, False = Does not consider surface charge
 	std::string adsorbent_name;					///< Name of the adsorbent for this object
 
 private:
