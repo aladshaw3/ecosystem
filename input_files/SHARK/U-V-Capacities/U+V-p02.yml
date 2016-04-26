@@ -29,8 +29,12 @@ SolverOptions:
 ---
 line_search: true      
 search_type: standard
-linear_solve: fom  
-nl_abstol: 1e-4    		
+linear_solve: kms 
+nl_abstol: 1e-4    
+
+- kms_options:
+  max_level: 0
+  inner_tol: 0.1		
 
 ...
 
@@ -512,7 +516,15 @@ basis: molar
 spec_area: 45000.0     #Units: m^2/kg
 spec_mole: 3.75       #Units: mol/kg
 total_mass: 1.51e-5     #Units: kg
-surf_charge: 0.0
+surf_activity: flory-huggins
+
+- volume_factors:
+  "UO2AHOOH + (s)": 500
+  "UO2(AHOOH)2 (s)": 8000
+  "UO2CO3AHOOH - (s)": 600
+  "UO2CO3(AHOOH)2 2- (s)": 8000
+  "VO2AHOO - (s)": 20
+  "V(AOO)2 - (s)": 40
 
 - rxn01:
   logK: -3
