@@ -535,7 +535,7 @@ surf_activity: flory-huggins
     "UO2AHOOH + (s)": 1
 
 - rxn02:
-  logK: -4
+  logK: -3.5
   mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -569,7 +569,7 @@ surf_activity: flory-huggins
     "VO2AHOO - (s)": 1
 
 - rxn06:
-  logK: 4.75
+  logK: 4.0
   mole_factor: 2.0
   - stoichiometry:
     "VO2 + (aq)": -1
