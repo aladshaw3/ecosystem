@@ -1512,10 +1512,10 @@ void AdsorptionReaction::calculateAreaFactors()
 		if (this->volume_factors[i] == 0.0 || this->List->get_species(i).MoleculePhaseID() != SOLID)
 			this->area_factors[i] = 0.0;
 		else if (this->volume_factors[i] == 0.0 && this->List->get_species(i).MoleculePhaseID() == SOLID)
-			this->area_factors[i] = M_PI * pow((3.0/(4.0*M_PI))*(1.892/Na), (2.0/3.0)) * Na / 10000.0;
+			this->area_factors[i] = 4.0 * M_PI * pow((3.0/(4.0*M_PI))*4.33, (2.0/3.0));
 		else
 		{
-			this->area_factors[i] = M_PI * pow((3.0/(4.0*M_PI))*(this->volume_factors[i]/Na), (2.0/3.0)) * Na / 10000.0;
+			this->area_factors[i] = 4.0 * M_PI * pow((3.0/(4.0*M_PI))*this->volume_factors[i], (2.0/3.0));
 		}
 	}
 }
