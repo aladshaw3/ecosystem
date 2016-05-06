@@ -398,18 +398,18 @@ EquilRxn:
 ---
 basis: molar
 spec_area: 45000.0     #Units: m^2/kg
-spec_mole: 3.75       #Units: mol/kg
+spec_mole: 3.75      #Units: mol/kg
 total_mass: 1.51e-5     #Units: kg
 surf_activity: flory-huggins
 
 - volume_factors:
-  "UO2AHOOH + (s)": 60.32
-  "UO2(AHOOH)2 (s)": 86.69
-  "UO2CO3AHOOH - (s)": 99.27
-  "UO2CO3(AHOOH)2 2- (s)": 125.64
+  "UO2AHOOH + (s)": 155.41
+  "UO2(AHOOH)2 (s)": 2078.88
+  "UO2CO3AHOOH - (s)": 322.83
+  "UO2CO3(AHOOH)2 2- (s)": 4076.89
 
 - rxn01:
-  logK: -4.0
+  logK: -3.0
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -417,7 +417,7 @@ surf_activity: flory-huggins
     "UO2AHOOH + (s)": 1
 
 - rxn02:
-  logK: -3.0
+  logK: -3.5
   mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -425,7 +425,7 @@ surf_activity: flory-huggins
     "UO2(AHOOH)2 (s)": 1
 
 - rxn03:
-  logK: 11.0
+  logK: -10
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -434,7 +434,7 @@ surf_activity: flory-huggins
     "UO2CO3AHOOH - (s)": 1
 
 - rxn04:
-  logK: 10.0
+  logK: 10.5
   mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1

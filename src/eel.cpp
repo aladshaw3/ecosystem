@@ -23,7 +23,8 @@ Name("No Name"),
 Symbol("N/A"),
 Category("N/A"),
 NaturalState("N/A"),
-atomic_number(0)
+atomic_number(0),
+atomic_radii(0)
 {
 }
 
@@ -48,6 +49,7 @@ Atom::Atom(std::string name)
 		Category = "Diatomic Non-metal";
 		NaturalState = "Gas";
 		atomic_number = 1;
+		atomic_radii = 1.2;
 	}
 	else if (name.compare("Helium") == 0)
 	{
@@ -62,6 +64,7 @@ Atom::Atom(std::string name)
 		Category = "Nobel Gas";
 		NaturalState = "Gas";
 		atomic_number = 2;
+		atomic_radii = 1.4;
 	}
 	else if (name.compare("Lithium") == 0)
 	{
@@ -76,6 +79,7 @@ Atom::Atom(std::string name)
 		Category = "Alkali Metal";
 		NaturalState = "Solid";
 		atomic_number = 3;
+		atomic_radii = 1.82;
 	}
 	else if (name.compare("Beryllium") == 0)
 	{
@@ -1718,6 +1722,7 @@ Atom::Atom(int number)
 		Category = "Diatomic Non-metal";
 		NaturalState = "Gas";
 		atomic_number = 1;
+		atomic_radii = 1.2;
 	}
 	else if (number == 2)
 	{
@@ -1732,6 +1737,7 @@ Atom::Atom(int number)
 		Category = "Nobel Gas";
 		NaturalState = "Gas";
 		atomic_number = 2;
+		atomic_radii = 1.4;
 	}
 	else if (number == 3)
 	{
@@ -1746,6 +1752,7 @@ Atom::Atom(int number)
 		Category = "Alkali Metal";
 		NaturalState = "Solid";
 		atomic_number = 3;
+		atomic_radii = 1.82;
 	}
 	else if (number == 4)
 	{
@@ -3388,6 +3395,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Diatomic Non-metal";
 		this->NaturalState = "Gas";
 		this->atomic_number = 1;
+		this->atomic_radii = 1.2;
 	}
 	else if (Symbol.compare("He") == 0)
 	{
@@ -3402,6 +3410,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Nobel Gas";
 		this->NaturalState = "Gas";
 		this->atomic_number = 2;
+		this->atomic_radii = 1.4;
 	}
 	else if (Symbol.compare("Li") == 0)
 	{
@@ -3416,6 +3425,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Alkali Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 3;
+		this->atomic_radii = 1.82;
 	}
 	else if (Symbol.compare("Be") == 0)
 	{
@@ -5061,6 +5071,7 @@ void Atom::Register(int number)
 		this->Category = "Diatomic Non-metal";
 		this->NaturalState = "Gas";
 		this->atomic_number = 1;
+		this->atomic_radii = 1.2;
 	}
 	else if (number == 2)
 	{
@@ -5075,6 +5086,7 @@ void Atom::Register(int number)
 		this->Category = "Nobel Gas";
 		this->NaturalState = "Gas";
 		this->atomic_number = 2;
+		this->atomic_radii = 1.4;
 	}
 	else if (number == 3)
 	{
@@ -5089,6 +5101,7 @@ void Atom::Register(int number)
 		this->Category = "Alkali Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 3;
+		this->atomic_radii = 1.82;
 	}
 	else if (number == 4)
 	{
@@ -6793,6 +6806,15 @@ void Atom::editValence(int val)
 	this->valence_e = val;
 }
 
+//Edit the atomic radii
+void Atom::editRadii(double r)
+{
+	if (r <= 0)
+		this->atomic_radii = 1.2;
+	else
+		this->atomic_radii = r;
+}
+
 //Remove a proton
 void Atom::removeProton()
 {
@@ -6876,6 +6898,12 @@ int Atom::BondingElectrons()
 	return this->valence_e;
 }
 
+//Return the van der Waals radii
+double Atom::AtomicRadii()
+{
+	return this->atomic_radii;
+}
+
 //Return the name of the atom
 std::string Atom::AtomName()
 {
@@ -6919,6 +6947,7 @@ void Atom::DisplayInfo()
 	else
 		std::cout << this->oxidation_state;
 	std::cout << "\tValence Electrons: " << this->valence_e << std::endl;
+	std::cout << "van der Waals Radius (Angstroms): " << this->atomic_radii << std::endl;
 	std::cout << std::endl;
 }
 

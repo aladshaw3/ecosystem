@@ -57,6 +57,7 @@ public:
 	void editNeutrons(int neutron);			///< Manually changes the number of neutrons
 	void editElectrons(int electron);		///< Manually changes the number of electrons
 	void editValence(int val);				///< Manually changes the number of valence electrons
+	void editRadii(double r);				///< Manually changes the van der Waals radii
 	
 	void removeProton();					///< Manually removes 1 proton and adjusts weight
 	void removeNeutron();					///< Manually removes 1 neutron and adjusts weight
@@ -68,6 +69,7 @@ public:
 	int Neutrons();							///< Returns the current number of neutrons
 	int Electrons();						///< Returns the current number of electrons
 	int BondingElectrons();					///< Returns the number of electrons available for bonding
+	double AtomicRadii();					///< Returns the current van der Waals radii (in angstroms)
 	
 	std::string AtomName();					///< Returns the name of the atom
 	std::string AtomSymbol();				///< Returns the symbol of the atom
@@ -84,6 +86,7 @@ protected:
 	int neutrons;							///< Holds the number of neutrons in the atom
 	int electrons;							///< Holds the number of electrons in the atom
 	int valence_e;							///< Holds the number of valence electrons in the atom
+	double atomic_radii;					///< Holds the van der Waals radii of the element (in angstroms)
 	
 private:
 	std::string Name;						///< Holds the name of the atom

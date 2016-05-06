@@ -59,6 +59,22 @@
 #define Faraday 96485.33289					///< Faraday's Constant - C/mol
 #endif
 
+#ifndef VolumeSTD
+#define VolumeSTD 7.24						///< Standard Segment Volume - cubic angstroms
+#endif
+
+#ifndef AreaSTD
+#define AreaSTD 18.1						///< Standard Segment Area - square angstroms
+#endif
+
+#ifndef CoordSTD
+#define CoordSTD 8							///< Standard Coordination Number
+#endif
+
+#ifndef LengthFactor
+#define LengthFactor(z,r,s) (((z/2.0)*(r-s)) - (r-1.0))	///< Calculation of the Length Factor Parameter in UNIQUAC
+#endif
+
 #ifndef VacuumPermittivity
 #define VacuumPermittivity 8.8541878176E-12	///< Vacuum Permittivity Constant - F/m or C/V/m
 #endif
