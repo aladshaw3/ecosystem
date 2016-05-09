@@ -94,6 +94,7 @@ Atom::Atom(std::string name)
 		Category = "Alkaline Earth Metal";
 		NaturalState = "Solid";
 		atomic_number = 4;
+		atomic_radii = 1.53;
 	}
 	else if (name.compare("Boron") == 0)
 	{
@@ -108,6 +109,7 @@ Atom::Atom(std::string name)
 		Category = "Metalloid";
 		NaturalState = "Solid";
 		atomic_number = 5;
+		atomic_radii = 1.92;
 	}
 	else if (name.compare("Carbon") == 0)
 	{
@@ -122,6 +124,7 @@ Atom::Atom(std::string name)
 		Category = "Polyatomic Non-metal";
 		NaturalState = "Solid";
 		atomic_number = 6;
+		atomic_radii = 1.70;
 	}
 	else if (name.compare("Nitrogen") == 0)
 	{
@@ -136,6 +139,7 @@ Atom::Atom(std::string name)
 		Category = "Diatomic Non-metal";
 		NaturalState = "Gas";
 		atomic_number = 7;
+		atomic_radii = 1.55;
 	}
 	else if (name.compare("Oxygen") == 0)
 	{
@@ -150,6 +154,7 @@ Atom::Atom(std::string name)
 		Category = "Diatomic Non-metal";
 		NaturalState = "Gas";
 		atomic_number = 8;
+		atomic_radii = 1.52;
 	}
 	else if (name.compare("Fluorine") == 0)
 	{
@@ -164,6 +169,7 @@ Atom::Atom(std::string name)
 		Category = "Diatomic Non-metal";
 		NaturalState = "Gas";
 		atomic_number = 9;
+		atomic_radii = 1.35;
 	}
 	else if (name.compare("Neon") == 0)
 	{
@@ -178,6 +184,7 @@ Atom::Atom(std::string name)
 		Category = "Nobel Gas";
 		NaturalState = "Gas";
 		atomic_number = 10;
+		atomic_radii = 1.54;
 	}
 	else if (name.compare("Sodium") == 0)
 	{
@@ -192,6 +199,7 @@ Atom::Atom(std::string name)
 		Category = "Alkali Metal";
 		NaturalState = "Solid";
 		atomic_number = 11;
+		atomic_radii = 2.27;
 	}
 	else if (name.compare("Magnesium") == 0)
 	{
@@ -206,6 +214,7 @@ Atom::Atom(std::string name)
 		Category = "Alkaline Earth Metal";
 		NaturalState = "Solid";
 		atomic_number = 12;
+		atomic_radii = 1.73;
 	}
 	else if (name.compare("Aluminium") == 0)
 	{
@@ -220,6 +229,7 @@ Atom::Atom(std::string name)
 		Category = "Metalloid";
 		NaturalState = "Solid";
 		atomic_number = 13;
+		atomic_radii = 1.84;
 	}
 	else if (name.compare("Silicon") == 0)
 	{
@@ -234,6 +244,7 @@ Atom::Atom(std::string name)
 		Category = "Metalloid";
 		NaturalState = "Solid";
 		atomic_number = 14;
+		atomic_radii = 2.10;
 	}
 	else if (name.compare("Phosphorus") == 0)
 	{
@@ -248,6 +259,7 @@ Atom::Atom(std::string name)
 		Category = "Metalloid";
 		NaturalState = "Solid";
 		atomic_number = 15;
+		atomic_radii = 1.80;
 	}
 	else if (name.compare("Sulfur") == 0)
 	{
@@ -262,6 +274,7 @@ Atom::Atom(std::string name)
 		Category = "Polyatomic Non-metal";
 		NaturalState = "Solid";
 		atomic_number = 16;
+		atomic_radii = 1.80;
 	}
 	else if (name.compare("Chlorine") == 0)
 	{
@@ -276,6 +289,7 @@ Atom::Atom(std::string name)
 		Category = "Diatomic Non-metal";
 		NaturalState = "Gas";
 		atomic_number = 17;
+		atomic_radii = 1.75;
 	}
 	else if (name.compare("Argon") == 0)
 	{
@@ -290,6 +304,7 @@ Atom::Atom(std::string name)
 		Category = "Nobel Gas";
 		NaturalState = "Gas";
 		atomic_number = 18;
+		atomic_radii = 1.88;
 	}
 	else if (name.compare("Potassium") == 0)
 	{
@@ -304,6 +319,7 @@ Atom::Atom(std::string name)
 		Category = "Alkali Metal";
 		NaturalState = "Solid";
 		atomic_number = 19;
+		atomic_radii = 2.75;
 	}
 	else if (name.compare("Calcium") == 0)
 	{
@@ -318,6 +334,7 @@ Atom::Atom(std::string name)
 		Category = "Alkaline Earth Metal";
 		NaturalState = "Solid";
 		atomic_number = 20;
+		atomic_radii = 2.31;
 	}
 	else if (name.compare("Scandium") == 0)
 	{
@@ -332,6 +349,7 @@ Atom::Atom(std::string name)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 21;
+		atomic_radii = 2.11;
 	}
 	else if (name.compare("Titanium") == 0)
 	{
@@ -346,6 +364,7 @@ Atom::Atom(std::string name)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 22;
+		atomic_radii = 1.60;
 	}
 	else if (name.compare("Vanadium") == 0)
 	{
@@ -360,6 +379,7 @@ Atom::Atom(std::string name)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 23;
+		atomic_radii = 1.53;
 	}
 	else if (name.compare("Chromium") == 0)
 	{
@@ -374,6 +394,7 @@ Atom::Atom(std::string name)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 24;
+		atomic_radii = 1.39;
 	}
 	else if (name.compare("Manganese") == 0)
 	{
@@ -388,6 +409,7 @@ Atom::Atom(std::string name)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 25;
+		atomic_radii = 1.39;
 	}
 	else if (name.compare("Iron") == 0)
 	{
@@ -402,6 +424,7 @@ Atom::Atom(std::string name)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 26;
+		atomic_radii = 1.32;
 	}
 	else if (name.compare("Cobalt") == 0)
 	{
@@ -416,6 +439,7 @@ Atom::Atom(std::string name)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 27;
+		atomic_radii = 1.26;
 	}
 	else if (name.compare("Nickel") == 0)
 	{
@@ -430,6 +454,7 @@ Atom::Atom(std::string name)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 28;
+		atomic_radii = 1.63;
 	}
 	else if (name.compare("Copper") == 0)
 	{
@@ -444,6 +469,7 @@ Atom::Atom(std::string name)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 29;
+		atomic_radii = 1.40;
 	}
 	else if (name.compare("Zinc") == 0)
 	{
@@ -458,6 +484,7 @@ Atom::Atom(std::string name)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 30;
+		atomic_radii = 1.39;
 	}
 	else if (name.compare("Gallium") == 0)
 	{
@@ -472,6 +499,7 @@ Atom::Atom(std::string name)
 		Category = "Post-Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 31;
+		atomic_radii = 1.87;
 	}
 	else if (name.compare("Germanium") == 0)
 	{
@@ -486,6 +514,7 @@ Atom::Atom(std::string name)
 		Category = "Metalloid";
 		NaturalState = "Solid";
 		atomic_number = 32;
+		atomic_radii = 2.11;
 	}
 	else if (name.compare("Arsenic") == 0)
 	{
@@ -500,6 +529,7 @@ Atom::Atom(std::string name)
 		Category = "Metalloid";
 		NaturalState = "Solid";
 		atomic_number = 33;
+		atomic_radii = 1.85;
 	}
 	else if (name.compare("Selenium") == 0)
 	{
@@ -514,6 +544,7 @@ Atom::Atom(std::string name)
 		Category = "Polyatomic Non-metal";
 		NaturalState = "Solid";
 		atomic_number = 34;
+		atomic_radii = 1.90;
 	}
 	else if (name.compare("Bromine") == 0)
 	{
@@ -528,6 +559,7 @@ Atom::Atom(std::string name)
 		Category = "Diatomic Non-metal";
 		NaturalState = "Liquid";
 		atomic_number = 35;
+		atomic_radii = 1.85;
 	}
 	else if (name.compare("Krypton") == 0)
 	{
@@ -542,6 +574,7 @@ Atom::Atom(std::string name)
 		Category = "Nobel Gas";
 		NaturalState = "Gas";
 		atomic_number = 36;
+		atomic_radii = 2.02;
 	}
 	else if (name.compare("Rubidium") == 0)
 	{
@@ -556,6 +589,7 @@ Atom::Atom(std::string name)
 		Category = "Alkali Metal";
 		NaturalState = "Solid";
 		atomic_number = 37;
+		atomic_radii = 3.03;
 	}
 	else if (name.compare("Strontium") == 0)
 	{
@@ -570,6 +604,7 @@ Atom::Atom(std::string name)
 		Category = "Alkaline Earth Metal";
 		NaturalState = "Solid";
 		atomic_number = 38;
+		atomic_radii = 2.49;
 	}
 	else if (name.compare("Yttrium") == 0)
 	{
@@ -584,6 +619,7 @@ Atom::Atom(std::string name)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 39;
+		atomic_radii = 1.90;
 	}
 	else if (name.compare("Zirconium") == 0)
 	{
@@ -598,6 +634,7 @@ Atom::Atom(std::string name)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 40;
+		atomic_radii = 1.75;
 	}
 	else if (name.compare("Niobium") == 0)
 	{
@@ -612,6 +649,7 @@ Atom::Atom(std::string name)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 41;
+		atomic_radii = 1.64;
 	}
 	else if (name.compare("Molybdenum") == 0)
 	{
@@ -626,6 +664,7 @@ Atom::Atom(std::string name)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 42;
+		atomic_radii = 1.54;
 	}
 	else if (name.compare("Technetium") == 0)
 	{
@@ -640,6 +679,7 @@ Atom::Atom(std::string name)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 43;
+		atomic_radii = 1.47;
 	}
 	else if (name.compare("Ruthenium") == 0)
 	{
@@ -654,6 +694,7 @@ Atom::Atom(std::string name)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 44;
+		atomic_radii = 1.46;
 	}
 	else if (name.compare("Rhodium") == 0)
 	{
@@ -668,6 +709,7 @@ Atom::Atom(std::string name)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 45;
+		atomic_radii = 1.42;
 	}
 	else if (name.compare("Palladium") == 0)
 	{
@@ -682,6 +724,7 @@ Atom::Atom(std::string name)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 46;
+		atomic_radii = 1.63;
 	}
 	else if (name.compare("Silver") == 0)
 	{
@@ -696,6 +739,7 @@ Atom::Atom(std::string name)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 47;
+		atomic_radii = 1.72;
 	}
 	else if (name.compare("Cadmium") == 0)
 	{
@@ -710,6 +754,7 @@ Atom::Atom(std::string name)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 48;
+		atomic_radii = 1.58;
 	}
 	else if (name.compare("Indium") == 0)
 	{
@@ -724,6 +769,7 @@ Atom::Atom(std::string name)
 		Category = "Post-Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 49;
+		atomic_radii = 1.93;
 	}
 	else if (name.compare("Tin") == 0)
 	{
@@ -738,6 +784,7 @@ Atom::Atom(std::string name)
 		Category = "Post-Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 50;
+		atomic_radii = 2.17;
 	}
 	else if (name.compare("Antimony") == 0)
 	{
@@ -752,6 +799,7 @@ Atom::Atom(std::string name)
 		Category = "Metalloid";
 		NaturalState = "Solid";
 		atomic_number = 51;
+		atomic_radii = 2.06;
 	}
 	else if (name.compare("Tellurium") == 0)
 	{
@@ -766,6 +814,7 @@ Atom::Atom(std::string name)
 		Category = "Metalloid";
 		NaturalState = "Solid";
 		atomic_number = 52;
+		atomic_radii = 2.06;
 	}
 	else if (name.compare("Iodine") == 0)
 	{
@@ -780,6 +829,7 @@ Atom::Atom(std::string name)
 		Category = "Diatomic Non-metal";
 		NaturalState = "Solid";
 		atomic_number = 53;
+		atomic_radii = 1.98;
 	}
 	else if (name.compare("Xenon") == 0)
 	{
@@ -794,6 +844,7 @@ Atom::Atom(std::string name)
 		Category = "Nobel Gas";
 		NaturalState = "Gas";
 		atomic_number = 54;
+		atomic_radii = 2.16;
 	}
 	else if (name.compare("Caesium") == 0)
 	{
@@ -808,6 +859,7 @@ Atom::Atom(std::string name)
 		Category = "Alkali Metal";
 		NaturalState = "Solid";
 		atomic_number = 55;
+		atomic_radii = 3.43;
 	}
 	else if (name.compare("Barium") == 0)
 	{
@@ -822,6 +874,7 @@ Atom::Atom(std::string name)
 		Category = "Alkaline Earth Metal";
 		NaturalState = "Solid";
 		atomic_number = 56;
+		atomic_radii = 2.68;
 	}
 	else if (name.compare("Lanthanum") == 0)
 	{
@@ -836,6 +889,7 @@ Atom::Atom(std::string name)
 		Category = "Lanthanide";
 		NaturalState = "Solid";
 		atomic_number = 57;
+		atomic_radii = 2.07;
 	}
 	else if (name.compare("Cerium") == 0)
 	{
@@ -850,6 +904,7 @@ Atom::Atom(std::string name)
 		Category = "Lanthanide";
 		NaturalState = "Solid";
 		atomic_number = 58;
+		atomic_radii = 2.04;
 	}
 	else if (name.compare("Praseodymium") == 0)
 	{
@@ -864,6 +919,7 @@ Atom::Atom(std::string name)
 		Category = "Lanthanide";
 		NaturalState = "Solid";
 		atomic_number = 59;
+		atomic_radii = 2.03;
 	}
 	else if (name.compare("Neodymium") == 0)
 	{
@@ -878,6 +934,7 @@ Atom::Atom(std::string name)
 		Category = "Lanthanide";
 		NaturalState = "Solid";
 		atomic_number = 60;
+		atomic_radii = 2.01;
 	}
 	else if (name.compare("Promethium") == 0)
 	{
@@ -892,6 +949,7 @@ Atom::Atom(std::string name)
 		Category = "Lanthanide";
 		NaturalState = "Solid";
 		atomic_number = 61;
+		atomic_radii = 1.99;
 	}
 	else if (name.compare("Samarium") == 0)
 	{
@@ -906,6 +964,7 @@ Atom::Atom(std::string name)
 		Category = "Lanthanide";
 		NaturalState = "Solid";
 		atomic_number = 62;
+		atomic_radii = 1.98;
 	}
 	else if (name.compare("Europium") == 0)
 	{
@@ -920,6 +979,7 @@ Atom::Atom(std::string name)
 		Category = "Lanthanide";
 		NaturalState = "Solid";
 		atomic_number = 63;
+		atomic_radii = 1.98;
 	}
 	else if (name.compare("Gadolinium") == 0)
 	{
@@ -934,6 +994,7 @@ Atom::Atom(std::string name)
 		Category = "Lanthanide";
 		NaturalState = "Solid";
 		atomic_number = 64;
+		atomic_radii = 1.96;
 	}
 	else if (name.compare("Terbium") == 0)
 	{
@@ -948,6 +1009,7 @@ Atom::Atom(std::string name)
 		Category = "Lanthanide";
 		NaturalState = "Solid";
 		atomic_number = 65;
+		atomic_radii = 1.94;
 	}
 	else if (name.compare("Dysprosium") == 0)
 	{
@@ -962,6 +1024,7 @@ Atom::Atom(std::string name)
 		Category = "Lanthanide";
 		NaturalState = "Solid";
 		atomic_number = 66;
+		atomic_radii = 1.92;
 	}
 	else if (name.compare("Holmium") == 0)
 	{
@@ -976,6 +1039,7 @@ Atom::Atom(std::string name)
 		Category = "Lanthanide";
 		NaturalState = "Solid";
 		atomic_number = 67;
+		atomic_radii = 1.92;
 	}
 	else if (name.compare("Erbium") == 0)
 	{
@@ -990,6 +1054,7 @@ Atom::Atom(std::string name)
 		Category = "Lanthanide";
 		NaturalState = "Solid";
 		atomic_number = 68;
+		atomic_radii = 1.89;
 	}
 	else if (name.compare("Thulium") == 0)
 	{
@@ -1004,6 +1069,7 @@ Atom::Atom(std::string name)
 		Category = "Lanthanide";
 		NaturalState = "Solid";
 		atomic_number = 69;
+		atomic_radii = 1.90;
 	}
 	else if (name.compare("Ytterbium") == 0)
 	{
@@ -1018,6 +1084,7 @@ Atom::Atom(std::string name)
 		Category = "Lanthanide";
 		NaturalState = "Solid";
 		atomic_number = 70;
+		atomic_radii = 1.87;
 	}
 	else if (name.compare("Lutetium") == 0)
 	{
@@ -1032,6 +1099,7 @@ Atom::Atom(std::string name)
 		Category = "Lanthanide";
 		NaturalState = "Solid";
 		atomic_number = 71;
+		atomic_radii = 1.87;
 	}
 	else if (name.compare("Hafnium") == 0)
 	{
@@ -1046,6 +1114,7 @@ Atom::Atom(std::string name)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 72;
+		atomic_radii = 1.75;
 	}
 	else if (name.compare("Tantalum") == 0)
 	{
@@ -1060,6 +1129,7 @@ Atom::Atom(std::string name)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 73;
+		atomic_radii = 1.70;
 	}
 	else if (name.compare("Tungsten") == 0)
 	{
@@ -1074,6 +1144,7 @@ Atom::Atom(std::string name)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 74;
+		atomic_radii = 1.62;
 	}
 	else if (name.compare("Rhenium") == 0)
 	{
@@ -1088,6 +1159,7 @@ Atom::Atom(std::string name)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 75;
+		atomic_radii = 1.51;
 	}
 	else if (name.compare("Osmium") == 0)
 	{
@@ -1102,6 +1174,7 @@ Atom::Atom(std::string name)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 76;
+		atomic_radii = 1.44;
 	}
 	else if (name.compare("Iridium") == 0)
 	{
@@ -1116,6 +1189,7 @@ Atom::Atom(std::string name)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 77;
+		atomic_radii = 1.41;
 	}
 	else if (name.compare("Platinum") == 0)
 	{
@@ -1130,6 +1204,7 @@ Atom::Atom(std::string name)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 78;
+		atomic_radii = 1.75;
 	}
 	else if (name.compare("Gold") == 0)
 	{
@@ -1144,6 +1219,7 @@ Atom::Atom(std::string name)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 79;
+		atomic_radii = 1.66;
 	}
 	else if (name.compare("Mercury") == 0)
 	{
@@ -1158,6 +1234,7 @@ Atom::Atom(std::string name)
 		Category = "Transition Metal";
 		NaturalState = "Liquid";
 		atomic_number = 80;
+		atomic_radii = 1.55;
 	}
 	else if (name.compare("Thallium") == 0)
 	{
@@ -1172,6 +1249,7 @@ Atom::Atom(std::string name)
 		Category = "Post-Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 81;
+		atomic_radii = 1.96;
 	}
 	else if (name.compare("Lead") == 0)
 	{
@@ -1186,6 +1264,7 @@ Atom::Atom(std::string name)
 		Category = "Post-Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 82;
+		atomic_radii = 2.02;
 	}
 	else if (name.compare("Bismuth") == 0)
 	{
@@ -1200,6 +1279,7 @@ Atom::Atom(std::string name)
 		Category = "Post-Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 83;
+		atomic_radii = 2.07;
 	}
 	else if (name.compare("Polonium") == 0)
 	{
@@ -1214,6 +1294,7 @@ Atom::Atom(std::string name)
 		Category = "Post-Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 84;
+		atomic_radii = 1.97;
 	}
 	else if (name.compare("Astatine") == 0)
 	{
@@ -1228,6 +1309,7 @@ Atom::Atom(std::string name)
 		Category = "Metalloid";
 		NaturalState = "Solid";
 		atomic_number = 85;
+		atomic_radii = 2.02;
 	}
 	else if (name.compare("Radon") == 0)
 	{
@@ -1242,6 +1324,7 @@ Atom::Atom(std::string name)
 		Category = "Nobel Gas";
 		NaturalState = "Gas";
 		atomic_number = 86;
+		atomic_radii = 2.20;
 	}
 	else if (name.compare("Francium") == 0)
 	{
@@ -1256,6 +1339,7 @@ Atom::Atom(std::string name)
 		Category = "Alkali Metal";
 		NaturalState = "Solid";
 		atomic_number = 87;
+		atomic_radii = 3.48;
 	}
 	else if (name.compare("Radium") == 0)
 	{
@@ -1270,6 +1354,7 @@ Atom::Atom(std::string name)
 		Category = "Alkaline Earth Metal";
 		NaturalState = "Solid";
 		atomic_number = 88;
+		atomic_radii = 2.83;
 	}
 	else if (name.compare("Actinium") == 0)
 	{
@@ -1284,6 +1369,7 @@ Atom::Atom(std::string name)
 		Category = "Actinide";
 		NaturalState = "Solid";
 		atomic_number = 89;
+		atomic_radii = 2.15;
 	}
 	else if (name.compare("Thorium") == 0)
 	{
@@ -1298,6 +1384,7 @@ Atom::Atom(std::string name)
 		Category = "Actinide";
 		NaturalState = "Solid";
 		atomic_number = 90;
+		atomic_radii = 2.06;
 	}
 	else if (name.compare("Protactinium") == 0)
 	{
@@ -1312,6 +1399,7 @@ Atom::Atom(std::string name)
 		Category = "Actinide";
 		NaturalState = "Solid";
 		atomic_number = 91;
+		atomic_radii = 2.00;
 	}
 	else if (name.compare("Uranium") == 0)
 	{
@@ -1326,6 +1414,7 @@ Atom::Atom(std::string name)
 		Category = "Actinide";
 		NaturalState = "Solid";
 		atomic_number = 92;
+		atomic_radii = 1.86;
 	}
 	else if (name.compare("Neptunium") == 0)
 	{
@@ -1340,6 +1429,7 @@ Atom::Atom(std::string name)
 		Category = "Actinide";
 		NaturalState = "Solid";
 		atomic_number = 93;
+		atomic_radii = 1.90;
 	}
 	else if (name.compare("Plutonium") == 0)
 	{
@@ -1354,6 +1444,7 @@ Atom::Atom(std::string name)
 		Category = "Actinide";
 		NaturalState = "Solid";
 		atomic_number = 94;
+		atomic_radii = 1.87;
 	}
 	else if (name.compare("Americium") == 0)
 	{
@@ -1368,6 +1459,7 @@ Atom::Atom(std::string name)
 		Category = "Actinide";
 		NaturalState = "Solid";
 		atomic_number = 95;
+		atomic_radii = 1.80;
 	}
 	else if (name.compare("Curium") == 0)
 	{
@@ -1382,6 +1474,7 @@ Atom::Atom(std::string name)
 		Category = "Actinide";
 		NaturalState = "Solid";
 		atomic_number = 96;
+		atomic_radii = 1.69;
 	}
 	else if (name.compare("Berkelium") == 0)
 	{
@@ -1396,6 +1489,7 @@ Atom::Atom(std::string name)
 		Category = "Actinide";
 		NaturalState = "Solid";
 		atomic_number = 97;
+		atomic_radii = 1.70;
 	}
 	else if (name.compare("Californium") == 0)
 	{
@@ -1410,6 +1504,7 @@ Atom::Atom(std::string name)
 		Category = "Actinide";
 		NaturalState = "Solid";
 		atomic_number = 98;
+		atomic_radii = 1.70;
 	}
 	else if (name.compare("Einsteinium") == 0)
 	{
@@ -1424,6 +1519,7 @@ Atom::Atom(std::string name)
 		Category = "Actinide";
 		NaturalState = "Solid";
 		atomic_number = 99;
+		atomic_radii = 1.70;
 	}
 	else if (name.compare("Fermium") == 0)
 	{
@@ -1438,6 +1534,7 @@ Atom::Atom(std::string name)
 		Category = "Actinide";
 		NaturalState = "Solid";
 		atomic_number = 100;
+		atomic_radii = 1.70;
 	}
 	else if (name.compare("Mendelevium") == 0)
 	{
@@ -1452,6 +1549,7 @@ Atom::Atom(std::string name)
 		Category = "Actinide";
 		NaturalState = "Solid";
 		atomic_number = 101;
+		atomic_radii = 1.70;
 	}
 	else if (name.compare("Nobelium") == 0)
 	{
@@ -1466,6 +1564,7 @@ Atom::Atom(std::string name)
 		Category = "Actinide";
 		NaturalState = "Solid";
 		atomic_number = 102;
+		atomic_radii = 1.70;
 	}
 	else if (name.compare("Lawrencium") == 0)
 	{
@@ -1480,6 +1579,7 @@ Atom::Atom(std::string name)
 		Category = "Actinide";
 		NaturalState = "Solid";
 		atomic_number = 103;
+		atomic_radii = 1.70;
 	}
 	else if (name.compare("Rutherfordium") == 0)
 	{
@@ -1494,6 +1594,7 @@ Atom::Atom(std::string name)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 104;
+		atomic_radii = 1.57;
 	}
 	else if (name.compare("Dubnium") == 0)
 	{
@@ -1508,6 +1609,7 @@ Atom::Atom(std::string name)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 105;
+		atomic_radii = 1.49;
 	}
 	else if (name.compare("Seaborgium") == 0)
 	{
@@ -1522,6 +1624,7 @@ Atom::Atom(std::string name)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 106;
+		atomic_radii = 1.43;
 	}
 	else if (name.compare("Bohrium") == 0)
 	{
@@ -1536,6 +1639,7 @@ Atom::Atom(std::string name)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 107;
+		atomic_radii = 1.41;
 	}
 	else if (name.compare("Hassium") == 0)
 	{
@@ -1550,6 +1654,7 @@ Atom::Atom(std::string name)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 108;
+		atomic_radii = 1.34;
 	}
 	else if (name.compare("Meitnerium") == 0)
 	{
@@ -1564,6 +1669,7 @@ Atom::Atom(std::string name)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 109;
+		atomic_radii = 1.29;
 	}
 	else if (name.compare("Darmstadium") == 0)
 	{
@@ -1578,6 +1684,7 @@ Atom::Atom(std::string name)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 110;
+		atomic_radii = 1.28;
 	}
 	else if (name.compare("Roentgenium") == 0)
 	{
@@ -1592,6 +1699,7 @@ Atom::Atom(std::string name)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 111;
+		atomic_radii = 1.21;
 	}
 	else if (name.compare("Copernicium") == 0)
 	{
@@ -1606,6 +1714,7 @@ Atom::Atom(std::string name)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 112;
+		atomic_radii = 1.22;
 	}
 	else if (name.compare("Ununtrium") == 0)
 	{
@@ -1620,6 +1729,7 @@ Atom::Atom(std::string name)
 		Category = "Post-Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 113;
+		atomic_radii = 1.76;
 	}
 	else if (name.compare("Flerovium") == 0)
 	{
@@ -1634,6 +1744,7 @@ Atom::Atom(std::string name)
 		Category = "Post-Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 114;
+		atomic_radii = 1.74;
 	}
 	else if (name.compare("Ununpentium") == 0)
 	{
@@ -1648,6 +1759,7 @@ Atom::Atom(std::string name)
 		Category = "Post-Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 115;
+		atomic_radii = 1.57;
 	}
 	else if (name.compare("Livermorium") == 0)
 	{
@@ -1662,6 +1774,7 @@ Atom::Atom(std::string name)
 		Category = "Post-Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 116;
+		atomic_radii = 1.64;
 	}
 	else if (name.compare("Ununseptium") == 0)
 	{
@@ -1676,6 +1789,7 @@ Atom::Atom(std::string name)
 		Category = "Metalloid";
 		NaturalState = "Solid";
 		atomic_number = 117;
+		atomic_radii = 1.57;
 	}
 	else if (name.compare("Ununoctium") == 0)
 	{
@@ -1690,6 +1804,7 @@ Atom::Atom(std::string name)
 		Category = "Nobel Gas";
 		NaturalState = "Solid";
 		atomic_number = 118;
+		atomic_radii = 1.57;
 	}
 	else
 	{
@@ -1767,6 +1882,7 @@ Atom::Atom(int number)
 		Category = "Alkaline Earth Metal";
 		NaturalState = "Solid";
 		atomic_number = 4;
+		atomic_radii = 1.53;
 	}
 	else if (number == 5)
 	{
@@ -1781,6 +1897,7 @@ Atom::Atom(int number)
 		Category = "Metalloid";
 		NaturalState = "Solid";
 		atomic_number = 5;
+		atomic_radii = 1.92;
 	}
 	else if (number == 6)
 	{
@@ -1795,6 +1912,7 @@ Atom::Atom(int number)
 		Category = "Polyatomic Non-metal";
 		NaturalState = "Solid";
 		atomic_number = 6;
+		atomic_radii = 1.70;
 	}
 	else if (number == 7)
 	{
@@ -1809,6 +1927,7 @@ Atom::Atom(int number)
 		Category = "Diatomic Non-metal";
 		NaturalState = "Gas";
 		atomic_number = 7;
+		atomic_radii = 1.55;
 	}
 	else if (number == 8)
 	{
@@ -1823,6 +1942,7 @@ Atom::Atom(int number)
 		Category = "Diatomic Non-metal";
 		NaturalState = "Gas";
 		atomic_number = 8;
+		atomic_radii = 1.52;
 	}
 	else if (number == 9)
 	{
@@ -1837,6 +1957,7 @@ Atom::Atom(int number)
 		Category = "Diatomic Non-metal";
 		NaturalState = "Gas";
 		atomic_number = 9;
+		atomic_radii = 1.35;
 	}
 	else if (number == 10)
 	{
@@ -1851,6 +1972,7 @@ Atom::Atom(int number)
 		Category = "Nobel Gas";
 		NaturalState = "Gas";
 		atomic_number = 10;
+		atomic_radii = 1.54;
 	}
 	else if (number == 11)
 	{
@@ -1865,6 +1987,7 @@ Atom::Atom(int number)
 		Category = "Alkali Metal";
 		NaturalState = "Solid";
 		atomic_number = 11;
+		atomic_radii = 2.27;
 	}
 	else if (number == 12)
 	{
@@ -1879,6 +2002,7 @@ Atom::Atom(int number)
 		Category = "Alkaline Earth Metal";
 		NaturalState = "Solid";
 		atomic_number = 12;
+		atomic_radii = 1.73;
 	}
 	else if (number == 13)
 	{
@@ -1893,6 +2017,7 @@ Atom::Atom(int number)
 		Category = "Metalloid";
 		NaturalState = "Solid";
 		atomic_number = 13;
+		atomic_radii = 1.84;
 	}
 	else if (number == 14)
 	{
@@ -1907,6 +2032,7 @@ Atom::Atom(int number)
 		Category = "Metalloid";
 		NaturalState = "Solid";
 		atomic_number = 14;
+		atomic_radii = 2.10;
 	}
 	else if (number == 15)
 	{
@@ -1921,6 +2047,7 @@ Atom::Atom(int number)
 		Category = "Metalloid";
 		NaturalState = "Solid";
 		atomic_number = 15;
+		atomic_radii = 1.80;
 	}
 	else if (number == 16)
 	{
@@ -1935,6 +2062,7 @@ Atom::Atom(int number)
 		Category = "Polyatomic Non-metal";
 		NaturalState = "Solid";
 		atomic_number = 16;
+		atomic_radii = 1.80;
 	}
 	else if (number == 17)
 	{
@@ -1949,6 +2077,7 @@ Atom::Atom(int number)
 		Category = "Diatomic Non-metal";
 		NaturalState = "Gas";
 		atomic_number = 17;
+		atomic_radii = 1.75;
 	}
 	else if (number == 18)
 	{
@@ -1963,6 +2092,7 @@ Atom::Atom(int number)
 		Category = "Nobel Gas";
 		NaturalState = "Gas";
 		atomic_number = 18;
+		atomic_radii = 1.88;
 	}
 	else if (number == 19)
 	{
@@ -1977,6 +2107,7 @@ Atom::Atom(int number)
 		Category = "Alkali Metal";
 		NaturalState = "Solid";
 		atomic_number = 19;
+		atomic_radii = 2.75;
 	}
 	else if (number == 20)
 	{
@@ -1991,6 +2122,7 @@ Atom::Atom(int number)
 		Category = "Alkaline Earth Metal";
 		NaturalState = "Solid";
 		atomic_number = 20;
+		atomic_radii = 2.31;
 	}
 	else if (number == 21)
 	{
@@ -2005,6 +2137,7 @@ Atom::Atom(int number)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 21;
+		atomic_radii = 2.11;
 	}
 	else if (number == 22)
 	{
@@ -2019,6 +2152,7 @@ Atom::Atom(int number)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 22;
+		atomic_radii = 1.60;
 	}
 	else if (number == 23)
 	{
@@ -2033,6 +2167,7 @@ Atom::Atom(int number)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 23;
+		atomic_radii = 1.53;
 	}
 	else if (number == 24)
 	{
@@ -2047,6 +2182,7 @@ Atom::Atom(int number)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 24;
+		atomic_radii = 1.39;
 	}
 	else if (number == 25)
 	{
@@ -2061,6 +2197,7 @@ Atom::Atom(int number)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 25;
+		atomic_radii = 1.39;
 	}
 	else if (number == 26)
 	{
@@ -2075,6 +2212,7 @@ Atom::Atom(int number)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 26;
+		atomic_radii = 1.32;
 	}
 	else if (number == 27)
 	{
@@ -2089,6 +2227,7 @@ Atom::Atom(int number)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 27;
+		atomic_radii = 1.26;
 	}
 	else if (number == 28)
 	{
@@ -2103,6 +2242,7 @@ Atom::Atom(int number)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 28;
+		atomic_radii = 1.63;
 	}
 	else if (number == 29)
 	{
@@ -2117,6 +2257,7 @@ Atom::Atom(int number)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 29;
+		atomic_radii = 1.40;
 	}
 	else if (number == 30)
 	{
@@ -2131,6 +2272,7 @@ Atom::Atom(int number)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 30;
+		atomic_radii = 1.39;
 	}
 	else if (number == 31)
 	{
@@ -2145,6 +2287,7 @@ Atom::Atom(int number)
 		Category = "Post-Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 31;
+		atomic_radii = 1.87;
 	}
 	else if (number == 32)
 	{
@@ -2159,6 +2302,7 @@ Atom::Atom(int number)
 		Category = "Metalloid";
 		NaturalState = "Solid";
 		atomic_number = 32;
+		atomic_radii = 2.11;
 	}
 	else if (number == 33)
 	{
@@ -2173,6 +2317,7 @@ Atom::Atom(int number)
 		Category = "Metalloid";
 		NaturalState = "Solid";
 		atomic_number = 33;
+		atomic_radii = 1.85;
 	}
 	else if (number == 34)
 	{
@@ -2187,6 +2332,7 @@ Atom::Atom(int number)
 		Category = "Polyatomic Non-metal";
 		NaturalState = "Solid";
 		atomic_number = 34;
+		atomic_radii = 1.90;
 	}
 	else if (number == 35)
 	{
@@ -2201,6 +2347,7 @@ Atom::Atom(int number)
 		Category = "Diatomic Non-metal";
 		NaturalState = "Liquid";
 		atomic_number = 35;
+		atomic_radii = 1.85;
 	}
 	else if (number == 36)
 	{
@@ -2215,6 +2362,7 @@ Atom::Atom(int number)
 		Category = "Nobel Gas";
 		NaturalState = "Gas";
 		atomic_number = 36;
+		atomic_radii = 2.02;
 	}
 	else if (number == 37)
 	{
@@ -2229,6 +2377,7 @@ Atom::Atom(int number)
 		Category = "Alkali Metal";
 		NaturalState = "Solid";
 		atomic_number = 37;
+		atomic_radii = 3.03;
 	}
 	else if (number == 38)
 	{
@@ -2243,6 +2392,7 @@ Atom::Atom(int number)
 		Category = "Alkaline Earth Metal";
 		NaturalState = "Solid";
 		atomic_number = 38;
+		atomic_radii = 2.49;
 	}
 	else if (number == 39)
 	{
@@ -2257,6 +2407,7 @@ Atom::Atom(int number)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 39;
+		atomic_radii = 1.90;
 	}
 	else if (number == 40)
 	{
@@ -2271,6 +2422,7 @@ Atom::Atom(int number)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 40;
+		atomic_radii = 1.75;
 	}
 	else if (number == 41)
 	{
@@ -2285,6 +2437,7 @@ Atom::Atom(int number)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 41;
+		atomic_radii = 1.64;
 	}
 	else if (number == 42)
 	{
@@ -2299,6 +2452,7 @@ Atom::Atom(int number)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 42;
+		atomic_radii = 1.54;
 	}
 	else if (number == 43)
 	{
@@ -2313,6 +2467,7 @@ Atom::Atom(int number)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 43;
+		atomic_radii = 1.47;
 	}
 	else if (number == 44)
 	{
@@ -2327,6 +2482,7 @@ Atom::Atom(int number)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 44;
+		atomic_radii = 1.46;
 	}
 	else if (number == 45)
 	{
@@ -2341,6 +2497,7 @@ Atom::Atom(int number)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 45;
+		atomic_radii = 1.42;
 	}
 	else if (number == 46)
 	{
@@ -2355,6 +2512,7 @@ Atom::Atom(int number)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 46;
+		atomic_radii = 1.63;
 	}
 	else if (number == 47)
 	{
@@ -2369,6 +2527,7 @@ Atom::Atom(int number)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 47;
+		atomic_radii = 1.72;
 	}
 	else if (number == 48)
 	{
@@ -2383,6 +2542,7 @@ Atom::Atom(int number)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 48;
+		atomic_radii = 1.58;
 	}
 	else if (number == 49)
 	{
@@ -2397,6 +2557,7 @@ Atom::Atom(int number)
 		Category = "Post-Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 49;
+		atomic_radii = 1.93;
 	}
 	else if (number == 50)
 	{
@@ -2411,6 +2572,7 @@ Atom::Atom(int number)
 		Category = "Post-Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 50;
+		atomic_radii = 2.17;
 	}
 	else if (number == 51)
 	{
@@ -2425,6 +2587,7 @@ Atom::Atom(int number)
 		Category = "Metalloid";
 		NaturalState = "Solid";
 		atomic_number = 51;
+		atomic_radii = 2.06;
 	}
 	else if (number == 52)
 	{
@@ -2439,6 +2602,7 @@ Atom::Atom(int number)
 		Category = "Metalloid";
 		NaturalState = "Solid";
 		atomic_number = 52;
+		atomic_radii = 2.06;
 	}
 	else if (number == 53)
 	{
@@ -2453,6 +2617,7 @@ Atom::Atom(int number)
 		Category = "Diatomic Non-metal";
 		NaturalState = "Solid";
 		atomic_number = 53;
+		atomic_radii = 1.98;
 	}
 	else if (number == 54)
 	{
@@ -2467,6 +2632,7 @@ Atom::Atom(int number)
 		Category = "Nobel Gas";
 		NaturalState = "Gas";
 		atomic_number = 54;
+		atomic_radii = 2.16;
 	}
 	else if (number == 55)
 	{
@@ -2481,6 +2647,7 @@ Atom::Atom(int number)
 		Category = "Alkali Metal";
 		NaturalState = "Solid";
 		atomic_number = 55;
+		atomic_radii = 3.43;
 	}
 	else if (number == 56)
 	{
@@ -2495,6 +2662,7 @@ Atom::Atom(int number)
 		Category = "Alkaline Earth Metal";
 		NaturalState = "Solid";
 		atomic_number = 56;
+		atomic_radii = 2.68;
 	}
 	else if (number == 57)
 	{
@@ -2509,6 +2677,7 @@ Atom::Atom(int number)
 		Category = "Lanthanide";
 		NaturalState = "Solid";
 		atomic_number = 57;
+		atomic_radii = 2.07;
 	}
 	else if (number == 58)
 	{
@@ -2523,6 +2692,7 @@ Atom::Atom(int number)
 		Category = "Lanthanide";
 		NaturalState = "Solid";
 		atomic_number = 58;
+		atomic_radii = 2.04;
 	}
 	else if (number == 59)
 	{
@@ -2537,6 +2707,7 @@ Atom::Atom(int number)
 		Category = "Lanthanide";
 		NaturalState = "Solid";
 		atomic_number = 59;
+		atomic_radii = 2.03;
 	}
 	else if (number == 60)
 	{
@@ -2551,6 +2722,7 @@ Atom::Atom(int number)
 		Category = "Lanthanide";
 		NaturalState = "Solid";
 		atomic_number = 60;
+		atomic_radii = 2.01;
 	}
 	else if (number == 61)
 	{
@@ -2565,6 +2737,7 @@ Atom::Atom(int number)
 		Category = "Lanthanide";
 		NaturalState = "Solid";
 		atomic_number = 61;
+		atomic_radii = 1.99;
 	}
 	else if (number == 62)
 	{
@@ -2579,6 +2752,7 @@ Atom::Atom(int number)
 		Category = "Lanthanide";
 		NaturalState = "Solid";
 		atomic_number = 62;
+		atomic_radii = 1.98;
 	}
 	else if (number == 63)
 	{
@@ -2593,6 +2767,7 @@ Atom::Atom(int number)
 		Category = "Lanthanide";
 		NaturalState = "Solid";
 		atomic_number = 63;
+		atomic_radii = 1.98;
 	}
 	else if (number == 64)
 	{
@@ -2607,6 +2782,7 @@ Atom::Atom(int number)
 		Category = "Lanthanide";
 		NaturalState = "Solid";
 		atomic_number = 64;
+		atomic_radii = 1.96;
 	}
 	else if (number == 65)
 	{
@@ -2621,6 +2797,7 @@ Atom::Atom(int number)
 		Category = "Lanthanide";
 		NaturalState = "Solid";
 		atomic_number = 65;
+		atomic_radii = 1.94;
 	}
 	else if (number == 66)
 	{
@@ -2635,6 +2812,7 @@ Atom::Atom(int number)
 		Category = "Lanthanide";
 		NaturalState = "Solid";
 		atomic_number = 66;
+		atomic_radii = 1.92;
 	}
 	else if (number == 67)
 	{
@@ -2649,6 +2827,7 @@ Atom::Atom(int number)
 		Category = "Lanthanide";
 		NaturalState = "Solid";
 		atomic_number = 67;
+		atomic_radii = 1.92;
 	}
 	else if (number == 68)
 	{
@@ -2663,6 +2842,7 @@ Atom::Atom(int number)
 		Category = "Lanthanide";
 		NaturalState = "Solid";
 		atomic_number = 68;
+		atomic_radii = 1.89;
 	}
 	else if (number == 69)
 	{
@@ -2677,6 +2857,7 @@ Atom::Atom(int number)
 		Category = "Lanthanide";
 		NaturalState = "Solid";
 		atomic_number = 69;
+		atomic_radii = 1.90;
 	}
 	else if (number == 70)
 	{
@@ -2691,6 +2872,7 @@ Atom::Atom(int number)
 		Category = "Lanthanide";
 		NaturalState = "Solid";
 		atomic_number = 70;
+		atomic_radii = 1.87;
 	}
 	else if (number == 71)
 	{
@@ -2705,6 +2887,7 @@ Atom::Atom(int number)
 		Category = "Lanthanide";
 		NaturalState = "Solid";
 		atomic_number = 71;
+		atomic_radii = 1.87;
 	}
 	else if (number == 72)
 	{
@@ -2719,6 +2902,7 @@ Atom::Atom(int number)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 72;
+		atomic_radii = 1.75;
 	}
 	else if (number == 73)
 	{
@@ -2733,6 +2917,7 @@ Atom::Atom(int number)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 73;
+		atomic_radii = 1.70;
 	}
 	else if (number == 74)
 	{
@@ -2747,6 +2932,7 @@ Atom::Atom(int number)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 74;
+		atomic_radii = 1.62;
 	}
 	else if (number == 75)
 	{
@@ -2761,6 +2947,7 @@ Atom::Atom(int number)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 75;
+		atomic_radii = 1.51;
 	}
 	else if (number == 76)
 	{
@@ -2775,6 +2962,7 @@ Atom::Atom(int number)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 76;
+		atomic_radii = 1.44;
 	}
 	else if (number == 77)
 	{
@@ -2789,6 +2977,7 @@ Atom::Atom(int number)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 77;
+		atomic_radii = 1.41;
 	}
 	else if (number == 78)
 	{
@@ -2803,6 +2992,7 @@ Atom::Atom(int number)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 78;
+		atomic_radii = 1.75;
 	}
 	else if (number == 79)
 	{
@@ -2817,6 +3007,7 @@ Atom::Atom(int number)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 79;
+		atomic_radii = 1.66;
 	}
 	else if (number == 80)
 	{
@@ -2831,6 +3022,7 @@ Atom::Atom(int number)
 		Category = "Transition Metal";
 		NaturalState = "Liquid";
 		atomic_number = 80;
+		atomic_radii = 1.55;
 	}
 	else if (number == 81)
 	{
@@ -2845,6 +3037,7 @@ Atom::Atom(int number)
 		Category = "Post-Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 81;
+		atomic_radii = 1.96;
 	}
 	else if (number == 82)
 	{
@@ -2859,6 +3052,7 @@ Atom::Atom(int number)
 		Category = "Post-Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 82;
+		atomic_radii = 2.02;
 	}
 	else if (number == 83)
 	{
@@ -2873,6 +3067,7 @@ Atom::Atom(int number)
 		Category = "Post-Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 83;
+		atomic_radii = 2.07;
 	}
 	else if (number == 84)
 	{
@@ -2887,6 +3082,7 @@ Atom::Atom(int number)
 		Category = "Post-Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 84;
+		atomic_radii = 1.97;
 	}
 	else if (number == 85)
 	{
@@ -2901,6 +3097,7 @@ Atom::Atom(int number)
 		Category = "Metalloid";
 		NaturalState = "Solid";
 		atomic_number = 85;
+		atomic_radii = 2.02;
 	}
 	else if (number == 86)
 	{
@@ -2915,6 +3112,7 @@ Atom::Atom(int number)
 		Category = "Nobel Gas";
 		NaturalState = "Gas";
 		atomic_number = 86;
+		atomic_radii = 2.20;
 	}
 	else if (number == 87)
 	{
@@ -2929,6 +3127,7 @@ Atom::Atom(int number)
 		Category = "Alkali Metal";
 		NaturalState = "Solid";
 		atomic_number = 87;
+		atomic_radii = 3.48;
 	}
 	else if (number == 88)
 	{
@@ -2943,6 +3142,7 @@ Atom::Atom(int number)
 		Category = "Alkaline Earth Metal";
 		NaturalState = "Solid";
 		atomic_number = 88;
+		atomic_radii = 2.83;
 	}
 	else if (number == 89)
 	{
@@ -2957,6 +3157,7 @@ Atom::Atom(int number)
 		Category = "Actinide";
 		NaturalState = "Solid";
 		atomic_number = 89;
+		atomic_radii = 2.15;
 	}
 	else if (number == 90)
 	{
@@ -2971,6 +3172,7 @@ Atom::Atom(int number)
 		Category = "Actinide";
 		NaturalState = "Solid";
 		atomic_number = 90;
+		atomic_radii = 2.06;
 	}
 	else if (number == 91)
 	{
@@ -2985,6 +3187,7 @@ Atom::Atom(int number)
 		Category = "Actinide";
 		NaturalState = "Solid";
 		atomic_number = 91;
+		atomic_radii = 2.00;
 	}
 	else if (number == 92)
 	{
@@ -2999,6 +3202,7 @@ Atom::Atom(int number)
 		Category = "Actinide";
 		NaturalState = "Solid";
 		atomic_number = 92;
+		atomic_radii = 1.86;
 	}
 	else if (number == 93)
 	{
@@ -3013,6 +3217,7 @@ Atom::Atom(int number)
 		Category = "Actinide";
 		NaturalState = "Solid";
 		atomic_number = 93;
+		atomic_radii = 1.90;
 	}
 	else if (number == 94)
 	{
@@ -3027,6 +3232,7 @@ Atom::Atom(int number)
 		Category = "Actinide";
 		NaturalState = "Solid";
 		atomic_number = 94;
+		atomic_radii = 1.87;
 	}
 	else if (number == 95)
 	{
@@ -3041,6 +3247,7 @@ Atom::Atom(int number)
 		Category = "Actinide";
 		NaturalState = "Solid";
 		atomic_number = 95;
+		atomic_radii = 1.80;
 	}
 	else if (number == 96)
 	{
@@ -3055,6 +3262,7 @@ Atom::Atom(int number)
 		Category = "Actinide";
 		NaturalState = "Solid";
 		atomic_number = 96;
+		atomic_radii = 1.69;
 	}
 	else if (number == 97)
 	{
@@ -3069,6 +3277,7 @@ Atom::Atom(int number)
 		Category = "Actinide";
 		NaturalState = "Solid";
 		atomic_number = 97;
+		atomic_radii = 1.70;
 	}
 	else if (number == 98)
 	{
@@ -3083,6 +3292,7 @@ Atom::Atom(int number)
 		Category = "Actinide";
 		NaturalState = "Solid";
 		atomic_number = 98;
+		atomic_radii = 1.70;
 	}
 	else if (number == 99)
 	{
@@ -3097,6 +3307,7 @@ Atom::Atom(int number)
 		Category = "Actinide";
 		NaturalState = "Solid";
 		atomic_number = 99;
+		atomic_radii = 1.70;
 	}
 	else if (number == 100)
 	{
@@ -3111,6 +3322,7 @@ Atom::Atom(int number)
 		Category = "Actinide";
 		NaturalState = "Solid";
 		atomic_number = 100;
+		atomic_radii = 1.70;
 	}
 	else if (number == 101)
 	{
@@ -3125,6 +3337,7 @@ Atom::Atom(int number)
 		Category = "Actinide";
 		NaturalState = "Solid";
 		atomic_number = 101;
+		atomic_radii = 1.70;
 	}
 	else if (number == 102)
 	{
@@ -3139,6 +3352,7 @@ Atom::Atom(int number)
 		Category = "Actinide";
 		NaturalState = "Solid";
 		atomic_number = 102;
+		atomic_radii = 1.70;
 	}
 	else if (number == 103)
 	{
@@ -3153,6 +3367,7 @@ Atom::Atom(int number)
 		Category = "Actinide";
 		NaturalState = "Solid";
 		atomic_number = 103;
+		atomic_radii = 1.70;
 	}
 	else if (number == 104)
 	{
@@ -3167,6 +3382,7 @@ Atom::Atom(int number)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 104;
+		atomic_radii = 1.57;
 	}
 	else if (number == 105)
 	{
@@ -3181,6 +3397,7 @@ Atom::Atom(int number)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 105;
+		atomic_radii = 1.49;
 	}
 	else if (number == 106)
 	{
@@ -3195,6 +3412,7 @@ Atom::Atom(int number)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 106;
+		atomic_radii = 1.43;
 	}
 	else if (number == 107)
 	{
@@ -3209,6 +3427,7 @@ Atom::Atom(int number)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 107;
+		atomic_radii = 1.41;
 	}
 	else if (number == 108)
 	{
@@ -3223,6 +3442,7 @@ Atom::Atom(int number)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 108;
+		atomic_radii = 1.34;
 	}
 	else if (number == 109)
 	{
@@ -3237,6 +3457,7 @@ Atom::Atom(int number)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 109;
+		atomic_radii = 1.29;
 	}
 	else if (number == 110)
 	{
@@ -3251,6 +3472,7 @@ Atom::Atom(int number)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 110;
+		atomic_radii = 1.28;
 	}
 	else if (number == 111)
 	{
@@ -3265,6 +3487,7 @@ Atom::Atom(int number)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 111;
+		atomic_radii = 1.21;
 	}
 	else if (number == 112)
 	{
@@ -3279,6 +3502,7 @@ Atom::Atom(int number)
 		Category = "Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 112;
+		atomic_radii = 1.22;
 	}
 	else if (number == 113)
 	{
@@ -3293,6 +3517,7 @@ Atom::Atom(int number)
 		Category = "Post-Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 113;
+		atomic_radii = 1.76;
 	}
 	else if (number == 114)
 	{
@@ -3307,6 +3532,7 @@ Atom::Atom(int number)
 		Category = "Post-Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 114;
+		atomic_radii = 1.74;
 	}
 	else if (number == 115)
 	{
@@ -3321,6 +3547,7 @@ Atom::Atom(int number)
 		Category = "Post-Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 115;
+		atomic_radii = 1.57;
 	}
 	else if (number == 116)
 	{
@@ -3335,6 +3562,7 @@ Atom::Atom(int number)
 		Category = "Post-Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 116;
+		atomic_radii = 1.64;
 	}
 	else if (number == 117)
 	{
@@ -3349,6 +3577,7 @@ Atom::Atom(int number)
 		Category = "Metalloid";
 		NaturalState = "Solid";
 		atomic_number = 117;
+		atomic_radii = 1.57;
 	}
 	else if (number == 118)
 	{
@@ -3363,6 +3592,7 @@ Atom::Atom(int number)
 		Category = "Nobel Gas";
 		NaturalState = "Solid";
 		atomic_number = 118;
+		atomic_radii = 1.57;
 	}
 	else
 	{
@@ -3440,6 +3670,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Alkaline Earth Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 4;
+		this->atomic_radii = 1.53;
 	}
 	else if (Symbol.compare("B") == 0)
 	{
@@ -3454,6 +3685,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Metalloid";
 		this->NaturalState = "Solid";
 		this->atomic_number = 5;
+		this->atomic_radii = 1.92;
 	}
 	else if (Symbol.compare("C") == 0)
 	{
@@ -3468,6 +3700,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Polyatomic Non-metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 6;
+		this->atomic_radii = 1.70;
 	}
 	else if (Symbol.compare("N") == 0)
 	{
@@ -3482,6 +3715,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Diatomic Non-metal";
 		this->NaturalState = "Gas";
 		this->atomic_number = 7;
+		this->atomic_radii = 1.55;
 	}
 	else if (Symbol.compare("O") == 0)
 	{
@@ -3496,6 +3730,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Diatomic Non-metal";
 		this->NaturalState = "Gas";
 		this->atomic_number = 8;
+		this->atomic_radii = 1.52;
 	}
 	else if (Symbol.compare("F") == 0)
 	{
@@ -3510,6 +3745,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Diatomic Non-metal";
 		this->NaturalState = "Gas";
 		this->atomic_number = 9;
+		this->atomic_radii = 1.35;
 	}
 	else if (Symbol.compare("Ne") == 0)
 	{
@@ -3524,6 +3760,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Nobel Gas";
 		this->NaturalState = "Gas";
 		this->atomic_number = 10;
+		this->atomic_radii = 1.54;
 	}
 	else if (Symbol.compare("Na") == 0)
 	{
@@ -3538,6 +3775,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Alkali Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 11;
+		this->atomic_radii = 2.27;
 	}
 	else if (Symbol.compare("Mg") == 0)
 	{
@@ -3552,6 +3790,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Alkaline Earth Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 12;
+		this->atomic_radii = 1.73;
 	}
 	else if (Symbol.compare("Al") == 0)
 	{
@@ -3566,6 +3805,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Metalloid";
 		this->NaturalState = "Solid";
 		this->atomic_number = 13;
+		this->atomic_radii = 1.84;
 	}
 	else if (Symbol.compare("Si") == 0)
 	{
@@ -3580,6 +3820,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Metalloid";
 		this->NaturalState = "Solid";
 		this->atomic_number = 14;
+		this->atomic_radii = 2.10;
 	}
 	else if (Symbol.compare("P") == 0)
 	{
@@ -3594,6 +3835,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Metalloid";
 		this->NaturalState = "Solid";
 		this->atomic_number = 15;
+		this->atomic_radii = 1.80;
 	}
 	else if (Symbol.compare("S") == 0)
 	{
@@ -3608,6 +3850,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Polyatomic Non-metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 16;
+		this->atomic_radii = 1.80;
 	}
 	else if (Symbol.compare("Cl") == 0)
 	{
@@ -3622,6 +3865,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Diatomic Non-metal";
 		this->NaturalState = "Gas";
 		this->atomic_number = 17;
+		this->atomic_radii = 1.75;
 	}
 	else if (Symbol.compare("Ar") == 0)
 	{
@@ -3636,6 +3880,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Nobel Gas";
 		this->NaturalState = "Gas";
 		this->atomic_number = 18;
+		this->atomic_radii = 1.88;
 	}
 	else if (Symbol.compare("K") == 0)
 	{
@@ -3650,6 +3895,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Alkali Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 19;
+		this->atomic_radii = 2.75;
 	}
 	else if (Symbol.compare("Ca") == 0)
 	{
@@ -3664,6 +3910,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Alkaline Earth Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 20;
+		this->atomic_radii = 2.31;
 	}
 	else if (Symbol.compare("Sc") == 0)
 	{
@@ -3678,6 +3925,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 21;
+		this->atomic_radii = 2.11;
 	}
 	else if (Symbol.compare("Ti") == 0)
 	{
@@ -3692,6 +3940,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 22;
+		this->atomic_radii = 1.60;
 	}
 	else if (Symbol.compare("V") == 0)
 	{
@@ -3706,6 +3955,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 23;
+		this->atomic_radii = 1.53;
 	}
 	else if (Symbol.compare("Cr") == 0)
 	{
@@ -3720,6 +3970,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 24;
+		this->atomic_radii = 1.39;
 	}
 	else if (Symbol.compare("Mn") == 0)
 	{
@@ -3734,6 +3985,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 25;
+		this->atomic_radii = 1.39;
 	}
 	else if (Symbol.compare("Fe") == 0)
 	{
@@ -3748,6 +4000,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 26;
+		this->atomic_radii = 1.32;
 	}
 	else if (Symbol.compare("Co") == 0)
 	{
@@ -3762,6 +4015,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 27;
+		this->atomic_radii = 1.26;
 	}
 	else if (Symbol.compare("Ni") == 0)
 	{
@@ -3776,6 +4030,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 28;
+		this->atomic_radii = 1.63;
 	}
 	else if (Symbol.compare("Cu") == 0)
 	{
@@ -3790,6 +4045,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 29;
+		this->atomic_radii = 1.40;
 	}
 	else if (Symbol.compare("Zn") == 0)
 	{
@@ -3804,6 +4060,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 30;
+		this->atomic_radii = 1.39;
 	}
 	else if (Symbol.compare("Ga") == 0)
 	{
@@ -3818,6 +4075,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Post-Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 31;
+		this->atomic_radii = 1.87;
 	}
 	else if (Symbol.compare("Ge") == 0)
 	{
@@ -3832,6 +4090,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Metalloid";
 		this->NaturalState = "Solid";
 		this->atomic_number = 32;
+		this->atomic_radii = 2.11;
 	}
 	else if (Symbol.compare("As") == 0)
 	{
@@ -3846,6 +4105,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Metalloid";
 		this->NaturalState = "Solid";
 		this->atomic_number = 33;
+		this->atomic_radii = 1.85;
 	}
 	else if (Symbol.compare("Se") == 0)
 	{
@@ -3860,6 +4120,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Polyatomic Non-metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 34;
+		this->atomic_radii = 1.90;
 	}
 	else if (Symbol.compare("Br") == 0)
 	{
@@ -3874,6 +4135,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Diatomic Non-metal";
 		this->NaturalState = "Liquid";
 		this->atomic_number = 35;
+		this->atomic_radii = 1.85;
 	}
 	else if (Symbol.compare("Kr") == 0)
 	{
@@ -3888,6 +4150,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Nobel Gas";
 		this->NaturalState = "Gas";
 		this->atomic_number = 36;
+		this->atomic_radii = 2.02;
 	}
 	else if (Symbol.compare("Rb") == 0)
 	{
@@ -3902,6 +4165,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Alkali Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 37;
+		this->atomic_radii = 3.03;
 	}
 	else if (Symbol.compare("Sr") == 0)
 	{
@@ -3916,6 +4180,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Alkaline Earth Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 38;
+		this->atomic_radii = 2.49;
 	}
 	else if (Symbol.compare("Y") == 0)
 	{
@@ -3930,6 +4195,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 39;
+		this->atomic_radii = 1.90;
 	}
 	else if (Symbol.compare("Zr") == 0)
 	{
@@ -3944,6 +4210,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 40;
+		this->atomic_radii = 1.75;
 	}
 	else if (Symbol.compare("Nb") == 0)
 	{
@@ -3958,6 +4225,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 41;
+		this->atomic_radii = 1.64;
 	}
 	else if (Symbol.compare("Mo") == 0)
 	{
@@ -3972,6 +4240,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 42;
+		this->atomic_radii = 1.54;
 	}
 	else if (Symbol.compare("Tc") == 0)
 	{
@@ -3986,6 +4255,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 43;
+		this->atomic_radii = 1.47;
 	}
 	else if (Symbol.compare("Ru") == 0)
 	{
@@ -4000,6 +4270,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 44;
+		this->atomic_radii = 1.46;
 	}
 	else if (Symbol.compare("Rh") == 0)
 	{
@@ -4014,6 +4285,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 45;
+		this->atomic_radii = 1.42;
 	}
 	else if (Symbol.compare("Pd") == 0)
 	{
@@ -4028,6 +4300,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 46;
+		this->atomic_radii = 1.63;
 	}
 	else if (Symbol.compare("Ag") == 0)
 	{
@@ -4042,6 +4315,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 47;
+		this->atomic_radii = 1.72;
 	}
 	else if (Symbol.compare("Cd") == 0)
 	{
@@ -4056,6 +4330,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 48;
+		this->atomic_radii = 1.58;
 	}
 	else if (Symbol.compare("In") == 0)
 	{
@@ -4070,6 +4345,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Post-Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 49;
+		this->atomic_radii = 1.93;
 	}
 	else if (Symbol.compare("Sn") == 0)
 	{
@@ -4084,6 +4360,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Post-Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 50;
+		this->atomic_radii = 2.17;
 	}
 	else if (Symbol.compare("Sb") == 0)
 	{
@@ -4098,6 +4375,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Metalloid";
 		this->NaturalState = "Solid";
 		this->atomic_number = 51;
+		this->atomic_radii = 2.06;
 	}
 	else if (Symbol.compare("Te") == 0)
 	{
@@ -4112,6 +4390,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Metalloid";
 		this->NaturalState = "Solid";
 		this->atomic_number = 52;
+		this->atomic_radii = 2.06;
 	}
 	else if (Symbol.compare("I") == 0)
 	{
@@ -4126,6 +4405,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Diatomic Non-metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 53;
+		this->atomic_radii = 1.98;
 	}
 	else if (Symbol.compare("Xe") == 0)
 	{
@@ -4140,6 +4420,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Nobel Gas";
 		this->NaturalState = "Gas";
 		this->atomic_number = 54;
+		this->atomic_radii = 2.16;
 	}
 	else if (Symbol.compare("Cs") == 0)
 	{
@@ -4154,6 +4435,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Alkali Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 55;
+		this->atomic_radii = 3.43;
 	}
 	else if (Symbol.compare("Ba") == 0)
 	{
@@ -4168,6 +4450,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Alkaline Earth Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 56;
+		this->atomic_radii = 2.68;
 	}
 	else if (Symbol.compare("La") == 0)
 	{
@@ -4182,6 +4465,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Lanthanide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 57;
+		this->atomic_radii = 2.07;
 	}
 	else if (Symbol.compare("Ce") == 0)
 	{
@@ -4196,6 +4480,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Lanthanide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 58;
+		this->atomic_radii = 2.04;
 	}
 	else if (Symbol.compare("Pr") == 0)
 	{
@@ -4210,6 +4495,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Lanthanide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 59;
+		this->atomic_radii = 2.03;
 	}
 	else if (Symbol.compare("Nd") == 0)
 	{
@@ -4224,6 +4510,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Lanthanide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 60;
+		this->atomic_radii = 2.01;
 	}
 	else if (Symbol.compare("Pm") == 0)
 	{
@@ -4238,6 +4525,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Lanthanide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 61;
+		this->atomic_radii = 1.99;
 	}
 	else if (Symbol.compare("Sm") == 0)
 	{
@@ -4252,6 +4540,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Lanthanide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 62;
+		this->atomic_radii = 1.98;
 	}
 	else if (Symbol.compare("Eu") == 0)
 	{
@@ -4266,6 +4555,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Lanthanide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 63;
+		this->atomic_radii = 1.98;
 	}
 	else if (Symbol.compare("Gd") == 0)
 	{
@@ -4280,6 +4570,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Lanthanide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 64;
+		this->atomic_radii = 1.96;
 	}
 	else if (Symbol.compare("Tb") == 0)
 	{
@@ -4294,6 +4585,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Lanthanide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 65;
+		this->atomic_radii = 1.94;
 	}
 	else if (Symbol.compare("Dy") == 0)
 	{
@@ -4308,6 +4600,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Lanthanide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 66;
+		this->atomic_radii = 1.92;
 	}
 	else if (Symbol.compare("Ho") == 0)
 	{
@@ -4322,6 +4615,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Lanthanide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 67;
+		this->atomic_radii = 1.92;
 	}
 	else if (Symbol.compare("Er") == 0)
 	{
@@ -4336,6 +4630,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Lanthanide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 68;
+		this->atomic_radii = 1.89;
 	}
 	else if (Symbol.compare("Tm") == 0)
 	{
@@ -4350,6 +4645,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Lanthanide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 69;
+		this->atomic_radii = 1.90;
 	}
 	else if (Symbol.compare("Yb") == 0)
 	{
@@ -4364,6 +4660,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Lanthanide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 70;
+		this->atomic_radii = 1.87;
 	}
 	else if (Symbol.compare("Lu") == 0)
 	{
@@ -4378,6 +4675,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Lanthanide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 71;
+		this->atomic_radii = 1.87;
 	}
 	else if (Symbol.compare("Hf") == 0)
 	{
@@ -4392,6 +4690,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 72;
+		this->atomic_radii = 1.75;
 	}
 	else if (Symbol.compare("Ta") == 0)
 	{
@@ -4406,6 +4705,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 73;
+		this->atomic_radii = 1.70;
 	}
 	else if (Symbol.compare("W") == 0)
 	{
@@ -4420,6 +4720,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 74;
+		this->atomic_radii = 1.62;
 	}
 	else if (Symbol.compare("Re") == 0)
 	{
@@ -4434,6 +4735,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 75;
+		this->atomic_radii = 1.51;
 	}
 	else if (Symbol.compare("Os") == 0)
 	{
@@ -4448,6 +4750,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 76;
+		this->atomic_radii = 1.44;
 	}
 	else if (Symbol.compare("Ir") == 0)
 	{
@@ -4462,6 +4765,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 77;
+		this->atomic_radii = 1.41;
 	}
 	else if (Symbol.compare("Pt") == 0)
 	{
@@ -4476,6 +4780,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 78;
+		this->atomic_radii = 1.75;
 	}
 	else if (Symbol.compare("Au") == 0)
 	{
@@ -4490,6 +4795,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 79;
+		this->atomic_radii = 1.66;
 	}
 	else if (Symbol.compare("Hg") == 0)
 	{
@@ -4504,6 +4810,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Liquid";
 		this->atomic_number = 80;
+		this->atomic_radii = 1.55;
 	}
 	else if (Symbol.compare("Tl") == 0)
 	{
@@ -4518,6 +4825,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Post-Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 81;
+		this->atomic_radii = 1.96;
 	}
 	else if (Symbol.compare("Pb") == 0)
 	{
@@ -4532,6 +4840,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Post-Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 82;
+		this->atomic_radii = 2.02;
 	}
 	else if (Symbol.compare("Bi") == 0)
 	{
@@ -4546,6 +4855,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Post-Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 83;
+		this->atomic_radii = 2.07;
 	}
 	else if (Symbol.compare("Po") == 0)
 	{
@@ -4560,6 +4870,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Post-Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 84;
+		this->atomic_radii = 1.97;
 	}
 	else if (Symbol.compare("At") == 0)
 	{
@@ -4574,6 +4885,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Metalloid";
 		this->NaturalState = "Solid";
 		this->atomic_number = 85;
+		this->atomic_radii = 2.02;
 	}
 	else if (Symbol.compare("Rn") == 0)
 	{
@@ -4588,6 +4900,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Nobel Gas";
 		this->NaturalState = "Gas";
 		this->atomic_number = 86;
+		this->atomic_radii = 2.20;
 	}
 	else if (Symbol.compare("Fr") == 0)
 	{
@@ -4602,6 +4915,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Alkali Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 87;
+		this->atomic_radii = 3.48;
 	}
 	else if (Symbol.compare("Ra") == 0)
 	{
@@ -4616,6 +4930,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Alkaline Earth Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 88;
+		this->atomic_radii = 2.83;
 	}
 	else if (Symbol.compare("Ac") == 0)
 	{
@@ -4630,6 +4945,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Actinide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 89;
+		this->atomic_radii = 2.15;
 	}
 	else if (Symbol.compare("Th") == 0)
 	{
@@ -4644,6 +4960,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Actinide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 90;
+		this->atomic_radii = 2.06;
 	}
 	else if (Symbol.compare("Pa") == 0)
 	{
@@ -4658,6 +4975,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Actinide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 91;
+		this->atomic_radii = 2.00;
 	}
 	else if (Symbol.compare("U") == 0)
 	{
@@ -4672,6 +4990,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Actinide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 92;
+		this->atomic_radii = 1.86;
 	}
 	else if (Symbol.compare("Np") == 0)
 	{
@@ -4686,6 +5005,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Actinide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 93;
+		this->atomic_radii = 1.90;
 	}
 	else if (Symbol.compare("Pu") == 0)
 	{
@@ -4700,6 +5020,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Actinide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 94;
+		this->atomic_radii = 1.87;
 	}
 	else if (Symbol.compare("Am") == 0)
 	{
@@ -4714,6 +5035,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Actinide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 95;
+		this->atomic_radii = 1.80;
 	}
 	else if (Symbol.compare("Cm") == 0)
 	{
@@ -4728,6 +5050,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Actinide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 96;
+		this->atomic_radii = 1.69;
 	}
 	else if (Symbol.compare("Bk") == 0)
 	{
@@ -4742,6 +5065,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Actinide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 97;
+		this->atomic_radii = 1.70;
 	}
 	else if (Symbol.compare("Cf") == 0)
 	{
@@ -4756,6 +5080,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Actinide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 98;
+		this->atomic_radii = 1.70;
 	}
 	else if (Symbol.compare("Es") == 0)
 	{
@@ -4770,6 +5095,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Actinide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 99;
+		this->atomic_radii = 1.70;
 	}
 	else if (Symbol.compare("Fm") == 0)
 	{
@@ -4784,6 +5110,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Actinide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 100;
+		this->atomic_radii = 1.70;
 	}
 	else if (Symbol.compare("Md") == 0)
 	{
@@ -4798,6 +5125,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Actinide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 101;
+		this->atomic_radii = 1.70;
 	}
 	else if (Symbol.compare("No") == 0)
 	{
@@ -4812,6 +5140,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Actinide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 102;
+		this->atomic_radii = 1.70;
 	}
 	else if (Symbol.compare("Lr") == 0)
 	{
@@ -4826,6 +5155,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Actinide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 103;
+		this->atomic_radii = 1.70;
 	}
 	else if (Symbol.compare("Rf") == 0)
 	{
@@ -4840,6 +5170,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 104;
+		this->atomic_radii = 1.57;
 	}
 	else if (Symbol.compare("Db") == 0)
 	{
@@ -4854,6 +5185,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 105;
+		this->atomic_radii = 1.49;
 	}
 	else if (Symbol.compare("Sg") == 0)
 	{
@@ -4868,6 +5200,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 106;
+		this->atomic_radii = 1.43;
 	}
 	else if (Symbol.compare("Bh") == 0)
 	{
@@ -4882,6 +5215,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 107;
+		this->atomic_radii = 1.41;
 	}
 	else if (Symbol.compare("Hs") == 0)
 	{
@@ -4896,6 +5230,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 108;
+		this->atomic_radii = 1.34;
 	}
 	else if (Symbol.compare("Mt") == 0)
 	{
@@ -4910,6 +5245,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 109;
+		this->atomic_radii = 1.29;
 	}
 	else if (Symbol.compare("Ds") == 0)
 	{
@@ -4924,6 +5260,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 110;
+		this->atomic_radii = 1.28;
 	}
 	else if (Symbol.compare("Rg") == 0)
 	{
@@ -4938,6 +5275,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 111;
+		this->atomic_radii = 1.21;
 	}
 	else if (Symbol.compare("Cn") == 0)
 	{
@@ -4952,6 +5290,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 112;
+		this->atomic_radii = 1.22;
 	}
 	else if (Symbol.compare("Uut") == 0)
 	{
@@ -4966,6 +5305,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Post-Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 113;
+		this->atomic_radii = 1.76;
 	}
 	else if (Symbol.compare("Fl") == 0)
 	{
@@ -4980,6 +5320,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Post-Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 114;
+		this->atomic_radii = 1.74;
 	}
 	else if (Symbol.compare("Uup") == 0)
 	{
@@ -4994,6 +5335,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Post-Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 115;
+		this->atomic_radii = 1.57;
 	}
 	else if (Symbol.compare("Lv") == 0)
 	{
@@ -5008,6 +5350,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Post-Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 116;
+		this->atomic_radii = 1.64;
 	}
 	else if (Symbol.compare("Uus") == 0)
 	{
@@ -5022,6 +5365,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Metalloid";
 		this->NaturalState = "Solid";
 		this->atomic_number = 117;
+		this->atomic_radii = 1.57;
 	}
 	else if (Symbol.compare("Uuo") == 0)
 	{
@@ -5036,6 +5380,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "Nobel Gas";
 		this->NaturalState = "Solid";
 		this->atomic_number = 118;
+		this->atomic_radii = 1.57;
 	}
 	else
 	{
@@ -5116,6 +5461,7 @@ void Atom::Register(int number)
 		this->Category = "Alkaline Earth Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 4;
+		this->atomic_radii = 1.53;
 	}
 	else if (number == 5)
 	{
@@ -5130,6 +5476,7 @@ void Atom::Register(int number)
 		this->Category = "Metalloid";
 		this->NaturalState = "Solid";
 		this->atomic_number = 5;
+		this->atomic_radii = 1.92;
 	}
 	else if (number == 6)
 	{
@@ -5144,6 +5491,7 @@ void Atom::Register(int number)
 		this->Category = "Polyatomic Non-metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 6;
+		this->atomic_radii = 1.70;
 	}
 	else if (number == 7)
 	{
@@ -5158,6 +5506,7 @@ void Atom::Register(int number)
 		this->Category = "Diatomic Non-metal";
 		this->NaturalState = "Gas";
 		this->atomic_number = 7;
+		this->atomic_radii = 1.55;
 	}
 	else if (number == 8)
 	{
@@ -5172,6 +5521,7 @@ void Atom::Register(int number)
 		this->Category = "Diatomic Non-metal";
 		this->NaturalState = "Gas";
 		this->atomic_number = 8;
+		this->atomic_radii = 1.52;
 	}
 	else if (number == 9)
 	{
@@ -5186,6 +5536,7 @@ void Atom::Register(int number)
 		this->Category = "Diatomic Non-metal";
 		this->NaturalState = "Gas";
 		this->atomic_number = 9;
+		this->atomic_radii = 1.35;
 	}
 	else if (number == 10)
 	{
@@ -5200,6 +5551,7 @@ void Atom::Register(int number)
 		this->Category = "Nobel Gas";
 		this->NaturalState = "Gas";
 		this->atomic_number = 10;
+		this->atomic_radii = 1.54;
 	}
 	else if (number == 11)
 	{
@@ -5214,6 +5566,7 @@ void Atom::Register(int number)
 		this->Category = "Alkali Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 11;
+		this->atomic_radii = 2.27;
 	}
 	else if (number == 12)
 	{
@@ -5228,6 +5581,7 @@ void Atom::Register(int number)
 		this->Category = "Alkaline Earth Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 12;
+		this->atomic_radii = 1.73;
 	}
 	else if (number == 13)
 	{
@@ -5242,6 +5596,7 @@ void Atom::Register(int number)
 		this->Category = "Metalloid";
 		this->NaturalState = "Solid";
 		this->atomic_number = 13;
+		this->atomic_radii = 1.84;
 	}
 	else if (number == 14)
 	{
@@ -5256,6 +5611,7 @@ void Atom::Register(int number)
 		this->Category = "Metalloid";
 		this->NaturalState = "Solid";
 		this->atomic_number = 14;
+		this->atomic_radii = 2.10;
 	}
 	else if (number == 15)
 	{
@@ -5270,6 +5626,7 @@ void Atom::Register(int number)
 		this->Category = "Metalloid";
 		this->NaturalState = "Solid";
 		this->atomic_number = 15;
+		this->atomic_radii = 1.80;
 	}
 	else if (number == 16)
 	{
@@ -5284,6 +5641,7 @@ void Atom::Register(int number)
 		this->Category = "Polyatomic Non-metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 16;
+		this->atomic_radii = 1.80;
 	}
 	else if (number == 17)
 	{
@@ -5298,6 +5656,7 @@ void Atom::Register(int number)
 		this->Category = "Diatomic Non-metal";
 		this->NaturalState = "Gas";
 		this->atomic_number = 17;
+		this->atomic_radii = 1.75;
 	}
 	else if (number == 18)
 	{
@@ -5312,6 +5671,7 @@ void Atom::Register(int number)
 		this->Category = "Nobel Gas";
 		this->NaturalState = "Gas";
 		this->atomic_number = 18;
+		this->atomic_radii = 1.88;
 	}
 	else if (number == 19)
 	{
@@ -5326,6 +5686,7 @@ void Atom::Register(int number)
 		this->Category = "Alkali Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 19;
+		this->atomic_radii = 2.75;
 	}
 	else if (number == 20)
 	{
@@ -5340,6 +5701,7 @@ void Atom::Register(int number)
 		this->Category = "Alkaline Earth Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 20;
+		this->atomic_radii = 2.31;
 	}
 	else if (number == 21)
 	{
@@ -5354,6 +5716,7 @@ void Atom::Register(int number)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 21;
+		this->atomic_radii = 2.11;
 	}
 	else if (number == 22)
 	{
@@ -5368,6 +5731,7 @@ void Atom::Register(int number)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 22;
+		this->atomic_radii = 1.60;
 	}
 	else if (number == 23)
 	{
@@ -5382,6 +5746,7 @@ void Atom::Register(int number)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 23;
+		this->atomic_radii = 1.53;
 	}
 	else if (number == 24)
 	{
@@ -5396,6 +5761,7 @@ void Atom::Register(int number)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 24;
+		this->atomic_radii = 1.39;
 	}
 	else if (number == 25)
 	{
@@ -5410,6 +5776,7 @@ void Atom::Register(int number)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 25;
+		this->atomic_radii = 1.39;
 	}
 	else if (number == 26)
 	{
@@ -5424,6 +5791,7 @@ void Atom::Register(int number)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 26;
+		this->atomic_radii = 1.32;
 	}
 	else if (number == 27)
 	{
@@ -5438,6 +5806,7 @@ void Atom::Register(int number)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 27;
+		this->atomic_radii = 1.26;
 	}
 	else if (number == 28)
 	{
@@ -5452,6 +5821,7 @@ void Atom::Register(int number)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 28;
+		this->atomic_radii = 1.63;
 	}
 	else if (number == 29)
 	{
@@ -5466,6 +5836,7 @@ void Atom::Register(int number)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 29;
+		this->atomic_radii = 1.40;
 	}
 	else if (number == 30)
 	{
@@ -5480,6 +5851,7 @@ void Atom::Register(int number)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 30;
+		this->atomic_radii = 1.39;
 	}
 	else if (number == 31)
 	{
@@ -5494,6 +5866,7 @@ void Atom::Register(int number)
 		this->Category = "Post-Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 31;
+		this->atomic_radii = 1.87;
 	}
 	else if (number == 32)
 	{
@@ -5508,6 +5881,7 @@ void Atom::Register(int number)
 		this->Category = "Metalloid";
 		this->NaturalState = "Solid";
 		this->atomic_number = 32;
+		this->atomic_radii = 2.11;
 	}
 	else if (number == 33)
 	{
@@ -5522,6 +5896,7 @@ void Atom::Register(int number)
 		this->Category = "Metalloid";
 		this->NaturalState = "Solid";
 		this->atomic_number = 33;
+		this->atomic_radii = 1.85;
 	}
 	else if (number == 34)
 	{
@@ -5536,6 +5911,7 @@ void Atom::Register(int number)
 		this->Category = "Polyatomic Non-metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 34;
+		this->atomic_radii = 1.90;
 	}
 	else if (number == 35)
 	{
@@ -5550,6 +5926,7 @@ void Atom::Register(int number)
 		this->Category = "Diatomic Non-metal";
 		this->NaturalState = "Liquid";
 		this->atomic_number = 35;
+		this->atomic_radii = 1.85;
 	}
 	else if (number == 36)
 	{
@@ -5564,6 +5941,7 @@ void Atom::Register(int number)
 		this->Category = "Nobel Gas";
 		this->NaturalState = "Gas";
 		this->atomic_number = 36;
+		this->atomic_radii = 2.02;
 	}
 	else if (number == 37)
 	{
@@ -5578,6 +5956,7 @@ void Atom::Register(int number)
 		this->Category = "Alkali Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 37;
+		this->atomic_radii = 3.03;
 	}
 	else if (number == 38)
 	{
@@ -5592,6 +5971,7 @@ void Atom::Register(int number)
 		this->Category = "Alkaline Earth Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 38;
+		this->atomic_radii = 2.49;
 	}
 	else if (number == 39)
 	{
@@ -5606,6 +5986,7 @@ void Atom::Register(int number)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 39;
+		this->atomic_radii = 1.90;
 	}
 	else if (number == 40)
 	{
@@ -5620,6 +6001,7 @@ void Atom::Register(int number)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 40;
+		this->atomic_radii = 1.75;
 	}
 	else if (number == 41)
 	{
@@ -5634,6 +6016,7 @@ void Atom::Register(int number)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 41;
+		this->atomic_radii = 1.64;
 	}
 	else if (number == 42)
 	{
@@ -5648,6 +6031,7 @@ void Atom::Register(int number)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 42;
+		this->atomic_radii = 1.54;
 	}
 	else if (number == 43)
 	{
@@ -5662,6 +6046,7 @@ void Atom::Register(int number)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 43;
+		this->atomic_radii = 1.47;
 	}
 	else if (number == 44)
 	{
@@ -5676,6 +6061,7 @@ void Atom::Register(int number)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 44;
+		this->atomic_radii = 1.46;
 	}
 	else if (number == 45)
 	{
@@ -5690,6 +6076,7 @@ void Atom::Register(int number)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 45;
+		this->atomic_radii = 1.42;
 	}
 	else if (number == 46)
 	{
@@ -5704,6 +6091,7 @@ void Atom::Register(int number)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 46;
+		this->atomic_radii = 1.63;
 	}
 	else if (number == 47)
 	{
@@ -5718,6 +6106,7 @@ void Atom::Register(int number)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 47;
+		this->atomic_radii = 1.72;
 	}
 	else if (number == 48)
 	{
@@ -5732,6 +6121,7 @@ void Atom::Register(int number)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 48;
+		this->atomic_radii = 1.58;
 	}
 	else if (number == 49)
 	{
@@ -5746,6 +6136,7 @@ void Atom::Register(int number)
 		this->Category = "Post-Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 49;
+		this->atomic_radii = 1.93;
 	}
 	else if (number == 50)
 	{
@@ -5760,6 +6151,7 @@ void Atom::Register(int number)
 		this->Category = "Post-Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 50;
+		this->atomic_radii = 2.17;
 	}
 	else if (number == 51)
 	{
@@ -5774,6 +6166,7 @@ void Atom::Register(int number)
 		this->Category = "Metalloid";
 		this->NaturalState = "Solid";
 		this->atomic_number = 51;
+		this->atomic_radii = 2.06;
 	}
 	else if (number == 52)
 	{
@@ -5788,6 +6181,7 @@ void Atom::Register(int number)
 		this->Category = "Metalloid";
 		this->NaturalState = "Solid";
 		this->atomic_number = 52;
+		this->atomic_radii = 2.06;
 	}
 	else if (number == 53)
 	{
@@ -5802,6 +6196,7 @@ void Atom::Register(int number)
 		this->Category = "Diatomic Non-metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 53;
+		this->atomic_radii = 1.98;
 	}
 	else if (number == 54)
 	{
@@ -5816,6 +6211,7 @@ void Atom::Register(int number)
 		this->Category = "Nobel Gas";
 		this->NaturalState = "Gas";
 		this->atomic_number = 54;
+		this->atomic_radii = 2.16;
 	}
 	else if (number == 55)
 	{
@@ -5830,6 +6226,7 @@ void Atom::Register(int number)
 		this->Category = "Alkali Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 55;
+		this->atomic_radii = 3.43;
 	}
 	else if (number == 56)
 	{
@@ -5844,6 +6241,7 @@ void Atom::Register(int number)
 		this->Category = "Alkaline Earth Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 56;
+		this->atomic_radii = 2.68;
 	}
 	else if (number == 57)
 	{
@@ -5858,6 +6256,7 @@ void Atom::Register(int number)
 		this->Category = "Lanthanide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 57;
+		this->atomic_radii = 2.07;
 	}
 	else if (number == 58)
 	{
@@ -5872,6 +6271,7 @@ void Atom::Register(int number)
 		this->Category = "Lanthanide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 58;
+		this->atomic_radii = 2.04;
 	}
 	else if (number == 59)
 	{
@@ -5886,6 +6286,7 @@ void Atom::Register(int number)
 		this->Category = "Lanthanide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 59;
+		this->atomic_radii = 2.03;
 	}
 	else if (number == 60)
 	{
@@ -5900,6 +6301,7 @@ void Atom::Register(int number)
 		this->Category = "Lanthanide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 60;
+		this->atomic_radii = 2.01;
 	}
 	else if (number == 61)
 	{
@@ -5914,6 +6316,7 @@ void Atom::Register(int number)
 		this->Category = "Lanthanide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 61;
+		this->atomic_radii = 1.99;
 	}
 	else if (number == 62)
 	{
@@ -5928,6 +6331,7 @@ void Atom::Register(int number)
 		this->Category = "Lanthanide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 62;
+		this->atomic_radii = 1.98;
 	}
 	else if (number == 63)
 	{
@@ -5942,6 +6346,7 @@ void Atom::Register(int number)
 		this->Category = "Lanthanide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 63;
+		this->atomic_radii = 1.98;
 	}
 	else if (number == 64)
 	{
@@ -5956,6 +6361,7 @@ void Atom::Register(int number)
 		this->Category = "Lanthanide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 64;
+		this->atomic_radii = 1.96;
 	}
 	else if (number == 65)
 	{
@@ -5970,6 +6376,7 @@ void Atom::Register(int number)
 		this->Category = "Lanthanide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 65;
+		this->atomic_radii = 1.94;
 	}
 	else if (number == 66)
 	{
@@ -5984,6 +6391,7 @@ void Atom::Register(int number)
 		this->Category = "Lanthanide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 66;
+		this->atomic_radii = 1.92;
 	}
 	else if (number == 67)
 	{
@@ -5998,6 +6406,7 @@ void Atom::Register(int number)
 		this->Category = "Lanthanide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 67;
+		this->atomic_radii = 1.92;
 	}
 	else if (number == 68)
 	{
@@ -6012,6 +6421,7 @@ void Atom::Register(int number)
 		this->Category = "Lanthanide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 68;
+		this->atomic_radii = 1.89;
 	}
 	else if (number == 69)
 	{
@@ -6026,6 +6436,7 @@ void Atom::Register(int number)
 		this->Category = "Lanthanide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 69;
+		this->atomic_radii = 1.90;
 	}
 	else if (number == 70)
 	{
@@ -6040,6 +6451,7 @@ void Atom::Register(int number)
 		this->Category = "Lanthanide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 70;
+		this->atomic_radii = 1.87;
 	}
 	else if (number == 71)
 	{
@@ -6054,6 +6466,7 @@ void Atom::Register(int number)
 		this->Category = "Lanthanide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 71;
+		this->atomic_radii = 1.87;
 	}
 	else if (number == 72)
 	{
@@ -6068,6 +6481,7 @@ void Atom::Register(int number)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 72;
+		this->atomic_radii = 1.75;
 	}
 	else if (number == 73)
 	{
@@ -6082,6 +6496,7 @@ void Atom::Register(int number)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 73;
+		this->atomic_radii = 1.70;
 	}
 	else if (number == 74)
 	{
@@ -6096,6 +6511,7 @@ void Atom::Register(int number)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 74;
+		this->atomic_radii = 1.62;
 	}
 	else if (number == 75)
 	{
@@ -6110,6 +6526,7 @@ void Atom::Register(int number)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 75;
+		this->atomic_radii = 1.51;
 	}
 	else if (number == 76)
 	{
@@ -6124,6 +6541,7 @@ void Atom::Register(int number)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 76;
+		this->atomic_radii = 1.44;
 	}
 	else if (number == 77)
 	{
@@ -6138,6 +6556,7 @@ void Atom::Register(int number)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 77;
+		this->atomic_radii = 1.41;
 	}
 	else if (number == 78)
 	{
@@ -6152,6 +6571,7 @@ void Atom::Register(int number)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 78;
+		this->atomic_radii = 1.75;
 	}
 	else if (number == 79)
 	{
@@ -6166,6 +6586,7 @@ void Atom::Register(int number)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 79;
+		this->atomic_radii = 1.66;
 	}
 	else if (number == 80)
 	{
@@ -6180,6 +6601,7 @@ void Atom::Register(int number)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Liquid";
 		this->atomic_number = 80;
+		this->atomic_radii = 1.55;
 	}
 	else if (number == 81)
 	{
@@ -6194,6 +6616,7 @@ void Atom::Register(int number)
 		this->Category = "Post-Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 81;
+		this->atomic_radii = 1.96;
 	}
 	else if (number == 82)
 	{
@@ -6208,6 +6631,7 @@ void Atom::Register(int number)
 		this->Category = "Post-Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 82;
+		this->atomic_radii = 2.02;
 	}
 	else if (number == 83)
 	{
@@ -6222,6 +6646,7 @@ void Atom::Register(int number)
 		this->Category = "Post-Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 83;
+		this->atomic_radii = 2.07;
 	}
 	else if (number == 84)
 	{
@@ -6236,6 +6661,7 @@ void Atom::Register(int number)
 		this->Category = "Post-Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 84;
+		this->atomic_radii = 1.97;
 	}
 	else if (number == 85)
 	{
@@ -6250,6 +6676,7 @@ void Atom::Register(int number)
 		this->Category = "Metalloid";
 		this->NaturalState = "Solid";
 		this->atomic_number = 85;
+		this->atomic_radii = 2.02;
 	}
 	else if (number == 86)
 	{
@@ -6264,6 +6691,7 @@ void Atom::Register(int number)
 		this->Category = "Nobel Gas";
 		this->NaturalState = "Gas";
 		this->atomic_number = 86;
+		this->atomic_radii = 2.20;
 	}
 	else if (number == 87)
 	{
@@ -6278,6 +6706,7 @@ void Atom::Register(int number)
 		this->Category = "Alkali Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 87;
+		this->atomic_radii = 3.48;
 	}
 	else if (number == 88)
 	{
@@ -6292,6 +6721,7 @@ void Atom::Register(int number)
 		this->Category = "Alkaline Earth Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 88;
+		this->atomic_radii = 2.83;
 	}
 	else if (number == 89)
 	{
@@ -6306,6 +6736,7 @@ void Atom::Register(int number)
 		this->Category = "Actinide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 89;
+		this->atomic_radii = 2.15;
 	}
 	else if (number == 90)
 	{
@@ -6320,6 +6751,7 @@ void Atom::Register(int number)
 		this->Category = "Actinide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 90;
+		this->atomic_radii = 2.06;
 	}
 	else if (number == 91)
 	{
@@ -6334,6 +6766,7 @@ void Atom::Register(int number)
 		this->Category = "Actinide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 91;
+		this->atomic_radii = 2.00;
 	}
 	else if (number == 92)
 	{
@@ -6348,6 +6781,7 @@ void Atom::Register(int number)
 		this->Category = "Actinide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 92;
+		this->atomic_radii = 1.86;
 	}
 	else if (number == 93)
 	{
@@ -6362,6 +6796,7 @@ void Atom::Register(int number)
 		this->Category = "Actinide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 93;
+		this->atomic_radii = 1.90;
 	}
 	else if (number == 94)
 	{
@@ -6376,6 +6811,7 @@ void Atom::Register(int number)
 		this->Category = "Actinide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 94;
+		this->atomic_radii = 1.87;
 	}
 	else if (number == 95)
 	{
@@ -6390,6 +6826,7 @@ void Atom::Register(int number)
 		this->Category = "Actinide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 95;
+		this->atomic_radii = 1.80;
 	}
 	else if (number == 96)
 	{
@@ -6404,6 +6841,7 @@ void Atom::Register(int number)
 		this->Category = "Actinide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 96;
+		this->atomic_radii = 1.69;
 	}
 	else if (number == 97)
 	{
@@ -6418,6 +6856,7 @@ void Atom::Register(int number)
 		this->Category = "Actinide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 97;
+		this->atomic_radii = 1.70;
 	}
 	else if (number == 98)
 	{
@@ -6432,6 +6871,7 @@ void Atom::Register(int number)
 		this->Category = "Actinide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 98;
+		this->atomic_radii = 1.70;
 	}
 	else if (number == 99)
 	{
@@ -6446,6 +6886,7 @@ void Atom::Register(int number)
 		this->Category = "Actinide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 99;
+		this->atomic_radii = 1.70;
 	}
 	else if (number == 100)
 	{
@@ -6460,6 +6901,7 @@ void Atom::Register(int number)
 		this->Category = "Actinide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 100;
+		this->atomic_radii = 1.70;
 	}
 	else if (number == 101)
 	{
@@ -6474,6 +6916,7 @@ void Atom::Register(int number)
 		this->Category = "Actinide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 101;
+		this->atomic_radii = 1.70;
 	}
 	else if (number == 102)
 	{
@@ -6488,6 +6931,7 @@ void Atom::Register(int number)
 		this->Category = "Actinide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 102;
+		this->atomic_radii = 1.70;
 	}
 	else if (number == 103)
 	{
@@ -6502,6 +6946,7 @@ void Atom::Register(int number)
 		this->Category = "Actinide";
 		this->NaturalState = "Solid";
 		this->atomic_number = 103;
+		this->atomic_radii = 1.70;
 	}
 	else if (number == 104)
 	{
@@ -6516,6 +6961,7 @@ void Atom::Register(int number)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 104;
+		this->atomic_radii = 1.57;
 	}
 	else if (number == 105)
 	{
@@ -6530,6 +6976,7 @@ void Atom::Register(int number)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 105;
+		this->atomic_radii = 1.49;
 	}
 	else if (number == 106)
 	{
@@ -6544,6 +6991,7 @@ void Atom::Register(int number)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 106;
+		this->atomic_radii = 1.43;
 	}
 	else if (number == 107)
 	{
@@ -6558,6 +7006,7 @@ void Atom::Register(int number)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 107;
+		this->atomic_radii = 1.41;
 	}
 	else if (number == 108)
 	{
@@ -6572,6 +7021,7 @@ void Atom::Register(int number)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 108;
+		this->atomic_radii = 1.34;
 	}
 	else if (number == 109)
 	{
@@ -6586,6 +7036,7 @@ void Atom::Register(int number)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 109;
+		this->atomic_radii = 1.29;
 	}
 	else if (number == 110)
 	{
@@ -6600,6 +7051,7 @@ void Atom::Register(int number)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 110;
+		this->atomic_radii = 1.28;
 	}
 	else if (number == 111)
 	{
@@ -6614,6 +7066,7 @@ void Atom::Register(int number)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 111;
+		this->atomic_radii = 1.21;
 	}
 	else if (number == 112)
 	{
@@ -6628,6 +7081,7 @@ void Atom::Register(int number)
 		this->Category = "Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 112;
+		this->atomic_radii = 1.22;
 	}
 	else if (number == 113)
 	{
@@ -6642,6 +7096,7 @@ void Atom::Register(int number)
 		this->Category = "Post-Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 113;
+		this->atomic_radii = 1.76;
 	}
 	else if (number == 114)
 	{
@@ -6656,6 +7111,7 @@ void Atom::Register(int number)
 		this->Category = "Post-Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 114;
+		this->atomic_radii = 1.74;
 	}
 	else if (number == 115)
 	{
@@ -6670,6 +7126,7 @@ void Atom::Register(int number)
 		this->Category = "Post-Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 115;
+		this->atomic_radii = 1.57;
 	}
 	else if (number == 116)
 	{
@@ -6684,6 +7141,7 @@ void Atom::Register(int number)
 		this->Category = "Post-Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 116;
+		this->atomic_radii = 1.64;
 	}
 	else if (number == 117)
 	{
@@ -6698,6 +7156,7 @@ void Atom::Register(int number)
 		this->Category = "Metalloid";
 		this->NaturalState = "Solid";
 		this->atomic_number = 117;
+		this->atomic_radii = 1.57;
 	}
 	else if (number == 118)
 	{
@@ -6712,6 +7171,7 @@ void Atom::Register(int number)
 		this->Category = "Nobel Gas";
 		this->NaturalState = "Solid";
 		this->atomic_number = 118;
+		this->atomic_radii = 1.57;
 	}
 	else
 	{
