@@ -24,6 +24,8 @@ atoms(0)
 	Phase = Name;
 	charge = 0;
 	molar_weight = 0;
+	molar_volume = 0;
+	molar_area = 0;
 	formation_energy = 0;
 	formation_enthalpy = 0;
 	formation_entropy = 0;
@@ -123,6 +125,8 @@ Molecule::Molecule(int c,
 	}
 	for (int i=0; i<atoms.size(); i++)
 		molar_weight+=atoms[i].AtomicWeight();
+	calculateMolarArea();
+	calculateMolarVolume();
 }
 
 //Register a molecule given all the necessary information
@@ -215,6 +219,8 @@ void Molecule::Register(int c,
 	}
 	for (int i=0; i<this->atoms.size(); i++)
 		this->molar_weight+=this->atoms[i].AtomicWeight();
+	this->calculateMolarVolume();
+	this->calculateMolarArea();
 }
 
 //Register a molecule based on a hard-coded library of known molecules
@@ -1774,8 +1780,8 @@ void Molecule::setFormula(std::string form)
 	this->Formula = form;
 }
 
-//Function forces recalculation of molar weight based on current atomic makeup
-void Molecule::recalculateMolarWeight()
+//Function forces calculation of molar weight based on current atomic makeup
+void Molecule::calculateMolarWeight()
 {
 	this->molar_weight = 0.0;
 	for (int i=0; i<this->atoms.size(); i++)
@@ -1784,10 +1790,42 @@ void Molecule::recalculateMolarWeight()
 	}
 }
 
+//Function to calculate van der Waals volume of molecule
+void Molecule::calculateMolarVolume()
+{
+	this->molar_volume = 0.0;
+	for (int i=0; i<this->atoms.size(); i++)
+	{
+		this->molar_volume+= SphereVolume(this->atoms[i].AtomicRadii()) ;
+	}
+}
+
+//Function to calculate van der Waals area of molecule
+void Molecule::calculateMolarArea()
+{
+	this->molar_area = 0.0;
+	for (int i=0; i<this->atoms.size(); i++)
+	{
+		this->molar_area+= SphereArea(this->atoms[i].AtomicRadii()) ;
+	}
+}
+
 //Set the molar weight of the molecule to a constant
 void Molecule::setMolarWeigth(double mw)
 {
 	this->molar_weight = mw;
+}
+
+//Set the van der Waals volume of the molecule
+void Molecule::setMolarVolume(double v)
+{
+	this->molar_volume = v;
+}
+
+//Set the van der Waals area of the molecule
+void Molecule::setMolarArea(double a)
+{
+	this->molar_area = a;
 }
 
 //Function to change the ionic charge of a molecule
@@ -1900,7 +1938,9 @@ void Molecule::removeOneAtom(std::string Symbol)
 		}
 	}
 	if (changed == false) {mError(invalid_atom); return;}
-	this->recalculateMolarWeight();
+	this->calculateMolarWeight();
+	this->calculateMolarVolume();
+	this->calculateMolarArea();
 }
 
 //Function to remove all atoms of symbol given (does not affect formula or name)
@@ -1917,7 +1957,9 @@ void Molecule::removeAllAtoms(std::string Symbol)
 		}
 	}
 	if (changed == false) {mError(invalid_atom); return;}
-	this->recalculateMolarWeight();
+	this->calculateMolarWeight();
+	this->calculateMolarArea();
+	this->calculateMolarVolume();
 }
 
 //Return the current ionic charge
@@ -1929,8 +1971,19 @@ int Molecule::Charge()
 //Return the current molecular weight
 double Molecule::MolarWeight()
 {
-	this->recalculateMolarWeight();
 	return this->molar_weight;
+}
+
+//Return the current molecular volume
+double Molecule::MolarVolume()
+{
+	return this->molar_volume;
+}
+
+//Return the current molecular area
+double Molecule::MolarArea()
+{
+	return this->molar_area;
 }
 
 //Return whether or not enthalpy and entropy are known
@@ -1998,8 +2051,11 @@ void Molecule::DisplayInfo()
 {	
 	std::cout << "\nCommon Name: " << this->Name << "\tFormula: " << this->Formula << std::endl;
 	std::cout << "-------------------------------------------------\n";
-	std::cout << "Molar Weight (g/mol): " << this->molar_weight << "\tIonic Charge: " << this->charge << std::endl;
-	std::cout << "Phase: " << this->Phase << "\nSTP Formation Energy (J/mol): ";
+	std::cout << "Molar Weight (g/mol): " << this->MolarWeight() << std::endl;
+	std::cout << "Phase: " << this->Phase << "\tIonic Charge: " << this->charge << std::endl;
+	std::cout << "van der Waals Volume (cubic angstroms): " << this->MolarVolume() << std::endl;
+	std::cout << "van der Waals Area (square angstroms): " << this->MolarArea() << std::endl;
+	std::cout << "STP Formation Energy (J/mol): ";
 	if (this->haveG == true) std::cout << this->formation_energy << "\n";
 	else std::cout << "Unknown\n";
 	std::cout << "STP Formation Enthalpy (J/mol): ";

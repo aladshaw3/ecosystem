@@ -407,6 +407,14 @@
 #include <ctype.h>
 #include "eel.h"
 
+#ifndef SphereVolume
+#define SphereVolume(r) ((4.0/3.0)*M_PI*r*r*r)
+#endif
+
+#ifndef SphereArea
+#define SphereArea(r) (4.0*M_PI*r*r)
+#endif
+
 typedef enum {SOLID, LIQUID, AQUEOUS, GAS, PLASMA, OTHER} valid_phase;
 
 /// C++ Molecule Object built from Atom Objects (click Molecule to go to function definitions)
@@ -487,8 +495,12 @@ public:
 	void Register(std::string formula);
 	
 	void setFormula(std::string form);				///< Sets the formula for a molecule
-	void recalculateMolarWeight();					///< Forces molecule to recalculate its molar weight
+	void calculateMolarWeight();					///< Forces molecule to calculate its molar weight
+	void calculateMolarVolume();					///< Force molecule to calculate van der Waals volume
+	void calculateMolarArea();						///< Force molecule to calculate van der Waals area
 	void setMolarWeigth(double mw);					///< Set the molar weight of species to a constant
+	void setMolarVolume(double v);					///< Set the van der Waals volume of the species to a constant
+	void setMolarArea(double a);					///< Set the van der Waals area of the species to a constant
 	void editCharge(int c);							///< Change the ionic charge of a molecule
 	
 	/// Change oxidation state of one of the given atoms (always first match found)
@@ -529,6 +541,8 @@ public:
 	
 	int Charge();							///< Return the charge of the molecule
 	double MolarWeight();					///< Return the molar weight of the molecule
+	double MolarVolume();					///< Return the van der Waals volume of the molecule
+	double MolarArea();						///< Return the van der Waals area of the molecule
 	bool HaveHS();							///< Returns true if enthalpy and entropy are known
 	bool HaveEnergy();						///< Returns true if the Gibb's energy is known
 	bool isRegistered();					///< Returns true if the molecule has been registered
@@ -545,6 +559,8 @@ public:
 protected:
 	int charge;								///< Ionic charge of the molecule - specified
 	double molar_weight;					///< Molar weight of the molecule (g/mol) - determined from atoms or specified
+	double molar_volume;					///< van der Waals Volume of the molecule (cubic angstroms) - determined from atoms or specified
+	double molar_area;						///< van der Waals Area of the molecule (square angstroms) - determined from atoms or specified
 	double formation_enthalpy;				///< Enthalpy of formation of the molecule (J/mol) - constant
 	double formation_entropy;				///< Entropy of formation of the molecule (J/K/mol) - constant
 	double formation_energy;				///< Gibb's energy of formation (J/mol) - given
