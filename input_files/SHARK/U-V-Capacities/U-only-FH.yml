@@ -86,7 +86,7 @@ MasterSpecies:
     have_G: false
     phase: Solid
     name: Uranyl-amidoximate
-    lin_form: none
+    lin_form: UO4H2
 
   - 37: 
     formula: UO2(AHOOH)2 (s)
@@ -98,7 +98,7 @@ MasterSpecies:
     have_G: false
     phase: Solid
     name: Uranyl-diamidoximate
-    lin_form: none
+    lin_form: UO6H4
 
   - 38: 
     formula: UO2CO3AHOOH - (s)
@@ -110,7 +110,7 @@ MasterSpecies:
     have_G: false
     phase: Solid
     name: Uranyl-carbonate-amidoximate
-    lin_form: none
+    lin_form: UO4H2CO3
 
   - 39: 
     formula: UO2CO3(AHOOH)2 2- (s)
@@ -122,7 +122,7 @@ MasterSpecies:
     have_G: false
     phase: Solid
     name: Uranyl-carbonate-diamidoximate
-    lin_form: none
+    lin_form: UO6H4CO3
 
 ...
 
@@ -401,12 +401,6 @@ spec_area: 45000.0     #Units: m^2/kg
 spec_mole: 3.75      #Units: mol/kg
 total_mass: 1.51e-5     #Units: kg
 surf_activity: flory-huggins
-
-- volume_factors:
-  "UO2AHOOH + (s)": 155.41
-  "UO2(AHOOH)2 (s)": 2078.88
-  "UO2CO3AHOOH - (s)": 322.83
-  "UO2CO3(AHOOH)2 2- (s)": 4076.89
 
 - rxn01:
   logK: -3.0

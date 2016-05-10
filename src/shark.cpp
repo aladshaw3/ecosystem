@@ -1512,10 +1512,10 @@ void AdsorptionReaction::calculateAreaFactors()
 		if (this->volume_factors[i] == 0.0 || this->List->get_species(i).MoleculePhaseID() != SOLID)
 			this->area_factors[i] = 0.0;
 		else if (this->volume_factors[i] == 0.0 && this->List->get_species(i).MoleculePhaseID() == SOLID)
-			this->area_factors[i] = 4.0 * M_PI * pow((3.0/(4.0*M_PI))*4.33, (2.0/3.0));
+			this->area_factors[i] = 4.0 * M_PI * pow((3.0/(4.0*M_PI))*(4.33/Na), (2.0/3.0)) / 10000.0 * Na;
 		else
 		{
-			this->area_factors[i] = 4.0 * M_PI * pow((3.0/(4.0*M_PI))*this->volume_factors[i], (2.0/3.0));
+			this->area_factors[i] = 4.0 * M_PI * pow((3.0/(4.0*M_PI))*(this->volume_factors[i]/Na), (2.0/3.0)) / 10000.0 * Na;
 		}
 	}
 }
@@ -4487,49 +4487,112 @@ int read_adsorbobjects(SHARK_DATA *shark_dat)
 			if (surf_act != IDEAL_ADS || shark_dat->AdsorptionList[i].isAreaBasis() == true)
 			{
 				int num_fact = 0;
+				bool HaveVol = false;
 				try
 				{
 					num_fact = shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i])("volume_factors").getDataMap().size();
-				}
-				catch (std::out_of_range)
-				{
-					mError(missing_information);
-					return -1;
-				}
-				if (num_fact != shark_dat->num_ssar[i])
-				{
-					mError(missing_information);
-					return -1;
-				}
-				
-				//Loop overall volume_factors
-				for (auto &x: shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i])("volume_factors").getDataMap().getMap())
-				{
-					int index = shark_dat->MasterList.get_index(x.first);
-					if (index < 0 || index > (shark_dat->numvar-1))
+					HaveVol = true;
+					
+					if (num_fact != shark_dat->num_ssar[i])
 					{
-						mError(read_error);
+						mError(missing_information);
 						return -1;
 					}
-					else
+					
+					//Loop overall volume_factors
+					for (auto &x: shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i])("volume_factors").getDataMap().getMap())
 					{
-						try
-						{
-							shark_dat->AdsorptionList[i].setVolumeFactor(index, x.second.getDouble());
-						}
-						catch (std::out_of_range)
+						int index = shark_dat->MasterList.get_index(x.first);
+						if (index < 0 || index > (shark_dat->numvar-1))
 						{
 							mError(read_error);
 							return -1;
 						}
+						else
+						{
+							try
+							{
+								shark_dat->AdsorptionList[i].setVolumeFactor(index, x.second.getDouble());
+							}
+							catch (std::out_of_range)
+							{
+								mError(read_error);
+								return -1;
+							}
+						}
+						
+					}
+				}
+				catch (std::out_of_range)
+				{
+					HaveVol = false;
+					//Loop to set volumes based on mola object
+					for (int index = 0; index<shark_dat->MasterList.list_size(); index++)
+					{
+						if (shark_dat->MasterList.get_species(index).MolarVolume() <= 0.0)
+							shark_dat->MasterList.get_species(index).setMolarVolume(VolumeSTD);
+						shark_dat->AdsorptionList[i].setVolumeFactor(index, shark_dat->MasterList.get_species(index).MolarVolume()*0.602);
+					}
+				}
+				
+				num_fact = 0;
+				try
+				{
+					num_fact = shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i])("area_factors").getDataMap().size();
+					
+					if (num_fact != shark_dat->num_ssar[i])
+					{
+						mError(missing_information);
+						return -1;
 					}
 					
+					//Loop overall area_factors
+					for (auto &x: shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i])("area_factors").getDataMap().getMap())
+					{
+						int index = shark_dat->MasterList.get_index(x.first);
+						if (index < 0 || index > (shark_dat->numvar-1))
+						{
+							mError(read_error);
+							return -1;
+						}
+						else
+						{
+							try
+							{
+								shark_dat->AdsorptionList[i].setAreaFactor(index, x.second.getDouble());
+							}
+							catch (std::out_of_range)
+							{
+								mError(read_error);
+								return -1;
+							}
+						}
+						
+					}
 				}
+				catch (std::out_of_range)
+				{
+					if (HaveVol == true)
+						shark_dat->AdsorptionList[i].calculateAreaFactors();
+					else
+					{
+						//Loop to set area factors based on mola object
+						for (int index = 0; index<shark_dat->MasterList.list_size(); index++)
+						{
+							if (shark_dat->MasterList.get_species(index).MolarArea() <= 0.0)
+								shark_dat->MasterList.get_species(index).setMolarArea(AreaSTD);
+							shark_dat->AdsorptionList[i].setAreaFactor(index, shark_dat->MasterList.get_species(index).MolarArea()*6020.0);
+						}
+					}
+				}
+				
 			}
 			
 			//Read in all reaction information
 			bool ContainsVolumeFactors;
+			bool ContainsAreaFactors;
 			std::string vol_check;
+			std::string area_check;
 			try
 			{
 				vol_check = shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i])("volume_factors").getName();
@@ -4538,6 +4601,15 @@ int read_adsorbobjects(SHARK_DATA *shark_dat)
 			catch (std::out_of_range)
 			{
 				ContainsVolumeFactors = false;
+			}
+			try
+			{
+				area_check = shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i])("area_factors").getName();
+				ContainsAreaFactors = true;
+			}
+			catch (std::out_of_range)
+			{
+				ContainsAreaFactors = false;
 			}
 			int num_head;
 			try
@@ -4549,7 +4621,23 @@ int read_adsorbobjects(SHARK_DATA *shark_dat)
 				mError(missing_information);
 				return -1;
 			}
-			if (ContainsVolumeFactors == true)
+			if (ContainsVolumeFactors == true && ContainsAreaFactors == false)
+			{
+				if (num_head != shark_dat->num_ssar[i]+1)
+				{
+					mError(missing_information);
+					return -1;
+				}
+			}
+			else if (ContainsVolumeFactors == true && ContainsAreaFactors == true)
+			{
+				if (num_head != shark_dat->num_ssar[i]+2)
+				{
+					mError(missing_information);
+					return -1;
+				}
+			}
+			else if (ContainsVolumeFactors == false && ContainsAreaFactors == true)
 			{
 				if (num_head != shark_dat->num_ssar[i]+1)
 				{
@@ -4570,7 +4658,7 @@ int read_adsorbobjects(SHARK_DATA *shark_dat)
 			int rxn = 0;
 			for (auto &x: shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i]).getHeadMap())
 			{
-				if (x.second.getName() != "volume_factors")
+				if (x.second.getName() != "volume_factors" && x.second.getName() != "area_factors")
 				{
 					if (shark_dat->AdsorptionList[i].isAreaBasis() == false)
 					{
@@ -4938,7 +5026,6 @@ int shark_parameter_check(SHARK_DATA *shark_dat)
 		if (success != 0) {mError(missing_information); return -1;}
 		success = shark_dat->AdsorptionList[i].setAqueousIndexAuto();
 		if (success != 0) {mError(missing_information); return -1;}
-		shark_dat->AdsorptionList[i].calculateAreaFactors();
 		shark_dat->AdsorptionList[i].setTotalVolume(shark_dat->volume);
 		success = shark_dat->AdsorptionList[i].checkAqueousIndices();
 		if (success != 0) {mError(missing_information); return -1;}

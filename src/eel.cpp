@@ -1818,6 +1818,7 @@ Atom::Atom(std::string name)
 		Category = "N/A";
 		NaturalState = "N/A";
 		atomic_number = 0;
+		atomic_radii = 1.20;
 	}
 }
 
@@ -3606,6 +3607,7 @@ Atom::Atom(int number)
 		Category = "N/A";
 		NaturalState = "N/A";
 		atomic_number = 0;
+		atomic_radii = 1.20;
 	}
 }
 
@@ -5397,6 +5399,7 @@ void Atom::Register(std::string Symbol)
 		this->Category = "N/A";
 		this->NaturalState = "N/A";
 		this->atomic_number = 0;
+		this->atomic_radii = 1.20;
 	}
 }
 
@@ -7187,6 +7190,7 @@ void Atom::Register(int number)
 		this->Category = "N/A";
 		this->NaturalState = "N/A";
 		this->atomic_number = 0;
+		this->atomic_radii = 1.20;
 	}
 }
 

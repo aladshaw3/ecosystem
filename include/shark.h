@@ -697,7 +697,7 @@ protected:
 	int (*surface_activity) (const Matrix<double>& logq, Matrix<double> &activity, const void *data);
 
 	const void *activity_data;					///< Pointer to the data structure needed for surface activities.
-	std::vector<double> area_factors;			///< List of area factors associated with surface species (m^2/mol)
+	std::vector<double> area_factors;			///< List of the van der Waals areas associated with surface species (m^2/mol)
 	std::vector<double> volume_factors;			///< List of the van der Waals volumes of each surface species (cm^3/mol)
 	std::vector<int> adsorb_index;				///< List of the indices for the adsorbed species in the reactions
 	std::vector<int> aqueous_index;				///< List of the indices for the primary aqueous species in the reactions
