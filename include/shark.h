@@ -772,7 +772,7 @@ typedef enum {IDEAL, DAVIES, DEBYE_HUCKEL, SIT, PITZER} valid_act;
 /// Enumeration for the list of valid surface activity models for non-ideal adsorption
 /** \note We had to create an IDEAL_ADS option to replace the IDEAL enum already in use for non-ideal solution
 	or aqueous phases. (ADS => adsorption) */
-typedef enum {IDEAL_ADS, FLORY_HUGGINS} valid_surf_act;
+typedef enum {IDEAL_ADS, FLORY_HUGGINS, UNIQUAC_ACT} valid_surf_act;
 
 /// Data structure for SHARK simulations
 /** C-style object holding data and function pointers associated with solving aqueous speciation and reaction
@@ -925,6 +925,18 @@ double calculate_ionic_strength(const Matrix<double> &x, MasterSpeciesList &Mast
 	\param F matrix of activity coefficients that are to be altered by this function
 	\param data pointer to the AdsorptionReaction object holding parameter information*/
 int FloryHuggins(const Matrix<double> &x, Matrix<double> &F, const void *data);
+
+///Surface Activity function for the UNIQUAC model for non-ideal adsorption
+/** This is a more complex surface activity model to be used with the Adsorption objects to evaluate the non-ideal
+	behavoir of the surface phase. The model's primary parameters are the shape factors in adsorption and the
+	relative concentrations of each surface species. Therefore, we will pass the Adsorption Object itself
+	as the const void *data structure. However, future development may require some additional parameters, which
+	will be accessed later.
+ 
+	\param x matrix of the log(C) concentration values at the current non-linear step
+	\param F matrix of activity coefficients that are to be altered by this function
+	\param data pointer to the AdsorptionReaction object holding parameter information*/
+int UNIQUAC(const Matrix<double> &x, Matrix<double> &F, const void *data);
 
 /// Activity function for Ideal Solution
 /** This is one of the default activity models available. It assumes the system behaves ideally and sets the

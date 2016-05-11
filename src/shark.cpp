@@ -2420,11 +2420,87 @@ int FloryHuggins(const Matrix<double> &x, Matrix<double> &F, const void *data)
 		logp = log(logp);
 		invp = 1.0 / invp;
 		lnact = 1.0 - logp - invp;
+		
 		F.edit(dat->getAdsorbIndex(i), 0, exp(lnact));
 		if (isinf(F(dat->getAdsorbIndex(i),0)) || isnan(F(dat->getAdsorbIndex(i),0)))
 			F.edit(dat->getAdsorbIndex(i), 0, DBL_MAX);
 	}
 
+	return success;
+}
+
+//UNIQUAC Surface Activity Model
+int UNIQUAC(const Matrix<double> &x, Matrix<double> &F, const void *data)
+{
+	int success = 0;
+	AdsorptionReaction *dat = (AdsorptionReaction *) data;
+	double total = 0.0;
+	std::vector<double> r;
+	std::vector<double> s;
+	std::vector<double> l;
+	std::vector<double> frac;
+	std::vector<double> theta;
+	r.resize(dat->getNumberRxns());
+	s.resize(dat->getNumberRxns());
+	l.resize(dat->getNumberRxns());
+	frac.resize(dat->getNumberRxns());
+	theta.resize(dat->getNumberRxns());
+	
+	//Loop to calculate total adsorption and calculate surface area and volume constants
+	for (int i=0; i<dat->getNumberRxns(); i++)
+	{
+		total = total + pow(10.0, x(dat->getAdsorbIndex(i),0));
+		r[i] = (dat->getVolumeFactor(dat->getAdsorbIndex(i))/100.0) / (VolumeSTD*0.602);
+		s[i] = (dat->getAreaFactor(dat->getAdsorbIndex(i))/100.0) / (AreaSTD*6020.0);
+		l[i] = LengthFactor(CoordSTD, r[i], s[i]);
+	}
+	
+	//Loop to calculate fractions and fraction dependent functions
+	double rx_sum = 0.0;
+	double sx_sum = 0.0;
+	double lx_sum = 0.0;
+	for (int i=0; i<dat->getNumberRxns(); i++)
+	{
+		frac[i] = pow(10.0, x(dat->getAdsorbIndex(i),0)) / total;
+		rx_sum = rx_sum + (r[i]*frac[i]);
+		sx_sum = sx_sum + (s[i]*frac[i]);
+		lx_sum = lx_sum + (l[i]*frac[i]);
+	}
+	
+	//Loop to gather the thetas
+	for (int i=0; i<dat->getNumberRxns(); i++)
+		theta[i] = (s[i]*frac[i])/sx_sum;
+	
+	//Loop to fill in activities
+	for (int i=0; i<dat->getNumberRxns(); i++)
+	{
+		double theta_tau_i = 0.0;
+		double theta_tau_rat = 0.0;
+		double lnact = 0.0;
+		
+		//Inner loop
+		for (int j=0; j<dat->getNumberRxns(); j++)
+		{
+			theta_tau_i = theta_tau_i + ( theta[j]*pow(10.0, (dat->getReaction(j).Get_Equilibrium()-dat->getReaction(i).Get_Equilibrium()) ) );
+			
+			double theta_tau_k = 0.0;
+			for (int k=0; k<dat->getNumberRxns(); k++)
+				theta_tau_k = theta_tau_k + ( theta[k]*pow(10.0, (dat->getReaction(k).Get_Equilibrium()-dat->getReaction(j).Get_Equilibrium()) ) );
+			
+			theta_tau_rat = theta_tau_rat + ( (theta[j]*pow(10.0, (dat->getReaction(i).Get_Equilibrium()-dat->getReaction(j).Get_Equilibrium()) ))/theta_tau_k	);
+		}
+		
+		lnact = log(r[i]/rx_sum) + ( (CoordSTD/2.0)*s[i]*log((s[i]/r[i])*(rx_sum/sx_sum)) ) + l[i] - ( r[i]*(lx_sum/rx_sum) ) - ( s[i]*log(theta_tau_i) ) + s[i] - ( s[i]*theta_tau_rat );
+		F.edit(dat->getAdsorbIndex(i), 0, exp(lnact));
+		
+		//std::cout << exp(lnact) << std::endl;
+		
+		if (isinf(F(dat->getAdsorbIndex(i),0)) || isnan(F(dat->getAdsorbIndex(i),0)))
+			F.edit(dat->getAdsorbIndex(i), 0, DBL_MAX);
+		if (F(dat->getAdsorbIndex(i),0) <= 1e-6)
+			F.edit(dat->getAdsorbIndex(i), 0, 1e-6);
+	}
+	
 	return success;
 }
 
@@ -3328,6 +3404,8 @@ int surf_act_choice(const std::string &input)
 		act = IDEAL_ADS;
 	else if (copy == "floryhuggins" || copy == "flory-huggins")
 		act = FLORY_HUGGINS;
+	else if (copy == "uniquac")
+		act = UNIQUAC_ACT;
 	else
 		act = IDEAL_ADS;
 	
@@ -4471,6 +4549,10 @@ int read_adsorbobjects(SHARK_DATA *shark_dat)
 						
 					case FLORY_HUGGINS:
 						shark_dat->AdsorptionList[i].setActivityModelInfo(FloryHuggins, &shark_dat->AdsorptionList[i]);
+						break;
+						
+					case UNIQUAC_ACT:
+						shark_dat->AdsorptionList[i].setActivityModelInfo(UNIQUAC, &shark_dat->AdsorptionList[i]);
 						break;
 						
 					default:
