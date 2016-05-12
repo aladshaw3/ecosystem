@@ -466,6 +466,7 @@ void Reaction::calculateEquilibrium(double T)
 	}
 	else if (this->HaveEquil == true)
 	{
+		this->energy = -Rstd*T*log(pow(10.0,this->Equilibrium));
 		return;
 	}
 	else
@@ -2435,24 +2436,25 @@ int UNIQUAC(const Matrix<double> &x, Matrix<double> &F, const void *data)
 	int success = 0;
 	AdsorptionReaction *dat = (AdsorptionReaction *) data;
 	double total = 0.0;
+	double Temp = 0.0;
 	std::vector<double> r;
 	std::vector<double> s;
 	std::vector<double> l;
+	std::vector<double> u;
 	std::vector<double> frac;
 	std::vector<double> theta;
 	r.resize(dat->getNumberRxns());
 	s.resize(dat->getNumberRxns());
 	l.resize(dat->getNumberRxns());
+	u.resize(dat->getNumberRxns());
 	frac.resize(dat->getNumberRxns());
 	theta.resize(dat->getNumberRxns());
+	Temp = -dat->getReaction(0).Get_Energy()/(Rstd*log(pow(10.0,dat->getReaction(0).Get_Equilibrium())));
 	
 	//Loop to calculate total adsorption and calculate surface area and volume constants
 	for (int i=0; i<dat->getNumberRxns(); i++)
 	{
 		total = total + pow(10.0, x(dat->getAdsorbIndex(i),0));
-		r[i] = (dat->getVolumeFactor(dat->getAdsorbIndex(i))/100.0) / (VolumeSTD*0.602);
-		s[i] = (dat->getAreaFactor(dat->getAdsorbIndex(i))/100.0) / (AreaSTD*6020.0);
-		l[i] = LengthFactor(CoordSTD, r[i], s[i]);
 	}
 	
 	//Loop to calculate fractions and fraction dependent functions
@@ -2462,6 +2464,10 @@ int UNIQUAC(const Matrix<double> &x, Matrix<double> &F, const void *data)
 	for (int i=0; i<dat->getNumberRxns(); i++)
 	{
 		frac[i] = pow(10.0, x(dat->getAdsorbIndex(i),0)) / total;
+		r[i] = dat->getVolumeFactor(dat->getAdsorbIndex(i)) / VolumeSTD;
+		s[i] = dat->getAreaFactor(dat->getAdsorbIndex(i)) / AreaSTD;
+		l[i] = LengthFactor(CoordSTD, r[i], s[i]);
+		u[i] = -dat->getReaction(i).Get_Energy()/s[i];
 		rx_sum = rx_sum + (r[i]*frac[i]);
 		sx_sum = sx_sum + (s[i]*frac[i]);
 		lx_sum = lx_sum + (l[i]*frac[i]);
@@ -2471,35 +2477,39 @@ int UNIQUAC(const Matrix<double> &x, Matrix<double> &F, const void *data)
 	for (int i=0; i<dat->getNumberRxns(); i++)
 		theta[i] = (s[i]*frac[i])/sx_sum;
 	
-	//Loop to fill in activities
+	//i Loop to fill in activities
 	for (int i=0; i<dat->getNumberRxns(); i++)
 	{
 		double theta_tau_i = 0.0;
 		double theta_tau_rat = 0.0;
 		double lnact = 0.0;
 		
-		//Inner loop
+		//Inner j loop
 		for (int j=0; j<dat->getNumberRxns(); j++)
 		{
-			theta_tau_i = theta_tau_i + ( theta[j]*pow(10.0, (dat->getReaction(j).Get_Equilibrium()-dat->getReaction(i).Get_Equilibrium()) ) );
+			theta_tau_i = theta_tau_i + ( theta[j]*exp(-(u[j] - u[i])/(Rstd*Temp*CoordSTD/3.0)) );
 			
 			double theta_tau_k = 0.0;
+			// k loop
 			for (int k=0; k<dat->getNumberRxns(); k++)
-				theta_tau_k = theta_tau_k + ( theta[k]*pow(10.0, (dat->getReaction(k).Get_Equilibrium()-dat->getReaction(j).Get_Equilibrium()) ) );
+			{
+				theta_tau_k = theta_tau_k + ( theta[k]*exp(-(u[k] - u[j])/(Rstd*Temp*CoordSTD/3.0)) );
+				
+			}// End k Loop
 			
-			theta_tau_rat = theta_tau_rat + ( (theta[j]*pow(10.0, (dat->getReaction(i).Get_Equilibrium()-dat->getReaction(j).Get_Equilibrium()) ))/theta_tau_k	);
-		}
+			theta_tau_rat = theta_tau_rat + ( (theta[j]*exp(-(u[i] - u[j])/(Rstd*Temp*CoordSTD/3.0)) )/theta_tau_k);
+			
+		}// End j loop
 		
 		lnact = log(r[i]/rx_sum) + ( (CoordSTD/2.0)*s[i]*log((s[i]/r[i])*(rx_sum/sx_sum)) ) + l[i] - ( r[i]*(lx_sum/rx_sum) ) - ( s[i]*log(theta_tau_i) ) + s[i] - ( s[i]*theta_tau_rat );
 		F.edit(dat->getAdsorbIndex(i), 0, exp(lnact));
 		
-		//std::cout << exp(lnact) << std::endl;
-		
 		if (isinf(F(dat->getAdsorbIndex(i),0)) || isnan(F(dat->getAdsorbIndex(i),0)))
 			F.edit(dat->getAdsorbIndex(i), 0, DBL_MAX);
-		if (F(dat->getAdsorbIndex(i),0) <= 1e-6)
-			F.edit(dat->getAdsorbIndex(i), 0, 1e-6);
-	}
+		if (F(dat->getAdsorbIndex(i),0) <= sqrt(DBL_MIN))
+			F.edit(dat->getAdsorbIndex(i), 0, sqrt(DBL_MIN));
+		
+	}// End i Loop
 	
 	return success;
 }
@@ -4612,7 +4622,7 @@ int read_adsorbobjects(SHARK_DATA *shark_dat)
 					for (int index = 0; index<shark_dat->MasterList.list_size(); index++)
 					{
 						if (shark_dat->MasterList.get_species(index).MolarVolume() <= 0.0)
-							shark_dat->MasterList.get_species(index).setMolarVolume(VolumeSTD);
+							shark_dat->MasterList.get_species(index).setMolarVolume(7.24);
 						shark_dat->AdsorptionList[i].setVolumeFactor(index, shark_dat->MasterList.get_species(index).MolarVolume()*0.602);
 					}
 				}
@@ -4662,7 +4672,7 @@ int read_adsorbobjects(SHARK_DATA *shark_dat)
 						for (int index = 0; index<shark_dat->MasterList.list_size(); index++)
 						{
 							if (shark_dat->MasterList.get_species(index).MolarArea() <= 0.0)
-								shark_dat->MasterList.get_species(index).setMolarArea(AreaSTD);
+								shark_dat->MasterList.get_species(index).setMolarArea(18.10);
 							shark_dat->AdsorptionList[i].setAreaFactor(index, shark_dat->MasterList.get_species(index).MolarArea()*6020.0);
 						}
 					}

@@ -60,15 +60,15 @@
 #endif
 
 #ifndef VolumeSTD
-#define VolumeSTD 7.24						///< Standard Segment Volume - cubic angstroms
+#define VolumeSTD 15.17						///< Standard Segment Volume - cm^3/mol
 #endif
 
 #ifndef AreaSTD
-#define AreaSTD 18.1						///< Standard Segment Area - square angstroms
+#define AreaSTD 2.5E5						///< Standard Segment Area - m^2/mol
 #endif
 
 #ifndef CoordSTD
-#define CoordSTD 8							///< Standard Coordination Number
+#define CoordSTD 10							///< Standard Coordination Number
 #endif
 
 #ifndef LengthFactor
