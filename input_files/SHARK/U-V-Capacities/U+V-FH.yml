@@ -519,7 +519,7 @@ total_mass: 1.51e-5     #Units: kg
 surf_activity: flory-huggins
 
 - rxn01:
-  logK: -3.0
+  logK: -5.0
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -527,7 +527,7 @@ surf_activity: flory-huggins
     "UO2AHOOH + (s)": 1
 
 - rxn02:
-  logK: -3.5
+  logK: -3.8
   mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -535,7 +535,7 @@ surf_activity: flory-huggins
     "UO2(AHOOH)2 (s)": 1
 
 - rxn03:
-  logK: -10
+  logK: 4.0
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -544,7 +544,7 @@ surf_activity: flory-huggins
     "UO2CO3AHOOH - (s)": 1
 
 - rxn04:
-  logK: 10.5
+  logK: 9.0
   mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -553,7 +553,7 @@ surf_activity: flory-huggins
     "UO2CO3(AHOOH)2 2- (s)": 1
 
 - rxn05:
-  logK: -10
+  logK: 3.0
   mole_factor: 1.0
   - stoichiometry:
     "VO2 + (aq)": -1
@@ -561,7 +561,7 @@ surf_activity: flory-huggins
     "VO2AHOO - (s)": 1
 
 - rxn06:
-  logK: 4.25
+  logK: 3.4
   mole_factor: 2.0
   - stoichiometry:
     "VO2 + (aq)": -1
