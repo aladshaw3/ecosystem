@@ -375,11 +375,11 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "Br - (aq)")
 		{
-			this->Register(0, -121500.0, 82.4, -104000.0, true, true, "Aqueous", "Bromine", formula, "Br"); //Correct
+			this->Register(-1, -121500.0, 82.4, -104000.0, true, true, "Aqueous", "Bromine", formula, "Br"); //Correct
 		}
 		else if (formula == "BrO - (aq)")
 		{
-			this->Register(0, -94100.0, 42.0, -33500.0, true, true, "Aqueous", "Hypobromite", formula, "BrO"); //Correct
+			this->Register(-1, -94100.0, 42.0, -33500.0, true, true, "Aqueous", "Hypobromite", formula, "BrO"); //Correct
 		}
 		else
 		{
@@ -1132,7 +1132,7 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "K + (aq)")
 		{
-			this->Register(0, -252140.0, 102.5, 0.0, true, false, "Aqueous", "Potassium", formula, "K"); //Correct
+			this->Register(1, -252140.0, 102.5, 0.0, true, false, "Aqueous", "Potassium", formula, "K"); //Correct
 		}
 		else
 		{
@@ -1604,7 +1604,7 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "(VO)2(OH)2 + (aq)")
 		{
-			this->Register(2, -1434000.0, 115.9, -1329000.0, true, true, "Aqueous", "DiVanadyl(IV)-dihydroxide", formula, "V2O2O2H2");
+			this->Register(1, -1434000.0, 115.9, -1329000.0, true, true, "Aqueous", "DiVanadyl(IV)-dihydroxide", formula, "V2O2O2H2");
 		}
 		else if (formula == "VOF + (aq)")
 		{

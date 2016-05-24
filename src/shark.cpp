@@ -5261,14 +5261,14 @@ int shark_guess(SHARK_DATA *shark_dat)
 		if (shark_dat->const_pH == true)
 			shark_dat->Conc_new.edit(shark_dat->pH_index, 0, pow(10.0,-shark_dat->pH));
 		else
-			shark_dat->Conc_new.edit(shark_dat->pH_index, 0, 1e-7);
+			shark_dat->Conc_new.edit(shark_dat->pH_index, 0, 10.0);
 	}
 	if (shark_dat->Contains_pOH == true)
 	{
 		if (shark_dat->const_pH == true)
 			shark_dat->Conc_new.edit(shark_dat->pOH_index, 0, pow(10.0,-(14.0-shark_dat->pH)));
 		else
-			shark_dat->Conc_new.edit(shark_dat->pOH_index, 0, 1e-7);
+			shark_dat->Conc_new.edit(shark_dat->pOH_index, 0, 10.0);
 	}
 	success = Convert2LogConcentration(shark_dat->Conc_new, shark_dat->X_new);
 	if (success != 0) {mError(simulation_fail); return -1;}
