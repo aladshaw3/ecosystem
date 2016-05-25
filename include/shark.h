@@ -265,6 +265,10 @@ private:
 
 };
 
+/// Enumeration for the list of valid activity models for non-ideal solutions
+/** \note The SIT and PITZER models are not currently supported. */
+typedef enum {BATCH, CSTR, PFR} valid_mb;
+
 /// Mass Balance Object
 /** C++ style object that holds data and functions associated with mass balances of primary species
 	in a system. The mass balances involve a total concentration (in mol/L) and a vector of weighted
@@ -290,12 +294,28 @@ public:
 	void Set_Delta(int i, double v);
 
 	void Set_TotalConcentration(double v);				///< Set the total concentration of the mass balance to v (mol/L)
+	void Set_Type(int type);							///< Set the Mass Balance type to BATCH, CSTR, or PFR
+	void Set_Volume(double v);							///< Set the volume of the reactor
+	void Set_FlowRate(double v);						///< Set the flow rate for the CSTR or PFR
+	void Set_Area(double v);							///< Set the cross sectional area for the PFR
+	void Set_TimeStep(double v);						///< Set the time step for the CSTR or PFR
+	void Set_InitialConcentration(double v);			///< Set the initial concentration for the mass balance
+	void Set_InletConcentration(double v);				///< Set the inlet concentration for the CSTR or PFR
+	void Set_SteadyState(bool ss);						///< Set the boolean for Steady-State simulation
 
 	void Set_Name(std::string name);					///< Set the name of the mass balance (i.e., Uranium, Carbonate, etc.)
 
 	double Get_Delta(int i);							///< Fetch the ith weight (i.e., delta) value
 	double Sum_Delta();									///< Sums up the delta values and returns the total (should never be zero)
 	double Get_TotalConcentration();					///< Fetch the total concentration (mol/L)
+	int Get_Type();										///< Fetch the reactor type
+	double Get_Volume();								///< Fetch the reactor volume
+	double Get_FlowRate();								///< Fetch the reactor flow rate
+	double Get_Area();									///< Fetch the reactor cross section area
+	double Get_TimeStep();								///< Fetch the time step
+	double Get_InitialConcentration();					///< Fetch the initial concentration
+	double Get_InletConcentration();					///< Fetch the inlet concentration
+	bool isSteadyState();								///< Fetch the steady-state condition
 	std::string Get_Name();								///< Return name of mass balance object
 
 	/// Evaluate the residual for the mass balance object given the log(C) concentrations
@@ -303,13 +323,23 @@ public:
 		concentration in the system and the weighted contributions from each species. Concentrations are
 		given as the log(C) values.
 
-		\param x matrix of the log(C) concentration values at the current non-linear step*/
-	double Eval_Residual(const Matrix<double> &x);
+		\param x_new matrix of the log(C) concentration values at the current non-linear step
+	    \param x_old matrix of the old log(C) concentration values for transient simulations*/
+	double Eval_Residual(const Matrix<double> &x_new, const Matrix<double> &x_old);
 
 protected:
 	MasterSpeciesList *List;							///< Pointer to a master species object
 	std::vector<double> Delta;							///< Vector of weights (i.e., deltas) used in the mass balance
 	double TotalConcentration;							///< Total concentration of specific object (mol/L)
+	
+	int Type;											///< Type of mass balance object (default = BATCH)
+	double volume;										///< Volume of the reactor (L)
+	double flow_rate;									///< Volumetric flow rate in reactor (L/hr)
+	double xsec_area;									///< Cross sectional area in PFR configuration (m^2)
+	double dt;											///< Time step for non-batch case (hrs)
+	double InitialConcentration;						///< Concentration initially in the domain (mol/L)
+	double InletConcentration;							///< Concentration in the inlet of the domain (mol/L)
+	bool SteadyState;									///< True if running steady-state simulation
 
 private:
 	std::string Name;									///< Name designation used in mass balance
@@ -813,6 +843,7 @@ typedef struct SHARK_DATA
 	std::vector<std::string> ads_names;				///< List of the adsorbent object names
 	int num_other = 0;								///< Number of other functions to be used (default is always 0)
 	int act_fun = IDEAL;							///< Flag denoting the activity function to use (default is IDEAL)
+	int reactor_type = BATCH;						///< Flag denoting the type of reactor considered for the system (default is BATCH)
 	int totalsteps = 0;								///< Total number of iterations
 	int totalcalls = 0;								///< Total number of residual function calls
 	int timesteps = 0;								///< Number of time steps taken to complete simulation
@@ -829,6 +860,8 @@ typedef struct SHARK_DATA
 	double pH = 7.0;								///< Value of pH if needed (default = 7)
 	double pH_step = 0.5;							///< Value by which to increment pH when doing a speciation curve (default = 0.5)
 	double volume = 1.0;							///< Volume of the domain in liters (default = 1 L)
+	double flow_rate = 1.0;							///< Flow rate in the reactor in L/hr (default = 1 L/hr)
+	double xsec_area = 1.0;							///< Cross sectional area of the reactor in m^2 (default = 1 m^2)
 	double Norm = 0.0;								///< Current value of euclidean norm in solution
 
 	double dielectric_const = 78.325;				///< Dielectric constant used in many activity models (default: water = 78.325 (1/K))
@@ -983,6 +1016,13 @@ int surf_act_choice(const std::string &input);
 
 	\param input string for the name of the activity model*/
 int act_choice(const std::string &input);
+
+/// Function takes a give string and returns a flag denoting which type of reactor was choosen for the system
+/** This function returns an integer flag that will be one of the valid reactor type flags from the
+	valid_mb enum. If the input string was not recognized, then it defaults to returning the BATCH flag.
+ 
+	\param input string for the name of the activity model*/
+int reactor_choice(const std::string &input);
 
 /// Function returns a bool to determine the form of line search requested
 /** This function returns true if the user requests a bouncing line search algorithm and false if the

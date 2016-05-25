@@ -549,6 +549,14 @@ MassBalance::MassBalance()
 Delta(1)
 {
 	TotalConcentration = 0.0;
+	Type = BATCH;
+	volume = 1.0;
+	flow_rate = 1.0;
+	xsec_area = 1.0;
+	dt = 0.1;
+	InitialConcentration = 0.0;
+	InletConcentration = 0.0;
+	SteadyState = true;
 }
 
 //Default destructor
@@ -620,6 +628,83 @@ void MassBalance::Set_TotalConcentration (double v)
 	this->TotalConcentration = v;
 }
 
+//Set the reactor type
+void MassBalance::Set_Type(int type)
+{
+	switch (type)
+	{
+		case BATCH:
+			this->Type = BATCH;
+			break;
+			
+		case CSTR:
+			this->Type = CSTR;
+			break;
+			
+		case PFR:
+			this->Type = PFR;
+			break;
+			
+		default:
+			this->Type = BATCH;
+			break;
+	}
+}
+
+//Set the volume of the reactor
+void MassBalance::Set_Volume(double v)
+{
+	if (v <= 0.0)
+		v = DBL_MIN;
+	this->volume = v;
+}
+
+//Set the flow rate of the reactor
+void MassBalance::Set_FlowRate(double v)
+{
+	if (v <= 0.0)
+		v = DBL_MIN;
+	this->flow_rate = v;
+}
+
+//Set the cross sectional area of the reactor
+void MassBalance::Set_Area(double v)
+{
+	if (v <= 0.0)
+		v = DBL_MIN;
+	this->xsec_area	= v;
+}
+
+//Set the time step of the reactor
+void MassBalance::Set_TimeStep(double v)
+{
+	if (v <= 0.0)
+		v = 0.1;
+	this->dt = v;
+}
+
+//Set the initial concentration
+void MassBalance::Set_InitialConcentration (double v)
+{
+	if (v <= 0.0)
+		v = DBL_MIN;
+	this->InitialConcentration = v;
+}
+
+//Set the inlet concentration
+void MassBalance::Set_InletConcentration (double v)
+{
+	if (v <= 0.0)
+		v = DBL_MIN;
+	this->InletConcentration = v;
+}
+
+//Set the steady-state option
+void MassBalance::Set_SteadyState(bool ss)
+{
+	this->SteadyState = ss;
+}
+
 //Set the name of the mass balance
 void MassBalance::Set_Name(std::string name)
 {
@@ -660,6 +745,54 @@ double MassBalance::Get_TotalConcentration ()
 		return this->TotalConcentration;
 }
 
+//Get the reactor type
+int MassBalance::Get_Type()
+{
+	return this->Type;
+}
+
+//Get the reactor volume
+double MassBalance::Get_Volume()
+{
+	return this->volume;
+}
+
+//Get the reactor flow rate
+double MassBalance::Get_FlowRate()
+{
+	return this->flow_rate;
+}
+
+//Get the reactor cross sectional area
+double MassBalance::Get_Area()
+{
+	return this->xsec_area;
+}
+
+//Get the time step
+double MassBalance::Get_TimeStep()
+{
+	return this->dt;
+}
+
+//Get the initial concentration
+double MassBalance::Get_InitialConcentration()
+{
+	return this->InitialConcentration;
+}
+
+//Get the inlet concentration
+double MassBalance::Get_InletConcentration()
+{
+	return this->InletConcentration;
+}
+
+//Get the steady-state value
+bool MassBalance::isSteadyState()
+{
+	return this->SteadyState;
+}
+
 //Get the name of the Mass Balance
 std::string MassBalance::Get_Name()
 {
@@ -667,23 +800,51 @@ std::string MassBalance::Get_Name()
 }
 
 //Function to evaluate the mass balance residual given the concentration matrix x
-double MassBalance::Eval_Residual(const Matrix<double> &x)
+double MassBalance::Eval_Residual(const Matrix<double> &x_new, const Matrix<double> &x_old)
 {
 	double res = 0.0;
-
-	//Loop for all species in list
-	for (int i=0; i<this->List->list_size(); i++)
-	{
-		res = res + ( this->Delta[i] * pow(10.0, x(i,0)) );
-	}
 	
-	if (this->Get_TotalConcentration() <= DBL_MIN)
-		res = (res - this->Get_TotalConcentration())/pow(DBL_EPSILON, 2.0);
-	else
-		res = (res / this->Get_TotalConcentration()) - 1.0;
+	if (this->Type == BATCH)
+	{
+		//Loop for all species in list
+		for (int i=0; i<this->List->list_size(); i++)
+		{
+			res = res + ( this->Delta[i] * pow(10.0, x_new(i,0)) );
+		}
+	
+		if (this->Get_TotalConcentration() <= DBL_MIN)
+			res = (res - this->Get_TotalConcentration())/pow(DBL_EPSILON, 2.0);
+		else
+			res = (res / this->Get_TotalConcentration()) - 1.0;
 
-	if (isnan(res) || isinf(res))
-		res = sqrt(DBL_MAX)/this->List->list_size();
+		if (isnan(res) || isinf(res))
+			res = sqrt(DBL_MAX)/this->List->list_size();
+	}
+	else if (this->Type == CSTR)
+	{
+		
+	}
+	else if (this->Type == PFR)
+	{
+		
+	}
+	else
+	{
+		//Default to Batch
+		//Loop for all species in list
+		for (int i=0; i<this->List->list_size(); i++)
+		{
+			res = res + ( this->Delta[i] * pow(10.0, x_new(i,0)) );
+		}
+		
+		if (this->Get_TotalConcentration() <= DBL_MIN)
+			res = (res - this->Get_TotalConcentration())/pow(DBL_EPSILON, 2.0);
+		else
+			res = (res / this->Get_TotalConcentration()) - 1.0;
+		
+		if (isnan(res) || isinf(res))
+			res = sqrt(DBL_MAX)/this->List->list_size();
+	}
 	
 	return res;
 }
@@ -2172,6 +2333,33 @@ void print2file_shark_header(SHARK_DATA *shark_dat)
 	}
 
 	fprintf(shark_dat->OutputFile, "-----------------SHARK SIMULATION CONDITIONS----------------\n\n");
+	switch (shark_dat->reactor_type)
+	{
+		case BATCH:
+			fprintf(shark_dat->OutputFile, "Reactor Type = BATCH\n");
+			break;
+			
+		case CSTR:
+			fprintf(shark_dat->OutputFile, "Reactor Type = CSTR\n");
+			break;
+			
+		case PFR:
+			fprintf(shark_dat->OutputFile, "Reactor Type = PFR\n");
+			break;
+			
+		default:
+			fprintf(shark_dat->OutputFile, "Reactor Type = BATCH\n");
+			break;
+	}
+	if (shark_dat->reactor_type == CSTR)
+	{
+		fprintf(shark_dat->OutputFile, "Flow Rate (L/hr) = \t%.6g\n", shark_dat->flow_rate);
+	}
+	if (shark_dat->reactor_type == PFR)
+	{
+		fprintf(shark_dat->OutputFile, "Flow Rate (L/hr) = \t%.6g\n", shark_dat->flow_rate);
+		fprintf(shark_dat->OutputFile, "Cross Section (m^2) = \t%.6g\n", shark_dat->xsec_area);
+	}
 	fprintf(shark_dat->OutputFile, "Total Volume (L) = \t%.6g\n", shark_dat->volume);
 	if (shark_dat->steadystate == true)
 		fprintf(shark_dat->OutputFile, "Steady-State = TRUE\n");
@@ -3447,6 +3635,27 @@ int act_choice(const std::string &input)
 	return act;
 }
 
+//Determine the reactor type choosen by user
+int reactor_choice(const std::string &input)
+{
+	int reactor = BATCH;
+	
+	std::string copy = input;
+	for (int i=0; i<copy.size(); i++)
+		copy[i] = tolower(copy[i]);
+	
+	if (copy == "batch")
+		reactor = BATCH;
+	else if (copy == "cstr")
+		reactor = CSTR;
+	else if (copy == "pfr")
+		reactor = PFR;
+	else
+		reactor = BATCH;
+	
+	return reactor;
+}
+
 //Determine the line search option
 bool linesearch_choice(const std::string &input)
 {
@@ -3680,6 +3889,31 @@ int read_scenario(SHARK_DATA *shark_dat)
 	} catch (std::out_of_range)
 	{
 		shark_dat->volume = 1.0;
+	}
+	
+	try
+	{
+		std::string reactor = shark_dat->yaml_object.getYamlWrapper()("Scenario")("sys_data")["reactor"].getString();
+		shark_dat->reactor_type = reactor_choice(reactor);
+	} catch (std::out_of_range)
+	{
+		shark_dat->reactor_type = BATCH;
+	}
+	
+	try
+	{
+		shark_dat->flow_rate = shark_dat->yaml_object.getYamlWrapper()("Scenario")("sys_data")["flow_rate"].getDouble();
+	} catch (std::out_of_range)
+	{
+		shark_dat->flow_rate = 1.0;
+	}
+	
+	try
+	{
+		shark_dat->xsec_area = shark_dat->yaml_object.getYamlWrapper()("Scenario")("sys_data")["xsec_area"].getDouble();
+	} catch (std::out_of_range)
+	{
+		shark_dat->xsec_area = 1.0;
 	}
 
 	//Now read in the run_time Header
@@ -4087,14 +4321,43 @@ int read_massbalance(SHARK_DATA *shark_dat)
 		for (auto &x: shark_dat->yaml_object.getYamlWrapper()("MassBalance").getHeadMap())
 		{
 			shark_dat->MassBalanceList[i].Set_Name(x.first);
-			try
+			if (shark_dat->reactor_type == BATCH)
 			{
-				shark_dat->MassBalanceList[i].Set_TotalConcentration(shark_dat->yaml_object.getYamlWrapper()("MassBalance")(x.first)["total_conc"].getDouble());
+				try
+				{
+					shark_dat->MassBalanceList[i].Set_TotalConcentration(shark_dat->yaml_object.getYamlWrapper()("MassBalance")(x.first)["total_conc"].getDouble());
+				}
+				catch (std::out_of_range)
+				{
+					mError(missing_information);
+					return -1;
+				}
 			}
-			catch (std::out_of_range)
+			
+			if (shark_dat->reactor_type == CSTR || shark_dat->reactor_type == PFR)
 			{
-				mError(missing_information);
-				return -1;
+				if (shark_dat->steadystate == false)
+				{
+					try
+					{
+						shark_dat->MassBalanceList[i].Set_InitialConcentration(shark_dat->yaml_object.getYamlWrapper()("MassBalance")(x.first)["initial_conc"].getDouble());
+					}
+					catch (std::out_of_range)
+					{
+						mError(missing_information);
+						return -1;
+					}
+				}
+				
+				try
+				{
+					shark_dat->MassBalanceList[i].Set_InletConcentration(shark_dat->yaml_object.getYamlWrapper()("MassBalance")(x.first)["inlet_conc"].getDouble());
+				}
+				catch (std::out_of_range)
+				{
+					mError(missing_information);
+					return -1;
+				}
 			}
 
 			int species;
@@ -5037,6 +5300,12 @@ int setup_SHARK_DATA( FILE *file, int (*residual) (const Matrix<double> &x, Matr
 	for (int i=0; i<dat->MassBalanceList.size(); i++)
 	{
 		dat->MassBalanceList[i].Initialize_Object(dat->MasterList);
+		dat->MassBalanceList[i].Set_SteadyState(dat->steadystate);
+		dat->MassBalanceList[i].Set_TimeStep(dat->dt);
+		dat->MassBalanceList[i].Set_Volume(dat->volume);
+		dat->MassBalanceList[i].Set_FlowRate(dat->flow_rate);
+		dat->MassBalanceList[i].Set_Area(dat->xsec_area);
+		dat->MassBalanceList[i].Set_Type(dat->reactor_type);
 	}
 
 	for (int i=0; i<dat->UnsteadyList.size(); i++)
@@ -5665,7 +5934,7 @@ int shark_residual(const Matrix<double> &x, Matrix<double> &F, const void *data)
 	}
 	for (int i=0; i<dat->MassBalanceList.size(); i++)
 	{
-		F(index,0) = dat->MassBalanceList[i].Eval_Residual(x);
+		F(index,0) = dat->MassBalanceList[i].Eval_Residual(x, dat->X_old);
 		index++;
 	}
 	for (int i=0; i<dat->OtherList.size(); i++)
@@ -5814,6 +6083,14 @@ int SHARK_SCENARIO(const char *yaml_input)
 	if (success != 0) {mError(read_error); return -1;}
 
 	//NOTE: we may have to build a custom read option for pitzer and sit models to establish their structures here
+	if (shark_dat.act_fun == PITZER || shark_dat.act_fun == SIT || shark_dat.reactor_type == PFR)
+	{
+		std::cout << "\n--------WARNING!!!---------\n\nUser selected unavailable options! Revert to defaul settings...\n\n";
+		if (shark_dat.act_fun == PITZER || shark_dat.act_fun == SIT)
+			shark_dat.act_fun = IDEAL;
+		if (shark_dat.reactor_type == PFR)
+			shark_dat.reactor_type = BATCH;
+	}
 
 	//Call the setup function
 	//NOTE: The NULL option between &shark_dat and (void *)&shark_dat needs to reflect the data structure for the PITZER model

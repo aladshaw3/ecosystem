@@ -20,6 +20,9 @@ Scenario:
   temp: 293.15       
   dielec: 78.325 
   volume: 75.0
+  reactor: batch
+  flow_rate: 60.0
+  xsec_area: 0.1
 
 - run_time:
   steady: true         
@@ -178,6 +181,8 @@ MassBalance:
 ---
 - water:
   total_conc: 1
+  initial_conc: 1
+  inlet_conc: 1
   - delta: 
     "H2O (l)": 1
 
