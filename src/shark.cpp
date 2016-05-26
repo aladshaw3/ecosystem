@@ -557,6 +557,7 @@ Delta(1)
 	InitialConcentration = 0.0;
 	InletConcentration = 0.0;
 	SteadyState = true;
+	ZeroInitialSolids = false;
 }
 
 //Default destructor
@@ -705,6 +706,12 @@ void MassBalance::Set_SteadyState(bool ss)
 	this->SteadyState = ss;
 }
 
+//Set the initial solids option
+void MassBalance::Set_ZeroInitialSolids(bool ss)
+{
+	this->ZeroInitialSolids = ss;
+}
+
 //Set the name of the mass balance
 void MassBalance::Set_Name(std::string name)
 {
@@ -793,6 +800,12 @@ bool MassBalance::isSteadyState()
 	return this->SteadyState;
 }
 
+//Get the initial solids value
+bool MassBalance::isZeroInitialSolids()
+{
+	return this->ZeroInitialSolids;
+}
+
 //Get the name of the Mass Balance
 std::string MassBalance::Get_Name()
 {
@@ -822,15 +835,59 @@ double MassBalance::Eval_Residual(const Matrix<double> &x_new, const Matrix<doub
 	}
 	else if (this->Type == CSTR)
 	{
-		
+		double CT = 0.0;
+		double CT_old = 0.0;
+		double ST = 0.0;
+		double ST_old = 0.0;
+		double theta = this->Get_FlowRate() / this->Get_Volume();
+		if (this->isSteadyState() == true)
+		{
+			//Loop for all species in list
+			for (int i=0; i<this->List->list_size(); i++)
+			{
+				if (this->List->get_species(i).MoleculePhaseID() == AQUEOUS || this->List->get_species(i).MoleculePhaseID() == LIQUID)
+					CT = CT + ( this->Delta[i] * pow(10.0, x_new(i,0)) );
+			}
+			
+			if (this->Get_InletConcentration() <= DBL_MIN)
+				res = (CT - this->Get_InletConcentration())/pow(DBL_EPSILON, 2.0);
+			else
+				res = (CT / this->Get_InletConcentration()) - 1.0;
+			
+			if (isnan(res) || isinf(res))
+				res = sqrt(DBL_MAX)/this->List->list_size();
+		}
+		else
+		{
+			//Loop for all species in list
+			for (int i=0; i<this->List->list_size(); i++)
+			{
+				if (this->List->get_species(i).MoleculePhaseID() == AQUEOUS || this->List->get_species(i).MoleculePhaseID() == LIQUID)
+				{
+					CT = CT + ( this->Delta[i] * pow(10.0, x_new(i,0)) );
+					CT_old = CT_old + ( this->Delta[i] * pow(10.0, x_old(i,0)) );
+				}
+				else if (this->List->get_species(i).MoleculePhaseID() == SOLID)
+				{
+					ST = ST + ( this->Delta[i] * pow(10.0, x_new(i,0)) );
+					ST_old = ST_old + ( this->Delta[i] * pow(10.0, x_old(i,0)) );
+				}
+				else
+				{
+					//Nothing
+				}
+			}
+			
+			res = ((CT_old + (theta*this->Get_TimeStep()*this->Get_InletConcentration()) - ST + ST_old) - (CT + (theta*this->Get_TimeStep()*CT))) /this->Get_InletConcentration() ;
+			
+			if (isnan(res) || isinf(res))
+				res = sqrt(DBL_MAX)/this->List->list_size();
+		}
 	}
 	else if (this->Type == PFR)
 	{
+		//----------Default to Batch--------------
 		
-	}
-	else
-	{
-		//Default to Batch
 		//Loop for all species in list
 		for (int i=0; i<this->List->list_size(); i++)
 		{
@@ -845,6 +902,52 @@ double MassBalance::Eval_Residual(const Matrix<double> &x_new, const Matrix<doub
 		if (isnan(res) || isinf(res))
 			res = sqrt(DBL_MAX)/this->List->list_size();
 	}
+	else
+	{
+		//--------------Default to Batch---------------
+		
+		//Loop for all species in list
+		for (int i=0; i<this->List->list_size(); i++)
+		{
+			res = res + ( this->Delta[i] * pow(10.0, x_new(i,0)) );
+		}
+		
+		if (this->Get_TotalConcentration() <= DBL_MIN)
+			res = (res - this->Get_TotalConcentration())/pow(DBL_EPSILON, 2.0);
+		else
+			res = (res / this->Get_TotalConcentration()) - 1.0;
+		
+		if (isnan(res) || isinf(res))
+			res = sqrt(DBL_MAX)/this->List->list_size();
+	}
+	
+	return res;
+}
+
+//Function to evaluate the mass balance residual given the concentration matrix x
+double MassBalance::Eval_IC_Residual(const Matrix<double> &x)
+{
+	double res = 0.0;
+	
+	//Loop for all species in list
+	for (int i=0; i<this->List->list_size(); i++)
+	{
+		if (this->isZeroInitialSolids() == false)
+			res = res + ( this->Delta[i] * pow(10.0, x(i,0)) );
+		else
+		{
+			if (this->List->get_species(i).MoleculePhaseID() == AQUEOUS || this->List->get_species(i).MoleculePhaseID() == LIQUID)
+				res = res + ( this->Delta[i] * pow(10.0, x(i,0)) );
+		}
+	}
+	
+	if (this->Get_InitialConcentration() <= DBL_MIN)
+		res = (res - this->Get_InitialConcentration())/pow(DBL_EPSILON, 2.0);
+	else
+		res = (res / this->Get_InitialConcentration()) - 1.0;
+	
+	if (isnan(res) || isinf(res))
+		res = sqrt(DBL_MAX)/this->List->list_size();
 	
 	return res;
 }
@@ -2290,7 +2393,10 @@ void print2file_shark_info(SHARK_DATA *shark_dat)
 	for (int j=0; j<shark_dat->num_mbe; j++)
 	{
 		fprintf(shark_dat->OutputFile, "%s\n",shark_dat->MassBalanceList[j].Get_Name().c_str());
-		fprintf(shark_dat->OutputFile, "%.6g\t= ", shark_dat->MassBalanceList[j].Get_TotalConcentration());
+		if (shark_dat->reactor_type == BATCH)
+			fprintf(shark_dat->OutputFile, "%.6g\t= ", shark_dat->MassBalanceList[j].Get_TotalConcentration());
+		else
+			fprintf(shark_dat->OutputFile, "%.6g\t= ", shark_dat->MassBalanceList[j].Get_InletConcentration());
 		bool first = true;
 		for (int i=0; i<shark_dat->numvar; i++)
 		{
@@ -3926,8 +4032,17 @@ int read_scenario(SHARK_DATA *shark_dat)
 		mError(missing_information);
 		return -1;
 	}
+	
+	try
+	{
+		shark_dat->ZeroInitialSolids = shark_dat->yaml_object.getYamlWrapper()("Scenario")("run_time")["zero_initial_solids"].getBool();
+	}
+	catch (std::out_of_range)
+	{
+		shark_dat->ZeroInitialSolids = false;
+	}
 
-	if (shark_dat->num_usr == 0)
+	if (shark_dat->num_usr == 0 && shark_dat->reactor_type == BATCH)
 		shark_dat->steadystate = true;
 
 	if (shark_dat->steadystate == true)
@@ -5306,6 +5421,7 @@ int setup_SHARK_DATA( FILE *file, int (*residual) (const Matrix<double> &x, Matr
 		dat->MassBalanceList[i].Set_FlowRate(dat->flow_rate);
 		dat->MassBalanceList[i].Set_Area(dat->xsec_area);
 		dat->MassBalanceList[i].Set_Type(dat->reactor_type);
+		dat->MassBalanceList[i].Set_ZeroInitialSolids(dat->ZeroInitialSolids);
 	}
 
 	for (int i=0; i<dat->UnsteadyList.size(); i++)
@@ -5488,15 +5604,27 @@ int shark_guess(SHARK_DATA *shark_dat)
 	for (int i=0; i<shark_dat->MassBalanceList.size(); i++)
 	{
 		double delta_sum = shark_dat->MassBalanceList[i].Sum_Delta();
-		double distribution = shark_dat->MassBalanceList[i].Get_TotalConcentration() / delta_sum;
+		double distribution;
+		if (shark_dat->reactor_type == BATCH)
+			distribution = shark_dat->MassBalanceList[i].Get_TotalConcentration() / delta_sum;
+		else
+			distribution = shark_dat->MassBalanceList[i].Get_InletConcentration() / delta_sum;
 		for (int j=0; j<shark_dat->MasterList.list_size(); j++)
 		{
 			if (shark_dat->MassBalanceList[i].Get_Delta(j) > 0.0 && shark_dat->Conc_new(j,0) == 0.0)
 				shark_dat->Conc_new.edit(j, 0, distribution);
 			else if (shark_dat->MassBalanceList[i].Get_Delta(j) > 0.0 && shark_dat->Conc_new(j,0) != 0.0)
 			{
-				if (shark_dat->Conc_new(j,0) >= shark_dat->MassBalanceList[i].Get_TotalConcentration())
-					shark_dat->Conc_new.edit(j, 0, distribution);
+				if (shark_dat->reactor_type == BATCH)
+				{
+					if (shark_dat->Conc_new(j,0) >= shark_dat->MassBalanceList[i].Get_TotalConcentration())
+						shark_dat->Conc_new.edit(j, 0, distribution);
+				}
+				else
+				{
+					if (shark_dat->Conc_new(j,0) >= shark_dat->MassBalanceList[i].Get_InletConcentration())
+						shark_dat->Conc_new.edit(j, 0, distribution);
+				}
 			}
 		}
 	}
@@ -5589,6 +5717,16 @@ int shark_initial_conditions(SHARK_DATA *shark_dat)
 			shark_dat->Converged = true;
 		else
 			shark_dat->Converged = false;
+		
+		if (shark_dat->ZeroInitialSolids == true)
+		{
+			//Loop and remove solids from solution
+			for (int i=0; i<shark_dat->MasterList.list_size(); i++)
+			{
+				if (shark_dat->MasterList.get_species(i).MoleculePhaseID() == SOLID)
+					shark_dat->X_new.edit(i, 0, -DBL_MAX_10_EXP);
+			}
+		}
 
 		success = Convert2Concentration(shark_dat->X_new, shark_dat->Conc_new);
 		if (success != 0) {mError(simulation_fail); return -1;}
@@ -5657,6 +5795,10 @@ int shark_timestep_const(SHARK_DATA *shark_dat)
 	{
 		shark_dat->UnsteadyList[i].Set_TimeStep(shark_dat->dt);
 	}
+	for (int i=0; i<shark_dat->MassBalanceList.size(); i++)
+	{
+		shark_dat->MassBalanceList[i].Set_TimeStep(shark_dat->dt);
+	}
 
 	return success;
 }
@@ -5688,6 +5830,10 @@ int shark_timestep_adapt(SHARK_DATA *shark_dat)
 	for (int i=0; i<shark_dat->UnsteadyList.size(); i++)
 	{
 		shark_dat->UnsteadyList[i].Set_TimeStep(shark_dat->dt);
+	}
+	for (int i=0; i<shark_dat->MassBalanceList.size(); i++)
+	{
+		shark_dat->MassBalanceList[i].Set_TimeStep(shark_dat->dt);
 	}
 
 	return success;
@@ -5722,7 +5868,7 @@ int shark_solver(SHARK_DATA *shark_dat)
 {
 	int success = 0;
 
-	if (shark_dat->steadystate == false)
+	if (shark_dat->steadystate == false && shark_dat->num_usr > 0)
 	{
 		if (shark_dat->Console_Output == true)
 			std::cout << "Explicit Approximation to Unsteady Variables...\n-----------------------------------------------\n";
@@ -5934,7 +6080,10 @@ int shark_residual(const Matrix<double> &x, Matrix<double> &F, const void *data)
 	}
 	for (int i=0; i<dat->MassBalanceList.size(); i++)
 	{
-		F(index,0) = dat->MassBalanceList[i].Eval_Residual(x, dat->X_old);
+		if (dat->steadystate == false && dat->time == 0.0)
+			F(index,0) = dat->MassBalanceList[i].Eval_IC_Residual(x);
+		else
+			F(index,0) = dat->MassBalanceList[i].Eval_Residual(x, dat->X_old);
 		index++;
 	}
 	for (int i=0; i<dat->OtherList.size(); i++)

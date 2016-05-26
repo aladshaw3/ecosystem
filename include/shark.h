@@ -302,6 +302,7 @@ public:
 	void Set_InitialConcentration(double v);			///< Set the initial concentration for the mass balance
 	void Set_InletConcentration(double v);				///< Set the inlet concentration for the CSTR or PFR
 	void Set_SteadyState(bool ss);						///< Set the boolean for Steady-State simulation
+	void Set_ZeroInitialSolids(bool solids);			///< Set the boolean for initial solids in solution
 
 	void Set_Name(std::string name);					///< Set the name of the mass balance (i.e., Uranium, Carbonate, etc.)
 
@@ -316,6 +317,7 @@ public:
 	double Get_InitialConcentration();					///< Fetch the initial concentration
 	double Get_InletConcentration();					///< Fetch the inlet concentration
 	bool isSteadyState();								///< Fetch the steady-state condition
+	bool isZeroInitialSolids();							///< Fetch the initial solids condition
 	std::string Get_Name();								///< Return name of mass balance object
 
 	/// Evaluate the residual for the mass balance object given the log(C) concentrations
@@ -326,6 +328,14 @@ public:
 		\param x_new matrix of the log(C) concentration values at the current non-linear step
 	    \param x_old matrix of the old log(C) concentration values for transient simulations*/
 	double Eval_Residual(const Matrix<double> &x_new, const Matrix<double> &x_old);
+	
+	/// Evaluate the initial residual for the unsteady mass balance object given the log(C) concentrations
+	/** This function calculates and provides the initial residual for this mass balance object based on the initial
+		concentration in the system and the weighted contributions from each species. Concentrations are
+		given as the log(C) values.
+	 
+		\param x matrix of the log(C) concentration values at the current non-linear step*/
+	double Eval_IC_Residual(const Matrix<double> &x);
 
 protected:
 	MasterSpeciesList *List;							///< Pointer to a master species object
@@ -340,6 +350,7 @@ protected:
 	double InitialConcentration;						///< Concentration initially in the domain (mol/L)
 	double InletConcentration;							///< Concentration in the inlet of the domain (mol/L)
 	bool SteadyState;									///< True if running steady-state simulation
+	bool ZeroInitialSolids;								///< True if zero solids present for initial condition
 
 private:
 	std::string Name;									///< Name designation used in mass balance
@@ -870,6 +881,7 @@ typedef struct SHARK_DATA
 	double ionic_strength = 0.0;					///< Solution ionic strength in Molar (calculated internally)
 
 	bool steadystate = true;						///< True = solve steady problem; False = solve transient problem
+	bool ZeroInitialSolids = false;					///< True = no solids or adsorption initially in the reactor
 	bool TimeAdaptivity = false;					///< True = solve using variable time step
 	bool const_pH = false;							///< True = set pH to a constant; False = solve for pH
 	bool SpeciationCurve = false;					///< True = runs a series of constant pH steady-state problems to produce curves
