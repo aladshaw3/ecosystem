@@ -19,7 +19,7 @@ Scenario:
   res_alk: 0.0
   temp: 293.15       
   dielec: 78.325 
-  volume: 100.0
+  volume: 1000.0
   reactor: cstr
   flow_rate: 60.0
 
@@ -42,6 +42,7 @@ linear_solve: kms
 #nl_maxit: 200 
 local_min: false
 nl_print: true
+l_print: false
 
 ...
 

@@ -878,7 +878,10 @@ double MassBalance::Eval_Residual(const Matrix<double> &x_new, const Matrix<doub
 				}
 			}
 			
-			res = ((CT_old + (theta*this->Get_TimeStep()*this->Get_InletConcentration()) - ST + ST_old) - (CT + (theta*this->Get_TimeStep()*CT))) /this->Get_InletConcentration() ;
+			if (this->Get_InletConcentration() <= DBL_MIN)
+				res = ((CT_old + (theta*this->Get_TimeStep()*this->Get_InletConcentration()) - ST + ST_old) - (CT + (theta*this->Get_TimeStep()*CT))) /(this->Get_InitialConcentration()*10.0) ;
+			else
+				res = ((CT_old + (theta*this->Get_TimeStep()*this->Get_InletConcentration()) - ST + ST_old) - (CT + (theta*this->Get_TimeStep()*CT))) /(this->Get_InletConcentration()*10.0) ;
 			
 			if (isnan(res) || isinf(res))
 				res = sqrt(DBL_MAX)/this->List->list_size();
@@ -5608,7 +5611,12 @@ int shark_guess(SHARK_DATA *shark_dat)
 		if (shark_dat->reactor_type == BATCH)
 			distribution = shark_dat->MassBalanceList[i].Get_TotalConcentration() / delta_sum;
 		else
-			distribution = shark_dat->MassBalanceList[i].Get_InletConcentration() / delta_sum;
+		{
+			if (shark_dat->steadystate == true)
+				distribution = shark_dat->MassBalanceList[i].Get_InletConcentration() / delta_sum;
+			else
+				distribution = shark_dat->MassBalanceList[i].Get_InitialConcentration() / delta_sum;
+		}
 		for (int j=0; j<shark_dat->MasterList.list_size(); j++)
 		{
 			if (shark_dat->MassBalanceList[i].Get_Delta(j) > 0.0 && shark_dat->Conc_new(j,0) == 0.0)
@@ -5886,12 +5894,52 @@ int shark_solver(SHARK_DATA *shark_dat)
 		success = Convert2LogConcentration(shark_dat->Conc_new, shark_dat->X_new);
 		if (success != 0) {mError(simulation_fail); return -1;}
 	}
+	
+	if (shark_dat->steadystate == false && shark_dat->time_old == 0.0)
+	{
+		//Loop through all mass balances and make corrections to those who were initially zero
+		for (int i=0; i<shark_dat->MassBalanceList.size(); i++)
+		{
+			if (shark_dat->MassBalanceList[i].Get_InitialConcentration() <= DBL_MIN && shark_dat->reactor_type != BATCH)
+			{
+				double delta_sum = shark_dat->MassBalanceList[i].Sum_Delta();
+				double distribution;
+				distribution = shark_dat->MassBalanceList[i].Get_InletConcentration() / delta_sum;
+				for (int j=0; j<shark_dat->MasterList.list_size(); j++)
+				{
+					if (shark_dat->MassBalanceList[i].Get_Delta(j) > 0.0)
+						shark_dat->Conc_new.edit(j, 0, distribution);
+				}
+			}
+		}
+		success = Convert2LogConcentration(shark_dat->Conc_new, shark_dat->X_new);
+		if (success != 0) {mError(simulation_fail); return -1;}
+		
+	}
 
 	success = pjfnk(shark_dat->Residual,shark_dat->lin_precon,shark_dat->X_new,&shark_dat->Newton_data,shark_dat->residual_data,shark_dat->precon_data);
 	shark_dat->ionic_strength = calculate_ionic_strength(shark_dat->X_new, shark_dat->MasterList);
 	shark_dat->totalsteps = shark_dat->totalsteps + shark_dat->Newton_data.nl_iter + shark_dat->Newton_data.l_iter;
 	shark_dat->totalcalls = shark_dat->totalcalls + shark_dat->Newton_data.fun_call;
 	if (success != 0) {mError(simulation_fail); return -1;}
+	
+	if (shark_dat->steadystate == true && shark_dat->reactor_type != BATCH)
+	{
+		//Loop through all mass balances and make corrections to those who have zero inlet
+		for (int i=0; i<shark_dat->MassBalanceList.size(); i++)
+		{
+			if (shark_dat->MassBalanceList[i].Get_InletConcentration() <= DBL_MIN)
+			{
+				for (int j=0; j<shark_dat->MasterList.list_size(); j++)
+				{
+					if (shark_dat->MassBalanceList[i].Get_Delta(j) > 0.0)
+						shark_dat->Conc_new.edit(j, 0, 0.0);
+				}
+			}
+		}
+		success = Convert2LogConcentration(shark_dat->Conc_new, shark_dat->X_new);
+		if (success != 0) {mError(simulation_fail); return -1;}
+	}
 
 	shark_dat->Norm = shark_dat->Newton_data.nl_res;
 	if (shark_dat->Norm <= shark_dat->Newton_data.nl_tol_abs || shark_dat->Newton_data.nl_relres <= shark_dat->Newton_data.nl_tol_rel)
