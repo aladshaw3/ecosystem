@@ -829,7 +829,7 @@ double MassBalance::Eval_Residual(const Matrix<double> &x_new, const Matrix<doub
 			res = (res - this->Get_TotalConcentration())/pow(DBL_EPSILON, 2.0);
 		else
 			res = (res / this->Get_TotalConcentration()) - 1.0;
-
+		
 		if (isnan(res) || isinf(res))
 			res = sqrt(DBL_MAX)/this->List->list_size();
 	}
@@ -932,25 +932,45 @@ double MassBalance::Eval_IC_Residual(const Matrix<double> &x)
 {
 	double res = 0.0;
 	
-	//Loop for all species in list
-	for (int i=0; i<this->List->list_size(); i++)
+	if (this->Type == BATCH)
 	{
-		if (this->isZeroInitialSolids() == false)
-			res = res + ( this->Delta[i] * pow(10.0, x(i,0)) );
-		else
+		//Loop for all species in list
+		for (int i=0; i<this->List->list_size(); i++)
 		{
-			if (this->List->get_species(i).MoleculePhaseID() == AQUEOUS || this->List->get_species(i).MoleculePhaseID() == LIQUID)
-				res = res + ( this->Delta[i] * pow(10.0, x(i,0)) );
+			res = res + ( this->Delta[i] * pow(10.0, x(i,0)) );
 		}
+		
+		if (this->Get_TotalConcentration() <= DBL_MIN)
+			res = (res - this->Get_TotalConcentration())/pow(DBL_EPSILON, 2.0);
+		else
+			res = (res / this->Get_TotalConcentration()) - 1.0;
+		
+		if (isnan(res) || isinf(res))
+			res = sqrt(DBL_MAX)/this->List->list_size();
 	}
-	
-	if (this->Get_InitialConcentration() <= DBL_MIN)
-		res = (res - this->Get_InitialConcentration())/pow(DBL_EPSILON, 2.0);
 	else
-		res = (res / this->Get_InitialConcentration()) - 1.0;
+	{
 	
-	if (isnan(res) || isinf(res))
-		res = sqrt(DBL_MAX)/this->List->list_size();
+		//Loop for all species in list
+		for (int i=0; i<this->List->list_size(); i++)
+		{
+			if (this->isZeroInitialSolids() == false)
+				res = res + ( this->Delta[i] * pow(10.0, x(i,0)) );
+			else
+			{
+				if (this->List->get_species(i).MoleculePhaseID() == AQUEOUS || this->List->get_species(i).MoleculePhaseID() == LIQUID)
+					res = res + ( this->Delta[i] * pow(10.0, x(i,0)) );
+			}
+		}
+	
+		if (this->Get_InitialConcentration() <= DBL_MIN)
+			res = (res - this->Get_InitialConcentration())/pow(DBL_EPSILON, 2.0);
+		else
+			res = (res / this->Get_InitialConcentration()) - 1.0;
+	
+		if (isnan(res) || isinf(res))
+			res = sqrt(DBL_MAX)/this->List->list_size();
+	}
 	
 	return res;
 }
