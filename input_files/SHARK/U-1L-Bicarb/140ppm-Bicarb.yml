@@ -322,7 +322,7 @@ UnsteadyRxn:
   unsteady_var: UO2AO2 (aq)
   initial_condition: 0
   logK: -1.35
-  forward: 4.50e+6
+  forward: 4.50e+7
   - stoichiometry:
     "UO2 2+ (aq)": -1
     "A(OH)2 (aq)": -1

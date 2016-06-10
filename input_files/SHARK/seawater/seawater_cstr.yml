@@ -26,7 +26,7 @@ Scenario:
 - run_time:
   steady: false         
   specs_curve: false
-  zero_initial_solids: false
+  zero_initial_solids: true
   pH_step: 0.25  
   dt: 0.1
   sim_time: 1500.0
