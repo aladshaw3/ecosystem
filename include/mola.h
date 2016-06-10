@@ -407,6 +407,10 @@
 #include <ctype.h>
 #include "eel.h"
 
+#ifndef M_PI
+#define M_PI 3.14159
+#endif
+
 #ifndef SphereVolume
 #define SphereVolume(r) ((4.0/3.0)*M_PI*r*r*r)
 #endif

@@ -14,22 +14,22 @@
 //Force Calculations
 double Magnetic_R(const Matrix<double>& dX, const Matrix<double>& dY, int i, double b, double mu_0, double chi_p, double M, double H0, double a)
 {
-	return -((4.0*3.1415*pow(b,3)*mu_0*chi_p*M*H0)/(3.0*a))*((M/(2.0*H0*pow(dY(i-1,0),5.0)))+(cos(2.0*dX(i-1,0))/pow(dY(i-1,0),3.0)));
+	return -((4.0*M_PI*pow(b,3)*mu_0*chi_p*M*H0)/(3.0*a))*((M/(2.0*H0*pow(dY(i-1,0),5.0)))+(cos(2.0*dX(i-1,0))/pow(dY(i-1,0),3.0)));
 }
 
 double Magnetic_T(const Matrix<double>& dX, const Matrix<double>& dY, int i, double b, double mu_0, double chi_p, double M, double H0, double a)
 {
-	return -((4.0*3.1415*pow(b,3.0)*mu_0*chi_p*M*H0)/(3.0*a))*(sin(2.0*dX(i-1,0))/pow(dY(i-1,0),3.0));
+	return -((4.0*M_PI*pow(b,3.0)*mu_0*chi_p*M*H0)/(3.0*a))*(sin(2.0*dX(i-1,0))/pow(dY(i-1,0),3.0));
 }
 
 double Grav_R(const Matrix<double>& dX, int i, double b, double rho_p, double rho_f)
 {
-	return -(4.0*3.1415*pow(b,3.0)/3.0)*(rho_p-rho_f)*9.81*sin(dX(i-1,0));
+	return -(4.0*M_PI*pow(b,3.0)/3.0)*(rho_p-rho_f)*9.81*sin(dX(i-1,0));
 }
 
 double Grav_T(const Matrix<double>& dX, int i, double b, double rho_p, double rho_f)
 {
-	return -(4.0*3.1415*pow(b,3.0)/3.0)*(rho_p-rho_f)*9.81*cos(dX(i-1,0));
+	return -(4.0*M_PI*pow(b,3.0)/3.0)*(rho_p-rho_f)*9.81*cos(dX(i-1,0));
 }
 
 double Van_R(const Matrix<double>& dX, const Matrix<double>& dY, int i, double Hamaker, double b, double a)
@@ -68,28 +68,69 @@ int POLAR(Matrix<double>& POL, const Matrix<double>& dX, const Matrix<double>& d
 
 	POL(5,0) = Magnetic_T(dX, dY, i, dat->b, dat->mu_0, dat->chi_p, dat-> M, dat->H0, dat->a);
 	POL(6,0) = Grav_T(dX, i, dat->b, dat->rho_p, dat->rho_f);
-	POL(7,0) = i;
+	POL(7,0) = 0.0;//i;
 	POL(8,0) = V_THETA(dX, dY, i, dat->V0, dat->rho_f, dat->a, dat->eta);
 	POL(9,0) = Brown_THETA (dat->s_rand, dat->t_rand, dat->sigma_n, dat->sigma_m);
 
 	return 0;
 }
 
-double RADIAL_FORCE (const Matrix<double>& POL, double eta, double b, double mp, double t, double a)
+double In_PVel_Rad (const Matrix<double>& POL)
 {
-	return ((POL(0,0)+POL(1,0)+POL(2,0))*((t/(6.0*3.1415*eta*b))-((1-exp(-6.0*3.1415*eta*b*t/mp))/(pow(6.0*3.1415*eta*b,2.0)/mp)))+(POL(3,0)*t)+POL(4,0))/a;
+	return POL(3,0);
 }
 
-double TANGENTIAL_FORCE (const Matrix<double>& POL, const Matrix<double>& dY, double eta, double b, double mp, double t, double a, int i)
+double In_PVel_Theta (const Matrix<double>& POL)
 {
-	return (POL(5,0)+POL(6,0)*((t/(6.0*3.1415*eta*b))-((1-exp(-6.0*3.1415*eta*b*t/mp))/(pow(6.0*3.1415*eta*b,2.0)/mp)))+POL(8,0)*t+POL(9,0))/(a*dY(i-1,0));
+	return POL(8,0);
 }
 
-int CARTESIAN(const Matrix<double>& POL, Matrix<double>& H, const Matrix<double>& dY, double i, const void *data)
+int In_P_Velocity (const Matrix<double>& POL, Matrix<double>& Vr, Matrix<double>& Vt)
+{
+	Vr(0,0) = In_PVel_Rad(POL);
+	Vt(0,0) = In_PVel_Theta(POL);
+	return 0;
+}
+
+double PVel_Rad (const Matrix<double>& POL, const Matrix<double>& Vr,int i, double mp, double beta, double dt, double sigma_v, double n_rand)
+{
+	return (Vr(i-2,0)*exp(-beta*dt))+(POL(3,0)+(POL(0,0)+POL(1,0)+POL(2,0))/(mp*beta))*(1-exp(-beta*dt))+(sigma_v*n_rand);
+}
+
+double PVel_Theta (const Matrix<double>& POL, const Matrix<double>& Vt,int i, double mp, double beta, double dt, double sigma_v, double s_rand)
+{
+	return (Vt(i-2,0)*exp(-beta*dt))+(POL(8,0)+((POL(5,0)+POL(6,0)))/(mp*beta))*(1-exp(-beta*dt))+(sigma_v*s_rand);
+}
+
+int P_Velocity (const Matrix<double>& POL, Matrix<double>& Vr, Matrix<double>& Vt, int i, const void *data)
 {
 	TRAJECTORY_DATA *dat = (TRAJECTORY_DATA *) data;
-	H(0,0) = RADIAL_FORCE(POL, dat->eta, dat->b, dat->mp, dat->dt, dat-> a);
-	H(1,0) = TANGENTIAL_FORCE(POL, dY, dat->eta, dat->b, dat->mp, dat->dt, dat->a, i);
+	Vr(i-1,0) = PVel_Rad(POL, Vr, i, dat->mp, dat-> beta, dat->dt, dat-> sigma_v, dat-> n_rand);
+	Vt(i-1,0) = PVel_Theta(POL, Vt, i, dat->mp, dat-> beta, dat->dt, dat-> sigma_v, dat-> n_rand);
+	return 0;
+}
+
+double RADIAL_FORCE (const Matrix<double>& POL, const Matrix<double>& Vr, int i, double beta, double mp, double dt, double a)
+{
+	return (((Vr(i-1,0)/beta)*(1-exp(-beta*dt)))+((POL(3,0)+(POL(0,0)+POL(1,0)+POL(2,0))/(mp*beta))*(dt-(1/beta)*(1-exp(-beta*dt))))+POL(4,0))/a;
+}
+
+double TANGENTIAL_FORCE (const Matrix<double>& POL, const Matrix<double>& Vt, const Matrix<double>& dY, int i, double beta, double mp, double dt, double a)
+{
+	return (((Vt(i-1,0)/beta)*(1-exp(-beta*dt)))+((POL(8,0)+(POL(5,0)+POL(6,0))/(mp*beta))*(dt-(1/beta)*(1-exp(-beta*dt))))+POL(9,0))/(a*dY(i-1,0));
+}
+
+double Capture_Force (const Matrix<double>& POL, const Matrix<double>& Vr, int i, double beta, double mp, double dt, double a)
+{
+	return (((Vr(i-1,0)/beta)*(1-exp(-beta*dt)))+((POL(3,0)+(POL(0,0)+POL(1,0)+POL(2,0))/(mp*beta))*(dt-(1/beta)*(1-exp(-beta*dt)))))/a;
+}
+
+int CARTESIAN(const Matrix<double>& POL, const Matrix<double>& Vr, const Matrix<double>& Vt, Matrix<double>& H, const Matrix<double>& dY, int i, const void *data)
+{
+	TRAJECTORY_DATA *dat = (TRAJECTORY_DATA *) data;
+	H(0,0) = RADIAL_FORCE(POL, Vr, i, dat->beta, dat->mp, dat->dt, dat-> a);
+	H(1,0) = TANGENTIAL_FORCE(POL, Vt, dY, i, dat->beta, dat->mp, dat->dt, dat->a);
+	H(2,0) = Capture_Force(POL, Vr, i, dat->beta, dat->mp, dat->dt, dat-> a);
 
 	return 0;
 }
@@ -113,7 +154,7 @@ int LOCATION (const Matrix<double>& dY, const Matrix<double>& dX, Matrix<double>
 double Removal_Efficiency (double Sum_Cap, const void *data)
 {
 	TRAJECTORY_DATA *dat = (TRAJECTORY_DATA *) data;
-	return 1.0-exp((-0.2*(1-dat->porosity)*Sum_Cap*dat->L)/(234520*M_PI*pow(dat->Rs,2.0)));
+	return 1.0-exp((-0.12*(1-dat->porosity)*Sum_Cap*dat->L)/(58630.0*(500.0/500.0)*(41.0/41.0)*M_PI*dat->a));
 }
 
 
@@ -130,14 +171,14 @@ int Trajectory_SetupConstants(TRAJECTORY_DATA *dat)
 	
 	//Separator Parameters
 	
-	dat->Rs = 0.0026925;										//Separator radius, m
-	dat->L = 0.0611;											//Separator length, m
-	dat->porosity = 0.8979;										//Separator porosity
+	dat->Rs = 0.002743;										//Separator radius, m
+	dat->L = 0.0644;											//Separator length, m
+	dat->porosity = 0.943;										//Separator porosity
 	dat->V_separator=M_PI*pow(dat->Rs,2.0)*dat->L;				//Volume of separator, m^3
 	
 	//System Parameters
 	
-	dat->a = 3.3e-5;											//Wire radius,m
+	dat->a = 3.9e-5;											//Wire radius,m
 	dat->V_wire = (1-dat->porosity)*dat->V_separator;			//Total wire volume, m^3
 	dat->L_wire = dat->V_wire/M_PI/pow(dat->a,2.0);				//Total wire length, m
 	dat->A_separator = M_PI*pow(dat->Rs,2.0);
@@ -148,9 +189,9 @@ int Trajectory_SetupConstants(TRAJECTORY_DATA *dat)
 	
 	//Particle parameters
 	
-	dat->b = 0.25e-6;											//Particle radius,m
-	dat->chi_p = 3.87e-6;										//Volume magnetic susceptibility, dimensionless
-	dat->rho_p = 8700.0;										//Particle density, Kg/m3
+	dat->b = 0.225e-6;											//Particle radius,m
+	dat->chi_p = 0.00048;										//Volume magnetic susceptibility, dimensionless
+	dat->rho_p = 5240.0;										//Particle density, Kg/m3
 	
 	//Some more missing info
 	
@@ -198,23 +239,25 @@ int Run_Trajectory()
 	success = Trajectory_SetupConstants(&dat);
 	
 	dat.POL.set_size(10,1);
-	dat.H.set_size(2,1);
-	dat.dX.set_size(300,1);
-	dat.dY.set_size(300,1);
-	dat.X.set_size(300, 1);
-	dat.Y.set_size(300, 1);
+	dat.Vr.set_size(400,1);
+	dat.Vt.set_size(400,1);
+	dat.H.set_size(3,1);
+	dat.dX.set_size(400,1);
+	dat.dY.set_size(400,1);
+	dat.X.set_size(400, 1);
+	dat.Y.set_size(400, 1);
 	dat.Cap.set_size(500,41);
 	
 	bool Hit = false;
 	for (int q = 0; q<41; q++)
 	{
 			dat.Y(0,0) = 20.0;
-			dat.dX(0,0) = (89.9+q*0.005)/180.0*M_PI;				//FIXED negative starting values for x
+			dat.dX(0,0) = (89.94+q*0.003)/180.0*M_PI;				//FIXED negative starting values for x
 			dat.dY(0,0) = dat.Y(0,0)/sin(dat.dX(0,0));
 
 	for (int j = 0; j<500; j++)
 	{
-		for (int i = 1; i<299; i++)
+		for (int i = 1; i<399; i++)
 		{
 			int Random;
 			Random = Number_Generator(&dat);
@@ -222,13 +265,24 @@ int Run_Trajectory()
 			int Force_Polar;
 			Force_Polar = POLAR(dat.POL,dat.dX,dat.dY,(void *)&dat,i);
 
+			if (i == 1)
+			{
+			int Initial_Particle_Velocity;
+			Initial_Particle_Velocity = In_P_Velocity (dat.POL,dat.Vr,dat.Vt);
+			}
+			else
+			{
+			int Particle_Velocity;
+			Particle_Velocity = P_Velocity(dat.POL,dat.Vr,dat.Vt,i,(void *)&dat);
+			}
+
 			int Force_Balance;
-			Force_Balance = CARTESIAN(dat.POL,dat.H,dat.dY,i,(void *)&dat);
+			Force_Balance = CARTESIAN(dat.POL,dat.Vr,dat.Vt,dat.H,dat.dY,i,(void *)&dat);
 
 			int Next;
 			Next = DISPLACEMENT(dat.dX,dat.dY,dat.H,i);
 		
-			if (dat.dY(i,0) <= (1.0+(0.25/33.0)) && dat.H(0,0) < 0.0)
+			if (dat.dY(i,0) <= (1.0+(0.225/39.0)) && dat.H(2,0) < 0.0)
 			{
 				Hit = true;
 				break;
@@ -237,7 +291,7 @@ int Run_Trajectory()
 			{
 				Hit = false;
 			}
-		
+
 		}
 
 		/*for (int i=0; i<300; i++)
@@ -246,7 +300,9 @@ int Run_Trajectory()
 			int Final;
 			Final = LOCATION (dat.dY,dat.dX,dat.X,dat.Y,i);
 		
-		}*/
+		}
+		dat.X.Display("X Profile");
+		dat.Y.Display("Y Profile");*/
 
 		if (Hit == true)
 		{
