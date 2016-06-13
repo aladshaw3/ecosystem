@@ -2197,6 +2197,552 @@ std::string AdsorptionReaction::getAdsorbentName()
  *								End: AdsorptionReaction
  */
 
+/*
+ *								Start: UnsteadyAdsorption
+ *	-------------------------------------------------------------------------------------
+ */
+//Default Constructor
+UnsteadyAdsorption::UnsteadyAdsorption()
+{
+	ads_rxn.resize(0);
+	area_factors.resize(0);
+	volume_factors.resize(0);
+	adsorb_index.resize(0);
+	molar_factor.resize(0);
+	surface_activity = (*ideal_solution);
+	activity_data = nullptr;
+	specific_area = 1.0;
+	specific_molality = 1.0;
+	surface_charge = 0.0;
+	total_mass = 0.0;
+	total_volume = 1.0;
+	charge_density = 0.0;
+	ionic_strength = 0.0;
+	num_rxns = 0;
+	AreaBasis = true;
+	IncludeSurfCharge = true;
+	adsorbent_name = "AX";
+}
+
+//Default Destructor
+UnsteadyAdsorption::~UnsteadyAdsorption()
+{
+	ads_rxn.clear();
+	area_factors.clear();
+	volume_factors.clear();
+	adsorb_index.clear();
+}
+
+//Initialize memory for unsteady adsorption
+void UnsteadyAdsorption::Initialize_Object(MasterSpeciesList &List, int n)
+{
+	this->List = &List;
+	this->num_rxns = n;
+	this->area_factors.resize(this->List->list_size());
+	this->volume_factors.resize(this->List->list_size());
+	this->activities.set_size(this->List->list_size(),1);
+	for (int i=0; i<this->List->list_size(); i++)
+	{
+		this->area_factors[i] = 0.0;
+		this->volume_factors[i] = 0.0;
+		this->activities(i,0) = 1.0;
+	}
+
+	this->ads_rxn.resize(this->num_rxns);
+	this->adsorb_index.resize(this->num_rxns);
+	this->aqueous_index.resize(this->num_rxns);
+	this->molar_factor.resize(this->num_rxns);
+	for (int i=0; i<this->num_rxns; i++)
+	{
+		this->ads_rxn[i].Initialize_Object(List);
+		this->adsorb_index[i] = -1;
+		this->aqueous_index[i] = -1;
+		this->molar_factor[i] = 1.0;
+	}
+}
+
+//Display object information
+void UnsteadyAdsorption::Display_Info()
+{
+	for (int i=0; i<this->ads_rxn.size(); i++)
+		this->ads_rxn[i].Display_Info();
+}
+
+//Modify the deltas in the given mass balance
+void UnsteadyAdsorption::modifyDeltas(MassBalance &mbo)
+{
+	this->AdsorptionReaction::modifyDeltas(mbo);
+}
+
+//Find and set the adsorption indices
+int UnsteadyAdsorption::setAdsorbIndices()
+{
+	int success = 0;
+	for (int i=0; i<this->num_rxns; i++)
+	{
+		for (int n=0; n<this->List->list_size(); n++)
+		{
+			if (this->ads_rxn[i].Get_Stoichiometric(n) != 0.0 && this->List->get_species(n).MoleculePhaseID() == SOLID)
+			{
+				this->adsorb_index[i] = n;
+				break;
+			}
+		}
+		double normal_factor = this->ads_rxn[i].Get_Stoichiometric(this->adsorb_index[i]);
+		for (int n=0; n<this->List->list_size(); n++)
+		{
+			this->ads_rxn[i].Set_Stoichiometric(n, this->ads_rxn[i].Get_Stoichiometric(n)/normal_factor);
+		}
+		if (this->adsorb_index[i] < 0)
+		{
+			mError(invalid_species);
+			return -1;
+		}
+	}
+	return success;
+}
+
+//Function to check for indexing errors in aqueous indices
+int UnsteadyAdsorption::checkAqueousIndices()
+{
+	int success = 0;
+	for (int i=0; i<this->num_rxns; i++)
+	{
+		if (this->aqueous_index[i] >= this->List->list_size() || this->aqueous_index[i] < 0)
+		{
+			mError(indexing_error);
+			return -1;
+		}
+		if (this->getReaction(i).Get_Stoichiometric(this->aqueous_index[i]) > 0.0)
+		{
+			if (this->getReaction(i).Get_Stoichiometric(this->adsorb_index[i]) > 0.0)
+			{
+				mError(indexing_error);
+				return -1;
+			}
+		}
+		if (this->getReaction(i).Get_Stoichiometric(this->aqueous_index[i]) < 0.0)
+		{
+			if (this->getReaction(i).Get_Stoichiometric(this->adsorb_index[i]) < 0.0)
+			{
+				mError(indexing_error);
+				return -1;
+			}
+		}
+	}
+	return success;
+}
+
+//Set the activity function and data structure
+void UnsteadyAdsorption::setActivityModelInfo( int (*act) (const Matrix<double>& logq, Matrix<double> &activity, const void *data),
+											  const void *act_data)
+{
+	this->AdsorptionReaction::setActivityModelInfo(act,act_data);
+}
+
+//Set the aqueous species index
+void UnsteadyAdsorption::setAqueousIndex(int rxn_i, int species_i)
+{
+	this->AdsorptionReaction::setAqueousIndex(rxn_i, species_i);
+}
+
+//Automatically set the aqueous species index
+int UnsteadyAdsorption::setAqueousIndexAuto()
+{
+	int success = 0;
+	for (int i=0; i<this->num_rxns; i++)
+	{
+		if (this->getReaction(i).Get_Stoichiometric(this->getAdsorbIndex(i)) > 0.0)
+		{
+			for (int n=0; n<this->List->list_size(); n++)
+			{
+				if (this->ads_rxn[i].Get_Stoichiometric(n) < 0.0 && this->List->get_species(n).MoleculePhaseID() == AQUEOUS	)
+				{
+					this->setAqueousIndex(i, n);
+					break;
+				}
+			}
+		}
+		else if (this->getReaction(i).Get_Stoichiometric(this->getAdsorbIndex(i)) < 0.0)
+		{
+			for (int n=0; n<this->List->list_size(); n++)
+			{
+				if (this->ads_rxn[i].Get_Stoichiometric(n) > 0.0 && this->List->get_species(n).MoleculePhaseID() == AQUEOUS	)
+				{
+					this->setAqueousIndex(i, n);
+					break;
+				}
+			}
+		}
+		else
+		{
+			mError(invalid_species);
+			return -1;
+		}
+	}
+	return success;
+}
+
+//Set the molar factor for the given reaction
+void UnsteadyAdsorption::setMolarFactor(int rxn_i, double m)
+{
+	this->AdsorptionReaction::setMolarFactor(rxn_i,m);
+}
+
+//Set the ith volume factor for the species
+void UnsteadyAdsorption::setVolumeFactor(int i, double v)
+{
+	this->AdsorptionReaction::setVolumeFactor(i,v);
+}
+
+//Set the ith area factor for the species
+void UnsteadyAdsorption::setAreaFactor(int i, double a)
+{
+	this->AdsorptionReaction::setAreaFactor(i,a);
+}
+
+//Set the specific area for the adsorbent
+void UnsteadyAdsorption::setSpecificArea(double a)
+{
+	this->AdsorptionReaction::setSpecificArea(a);
+}
+
+//Set the specific molality for the adsorbent
+void UnsteadyAdsorption::setSpecificMolality(double a)
+{
+	this->AdsorptionReaction::setSpecificMolality(a);
+}
+
+//Set the surface charge
+void UnsteadyAdsorption::setSurfaceCharge(double c)
+{
+	this->AdsorptionReaction::setSurfaceCharge(c);
+}
+
+//Set the total mass of adsorbent in system
+void UnsteadyAdsorption::setTotalMass(double m)
+{
+	this->AdsorptionReaction::setTotalMass(m);
+}
+
+//Set the total volume of the system
+void UnsteadyAdsorption::setTotalVolume(double v)
+{
+	this->AdsorptionReaction::setTotalVolume(v);
+}
+
+//Directly set the area basis boolean
+void UnsteadyAdsorption::setAreaBasisBool(bool opt)
+{
+	this->AdsorptionReaction::setAreaBasisBool(opt);
+}
+
+//Directly set the surface charging boolean
+void UnsteadyAdsorption::setSurfaceChargeBool(bool opt)
+{
+	this->AdsorptionReaction::setSurfaceChargeBool(opt);
+}
+
+//Set the area basis from the string argument
+void UnsteadyAdsorption::setBasis(std::string option)
+{
+	this->AdsorptionReaction::setBasis(option);
+}
+
+//Set the name of the adsorbent
+void UnsteadyAdsorption::setAdsorbentName(std::string name)
+{
+	this->AdsorptionReaction::setAdsorbentName(name);
+}
+
+UnsteadyReaction& UnsteadyAdsorption::getReaction(int i)
+{
+	if (i >= this->num_rxns || i < 0)
+	{
+		mError(out_of_bounds);
+		i = 0;
+	}
+	return this->ads_rxn[i];
+}
+//Return the ith molar factor
+double UnsteadyAdsorption::getMolarFactor(int i)
+{
+	if (i >= this->num_rxns || i < 0)
+	{
+		mError(out_of_bounds);
+		i = 0;
+	}
+	return this->molar_factor[i];
+}
+
+//Return the ith volume factor
+double UnsteadyAdsorption::getVolumeFactor(int i)
+{
+	if (i >= this->List->list_size() || i < 0)
+	{
+		mError(out_of_bounds);
+		i = 0;
+	}
+	return this->volume_factors[i];
+}
+
+//Calculation and initialization of the area factors
+void UnsteadyAdsorption::calculateAreaFactors()
+{
+	this->AdsorptionReaction::calculateAreaFactors();
+}
+
+
+//Set the charge density
+void UnsteadyAdsorption::setChargeDensity(const Matrix<double> &x)
+{
+	this->AdsorptionReaction::setChargeDensity(x);
+}
+
+//Set the Ionic strength of the solution
+void UnsteadyAdsorption::setIonicStrength(const Matrix<double> &x)
+{
+	this->AdsorptionReaction::setIonicStrength(x);
+}
+
+//Call the activity model passing the logx concentrations of species
+int UnsteadyAdsorption::callSurfaceActivity(const Matrix<double> &x)
+{
+	this->AdsorptionReaction::callSurfaceActivity(x);
+}
+
+//Calculation of the active fraction of the surface area
+double UnsteadyAdsorption::calculateActiveFraction(const Matrix<double> &x)
+{
+	double phi = 0.0, sum = 0.0;
+
+	if (this->isAreaBasis() == true)
+	{
+		for (int i=0; i<this->List->list_size(); i++)
+		{
+			sum = sum + (this->getAreaFactor(i) * pow(10.0, x(i,0)));
+		}
+		if (sum > this->specific_area)
+			sum = this->specific_area;
+		phi = 1.0 - (sum / this->specific_area);
+		if (phi < DBL_MIN)
+			phi = DBL_MIN;
+	}
+	else
+	{
+		for (int i=0; i<this->num_rxns; i++)
+		{
+			sum = sum + (this->getMolarFactor(i) * pow(10.0, x(this->getAdsorbIndex(i),0)));
+		}
+		if (sum > this->specific_molality)
+			sum = this->specific_molality;
+		phi = 1.0 - (sum / this->specific_molality);
+		if (phi < DBL_MIN)
+			phi = DBL_MIN;
+	}
+
+	return phi;
+}
+
+//Calculation of the surface charge density
+double UnsteadyAdsorption::calculateSurfaceChargeDensity( const Matrix<double> &x)
+{
+	double sigma = 0.0;
+	double sum = 0.0;
+	for (int i=0; i<this->getNumberRxns(); i++)
+	{
+		sum = sum + (this->List->charge(this->getAdsorbIndex(i)) * pow(10.0, x(this->getAdsorbIndex(i),0))) - (this->getSurfaceCharge() * this->getAreaFactor(this->getAdsorbIndex(i)) * pow(10.0, x(this->getAdsorbIndex(i),0)));
+	}
+	sum = sum + (this->getSurfaceCharge() * this->getSpecificMolality());
+	sigma = sum * (Faraday/this->getSpecificArea());
+
+	return sigma;
+}
+
+//Approximation of the electric potential of the surface
+double UnsteadyAdsorption::calculateCubicPsiApprox(double sigma, double T, double I, double rel_epsilon)
+{
+	this->AdsorptionReaction::calculateCubicPsiApprox(sigma,T,I,rel_epsilon);
+}
+
+//Calculation of charge exchange in given reaction
+double UnsteadyAdsorption::calculateAqueousChargeExchange(int i)
+{
+	this->AdsorptionReaction::calculateAqueousChargeExchange(i);
+}
+
+//Calculation of equilibrium correct term
+double UnsteadyAdsorption::calculateEquilibriumCorrection(double sigma, double T, double I, double rel_epsilon, int i)
+{
+	if (this->includeSurfaceCharge() == true)
+		return -(this->calculateAqueousChargeExchange(i)*e*calculateCubicPsiApprox(sigma, T, I, rel_epsilon))/(kB*T);
+	else
+		return 0.0;
+}
+
+//Calculation of residual of ith reaction for the solver to work on
+double UnsteadyAdsorption::Eval_Residual(const Matrix<double> &x, const Matrix<double> &gama, double T, double rel_perm, int i)
+{
+	double res = this->getReaction(i).Get_Stoichiometric(this->getAdsorbIndex(i)) * ( log10(this->getActivity(this->getAdsorbIndex(i))) + x(this->getAdsorbIndex(i),0) );
+
+	if (this->getReaction(i).Get_Stoichiometric(this->getAdsorbIndex(i)) > 0.0)
+	{
+		if (this->isAreaBasis() == true)
+			res = res - log10(this->getSpecificArea()*this->calculateActiveFraction(x));
+		else
+			res = res - (this->getMolarFactor(i) * log10(this->getSpecificMolality()*this->calculateActiveFraction(x)));
+	}
+	else
+	{
+		if (this->isAreaBasis() == true)
+			res = res + log10(this->getSpecificArea()*this->calculateActiveFraction(x));
+		else
+			res = res + (this->getMolarFactor(i) * log10(this->getSpecificMolality()*this->calculateActiveFraction(x)));
+	}
+
+	for (int n=0; n<this->List->list_size(); n++)
+	{
+		if (this->List->get_species(n).MoleculePhaseID() == AQUEOUS || this->List->get_species(n).MoleculePhaseID() == LIQUID)
+			res = res + ( this->getReaction(i).Get_Stoichiometric(n)*( log10(gama(n,0))+x(n,0) ) );
+	}
+
+	double logK = this->getReaction(i).Get_Equilibrium();
+	logK = logK + (this->calculateEquilibriumCorrection(this->getChargeDensity(), T, this->getIonicStrength(), rel_perm, i)/log(10.0));
+	res = res - logK;
+
+	return res;
+}
+//Return the ith area factor
+double UnsteadyAdsorption::getAreaFactor(int i)
+{
+	if (i >= this->List->list_size() || i < 0)
+	{
+		mError(out_of_bounds);
+		i = 0;
+	}
+	return this->area_factors[i];
+}
+
+//Return the ith activity coefficient
+double UnsteadyAdsorption::getActivity(int i)
+{
+	if (i >= this->List->list_size() || i < 0)
+	{
+		mError(out_of_bounds);
+		i = 0;
+	}
+	return this->activities(i,0);
+}
+
+//Return the specific molality
+double UnsteadyAdsorption::getSpecificMolality()
+{
+	return this->specific_molality;
+}
+
+//Return the specific area
+double UnsteadyAdsorption::getSpecificArea()
+{
+	return this->specific_area;
+}
+
+//Return the surface charge
+double UnsteadyAdsorption::getSurfaceCharge()
+{
+	return this->surface_charge;
+}
+
+//Calculate and return the bulk density of the adsorbent in the system
+double UnsteadyAdsorption::getBulkDensity()
+{
+	return this->total_mass / this->total_volume;
+}
+
+//Return the total mass
+double UnsteadyAdsorption::getTotalMass()
+{
+	return this->total_mass;
+}
+
+//Return the total system volume
+double UnsteadyAdsorption::getTotalVolume()
+{
+	return this->total_volume;
+}
+
+//Return charge density
+double UnsteadyAdsorption::getChargeDensity()
+{
+	return this->charge_density;
+}
+
+//Return the ionic strength
+double UnsteadyAdsorption::getIonicStrength()
+{
+	return this->ionic_strength;
+}
+
+//Return the number of reactions
+int UnsteadyAdsorption::getNumberRxns()
+{
+	return this->num_rxns;
+}
+
+//Return index of the adsorbed species
+int UnsteadyAdsorption::getAdsorbIndex(int i)
+{
+	if (i >= this->num_rxns || i < 0)
+	{
+		mError(out_of_bounds);
+		return 0;
+	}
+	if (this->adsorb_index[i] >= this->List->list_size() || this->adsorb_index[i] < 0)
+	{
+		mError(out_of_bounds);
+		return 0;
+	}
+	return this->adsorb_index[i];
+}
+
+//Return the index of the primary aqueous species
+int UnsteadyAdsorption::getAqueousIndex(int i)
+{
+	if (i >= this->num_rxns || i < 0)
+	{
+		mError(out_of_bounds);
+		return 0;
+	}
+	if (this->aqueous_index[i] >= this->List->list_size() || this->aqueous_index[i] < 0)
+	{
+		mError(out_of_bounds);
+		return 0;
+	}
+	return this->aqueous_index[i];
+}
+
+//Return true is in Area basis
+bool UnsteadyAdsorption::isAreaBasis()
+{
+	return this->AreaBasis;
+}
+
+//Return state of surface charge inclusion
+bool UnsteadyAdsorption::includeSurfaceCharge()
+{
+	return this->IncludeSurfCharge;
+}
+
+//Return the name of the adsorbent
+std::string UnsteadyAdsorption::getAdsorbentName()
+{
+	return this->adsorbent_name;
+}
+
+/*
+ *	-------------------------------------------------------------------------------------
+ *								End: UnsteadyAdsorption
+ */
+
 //Print SHARK info to output file
 void print2file_shark_info(SHARK_DATA *shark_dat)
 {
