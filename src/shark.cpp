@@ -2496,7 +2496,7 @@ void UnsteadyAdsorption::calculateAreaFactors()
 //Set the charge density
 void UnsteadyAdsorption::setChargeDensity(const Matrix<double> &x)
 {
-	this->AdsorptionReaction::setChargeDensity(x);
+	this->charge_density = this->calculateSurfaceChargeDensity(x);
 }
 
 //Set the Ionic strength of the solution
@@ -2508,7 +2508,7 @@ void UnsteadyAdsorption::setIonicStrength(const Matrix<double> &x)
 //Call the activity model passing the logx concentrations of species
 int UnsteadyAdsorption::callSurfaceActivity(const Matrix<double> &x)
 {
-	this->AdsorptionReaction::callSurfaceActivity(x);
+	return this->AdsorptionReaction::callSurfaceActivity(x);
 }
 
 //Calculation of the active fraction of the surface area
@@ -2562,13 +2562,23 @@ double UnsteadyAdsorption::calculateSurfaceChargeDensity( const Matrix<double> &
 //Approximation of the electric potential of the surface
 double UnsteadyAdsorption::calculateCubicPsiApprox(double sigma, double T, double I, double rel_epsilon)
 {
-	this->AdsorptionReaction::calculateCubicPsiApprox(sigma,T,I,rel_epsilon);
+	return this->AdsorptionReaction::calculateCubicPsiApprox(sigma,T,I,rel_epsilon);
 }
 
 //Calculation of charge exchange in given reaction
 double UnsteadyAdsorption::calculateAqueousChargeExchange(int i)
 {
-	this->AdsorptionReaction::calculateAqueousChargeExchange(i);
+	double n = 0.0;
+	
+	for (int j = 0; j<this->List->list_size(); j++)
+	{
+		if (this->List->get_species(j).MoleculePhaseID() == AQUEOUS || this->List->get_species(j).MoleculePhaseID() == LIQUID)
+		{
+			n = n + (this->getReaction(i).Get_Stoichiometric(j)*this->List->charge(j));
+		}
+	}
+	
+	return n;
 }
 
 //Calculation of equilibrium correct term
