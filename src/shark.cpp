@@ -2285,6 +2285,7 @@ int UnsteadyAdsorption::setAdsorbIndices()
 			if (this->ads_rxn[i].Get_Stoichiometric(n) != 0.0 && this->List->get_species(n).MoleculePhaseID() == SOLID)
 			{
 				this->adsorb_index[i] = n;
+				this->ads_rxn[i].Set_Species_Index(n);
 				break;
 			}
 		}
@@ -2622,6 +2623,93 @@ double UnsteadyAdsorption::Eval_Residual(const Matrix<double> &x, const Matrix<d
 
 	return res;
 }
+
+//Unsteady Adsorption residual
+double UnsteadyAdsorption::Eval_Residual(const Matrix<double> &x_new, const Matrix<double> &x_old, const Matrix<double> &gama_new, const Matrix<double> &gama_old, double T, double rel_perm, int i)
+{
+	double res = 0.0, rate;
+		double step, log_step;
+
+		//Take full implicit time step
+		rate = this->Eval_ReactionRate(x_new, gama_new, T, rel_perm, i);
+		step = ( (gama_old(this->getReaction(i).Get_Species_Index(),0) * pow(10.0, x_old(this->getReaction(i).Get_Species_Index(),0))) + (this->getReaction(i).Get_TimeStep() * rate) );
+
+		if (step <= 0.0)
+			step = DBL_MIN;
+		log_step = log10(step);
+		if (log_step >= log10(this->getReaction(i).Get_MaximumValue()))
+			res = this->UnsteadyAdsorption::Eval_Residual(x_new, gama_new, T, rel_perm, i);
+		else
+			res = log10(gama_new(this->getReaction(i).Get_Species_Index(),0)) + x_new(this->getReaction(i).Get_Species_Index(),0) - log_step;
+
+		if (isnan(res) || isinf(res))
+			res = sqrt(DBL_MAX)/this->List->list_size();
+
+		return res;
+}
+
+//Evaluation of the reaction rate
+double UnsteadyAdsorption::Eval_ReactionRate(const Matrix<double> &x, const Matrix<double> &gama, double T, double rel_perm, int n)
+{
+	double R = 0.0;
+
+	//Loop over all species in list
+	double reactants = 0.0, products = 0.0;
+	bool first_prod = true, first_reac = true;
+	for (int i=0; i<this->List->list_size(); i++)
+	{
+		if (this->getReaction(n).Get_Stoichiometric(i) > 0.0)
+		{
+			if (first_prod == true)
+			{
+				if (this->List->get_species(i).MoleculePhaseID() == SOLID)
+					products = ( pow(this->getActivity(i),fabs(this->getReaction(n).Get_Stoichiometric(i))) * pow(10.0,(fabs(this->getReaction(n).Get_Stoichiometric(i))*x(i,0)) ) );
+				else
+					products = ( pow(gama(i,0),fabs(this->getReaction(n).Get_Stoichiometric(i))) * pow(10.0,(fabs(this->getReaction(n).Get_Stoichiometric(i))*x(i,0)) ) );
+				first_prod = false;
+			}
+			else
+			{
+				if (this->List->get_species(i).MoleculePhaseID() == SOLID)
+					products = products * ( pow(this->getActivity(i),fabs(this->getReaction(n).Get_Stoichiometric(i))) * pow(10.0,(fabs(this->getReaction(n).Get_Stoichiometric(i))*x(i,0)) ) );
+				else
+					products = products * ( pow(gama(i,0),fabs(this->getReaction(n).Get_Stoichiometric(i))) * pow(10.0,(fabs(this->getReaction(n).Get_Stoichiometric(i))*x(i,0)) ) );
+			}
+		}
+		else if (this->getReaction(n).Get_Stoichiometric(i) < 0.0)
+		{
+			if (first_reac == true)
+			{
+				if (this->List->get_species(i).MoleculePhaseID() == SOLID)
+					reactants = ( pow(this->getActivity(i),fabs(this->getReaction(n).Get_Stoichiometric(i))) * pow(10.0,(fabs(this->getReaction(n).Get_Stoichiometric(i))*x(i,0)) ) );
+				else
+					reactants = ( pow(gama(i,0),fabs(this->getReaction(n).Get_Stoichiometric(i))) * pow(10.0,(fabs(this->getReaction(n).Get_Stoichiometric(i))*x(i,0)) ) );
+				first_reac = false;
+			}
+			else
+			{
+				if (this->List->get_species(i).MoleculePhaseID() == SOLID)
+					reactants = reactants * ( pow(this->getActivity(i),fabs(this->getReaction(n).Get_Stoichiometric(i))) * pow(10.0,(fabs(this->getReaction(n).Get_Stoichiometric(i))*x(i,0)) ) );
+				else
+					reactants = reactants * ( pow(gama(i,0),fabs(this->getReaction(n).Get_Stoichiometric(i))) * pow(10.0,(fabs(this->getReaction(n).Get_Stoichiometric(i))*x(i,0)) ) );
+			}
+		}
+		else
+		{
+			//No action
+		}
+	}
+
+	if (this->isAreaBasis() == true)
+		reactants = reactants * this->getSpecificArea()*this->calculateActiveFraction(x);
+	else
+		reactants = reactants * pow(this->getSpecificMolality()*this->calculateActiveFraction(x),this->getMolarFactor(n));
+
+	R = fabs(this->getReaction(n).Get_Stoichiometric(this->getReaction(n).Get_Species_Index())) * (this->getReaction(n).Get_Forward() * reactants) - (this->getReaction(n).Get_Reverse() * products);
+
+	return R;
+}
+
 //Return the ith area factor
 double UnsteadyAdsorption::getAreaFactor(int i)
 {

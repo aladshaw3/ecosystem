@@ -881,6 +881,34 @@ public:
 		\param i index of the reaction of interest for the adsorption object*/
 	double Eval_Residual(const Matrix<double> &x, const Matrix<double> &gama, double T, double rel_perm, int i);
 
+	/// Calculates the unsteady residual for the ith reaction in the system
+	/** This function will provide a system residual for the ith reaction object involved in the Unsteady Adsorption
+		Reaction. The residual is fed into the SHARK solver to find the solution to solid and aqueous phase
+		concentrations simultaneously. This function will also adjust the equilibrium parameter for the reaction
+
+
+		\param x_new matrix of the current log(C) concentration values at the current non-linear step
+		\param gama_new matrix of current activity coefficients for each species at the current non-linear step
+		\param x_old matrix of the old log(C) concentration values at the current non-linear step
+		\param gama_old matrix of old activity coefficients for each species at the current non-linear step
+		\param T temperature of the system in question (K)
+		\param rel_perm relative permittivity of the media (unitless)
+		\param i index of the reaction of interest for the adsorption object*/
+	double Eval_Residual(const Matrix<double> &x_new, const Matrix<double> &x_old, const Matrix<double> &gama_new, const Matrix<double> &gama_old, double T, double rel_perm, int i);
+
+	/// Function to calculate the explicit or implicit rate of reaction
+	/** This function will calculate the rate/extent of the unsteady adsorption reaction given the log(C) concentrations
+	 * and aqueous activities, as well as temperature and permittivity. The temperature and permittivity are used to make
+	 * surface charge corrections to the equilibria and rate constants.
+	 *
+	 	\param x matrix of the log(C) concentration values at the current non-linear step
+		\param gama matrix of activity coefficients for each species at the current non-linear step
+		\param T temperature of the system in question (K)
+		\param rel_perm relative permittivity of the media (unitless)
+		\param i index of the reaction of interest for the adsorption object
+	 */
+	double Eval_ReactionRate(const Matrix<double> &x, const Matrix<double> &gama, double T, double rel_perm, int i);
+
 	UnsteadyReaction& getReaction(int i);				///< Return reference to the ith reaction object in the adsorption object
 	double getMolarFactor(int i);				///< Get the ith reaction's molar factor for adsorption (mol/mol)
 	double getVolumeFactor(int i);				///< Get the ith volume factor (species not involved return zeros) (cm^3/mol)
