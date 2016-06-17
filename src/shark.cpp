@@ -6626,7 +6626,13 @@ int shark_timestep_const(SHARK_DATA *shark_dat)
 	{
 		shark_dat->MassBalanceList[i].Set_TimeStep(shark_dat->dt);
 	}
-
+	for (int i=0; i<shark_dat->UnsteadyAdsList.size(); i++)
+	{
+		for (int n=0; n<shark_dat->UnsteadyAdsList[i].getNumberRxns(); n++)
+		{
+			shark_dat->UnsteadyAdsList[i].getReaction(n).Set_TimeStep(shark_dat->dt);
+		}
+	}
 	return success;
 }
 
@@ -6661,6 +6667,13 @@ int shark_timestep_adapt(SHARK_DATA *shark_dat)
 	for (int i=0; i<shark_dat->MassBalanceList.size(); i++)
 	{
 		shark_dat->MassBalanceList[i].Set_TimeStep(shark_dat->dt);
+	}
+	for (int i=0; i<shark_dat->UnsteadyAdsList.size(); i++)
+	{
+		for (int n=0; n<shark_dat->UnsteadyAdsList[i].getNumberRxns(); n++)
+		{
+			shark_dat->UnsteadyAdsList[i].getReaction(n).Set_TimeStep(shark_dat->dt);
+		}
 	}
 
 	return success;
@@ -6943,6 +6956,30 @@ int shark_residual(const Matrix<double> &x, Matrix<double> &F, const void *data)
 		{
 			F(index,0) = dat->AdsorptionList[i].Eval_Residual(x, dat->activity_new, dat->temperature, dat->relative_permittivity, n);
 			index++;
+		}
+	}
+	for (int i=0; i<dat->UnsteadyAdsList.size(); i++)
+	{
+		success = dat->UnsteadyAdsList[i].callSurfaceActivity(x);
+		if (success != 0) {mError(simulation_fail); return -1;}
+
+		dat->UnsteadyAdsList[i].setIonicStrength(x);
+		dat->UnsteadyAdsList[i].setChargeDensity(x);
+
+		for (int n=0; n<dat->UnsteadyAdsList[i].getNumberRxns(); n++)
+		{
+			if (dat->steadystate == false)
+			{
+				if (dat->time == 0.0)
+					F(index,0) = dat->UnsteadyAdsList[i].Eval_IC_Residual(x, n);
+				else
+					F(index,0) = dat->UnsteadyAdsList[i].Eval_Residual(x, dat->X_old, dat->activity_new, dat->activity_old, dat->temperature, dat->relative_permittivity, n);
+			}
+			else
+			{
+				F(index,0) = dat->UnsteadyAdsList[i].Eval_Residual(x, dat->activity_new, dat->temperature, dat->relative_permittivity, n);
+			}
+		index++;
 		}
 	}
 	for (int i=0; i<dat->MassBalanceList.size(); i++)

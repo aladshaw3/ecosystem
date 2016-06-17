@@ -936,7 +936,7 @@ public:
 		\param i index of the reaction of interest for the adsorption object*/
 	double Explicit_Eval(const Matrix<double> &x, const Matrix<double> &gama, double T, double rel_perm, int i);
 
-	UnsteadyReaction& getReaction(int i);				///< Return reference to the ith reaction object in the adsorption object
+	UnsteadyReaction& getReaction(int i);		///< Return reference to the ith reaction object in the adsorption object
 	double getMolarFactor(int i);				///< Get the ith reaction's molar factor for adsorption (mol/mol)
 	double getVolumeFactor(int i);				///< Get the ith volume factor (species not involved return zeros) (cm^3/mol)
 	double getAreaFactor(int i);				///< Get the ith area factor (species not involved return zeros) (m^2/mol)
