@@ -819,7 +819,10 @@ public:
 	void setBasis(std::string option);					///< Set the basis of the adsorption problem from the given string arg
 	void setAdsorbentName(std::string name);			///< Set the name of the adsorbent to the given string
 
+	void updateActivities();							///< Set the old activities as the new activities before doing next time step
 	void calculateAreaFactors();						///< Calculates the area factors used from the van der Waals volumes
+	void calculateEquilibria(double T);					///< Calculates all equilibrium parameters as a function of temperature
+	void calculateRates(double T);						///< Calculates all reaction rate parameters as a function of temperature
 	void setChargeDensity(const Matrix<double> &x);		///< Calculates and sets the current value of charge density
 	void setIonicStrength(const Matrix<double> &x);		///< Calculates and sets the current value of ionic strength
 	int callSurfaceActivity(const Matrix<double> &x);	///< Calls the activity model and returns an int flag for success or failure
@@ -909,11 +912,36 @@ public:
 	 */
 	double Eval_ReactionRate(const Matrix<double> &x, const Matrix<double> &gama, double T, double rel_perm, int i);
 
+	/// Calculate the unsteady residual for initial conditions
+	/** Setting the intial conditions for all variables in the system requires a speciation calculation.
+		However, we want the unsteady variables to be set to their respective initial conditions. Using this
+		residual function imposes an equality constraint on those non-linear, unsteady variables allowing the
+		rest of the speciation problem to be solved via PJFNK iterations.
+
+		\param x matrix of the log(C) concentration values at the current non-linear step
+		\param i index of the reaction of interest for the adsorption object*/
+	double Eval_IC_Residual(const Matrix<double> &x, int i);
+
+	/// Return an approximate explicit solution to our unsteady adsorption variable (mol/kg)
+	/** This function will approximate the concentration of the unsteady variables based on an explicit time
+		discretization. The purpose of this function is to try to provide the PJFNK method with a good initial
+		guess for the values of the non-linear, unsteady variables. If we do not provide a good initial guess
+		to these variables, then the PJFNK method may not converge to the correct solution, because the unsteady
+		problem is the most difficult to solve.
+
+		\param x matrix of the log(C) concentration values at the current non-linear step
+		\param gama matrix of activity coefficients for each species at the current non-linear step
+		\param T temperature of the system in question (K)
+		\param rel_perm relative permittivity of the media (unitless)
+		\param i index of the reaction of interest for the adsorption object*/
+	double Explicit_Eval(const Matrix<double> &x, const Matrix<double> &gama, double T, double rel_perm, int i);
+
 	UnsteadyReaction& getReaction(int i);				///< Return reference to the ith reaction object in the adsorption object
 	double getMolarFactor(int i);				///< Get the ith reaction's molar factor for adsorption (mol/mol)
 	double getVolumeFactor(int i);				///< Get the ith volume factor (species not involved return zeros) (cm^3/mol)
 	double getAreaFactor(int i);				///< Get the ith area factor (species not involved return zeros) (m^2/mol)
 	double getActivity(int i);					///< Get the ith activity factor for the surface species
+	double getOldActivity(int i);				///< Get the ith old activity factor for the surface species
 	double getSpecificArea();					///< Get the specific area of the adsorbent (m^2/kg) or (mol/kg)
 	double getSpecificMolality();				///< Get the specific molality of the adsorbent (mol/kg)
 	double getSurfaceCharge();					///< Get the surface charge of the adsorbent
@@ -930,6 +958,7 @@ public:
 	std::string getAdsorbentName();				///< Returns the name of the adsorbent as a string
 
 protected:
+	Matrix<double> activities_old;				///< List of the old activities calculated by the activity model
 
 private:
 	std::vector<UnsteadyReaction> ads_rxn;				///< List of reactions involved with adsorption
@@ -1005,6 +1034,7 @@ typedef struct SHARK_DATA
 	std::vector<MassBalance> MassBalanceList;		///< Mass balance objects
 	std::vector<UnsteadyReaction> UnsteadyList;		///< Unsteady Reaction objects
 	std::vector<AdsorptionReaction> AdsorptionList;	///< Equilibrium Adsorption Reaction Objects
+	std::vector<UnsteadyAdsorption> UnsteadyAdsList;///< Unsteady Adsorption Reaction Objects
 
 	/// Array of Other Residual functions to be defined by user
 	/** This list of function pointers can be declared and set up by the user in order to add to or change
@@ -1025,8 +1055,11 @@ typedef struct SHARK_DATA
 	int num_mbe;									///< Number of mass balance equations
 	int num_usr = 0;								///< Number of unsteady-state reactions
 	int num_ssao = 0;								///< Number of steady-state adsorption objects
+	int num_usao = 0;								///< Number of unsteady adsorption objects
 	std::vector<int> num_ssar;						///< List of the numbers of reactions in each adsorption object
-	std::vector<std::string> ads_names;				///< List of the adsorbent object names
+	std::vector<int> num_usar;						///< List of the numbers of reactions in each unsteady adsorption object
+	std::vector<std::string> ss_ads_names;			///< List of the steady-state adsorbent object names
+	std::vector<std::string> us_ads_names;			///< List of the unsteady adsorption object names
 	int num_other = 0;								///< Number of other functions to be used (default is always 0)
 	int act_fun = IDEAL;							///< Flag denoting the activity function to use (default is IDEAL)
 	int reactor_type = BATCH;						///< Flag denoting the type of reactor considered for the system (default is BATCH)

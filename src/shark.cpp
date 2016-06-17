@@ -2241,6 +2241,7 @@ void UnsteadyAdsorption::Initialize_Object(MasterSpeciesList &List, int n)
 	this->area_factors.resize(this->List->list_size());
 	this->volume_factors.resize(this->List->list_size());
 	this->activities.set_size(this->List->list_size(),1);
+	this->activities_old.set_size(this->List->list_size(),1);
 	for (int i=0; i<this->List->list_size(); i++)
 	{
 		this->area_factors[i] = 0.0;
@@ -2456,6 +2457,12 @@ void UnsteadyAdsorption::setAdsorbentName(std::string name)
 	this->AdsorptionReaction::setAdsorbentName(name);
 }
 
+//Update activities for next time step
+void UnsteadyAdsorption::updateActivities()
+{
+	this->activities_old = this->activities;
+}
+
 UnsteadyReaction& UnsteadyAdsorption::getReaction(int i)
 {
 	if (i >= this->num_rxns || i < 0)
@@ -2493,6 +2500,19 @@ void UnsteadyAdsorption::calculateAreaFactors()
 	this->AdsorptionReaction::calculateAreaFactors();
 }
 
+//Calculate equilibria parameters in each reaction
+void UnsteadyAdsorption::calculateEquilibria(double T)
+{
+	for (int i=0; i<this->num_rxns; i++)
+		this->getReaction(i).calculateEquilibrium(T);
+}
+
+//Calculate reaction rate parameters in each reaction
+void UnsteadyAdsorption::calculateRates(double T)
+{
+	for (int i=0; i<this->num_rxns; i++)
+		this->getReaction(i).calculateRate(T);
+}
 
 //Set the charge density
 void UnsteadyAdsorption::setChargeDensity(const Matrix<double> &x)
@@ -2628,24 +2648,24 @@ double UnsteadyAdsorption::Eval_Residual(const Matrix<double> &x, const Matrix<d
 double UnsteadyAdsorption::Eval_Residual(const Matrix<double> &x_new, const Matrix<double> &x_old, const Matrix<double> &gama_new, const Matrix<double> &gama_old, double T, double rel_perm, int i)
 {
 	double res = 0.0, rate;
-		double step, log_step;
+	double step, log_step;
 
-		//Take full implicit time step
-		rate = this->Eval_ReactionRate(x_new, gama_new, T, rel_perm, i);
-		step = ( (gama_old(this->getReaction(i).Get_Species_Index(),0) * pow(10.0, x_old(this->getReaction(i).Get_Species_Index(),0))) + (this->getReaction(i).Get_TimeStep() * rate) );
+	//Take full implicit time step
+	rate = this->Eval_ReactionRate(x_new, gama_new, T, rel_perm, i);
+	step = ( (this->getOldActivity(this->getReaction(i).Get_Species_Index()) * pow(10.0, x_old(this->getReaction(i).Get_Species_Index(),0))) + (this->getReaction(i).Get_TimeStep() * rate) );
 
-		if (step <= 0.0)
-			step = DBL_MIN;
-		log_step = log10(step);
-		if (log_step >= log10(this->getReaction(i).Get_MaximumValue()))
-			res = this->UnsteadyAdsorption::Eval_Residual(x_new, gama_new, T, rel_perm, i);
-		else
-			res = log10(gama_new(this->getReaction(i).Get_Species_Index(),0)) + x_new(this->getReaction(i).Get_Species_Index(),0) - log_step;
+	if (step <= 0.0)
+		step = DBL_MIN;
+	log_step = log10(step);
+	if (log_step >= log10(this->getReaction(i).Get_MaximumValue()))
+		res = this->UnsteadyAdsorption::Eval_Residual(x_new, gama_new, T, rel_perm, i);
+	else
+		res = log10(this->getActivity(this->getReaction(i).Get_Species_Index())) + x_new(this->getReaction(i).Get_Species_Index(),0) - log_step;
 
-		if (isnan(res) || isinf(res))
-			res = sqrt(DBL_MAX)/this->List->list_size();
+	if (isnan(res) || isinf(res))
+		res = sqrt(DBL_MAX)/this->List->list_size();
 
-		return res;
+	return res;
 }
 
 //Evaluation of the reaction rate
@@ -2710,6 +2730,29 @@ double UnsteadyAdsorption::Eval_ReactionRate(const Matrix<double> &x, const Matr
 	return R;
 }
 
+//Calculate the residual for the initial condtions
+double UnsteadyAdsorption::Eval_IC_Residual(const Matrix<double> &x, int i)
+{
+	double ic = 0.0;
+	if (this->getReaction(i).Get_InitialValue() <= 0.0)
+		ic = -DBL_MAX;
+	else
+		ic = log10(this->getReaction(i).Get_InitialValue());
+
+	return x(this->getReaction(i).Get_Species_Index(),0) - ic;
+}
+
+//Function to estimate the new concentration by an explicit step
+double UnsteadyAdsorption::Explicit_Eval(const Matrix<double> &x, const Matrix<double> &gama, double T, double rel_perm, int i)
+{
+	double conc = pow(10.0,x(this->getReaction(i).Get_Species_Index(),0))+(this->getReaction(i).Get_TimeStep()*this->Eval_ReactionRate(x, gama, T, rel_perm,i))/this->getActivity(this->getReaction(i).Get_Species_Index());
+	if (conc <= 0.0)
+		conc = DBL_MIN;
+	if (conc > this->getReaction(i).Get_MaximumValue())
+		conc = this->getReaction(i).Get_MaximumValue() * 0.90;
+	return conc;
+}
+
 //Return the ith area factor
 double UnsteadyAdsorption::getAreaFactor(int i)
 {
@@ -2730,6 +2773,17 @@ double UnsteadyAdsorption::getActivity(int i)
 		i = 0;
 	}
 	return this->activities(i,0);
+}
+
+//Return the ith old activity coefficient
+double UnsteadyAdsorption::getOldActivity(int i)
+{
+	if (i >= this->List->list_size() || i < 0)
+	{
+		mError(out_of_bounds);
+		i = 0;
+	}
+	return this->activities_old(i,0);
 }
 
 //Return the specific molality
@@ -4546,7 +4600,7 @@ int read_scenario(SHARK_DATA *shark_dat)
 		shark_dat->num_ssao = 0;
 	}
 	shark_dat->num_ssar.resize(shark_dat->num_ssao);
-	shark_dat->ads_names.resize(shark_dat->num_ssao);
+	shark_dat->ss_ads_names.resize(shark_dat->num_ssao);
 	try
 	{
 		shark_dat->num_other = shark_dat->yaml_object.getYamlWrapper()("Scenario")("vars_fun")["num_other"].getInt();
@@ -4581,7 +4635,7 @@ int read_scenario(SHARK_DATA *shark_dat)
 			try
 			{
 				shark_dat->num_ssar[obj] = x.second.getMap().getInt("num_rxns");
-				shark_dat->ads_names[obj] = x.second.getMap().getString("name");
+				shark_dat->ss_ads_names[obj] = x.second.getMap().getString("name");
 			}
 			catch (std::out_of_range)
 			{
@@ -5528,7 +5582,7 @@ int read_adsorbobjects(SHARK_DATA *shark_dat)
 			//Check for existance of the necessary object and quit if necessary
 			try
 			{
-				shark_dat->AdsorptionList[i].setAdsorbentName( shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i]).getName() );
+				shark_dat->AdsorptionList[i].setAdsorbentName( shark_dat->yaml_object.getYamlWrapper()(shark_dat->ss_ads_names[i]).getName() );
 				shark_dat->AdsorptionList[i].setTotalVolume(shark_dat->volume);
 			}
 			catch (std::out_of_range)
@@ -5540,7 +5594,7 @@ int read_adsorbobjects(SHARK_DATA *shark_dat)
 			// Other required pieces of information
 			try
 			{
-				shark_dat->AdsorptionList[i].setBasis(shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i]).getDataMap().getString("basis"));
+				shark_dat->AdsorptionList[i].setBasis(shark_dat->yaml_object.getYamlWrapper()(shark_dat->ss_ads_names[i]).getDataMap().getString("basis"));
 			}
 			catch (std::out_of_range)
 			{
@@ -5549,7 +5603,7 @@ int read_adsorbobjects(SHARK_DATA *shark_dat)
 			}
 			try
 			{
-				shark_dat->AdsorptionList[i].setTotalMass(shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i]).getDataMap().getDouble("total_mass"));
+				shark_dat->AdsorptionList[i].setTotalMass(shark_dat->yaml_object.getYamlWrapper()(shark_dat->ss_ads_names[i]).getDataMap().getDouble("total_mass"));
 			}
 			catch (std::out_of_range)
 			{
@@ -5558,7 +5612,7 @@ int read_adsorbobjects(SHARK_DATA *shark_dat)
 			}
 			try
 			{
-				shark_dat->AdsorptionList[i].setSpecificArea(shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i]).getDataMap().getDouble("spec_area"));
+				shark_dat->AdsorptionList[i].setSpecificArea(shark_dat->yaml_object.getYamlWrapper()(shark_dat->ss_ads_names[i]).getDataMap().getDouble("spec_area"));
 			}
 			catch (std::out_of_range)
 			{
@@ -5569,7 +5623,7 @@ int read_adsorbobjects(SHARK_DATA *shark_dat)
 			// Some optional pieces of information
 			try
 			{
-				shark_dat->AdsorptionList[i].setSpecificMolality(shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i]).getDataMap().getDouble("spec_mole"));
+				shark_dat->AdsorptionList[i].setSpecificMolality(shark_dat->yaml_object.getYamlWrapper()(shark_dat->ss_ads_names[i]).getDataMap().getDouble("spec_mole"));
 			}
 			catch (std::out_of_range)
 			{
@@ -5577,7 +5631,7 @@ int read_adsorbobjects(SHARK_DATA *shark_dat)
 			}
 			try
 			{
-				shark_dat->AdsorptionList[i].setSurfaceCharge(shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i]).getDataMap().getDouble("surf_charge"));
+				shark_dat->AdsorptionList[i].setSurfaceCharge(shark_dat->yaml_object.getYamlWrapper()(shark_dat->ss_ads_names[i]).getDataMap().getDouble("surf_charge"));
 			}
 			catch (std::out_of_range)
 			{
@@ -5585,7 +5639,7 @@ int read_adsorbobjects(SHARK_DATA *shark_dat)
 			}
 			try
 			{
-				shark_dat->AdsorptionList[i].setSurfaceChargeBool(shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i]).getDataMap().getBool("include_surfcharge"));
+				shark_dat->AdsorptionList[i].setSurfaceChargeBool(shark_dat->yaml_object.getYamlWrapper()(shark_dat->ss_ads_names[i]).getDataMap().getBool("include_surfcharge"));
 			}
 			catch (std::out_of_range)
 			{
@@ -5594,7 +5648,7 @@ int read_adsorbobjects(SHARK_DATA *shark_dat)
 			int surf_act;
 			try
 			{
-				surf_act = surf_act_choice( shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i]).getDataMap().getString("surf_activity") );
+				surf_act = surf_act_choice( shark_dat->yaml_object.getYamlWrapper()(shark_dat->ss_ads_names[i]).getDataMap().getString("surf_activity") );
 				
 				switch (surf_act)
 				{
@@ -5627,7 +5681,7 @@ int read_adsorbobjects(SHARK_DATA *shark_dat)
 				bool HaveVol = false;
 				try
 				{
-					num_fact = shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i])("volume_factors").getDataMap().size();
+					num_fact = shark_dat->yaml_object.getYamlWrapper()(shark_dat->ss_ads_names[i])("volume_factors").getDataMap().size();
 					HaveVol = true;
 					
 					if (num_fact != shark_dat->num_ssar[i])
@@ -5637,7 +5691,7 @@ int read_adsorbobjects(SHARK_DATA *shark_dat)
 					}
 					
 					//Loop overall volume_factors
-					for (auto &x: shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i])("volume_factors").getDataMap().getMap())
+					for (auto &x: shark_dat->yaml_object.getYamlWrapper()(shark_dat->ss_ads_names[i])("volume_factors").getDataMap().getMap())
 					{
 						int index = shark_dat->MasterList.get_index(x.first);
 						if (index < 0 || index > (shark_dat->numvar-1))
@@ -5675,7 +5729,7 @@ int read_adsorbobjects(SHARK_DATA *shark_dat)
 				num_fact = 0;
 				try
 				{
-					num_fact = shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i])("area_factors").getDataMap().size();
+					num_fact = shark_dat->yaml_object.getYamlWrapper()(shark_dat->ss_ads_names[i])("area_factors").getDataMap().size();
 					
 					if (num_fact != shark_dat->num_ssar[i])
 					{
@@ -5684,7 +5738,7 @@ int read_adsorbobjects(SHARK_DATA *shark_dat)
 					}
 					
 					//Loop overall area_factors
-					for (auto &x: shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i])("area_factors").getDataMap().getMap())
+					for (auto &x: shark_dat->yaml_object.getYamlWrapper()(shark_dat->ss_ads_names[i])("area_factors").getDataMap().getMap())
 					{
 						int index = shark_dat->MasterList.get_index(x.first);
 						if (index < 0 || index > (shark_dat->numvar-1))
@@ -5732,7 +5786,7 @@ int read_adsorbobjects(SHARK_DATA *shark_dat)
 			std::string area_check;
 			try
 			{
-				vol_check = shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i])("volume_factors").getName();
+				vol_check = shark_dat->yaml_object.getYamlWrapper()(shark_dat->ss_ads_names[i])("volume_factors").getName();
 				ContainsVolumeFactors = true;
 			}
 			catch (std::out_of_range)
@@ -5741,7 +5795,7 @@ int read_adsorbobjects(SHARK_DATA *shark_dat)
 			}
 			try
 			{
-				area_check = shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i])("area_factors").getName();
+				area_check = shark_dat->yaml_object.getYamlWrapper()(shark_dat->ss_ads_names[i])("area_factors").getName();
 				ContainsAreaFactors = true;
 			}
 			catch (std::out_of_range)
@@ -5751,7 +5805,7 @@ int read_adsorbobjects(SHARK_DATA *shark_dat)
 			int num_head;
 			try
 			{
-				num_head = (int)shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i]).getHeadMap().size();
+				num_head = (int)shark_dat->yaml_object.getYamlWrapper()(shark_dat->ss_ads_names[i]).getHeadMap().size();
 			}
 			catch (std::out_of_range)
 			{
@@ -5793,7 +5847,7 @@ int read_adsorbobjects(SHARK_DATA *shark_dat)
 			
 			//Loop over all headers
 			int rxn = 0;
-			for (auto &x: shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i]).getHeadMap())
+			for (auto &x: shark_dat->yaml_object.getYamlWrapper()(shark_dat->ss_ads_names[i]).getHeadMap())
 			{
 				if (x.second.getName() != "volume_factors" && x.second.getName() != "area_factors")
 				{
@@ -5801,7 +5855,7 @@ int read_adsorbobjects(SHARK_DATA *shark_dat)
 					{
 						try
 						{
-							shark_dat->AdsorptionList[i].setMolarFactor(rxn, shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i])(x.first)["mole_factor"].getDouble());
+							shark_dat->AdsorptionList[i].setMolarFactor(rxn, shark_dat->yaml_object.getYamlWrapper()(shark_dat->ss_ads_names[i])(x.first)["mole_factor"].getDouble());
 						}
 						catch (std::out_of_range)
 						{
@@ -5812,7 +5866,7 @@ int read_adsorbobjects(SHARK_DATA *shark_dat)
 				
 					try
 					{
-						shark_dat->AdsorptionList[i].getReaction(rxn).Set_Equilibrium(shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i])(x.first)["logK"].getDouble());
+						shark_dat->AdsorptionList[i].getReaction(rxn).Set_Equilibrium(shark_dat->yaml_object.getYamlWrapper()(shark_dat->ss_ads_names[i])(x.first)["logK"].getDouble());
 					}
 					catch (std::out_of_range)
 					{
@@ -5824,7 +5878,7 @@ int read_adsorbobjects(SHARK_DATA *shark_dat)
 					double dH, dS;
 					try
 					{
-						dH = shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i])(x.first)["enthalpy"].getDouble();
+						dH = shark_dat->yaml_object.getYamlWrapper()(shark_dat->ss_ads_names[i])(x.first)["enthalpy"].getDouble();
 						shark_dat->AdsorptionList[i].getReaction(rxn).Set_Enthalpy(dH);
 						count++;
 					}
@@ -5836,7 +5890,7 @@ int read_adsorbobjects(SHARK_DATA *shark_dat)
 					
 					try
 					{
-						dS = shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i])(x.first)["entropy"].getDouble();
+						dS = shark_dat->yaml_object.getYamlWrapper()(shark_dat->ss_ads_names[i])(x.first)["entropy"].getDouble();
 						shark_dat->AdsorptionList[i].getReaction(rxn).Set_Entropy(dS);
 						count++;
 					}
@@ -5850,7 +5904,7 @@ int read_adsorbobjects(SHARK_DATA *shark_dat)
 					
 					try
 					{
-						shark_dat->AdsorptionList[i].getReaction(rxn).Set_Energy(shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i])(x.first)["energy"].getDouble());
+						shark_dat->AdsorptionList[i].getReaction(rxn).Set_Energy(shark_dat->yaml_object.getYamlWrapper()(shark_dat->ss_ads_names[i])(x.first)["energy"].getDouble());
 					}
 					catch (std::out_of_range)
 					{
@@ -5861,7 +5915,7 @@ int read_adsorbobjects(SHARK_DATA *shark_dat)
 					int stoich;
 					try
 					{
-						stoich = shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i])(x.first)("stoichiometry").getMap().size();
+						stoich = shark_dat->yaml_object.getYamlWrapper()(shark_dat->ss_ads_names[i])(x.first)("stoichiometry").getMap().size();
 					}
 					catch (std::out_of_range)
 					{
@@ -5874,7 +5928,7 @@ int read_adsorbobjects(SHARK_DATA *shark_dat)
 						return -1;
 					}
 					
-					for (auto &y: shark_dat->yaml_object.getYamlWrapper()(shark_dat->ads_names[i])(x.first)("stoichiometry").getMap())
+					for (auto &y: shark_dat->yaml_object.getYamlWrapper()(shark_dat->ss_ads_names[i])(x.first)("stoichiometry").getMap())
 					{
 						int index = shark_dat->MasterList.get_index(y.first);
 						if (index < 0 || index > (shark_dat->numvar-1))
@@ -5952,7 +6006,19 @@ int setup_SHARK_DATA( FILE *file, int (*residual) (const Matrix<double> &x, Matr
 		}
 		ssao_sum += dat->num_ssar[i];
 	}
-	if (dat->numvar != (dat->num_mbe+dat->num_ssr+dat->num_usr+dat->num_other+1+ssao_sum))
+
+	int usao_sum = 0;
+	for (int i=0; i<dat->num_usao; i++)
+	{
+		if (dat->num_usar[i] == 0)
+		{
+			mError(missing_information);
+			return -1;
+		}
+		usao_sum += dat->num_usar[i];
+	}
+
+	if (dat->numvar != (dat->num_mbe+dat->num_ssr+dat->num_usr+dat->num_other+1+ssao_sum+usao_sum))
 	{
 		mError(dim_mis_match);
 		std::cout << "Number of equations and variables do not match!\n";
@@ -6072,6 +6138,7 @@ int setup_SHARK_DATA( FILE *file, int (*residual) (const Matrix<double> &x, Matr
 	dat->MassBalanceList.resize(dat->num_mbe);
 	dat->UnsteadyList.resize(dat->num_usr);
 	dat->AdsorptionList.resize(dat->num_ssao);
+	dat->UnsteadyAdsList.resize(dat->num_usao);
 	dat->OtherList.resize(dat->num_other);
 
 	for (int i=0; i<dat->ReactionList.size(); i++)
@@ -6099,6 +6166,11 @@ int setup_SHARK_DATA( FILE *file, int (*residual) (const Matrix<double> &x, Matr
 	for (int i=0; i<dat->AdsorptionList.size(); i++)
 	{
 		dat->AdsorptionList[i].Initialize_Object(dat->MasterList, dat->num_ssar[i]);
+	}
+
+	for (int i=0; i<dat->UnsteadyAdsList.size(); i++)
+	{
+		dat->UnsteadyAdsList[i].Initialize_Object(dat->MasterList, dat->num_usar[i]);
 	}
 
 	return success;
@@ -6175,6 +6247,30 @@ int shark_parameter_check(SHARK_DATA *shark_dat)
 		if (success != 0) {mError(missing_information); return -1;}
 	}
 
+	for (int i=0; i<shark_dat->UnsteadyAdsList.size(); i++)
+	{
+		for (int n=0; n<shark_dat->UnsteadyAdsList[i].getNumberRxns(); n++)
+		{
+			shark_dat->UnsteadyAdsList[i].getReaction(n).checkSpeciesEnergies();
+			if (shark_dat->UnsteadyAdsList[i].getReaction(n).haveEquilibrium() == false && shark_dat->UnsteadyAdsList[i].getReaction(n).haveRate() == false)
+			{
+				mError(missing_information);
+				return -1;
+			}
+		}
+		for (int m=0; m<shark_dat->MassBalanceList.size(); m++)
+		{
+			shark_dat->UnsteadyAdsList[i].modifyDeltas(shark_dat->MassBalanceList[m]);
+		}
+		success = shark_dat->UnsteadyAdsList[i].setAdsorbIndices();
+		if (success != 0) {mError(missing_information); return -1;}
+		success = shark_dat->UnsteadyAdsList[i].setAqueousIndexAuto();
+		if (success != 0) {mError(missing_information); return -1;}
+		shark_dat->UnsteadyAdsList[i].setTotalVolume(shark_dat->volume);
+		success = shark_dat->UnsteadyAdsList[i].checkAqueousIndices();
+		if (success != 0) {mError(missing_information); return -1;}
+	}
+
 	return success;
 }
 
@@ -6198,6 +6294,13 @@ int shark_energy_calculations(SHARK_DATA *shark_dat)
 			shark_dat->AdsorptionList[i].getReaction(n).calculateEnergies();
 		}
 	}
+	for (int i=0; i<shark_dat->UnsteadyAdsList.size(); i++)
+	{
+		for (int n=0; n<shark_dat->UnsteadyAdsList[i].getNumberRxns(); n++)
+		{
+			shark_dat->UnsteadyAdsList[i].getReaction(n).calculateEnergies();
+		}
+	}
 
 	return success;
 }
@@ -6218,6 +6321,10 @@ int shark_temperature_calculations(SHARK_DATA *shark_dat)
 	for (int i=0; i<shark_dat->AdsorptionList.size(); i++)
 	{
 		shark_dat->AdsorptionList[i].calculateEquilibria(shark_dat->temperature);
+	}
+	for (int i=0; i<shark_dat->UnsteadyAdsList.size(); i++)
+	{
+		shark_dat->UnsteadyAdsList[i].calculateRates(shark_dat->temperature);
 	}
 
 	return success;
@@ -6313,14 +6420,62 @@ int shark_guess(SHARK_DATA *shark_dat)
 			{
 				if (shark_dat->MassBalanceList[j].Get_Delta(shark_dat->UnsteadyList[i].Get_Species_Index()) != 0.0)
 				{
-					if (max == 0)
-						max = shark_dat->MassBalanceList[j].Get_TotalConcentration();
-					current = shark_dat->MassBalanceList[j].Get_TotalConcentration();
-					if (max > current)
-						max = shark_dat->MassBalanceList[j].Get_TotalConcentration();
+					if (shark_dat->reactor_type == BATCH)
+					{
+						if (max == 0)
+							max = shark_dat->MassBalanceList[j].Get_TotalConcentration();
+						current = shark_dat->MassBalanceList[j].Get_TotalConcentration();
+						if (max > current)
+							max = shark_dat->MassBalanceList[j].Get_TotalConcentration();
+					}
+					else
+					{
+						if (max == 0)
+							max = shark_dat->MassBalanceList[j].Get_InletConcentration();
+						current = shark_dat->MassBalanceList[j].Get_InletConcentration();
+						if (max > current)
+							max = shark_dat->MassBalanceList[j].Get_InletConcentration();
+					}
 				}
 			}
 			shark_dat->UnsteadyList[i].Set_MaximumValue(max);
+		}
+
+		//Loop for all Unsteady Adsorption Objects
+		for (int n=0; n<shark_dat->UnsteadyAdsList.size(); n++)
+		{
+			//Loop for all reactions in the nth unsteady adsorption object
+			for (int i=0; i<shark_dat->UnsteadyAdsList[n].getNumberRxns(); i++)
+			{
+				double max = 0.0, current = 0.0;
+				shark_dat->Conc_new.edit(shark_dat->UnsteadyAdsList[n].getReaction(i).Get_Species_Index(),0,shark_dat->UnsteadyAdsList[n].getReaction(i).Get_InitialValue());
+
+				//Loop through MassBalanceList and MasterList to find max value for unsteady species
+				for (int j=0; j<shark_dat->MassBalanceList.size(); j++)
+				{
+					if (shark_dat->MassBalanceList[j].Get_Delta(shark_dat->UnsteadyAdsList[n].getReaction(i).Get_Species_Index()) != 0.0)
+					{
+						if (shark_dat->reactor_type == BATCH)
+						{
+							if (max == 0)
+								max = shark_dat->MassBalanceList[j].Get_TotalConcentration()/shark_dat->UnsteadyAdsList[n].getBulkDensity();
+							current = shark_dat->MassBalanceList[j].Get_TotalConcentration()/shark_dat->UnsteadyAdsList[n].getBulkDensity();
+							if (max > current)
+								max = shark_dat->MassBalanceList[j].Get_TotalConcentration()/shark_dat->UnsteadyAdsList[n].getBulkDensity();
+						}
+						else
+						{
+							if (max == 0)
+								max = shark_dat->MassBalanceList[j].Get_InletConcentration()/shark_dat->UnsteadyAdsList[n].getBulkDensity();
+							current = shark_dat->MassBalanceList[j].Get_InletConcentration()/shark_dat->UnsteadyAdsList[n].getBulkDensity();
+							if (max > current)
+								max = shark_dat->MassBalanceList[j].Get_InletConcentration()/shark_dat->UnsteadyAdsList[n].getBulkDensity();
+						}
+					}
+				}
+				shark_dat->UnsteadyAdsList[n].getReaction(i).Set_MaximumValue(max);
+
+			}
 		}
 	}
 
@@ -7035,7 +7190,7 @@ int SHARK_TESTS()
 	shark_dat.volume = 1.0;							//SHOULD BE REQUIRED IF WE HAVE ADSORPTION OBJECTS!!!
 
 	shark_dat.num_ssar.resize(shark_dat.num_ssao);	//Required to set this up PRIOR to calling the setup function for shark
-	shark_dat.ads_names.resize(shark_dat.num_ssao);
+	shark_dat.ss_ads_names.resize(shark_dat.num_ssao);
 	shark_dat.num_ssar[0] = 2;						//Required to set this up PRIOR to calling the setup function for shark
 
 	//Temporary Variables to modify test case
