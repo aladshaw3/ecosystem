@@ -708,6 +708,7 @@ int set_SCOPSOWL_ICs(SCOPSOWL_DATA *owl_dat)
 			owl_dat->skua_dat[l].total_steps = 0;
 			owl_dat->skua_dat[l].magpie_dat.sys_dat.T = owl_dat->gas_temperature;
 			owl_dat->skua_dat[l].magpie_dat.sys_dat.PT = owl_dat->total_pressure;
+			owl_dat->skua_dat[l].magpie_dat.sys_dat.qT = owl_dat->magpie_dat.sys_dat.qT;
 			for (int i=0; i<owl_dat->magpie_dat.sys_dat.N; i++)
 			{
 				owl_dat->skua_dat[l].param_dat[i].ref_diffusion = D_inf(owl_dat->param_dat[i].ref_diffusion, owl_dat->param_dat[i].ref_temperature, owl_dat->param_dat[i].affinity, owl_dat->y[i]*owl_dat->total_pressure, owl_dat->gas_temperature);
