@@ -154,7 +154,7 @@ double default_adsorption(int i, int l, const void *user_data)
 		
 		//Call MAGPIE to evaluate perturbed adsorption
 		success = MAGPIE((void *)&dat->magpie_dat);
-		if (success < 0 || success > 3) {mError(simulation_fail); return -1;}
+		if (success < 0 || success > 5) {mError(simulation_fail); return -1;}
 		else success = 0;
 		dat->total_steps = dat->total_steps + dat->magpie_dat.sys_dat.total_eval;
 		
@@ -172,7 +172,7 @@ double default_adsorption(int i, int l, const void *user_data)
 				
 		//Call MAGPIE to evaluate adsorption
 		success = MAGPIE((void *)&dat->magpie_dat);
-		if (success < 0 || success > 3) {mError(simulation_fail); return -1;}
+		if (success < 0 || success > 5) {mError(simulation_fail); return -1;}
 		else success = 0;
 		dat->total_steps = dat->total_steps + dat->magpie_dat.sys_dat.total_eval;
 		
@@ -286,7 +286,7 @@ double default_adsorption(int i, int l, const void *user_data)
 			
 			//Call MAGPIE to evaluate perturbed adsorption
 			success = MAGPIE((void *)&dat->magpie_dat);
-			if (success < 0 || success > 3) {mError(simulation_fail); return -1;}
+			if (success < 0 || success > 5) {mError(simulation_fail); return -1;}
 			else success = 0;
 			dat->total_steps = dat->total_steps + dat->magpie_dat.sys_dat.total_eval;
 			
@@ -311,7 +311,7 @@ double default_adsorption(int i, int l, const void *user_data)
 			
 			//Call MAGPIE to evaluate adsorption
 			success = MAGPIE((void *)&dat->magpie_dat);
-			if (success < 0 || success > 3) {mError(simulation_fail); return -1;}
+			if (success < 0 || success > 5) {mError(simulation_fail); return -1;}
 			else success = 0;
 			dat->total_steps = dat->total_steps + dat->magpie_dat.sys_dat.total_eval;
 			
@@ -868,7 +868,7 @@ int set_SCOPSOWL_ICs(SCOPSOWL_DATA *owl_dat)
 		
 		//Temperature, pressure, total adsorption, and x's are set: Call MAGPIE
 		success = MAGPIE((void *)&owl_dat->magpie_dat);
-		if (success < 0 || success > 3) {mError(simulation_fail); return -1;}
+		if (success < 0 || success > 5) {mError(simulation_fail); return -1;}
 		else success = 0;
 		owl_dat->total_steps = owl_dat->total_steps + owl_dat->magpie_dat.sys_dat.total_eval;
 		
