@@ -1397,7 +1397,7 @@ double UnsteadyReaction::Eval_ReactionRate(const Matrix<double> &x, const Matrix
 			//No action
 		}
 	}
-	R = fabs(this->Get_Stoichiometric(this->Get_Species_Index())) * (this->Get_Forward() * reactants) - (this->Get_Reverse() * products);
+	R = fabs(this->Get_Stoichiometric(this->Get_Species_Index())) * ((this->Get_Forward() * reactants) - (this->Get_Reverse() * products));
 
 	return R;
 }
@@ -2725,7 +2725,7 @@ double UnsteadyAdsorption::Eval_ReactionRate(const Matrix<double> &x, const Matr
 	else
 		reactants = reactants * pow(this->getSpecificMolality()*this->calculateActiveFraction(x),this->getMolarFactor(n));
 
-	R = fabs(this->getReaction(n).Get_Stoichiometric(this->getReaction(n).Get_Species_Index())) * (this->getReaction(n).Get_Forward() * reactants) - (this->getReaction(n).Get_Reverse() * products);
+	R = fabs(this->getReaction(n).Get_Stoichiometric(this->getReaction(n).Get_Species_Index())) * ((this->getReaction(n).Get_Forward() * reactants) - (this->getReaction(n).Get_Reverse() * products));
 
 	return R;
 }
