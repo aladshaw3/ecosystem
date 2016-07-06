@@ -16,7 +16,7 @@ Scenario:
 
 - run_time:
   steady: true         
-  specs_curve: false
+  specs_curve: true
   pH_step: 0.25    
 ...
 
