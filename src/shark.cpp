@@ -1988,7 +1988,7 @@ double AdsorptionReaction::calculateAqueousChargeExchange(int i)
 		}
 	}
 
-	return -n;
+	return n;
 }
 
 //Calculation of equilibrium correct term
@@ -2027,8 +2027,8 @@ double AdsorptionReaction::Eval_Residual(const Matrix<double> &x, const Matrix<d
 			res = res + ( this->getReaction(i).Get_Stoichiometric(n)*( log10(gama(n,0))+x(n,0) ) );
 	}
 	
-	double logK = this->getReaction(i).Get_Equilibrium();
-	logK = logK + (this->calculateEquilibriumCorrection(this->getChargeDensity(), T, this->getIonicStrength(), rel_perm, i)/log(10.0));
+	double logK = this->getReaction(i).Get_Equilibrium()/* + log10(gama(this->getAdsorbIndex(i),0))*/;
+	logK = logK + ((this->calculateEquilibriumCorrection(this->getChargeDensity(), T, this->getIonicStrength(), rel_perm, i)/gama(this->getAdsorbIndex(i),0))/log(10.0));
 	//std::cout << logK << std::endl;
 	res = res - logK;
 	
@@ -2601,7 +2601,7 @@ double UnsteadyAdsorption::calculateAqueousChargeExchange(int i)
 		}
 	}
 	
-	return -n;
+	return n;
 }
 
 //Calculation of equilibrium correct term

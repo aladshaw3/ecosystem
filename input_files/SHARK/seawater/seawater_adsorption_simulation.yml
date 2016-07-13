@@ -34,7 +34,8 @@ SolverOptions:
 ---
 line_search: true     
 search_type: standard
-linear_solve: fom 
+linear_solve: fom
+nl_maxit: 100 
 
 ...
 
@@ -208,7 +209,7 @@ MassBalance:
     "UO2CO3(AHOOH)2 2- (s)": 1
 
 - sodium: 
-  total_conc: 0.432
+  total_conc: 0.00167
   initial_conc: 0.468
   inlet_conc: 0.468
   - delta:
@@ -252,7 +253,7 @@ MassBalance:
     "UO2CO3(AHOOH)2 2- (s)": 1
 
 - chlorine:
-  total_conc: 0.43
+  total_conc: 1e-25
   initial_conc: 0.546
   inlet_conc: 0.546
   - delta:
@@ -650,7 +651,7 @@ surf_activity: uniquac
 include_surfcharge: true
 
 - rxn01:
-  logK: -1.0 #-2.0
+  logK: -2.0 #-2.0
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -658,7 +659,7 @@ include_surfcharge: true
     "UO2AHOOH + (s)": 1
 
 - rxn02:
-  logK: -1.0 #-4.5
+  logK: -4.5 #-4.5
   mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -666,7 +667,7 @@ include_surfcharge: true
     "UO2(AHOOH)2 (s)": 1
 
 - rxn03:
-  logK: -1.0 #4.0
+  logK: 4.0 #4.0
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -675,7 +676,7 @@ include_surfcharge: true
     "UO2CO3AHOOH - (s)": 1
 
 - rxn04:
-  logK: -1.0 #9.0
+  logK: 9.0 #9.0
   mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
