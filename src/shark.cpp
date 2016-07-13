@@ -1994,7 +1994,6 @@ double AdsorptionReaction::calculateAqueousChargeExchange(int i)
 //Calculation of equilibrium correct term
 double AdsorptionReaction::calculateEquilibriumCorrection(double sigma, double T, double I, double rel_epsilon, int i)
 {
-	//std::cout << sigma << std::endl;
 	if (this->includeSurfaceCharge() == true)
 		return -(this->calculateAqueousChargeExchange(i)*e*calculateCubicPsiApprox(sigma, T, I, rel_epsilon))/(kB*T);
 	else
@@ -2029,7 +2028,6 @@ double AdsorptionReaction::Eval_Residual(const Matrix<double> &x, const Matrix<d
 	
 	double logK = this->getReaction(i).Get_Equilibrium()/* + log10(gama(this->getAdsorbIndex(i),0))*/;
 	logK = logK + ((this->calculateEquilibriumCorrection(this->getChargeDensity(), T, this->getIonicStrength(), rel_perm, i)/gama(this->getAdsorbIndex(i),0))/log(10.0));
-	//std::cout << logK << std::endl;
 	res = res - logK;
 	
 	return res;
@@ -2640,7 +2638,7 @@ double UnsteadyAdsorption::Eval_Residual(const Matrix<double> &x, const Matrix<d
 	}
 
 	double logK = this->getReaction(i).Get_Equilibrium();
-	logK = logK + (this->calculateEquilibriumCorrection(this->getChargeDensity(), T, this->getIonicStrength(), rel_perm, i)/log(10.0));
+	logK = logK + ((this->calculateEquilibriumCorrection(this->getChargeDensity(), T, this->getIonicStrength(), rel_perm, i)/gama(this->getAdsorbIndex(i),0))/log(10.0));
 	res = res - logK;
 
 	return res;
