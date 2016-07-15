@@ -472,6 +472,11 @@ public:
 	void calculateRate(double T);
 	bool haveEquilibrium();								///< True if equilibrium constant is given or can be calculated (see Reaction object)
 	bool haveRate();									///< Function to return true if you have the forward or reverse rate calculated
+	
+	bool haveForwardRef();								///< Function to return true if you have the forward reference rate
+	bool haveReverseRef();								///< Function to return true if you have the reverse reference rate
+	bool haveForward();									///< Function to return true if you have the forward rate
+	bool haveReverse();									///< Function to return true if you have the reverse rate
 
 	int Get_Species_Index();							///< Fetch the index of the Unsteady species
 	double Get_Stoichiometric(int i);					///< Fetch the ith stoichiometric value

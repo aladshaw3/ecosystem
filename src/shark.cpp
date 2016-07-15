@@ -1262,6 +1262,30 @@ bool UnsteadyReaction::haveRate()
 		return false;
 }
 
+//Return true if have forward reference
+bool UnsteadyReaction::haveForwardRef()
+{
+	return this->HaveForRef;
+}
+
+//Return true if have reverse reference
+bool UnsteadyReaction::haveReverseRef()
+{
+	return this->HaveRevRef;
+}
+
+//Return true if have forward rate
+bool UnsteadyReaction::haveForward()
+{
+	return this->HaveForward;
+}
+
+//Return true if have reverse rate
+bool UnsteadyReaction::haveReverse()
+{
+	return this->HaveReverse;
+}
+
 //Get the species index for the Unsteady species
 int UnsteadyReaction::Get_Species_Index()
 {
@@ -2676,6 +2700,30 @@ double UnsteadyAdsorption::Eval_ReactionRate(const Matrix<double> &x, const Matr
 	//Loop over all species in list
 	double reactants = 0.0, products = 0.0;
 	bool first_prod = true, first_reac = true;
+	
+	this->getReaction(n).Set_Equilibrium( this->getReaction(n).Get_Equilibrium() + ((this->calculateEquilibriumCorrection(this->getChargeDensity(), T, this->getIonicStrength(), rel_perm, n)/gama(this->getAdsorbIndex(n),0))/log(10.0)) );
+
+	if (this->getReaction(n).haveForwardRef() == true)
+	{
+		this->getReaction(n).Set_Forward(this->getReaction(n).Get_ForwardRef() * pow(T, this->getReaction(n).Get_Affinity()) * exp(-this->getReaction(n).Get_ActivationEnergy()/(Rstd*T)));
+	}
+	else if (this->getReaction(n).haveReverseRef() == true)
+	{
+		this->getReaction(n).Set_Reverse(this->getReaction(n).Get_ReverseRef() * pow(T, this->getReaction(n).Get_Affinity()) * exp(-this->getReaction(n).Get_ActivationEnergy()/(Rstd*T)));
+	}
+	else if (this->getReaction(n).haveForward() == true)
+	{
+		this->getReaction(n).Set_Reverse( this->getReaction(n).Get_Forward() / pow(10.0,this->getReaction(n).Get_Equilibrium()) );
+	}
+	else if (this->getReaction(n).haveReverse() == true)
+	{
+		this->getReaction(n).Set_Forward( this->getReaction(n).Get_Reverse() * pow(10.0,this->getReaction(n).Get_Equilibrium()) );
+	}
+	else
+	{
+		//No Action
+	}
+	
 	for (int i=0; i<this->List->list_size(); i++)
 	{
 		if (this->getReaction(n).Get_Stoichiometric(i) > 0.0)
