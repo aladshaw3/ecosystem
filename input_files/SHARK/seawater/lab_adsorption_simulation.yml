@@ -19,7 +19,7 @@ Scenario:
   res_alk: 0.0
   temp: 293.15       
   dielec: 78.325 
-  volume: 75.0
+  volume: 19.0
   reactor: batch
   flow_rate: 60.0
 
@@ -187,7 +187,7 @@ MassBalance:
     "H2O (l)": 1
 
 - carbonate:
-  total_conc: 0.00233
+  total_conc: 0.00167
   initial_conc: 0.00233
   inlet_conc: 0.00233
   - delta: 
@@ -209,7 +209,7 @@ MassBalance:
     "UO2CO3(AHOOH)2 2- (s)": 1
 
 - sodium: 
-  total_conc: 0.234
+  total_conc: 0.43167
   initial_conc: 0.468
   inlet_conc: 0.468
   - delta:
@@ -221,7 +221,7 @@ MassBalance:
     "NaOH (aq)": 1
 
 - uranium:
-  total_conc: 1.386E-8
+  total_conc: 4.141E-8
   initial_conc: 1.386E-8
   inlet_conc: 1.386E-8
   - delta:
@@ -253,7 +253,7 @@ MassBalance:
     "UO2CO3(AHOOH)2 2- (s)": 1
 
 - chlorine:
-  total_conc: 0.312
+  total_conc: 0.43
   initial_conc: 0.546
   inlet_conc: 0.546
   - delta:
@@ -267,7 +267,7 @@ MassBalance:
     "UO2Cl3 - (aq)": 3
 
 - sulfate:
-  total_conc: 0.0282
+  total_conc: 1e-25
   initial_conc: 0.0282
   inlet_conc: 0.0282
   - delta:
@@ -279,7 +279,7 @@ MassBalance:
     "VO2SO4 - (aq)": 1
 
 - magnesium:
-  total_conc: 0.05327
+  total_conc: 1e-25
   initial_conc: 0.05327
   inlet_conc: 0.05327
   - delta:
@@ -289,7 +289,7 @@ MassBalance:
     "MgUO2(CO3)3 2- (aq)": 1
 
 - calcium:
-  total_conc: 0.01033
+  total_conc: 1e-25
   initial_conc: 0.01033
   inlet_conc: 0.01033
   - delta:
@@ -301,7 +301,7 @@ MassBalance:
     "Ca2UO2(CO3)3 (aq)": 2
 
 - vanadium(v):
-  total_conc: 3.73e-8
+  total_conc: 1e-25
   initial_conc: 3.73e-8
   inlet_conc: 3.73e-8
   - delta: 
@@ -320,7 +320,7 @@ MassBalance:
     "V(AOO)2 - (s)": 1
 
 - potassium:
-  total_conc: 0.0096
+  total_conc: 1e-25
   initial_conc: 0.0096
   inlet_conc: 0.0096
   - delta:
@@ -646,7 +646,7 @@ EquilRxn:
 basis: molar
 spec_area: 45000.0     #Units: m^2/kg
 spec_mole: 3.75       #Units: mol/kg
-total_mass: 1.51e-5     #Units: kg
+total_mass: 8.31e-6     #Units: kg
 surf_activity: uniquac
 include_surfcharge: true
 

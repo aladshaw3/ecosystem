@@ -13,6 +13,7 @@ Scenario:
   res_alk: 0.0
   temp: 293.15       
   dielec: 78.325 
+  volume: 75.0
 
 - run_time:
   steady: true         
@@ -25,7 +26,7 @@ SolverOptions:
 line_search: true     
 search_type: standard
 linear_solve: fom 
-nl_maxit: 10000     
+nl_maxit: 100     
 
 ...
 
@@ -120,7 +121,7 @@ MassBalance:
     "VO2(CO3)2 3- (aq)": 2
 
 - sodium: 
-  total_conc: 0.468
+  total_conc: 1e-25
   - delta:
     "NaHCO3 (aq)": 1
     "NaCO3 - (aq)": 1
@@ -156,7 +157,7 @@ MassBalance:
     "UO2(SO4)2 2- (aq)": 1
 
 - chlorine:
-  total_conc: 0.546
+  total_conc: 1e-25
   - delta:
     "Cl - (aq)": 1
     "CaCl2 (aq)": 2

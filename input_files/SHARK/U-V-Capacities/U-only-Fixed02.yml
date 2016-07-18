@@ -16,7 +16,7 @@ Scenario:
   const_pH: false	
   temp: 293.15        
   dielec: 78.325     
-  volume: 0.75       #Units: L
+  volume: 19.0       #Units: L
 
 - run_time:
   steady: true        
@@ -134,7 +134,7 @@ MassBalance:
     "H2O (l)": 1
 
 - carbonate:
-  total_conc: 0.002290951
+  total_conc: 0.00229095
   - delta: 
     "NaHCO3 (aq)": 1
     "NaCO3 - (aq)": 1 
@@ -149,7 +149,7 @@ MassBalance:
     "UO2CO3(AHOOH)2 2- (s)": 1
 
 - nitrate:
-  total_conc: 6.454E-05
+  total_conc: 3.225e-7
   - delta:
     "HNO3 (aq)": 1
     "NO3 - (aq)": 1
@@ -157,7 +157,7 @@ MassBalance:
     "UO2(NO3)2 (aq)": 2
 
 - sodium: 
-  total_conc: 0.002290951
+  total_conc: 0.00229095
   - delta:
     "NaHCO3 (aq)": 1
     "NaCO3 - (aq)": 1
@@ -167,7 +167,7 @@ MassBalance:
     "NaOH (aq)": 1
 
 - uranyl:
-  total_conc: 3.227E-05
+  total_conc: 1.6125e-7
   - delta:
     "UO2AHOOH + (s)": 1
     "UO2(AHOOH)2 (s)": 1
@@ -399,7 +399,7 @@ EquilRxn:
 basis: molar
 spec_area: 45000.0     #Units: m^2/kg
 spec_mole: 3.75      #Units: mol/kg
-total_mass: 1.51e-5     #Units: kg
+total_mass: 8.31e-6     #Units: kg
 surf_activity: uniquac
 
 - rxn01:

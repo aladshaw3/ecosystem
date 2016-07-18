@@ -2050,8 +2050,8 @@ double AdsorptionReaction::Eval_Residual(const Matrix<double> &x, const Matrix<d
 			res = res + ( this->getReaction(i).Get_Stoichiometric(n)*( log10(gama(n,0))+x(n,0) ) );
 	}
 	
-	double logK = this->getReaction(i).Get_Equilibrium()/* + log10(gama(this->getAdsorbIndex(i),0))*/;
-	logK = logK + ((this->calculateEquilibriumCorrection(this->getChargeDensity(), T, this->getIonicStrength(), rel_perm, i)/gama(this->getAdsorbIndex(i),0))/log(10.0));
+	double logK = this->getReaction(i).Get_Equilibrium();
+	logK = logK + ((this->calculateEquilibriumCorrection(this->getChargeDensity(), T, this->getIonicStrength(), rel_perm, i)/*/gama(this->getAdsorbIndex(i),0)*/)/log(10.0));
 	res = res - logK;
 	
 	return res;
@@ -2662,7 +2662,7 @@ double UnsteadyAdsorption::Eval_Residual(const Matrix<double> &x, const Matrix<d
 	}
 
 	double logK = this->getReaction(i).Get_Equilibrium();
-	logK = logK + ((this->calculateEquilibriumCorrection(this->getChargeDensity(), T, this->getIonicStrength(), rel_perm, i)/gama(this->getAdsorbIndex(i),0))/log(10.0));
+	logK = logK + ((this->calculateEquilibriumCorrection(this->getChargeDensity(), T, this->getIonicStrength(), rel_perm, i)/*/gama(this->getAdsorbIndex(i),0)*/)/log(10.0));
 	res = res - logK;
 
 	return res;
@@ -2701,7 +2701,7 @@ double UnsteadyAdsorption::Eval_ReactionRate(const Matrix<double> &x, const Matr
 	double reactants = 0.0, products = 0.0;
 	bool first_prod = true, first_reac = true;
 	
-	this->getReaction(n).Set_Equilibrium( this->getReaction(n).Get_Equilibrium() + ((this->calculateEquilibriumCorrection(this->getChargeDensity(), T, this->getIonicStrength(), rel_perm, n)/gama(this->getAdsorbIndex(n),0))/log(10.0)) );
+	this->getReaction(n).Set_Equilibrium( this->getReaction(n).Get_Equilibrium() + ((this->calculateEquilibriumCorrection(this->getChargeDensity(), T, this->getIonicStrength(), rel_perm, n)/*/gama(this->getAdsorbIndex(n),0)*/)/log(10.0)) );
 
 	if (this->getReaction(n).haveForwardRef() == true)
 	{
