@@ -6909,6 +6909,11 @@ int shark_reset(SHARK_DATA *shark_dat)
 	shark_dat->activity_old = shark_dat->activity_new;
 	shark_dat->time_old = shark_dat->time;
 
+	for (int i=0; i<shark_dat->UnsteadyAdsList.size(); i++)
+		{
+				shark_dat->UnsteadyAdsList[i].updateActivities();
+		}
+
 	return success;
 }
 
