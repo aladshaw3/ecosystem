@@ -570,7 +570,6 @@ int gsta_optimize(const char* fileName)
     						<< " is no longer improving after " << (dat.n_par-1) << " parameters.\n" <<  std::endl;
     				break;
     			}
-				
 
     			//Creating an average of the adjustable qmax values
     			if(dat.qmax == 0 && fabs(par[0]) > y[(m_dat[dat.iso]-1)] )

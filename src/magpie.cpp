@@ -1306,6 +1306,7 @@ int MAGPIE_SCENARIOS(const char *inputFileName, const char *sceneFileName)
 	std::cout << "Total Number of Systems to Solve: " << (dat.sys_dat.Sys * num_scene) << std::endl;
 	std::cout << "--------------------------------------------------\n" << std::endl;
 	int sceneCount = 0;
+	double total_iter = 0;
 	do
 	{
 		sceneFile >> d_read; dat.sys_dat.PT = d_read;
@@ -1358,6 +1359,7 @@ int MAGPIE_SCENARIOS(const char *inputFileName, const char *sceneFileName)
 
 		//All Reads and initializations are now complete: Call MAGPIE Routine
 		solnFlag = MAGPIE((void *)&dat);
+		total_iter += dat.sys_dat.total_eval;
 		if (solnFlag < 4) {std::cout << "\nScenario simulation successful!\n" << std::endl;}
 		else {mError(scenario_fail);}
 
@@ -1390,10 +1392,10 @@ int MAGPIE_SCENARIOS(const char *inputFileName, const char *sceneFileName)
 	time = clock() - time;
 	if (dat.sys_dat.total_eval > 0)
 	{
-		std::cout << "\nTotal Non-Linear Evaluations: " << dat.sys_dat.total_eval << std::endl;
+		std::cout << "\nTotal Non-Linear Evaluations: " << total_iter << std::endl;
 		std::cout << "\nMaximum E. Norm Calculated: " << dat.sys_dat.max_norm << std::endl;
 		std::cout << "\nAverage Euclidean Norm: " <<
-				(dat.sys_dat.avg_norm / dat.sys_dat.total_eval) << std::endl;
+				(dat.sys_dat.avg_norm / total_iter) << std::endl;
 	}
 	std::cout << "\nTotal Runtime: " << (time/ CLOCKS_PER_SEC) << " seconds" << std::endl;
 
