@@ -198,6 +198,15 @@ double default_pore_diffusion(int i, int l, const void *user_data);
 	\param user_data pointer for the SCOSPOWL_DATA structure*/
 double default_surf_diffusion(int i, int l, const void *user_data);
 
+/// Zero function for evaluating no surface diffusion in HOMOGENEOUS pellets
+/** This function is ONLY used if the pellet is determined to be homogeneous and we want
+	to specify that there is no surface diffusion.
+ 
+	\param i index for the ith species in the system
+	\param l index for the lth node in the macro-scale domain
+	\param user_data pointer for the SCOSPOWL_DATA structure*/
+double zero_surf_diffusion(int i, int l, const void *user_data);
+
 /// Default function for evaluating effective diffusivity for HOMOGENEOUS pellets
 /** This function is ONLY used if the pellet is determined to be homogeneous. Otherwise,
 	this is replaced by the pore diffusion function. The effective diffusivity is determined
@@ -335,15 +344,7 @@ int SCOPSOWL(SCOPSOWL_DATA *owl_dat);
 
 /// \cond
 
-int LARGE_CYCLE_TEST01(SCOPSOWL_DATA *owl_dat);
-
-int SMALL_CYCLE_TEST02(SCOPSOWL_DATA *owl_dat);
-
-int CURVE_TEST03(SCOPSOWL_DATA *owl_dat);
-
-int CURVE_TEST04(SCOPSOWL_DATA *owl_dat);
-
-int CURVE_TEST05(SCOPSOWL_DATA *owl_dat);
+int LARGE_CYCLE_TEST(SCOPSOWL_DATA *owl_dat);
 
 /// \endcond
 

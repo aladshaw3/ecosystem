@@ -342,10 +342,16 @@ double default_retardation(int i, int l, const void *user_data)
 {
 	double Ret = 1.0;
 	SCOPSOWL_DATA *dat = (SCOPSOWL_DATA *) user_data;
+	double ads_coeff = (dat->pellet_density*(*dat->eval_ads)(i,l,user_data));
 	if (l < 0 && dat->DirichletBC == false)
 		Ret = (dat->binder_porosity*dat->binder_fraction);
 	else
-		Ret = (dat->binder_porosity*dat->binder_fraction) + (dat->pellet_density*(*dat->eval_ads)(i,l,user_data));
+	{
+		if (ads_coeff > 0.0)
+			Ret = (dat->binder_porosity*dat->binder_fraction) + ads_coeff;
+		else
+			Ret = (dat->binder_porosity*dat->binder_fraction);
+	}
 	if (Ret < 0.0)
 	{
 		mError(unstable_matrix);
@@ -436,6 +442,12 @@ double default_surf_diffusion(int i, int l, const void *user_data)
 	Dc = D_o(dat->param_dat[i].ref_diffusion, dat->param_dat[i].activation_energy, dat->magpie_dat.sys_dat.T);
 	Dc = D_inf(Dc, dat->param_dat[i].ref_temperature, dat->param_dat[i].affinity, dat->param_dat[i].ref_pressure, dat->magpie_dat.sys_dat.T);
 	return Dc;
+}
+
+//Function to return 0 as surface diffusion
+double zero_surf_diffusion(int i, int l, const void *user_data)
+{
+	return 0.0;
 }
 
 //Function to evaluate an effective diffusivity based on pore and surface diffusion
@@ -628,6 +640,11 @@ int setup_SCOPSOWL_DATA(FILE *file,
 	{
 		owl_data->eval_diff = (*default_effective_diffusion);
 		owl_data->eval_surfDiff = (*eval_surface_diff);
+	}
+	else if (owl_data->SurfDiff == false && owl_data->Heterogeneous == false)
+	{
+		owl_data->eval_diff = (*default_effective_diffusion);
+		owl_data->eval_surfDiff = (*zero_surf_diffusion);
 	}
 	else
 	{
@@ -1205,11 +1222,12 @@ int SCOPSOWL(SCOPSOWL_DATA *owl_dat)
 }
 
 //Run the large scale cycle test
-int LARGE_CYCLE_TEST01(SCOPSOWL_DATA *owl_dat)
+int LARGE_CYCLE_TEST(SCOPSOWL_DATA *owl_dat)
 {
 	int success = 0;
 	
-	//Set specific values for this test
+	//Set specific values for this test (H2O on MS3A)
+	/*
 	owl_dat->total_pressure = 101.35;//kPa
 	owl_dat->gas_temperature = 313.15;//K
 	owl_dat->gas_velocity = 0.36;//cm/s
@@ -1220,6 +1238,20 @@ int LARGE_CYCLE_TEST01(SCOPSOWL_DATA *owl_dat)
 	owl_dat->y[2] = 0.00934;
 	owl_dat->y[3] = 0.000314;
 	owl_dat->y[4] = 0.0030325;
+	 */
+	
+	// H2O and I2 on Ag0Z
+	owl_dat->total_pressure = 101.35;//kPa
+	owl_dat->gas_temperature = 423.15;//K
+	owl_dat->gas_velocity = 1.833;//cm/s
+	owl_dat->sim_time = 200.0;//hr
+	owl_dat->t_print = 0.5;
+	owl_dat->y[0] = 0.779876175;				//-
+	owl_dat->y[1] = 0.209476;				//-
+	owl_dat->y[2] = 0.00934;				//-
+	//owl_dat->y[3] = 7.6425e-5; //I2
+	owl_dat->y[3] = 0.0; //I2
+	owl_dat->y[4] = 1.2314e-3; //H2O
 	
 	//Set Initial Conditions
 	success = set_SCOPSOWL_ICs(owl_dat);
@@ -1237,7 +1269,18 @@ int LARGE_CYCLE_TEST01(SCOPSOWL_DATA *owl_dat)
 		if (success != 0) {mError(simulation_fail); return -1;}
 		std::cout << "Evaluating time: " << owl_dat->t << " hrs..." << std::endl;
 
-		//Cycling Info Here
+		//I2 and H2O on Ag0Z
+		if (owl_dat->t > 25.0)
+		{
+			owl_dat->y[3] = 7.6425e-5;
+		}
+		if (owl_dat->t > 125.0)
+		{
+			owl_dat->y[4] = 0.0;
+		}
+		
+		//Cycling Info Here (H2O on MS3A)
+		/*
 		if (owl_dat->t > 18.3)
 		{
 			owl_dat->y[0] = 0.789994;					//-
@@ -1452,195 +1495,7 @@ int LARGE_CYCLE_TEST01(SCOPSOWL_DATA *owl_dat)
 			double m = (2.943E-5 - 3.321E-5) / (527.0 - 525.8);
 			owl_dat->y[4] = (m * (owl_dat->t - 525.8)) + 3.321E-5;
 		}
-		
-		success = SCOPSOWL_Executioner(owl_dat);
-		if (success == 0)
-		{
-			std::cout << "Simulation Successful!\n" << std::endl;
-			for (int i=0; i<owl_dat->magpie_dat.sys_dat.N; i++)
-				owl_dat->finch_dat[i].Update = true;
-		}
-		else {mError(simulation_fail); owl_dat->finch_dat[0].Update = false; return -1;}
-		owl_dat->total_steps++;
-	} while (owl_dat->t < owl_dat->sim_time);
-	
-	return success;
-}
-
-//Run a small scale cycle test
-int SMALL_CYCLE_TEST02(SCOPSOWL_DATA *owl_dat)
-{
-	int success = 0;
-	
-	//Set specific values for this test
-	owl_dat->total_pressure = 101.35;//kPa
-	owl_dat->gas_temperature = 353.15;//K
-	owl_dat->gas_velocity = 0.36;//cm/s
-	owl_dat->sim_time = 10.0;//hr
-	owl_dat->t_print = 0.05;
-	owl_dat->y[0] = 0.77471;				//-
-	owl_dat->y[1] = 0.2061;				//-
-	owl_dat->y[2] = 0.01919;				//-
-	
-	//Set Initial Conditions
-	success = set_SCOPSOWL_ICs(owl_dat);
-	if (success != 0) {mError(simulation_fail); return -1;}
-	
-	//Loop till simulation complete
-	do
-	{
-		if (owl_dat->finch_dat[0].Update == true)
-		{
-			success = SCOPSOWL_reset(owl_dat);
-			if (success != 0) {mError(simulation_fail); return -1;}
-		}
-		success = set_SCOPSOWL_timestep(owl_dat);
-		if (success != 0) {mError(simulation_fail); return -1;}
-		std::cout << "Evaluating time: " << owl_dat->t << " hrs..." << std::endl;
-		
-		//Cycling Info Here
-		if (owl_dat->t > 2.0)
-		{
-		 	owl_dat->y[0] = 0.789995;					//-
-		 	owl_dat->y[1] = 0.21;					//-
-		 	owl_dat->y[2] = 5.0E-6;					//-
-		}
-		
-		
-		success = SCOPSOWL_Executioner(owl_dat);
-		if (success == 0)
-		{
-			std::cout << "Simulation Successful!\n" << std::endl;
-			for (int i=0; i<owl_dat->magpie_dat.sys_dat.N; i++)
-				owl_dat->finch_dat[i].Update = true;
-		}
-		else {mError(simulation_fail); owl_dat->finch_dat[0].Update = false; return -1;}
-		owl_dat->total_steps++;
-	} while (owl_dat->t < owl_dat->sim_time);
-	
-	return success;
-}
-
-//Run the third curve test scenario
-int CURVE_TEST03(SCOPSOWL_DATA *owl_dat)
-{
-	int success = 0;
-	
-	//Set specific values for this test
-	owl_dat->total_pressure = 101.35;//kPa
-	owl_dat->gas_temperature = 298.15;//K
-	owl_dat->gas_velocity = 0.36;//cm/s
-	owl_dat->sim_time = 160.0;//hr
-	owl_dat->t_print = 0.16;
-	owl_dat->y[0] = 0.7898848;				//-
-	owl_dat->y[1] = 0.210076;				//-
-	owl_dat->y[2] = 3.92E-5;				//-
-	
-	//Set Initial Conditions
-	success = set_SCOPSOWL_ICs(owl_dat);
-	if (success != 0) {mError(simulation_fail); return -1;}
-	
-	//Loop till simulation complete
-	do
-	{
-		if (owl_dat->finch_dat[0].Update == true)
-		{
-			success = SCOPSOWL_reset(owl_dat);
-			if (success != 0) {mError(simulation_fail); return -1;}
-		}
-		success = set_SCOPSOWL_timestep(owl_dat);
-		if (success != 0) {mError(simulation_fail); return -1;}
-		std::cout << "Evaluating time: " << owl_dat->t << " hrs..." << std::endl;
-		
-		success = SCOPSOWL_Executioner(owl_dat);
-		if (success == 0)
-		{
-			std::cout << "Simulation Successful!\n" << std::endl;
-			for (int i=0; i<owl_dat->magpie_dat.sys_dat.N; i++)
-				owl_dat->finch_dat[i].Update = true;
-		}
-		else {mError(simulation_fail); owl_dat->finch_dat[0].Update = false; return -1;}
-		owl_dat->total_steps++;
-	} while (owl_dat->t < owl_dat->sim_time);
-	
-	return success;
-}
-
-//Run the forth curve test scenario
-int CURVE_TEST04(SCOPSOWL_DATA *owl_dat)
-{
-	int success = 0;
-	
-	//Set specific values for this test
-	owl_dat->total_pressure = 101.35;//kPa
-	owl_dat->gas_temperature = 333.15;//K
-	owl_dat->gas_velocity = 0.36;//cm/s
-	owl_dat->sim_time = 42.0;//hr
-	owl_dat->t_print = 0.03;
-	owl_dat->y[0] = 0.789677;				//-
-	owl_dat->y[1] = 0.210020;				//-
-	owl_dat->y[2] = 3.03E-4;				//-
-	
-	//Set Initial Conditions
-	success = set_SCOPSOWL_ICs(owl_dat);
-	if (success != 0) {mError(simulation_fail); return -1;}
-	
-	//Loop till simulation complete
-	do
-	{
-		if (owl_dat->finch_dat[0].Update == true)
-		{
-			success = SCOPSOWL_reset(owl_dat);
-			if (success != 0) {mError(simulation_fail); return -1;}
-		}
-		success = set_SCOPSOWL_timestep(owl_dat);
-		if (success != 0) {mError(simulation_fail); return -1;}
-		std::cout << "Evaluating time: " << owl_dat->t << " hrs..." << std::endl;
-		
-		success = SCOPSOWL_Executioner(owl_dat);
-		if (success == 0)
-		{
-			std::cout << "Simulation Successful!\n" << std::endl;
-			for (int i=0; i<owl_dat->magpie_dat.sys_dat.N; i++)
-				owl_dat->finch_dat[i].Update = true;
-		}
-		else {mError(simulation_fail); owl_dat->finch_dat[0].Update = false; return -1;}
-		owl_dat->total_steps++;
-	} while (owl_dat->t < owl_dat->sim_time);
-	
-	return success;
-}
-
-//Run the forth curve test scenario
-int CURVE_TEST05(SCOPSOWL_DATA *owl_dat)
-{
-	int success = 0;
-	
-	//Set specific values for this test
-	owl_dat->total_pressure = 101.35;//kPa
-	owl_dat->gas_temperature = 313.15;//K
-	owl_dat->gas_velocity = 0.36;//cm/s
-	owl_dat->sim_time = 75.0;//hr
-	owl_dat->t_print = 0.16;
-	owl_dat->y[0] = 0.789912393;				//-
-	owl_dat->y[1] = 0.210083;				//-
-	owl_dat->y[2] = 4.607E-6;				//-
-	
-	//Set Initial Conditions
-	success = set_SCOPSOWL_ICs(owl_dat);
-	if (success != 0) {mError(simulation_fail); return -1;}
-	
-	//Loop till simulation complete
-	do
-	{
-		if (owl_dat->finch_dat[0].Update == true)
-		{
-			success = SCOPSOWL_reset(owl_dat);
-			if (success != 0) {mError(simulation_fail); return -1;}
-		}
-		success = set_SCOPSOWL_timestep(owl_dat);
-		if (success != 0) {mError(simulation_fail); return -1;}
-		std::cout << "Evaluating time: " << owl_dat->t << " hrs..." << std::endl;
+		 */
 		
 		success = SCOPSOWL_Executioner(owl_dat);
 		if (success == 0)
@@ -1917,17 +1772,17 @@ int SCOPSOWL_TESTS()
 	dat.total_steps = 0;
 	
 	//	(1) - Scenario to Test (with initializations)
-	dat.gas_temperature = 313.15;				//K
+	dat.gas_temperature = 423.15;				//K
 	dat.total_pressure = 101.35;				//kPa
 	dat.magpie_dat.sys_dat.T = dat.gas_temperature; 			//K
 	dat.magpie_dat.sys_dat.PT = dat.total_pressure;			//kPa
-	dat.gas_velocity = 0.36;
-	//dat.gas_velocity = 1.833;					//cm/s
-	dat.sim_time = 10.0;						//hrs
-	dat.t_print = 0.05;
+	//dat.gas_velocity = 0.36;
+	dat.gas_velocity = 1.833;					//cm/s
+	dat.sim_time = 2.0;						//hrs
+	dat.t_print = 0.1;
 	dat.DirichletBC = false;					//-
-	dat.SurfDiff = true;						//-
-	dat.Heterogeneous = true;
+	dat.SurfDiff = false;						//-
+	dat.Heterogeneous = false;
 	dat.t = 0.0;								//hrs
 	dat.t_old = 0.0;							//hrs
 	dat.magpie_dat.sys_dat.N = 5;				//-
@@ -1942,20 +1797,20 @@ int SCOPSOWL_TESTS()
 	dat.param_dat[0].speciesName = "N2";
 	dat.param_dat[1].speciesName = "O2";
 	dat.param_dat[2].speciesName = "Ar";
-	dat.param_dat[3].speciesName = "CO2";
+	dat.param_dat[3].speciesName = "I2";
 	dat.param_dat[4].speciesName = "H2O";
 	
 	dat.param_dat[0].Adsorbable = false;		//-
 	dat.param_dat[1].Adsorbable = false;		//-
 	dat.param_dat[2].Adsorbable = false;		//-
-	dat.param_dat[3].Adsorbable = false;		//-
+	dat.param_dat[3].Adsorbable = true;		//-
 	dat.param_dat[4].Adsorbable = true;			//-
 	
-	dat.y[0] = 0.780485;				//-
+	dat.y[0] = 0.779876175;				//-
 	dat.y[1] = 0.209476;				//-
 	dat.y[2] = 0.00934;				//-
-	dat.y[3] = 0.000314;
-	dat.y[4] = 3.85E-4;
+	dat.y[3] = 7.6425e-5;
+	dat.y[4] = 1.2314e-3;
 	
 	dat.param_dat[0].xIC = 0.0;
 	dat.param_dat[1].xIC = 0.0;
@@ -1970,12 +1825,12 @@ int SCOPSOWL_TESTS()
 	//NOTE: Should Check Molefractions here ------------------------------
 	
 	//	(2) - Sorbent to test (with more initializations)
-	dat.coord_macro = 2;
-	dat.char_macro = 1.0;
-	dat.pellet_radius = 0.118;								//cm
-	dat.pellet_density = 1.69;								//kg/L
-	dat.binder_porosity = 0.272;							//-
-	dat.binder_poresize = 3.5E-6;							//cm
+	dat.coord_macro = 1;
+	dat.char_macro = 0.4;									//cm
+	dat.pellet_radius = 0.08;								//cm
+	dat.pellet_density = 3.06;								//kg/L
+	dat.binder_porosity = 0.384;							//-
+	dat.binder_poresize = 1.5E-4;							//cm
 	dat.coord_micro = 2;
 	dat.char_micro = 1.0;
 	dat.crystal_radius = 2.0;								//um
@@ -2005,31 +1860,31 @@ int SCOPSOWL_TESTS()
 	mixture.species_dat[0].molecular_weight = 28.016;
 	mixture.species_dat[1].molecular_weight = 32.0;
 	mixture.species_dat[2].molecular_weight = 39.948;
-	mixture.species_dat[3].molecular_weight = 44.009;
+	mixture.species_dat[3].molecular_weight = 253.808;
 	mixture.species_dat[4].molecular_weight = 18.0;
 	
 	mixture.species_dat[0].specific_heat = 1.04;
 	mixture.species_dat[1].specific_heat = 0.919;
 	mixture.species_dat[2].specific_heat = 0.522;
-	mixture.species_dat[3].specific_heat = 0.846;
+	mixture.species_dat[3].specific_heat = 0.214;
 	mixture.species_dat[4].specific_heat = 1.97;
 	
 	mixture.species_dat[0].Sutherland_Viscosity = 0.0001781;
 	mixture.species_dat[1].Sutherland_Viscosity = 0.0002018;
 	mixture.species_dat[2].Sutherland_Viscosity = 0.0002125;
-	mixture.species_dat[3].Sutherland_Viscosity = 0.000148;
+	mixture.species_dat[3].Sutherland_Viscosity = 0.00013283;
 	mixture.species_dat[4].Sutherland_Viscosity = 0.0001043;
 	
 	mixture.species_dat[0].Sutherland_Temp = 300.55;
 	mixture.species_dat[1].Sutherland_Temp = 292.25;
 	mixture.species_dat[2].Sutherland_Temp = 273.11;
-	mixture.species_dat[3].Sutherland_Temp = 293.15;
+	mixture.species_dat[3].Sutherland_Temp = 295.496;
 	mixture.species_dat[4].Sutherland_Temp = 298.16;
 	
 	mixture.species_dat[0].Sutherland_Const = 111.0;
 	mixture.species_dat[1].Sutherland_Const = 127.0;
 	mixture.species_dat[2].Sutherland_Const = 144.4;
-	mixture.species_dat[3].Sutherland_Const = 240.0;
+	mixture.species_dat[3].Sutherland_Const = 573.474;
 	mixture.species_dat[4].Sutherland_Const = 784.72;
 	
 	//	(4) - Adsorbate to test
@@ -2058,55 +1913,49 @@ int SCOPSOWL_TESTS()
 		}
 		else
 		{
-			//Theoretical Darken Parameters
-			//dat.param_dat[i].ref_diffusion = 54.208;		//um^2/hr
-			//dat.param_dat[i].activation_energy = 16848.594;	//J/mol
-			//dat.param_dat[i].ref_temperature = 166.954;			//K
-			//dat.param_dat[i].affinity = 0.000371;				//-
-			
-			//Simple Darken Parameters
-			//dat.param_dat[i].ref_diffusion = 15.8217;		//um^2/hr
-			//dat.param_dat[i].activation_energy = 10902.916;	//J/mol
-			//dat.param_dat[i].ref_temperature = 216.5132;			//K
-			//dat.param_dat[i].affinity = 0.0003701;				//-
-			
-			//Const Dc Parameters
-			dat.param_dat[i].ref_diffusion = 0.8814;		//um^2/hr
-			dat.param_dat[i].activation_energy = 0.0;	//J/mol
-			dat.param_dat[i].ref_temperature = 267.999;			//K
-			dat.param_dat[i].affinity = 0.0;				//-
-			
-			dat.magpie_dat.mspd_dat[i].v = 13.91;			//cm^3/mol
-			dat.magpie_dat.gsta_dat[i].qmax = 11.67;		//mol/kg
-			dat.magpie_dat.gsta_dat[i].m = 4;				//-
-			dat.magpie_dat.gsta_dat[i].dHo.resize(dat.magpie_dat.gsta_dat[i].m);
-			dat.magpie_dat.gsta_dat[i].dSo.resize(dat.magpie_dat.gsta_dat[i].m);
+			if (i==3) //I2
+			{
+				//Const Dc Parameters
+				dat.param_dat[i].ref_diffusion = 0.0;		//um^2/hr
+				dat.param_dat[i].activation_energy = 0.0;	//J/mol
+				dat.param_dat[i].ref_temperature = 0.0;			//K
+				dat.param_dat[i].affinity = 0.0;				//-
+				
+				dat.magpie_dat.mspd_dat[i].v = 12.32;			//cm^3/mol
+				dat.magpie_dat.gsta_dat[i].qmax = 1.062207984;		//mol/kg
+				dat.magpie_dat.gsta_dat[i].m = 1;				//-
+				dat.magpie_dat.gsta_dat[i].dHo.resize(dat.magpie_dat.gsta_dat[i].m);
+				dat.magpie_dat.gsta_dat[i].dSo.resize(dat.magpie_dat.gsta_dat[i].m);
 			 
-			dat.magpie_dat.gsta_dat[i].dHo[0] = -46597.5;	//J/mol
-			dat.magpie_dat.gsta_dat[i].dSo[0] = -53.6994;	//J/K/mol
-			dat.magpie_dat.gsta_dat[i].dHo[1] = -125024;	//J/mol
-			dat.magpie_dat.gsta_dat[i].dSo[1] = -221.073;	//J/K/mol
-			dat.magpie_dat.gsta_dat[i].dHo[2] = -193619;	//J/mol
-			dat.magpie_dat.gsta_dat[i].dSo[2] = -356.728;	//J/K/mol
-			dat.magpie_dat.gsta_dat[i].dHo[3] = -272228;	//J/mol
-			dat.magpie_dat.gsta_dat[i].dSo[3] = -567.459;	//J/K/mol
+				dat.magpie_dat.gsta_dat[i].dHo[0] = -8308.67985;	//J/mol
+				dat.magpie_dat.gsta_dat[i].dSo[0] = 92.3491515;	//J/K/mol
+				
+			}
 			
-			/*
-			dat.param_dat[i].ref_diffusion = 3.5;		//um^2/hr
-			dat.param_dat[i].activation_energy = 0.0;	//J/mol
-			dat.param_dat[i].ref_temperature = 0.0;			//K
-			dat.param_dat[i].affinity = 0.0;				//-
-			dat.magpie_dat.mspd_dat[i].v = 13.91;			//cm^3/mol
-			dat.magpie_dat.gsta_dat[i].qmax = 2.03;		//mol/kg
-			dat.magpie_dat.gsta_dat[i].m = 2;				//-
-			dat.magpie_dat.gsta_dat[i].dHo.resize(dat.magpie_dat.gsta_dat[i].m);
-			dat.magpie_dat.gsta_dat[i].dSo.resize(dat.magpie_dat.gsta_dat[i].m);
+			if (i==4) //H2O
+			{
 			
-			dat.magpie_dat.gsta_dat[i].dHo[0] = -51755.62806;	//J/mol
-			dat.magpie_dat.gsta_dat[i].dSo[0] = -53.6994;	//J/K/mol
-			dat.magpie_dat.gsta_dat[i].dHo[1] = -141243.4611;	//J/mol
-			dat.magpie_dat.gsta_dat[i].dSo[1] = -221.073;	//J/K/mol
-			*/
+				//Const Dc Parameters
+				dat.param_dat[i].ref_diffusion = 0.0;		//um^2/hr
+				dat.param_dat[i].activation_energy = 0.0;	//J/mol
+				dat.param_dat[i].ref_temperature = 0.0;			//K
+				dat.param_dat[i].affinity = 0.0;				//-
+			
+				dat.magpie_dat.mspd_dat[i].v = 13.91;			//cm^3/mol
+				dat.magpie_dat.gsta_dat[i].qmax = 3.34;		//mol/kg
+				dat.magpie_dat.gsta_dat[i].m = 3;				//-
+				dat.magpie_dat.gsta_dat[i].dHo.resize(dat.magpie_dat.gsta_dat[i].m);
+				dat.magpie_dat.gsta_dat[i].dSo.resize(dat.magpie_dat.gsta_dat[i].m);
+			 
+				dat.magpie_dat.gsta_dat[i].dHo[0] = -39183;	//J/mol
+				dat.magpie_dat.gsta_dat[i].dSo[0] = -21.787;	//J/K/mol
+				
+				dat.magpie_dat.gsta_dat[i].dHo[1] = -91175;	//J/mol
+				dat.magpie_dat.gsta_dat[i].dSo[1] = -108.684;	//J/K/mol
+				
+				dat.magpie_dat.gsta_dat[i].dHo[2] = -140640;	//J/mol
+				dat.magpie_dat.gsta_dat[i].dSo[2] = -195.408;	//J/K/mol
+			}
 		}
 		
 	}
@@ -2115,23 +1964,25 @@ int SCOPSOWL_TESTS()
 	if (dat.Heterogeneous == true)
 	{
 		success = setup_SCOPSOWL_DATA(TestOutput, default_adsorption, default_retardation, default_pore_diffusion, default_filmMassTransfer, default_Dc, (void *)&dat, &mixture, &dat);
-		//success = setup_SCOPSOWL_DATA(TestOutput, default_adsorption, default_retardation, default_pore_diffusion, default_filmMassTransfer, simple_darken_Dc, (void *)&dat, &mixture, &dat);
-		//success = setup_SCOPSOWL_DATA(TestOutput, default_adsorption, default_retardation, default_pore_diffusion, default_filmMassTransfer, theoretical_darken_Dc, (void *)&dat, &mixture, &dat);
 	}
 	//Setups for Homo Pellet
-	else
+	else if (dat.Heterogeneous == false && dat.SurfDiff == true)
 	{
 		success = setup_SCOPSOWL_DATA(TestOutput, default_adsorption, default_retardation, default_pore_diffusion, default_filmMassTransfer, default_surf_diffusion, (void *)&dat, &mixture, &dat);
+	}
+	else if (dat.Heterogeneous == false && dat.SurfDiff == false)
+	{
+		success = setup_SCOPSOWL_DATA(TestOutput, default_adsorption, default_retardation, default_pore_diffusion, default_filmMassTransfer, zero_surf_diffusion, (void *)&dat, &mixture, &dat);
+	}
+	else
+	{
+		//Nothing
 	}
 	if (success != 0) {mError(simulation_fail); return -1;}
 		
 	//Call Routine
-	success = SCOPSOWL(&dat);
-	//success = LARGE_CYCLE_TEST01(&dat);
-	//success = SMALL_CYCLE_TEST02(&dat);
-	//success = CURVE_TEST03(&dat);
-	//success = CURVE_TEST04(&dat);
-	//success = CURVE_TEST05(&dat);
+	//success = SCOPSOWL(&dat);
+	success = LARGE_CYCLE_TEST(&dat);
 	if (success != 0) {mError(simulation_fail); return -1;}
 		
 	//END execution
