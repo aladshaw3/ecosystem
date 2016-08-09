@@ -3,15 +3,15 @@
 Scenario:
 ---
 - vars_fun:
-  numvar: 65
+  numvar: 62
   num_ssr: 48
   num_mbe: 10
   num_ssao: 1
 
 - ss_ads_objs:
   - obj01:
-    name: AH(OH)2 (s)
-    num_rxns: 6 
+    name: IDO 2- (ad)
+    num_rxns: 3 
 
 - sys_data:
   act_fun: davies    
@@ -104,76 +104,40 @@ MasterSpecies:
 
 - unreg:
   - 59: 
-    formula: UO2AHOOH + (s)
+    formula: H3IDO + (ad)
     charge: 1
     enthalpy: 0
     entropy: 0
     have_HS: false
     energy: 0
     have_G: false
-    phase: Solid
-    name: Uranyl-amidoximate
-    lin_form: UO4H2
+    phase: solid
+    name: imide-dioxime
+    lin_form: H3
 
   - 60: 
-    formula: UO2(AHOOH)2 (s)
+    formula: H2IDO (ad)
     charge: 0
     enthalpy: 0
     entropy: 0
     have_HS: false
     energy: 0
     have_G: false
-    phase: Solid
-    name: Uranyl-diamidoximate
-    lin_form: UO6H4
+    phase: solid
+    name: imide-dioxime
+    lin_form: H2
 
   - 61: 
-    formula: UO2CO3AHOOH - (s)
+    formula: HIDO - (ad)
     charge: -1
     enthalpy: 0
     entropy: 0
     have_HS: false
     energy: 0
     have_G: false
-    phase: Solid
-    name: Uranyl-carbonate-amidoximate
-    lin_form: UO4H2CO3
-
-  - 62: 
-    formula: UO2CO3(AHOOH)2 2- (s)
-    charge: -2
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: Solid
-    name: Uranyl-carbonate-diamidoximate
-    lin_form: UO6H4CO3
-
-  - 63: 
-    formula: VO2AHOO - (s)
-    charge: -1
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: Solid
-    name: Vanadyl-amidoximate
-    lin_form: VO4H
-
-  - 64: 
-    formula: V(AOO)2 - (s)
-    charge: -1
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: Solid
-    name: Vanadium-diamidoximate
-    lin_form: VO4
+    phase: solid
+    name: imide-dioxime
+    lin_form: H
 
 ...
 
@@ -205,8 +169,6 @@ MassBalance:
     "MgUO2(CO3)3 2- (aq)": 3
     "VO2OHCO3 2- (aq)": 1
     "VO2(CO3)2 3- (aq)": 2
-    "UO2CO3AHOOH - (s)": 1
-    "UO2CO3(AHOOH)2 2- (s)": 1
 
 - sodium: 
   total_conc: 0.468
@@ -247,10 +209,6 @@ MassBalance:
     "UO2Cl3 - (aq)": 1
     "UO2SO4 (aq)": 1
     "UO2(SO4)2 2- (aq)": 1
-    "UO2AHOOH + (s)": 1
-    "UO2(AHOOH)2 (s)": 1
-    "UO2CO3AHOOH - (s)": 1
-    "UO2CO3(AHOOH)2 2- (s)": 1
 
 - chlorine:
   total_conc: 0.546
@@ -316,8 +274,6 @@ MassBalance:
     "VO2SO4 - (aq)": 1
     "VO2OHCO3 2- (aq)": 1
     "VO2(CO3)2 3- (aq)": 1
-    "VO2AHOO - (s)": 1
-    "V(AOO)2 - (s)": 1
 
 - potassium:
   total_conc: 0.0096
@@ -641,7 +597,7 @@ EquilRxn:
 
 ...
 
-"AH(OH)2 (s)":
+"IDO 2- (ad)":
 ---
 basis: molar
 spec_area: 45000.0     #Units: m^2/kg
@@ -649,56 +605,27 @@ spec_mole: 3.75       #Units: mol/kg
 total_mass: 1.51e-5     #Units: kg
 surf_activity: uniquac
 include_surfcharge: true
+surf_charge: -2
 
 - rxn01:
-  logK: -5
+  logK: 12.85
   mole_factor: 1.0
   - stoichiometry:
-    "UO2 2+ (aq)": -1
-    "H + (aq)": 1
-    "UO2AHOOH + (s)": 1
+    "H + (aq)": -1
+    "HIDO - (ad)": 1
 
 - rxn02:
-  logK: -3.8
-  mole_factor: 2.0
+  logK: 23.84
+  mole_factor: 1.0
   - stoichiometry:
-    "UO2 2+ (aq)": -1
-    "H + (aq)": 2
-    "UO2(AHOOH)2 (s)": 1
+    "H + (aq)": -2
+    "H2IDO (ad)": 1
 
 - rxn03:
-  logK: 4
+  logK: 25.97
   mole_factor: 1.0
   - stoichiometry:
-    "UO2 2+ (aq)": -1
-    "H + (aq)": 1
-    "CO3 2- (aq)": -1
-    "UO2CO3AHOOH - (s)": 1
-
-- rxn04:
-  logK: 9
-  mole_factor: 2.0
-  - stoichiometry:
-    "UO2 2+ (aq)": -1
-    "H + (aq)": 2
-    "CO3 2- (aq)": -1
-    "UO2CO3(AHOOH)2 2- (s)": 1
-
-- rxn05:
-  logK: 3
-  mole_factor: 1.0
-  - stoichiometry:
-    "VO2 + (aq)": -1
-    "H + (aq)": 2
-    "VO2AHOO - (s)": 1
-
-- rxn06:
-  logK: 3.4
-  mole_factor: 2.0
-  - stoichiometry:
-    "VO2 + (aq)": -1
-    "H + (aq)": 2
-    "H2O (l)": 2
-    "V(AOO)2 - (s)": 1
+    "H + (aq)": -3
+    "H3IDO + (ad)": 1
 
 ...
