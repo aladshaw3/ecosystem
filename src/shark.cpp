@@ -6546,6 +6546,7 @@ int shark_guess(SHARK_DATA *shark_dat)
 		else
 			shark_dat->Conc_new.edit(shark_dat->pOH_index, 0, 10.0);
 	}
+	
 	success = Convert2LogConcentration(shark_dat->Conc_new, shark_dat->X_new);
 	if (success != 0) {mError(simulation_fail); return -1;}
 
