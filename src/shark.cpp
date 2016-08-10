@@ -1566,7 +1566,7 @@ int AdsorptionReaction::setAdsorbIndices()
 	{
 		for (int n=0; n<this->List->list_size(); n++)
 		{
-			if (this->ads_rxn[i].Get_Stoichiometric(n) != 0.0 && (this->List->get_species(n).MoleculePhaseID() == SOLID || this->List->get_species(i).MoleculePhaseID() == ADSORBED))
+			if (this->ads_rxn[i].Get_Stoichiometric(n) != 0.0 && (this->List->get_species(n).MoleculePhaseID() == SOLID || this->List->get_species(n).MoleculePhaseID() == ADSORBED))
 			{
 				this->adsorb_index[i] = n;
 				break;
@@ -1933,7 +1933,7 @@ double AdsorptionReaction::calculateLangmuirEquParam(const Matrix<double> &x, co
 
 	for (int n=0; n<this->List->list_size(); n++)
 	{
-		if (n != this->getAqueousIndex(i) && this->List->get_species(n).MoleculePhaseID() != SOLID && this->List->get_species(i).MoleculePhaseID() != ADSORBED)
+		if (n != this->getAqueousIndex(i) && this->List->get_species(n).MoleculePhaseID() != SOLID && this->List->get_species(n).MoleculePhaseID() != ADSORBED)
 		{
 			if (this->getReaction(i).Get_Stoichiometric(n) > 0.0)
 			{
@@ -2307,7 +2307,7 @@ int UnsteadyAdsorption::setAdsorbIndices()
 	{
 		for (int n=0; n<this->List->list_size(); n++)
 		{
-			if (this->ads_rxn[i].Get_Stoichiometric(n) != 0.0 && (this->List->get_species(n).MoleculePhaseID() == SOLID || this->List->get_species(i).MoleculePhaseID() == ADSORBED))
+			if (this->ads_rxn[i].Get_Stoichiometric(n) != 0.0 && (this->List->get_species(n).MoleculePhaseID() == SOLID || this->List->get_species(n).MoleculePhaseID() == ADSORBED))
 			{
 				this->adsorb_index[i] = n;
 				this->ads_rxn[i].Set_Species_Index(n);
