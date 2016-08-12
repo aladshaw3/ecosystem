@@ -2,8 +2,14 @@ Scenario:
 ---
 - vars_fun:
   numvar: 44
-  num_ssr: 36
-  num_mbe: 7
+  num_ssr: 29
+  num_mbe: 6
+  num_ssao: 1
+
+- ss_ads_objs:
+  - obj01:
+    name: IDO 2- (ad)
+    num_rxns: 8 
 
 - sys_data:
   act_fun: davies    
@@ -71,117 +77,105 @@ MasterSpecies:
 
 - unreg:
   - 36: 
-    formula: AO - (ad)
-    charge: -1
+    formula: UO2IDO (ad)
+    charge: 0
     enthalpy: 0
     entropy: 0
     have_HS: false
     energy: 0
     have_G: false
-    phase: aqueous
-    name: imide-dioxime
-    lin_form: none
+    phase: adsorbed
+    name: uranyl-imide-dioxime
+    lin_form: UO2
 
   - 37: 
-    formula: HAO (ad)
-    charge: 0
+    formula: UO2HIDO + (ad)
+    charge: 1
     enthalpy: 0
     entropy: 0
     have_HS: false
     energy: 0
     have_G: false
-    phase: aqueous
-    name: imide-dioxime
-    lin_form: H
+    phase: adsorbed
+    name: uranyl-imide-dioxime
+    lin_form: UO2H
 
   - 38: 
-    formula: H2AO + (ad)
-    charge: 1
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: aqueous
-    name: imide-dioxime
-    lin_form: H
-
-  - 39: 
-    formula: UO2AO + (ad)
-    charge: 1
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: aqueous
-    name: imide-dioxime
-    lin_form: UO2
-
-  - 40: 
-    formula: UO2(AO)2 (ad)
-    charge: 0
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: aqueous
-    name: uranyl-imide-dioxime
-    lin_form: UO2
-
-  - 41: 
-    formula: UO2(AO)3 - (ad)
-    charge: -1
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: aqueous
-    name: uranyl-imide-dioxime
-    lin_form: UO2
-
-  - 42: 
-    formula: UO2CO3AO - (ad)
-    charge: -1
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: aqueous
-    name: uranyl-diimide-dioxime
-    lin_form: UO2CO3
-
-  - 43: 
-    formula: UO2CO3(AO)2 2- (ad)
+    formula: UO2(IDO)2 2- (ad)
     charge: -2
     enthalpy: 0
     entropy: 0
     have_HS: false
     energy: 0
     have_G: false
-    phase: aqueous
+    phase: adsorbed
     name: uranyl-diimide-dioxime
-    lin_form: UO2CO3
+    lin_form: U2O4
+
+  - 39: 
+    formula: UO2(HIDO)IDO - (ad)
+    charge: -1
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: uranyl-diimide-dioxime
+    lin_form: U2O4H
+
+  - 40: 
+    formula: UO2(HIDO)2 (ad)
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: uranyl-diimide-dioxime
+    lin_form: U2O4H2
+
+  - 41: 
+    formula: H3IDO + (ad)
+    charge: 1
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: imide-dioxime
+    lin_form: H3
+
+  - 42: 
+    formula: H2IDO (ad)
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: imide-dioxime
+    lin_form: H2
+
+  - 43: 
+    formula: HIDO - (ad)
+    charge: -1
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: imide-dioxime
+    lin_form: H
 
 ...
 
 MassBalance:
 ---
-- AO:
-  total_conc: 0.000116
-  - delta: 
-    "AO - (ad)": 1
-    "HAO (ad)": 1
-    "H2AO + (ad)": 1
-    "UO2AO + (ad)": 1
-    "UO2(AO)2 (ad)": 2
-    "UO2(AO)3 - (ad)": 3
-    "UO2CO3AO - (ad)": 1
-    "UO2CO3(AO)2 2- (ad)": 2
-
 - water:
   total_conc: 1
   - delta: 
@@ -199,8 +193,6 @@ MassBalance:
     "UO2CO3 (aq)": 1
     "UO2(CO3)2 2- (aq)": 2
     "UO2(CO3)3 4- (aq)": 3
-    "UO2CO3AO - (ad)": 1
-    "UO2CO3(AO)2 2- (ad)": 1
 
 - nitrate:
   total_conc: 6.454E-05
@@ -242,11 +234,11 @@ MassBalance:
     "UO2Cl + (aq)": 1
     "UO2Cl2 (aq)": 1
     "UO2Cl3 - (aq)": 1
-    "UO2AO + (ad)": 1
-    "UO2(AO)2 (ad)": 1
-    "UO2(AO)3 - (ad)": 1
-    "UO2CO3AO - (ad)": 1
-    "UO2CO3(AO)2 2- (ad)": 1
+    "UO2IDO (ad)": 1
+    "UO2HIDO + (ad)": 1
+    "UO2(IDO)2 2- (ad)": 1
+    "UO2(HIDO)IDO - (ad)": 1
+    "UO2(HIDO)2 (ad)": 1
 
 - chlorine:
   total_conc: 0.43
@@ -447,55 +439,75 @@ EquilRxn:
     "UO2 2+ (aq)": -1
     "UO2Cl3 - (aq)": 1
 
-- rxn29:
-  logK: 13.21
+...
+
+"IDO 2- (ad)":
+---
+basis: molar
+spec_area: 45000.0     #Units: m^2/kg
+spec_mole: 2.9       #Units: mol/kg
+total_mass: 1.51e-5     #Units: kg
+surf_activity: uniquac
+include_surfcharge: true
+surf_charge: -2
+
+- rxn01:
+  logK: 12.85
+  mole_factor: 1.0
   - stoichiometry:
-    "AO - (ad)": -1
     "H + (aq)": -1
-    "HAO (ad)": 1
+    "HIDO - (ad)": 1
 
-- rxn30:
-  logK: 18.99
+- rxn02:
+  logK: 23.84
+  mole_factor: 1.0
   - stoichiometry:
-    "AO - (ad)": -1
     "H + (aq)": -2
-    "H2AO + (ad)": 1
+    "H2IDO (ad)": 1
 
-- rxn31:
-  logK: 13.6
+- rxn03:
+  logK: 25.97
+  mole_factor: 1.0
+  - stoichiometry:
+    "H + (aq)": -3
+    "H3IDO + (ad)": 1
+
+- rxn04:
+  logK: 19.2
+  mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
-    "AO - (ad)": -1
-    "UO2AO + (ad)": 1
+    "UO2IDO (ad)": 1
 
-- rxn32:
-  logK: 23.7
+- rxn05:
+  logK: 23.5
+  mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
-    "AO - (ad)": -2
-    "UO2(AO)2 (ad)": 1
+    "H + (aq)": -1
+    "UO2HIDO + (ad)": 1
 
-- rxn33:
-  logK: 31.5
+- rxn06:
+  logK: 29.0
+  mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
-    "AO - (ad)": -3
-    "UO2(AO)3 - (ad)": 1
+    "UO2(IDO)2 2- (ad)": 1
 
-- rxn34:
-  logK: 20.7
+- rxn07:
+  logK: 38.9
+  mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
-    "CO3 2- (aq)": -1
-    "AO - (ad)": -1
-    "UO2CO3AO - (ad)": 1
+    "H + (aq)": -1
+    "UO2(HIDO)IDO - (ad)": 1
 
-- rxn35:
-  logK: 29.4
+- rxn08:
+  logK: 44.2
+  mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
-    "CO3 2- (aq)": -1
-    "AO - (ad)": -2
-    "UO2CO3(AO)2 2- (ad)": 1
+    "H + (aq)": -2
+    "UO2(HIDO)2 (ad)": 1
 
 ...

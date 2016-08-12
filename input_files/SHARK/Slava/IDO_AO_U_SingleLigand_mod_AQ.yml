@@ -71,8 +71,8 @@ MasterSpecies:
 
 - unreg:
   - 36: 
-    formula: IDO 2- (ad)
-    charge: -2
+    formula: H2IDO (ad)
+    charge: 0
     enthalpy: 0
     entropy: 0
     have_HS: false
@@ -107,8 +107,8 @@ MasterSpecies:
     lin_form: UO2H
 
   - 39: 
-    formula: AO - (ad)
-    charge: -1
+    formula: HAO (ad)
+    charge: 0
     enthalpy: 0
     entropy: 0
     have_HS: false
@@ -147,16 +147,16 @@ MasterSpecies:
 MassBalance:
 ---
 - IDO:
-  total_conc: 0.00000058
+  total_conc: 0.000058
   - delta: 
-    "IDO 2- (ad)": 1
+    "H2IDO (ad)": 1
     "UO2HIDO + (ad)": 1
     "UO2IDO (ad)": 1
 
 - AO:
-  total_conc: 0.00000058
+  total_conc: 0.000058
   - delta: 
-    "AO - (ad)": 1
+    "HAO (ad)": 1
     "UO2AO + (ad)": 1
     "UO2CO3AO - (ad)": 1
 
@@ -424,34 +424,37 @@ EquilRxn:
     "UO2Cl3 - (aq)": 1
 
 - rxn29:
-  logK: 19.2
+  logK: -4.64
   - stoichiometry:
     "UO2 2+ (aq)": -1
-    "IDO 2- (ad)": -1
+    "H2IDO (ad)": -1
     "UO2IDO (ad)": 1
+    "H + (aq)": 2
 
 - rxn30:
-  logK: 23.5
+  logK: -0.34
   - stoichiometry:
     "UO2 2+ (aq)": -1
-    "H + (aq)": -1
-    "IDO 2- (ad)": -1
+    "H + (aq)": 1
+    "H2IDO (ad)": -1
     "UO2HIDO + (ad)": 1
 
 - rxn31:
-  logK: 13.6
+  logK: 0.39
   - stoichiometry:
     "UO2 2+ (aq)": -1
-    "AO - (ad)": -1
+    "HAO (ad)": -1
     "UO2AO + (ad)": 1
+    "H + (aq)": 1
 
 - rxn32:
-  logK: 20.7
+  logK: 7.49
   - stoichiometry:
     "UO2 2+ (aq)": -1
     "CO3 2- (aq)": -1
-    "AO - (ad)": -1
+    "HAO (ad)": -1
     "UO2CO3AO - (ad)": 1
+    "H + (aq)": 1
 
 
 ...

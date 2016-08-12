@@ -279,7 +279,7 @@ MasterSpecies:
 MassBalance:
 ---
 - IDO:
-  total_conc: 0.0002
+  total_conc: 1.044e-4
   - delta: 
     "IDO 2- (ad)": 1
     "UO2(HIDO)2 (ad)": 2
@@ -292,7 +292,7 @@ MassBalance:
     "H3IDO + (ad)": 1
 
 - AO:
-  total_conc: 0.0008
+  total_conc: 1.16e-5
   - delta: 
     "AO - (ad)": 1
     "HAO (ad)": 1

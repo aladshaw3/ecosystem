@@ -1,0 +1,318 @@
+Scenario:
+---
+- vars_fun:
+  numvar: 28
+  num_ssr: 19
+  num_mbe: 5
+  num_ssao: 1
+
+- ss_ads_objs:
+  - obj01:
+    name: H2IDO (ad)
+    num_rxns: 3       
+
+- sys_data:
+  act_fun: davies    
+  const_pH: false	
+  temp: 293.15        
+  dielec: 78.325     
+  volume: 0.75       #Units: L
+
+- run_time:
+  steady: true        
+  specs_curve: true  
+  pH_step: 0.25
+  
+...
+
+SolverOptions:
+---
+line_search: true      
+search_type: standard
+linear_solve: fom   
+nl_abstol: 1e-4   		
+
+...
+
+MasterSpecies:
+---
+- reg:
+  0: Cl - (aq)
+  1: Cl2 (aq)
+  2: H2O (l)
+  3: H + (aq)
+  4: OH - (aq)
+  5: H2CO3 (aq)
+  6: HCO3 - (aq)
+  7: CO3 2- (aq)
+  8: HCl (aq)
+  9: NaHCO3 (aq)
+  10: NaCO3 - (aq)
+  11: Na2CO3 (aq)
+  12: Na + (aq)
+  13: NaCl (aq)
+  14: NaOH (aq)
+  15: VO2 + (aq)
+  16: H4VO4 + (aq)
+  17: H3VO4 (aq)
+  18: H2VO4 - (aq)
+  19: HVO4 2- (aq)
+  20: VO4 3- (aq)
+  21: HV2O7 3- (aq)
+  22: V2O7 4- (aq)
+  23: VO2OHCO3 2- (aq)
+  24: VO2(CO3)2 3- (aq)
+
+- unreg:
+  - 25: 
+    formula: VO2IDO - (ad)
+    charge: -1
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Vanadyl-amidoximate
+    lin_form: VO2
+
+  - 26: 
+    formula: VO2HIDO (ad)
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Vanadium-diamidoximate
+    lin_form: VO2H
+
+  - 27: 
+    formula: V(IDO_H)2 - (ad)
+    charge: -1
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Vanadium-diamidoximate
+    lin_form: V2
+
+...
+
+MassBalance:
+---
+- water:
+  total_conc: 1
+  - delta: 
+    "H2O (l)": 1
+
+- carbonate:
+  total_conc: 0.002290951
+  - delta: 
+    "NaHCO3 (aq)": 1
+    "NaCO3 - (aq)": 1 
+    "Na2CO3 (aq)": 1
+    "H2CO3 (aq)": 1 
+    "HCO3 - (aq)": 1
+    "CO3 2- (aq)": 1
+    "VO2OHCO3 2- (aq)": 1
+    "VO2(CO3)2 3- (aq)": 2
+
+- sodium: 
+  total_conc: 0.432465656
+  - delta:
+    "NaHCO3 (aq)": 1
+    "NaCO3 - (aq)": 1
+    "Na2CO3 (aq)": 2
+    "Na + (aq)": 1
+    "NaCl (aq)": 1
+    "NaOH (aq)": 1
+
+- vanadium:
+  total_conc: 5.8235E-05
+  - delta:
+    "VO2 + (aq)": 1
+    "H4VO4 + (aq)": 1 
+    "H3VO4 (aq)": 1 
+    "H2VO4 - (aq)": 1 
+    "HVO4 2- (aq)": 1
+    "VO4 3- (aq)": 1
+    "HV2O7 3- (aq)": 2
+    "V2O7 4- (aq)": 2
+    "VO2OHCO3 2- (aq)": 1
+    "VO2(CO3)2 3- (aq)": 1
+    "VO2IDO - (ad)": 1
+    "VO2HIDO (ad)": 1
+    "V(IDO_H)2 - (ad)": 1
+
+- chlorine:
+  total_conc: 0.43
+  - delta:
+    "Cl - (aq)": 1
+    "Cl2 (aq)": 2
+    "HCl (aq)": 1
+    "NaCl (aq)": 1
+
+...
+
+EquilRxn:
+---
+- rxn00:
+  - stoichiometry:
+    "H2O (l)": -1
+    "OH - (aq)": 1
+    "H + (aq)": 1
+
+- rxn01:
+  - stoichiometry:
+    "H2CO3 (aq)": -1
+    "HCO3 - (aq)": 1
+    "H + (aq)": 1
+
+- rxn02:
+  - stoichiometry:
+    "HCO3 - (aq)": -1
+    "CO3 2- (aq)": 1
+    "H + (aq)": 1
+
+- rxn03:
+  - stoichiometry:
+    "NaHCO3 (aq)": -1
+    "Na + (aq)": 1
+    "CO3 2- (aq)": 1
+    "H + (aq)": 1
+
+- rxn04:
+  - stoichiometry:
+    "NaCO3 - (aq)": -1
+    "Na + (aq)": 1
+    "CO3 2- (aq)": 1
+
+- rxn05:
+  - stoichiometry:
+    "NaCl (aq)": -1 
+    "Na + (aq)": 1
+    "Cl - (aq)": 1
+
+- rxn06:
+  - stoichiometry:
+    "Cl - (aq)": -2
+    "Cl2 (aq)": 1
+
+- rxn07:
+  - stoichiometry:
+    "Na2CO3 (aq)": -1
+    "Na + (aq)": 2
+    "CO3 2- (aq)": 1
+
+- rxn08:
+  - stoichiometry:
+    "HCl (aq)": -1 
+    "H + (aq)": 1
+    "Cl - (aq)": 1
+
+- rxn09:
+  - stoichiometry:
+    "NaOH (aq)": -1 
+    "Na + (aq)": 1
+    "OH - (aq)": 1
+
+- rxn10:
+  - stoichiometry:
+    "VO2 + (aq)": -1
+    "H2O (l)": -2
+    "VO4 3- (aq)": 1
+    "H + (aq)": 4
+
+- rxn11:
+  - stoichiometry:
+    "VO2 + (aq)": -2
+    "H2O (l)": -3
+    "V2O7 4- (aq)": 1
+    "H + (aq)": 6
+
+- rxn12:
+  - stoichiometry:
+    "H4VO4 + (aq)": -1
+    "H + (aq)": 1
+    "H3VO4 (aq)": 1
+
+- rxn13:
+  - stoichiometry:
+    "H3VO4 (aq)": -1
+    "H + (aq)": 1
+    "H2VO4 - (aq)": 1
+
+- rxn14:
+  - stoichiometry:
+    "H2VO4 - (aq)": -1
+    "H + (aq)": 1
+    "HVO4 2- (aq)": 1
+
+- rxn15:
+  - stoichiometry:
+    "HVO4 2- (aq)": -1
+    "H + (aq)": 1
+    "VO4 3- (aq)": 1
+
+- rxn16:
+  - stoichiometry:
+    "HV2O7 3- (aq)": -1
+    "H + (aq)": 1
+    "V2O7 4- (aq)": 1
+
+- rxn17:
+  - stoichiometry:
+    "H2VO4 - (aq)": -1
+    "H + (aq)": -1
+    "CO3 2- (aq)": -1
+    "H2O (l)": 1
+    "VO2OHCO3 2- (aq)": 1
+
+- rxn18:
+  - stoichiometry:
+    "H2VO4 - (aq)": -1
+    "H + (aq)": -2
+    "CO3 2- (aq)": -2
+    "H2O (l)": 2
+    "VO2(CO3)2 3- (aq)": 1
+
+...
+
+"H2IDO (ad)":
+---
+basis: molar
+spec_area: 45000.0     #Units: m^2/kg
+spec_mole: 2.9      #Units: mol/kg
+total_mass: 1.51e-5     #Units: kg
+surf_activity: uniquac
+
+- rxn01:
+  logK: -5.54 #-5.54
+  mole_factor: 1.0
+  - stoichiometry:
+    "VO2 + (aq)": -1
+    "H + (aq)": 2
+    "VO2IDO - (ad)": 1
+
+- rxn02:
+  logK: 1.49 #-2.49
+  mole_factor: 1.0
+  - stoichiometry:
+    "VO2 + (aq)": -1
+    "H + (aq)": 1
+    "VO2HIDO (ad)": 1
+
+- rxn03:
+  logK: 5.52 #-1.48
+  mole_factor: 2.0
+  - stoichiometry:
+    "VO2 + (aq)": -1
+    "H + (aq)": 2
+    "H2O (l)": 2
+    "V(IDO_H)2 - (ad)": 1
+
+...
