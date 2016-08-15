@@ -110,7 +110,7 @@ MasterSpecies:
     have_G: false
     phase: adsorbed
     name: uranyl-diimide-dioxime
-    lin_form: U2O4
+    lin_form: UO2
 
   - 39: 
     formula: UO2(HIDO)IDO - (ad)
@@ -122,7 +122,7 @@ MasterSpecies:
     have_G: false
     phase: adsorbed
     name: uranyl-diimide-dioxime
-    lin_form: U2O4H
+    lin_form: UO2H
 
   - 40: 
     formula: UO2(HIDO)2 (ad)
@@ -134,7 +134,7 @@ MasterSpecies:
     have_G: false
     phase: adsorbed
     name: uranyl-diimide-dioxime
-    lin_form: U2O4H2
+    lin_form: UO2H2
 
 ...
 

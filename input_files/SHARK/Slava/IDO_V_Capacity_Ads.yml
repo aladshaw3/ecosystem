@@ -98,7 +98,7 @@ MasterSpecies:
     have_G: false
     phase: adsorbed
     name: Vanadium-diamidoximate
-    lin_form: V2
+    lin_form: V
 
 ...
 

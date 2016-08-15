@@ -86,7 +86,7 @@ MasterSpecies:
     have_G: false
     phase: adsorbed
     name: Vanadium-diamidoximate
-    lin_form: V2O4
+    lin_form: VO2
 
   - 27: 
     formula: VOOH(AO)2 (ad)
@@ -98,7 +98,7 @@ MasterSpecies:
     have_G: false
     phase: adsorbed
     name: Vanadium-diamidoximate
-    lin_form: V2O4H2
+    lin_form: VO2H
 
   - 28: 
     formula: V(AO)(AO_H)2 (ad)
@@ -110,7 +110,7 @@ MasterSpecies:
     have_G: false
     phase: adsorbed
     name: Vanadium-diamidoximate
-    lin_form: V3
+    lin_form: V
 
   - 29: 
     formula: V(AO)3 2+ (ad)
@@ -122,7 +122,7 @@ MasterSpecies:
     have_G: false
     phase: adsorbed
     name: Vanadium-diamidoximate
-    lin_form: V3
+    lin_form: V
 
 ...
 
