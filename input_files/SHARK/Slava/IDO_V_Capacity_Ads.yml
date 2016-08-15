@@ -288,7 +288,7 @@ basis: molar
 spec_area: 45000.0     #Units: m^2/kg
 spec_mole: 2.9      #Units: mol/kg
 total_mass: 1.51e-5     #Units: kg
-surf_activity: floryhuggins
+surf_activity: uniquac
 
 
 - rxn06:

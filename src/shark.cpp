@@ -3534,7 +3534,7 @@ int UNIQUAC(const Matrix<double> &x, Matrix<double> &F, const void *data)
 		r[i] = dat->getVolumeFactor(dat->getAdsorbIndex(i)) / VolumeSTD;
 		s[i] = dat->getAreaFactor(dat->getAdsorbIndex(i)) / AreaSTD;
 		l[i] = LengthFactor(CoordSTD, r[i], s[i]);
-		u[i] = -dat->getReaction(i).Get_Energy()/s[i];
+		u[i] = -dat->getReaction(i).Get_Energy()/s[i]/CoordSTD/CoordSTD;
 		rx_sum = rx_sum + (r[i]*frac[i]);
 		sx_sum = sx_sum + (s[i]*frac[i]);
 		lx_sum = lx_sum + (l[i]*frac[i]);
@@ -3554,17 +3554,17 @@ int UNIQUAC(const Matrix<double> &x, Matrix<double> &F, const void *data)
 		//Inner j loop
 		for (int j=0; j<dat->getNumberRxns(); j++)
 		{
-			theta_tau_i = theta_tau_i + ( theta[j]*exp(-(u[j] - u[i])/(Rstd*Temp*CoordSTD/3.0)) );
+			theta_tau_i = theta_tau_i + ( theta[j]*exp(-(sqrt(fabs(u[j]*u[i])) - u[i])/(Rstd*Temp)) );
 			
 			double theta_tau_k = 0.0;
 			// k loop
 			for (int k=0; k<dat->getNumberRxns(); k++)
 			{
-				theta_tau_k = theta_tau_k + ( theta[k]*exp(-(u[k] - u[j])/(Rstd*Temp*CoordSTD/3.0)) );
+				theta_tau_k = theta_tau_k + ( theta[k]*exp(-(sqrt(fabs(u[k]*u[j])) - u[j])/(Rstd*Temp)) );
 				
 			}// End k Loop
 			
-			theta_tau_rat = theta_tau_rat + ( (theta[j]*exp(-(u[i] - u[j])/(Rstd*Temp*CoordSTD/3.0)) )/theta_tau_k);
+			theta_tau_rat = theta_tau_rat + ( (theta[j]*exp(-(sqrt(fabs(u[i]*u[j])) - u[j])/(Rstd*Temp)) )/theta_tau_k);
 			
 		}// End j loop
 		
