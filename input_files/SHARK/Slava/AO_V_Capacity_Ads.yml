@@ -1,15 +1,15 @@
 Scenario:
 ---
 - vars_fun:
-  numvar: 28
+  numvar: 30
   num_ssr: 19
   num_mbe: 5
   num_ssao: 1
 
 - ss_ads_objs:
   - obj01:
-    name: H2IDO (ad)
-    num_rxns: 3       
+    name: HAO (ad)
+    num_rxns: 5       
 
 - sys_data:
   act_fun: davies    
@@ -65,8 +65,8 @@ MasterSpecies:
 
 - unreg:
   - 25: 
-    formula: VO2IDO - (ad)
-    charge: -1
+    formula: VO2AO (ad)
+    charge: 0
     enthalpy: 0
     entropy: 0
     have_HS: false
@@ -77,19 +77,7 @@ MasterSpecies:
     lin_form: VO2
 
   - 26: 
-    formula: VO2HIDO (ad)
-    charge: 0
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: adsorbed
-    name: Vanadium-diamidoximate
-    lin_form: VO2H
-
-  - 27: 
-    formula: V(IDO_H)2 - (ad)
+    formula: VO2(AO)2 - (ad)
     charge: -1
     enthalpy: 0
     entropy: 0
@@ -98,7 +86,43 @@ MasterSpecies:
     have_G: false
     phase: adsorbed
     name: Vanadium-diamidoximate
-    lin_form: V2
+    lin_form: V2O4
+
+  - 27: 
+    formula: VOOH(AO)2 (ad)
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Vanadium-diamidoximate
+    lin_form: V2O4H2
+
+  - 28: 
+    formula: V(AO)(AO_H)2 (ad)
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Vanadium-diamidoximate
+    lin_form: V3
+
+  - 29: 
+    formula: V(AO)3 2+ (ad)
+    charge: 2
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Vanadium-diamidoximate
+    lin_form: V3
 
 ...
 
@@ -144,9 +168,11 @@ MassBalance:
     "V2O7 4- (aq)": 2
     "VO2OHCO3 2- (aq)": 1
     "VO2(CO3)2 3- (aq)": 1
-    "VO2IDO - (ad)": 1
-    "VO2HIDO (ad)": 1
-    "V(IDO_H)2 - (ad)": 1
+    "VO2AO (ad)": 1
+    "VO2(AO)2 - (ad)": 1
+    "VOOH(AO)2 (ad)": 1
+    "V(AO)(AO_H)2 (ad)": 1
+    "V(AO)3 2+ (ad)": 1
 
 - chlorine:
   total_conc: 0.43
@@ -282,7 +308,7 @@ EquilRxn:
 
 ...
 
-"H2IDO (ad)":
+"HAO (ad)":
 ---
 basis: molar
 spec_area: 45000.0     #Units: m^2/kg
@@ -290,57 +316,49 @@ spec_mole: 2.9      #Units: mol/kg
 total_mass: 1.51e-5     #Units: kg
 surf_activity: floryhuggins
 
-
-- rxn06:
-  logK: 24.61
-  mole_factor: 1.0
-  - stoichiometry:
-    "VO4 3- (aq)": -1
-    "H + (aq)": -2
-    "VO2IDO - (ad)": 1
-    "H2O (l)": 2
-
-- rxn07:
-  logK: 27.66
+- rxn01:
+  logK: 27.34
   mole_factor: 1.0
   - stoichiometry:
     "VO4 3- (aq)": -1
     "H + (aq)": -3
-    "VO2HIDO (ad)": 1
+    "VO2AO (ad)": 1
     "H2O (l)": 2
 
-- rxn08:
-  logK: 28.67
+- rxn02:
+  logK: 21.93
   mole_factor: 2.0
   - stoichiometry:
     "VO4 3- (aq)": -1
     "H + (aq)": -2
+    "VO2(AO)2 - (ad)": 1
+    "H2O (l)": 2
+
+- rxn03:
+  logK: 24.93
+  mole_factor: 2.0
+  - stoichiometry:
+    "VO4 3- (aq)": -1
+    "H + (aq)": -3
+    "VOOH(AO)2 (ad)": 1
+    "H2O (l)": 2
+
+- rxn04:
+  logK: 26.62
+  mole_factor: 3.0
+  - stoichiometry:
+    "VO4 3- (aq)": -1
+    "H + (aq)": -3
+    "V(AO)(AO_H)2 (ad)": 1
     "H2O (l)": 4
-    "V(IDO_H)2 - (ad)": 1
 
-#- rxn06:
-  #logK: -5.54
-  #mole_factor: 1.0
-  #- stoichiometry:
-    #"VO2 + (aq)": -1
-    #"H + (aq)": 2
-    #"VO2IDO - (ad)": 1
-
-#- rxn07:
-  #logK: -2.49
-  #mole_factor: 1.0
-  #- stoichiometry:
-    #"VO2 + (aq)": -1
-    #"H + (aq)": 1
-    #"VO2HIDO (ad)": 1
-
-#- rxn08:
-  #logK: -1.48
-  #mole_factor: 2.0
-  #- stoichiometry:
-    #"VO2 + (aq)": -1
-    #"H + (aq)": 2
-    #"H2O (l)": 2
-    #"V(IDO_H)2 - (ad)": 1
+- rxn05:
+  logK: 22.72
+  mole_factor: 3.0
+  - stoichiometry:
+    "VO4 3- (aq)": -1
+    "H + (aq)": -5
+    "V(AO)3 2+ (ad)": 1
+    "H2O (l)": 4
 
 ...

@@ -1,15 +1,15 @@
 Scenario:
 ---
 - vars_fun:
-  numvar: 41
-  num_ssr: 29
-  num_mbe: 6
+  numvar: 54
+  num_ssr: 38
+  num_mbe: 7
   num_ssao: 1
 
 - ss_ads_objs:
   - obj01:
     name: H2IDO (ad)
-    num_rxns: 5 
+    num_rxns: 8       
 
 - sys_data:
   act_fun: davies    
@@ -29,8 +29,9 @@ SolverOptions:
 ---
 line_search: true      
 search_type: standard
-linear_solve: fom  
-nl_abstol: 1e-4    		
+linear_solve: kms 
+nl_abstol: 1e-4    
+nl_maxit: 5000		
 
 ...
 
@@ -73,10 +74,20 @@ MasterSpecies:
   33: UO2Cl3 - (aq)
   34: UO2NO3 + (aq)
   35: UO2(NO3)2 (aq)
+  36: VO2 + (aq)
+  37: H4VO4 + (aq)
+  38: H3VO4 (aq)
+  39: H2VO4 - (aq)
+  40: HVO4 2- (aq)
+  41: VO4 3- (aq)
+  42: HV2O7 3- (aq)
+  43: V2O7 4- (aq)
+  44: VO2OHCO3 2- (aq)
+  45: VO2(CO3)2 3- (aq)
 
 
 - unreg:
-  - 36: 
+  - 46: 
     formula: UO2IDO (ad)
     charge: 0
     enthalpy: 0
@@ -88,7 +99,7 @@ MasterSpecies:
     name: uranyl-imide-dioxime
     lin_form: UO2
 
-  - 37: 
+  - 47: 
     formula: UO2HIDO + (ad)
     charge: 1
     enthalpy: 0
@@ -100,7 +111,7 @@ MasterSpecies:
     name: uranyl-imide-dioxime
     lin_form: UO2H
 
-  - 38: 
+  - 48: 
     formula: UO2(IDO)2 2- (ad)
     charge: -2
     enthalpy: 0
@@ -112,7 +123,7 @@ MasterSpecies:
     name: uranyl-diimide-dioxime
     lin_form: U2O4
 
-  - 39: 
+  - 49: 
     formula: UO2(HIDO)IDO - (ad)
     charge: -1
     enthalpy: 0
@@ -124,7 +135,7 @@ MasterSpecies:
     name: uranyl-diimide-dioxime
     lin_form: U2O4H
 
-  - 40: 
+  - 50: 
     formula: UO2(HIDO)2 (ad)
     charge: 0
     enthalpy: 0
@@ -135,6 +146,42 @@ MasterSpecies:
     phase: adsorbed
     name: uranyl-diimide-dioxime
     lin_form: U2O4H2
+
+  - 51: 
+    formula: VO2IDO - (ad)
+    charge: -1
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Vanadyl-amidoximate
+    lin_form: VO2
+
+  - 52: 
+    formula: VO2HIDO (ad)
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Vanadium-diamidoximate
+    lin_form: VO2H
+
+  - 53: 
+    formula: V(IDO_H)2 - (ad)
+    charge: -1
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Vanadium-diamidoximate
+    lin_form: V2
 
 ...
 
@@ -157,9 +204,11 @@ MassBalance:
     "UO2CO3 (aq)": 1
     "UO2(CO3)2 2- (aq)": 2
     "UO2(CO3)3 4- (aq)": 3
+    "VO2OHCO3 2- (aq)": 1
+    "VO2(CO3)2 3- (aq)": 2
 
 - nitrate:
-  total_conc: 6.454E-05
+  total_conc: 6.292E-05
   - delta:
     "HNO3 (aq)": 1
     "NO3 - (aq)": 1
@@ -167,7 +216,7 @@ MassBalance:
     "UO2(NO3)2 (aq)": 2
 
 - sodium: 
-  total_conc: 0.432290951
+  total_conc: 0.432465656
   - delta:
     "NaHCO3 (aq)": 1
     "NaCO3 - (aq)": 1
@@ -177,7 +226,7 @@ MassBalance:
     "NaOH (aq)": 1
 
 - uranyl:
-  total_conc: 3.227E-05
+  total_conc: 3.146E-05
   - delta:
     "UO2NO3 + (aq)": 1
     "UO2(NO3)2 (aq)": 1
@@ -203,6 +252,23 @@ MassBalance:
     "UO2(IDO)2 2- (ad)": 1
     "UO2(HIDO)IDO - (ad)": 1
     "UO2(HIDO)2 (ad)": 1
+
+- vanadium:
+  total_conc: 5.8235E-05
+  - delta:
+    "VO2 + (aq)": 1
+    "H4VO4 + (aq)": 1 
+    "H3VO4 (aq)": 1 
+    "H2VO4 - (aq)": 1 
+    "HVO4 2- (aq)": 1
+    "VO4 3- (aq)": 1
+    "HV2O7 3- (aq)": 2
+    "V2O7 4- (aq)": 2
+    "VO2OHCO3 2- (aq)": 1
+    "VO2(CO3)2 3- (aq)": 1
+    "VO2IDO - (ad)": 1
+    "VO2HIDO (ad)": 1
+    "V(IDO_H)2 - (ad)": 1
 
 - chlorine:
   total_conc: 0.43
@@ -403,6 +469,66 @@ EquilRxn:
     "UO2 2+ (aq)": -1
     "UO2Cl3 - (aq)": 1
 
+- rxn29:
+  - stoichiometry:
+    "VO2 + (aq)": -1
+    "H2O (l)": -2
+    "VO4 3- (aq)": 1
+    "H + (aq)": 4
+
+- rxn30:
+  - stoichiometry:
+    "VO2 + (aq)": -2
+    "H2O (l)": -3
+    "V2O7 4- (aq)": 1
+    "H + (aq)": 6
+
+- rxn31:
+  - stoichiometry:
+    "H4VO4 + (aq)": -1
+    "H + (aq)": 1
+    "H3VO4 (aq)": 1
+
+- rxn32:
+  - stoichiometry:
+    "H3VO4 (aq)": -1
+    "H + (aq)": 1
+    "H2VO4 - (aq)": 1
+
+- rxn33:
+  - stoichiometry:
+    "H2VO4 - (aq)": -1
+    "H + (aq)": 1
+    "HVO4 2- (aq)": 1
+
+- rxn34:
+  - stoichiometry:
+    "HVO4 2- (aq)": -1
+    "H + (aq)": 1
+    "VO4 3- (aq)": 1
+
+- rxn35:
+  - stoichiometry:
+    "HV2O7 3- (aq)": -1
+    "H + (aq)": 1
+    "V2O7 4- (aq)": 1
+
+- rxn36:
+  - stoichiometry:
+    "H2VO4 - (aq)": -1
+    "H + (aq)": -1
+    "CO3 2- (aq)": -1
+    "H2O (l)": 1
+    "VO2OHCO3 2- (aq)": 1
+
+- rxn37:
+  - stoichiometry:
+    "H2VO4 - (aq)": -1
+    "H + (aq)": -2
+    "CO3 2- (aq)": -2
+    "H2O (l)": 2
+    "VO2(CO3)2 3- (aq)": 1
+
 ...
 
 "H2IDO (ad)":
@@ -454,5 +580,32 @@ surf_charge: 0
     "UO2 2+ (aq)": -1
     "UO2(HIDO)2 (ad)": 1
     "H + (aq)": 2
+
+- rxn06:
+  logK: 24.61
+  mole_factor: 1.0
+  - stoichiometry:
+    "VO4 3- (aq)": -1
+    "H + (aq)": -2
+    "VO2IDO - (ad)": 1
+    "H2O (l)": 2
+
+- rxn07:
+  logK: 27.66
+  mole_factor: 1.0
+  - stoichiometry:
+    "VO4 3- (aq)": -1
+    "H + (aq)": -3
+    "VO2HIDO (ad)": 1
+    "H2O (l)": 2
+
+- rxn08:
+  logK: 28.67
+  mole_factor: 2.0
+  - stoichiometry:
+    "VO4 3- (aq)": -1
+    "H + (aq)": -2
+    "H2O (l)": 4
+    "V(IDO_H)2 - (ad)": 1
 
 ...
