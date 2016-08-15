@@ -1827,6 +1827,8 @@ void AdsorptionReaction::calculateAreaFactors()
 			this->area_factors[i] = 4.0 * M_PI * pow((3.0/(4.0*M_PI))*(4.33/Na), (2.0/3.0)) / 10000.0 * Na;
 		else
 		{
+			if (this->AreaBasis == false)
+				this->volume_factors[i] = this->volume_factors[i] * this->molar_factor[i];
 			this->area_factors[i] = 4.0 * M_PI * pow((3.0/(4.0*M_PI))*(this->volume_factors[i]/Na), (2.0/3.0)) / 10000.0 * Na;
 		}
 	}

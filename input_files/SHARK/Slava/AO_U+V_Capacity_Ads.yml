@@ -112,7 +112,7 @@ MasterSpecies:
     have_G: false
     phase: adsorbed
     name: uranyl-di-amidioxime
-    lin_form: U2O4
+    lin_form: UO2
 
   - 48: 
     formula: UO2(AO)3 - (ad)
@@ -124,7 +124,7 @@ MasterSpecies:
     have_G: false
     phase: adsorbed
     name: uranyl-tri-amidioxime
-    lin_form: U3O6
+    lin_form: UO2
 
   - 49: 
     formula: UO2CO3AO - (ad)
@@ -148,7 +148,7 @@ MasterSpecies:
     have_G: false
     phase: adsorbed
     name: uranyl-carbonate-diamidioxime
-    lin_form: U2O4C2O6
+    lin_form: UO2CO3
 
   - 51: 
     formula: VO2AO (ad)
@@ -172,7 +172,7 @@ MasterSpecies:
     have_G: false
     phase: adsorbed
     name: Vanadium-diamidoximate
-    lin_form: V2O4
+    lin_form: VO2
 
   - 53: 
     formula: VOOH(AO)2 (ad)
@@ -184,7 +184,7 @@ MasterSpecies:
     have_G: false
     phase: adsorbed
     name: Vanadium-diamidoximate
-    lin_form: V2O4H2
+    lin_form: VO2H
 
   - 54: 
     formula: V(AO)(AO_H)2 (ad)
@@ -196,7 +196,7 @@ MasterSpecies:
     have_G: false
     phase: adsorbed
     name: Vanadium-diamidoximate
-    lin_form: V3
+    lin_form: V
 
   - 55: 
     formula: V(AO)3 2+ (ad)
@@ -208,7 +208,7 @@ MasterSpecies:
     have_G: false
     phase: adsorbed
     name: Vanadium-diamidoximate
-    lin_form: V3
+    lin_form: V
 
 ...
 
