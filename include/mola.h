@@ -419,7 +419,7 @@
 #define SphereArea(r) (4.0*M_PI*r*r)
 #endif
 
-typedef enum {SOLID, LIQUID, AQUEOUS, GAS, PLASMA, OTHER} valid_phase;
+typedef enum {SOLID, LIQUID, AQUEOUS, GAS, PLASMA, ADSORBED, OTHER} valid_phase;
 
 /// C++ Molecule Object built from Atom Objects (click Molecule to go to function definitions)
 /** C++ Class Object that stores information and certain operations associated with molecules.

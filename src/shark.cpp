@@ -867,7 +867,7 @@ double MassBalance::Eval_Residual(const Matrix<double> &x_new, const Matrix<doub
 					CT = CT + ( this->Delta[i] * pow(10.0, x_new(i,0)) );
 					CT_old = CT_old + ( this->Delta[i] * pow(10.0, x_old(i,0)) );
 				}
-				else if (this->List->get_species(i).MoleculePhaseID() == SOLID)
+				else if (this->List->get_species(i).MoleculePhaseID() == SOLID || this->List->get_species(i).MoleculePhaseID() == ADSORBED)
 				{
 					ST = ST + ( this->Delta[i] * pow(10.0, x_new(i,0)) );
 					ST_old = ST_old + ( this->Delta[i] * pow(10.0, x_old(i,0)) );
@@ -1262,6 +1262,30 @@ bool UnsteadyReaction::haveRate()
 		return false;
 }
 
+//Return true if have forward reference
+bool UnsteadyReaction::haveForwardRef()
+{
+	return this->HaveForRef;
+}
+
+//Return true if have reverse reference
+bool UnsteadyReaction::haveReverseRef()
+{
+	return this->HaveRevRef;
+}
+
+//Return true if have forward rate
+bool UnsteadyReaction::haveForward()
+{
+	return this->HaveForward;
+}
+
+//Return true if have reverse rate
+bool UnsteadyReaction::haveReverse()
+{
+	return this->HaveReverse;
+}
+
 //Get the species index for the Unsteady species
 int UnsteadyReaction::Get_Species_Index()
 {
@@ -1397,7 +1421,7 @@ double UnsteadyReaction::Eval_ReactionRate(const Matrix<double> &x, const Matrix
 			//No action
 		}
 	}
-	R = fabs(this->Get_Stoichiometric(this->Get_Species_Index())) * (this->Get_Forward() * reactants) - (this->Get_Reverse() * products);
+	R = fabs(this->Get_Stoichiometric(this->Get_Species_Index())) * ((this->Get_Forward() * reactants) - (this->Get_Reverse() * products));
 
 	return R;
 }
@@ -1542,7 +1566,7 @@ int AdsorptionReaction::setAdsorbIndices()
 	{
 		for (int n=0; n<this->List->list_size(); n++)
 		{
-			if (this->ads_rxn[i].Get_Stoichiometric(n) != 0.0 && this->List->get_species(n).MoleculePhaseID() == SOLID)
+			if (this->ads_rxn[i].Get_Stoichiometric(n) != 0.0 && (this->List->get_species(n).MoleculePhaseID() == SOLID || this->List->get_species(n).MoleculePhaseID() == ADSORBED))
 			{
 				this->adsorb_index[i] = n;
 				break;
@@ -1785,7 +1809,7 @@ void AdsorptionReaction::modifyDeltas(MassBalance &mbo)
 {
 	for (int i=0; i<this->List->list_size(); i++)
 	{
-		if (this->List->get_species(i).MoleculePhaseID() == SOLID)
+		if (this->List->get_species(i).MoleculePhaseID() == SOLID || this->List->get_species(i).MoleculePhaseID() == ADSORBED)
 		{
 			mbo.Set_Delta(i, (mbo.Get_Delta(i) * this->getBulkDensity()) );
 		}
@@ -1797,12 +1821,14 @@ void AdsorptionReaction::calculateAreaFactors()
 {
 	for (int i=0; i<this->List->list_size(); i++)
 	{
-		if (this->volume_factors[i] == 0.0 || this->List->get_species(i).MoleculePhaseID() != SOLID)
+		if (this->volume_factors[i] == 0.0 || (this->List->get_species(i).MoleculePhaseID() != SOLID && this->List->get_species(i).MoleculePhaseID() != ADSORBED))
 			this->area_factors[i] = 0.0;
-		else if (this->volume_factors[i] == 0.0 && this->List->get_species(i).MoleculePhaseID() == SOLID)
+		else if (this->volume_factors[i] == 0.0 && (this->List->get_species(i).MoleculePhaseID() == SOLID || this->List->get_species(i).MoleculePhaseID() == ADSORBED))
 			this->area_factors[i] = 4.0 * M_PI * pow((3.0/(4.0*M_PI))*(4.33/Na), (2.0/3.0)) / 10000.0 * Na;
 		else
 		{
+			if (this->AreaBasis == false)
+				this->volume_factors[i] = this->volume_factors[i] * this->molar_factor[i];
 			this->area_factors[i] = 4.0 * M_PI * pow((3.0/(4.0*M_PI))*(this->volume_factors[i]/Na), (2.0/3.0)) / 10000.0 * Na;
 		}
 	}
@@ -1909,7 +1935,7 @@ double AdsorptionReaction::calculateLangmuirEquParam(const Matrix<double> &x, co
 
 	for (int n=0; n<this->List->list_size(); n++)
 	{
-		if (n != this->getAqueousIndex(i) && this->List->get_species(n).MoleculePhaseID() != SOLID)
+		if (n != this->getAqueousIndex(i) && this->List->get_species(n).MoleculePhaseID() != SOLID && this->List->get_species(n).MoleculePhaseID() != ADSORBED)
 		{
 			if (this->getReaction(i).Get_Stoichiometric(n) > 0.0)
 			{
@@ -2027,7 +2053,7 @@ double AdsorptionReaction::Eval_Residual(const Matrix<double> &x, const Matrix<d
 	}
 	
 	double logK = this->getReaction(i).Get_Equilibrium();
-	logK = logK + (this->calculateEquilibriumCorrection(this->getChargeDensity(), T, this->getIonicStrength(), rel_perm, i)/log(10.0));
+	logK = logK + ((this->calculateEquilibriumCorrection(this->getChargeDensity(), T, this->getIonicStrength(), rel_perm, i)/*/gama(this->getAdsorbIndex(i),0)*/)/log(10.0));
 	res = res - logK;
 	
 	return res;
@@ -2283,7 +2309,7 @@ int UnsteadyAdsorption::setAdsorbIndices()
 	{
 		for (int n=0; n<this->List->list_size(); n++)
 		{
-			if (this->ads_rxn[i].Get_Stoichiometric(n) != 0.0 && this->List->get_species(n).MoleculePhaseID() == SOLID)
+			if (this->ads_rxn[i].Get_Stoichiometric(n) != 0.0 && (this->List->get_species(n).MoleculePhaseID() == SOLID || this->List->get_species(n).MoleculePhaseID() == ADSORBED))
 			{
 				this->adsorb_index[i] = n;
 				this->ads_rxn[i].Set_Species_Index(n);
@@ -2638,7 +2664,7 @@ double UnsteadyAdsorption::Eval_Residual(const Matrix<double> &x, const Matrix<d
 	}
 
 	double logK = this->getReaction(i).Get_Equilibrium();
-	logK = logK + (this->calculateEquilibriumCorrection(this->getChargeDensity(), T, this->getIonicStrength(), rel_perm, i)/log(10.0));
+	logK = logK + ((this->calculateEquilibriumCorrection(this->getChargeDensity(), T, this->getIonicStrength(), rel_perm, i)/*/gama(this->getAdsorbIndex(i),0)*/)/log(10.0));
 	res = res - logK;
 
 	return res;
@@ -2676,13 +2702,37 @@ double UnsteadyAdsorption::Eval_ReactionRate(const Matrix<double> &x, const Matr
 	//Loop over all species in list
 	double reactants = 0.0, products = 0.0;
 	bool first_prod = true, first_reac = true;
+	
+	this->getReaction(n).Set_Equilibrium( this->getReaction(n).Get_Equilibrium() + ((this->calculateEquilibriumCorrection(this->getChargeDensity(), T, this->getIonicStrength(), rel_perm, n)/*/gama(this->getAdsorbIndex(n),0)*/)/log(10.0)) );
+
+	if (this->getReaction(n).haveForwardRef() == true)
+	{
+		this->getReaction(n).Set_Forward(this->getReaction(n).Get_ForwardRef() * pow(T, this->getReaction(n).Get_Affinity()) * exp(-this->getReaction(n).Get_ActivationEnergy()/(Rstd*T)));
+	}
+	else if (this->getReaction(n).haveReverseRef() == true)
+	{
+		this->getReaction(n).Set_Reverse(this->getReaction(n).Get_ReverseRef() * pow(T, this->getReaction(n).Get_Affinity()) * exp(-this->getReaction(n).Get_ActivationEnergy()/(Rstd*T)));
+	}
+	else if (this->getReaction(n).haveForward() == true)
+	{
+		this->getReaction(n).Set_Reverse( this->getReaction(n).Get_Forward() / pow(10.0,this->getReaction(n).Get_Equilibrium()) );
+	}
+	else if (this->getReaction(n).haveReverse() == true)
+	{
+		this->getReaction(n).Set_Forward( this->getReaction(n).Get_Reverse() * pow(10.0,this->getReaction(n).Get_Equilibrium()) );
+	}
+	else
+	{
+		//No Action
+	}
+	
 	for (int i=0; i<this->List->list_size(); i++)
 	{
 		if (this->getReaction(n).Get_Stoichiometric(i) > 0.0)
 		{
 			if (first_prod == true)
 			{
-				if (this->List->get_species(i).MoleculePhaseID() == SOLID)
+				if (this->List->get_species(i).MoleculePhaseID() == SOLID || this->List->get_species(i).MoleculePhaseID() == ADSORBED)
 					products = ( pow(this->getActivity(i),fabs(this->getReaction(n).Get_Stoichiometric(i))) * pow(10.0,(fabs(this->getReaction(n).Get_Stoichiometric(i))*x(i,0)) ) );
 				else
 					products = ( pow(gama(i,0),fabs(this->getReaction(n).Get_Stoichiometric(i))) * pow(10.0,(fabs(this->getReaction(n).Get_Stoichiometric(i))*x(i,0)) ) );
@@ -2690,7 +2740,7 @@ double UnsteadyAdsorption::Eval_ReactionRate(const Matrix<double> &x, const Matr
 			}
 			else
 			{
-				if (this->List->get_species(i).MoleculePhaseID() == SOLID)
+				if (this->List->get_species(i).MoleculePhaseID() == SOLID || this->List->get_species(i).MoleculePhaseID() == ADSORBED)
 					products = products * ( pow(this->getActivity(i),fabs(this->getReaction(n).Get_Stoichiometric(i))) * pow(10.0,(fabs(this->getReaction(n).Get_Stoichiometric(i))*x(i,0)) ) );
 				else
 					products = products * ( pow(gama(i,0),fabs(this->getReaction(n).Get_Stoichiometric(i))) * pow(10.0,(fabs(this->getReaction(n).Get_Stoichiometric(i))*x(i,0)) ) );
@@ -2700,7 +2750,7 @@ double UnsteadyAdsorption::Eval_ReactionRate(const Matrix<double> &x, const Matr
 		{
 			if (first_reac == true)
 			{
-				if (this->List->get_species(i).MoleculePhaseID() == SOLID)
+				if (this->List->get_species(i).MoleculePhaseID() == SOLID || this->List->get_species(i).MoleculePhaseID() == ADSORBED)
 					reactants = ( pow(this->getActivity(i),fabs(this->getReaction(n).Get_Stoichiometric(i))) * pow(10.0,(fabs(this->getReaction(n).Get_Stoichiometric(i))*x(i,0)) ) );
 				else
 					reactants = ( pow(gama(i,0),fabs(this->getReaction(n).Get_Stoichiometric(i))) * pow(10.0,(fabs(this->getReaction(n).Get_Stoichiometric(i))*x(i,0)) ) );
@@ -2708,7 +2758,7 @@ double UnsteadyAdsorption::Eval_ReactionRate(const Matrix<double> &x, const Matr
 			}
 			else
 			{
-				if (this->List->get_species(i).MoleculePhaseID() == SOLID)
+				if (this->List->get_species(i).MoleculePhaseID() == SOLID || this->List->get_species(i).MoleculePhaseID() == ADSORBED)
 					reactants = reactants * ( pow(this->getActivity(i),fabs(this->getReaction(n).Get_Stoichiometric(i))) * pow(10.0,(fabs(this->getReaction(n).Get_Stoichiometric(i))*x(i,0)) ) );
 				else
 					reactants = reactants * ( pow(gama(i,0),fabs(this->getReaction(n).Get_Stoichiometric(i))) * pow(10.0,(fabs(this->getReaction(n).Get_Stoichiometric(i))*x(i,0)) ) );
@@ -2725,7 +2775,7 @@ double UnsteadyAdsorption::Eval_ReactionRate(const Matrix<double> &x, const Matr
 	else
 		reactants = reactants * pow(this->getSpecificMolality()*this->calculateActiveFraction(x),this->getMolarFactor(n));
 
-	R = fabs(this->getReaction(n).Get_Stoichiometric(this->getReaction(n).Get_Species_Index())) * (this->getReaction(n).Get_Forward() * reactants) - (this->getReaction(n).Get_Reverse() * products);
+	R = fabs(this->getReaction(n).Get_Stoichiometric(this->getReaction(n).Get_Species_Index())) * ((this->getReaction(n).Get_Forward() * reactants) - (this->getReaction(n).Get_Reverse() * products));
 
 	return R;
 }
@@ -3306,6 +3356,10 @@ void print2file_shark_header(SHARK_DATA *shark_dat)
 			case SOLID:
 				fprintf(shark_dat->OutputFile, "\t(mol/kg)");
 				break;
+				
+			case ADSORBED:
+				fprintf(shark_dat->OutputFile, "\t(mol/kg)");
+				break;
 
 			default:
 				fprintf(shark_dat->OutputFile, "\t(-)");
@@ -3482,7 +3536,7 @@ int UNIQUAC(const Matrix<double> &x, Matrix<double> &F, const void *data)
 		r[i] = dat->getVolumeFactor(dat->getAdsorbIndex(i)) / VolumeSTD;
 		s[i] = dat->getAreaFactor(dat->getAdsorbIndex(i)) / AreaSTD;
 		l[i] = LengthFactor(CoordSTD, r[i], s[i]);
-		u[i] = -dat->getReaction(i).Get_Energy()/s[i];
+		u[i] = -dat->getReaction(i).Get_Energy()/s[i]/CoordSTD/CoordSTD;
 		rx_sum = rx_sum + (r[i]*frac[i]);
 		sx_sum = sx_sum + (s[i]*frac[i]);
 		lx_sum = lx_sum + (l[i]*frac[i]);
@@ -3502,17 +3556,17 @@ int UNIQUAC(const Matrix<double> &x, Matrix<double> &F, const void *data)
 		//Inner j loop
 		for (int j=0; j<dat->getNumberRxns(); j++)
 		{
-			theta_tau_i = theta_tau_i + ( theta[j]*exp(-(u[j] - u[i])/(Rstd*Temp*CoordSTD/3.0)) );
+			theta_tau_i = theta_tau_i + ( theta[j]*exp(-(sqrt(fabs(u[j]*u[i])) - u[i])/(Rstd*Temp)) );
 			
 			double theta_tau_k = 0.0;
 			// k loop
 			for (int k=0; k<dat->getNumberRxns(); k++)
 			{
-				theta_tau_k = theta_tau_k + ( theta[k]*exp(-(u[k] - u[j])/(Rstd*Temp*CoordSTD/3.0)) );
+				theta_tau_k = theta_tau_k + ( theta[k]*exp(-(sqrt(fabs(u[k]*u[j])) - u[j])/(Rstd*Temp)) );
 				
 			}// End k Loop
 			
-			theta_tau_rat = theta_tau_rat + ( (theta[j]*exp(-(u[i] - u[j])/(Rstd*Temp*CoordSTD/3.0)) )/theta_tau_k);
+			theta_tau_rat = theta_tau_rat + ( (theta[j]*exp(-(sqrt(fabs(u[i]*u[j])) - u[j])/(Rstd*Temp)) )/theta_tau_k);
 			
 		}// End j loop
 		
@@ -6494,6 +6548,7 @@ int shark_guess(SHARK_DATA *shark_dat)
 		else
 			shark_dat->Conc_new.edit(shark_dat->pOH_index, 0, 10.0);
 	}
+	
 	success = Convert2LogConcentration(shark_dat->Conc_new, shark_dat->X_new);
 	if (success != 0) {mError(simulation_fail); return -1;}
 
@@ -6550,7 +6605,7 @@ int shark_initial_conditions(SHARK_DATA *shark_dat)
 			//Loop and remove solids from solution
 			for (int i=0; i<shark_dat->MasterList.list_size(); i++)
 			{
-				if (shark_dat->MasterList.get_species(i).MoleculePhaseID() == SOLID)
+				if (shark_dat->MasterList.get_species(i).MoleculePhaseID() == SOLID || shark_dat->MasterList.get_species(i).MoleculePhaseID() == ADSORBED)
 					shark_dat->X_new.edit(i, 0, -DBL_MAX_10_EXP);
 			}
 		}

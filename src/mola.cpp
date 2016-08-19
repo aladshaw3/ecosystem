@@ -69,6 +69,8 @@ Molecule::Molecule(int c,
 		PhaseID = GAS;
 	else if (phase == "plasma")
 		PhaseID = PLASMA;
+	else if (phase == "adsorbed")
+		PhaseID = ADSORBED;
 	else
 		PhaseID = OTHER;
 	Name = name;
@@ -160,6 +162,8 @@ void Molecule::Register(int c,
 		this->PhaseID = GAS;
 	else if (phase == "plasma")
 		this->PhaseID = PLASMA;
+	else if (phase == "adsorbed")
+		this->PhaseID = ADSORBED;
 	else
 		this->PhaseID = OTHER;
 	this->Name = name;

@@ -657,7 +657,7 @@ total_mass: 1.51e-5     #Units: kg
 surf_activity: uniquac
 
 - rxn01:
-  logK: -2.0
+  logK: -5
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -665,7 +665,7 @@ surf_activity: uniquac
     "UO2AHOOH + (s)": 1
 
 - rxn02:
-  logK: -4.5
+  logK: -3.8
   mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -691,7 +691,7 @@ surf_activity: uniquac
     "UO2CO3(AHOOH)2 2- (s)": 1
 
 - rxn05:
-  logK: 1.0
+  logK: 3
   mole_factor: 1.0
   - stoichiometry:
     "VO2 + (aq)": -1
@@ -699,7 +699,7 @@ surf_activity: uniquac
     "VO2AHOO - (s)": 1
 
 - rxn06:
-  logK: 4.0
+  logK: 3.4
   mole_factor: 2.0
   - stoichiometry:
     "VO2 + (aq)": -1
