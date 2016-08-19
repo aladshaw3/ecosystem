@@ -832,6 +832,8 @@ double MassBalance::Eval_Residual(const Matrix<double> &x_new, const Matrix<doub
 		
 		if (isnan(res) || isinf(res))
 			res = sqrt(DBL_MAX)/this->List->list_size();
+		
+		return res;
 	}
 	else if (this->Type == CSTR)
 	{
@@ -847,6 +849,7 @@ double MassBalance::Eval_Residual(const Matrix<double> &x_new, const Matrix<doub
 			{
 				if (this->List->get_species(i).MoleculePhaseID() == AQUEOUS || this->List->get_species(i).MoleculePhaseID() == LIQUID)
 					CT = CT + ( this->Delta[i] * pow(10.0, x_new(i,0)) );
+				
 			}
 			
 			if (this->Get_InletConcentration() <= DBL_MIN)
@@ -856,6 +859,8 @@ double MassBalance::Eval_Residual(const Matrix<double> &x_new, const Matrix<doub
 			
 			if (isnan(res) || isinf(res))
 				res = sqrt(DBL_MAX)/this->List->list_size();
+			
+			return res;
 		}
 		else
 		{
@@ -885,6 +890,8 @@ double MassBalance::Eval_Residual(const Matrix<double> &x_new, const Matrix<doub
 			
 			if (isnan(res) || isinf(res))
 				res = sqrt(DBL_MAX)/this->List->list_size();
+			
+			return res;
 		}
 	}
 	else if (this->Type == PFR)
@@ -904,6 +911,8 @@ double MassBalance::Eval_Residual(const Matrix<double> &x_new, const Matrix<doub
 		
 		if (isnan(res) || isinf(res))
 			res = sqrt(DBL_MAX)/this->List->list_size();
+		
+		return res;
 	}
 	else
 	{
@@ -922,9 +931,10 @@ double MassBalance::Eval_Residual(const Matrix<double> &x_new, const Matrix<doub
 		
 		if (isnan(res) || isinf(res))
 			res = sqrt(DBL_MAX)/this->List->list_size();
+		
+		return res;
 	}
 	
-	return res;
 }
 
 //Function to evaluate the mass balance residual given the concentration matrix x
@@ -6809,6 +6819,10 @@ int shark_solver(SHARK_DATA *shark_dat)
 	shark_dat->totalsteps = shark_dat->totalsteps + shark_dat->Newton_data.nl_iter + shark_dat->Newton_data.l_iter;
 	shark_dat->totalcalls = shark_dat->totalcalls + shark_dat->Newton_data.fun_call;
 	if (success != 0) {mError(simulation_fail); return -1;}
+	
+	success = Convert2Concentration(shark_dat->X_new, shark_dat->Conc_new);
+	if (success != 0) {mError(simulation_fail); return -1;}
+	
 	
 	if (shark_dat->steadystate == true && shark_dat->reactor_type != BATCH)
 	{

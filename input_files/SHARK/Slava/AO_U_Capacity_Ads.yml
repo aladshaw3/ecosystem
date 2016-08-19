@@ -16,12 +16,15 @@ Scenario:
   const_pH: false	
   temp: 293.15        
   dielec: 78.325     
-  volume: 0.75       #Units: L
+  volume: 0.75      #Units: L
+  reactor: batch
+  flow_rate: 60.0
 
 - run_time:
   steady: true        
   specs_curve: true  
   pH_step: 0.25
+  zero_initial_solids: false
   
 ...
 
@@ -140,13 +143,22 @@ MasterSpecies:
 
 MassBalance:
 ---
+#Seawater U: 1.386E-8
+#Lab U: 3.227E-5
+#U=2N
+#Sea N: 2.772E-8
+#Lab N: 6.454E-5
 - water:
   total_conc: 1
+  inlet_conc: 1
+  initial_conc: 1
   - delta: 
     "H2O (l)": 1
 
 - carbonate:
   total_conc: 0.002290951
+  inlet_conc: 0.002290951
+  initial_conc: 0.002290951
   - delta: 
     "NaHCO3 (aq)": 1
     "NaCO3 - (aq)": 1 
@@ -161,7 +173,9 @@ MassBalance:
     "UO2CO3(AO)2 2- (ad)": 1
 
 - nitrate:
-  total_conc: 6.454E-05
+  total_conc: 6.454E-5
+  inlet_conc: 6.454E-5
+  initial_conc: 6.454E-5
   - delta:
     "HNO3 (aq)": 1
     "NO3 - (aq)": 1
@@ -170,6 +184,8 @@ MassBalance:
 
 - sodium: 
   total_conc: 0.432290951
+  inlet_conc: 0.432290951
+  initial_conc: 0.432290951
   - delta:
     "NaHCO3 (aq)": 1
     "NaCO3 - (aq)": 1
@@ -179,7 +195,9 @@ MassBalance:
     "NaOH (aq)": 1
 
 - uranyl:
-  total_conc: 3.227E-05
+  total_conc: 3.227E-5
+  inlet_conc: 3.227E-5
+  initial_conc: 3.227E-5
   - delta:
     "UO2NO3 + (aq)": 1
     "UO2(NO3)2 (aq)": 1
@@ -208,6 +226,8 @@ MassBalance:
 
 - chlorine:
   total_conc: 0.43
+  inlet_conc: 0.43
+  initial_conc: 0.43
   - delta:
     "Cl - (aq)": 1
     "Cl2 (aq)": 2
@@ -413,7 +433,7 @@ basis: molar
 spec_area: 45000.0     #Units: m^2/kg
 spec_mole: 2.9       #Units: mol/kg
 total_mass: 1.51e-5     #Units: kg
-surf_activity: floryhuggins
+surf_activity: uniquac
 include_surfcharge: true
 surf_charge: 0
 
@@ -434,7 +454,7 @@ surf_charge: 0
     "H + (aq)": 2
 
 - rxn03:
-  logK: -8.13
+  logK: -11.73
   mole_factor: 3.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -442,7 +462,7 @@ surf_charge: 0
     "H + (aq)": 3
 
 - rxn04:
-  logK: 7.49
+  logK: 2.59
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -451,7 +471,7 @@ surf_charge: 0
     "H + (aq)": 1
 
 - rxn05:
-  logK: 2.98
+  logK: -0.92
   mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
