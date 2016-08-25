@@ -193,6 +193,8 @@ MassBalance:
     "UO2CO3 (aq)": 1
     "UO2(CO3)2 2- (aq)": 2
     "UO2(CO3)3 4- (aq)": 3
+    "UO2CO3IDO 2- (ad)": 1
+    "UO2CO3HIDO - (ad)": 1
 
 - nitrate:
   total_conc: 6.454E-5
@@ -245,6 +247,8 @@ MassBalance:
     "UO2(IDO)2 2- (ad)": 1
     "UO2(HIDO)IDO - (ad)": 1
     "UO2(HIDO)2 (ad)": 1
+    "UO2CO3IDO 2- (ad)": 1
+    "UO2CO3HIDO - (ad)": 1
 
 - chlorine:
   total_conc: 0.43
