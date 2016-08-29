@@ -337,7 +337,7 @@ surf_activity: uniquac
     "H2O (l)": 2
 
 - rxn03:
-  logK: 35.5
+  logK: 28.67
   mole_factor: 2.0
   - stoichiometry:
     "VO4 3- (aq)": -1
