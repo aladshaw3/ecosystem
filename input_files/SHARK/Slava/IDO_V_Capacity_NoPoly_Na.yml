@@ -88,8 +88,8 @@ MasterSpecies:
     lin_form: VO2H
 
   - 24: 
-    formula: V(IDO_H)2 - (ad)
-    charge: -1
+    formula: NaV(IDO_H)2 (ad)
+    charge: 0
     enthalpy: 0
     entropy: 0
     have_HS: false
@@ -97,7 +97,7 @@ MasterSpecies:
     have_G: false
     phase: adsorbed
     name: Vanadium-diamidoximate
-    lin_form: V
+    lin_form: VNa
 
   - 25: 
     formula: V(IDO)(IDO_H) (ad)
@@ -153,6 +153,7 @@ MassBalance:
     "Na + (aq)": 1
     "NaCl (aq)": 1
     "NaOH (aq)": 1
+    "NaV(IDO_H)2 (ad)": 1
 
 #V: 5.8235E-05
 - vanadium:
@@ -167,7 +168,7 @@ MassBalance:
     "VO2(CO3)2 3- (aq)": 1
     "VO2IDO - (ad)": 1
     "VO2HIDO (ad)": 1
-    "V(IDO_H)2 - (ad)": 1
+    "NaV(IDO_H)2 (ad)": 1
     "V(IDO)(IDO_H) (ad)": 1
     "V(IDO)2 + (ad)": 1
 
@@ -315,13 +316,14 @@ include_surfcharge: true
     "H2O (l)": 2
 
 - rxn03:
-  logK: 28.67
+  logK: 29.24
   mole_factor: 2.0
   - stoichiometry:
     "VO4 3- (aq)": -1
     "H + (aq)": -2
+    "Na + (aq)": -1
     "H2O (l)": 4
-    "V(IDO_H)2 - (ad)": 1
+    "NaV(IDO_H)2 (ad)": 1
 
 - rxn04:
   logK: 30.07

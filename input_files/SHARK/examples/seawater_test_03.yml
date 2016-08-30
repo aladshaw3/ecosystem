@@ -16,7 +16,7 @@ Scenario:
 
 - run_time:
   steady: true         
-  specs_curve: false
+  specs_curve: true
   pH_step: 0.25    
 ...
 
@@ -25,7 +25,7 @@ SolverOptions:
 line_search: true     
 search_type: standard
 linear_solve: fom 
-nl_maxit: 10000     
+nl_maxit: 1000     
 
 ...
 

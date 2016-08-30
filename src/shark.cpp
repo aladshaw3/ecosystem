@@ -1898,7 +1898,7 @@ double AdsorptionReaction::calculateActiveFraction(const Matrix<double> &x)
 		}
 		if (sum > this->specific_area)
 			sum = this->specific_area;
-		phi = 1.0 - (sum / this->specific_area);
+		phi = 1.0 - (sum / (this->specific_area + 0.01)); //Small leeway added to improve convergence
 		if (phi < DBL_MIN)
 			phi = DBL_MIN;
 	}
@@ -1910,7 +1910,7 @@ double AdsorptionReaction::calculateActiveFraction(const Matrix<double> &x)
 		}
 		if (sum > this->specific_molality)
 			sum = this->specific_molality;
-		phi = 1.0 - (sum / this->specific_molality);
+		phi = 1.0 - (sum / (this->specific_molality + 0.01)); //Small leeway added to improve convergence
 		if (phi < DBL_MIN)
 			phi = DBL_MIN;
 	}
@@ -2040,7 +2040,7 @@ double AdsorptionReaction::calculateEquilibriumCorrection(double sigma, double T
 double AdsorptionReaction::Eval_Residual(const Matrix<double> &x, const Matrix<double> &gama, double T, double rel_perm, int i)
 {
 	double res = this->getReaction(i).Get_Stoichiometric(this->getAdsorbIndex(i)) * ( log10(this->getActivity(this->getAdsorbIndex(i))) + x(this->getAdsorbIndex(i),0) );
-
+	
 	if (this->getReaction(i).Get_Stoichiometric(this->getAdsorbIndex(i)) > 0.0)
 	{
 		if (this->isAreaBasis() == true)
@@ -2064,6 +2064,7 @@ double AdsorptionReaction::Eval_Residual(const Matrix<double> &x, const Matrix<d
 	
 	double logK = this->getReaction(i).Get_Equilibrium();
 	logK = logK + ((this->calculateEquilibriumCorrection(this->getChargeDensity(), T, this->getIonicStrength(), rel_perm, i)/*/gama(this->getAdsorbIndex(i),0)*/)/log(10.0));
+	
 	res = res - logK;
 	
 	return res;
@@ -2581,7 +2582,7 @@ double UnsteadyAdsorption::calculateActiveFraction(const Matrix<double> &x)
 		}
 		if (sum > this->specific_area)
 			sum = this->specific_area;
-		phi = 1.0 - (sum / this->specific_area);
+		phi = 1.0 - (sum / (this->specific_area + 0.01));
 		if (phi < DBL_MIN)
 			phi = DBL_MIN;
 	}
@@ -2593,7 +2594,7 @@ double UnsteadyAdsorption::calculateActiveFraction(const Matrix<double> &x)
 		}
 		if (sum > this->specific_molality)
 			sum = this->specific_molality;
-		phi = 1.0 - (sum / this->specific_molality);
+		phi = 1.0 - (sum / (this->specific_molality + 0.01));
 		if (phi < DBL_MIN)
 			phi = DBL_MIN;
 	}
@@ -6854,6 +6855,25 @@ int shark_solver(SHARK_DATA *shark_dat)
 		if (shark_dat->steadystate == false)
 			std::cout << "dt =\t" << shark_dat->dt << std::endl;
 		std::cout << "E. Norm =\t" << shark_dat->Norm << "\nIterations =\t" << shark_dat->Newton_data.nl_iter << std::endl;
+		
+		std::cout << "\nAdsorption info...\n-------------------------\n";
+		for (int i=0; i<shark_dat->AdsorptionList.size(); i++)
+		{
+			std::cout << "Active Surface Fraction for " << i << " =\t" << shark_dat->AdsorptionList[i].calculateActiveFraction(shark_dat->X_new) << std::endl;
+			std::cout << "Surface Charge Density (C/m^2) for " << i << " =\t" << shark_dat->AdsorptionList[i].getChargeDensity() << std::endl;
+			std::cout << "logK values for " << i << "...\n";
+			
+			for (int j=0; j<shark_dat->AdsorptionList[i].getNumberRxns(); j++)
+			{
+				double logK = shark_dat->AdsorptionList[i].getReaction(j).Get_Equilibrium();
+				
+				if (shark_dat->AdsorptionList[i].includeSurfaceCharge() == true)
+				{
+					logK = logK + ((shark_dat->AdsorptionList[i].calculateEquilibriumCorrection(shark_dat->AdsorptionList[i].getChargeDensity(), shark_dat->temperature, shark_dat->AdsorptionList[i].getIonicStrength(), shark_dat->relative_permittivity, j))/log(10.0));
+				}
+				std::cout << "\tlogK(" << j << ") =\t" << logK << std::endl;
+			}
+		}
 		
 		if (shark_dat->Converged == false)
 		{
