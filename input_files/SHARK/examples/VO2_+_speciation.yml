@@ -10,7 +10,7 @@ Scenario:
 - sys_data:
   act_fun: davies    
   const_pH: false	
-  temp: 298.15      
+  temp: 293.15      
 
 - run_time:
   steady: true         
