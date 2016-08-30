@@ -8,7 +8,7 @@ Scenario:
   num_mbe: 6
 
 - sys_data:
-  act_fun: davies    
+  act_fun: ideal    
   const_pH: false	
   temp: 293.15      
 
