@@ -6,3 +6,4 @@ doc/doxygen/html
 doc/doxygen/latex
 *.exe
 eco0
+*.a

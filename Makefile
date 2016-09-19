@@ -14,6 +14,7 @@ INSDIR=/usr/local/bin
 #current_dir := $(notdir $(patsubst %/,%,$(dir $(mkfile_path))))
 
 EXE=eco0
+LIB=libeco.a
 
 _DEPS = config.h lmmin.h lmcurve.h dogfish.h eel.h egret.h error.h \
 	finch.h flock.h gsta_opt.h lark.h macaw.h magpie.h mola.h \
@@ -39,10 +40,17 @@ $(ODIR)/%.o: src/%.cpp $(DEPS)
 $(EXE): $(OBJ)
 	$(CXX) -O3 -o $@ $^ $(CXXFLAGS)
 
-.PHONY: clean install cleanall
+.PHONY: clean install cleanall lib
+
+lib:$(LIB)
+
+$(LIB): $(OBJ)
+	ar ru $@ $^
+	ranlib $@
 
 clean:
 	rm -f $(EXE) $(ODIR)/*.o *~ core $(INCDIR)/*~
+	rm $(LIB)
 install:
 	cp $(EXE) $(INSDIR)
 	mkdir $(INSDIR)/ecodoc
