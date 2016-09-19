@@ -45,7 +45,7 @@ $(EXE): $(OBJ)
 lib:$(LIB)
 
 $(LIB): $(OBJ)
-	ar ru $@ $^
+	ar rcs $@ $^
 	ranlib $@
 
 clean:
