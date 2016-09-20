@@ -4,8 +4,8 @@
 IDIR=include
 CC=gcc
 CXX=g++
-CFLAGS=-I$(IDIR) -Wno-ignored-qualifiers
-CXXFLAGS= -I$(IDIR) -Wwrite-strings -Wconversion-null -std=c++11 -fpermissive
+CFLAGS=-I$(IDIR) -fpic -Wno-ignored-qualifiers
+CXXFLAGS= -I$(IDIR) -fpic -Wwrite-strings -Wconversion-null -std=c++11 -fpermissive
 
 ODIR=src/obj
 INSDIR=/usr/local/bin
@@ -14,7 +14,7 @@ INSDIR=/usr/local/bin
 #current_dir := $(notdir $(patsubst %/,%,$(dir $(mkfile_path))))
 
 EXE=eco0
-LIB=libeco.a
+LIB=libeco.so
 
 _DEPS = config.h lmmin.h lmcurve.h dogfish.h eel.h egret.h error.h \
 	finch.h flock.h gsta_opt.h lark.h macaw.h magpie.h mola.h \
@@ -23,12 +23,13 @@ _DEPS = config.h lmmin.h lmcurve.h dogfish.h eel.h egret.h error.h \
 	ui.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
-_OBJ = main.o api.o  lmmin.o lmcurve.o dogfish.o dumper.o eel.o egret.o emitter.o \
+_OBJ = api.o  lmmin.o lmcurve.o dogfish.o dumper.o eel.o egret.o emitter.o \
 	error.o finch.o gsta_opt.o lark.o loader.o macaw.o magpie.o \
 	mola.o monkfish.o parser.o reader.o sandbox.o scanner.o scopsowl_opt.o \
 	scopsowl.o shark.o skua_opt.o skua.o writer.o yaml_wrapper.o Trajectory.o \
 	ui.o
-OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
+OBJ = $(patsubst %,$(ODIR)/%, main.o $(_OBJ))
+LOBJ = $(patsubst %,$(ODIR)/%, $(_OBJ))
 
 
 $(ODIR)/%.o: src/%.c $(DEPS)
@@ -44,9 +45,8 @@ $(EXE): $(OBJ)
 
 lib:$(LIB)
 
-$(LIB): $(OBJ)
-	ar rcs $@ $^
-	ranlib $@
+$(LIB): $(LOBJ)
+	$(CXX) -shared -o $@ $^
 
 clean:
 	rm -f $(EXE) $(ODIR)/*.o *~ core $(INCDIR)/*~

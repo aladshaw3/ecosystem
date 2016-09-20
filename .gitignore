@@ -7,3 +7,4 @@ doc/doxygen/latex
 *.exe
 eco0
 *.a
+*.so
