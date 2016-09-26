@@ -14,6 +14,9 @@
 #include <random>
 #include <chrono>
 
+#ifndef TRAJECTORY_HPP_
+#define TRAJECTORY_HPP_
+
 typedef struct
 {
 	//Constants
@@ -132,3 +135,5 @@ int Number_Generator(TRAJECTORY_DATA *dat);
 /// Run_Trajectory function
 /** Function to run the Trajectory project. */
 int Run_Trajectory();
+
+#endif
