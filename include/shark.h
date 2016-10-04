@@ -664,16 +664,14 @@ public:
 	double calculateLangmuirAdsorption(const Matrix<double> &x, const Matrix<double> &gama, int i);
 
 	/// Function calculates the Psi (electric surface potential) given a set of arguments
-	/** This function will approximate the electric surface potential of the adsorbent under the current
-		conditions of charge density, temperature, ionic strength, and relative permittivity. Approximations
-		are made via the cubic representations of the hyberbolic sine function. As a result, this approximation
-		is fourth order accurate and is a faster approximation then solving with derivatives of the function.
+	/** This function will calculate the electric surface potential of the adsorbent under the current
+		conditions of charge density, temperature, ionic strength, and relative permittivity.
 
 		\param sigma charge density of the surface (C/m^2)
 		\param T temperature of the system in question (K)
 		\param I ionic strength of the medium the surface is in (mol/L)
 		\param rel_epsilon relative permittivity of the medium (Unitless) */
-	double calculateCubicPsiApprox(double sigma, double T, double I, double rel_epsilon);
+	double calculatePsi(double sigma, double T, double I, double rel_epsilon);
 
 	/// Function to calculate the net exchange of charges of the aqeous species involved in a given reaction
 	/** This function will look at all aqueous species involved in the ith adsorption reaction and sum up
@@ -844,16 +842,14 @@ public:
 	double calculateSurfaceChargeDensity( const Matrix<double> &x);
 
 	/// Function calculates the Psi (electric surface potential) given a set of arguments
-	/** This function will approximate the electric surface potential of the adsorbent under the current
-		conditions of charge density, temperature, ionic strength, and relative permittivity. Approximations
-		are made via the cubic representations of the hyberbolic sine function. As a result, this approximation
-		is fourth order accurate and is a faster approximation then solving with derivatives of the function.
+	/** This function will calculate the electric surface potential of the adsorbent under the current
+		conditions of charge density, temperature, ionic strength, and relative permittivity.
 
 		\param sigma charge density of the surface (C/m^2)
 		\param T temperature of the system in question (K)
 		\param I ionic strength of the medium the surface is in (mol/L)
 		\param rel_epsilon relative permittivity of the medium (Unitless) */
-	double calculateCubicPsiApprox(double sigma, double T, double I, double rel_epsilon);
+	double calculatePsi(double sigma, double T, double I, double rel_epsilon);
 
 	/// Function to calculate the net exchange of charges of the aqeous species involved in a given reaction
 	/** This function will look at all aqueous species involved in the ith adsorption reaction and sum up

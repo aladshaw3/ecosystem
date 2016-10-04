@@ -1998,17 +1998,16 @@ double AdsorptionReaction::calculateLangmuirAdsorption(const Matrix<double> &x, 
 }
 
 //Approximation of the electric potential of the surface
-double AdsorptionReaction::calculateCubicPsiApprox(double sigma, double T, double I, double rel_epsilon)
+double AdsorptionReaction::calculatePsi(double sigma, double T, double I, double rel_epsilon)
 {
 	double psi = 0.0;
 
 	I = I * 1000.0;//First, convert ionic strength to mol/m^3
-	double f = (2.0 * sigma) / sqrt(8.0*AbsPerm(rel_epsilon)*Rstd*T*I);
-	double C = pow((((81.0*f) + sqrt(pow((81.0*f), 2.0) + 23328.0))/2.0),(1.0/3.0));
-	double x = (18.0 - pow(C, 2.0))/(3.0*C);
-	psi = (2.0 * kB * T * x) / e;
-
-	return psi;
+	double coeff = sigma / sqrt(8.0*AbsPerm(rel_epsilon)*Rstd*T*I);
+	double inv = log(coeff + sqrt((coeff*coeff)+1.0));
+	psi = (2.0 * kB * T * inv) / e;
+	
+	return psi; //Units: V
 }
 
 //Calculation of charge exchange in given reaction
@@ -2024,14 +2023,14 @@ double AdsorptionReaction::calculateAqueousChargeExchange(int i)
 		}
 	}
 
-	return n;
+	return -n;
 }
 
 //Calculation of equilibrium correct term
 double AdsorptionReaction::calculateEquilibriumCorrection(double sigma, double T, double I, double rel_epsilon, int i)
 {
 	if (this->includeSurfaceCharge() == true)
-		return -(this->calculateAqueousChargeExchange(i)*e*calculateCubicPsiApprox(sigma, T, I, rel_epsilon))/(kB*T);
+		return -(this->calculateAqueousChargeExchange(i)*e*calculatePsi(sigma, T, I, rel_epsilon))/(kB*T);
 	else
 		return 0.0;
 }
@@ -2618,9 +2617,9 @@ double UnsteadyAdsorption::calculateSurfaceChargeDensity( const Matrix<double> &
 }
 
 //Approximation of the electric potential of the surface
-double UnsteadyAdsorption::calculateCubicPsiApprox(double sigma, double T, double I, double rel_epsilon)
+double UnsteadyAdsorption::calculatePsi(double sigma, double T, double I, double rel_epsilon)
 {
-	return this->AdsorptionReaction::calculateCubicPsiApprox(sigma,T,I,rel_epsilon);
+	return this->AdsorptionReaction::calculatePsi(sigma,T,I,rel_epsilon);
 }
 
 //Calculation of charge exchange in given reaction
@@ -2636,14 +2635,14 @@ double UnsteadyAdsorption::calculateAqueousChargeExchange(int i)
 		}
 	}
 	
-	return n;
+	return -n;
 }
 
 //Calculation of equilibrium correct term
 double UnsteadyAdsorption::calculateEquilibriumCorrection(double sigma, double T, double I, double rel_epsilon, int i)
 {
 	if (this->includeSurfaceCharge() == true)
-		return -(this->calculateAqueousChargeExchange(i)*e*calculateCubicPsiApprox(sigma, T, I, rel_epsilon))/(kB*T);
+		return -(this->calculateAqueousChargeExchange(i)*e*calculatePsi(sigma, T, I, rel_epsilon))/(kB*T);
 	else
 		return 0.0;
 }
