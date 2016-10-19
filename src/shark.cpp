@@ -2499,6 +2499,7 @@ void UnsteadyAdsorption::updateActivities()
 	this->activities_old = this->activities;
 }
 
+//Return reference to the corresponding reaction
 UnsteadyReaction& UnsteadyAdsorption::getReaction(int i)
 {
 	if (i >= this->num_rxns || i < 0)
@@ -2508,6 +2509,7 @@ UnsteadyReaction& UnsteadyAdsorption::getReaction(int i)
 	}
 	return this->ads_rxn[i];
 }
+
 //Return the ith molar factor
 double UnsteadyAdsorption::getMolarFactor(int i)
 {
@@ -2953,6 +2955,335 @@ std::string UnsteadyAdsorption::getAdsorbentName()
 /*
  *	-------------------------------------------------------------------------------------
  *								End: UnsteadyAdsorption
+ */
+
+/*
+ *								Start: MultiligandAdsorption
+ *	-------------------------------------------------------------------------------------
+ */
+//Default Constructor
+MultiligandAdsorption::MultiligandAdsorption()
+:
+ligand_obj(0),
+activities()
+{
+	num_ligands = 0;
+	adsorbent_name = "Adsorbent A";
+	
+	surface_activity = (*ideal_solution);
+	activity_data = nullptr;
+	specific_area = 1.0;
+	total_mass = 0.0;
+	total_volume = 1.0;
+	charge_density = 0.0;
+	ionic_strength = 0.0;
+	IncludeSurfCharge = true;
+
+}
+
+//Default Destructor
+MultiligandAdsorption::~MultiligandAdsorption()
+{
+	ligand_obj.clear();
+}
+
+//Initialize the list of adsorption objects
+void MultiligandAdsorption::Initialize_Object(MasterSpeciesList &List, int ligand, std::vector<int> n)
+{
+	this->List = &List;
+	this->num_ligands = ligand;
+	this->ligand_obj.resize(ligand);
+	this->activities.set_size(this->List->list_size(), 0);
+	
+	if (n.size() != ligand)
+	{
+		this->num_ligands = 0;
+		mError(invalid_size);
+		return;
+	}
+	
+	for (int l=0; l<this->num_ligands; l++)
+	{
+		this->getAdsorptionObject(l).Initialize_Object(List, n[l]);
+		this->getAdsorptionObject(l).setAreaBasisBool(false);
+	}
+}
+
+//Modify the deltas for the mass balance object
+void MultiligandAdsorption::modifyDeltas(MassBalance &mbo)
+{
+	for (int l=0; l<this->getNumberLigands(); l++)
+	{
+		this->getAdsorptionObject(l).setTotalMass(this->getTotalMass());
+		this->getAdsorptionObject(l).setTotalVolume(this->getTotalVolume());
+		this->getAdsorptionObject(l).modifyDeltas(mbo);
+	}
+}
+
+//Set the adsorb indices for all reactions and ligands
+int MultiligandAdsorption::setAdsorbIndices()
+{
+	int success = 0;
+	
+	for (int l=0; l<this->getNumberLigands(); l++)
+	{
+		success = this->getAdsorptionObject(l).setAdsorbIndices();
+		if (success == -1)
+			return success;
+	}
+	
+	return success;
+}
+
+//Check all aqueous indices from all reactions and all ligands for errors
+int MultiligandAdsorption::checkAqueousIndices()
+{
+	int success = 0;
+	
+	for (int l=0; l<this->getNumberLigands(); l++)
+	{
+		success = this->getAdsorptionObject(l).checkAqueousIndices();
+		if (success == -1)
+			return success;
+	}
+	
+	return success;
+}
+
+//Set the activity function and data structure
+void MultiligandAdsorption::setActivityModelInfo( int (*act) (const Matrix<double>& logq, Matrix<double> &activity, const void *data), const void *act_data)
+{
+	if ( (*act) == NULL )
+	{
+		this->surface_activity = (*ideal_solution);
+	}
+	else
+	{
+		this->surface_activity = (*act);
+	}
+	if ( (act_data) == NULL	)
+	{
+		this->activity_data = this;
+	}
+	else
+	{
+		this->activity_data = act_data;
+	}
+	
+	for (int l=0; l<this->getNumberLigands(); l++)
+	{
+		this->getAdsorptionObject(l).setActivityModelInfo(NULL,NULL);
+	}
+}
+
+//Set the aqueous indices for each adsorption object
+int MultiligandAdsorption::setAqueousIndexAuto()
+{
+	int success = 0;
+	
+	for (int l=0; l<this->getNumberLigands(); l++)
+	{
+		success = this->getAdsorptionObject(l).setAqueousIndexAuto();
+		if (success == -1)
+			return success;
+	}
+	
+	return success;
+}
+
+//Set the molar factor
+void MultiligandAdsorption::setMolarFactor(int ligand, int rxn, double m)
+{
+	if (ligand >= this->getNumberLigands() || ligand < 0)
+	{
+		mError(out_of_bounds);
+		ligand = 0;
+	}
+	
+	this->getAdsorptionObject(ligand).setMolarFactor(rxn, m);
+}
+
+//Set all volume factors
+void MultiligandAdsorption::setVolumeFactor(int i, double v)
+{
+	for (int l=0; l<this->getNumberLigands(); l++)
+	{
+		this->getAdsorptionObject(l).setVolumeFactor(i, v);
+	}
+}
+
+//Set all area factors
+void MultiligandAdsorption::setAreaFactor(int i, double a)
+{
+	for (int l=0; l<this->getNumberLigands(); l++)
+	{
+		this->getAdsorptionObject(l).setAreaFactor(i, a);
+	}
+}
+
+//Set the molality of the given ligand
+void MultiligandAdsorption::setSpecificMolality(int ligand, double a)
+{
+	if (ligand >= this->getNumberLigands() || ligand < 0)
+	{
+		mError(out_of_bounds);
+		ligand = 0;
+	}
+	
+	this->getAdsorptionObject(ligand).setSpecificMolality(a);
+}
+
+//Set the surface charge of the given ligand
+void MultiligandAdsorption::setSurfaceCharge(int ligand, double a)
+{
+	if (ligand >= this->getNumberLigands() || ligand < 0)
+	{
+		mError(out_of_bounds);
+		ligand = 0;
+	}
+	
+	this->getAdsorptionObject(ligand).setSurfaceCharge(a);
+}
+
+//Set the adsorbent name
+void MultiligandAdsorption::setAdsorbentName(std::string name)
+{
+	this->adsorbent_name = name;
+}
+
+//Set the name of the ith ligand
+void MultiligandAdsorption::setLigandName(int ligand, std::string name)
+{
+	this->getAdsorptionObject(ligand).setAdsorbentName(name);
+}
+
+//Set the specific area of the adsorbent
+void MultiligandAdsorption::setSpecificArea(double area)
+{
+	if (area < 0)
+		area = DBL_MIN;
+	this->specific_area = area;
+	
+	for (int l=0; l<this->getNumberLigands(); l++)
+		this->getAdsorptionObject(l).setSpecificArea(area);
+}
+
+//Set the total mass
+void MultiligandAdsorption::setTotalMass(double mass)
+{
+	if (mass < 0)
+		mass = DBL_MIN;
+	this->total_mass = mass;
+	
+	for (int l=0; l<this->getNumberLigands(); l++)
+		this->getAdsorptionObject(l).setTotalMass(mass);
+}
+
+//Set the total volume of the system
+void MultiligandAdsorption::setTotalVolume(double volume)
+{
+	if (volume < 0)
+		volume = DBL_MIN;
+	this->total_volume = volume;
+	
+	for (int l=0; l<this->getNumberLigands(); l++)
+		this->getAdsorptionObject(l).setTotalVolume(volume);
+}
+
+//Directly set the surface charging boolean
+void MultiligandAdsorption::setSurfaceChargeBool(bool opt)
+{
+	this->IncludeSurfCharge = opt;
+	
+	for (int l=0; l<this->getNumberLigands(); l++)
+		this->getAdsorptionObject(l).setSurfaceChargeBool(opt);
+}
+
+//Return reference to the corresponding adsorption object
+AdsorptionReaction& MultiligandAdsorption::getAdsorptionObject(int l)
+{
+	if (l >= this->num_ligands || l < 0)
+	{
+		mError(out_of_bounds);
+		l = 0;
+	}
+	return this->ligand_obj[l];
+}
+
+//Return number of ligands on the surface
+int MultiligandAdsorption::getNumberLigands()
+{
+	return this->num_ligands;
+}
+
+//Return the value of activity for the ith species
+double MultiligandAdsorption::getActivity(int i)
+{
+	if (i >= this->List->list_size() || i < 0)
+	{
+		mError(out_of_bounds);
+		i = 0;
+	}
+	return this->activities(i,0);
+}
+
+//Return the specific area of the adsorbent
+double MultiligandAdsorption::getSpecificArea()
+{
+	return this->specific_area;
+}
+
+//Return the bulk density
+double MultiligandAdsorption::getBulkDensity()
+{
+	return this->total_mass / this->total_volume;
+}
+
+//Return the total mass of adsorbent
+double MultiligandAdsorption::getTotalMass()
+{
+	return this->total_mass;
+}
+
+//Return the total volume of the system
+double MultiligandAdsorption::getTotalVolume()
+{
+	return this->total_volume;
+}
+
+//Return the charge density
+double MultiligandAdsorption::getChargeDensity()
+{
+	return this->charge_density;
+}
+
+//Return ionic strength
+double MultiligandAdsorption::getIonicStrength()
+{
+	return this->ionic_strength;
+}
+
+//Return the value of the boolean for including surface charge
+bool MultiligandAdsorption::includeSurfaceCharge()
+{
+	return this->IncludeSurfCharge;
+}
+
+//Return the name of the ligand at i
+std::string MultiligandAdsorption::getLigandName(int l)
+{
+	return this->getAdsorptionObject(l).getAdsorbentName();
+}
+
+//Return the name of the adsorbent
+std::string MultiligandAdsorption::getAdsorbentName()
+{
+	return this->adsorbent_name;
+}
+
+/*
+ *	-------------------------------------------------------------------------------------
+ *								End: MultiligandAdsorption
  */
 
 //Print SHARK info to output file
@@ -3471,7 +3802,7 @@ double calculate_ionic_strength(const Matrix<double> &x, MasterSpeciesList &Mast
 	return I;
 }
 
-//Flory-Huggins Surface Activity Model
+//Flory-Huggins Surface Activity Model (for AdsorptionReaction)
 int FloryHuggins(const Matrix<double> &x, Matrix<double> &F, const void *data)
 {
 	int success = 0;
@@ -3509,7 +3840,53 @@ int FloryHuggins(const Matrix<double> &x, Matrix<double> &F, const void *data)
 	return success;
 }
 
-//UNIQUAC Surface Activity Model
+//Flory-Huggins Surface Activity Model (for UnsteadyAdsorption)
+int FloryHuggins_unsteady(const Matrix<double> &x, Matrix<double> &F, const void *data)
+{
+	int success = 0;
+	UnsteadyAdsorption *dat = (UnsteadyAdsorption *) data;
+	double logp = 0.0, invp = 0.0;
+	double total = 0.0, lnact = 0.0;
+	
+	for (int i=0; i<F.rows(); i++)
+		F.edit(i, 0, 1.0);
+	
+	for (int i=0; i<dat->getNumberRxns(); i++)
+	{
+		total = total + pow(10.0, x(dat->getAdsorbIndex(i),0));
+	}
+	
+	for (int i=0; i<dat->getNumberRxns(); i++)
+	{
+		logp = 0.0;
+		invp = 0.0;
+		for (int j=0; j<dat->getNumberRxns(); j++)
+		{
+			double alpha = (dat->getAreaFactor(dat->getAdsorbIndex(i))/dat->getAreaFactor(dat->getAdsorbIndex(j))) - 1.0;
+			logp = logp + ( (pow(10.0, x(dat->getAdsorbIndex(j),0))/total)/ (alpha + 1.0) );
+			invp = logp;
+		}
+		logp = log(logp);
+		invp = 1.0 / invp;
+		lnact = 1.0 - logp - invp;
+		
+		F.edit(dat->getAdsorbIndex(i), 0, exp(lnact));
+		if (isinf(F(dat->getAdsorbIndex(i),0)) || isnan(F(dat->getAdsorbIndex(i),0)))
+			F.edit(dat->getAdsorbIndex(i), 0, DBL_MAX);
+	}
+	
+	return success;
+}
+
+//Flory-Huggins Surface Activity Model (for MultiligandAdsorption)
+int FloryHuggins_multiligand(const Matrix<double> &x, Matrix<double> &F, const void *data)
+{
+	int success = 0;
+	success = ideal_solution(x, F, data);
+	return success;
+}
+
+//UNIQUAC Surface Activity Model (for AdsorptionReaction)
 int UNIQUAC(const Matrix<double> &x, Matrix<double> &F, const void *data)
 {
 	int success = 0;
@@ -3593,6 +3970,98 @@ int UNIQUAC(const Matrix<double> &x, Matrix<double> &F, const void *data)
 	return success;
 }
 
+//UNIQUAC Surface Activity Model (for UnsteadyAdsorption)
+int UNIQUAC_unsteady(const Matrix<double> &x, Matrix<double> &F, const void *data)
+{
+	int success = 0;
+	UnsteadyAdsorption *dat = (UnsteadyAdsorption *) data;
+	double total = 0.0;
+	double Temp = 0.0;
+	std::vector<double> r;
+	std::vector<double> s;
+	std::vector<double> l;
+	std::vector<double> u;
+	std::vector<double> frac;
+	std::vector<double> theta;
+	r.resize(dat->getNumberRxns());
+	s.resize(dat->getNumberRxns());
+	l.resize(dat->getNumberRxns());
+	u.resize(dat->getNumberRxns());
+	frac.resize(dat->getNumberRxns());
+	theta.resize(dat->getNumberRxns());
+	Temp = -dat->getReaction(0).Get_Energy()/(Rstd*log(pow(10.0,dat->getReaction(0).Get_Equilibrium())));
+	
+	//Loop to calculate total adsorption and calculate surface area and volume constants
+	for (int i=0; i<dat->getNumberRxns(); i++)
+	{
+		total = total + pow(10.0, x(dat->getAdsorbIndex(i),0));
+	}
+	
+	//Loop to calculate fractions and fraction dependent functions
+	double rx_sum = 0.0;
+	double sx_sum = 0.0;
+	double lx_sum = 0.0;
+	for (int i=0; i<dat->getNumberRxns(); i++)
+	{
+		frac[i] = pow(10.0, x(dat->getAdsorbIndex(i),0)) / total;
+		r[i] = dat->getVolumeFactor(dat->getAdsorbIndex(i)) / VolumeSTD;
+		s[i] = dat->getAreaFactor(dat->getAdsorbIndex(i)) / AreaSTD;
+		l[i] = LengthFactor(CoordSTD, r[i], s[i]);
+		u[i] = -dat->getReaction(i).Get_Energy()/s[i]/CoordSTD/CoordSTD;
+		rx_sum = rx_sum + (r[i]*frac[i]);
+		sx_sum = sx_sum + (s[i]*frac[i]);
+		lx_sum = lx_sum + (l[i]*frac[i]);
+	}
+	
+	//Loop to gather the thetas
+	for (int i=0; i<dat->getNumberRxns(); i++)
+		theta[i] = (s[i]*frac[i])/sx_sum;
+	
+	//i Loop to fill in activities
+	for (int i=0; i<dat->getNumberRxns(); i++)
+	{
+		double theta_tau_i = 0.0;
+		double theta_tau_rat = 0.0;
+		double lnact = 0.0;
+		
+		//Inner j loop
+		for (int j=0; j<dat->getNumberRxns(); j++)
+		{
+			theta_tau_i = theta_tau_i + ( theta[j]*exp(-(sqrt(fabs(u[j]*u[i])) - u[i])/(Rstd*Temp)) );
+			
+			double theta_tau_k = 0.0;
+			// k loop
+			for (int k=0; k<dat->getNumberRxns(); k++)
+			{
+				theta_tau_k = theta_tau_k + ( theta[k]*exp(-(sqrt(fabs(u[k]*u[j])) - u[j])/(Rstd*Temp)) );
+				
+			}// End k Loop
+			
+			theta_tau_rat = theta_tau_rat + ( (theta[j]*exp(-(sqrt(fabs(u[i]*u[j])) - u[j])/(Rstd*Temp)) )/theta_tau_k);
+			
+		}// End j loop
+		
+		lnact = log(r[i]/rx_sum) + ( (CoordSTD/2.0)*s[i]*log((s[i]/r[i])*(rx_sum/sx_sum)) ) + l[i] - ( r[i]*(lx_sum/rx_sum) ) - ( s[i]*log(theta_tau_i) ) + s[i] - ( s[i]*theta_tau_rat );
+		F.edit(dat->getAdsorbIndex(i), 0, exp(lnact));
+		
+		if (isinf(F(dat->getAdsorbIndex(i),0)) || isnan(F(dat->getAdsorbIndex(i),0)))
+			F.edit(dat->getAdsorbIndex(i), 0, DBL_MAX);
+		if (F(dat->getAdsorbIndex(i),0) <= sqrt(DBL_MIN))
+			F.edit(dat->getAdsorbIndex(i), 0, sqrt(DBL_MIN));
+		
+	}// End i Loop
+	
+	return success;
+}
+
+//UNIQUAC Surface Activity Model (for MultiligandAdsorption)
+int UNIQUAC_multiligand(const Matrix<double> &x, Matrix<double> &F, const void *data)
+{
+	int success = 0;
+	success = ideal_solution(x, F, data);
+	return success;
+}
+
 //Default Activity function is ideal solution
 int ideal_solution (const Matrix<double>& x, Matrix<double> &F, const void *data)
 {
@@ -3646,6 +4115,7 @@ int DebyeHuckel_equation (const Matrix<double> &x, Matrix<double> &F, const void
 	return success;
 }
 
+/*
 int Sit_equation (const Matrix<double>& x, Matrix<double> &F, const void *data)
 {
 	int success = 0;
@@ -4479,7 +4949,8 @@ int pitzer_equation (const Matrix<double>& x, Matrix<double> &F, const void *dat
 
 	return success;
 }
-
+*/
+ 
 //Determine the surface activity function choosen by user
 int surf_act_choice(const std::string &input)
 {
@@ -6150,12 +6621,12 @@ int setup_SHARK_DATA( FILE *file, int (*residual) (const Matrix<double> &x, Matr
 	//NOTE: The below lines of code will change after we define the PITZER and SIT models and what data structures they need
 	else if (dat->act_fun == PITZER)
 	{
-		dat->EvalActivity = pitzer_equation;
+		dat->EvalActivity = ideal_solution;
 		dat->activity_data = dat;
 	}
 	else if (dat->act_fun == SIT)
 	{
-		dat->EvalActivity = Sit_equation;
+		dat->EvalActivity = ideal_solution;
 		dat->activity_data = dat;
 	}
 	else

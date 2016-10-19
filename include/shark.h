@@ -568,7 +568,7 @@ public:
 	AdsorptionReaction();								///< Default Constructor
 	~AdsorptionReaction();								///< Default Destructor
 
-	void Initialize_Object(MasterSpeciesList &List, int i); ///< Function to call the initialization of objects sequentially
+	void Initialize_Object(MasterSpeciesList &List, int n); ///< Function to call the initialization of objects sequentially
 	void Display_Info();								///< Display the adsorption reaction information (PLACE HOLDER)
 
 	/// Modify the Deltas in the MassBalance Object
@@ -787,7 +787,7 @@ public:
 	void modifyDeltas(MassBalance &mbo);
 
 	/// Find and set the adsorbed species indices for each reaction object
-	/** This function searches through the Reaction objects in AdsorptionReaction to find the solid species
+	/** This function searches through the Reaction objects in UnsteadyAdsorption to find the solid species
 		and their indices to set that information in the adsorb_index structure. That information will be used
 		later to approximate maximum capacities and equilibrium parameters for use in a modified extended Langmuir
 		type expression. Function will return 0 if successful and -1 on a failure.*/
@@ -965,6 +965,116 @@ private:
 	std::vector<UnsteadyReaction> ads_rxn;				///< List of reactions involved with adsorption
 
 };
+
+/// Multi-ligand Adsorption Reaction Object
+/** C++ Object to handle data and functions associated with forumlating multi-ligand adsorption reactions
+	in a aqueous mixture. Each unique surface in a system will require an instance of this structure. This
+	object is made from a vector of AdsorptionReaction objects, but differentiate between different ligands
+	that exist on the surface.
+ 
+ */
+class MultiligandAdsorption
+{
+public:
+	MultiligandAdsorption();								///< Default Constructor
+	~MultiligandAdsorption();								///< Default Destructor
+	
+	/// Function to call the initialization of objects sequentially
+	/** Function will initialize each ligand adsorption object. 
+	 
+		\param List reference to MasterSpeciesList object
+		\param l number of ligands on the surface
+		\param n number of reactions for each ligand (ligands must be correctly indexed)*/
+	void Initialize_Object(MasterSpeciesList &List, int l, std::vector<int> n);
+	
+	/// Modify the Deltas in the MassBalance Object
+	/** This function will take a mass balance object as an argument and modify the deltas in that object to
+		correct for how adsorption affects that particular mass balance. Since adsorption can effect multiple
+		mass balances, this function must be called for each mass balance in the system.
+	 
+		\param mbo reference to the MassBalance Object the adsorption is acting on*/
+	void modifyDeltas(MassBalance &mbo);
+	
+	/// Find and set the adsorbed species indices for each reaction object in each ligand object
+	/** This function searches through the Reaction objects in AdsorptionReaction to find the solid species
+		and their indices to set that information in the adsorb_index structure. That information will be used
+		later to approximate maximum capacities and equilibrium parameters for use in a modified extended Langmuir
+		type expression. Function will return 0 if successful and -1 on a failure.*/
+	int setAdsorbIndices();
+	
+	/// Function to check and report errors in the aqueous species indices
+	int checkAqueousIndices();
+	
+	/// Function to set the surface activity model and data pointer
+	/** This function will setup the surface activity model based on the given pointer arguments. If no arguments
+		are given, or are given as NULL, then the activity model will default to ideal solution assumption.*/
+	void setActivityModelInfo( int (*act) (const Matrix<double>& logq, Matrix<double> &activity, const void *data),
+							  const void *act_data);
+	
+	/// Automatically sets the primary aqueous species index based on reactions for each ligand
+	/** This function will go through all species and all reactions in each adsorption object and automatically set the
+		primary aqueous species index based on the stoicheometry of the reaction. It will also check and make sure that
+		the primary aqueous index species appears opposite of the adsorbed species in the reactions. Note: This function
+		assumes that the adsorbed indices have already been set. */
+	int setAqueousIndexAuto();
+	
+	/// Set the molar factor for the rxn reaction of the ligand ligand to a value of m
+	void setMolarFactor(int ligand, int rxn, double m);
+	
+	void setVolumeFactor(int i, double v);			///< Set all ith volume factors for the species list (cm^3/mol)
+	void setAreaFactor(int i, double a);			///< Set all ith area factors for the species list (m^2/mol)
+	void setSpecificMolality(int ligand, double a);	///< Set the specific molality for the ligand (mol/kg)
+	void setSurfaceCharge(int ligand, double c);	//< Set the surface charge of the uncomplexed ligand
+	
+	void setAdsorbentName(std::string name);		///< Set the name of the adsorbent material or particle
+	void setLigandName(int i, std::string name);	///< Set the name of the ith ligand
+	void setSpecificArea(double area);				///< Set the specific area of the adsorbent
+	void setTotalMass(double mass);					///< Set the mass of the adsorbent
+	void setTotalVolume(double volume);				///< Set the total volume of the system
+	void setSurfaceChargeBool(bool opt);			///< Set the surface charge boolean
+	
+	AdsorptionReaction& getAdsorptionObject(int i);	///< Return reference to the adsortpion object corresponding to ligand i
+	int getNumberLigands();							///< Get the number of ligands involved with the surface
+	double getActivity(int i);						///< Get the ith activity coefficient from the matrix object
+	double getSpecificArea();						///< Get the specific area of the adsorbent (m^2/kg) or (mol/kg)
+	double getBulkDensity();						///< Calculate and return bulk density of adsorbent in system (kg/L)
+	double getTotalMass();							///< Get the total mass of adsorbent in the system (kg)
+	double getTotalVolume();						///< Get the total volume of the system (L)
+	double getChargeDensity();						///< Get the value of the surface charge density (C/m^2)
+	double getIonicStrength();						///< Get the value of the ionic strength of solution (mol/L)
+	bool includeSurfaceCharge();					///< Returns true if we are considering surface charging during adsorption
+	std::string getLigandName(int i);				///< Get the name of the ligand object indexed by i
+	std::string getAdsorbentName();					///< Get the name of the adsorbent
+	
+protected:
+	MasterSpeciesList *List;						///< Pointer to the MasterSpeciesList object
+	int num_ligands;								///< Number of different ligands to consider
+	std::string adsorbent_name;						///< Name of the adsorbent
+	
+	/// Pointer to a surface activity model
+	/** This is a function pointer for a surface activity model. The function must accept the log of the
+		surface concentrations as an argument (logq) and provide the activities for each species (activity).
+		The pointer data is used to pass any additional arguments needed.
+	 
+		\param logq matrix of the log (base 10) of surface concentrations of all species
+		\param activity matrix of activity coefficients for all surface species (must be overriden)
+		\param data pointer to a data structure needed to calculate activities*/
+	int (*surface_activity) (const Matrix<double>& logq, Matrix<double> &activity, const void *data);
+	
+	const void *activity_data;					///< Pointer to the data structure needed for surface activities.
+	Matrix<double> activities;					///< List of the activities calculated by the activity model
+	double specific_area;						///< Specific surface area of the adsorbent (m^2/kg)
+	double total_mass;							///< Total mass of the adsorbent in the system (kg)
+	double total_volume;						///< Total volume of the system (L)
+	double ionic_strength;						///< Ionic Strength of the system used to adjust equilibria constants (mol/L)
+	double charge_density;						///< Surface charge density of the adsorbent used to adjust equilbria (C/m^2)
+	bool IncludeSurfCharge;						///< True = Includes surface charging corrections, False = Does not consider surface charge
+	
+private:
+	std::vector<AdsorptionReaction> ligand_obj;		///< List of the ligands and reactions they have on the surface
+	
+};
+
 
 /// \cond
 
@@ -1169,28 +1279,74 @@ void print2file_shark_results_old(SHARK_DATA *shark_dat);
 	\param MasterList reference to the MasterSpeciesList object holding species information*/
 double calculate_ionic_strength(const Matrix<double> &x, MasterSpeciesList &MasterList);
 
-///Surface Activity function for simple non-ideal adsorption
+///Surface Activity function for simple non-ideal adsorption (for adsorption reaction object)
 /** This is a simple surface activity model to be used with the Adsorption objects to evaluate the non-ideal
 	behavoir of the surface phase. The model's only parameters are the shape factors in adsorption and the
 	relative concentrations of each surface species. Therefore, we will pass the Adsorption Object itself
-	as the const void *data structure.
+	as the const void *data structure. NOTE: Only for AdsorptionReaction!
 
 	\param x matrix of the log(C) concentration values at the current non-linear step
 	\param F matrix of activity coefficients that are to be altered by this function
 	\param data pointer to the AdsorptionReaction object holding parameter information*/
 int FloryHuggins(const Matrix<double> &x, Matrix<double> &F, const void *data);
 
-///Surface Activity function for the UNIQUAC model for non-ideal adsorption
+///Surface Activity function for simple non-ideal adsorption (for unsteady adsorption object)
+/** This is a simple surface activity model to be used with the Adsorption objects to evaluate the non-ideal
+	behavoir of the surface phase. The model's only parameters are the shape factors in adsorption and the
+	relative concentrations of each surface species. Therefore, we will pass the Adsorption Object itself
+	as the const void *data structure. NOTE: Only for UnsteadyAdsorption!
+ 
+	\param x matrix of the log(C) concentration values at the current non-linear step
+	\param F matrix of activity coefficients that are to be altered by this function
+	\param data pointer to the UnsteadyAdsorption object holding parameter information*/
+int FloryHuggins_unsteady(const Matrix<double> &x, Matrix<double> &F, const void *data);
+
+///Surface Activity function for simple non-ideal adsorption (for multiligand adsorption object)
+/** This is a simple surface activity model to be used with the Adsorption objects to evaluate the non-ideal
+	behavoir of the surface phase. The model's only parameters are the shape factors in adsorption and the
+	relative concentrations of each surface species. Therefore, we will pass the Adsorption Object itself
+	as the const void *data structure. NOTE: Only for MultiligandAdsorption!
+ 
+	\param x matrix of the log(C) concentration values at the current non-linear step
+	\param F matrix of activity coefficients that are to be altered by this function
+	\param data pointer to the MultiligandAdsorption object holding parameter information*/
+int FloryHuggins_multiligand(const Matrix<double> &x, Matrix<double> &F, const void *data);
+
+///Surface Activity function for the UNIQUAC model for non-ideal adsorption (for adsorption reaction object)
 /** This is a more complex surface activity model to be used with the Adsorption objects to evaluate the non-ideal
 	behavoir of the surface phase. The model's primary parameters are the shape factors in adsorption and the
 	relative concentrations of each surface species. Therefore, we will pass the Adsorption Object itself
 	as the const void *data structure. However, future development may require some additional parameters, which
-	will be accessed later.
+	will be accessed later. NOTE: Only for AdsorptionReaction!
  
 	\param x matrix of the log(C) concentration values at the current non-linear step
 	\param F matrix of activity coefficients that are to be altered by this function
 	\param data pointer to the AdsorptionReaction object holding parameter information*/
 int UNIQUAC(const Matrix<double> &x, Matrix<double> &F, const void *data);
+
+///Surface Activity function for the UNIQUAC model for non-ideal adsorption (for unsteady adsorption object)
+/** This is a more complex surface activity model to be used with the Adsorption objects to evaluate the non-ideal
+	behavoir of the surface phase. The model's primary parameters are the shape factors in adsorption and the
+	relative concentrations of each surface species. Therefore, we will pass the Adsorption Object itself
+	as the const void *data structure. However, future development may require some additional parameters, which
+	will be accessed later. NOTE: Only for UnsteadyAdsorption!
+ 
+	\param x matrix of the log(C) concentration values at the current non-linear step
+	\param F matrix of activity coefficients that are to be altered by this function
+	\param data pointer to the UnsteadyAdsorption object holding parameter information*/
+int UNIQUAC_unsteady(const Matrix<double> &x, Matrix<double> &F, const void *data);
+
+///Surface Activity function for the UNIQUAC model for non-ideal adsorption (for multiligand adsorption object)
+/** This is a more complex surface activity model to be used with the Adsorption objects to evaluate the non-ideal
+	behavoir of the surface phase. The model's primary parameters are the shape factors in adsorption and the
+	relative concentrations of each surface species. Therefore, we will pass the Adsorption Object itself
+	as the const void *data structure. However, future development may require some additional parameters, which
+	will be accessed later. NOTE: Only for MultiligandAdsorption!
+ 
+	\param x matrix of the log(C) concentration values at the current non-linear step
+	\param F matrix of activity coefficients that are to be altered by this function
+	\param data pointer to the MultiligandAdsorption object holding parameter information*/
+int UNIQUAC_multiligand(const Matrix<double> &x, Matrix<double> &F, const void *data);
 
 /// Activity function for Ideal Solution
 /** This is one of the default activity models available. It assumes the system behaves ideally and sets the
@@ -1222,7 +1378,7 @@ int Davies_equation (const Matrix<double>& x, Matrix<double> &F, const void *dat
 int DebyeHuckel_equation (const Matrix<double> &x, Matrix<double> &F, const void *data);
 
 /// First test of SIT Model
-int Sit_equation (const Matrix<double>& x, Matrix<double> &F, const void *data);
+//int Sit_equation (const Matrix<double>& x, Matrix<double> &F, const void *data);
 
 /// Function takes a given string and returns a flag denoting which surface activity model was choosen
 /** This function returns an integer flag that will be one of the valid surface activity model flags from the
