@@ -614,6 +614,10 @@ public:
 	void setSurfaceChargeBool(bool opt);				///< Set the boolean for inclusion of surface charging 
 	void setBasis(std::string option);					///< Set the basis of the adsorption problem from the given string arg
 	void setAdsorbentName(std::string name);			///< Set the name of the adsorbent to the given string
+	
+	void setChargeDensityValue(double a);				///< Set the value of the charge density parameter to a (C/m^2)
+	void setIonicStrengthValue(double a);				///< Set the value of the ionic strength parameter to a (mol/L)
+	void setActivities(Matrix<double> &x);		///< Set the values of activities in the activity matrix
 
 	void calculateAreaFactors();						///< Calculates the area factors used from the van der Waals volumes
 	void calculateEquilibria(double T);					///< Calculates all equilibrium parameters as a function of temperature
@@ -1032,6 +1036,50 @@ public:
 	void setTotalMass(double mass);					///< Set the mass of the adsorbent
 	void setTotalVolume(double volume);				///< Set the total volume of the system
 	void setSurfaceChargeBool(bool opt);			///< Set the surface charge boolean
+	void setElectricPotential(double a);			///< Set the surface electric potential
+	
+	void calculateAreaFactors();						///< Calculates the area factors used from the van der Waals volumes
+	void calculateEquilibria(double T);					///< Calculates all equilibrium parameters as a function of temperature
+	void setChargeDensity(const Matrix<double> &x);		///< Calculates and sets the current value of charge density
+	void setIonicStrength(const Matrix<double> &x);		///< Calculates and sets the current value of ionic strength
+	int callSurfaceActivity(const Matrix<double> &x);	///< Calls the activity model and returns an int flag for success or failure
+	
+	/// Function calculates the Psi (electric surface potential) given a set of arguments
+	/** This function will calculate the electric surface potential of the adsorbent under the current
+		conditions of charge density, temperature, ionic strength, and relative permittivity.
+	 
+		\param sigma charge density of the surface (C/m^2)
+		\param T temperature of the system in question (K)
+		\param I ionic strength of the medium the surface is in (mol/L)
+		\param rel_epsilon relative permittivity of the medium (Unitless) */
+	void calculateElecticPotential(double sigma, double T, double I, double rel_epsilon);
+	
+	/// Function to calculate the correction term for the equilibrium parameter
+	/** This function calculates the correction term that gets applied to the equilibrium parameter to
+		correct for surface charge and charge accumulation/depletion effects. It will call the psi approximation
+		and charge exchange functions, therefore it needs to have those functions arguments passed to it as well.
+	 
+		\param sigma charge density of the surface (C/m^2)
+		\param T temperature of the system in question (K)
+		\param I ionic strength of the medium the surface is in (mol/L)
+		\param rel_epsilon relative permittivity of the medium (Unitless)
+		\param rxn index of the reaction of interest for the adsorption object
+		\param ligand index of the ligand of interest for the adsorption object*/
+	double calculateEquilibriumCorrection(double sigma, double T, double I, double rel_epsilon, int rxn, int ligand);
+	
+	/// Calculates the residual for the ith reaction in the system
+	/** This function will provide a system residual for the ith reaction object involved in the Adsorption
+		Reaction. The residual is fed into the SHARK solver to find the solution to solid and aqueous phase
+		concentrations simultaneously. This function will also adjust the equilibrium parameter for the reaction
+		
+	 
+		\param x matrix of the log(C) concentration values at the current non-linear step
+		\param gama matrix of activity coefficients for each species at the current non-linear step
+		\param T temperature of the system in question (K)
+		\param rel_perm relative permittivity of the media (unitless)
+		\param rxn index of the reaction of interest for the adsorption object
+		\param ligand index of the ligand of interest for the adsorption object*/
+	double Eval_Residual(const Matrix<double> &x, const Matrix<double> &gama, double T, double rel_perm, int rxn, int ligand);
 	
 	AdsorptionReaction& getAdsorptionObject(int i);	///< Return reference to the adsortpion object corresponding to ligand i
 	int getNumberLigands();							///< Get the number of ligands involved with the surface
@@ -1042,6 +1090,7 @@ public:
 	double getTotalVolume();						///< Get the total volume of the system (L)
 	double getChargeDensity();						///< Get the value of the surface charge density (C/m^2)
 	double getIonicStrength();						///< Get the value of the ionic strength of solution (mol/L)
+	double getElectricPotential();					///< Get the value of the electric surface potential (V)
 	bool includeSurfaceCharge();					///< Returns true if we are considering surface charging during adsorption
 	std::string getLigandName(int i);				///< Get the name of the ligand object indexed by i
 	std::string getAdsorbentName();					///< Get the name of the adsorbent
@@ -1068,6 +1117,7 @@ protected:
 	double total_volume;						///< Total volume of the system (L)
 	double ionic_strength;						///< Ionic Strength of the system used to adjust equilibria constants (mol/L)
 	double charge_density;						///< Surface charge density of the adsorbent used to adjust equilbria (C/m^2)
+	double electric_potential;					///< Electric surface potential of the adsorbent used to adjust equilibria (V)
 	bool IncludeSurfCharge;						///< True = Includes surface charging corrections, False = Does not consider surface charge
 	
 private:

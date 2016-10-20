@@ -1814,6 +1814,30 @@ void AdsorptionReaction::setAdsorbentName(std::string name)
 	this->adsorbent_name = name;
 }
 
+//Function to set the charge density to a given value
+void AdsorptionReaction::setChargeDensityValue(double a)
+{
+	this->charge_density = a;
+}
+
+//Function to set ionic strength to a given value
+void AdsorptionReaction::setIonicStrengthValue(double a)
+{
+	this->ionic_strength = a;
+}
+
+//Function to set the activity matrix to a specific matrix
+void AdsorptionReaction::setActivities(Matrix<double> &x)
+{
+	if (x.rows() != this->activities.rows() || x.columns() != this->activities.columns())
+	{
+		mError(dim_mis_match);
+		return;
+	}
+	
+	this->activities = x;
+}
+
 //Modify the deltas in the given mass balance
 void AdsorptionReaction::modifyDeltas(MassBalance &mbo)
 {
@@ -2977,6 +3001,7 @@ activities()
 	total_volume = 1.0;
 	charge_density = 0.0;
 	ionic_strength = 0.0;
+	electric_potential = 0.0;
 	IncludeSurfCharge = true;
 
 }
@@ -3199,6 +3224,80 @@ void MultiligandAdsorption::setSurfaceChargeBool(bool opt)
 		this->getAdsorptionObject(l).setSurfaceChargeBool(opt);
 }
 
+//Function to set the electic potential of the surface
+void MultiligandAdsorption::setElectricPotential(double a)
+{
+	this->electric_potential = a;
+}
+
+//Function to calculate the area factors used by adsorption models
+void MultiligandAdsorption::calculateAreaFactors()
+{
+	for (int l=0; l<this->getNumberLigands(); l++)
+		this->getAdsorptionObject(l).calculateAreaFactors();
+}
+
+//Function to calculate all equilibria parameters for all reactions
+void MultiligandAdsorption::calculateEquilibria(double T)
+{
+	for (int l=0; l<this->getNumberLigands(); l++)
+		this->getAdsorptionObject(l).calculateEquilibria(T);
+}
+
+//Function to calculate and set the appropriate charge density
+void MultiligandAdsorption::setChargeDensity(const Matrix<double> &x)
+{
+	this->charge_density = 0.0;
+	for (int l=0; l<this->getNumberLigands(); l++)
+	{
+		this->getAdsorptionObject(l).setChargeDensity(x);
+		this->charge_density = this->charge_density + this->getAdsorptionObject(l).getChargeDensity();
+	}
+	
+	for (int l=0; l<this->getNumberLigands(); l++)
+		this->getAdsorptionObject(l).setChargeDensityValue(this->charge_density);
+}
+
+//Function to set the ionic strength parameter
+void MultiligandAdsorption::setIonicStrength(const Matrix<double> &x)
+{
+	this->ionic_strength = calculate_ionic_strength(x, *this->List);
+	
+	for (int l=0; l<this->getNumberLigands(); l++)
+		this->getAdsorptionObject(l).setIonicStrengthValue(this->ionic_strength);
+}
+
+//Function to call the surface activity model
+int MultiligandAdsorption::callSurfaceActivity(const Matrix<double> &x)
+{
+	int success = this->surface_activity(x,this->activities,this->activity_data);
+	
+	for (int l=0; l<this->getNumberLigands(); l++)
+		this->getAdsorptionObject(l).setActivities(this->activities);
+	
+	return success;
+}
+
+//Function to calculate the electric surface potential
+void MultiligandAdsorption::calculateElecticPotential(double sigma, double T, double I, double rel_epsilon)
+{
+	I = I * 1000.0;//First, convert ionic strength to mol/m^3
+	double coeff = sigma / sqrt(8.0*AbsPerm(rel_epsilon)*Rstd*T*I);
+	double inv = log(coeff + sqrt((coeff*coeff)+1.0));
+	this->electric_potential = (2.0 * kB * T * inv) / e;
+}
+
+//Calculation of equilibrium correct term
+double MultiligandAdsorption::calculateEquilibriumCorrection(double sigma, double T, double I, double rel_epsilon, int rxn, int ligand)
+{
+	this->calculateElecticPotential(sigma, T, I, rel_epsilon);
+	
+	if (this->includeSurfaceCharge() == true)
+		return -(this->getAdsorptionObject(ligand).calculateAqueousChargeExchange(rxn)*e*this->getElectricPotential())/(kB*T);
+	else
+		return 0.0;
+}
+
 //Return reference to the corresponding adsorption object
 AdsorptionReaction& MultiligandAdsorption::getAdsorptionObject(int l)
 {
@@ -3261,6 +3360,12 @@ double MultiligandAdsorption::getChargeDensity()
 double MultiligandAdsorption::getIonicStrength()
 {
 	return this->ionic_strength;
+}
+
+//Return the electric potential
+double MultiligandAdsorption::getElectricPotential()
+{
+	return this->electric_potential;
 }
 
 //Return the value of the boolean for including surface charge
