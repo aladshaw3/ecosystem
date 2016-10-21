@@ -1067,9 +1067,9 @@ public:
 		\param ligand index of the ligand of interest for the adsorption object*/
 	double calculateEquilibriumCorrection(double sigma, double T, double I, double rel_epsilon, int rxn, int ligand);
 	
-	/// Calculates the residual for the ith reaction in the system
-	/** This function will provide a system residual for the ith reaction object involved in the Adsorption
-		Reaction. The residual is fed into the SHARK solver to find the solution to solid and aqueous phase
+	/// Calculates the residual for the ith reaction and lth ligand in the system
+	/** This function will provide a system residual for the ith reaction object involved in the lth ligand's Adsorption
+		Reaction object. The residual is fed into the SHARK solver to find the solution to solid and aqueous phase
 		concentrations simultaneously. This function will also adjust the equilibrium parameter for the reaction
 		
 	 
@@ -1196,6 +1196,7 @@ typedef struct SHARK_DATA
 	std::vector<UnsteadyReaction> UnsteadyList;		///< Unsteady Reaction objects
 	std::vector<AdsorptionReaction> AdsorptionList;	///< Equilibrium Adsorption Reaction Objects
 	std::vector<UnsteadyAdsorption> UnsteadyAdsList;///< Unsteady Adsorption Reaction Objects
+	std::vector<MultiligandAdsorption> MultiAdsList;///< Multiligand Adsorptioin Objects
 
 	/// Array of Other Residual functions to be defined by user
 	/** This list of function pointers can be declared and set up by the user in order to add to or change
@@ -1217,8 +1218,10 @@ typedef struct SHARK_DATA
 	int num_usr = 0;								///< Number of unsteady-state reactions
 	int num_ssao = 0;								///< Number of steady-state adsorption objects
 	int num_usao = 0;								///< Number of unsteady adsorption objects
+	int num_multi_ssao = 0;							///< Number of multiligand steady-state adsorption objects
 	std::vector<int> num_ssar;						///< List of the numbers of reactions in each adsorption object
 	std::vector<int> num_usar;						///< List of the numbers of reactions in each unsteady adsorption object
+	std::vector< std::vector<int> > num_multi_ssar; ///< List of all multiligand objects -> List of ligands and rxns of that ligand
 	std::vector<std::string> ss_ads_names;			///< List of the steady-state adsorbent object names
 	std::vector<std::string> us_ads_names;			///< List of the unsteady adsorption object names
 	int num_other = 0;								///< Number of other functions to be used (default is always 0)
@@ -1488,6 +1491,12 @@ int Convert2Concentration(const Matrix<double> &logx, Matrix<double> &x);
 	to setup the shark simulation for the input given in the input file. */
 int read_scenario(SHARK_DATA *shark_dat);
 
+/// Function to go through the yaml object to setup memory space for multiligand objects
+/** This function checks the yaml object for the expected keys and values of the multiligand scenario documents
+	to setup the shark simulation for the input given in the input file.
+	*/
+int read_multiligand_scenario(SHARK_DATA *shark_dat);
+
 /// Function to go through the yaml object for the solver options document
 /** This function checks the yaml object for the expected keys and values of the solver options document
 	to setup the shark simulation for the input given in the input file. */
@@ -1519,6 +1528,13 @@ int read_unsteadyrxn(SHARK_DATA *shark_dat);
 	
 	\note Each adsorption object will have its own document header by the name of that object*/
 int read_adsorbobjects(SHARK_DATA *shark_dat);
+
+/// Function to go through the yaml object for each MultiligandAdsorption Object
+/** This function checks the yaml object for the expected keys and values of the multiligand object documents
+	to setup the shark simulation for the input given in the input file.
+	
+	\note Each ligand object will have its own document header by the name of that object*/
+int read_multiligandobjects(SHARK_DATA *shark_dat);
 
 /// Function to setup the memory and pointers for the SHARK_DATA structure for the current simulation
 /** This function will be called after reading the scenario file and is used to setup the memory and other pointers
