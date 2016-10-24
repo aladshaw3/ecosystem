@@ -3018,7 +3018,7 @@ void MultiligandAdsorption::Initialize_Object(MasterSpeciesList &List, int ligan
 	this->List = &List;
 	this->num_ligands = ligand;
 	this->ligand_obj.resize(ligand);
-	this->activities.set_size(this->List->list_size(), 0);
+	this->activities.set_size(this->List->list_size(), 1);
 	
 	if (n.size() != ligand)
 	{
@@ -3247,15 +3247,17 @@ void MultiligandAdsorption::calculateEquilibria(double T)
 //Function to calculate and set the appropriate charge density
 void MultiligandAdsorption::setChargeDensity(const Matrix<double> &x)
 {
+	/*
 	this->charge_density = 0.0;
 	for (int l=0; l<this->getNumberLigands(); l++)
 	{
-		this->getAdsorptionObject(l).setChargeDensity(x);
-		this->charge_density = this->charge_density + this->getAdsorptionObject(l).getChargeDensity();
+		this->charge_density = this->charge_density + this->getAdsorptionObject(l).calculateSurfaceChargeDensity(x);
 	}
 	
 	for (int l=0; l<this->getNumberLigands(); l++)
 		this->getAdsorptionObject(l).setChargeDensityValue(this->charge_density);
+	 */
+	this->charge_density = this->getAdsorptionObject(0).calculateSurfaceChargeDensity(x);
 }
 
 //Function to set the ionic strength parameter
@@ -4104,7 +4106,44 @@ int FloryHuggins_unsteady(const Matrix<double> &x, Matrix<double> &F, const void
 int FloryHuggins_multiligand(const Matrix<double> &x, Matrix<double> &F, const void *data)
 {
 	int success = 0;
-	success = ideal_solution(x, F, data);
+	
+	MultiligandAdsorption *dat = (MultiligandAdsorption *) data;
+	double logp = 0.0, invp = 0.0;
+	double total = 0.0, lnact = 0.0;
+	
+	for (int i=0; i<F.rows(); i++)
+		F.edit(i, 0, 1.0);
+	
+	for (int l=0; l<dat->getNumberLigands(); l++)
+	{
+		for (int i=0; i<dat->getAdsorptionObject(l).getNumberRxns(); i++)
+		{
+			total = total + pow(10.0, x(dat->getAdsorptionObject(l).getAdsorbIndex(i),0));
+		}
+	}
+	
+	for (int l=0; l<dat->getNumberLigands(); l++)
+	{
+		for (int i=0; i<dat->getAdsorptionObject(l).getNumberRxns(); i++)
+		{
+			logp = 0.0;
+			invp = 0.0;
+			for (int j=0; j<dat->getAdsorptionObject(l).getNumberRxns(); j++)
+			{
+				double alpha = (dat->getAdsorptionObject(l).getAreaFactor(dat->getAdsorptionObject(l).getAdsorbIndex(i))/dat->getAdsorptionObject(l).getAreaFactor(dat->getAdsorptionObject(l).getAdsorbIndex(j))) - 1.0;
+				logp = logp + ( (pow(10.0, x(dat->getAdsorptionObject(l).getAdsorbIndex(j),0))/total)/ (alpha + 1.0) );
+				invp = logp;
+			}
+			logp = log(logp);
+			invp = 1.0 / invp;
+			lnact = 1.0 - logp - invp;
+		
+			F.edit(dat->getAdsorptionObject(l).getAdsorbIndex(i), 0, exp(lnact));
+			if (isinf(F(dat->getAdsorptionObject(l).getAdsorbIndex(i),0)) || isnan(F(dat->getAdsorptionObject(l).getAdsorbIndex(i),0)))
+				F.edit(dat->getAdsorptionObject(l).getAdsorbIndex(i), 0, DBL_MAX);
+		}
+	}
+	
 	return success;
 }
 
@@ -4280,7 +4319,105 @@ int UNIQUAC_unsteady(const Matrix<double> &x, Matrix<double> &F, const void *dat
 int UNIQUAC_multiligand(const Matrix<double> &x, Matrix<double> &F, const void *data)
 {
 	int success = 0;
-	success = ideal_solution(x, F, data);
+	
+	MultiligandAdsorption *dat = (MultiligandAdsorption *) data;
+	double total = 0.0;
+	double Temp = 0.0;
+	std::vector< std::vector<double> > r;
+	std::vector< std::vector<double> > s;
+	std::vector< std::vector<double> > l;
+	std::vector< std::vector<double> > u;
+	std::vector< std::vector<double> > frac;
+	std::vector< std::vector<double> > theta;
+	
+	r.resize(dat->getNumberLigands());
+	s.resize(dat->getNumberLigands());
+	l.resize(dat->getNumberLigands());
+	u.resize(dat->getNumberLigands());
+	frac.resize(dat->getNumberLigands());
+	theta.resize(dat->getNumberLigands());
+	
+	for (int k=0; k<dat->getNumberLigands(); k++)
+	{
+		r[k].resize(dat->getAdsorptionObject(k).getNumberRxns());
+		s[k].resize(dat->getAdsorptionObject(k).getNumberRxns());
+		l[k].resize(dat->getAdsorptionObject(k).getNumberRxns());
+		u[k].resize(dat->getAdsorptionObject(k).getNumberRxns());
+		frac[k].resize(dat->getAdsorptionObject(k).getNumberRxns());
+		theta[k].resize(dat->getAdsorptionObject(k).getNumberRxns());
+	}
+	Temp = -dat->getAdsorptionObject(0).getReaction(0).Get_Energy()/(Rstd*log(pow(10.0,dat->getAdsorptionObject(0).getReaction(0).Get_Equilibrium())));
+	
+	//Loop to calculate total adsorption and calculate surface area and volume constants
+	for (int k=0; k<dat->getNumberLigands(); k++)
+	{
+		for (int i=0; i<dat->getAdsorptionObject(k).getNumberRxns(); i++)
+		{
+			total = total + pow(10.0, x(dat->getAdsorptionObject(k).getAdsorbIndex(i),0));
+		}
+	}
+	
+	//Loop to calculate fractions and fraction dependent functions
+	double rx_sum = 0.0;
+	double sx_sum = 0.0;
+	double lx_sum = 0.0;
+	for (int k=0; k<dat->getNumberLigands(); k++)
+	{
+		for (int i=0; i<dat->getAdsorptionObject(k).getNumberRxns(); i++)
+		{
+			frac[k][i] = pow(10.0, x(dat->getAdsorptionObject(k).getAdsorbIndex(i),0)) / total;
+			r[k][i] = dat->getAdsorptionObject(k).getVolumeFactor(dat->getAdsorptionObject(k).getAdsorbIndex(i)) / VolumeSTD;
+			s[k][i] = dat->getAdsorptionObject(k).getAreaFactor(dat->getAdsorptionObject(k).getAdsorbIndex(i)) / AreaSTD;
+			l[k][i] = LengthFactor(CoordSTD, r[k][i], s[k][i]);
+			u[k][i] = -dat->getAdsorptionObject(k).getReaction(i).Get_Energy()/s[k][i]/CoordSTD/CoordSTD;
+			rx_sum = rx_sum + (r[k][i]*frac[k][i]);
+			sx_sum = sx_sum + (s[k][i]*frac[k][i]);
+			lx_sum = lx_sum + (l[k][i]*frac[k][i]);
+		}
+	}
+	
+	//Loop to gather the thetas
+	for (int k=0; k<dat->getNumberLigands(); k++)
+		for (int i=0; i<dat->getAdsorptionObject(k).getNumberRxns(); i++)
+			theta[k][i] = (s[k][i]*frac[k][i])/sx_sum;
+	
+	//i Loop to fill in activities
+	for (int n=0; n<dat->getNumberLigands(); n++)
+	{
+		for (int i=0; i<dat->getAdsorptionObject(n).getNumberRxns(); i++)
+		{
+			double theta_tau_i = 0.0;
+			double theta_tau_rat = 0.0;
+			double lnact = 0.0;
+		
+			//Inner j loop
+			for (int j=0; j<dat->getAdsorptionObject(n).getNumberRxns(); j++)
+			{
+				theta_tau_i = theta_tau_i + ( theta[n][j]*exp(-(sqrt(fabs(u[n][j]*u[n][i])) - u[n][i])/(Rstd*Temp)) );
+			
+				double theta_tau_k = 0.0;
+				// k loop
+				for (int k=0; k<dat->getAdsorptionObject(n).getNumberRxns(); k++)
+				{
+					theta_tau_k = theta_tau_k + ( theta[n][k]*exp(-(sqrt(fabs(u[n][k]*u[n][j])) - u[n][j])/(Rstd*Temp)) );
+				
+				}// End k Loop
+			
+				theta_tau_rat = theta_tau_rat + ( (theta[n][j]*exp(-(sqrt(fabs(u[n][i]*u[n][j])) - u[n][j])/(Rstd*Temp)) )/theta_tau_k);
+			
+			}// End j loop
+		
+			lnact = log(r[n][i]/rx_sum) + ( (CoordSTD/2.0)*s[n][i]*log((s[n][i]/r[n][i])*(rx_sum/sx_sum)) ) + l[n][i] - ( r[n][i]*(lx_sum/rx_sum) ) - ( s[n][i]*log(theta_tau_i) ) + s[n][i] - ( s[n][i]*theta_tau_rat );
+			F.edit(dat->getAdsorptionObject(n).getAdsorbIndex(i), 0, exp(lnact));
+		
+			if (isinf(F(dat->getAdsorptionObject(n).getAdsorbIndex(i),0)) || isnan(F(dat->getAdsorptionObject(n).getAdsorbIndex(i),0)))
+				F.edit(dat->getAdsorptionObject(n).getAdsorbIndex(i), 0, DBL_MAX);
+			if (F(dat->getAdsorptionObject(n).getAdsorbIndex(i),0) <= sqrt(DBL_MIN))
+				F.edit(dat->getAdsorptionObject(n).getAdsorbIndex(i), 0, sqrt(DBL_MIN));
+		
+		}// End i Loop
+	}
+	
 	return success;
 }
 
@@ -5360,6 +5497,17 @@ int read_scenario(SHARK_DATA *shark_dat)
 	shark_dat->ss_ads_names.resize(shark_dat->num_ssao);
 	try
 	{
+		shark_dat->num_multi_ssao = shark_dat->yaml_object.getYamlWrapper()("Scenario")("vars_fun")["num_multi_ssao"].getInt();
+	}
+	catch (std::out_of_range)
+	{
+		shark_dat->num_multi_ssao = 0;
+	}
+	shark_dat->num_multi_ssar.resize(shark_dat->num_multi_ssao);
+	shark_dat->ssmulti_names.resize(shark_dat->num_multi_ssao);
+	shark_dat->MultiAdsList.resize(shark_dat->num_multi_ssao);
+	try
+	{
 		shark_dat->num_other = shark_dat->yaml_object.getYamlWrapper()("Scenario")("vars_fun")["num_other"].getInt();
 	}
 	catch (std::out_of_range)
@@ -5393,6 +5541,43 @@ int read_scenario(SHARK_DATA *shark_dat)
 			{
 				shark_dat->num_ssar[obj] = x.second.getMap().getInt("num_rxns");
 				shark_dat->ss_ads_names[obj] = x.second.getMap().getString("name");
+			}
+			catch (std::out_of_range)
+			{
+				mError(missing_information);
+				return -1;
+			}
+			obj++;
+		}
+	}
+	
+	//Read through all multiligand objects for the names of all adsorbents (and number of ligands each contains)
+	if (shark_dat->num_multi_ssao > 0)
+	{
+		int object_check;
+		try
+		{
+			object_check = (int)shark_dat->yaml_object.getYamlWrapper()("Scenario")("ss_multiads_objs").getSubMap().size();
+		}
+		catch (std::out_of_range)
+		{
+			mError(missing_information);
+			return -1;
+		}
+		if (object_check != shark_dat->num_multi_ssao)
+		{
+			mError(missing_information);
+			return -1;
+		}
+		
+		int obj = 0;
+		for (auto &x: shark_dat->yaml_object.getYamlWrapper()("Scenario")("ss_multiads_objs").getSubMap())
+		{
+			try
+			{
+				shark_dat->MultiAdsList[obj].setAdsorbentName( x.second.getMap().getString("name") );
+				shark_dat->num_multi_ssar[obj].resize(x.second.getMap().getInt("num_ligands"));
+				shark_dat->ssmulti_names[obj].resize(x.second.getMap().getInt("num_ligands"));
 			}
 			catch (std::out_of_range)
 			{
@@ -5582,6 +5767,98 @@ int read_scenario(SHARK_DATA *shark_dat)
 int read_multiligand_scenario(SHARK_DATA *shark_dat)
 {
 	int success = 0;
+	
+	if (shark_dat->num_multi_ssao > 0)
+	{
+		//Loop through ligand names and match Document name with object name
+		for (int i=0; i<shark_dat->num_multi_ssao; i++)
+		{
+			//Set the values of the fiber constants
+			try
+			{
+				shark_dat->MultiAdsList[i].setSpecificArea( shark_dat->yaml_object.getYamlWrapper()(shark_dat->MultiAdsList[i].getAdsorbentName())["spec_area"].getDouble() );
+				shark_dat->MultiAdsList[i].setTotalVolume(shark_dat->volume);
+				shark_dat->MultiAdsList[i].setTotalMass( shark_dat->yaml_object.getYamlWrapper()(shark_dat->MultiAdsList[i].getAdsorbentName())["total_mass"].getDouble() );
+			}
+			catch (std::out_of_range)
+			{
+				mError(missing_information);
+				return -1;
+			}
+			try
+			{
+				shark_dat->MultiAdsList[i].setSurfaceChargeBool( shark_dat->yaml_object.getYamlWrapper()(shark_dat->MultiAdsList[i].getAdsorbentName())["include_surfcharge"].getBool() );
+			}
+			catch (std::out_of_range)
+			{
+				shark_dat->MultiAdsList[i].setSurfaceChargeBool( true );
+			}
+			
+			//Set the activity function
+			int surf_act;
+			try
+			{
+				surf_act = surf_act_choice( shark_dat->yaml_object.getYamlWrapper()(shark_dat->MultiAdsList[i].getAdsorbentName())["surf_activity"].getString() );
+				
+				switch (surf_act)
+				{
+					case IDEAL_ADS:
+						shark_dat->MultiAdsList[i].setActivityModelInfo(ideal_solution, NULL);
+						break;
+						
+					case FLORY_HUGGINS:
+						shark_dat->MultiAdsList[i].setActivityModelInfo(FloryHuggins_multiligand, &shark_dat->MultiAdsList[i]);
+						break;
+						
+					case UNIQUAC_ACT:
+						shark_dat->MultiAdsList[i].setActivityModelInfo(UNIQUAC_multiligand, &shark_dat->MultiAdsList[i]);
+						break;
+						
+					default:
+						shark_dat->MultiAdsList[i].setActivityModelInfo(ideal_solution, NULL);
+						break;
+				}
+			} catch (std::out_of_range)
+			{
+				shark_dat->MultiAdsList[i].setActivityModelInfo(ideal_solution, NULL);
+				surf_act = IDEAL_ADS;
+			}
+			
+			//Check to make sure that this Multiligand object has the correct number of ligands
+			int num_ligands;
+			try
+			{
+				num_ligands = (int)shark_dat->yaml_object.getYamlWrapper()(shark_dat->MultiAdsList[i].getAdsorbentName()).getHeadMap().size();
+				if (num_ligands != shark_dat->num_multi_ssar[i].size())
+				{
+					mError(missing_information);
+					return -1;
+				}
+			}
+			catch (std::out_of_range)
+			{
+				mError(missing_information);
+				return -1;
+			}
+			
+			//Now iterate over the Headers to find the ligand names and number of reactions for each ligand
+			int ligand = 0;
+			for (auto &x: shark_dat->yaml_object.getYamlWrapper()(shark_dat->MultiAdsList[i].getAdsorbentName()).getHeadMap())
+			{
+				try
+				{
+					shark_dat->num_multi_ssar[i][ligand] = shark_dat->yaml_object.getYamlWrapper()(shark_dat->MultiAdsList[i].getAdsorbentName())(x.first)["num_rxns"].getInt();
+					shark_dat->ssmulti_names[i][ligand] = shark_dat->yaml_object.getYamlWrapper()(shark_dat->MultiAdsList[i].getAdsorbentName())(x.first)["name"].getString();
+				}
+				catch (std::out_of_range)
+				{
+					mError(missing_information);
+					return -1;
+				}
+				ligand++;
+			}
+		}
+	}
 	
 	return success;
 }
@@ -6577,6 +6854,7 @@ int read_adsorbobjects(SHARK_DATA *shark_dat)
 				mError(missing_information);
 				return -1;
 			}
+			
 			if (ContainsVolumeFactors == true && ContainsAreaFactors == false)
 			{
 				if (num_head != shark_dat->num_ssar[i]+1)
@@ -6733,6 +7011,319 @@ int read_adsorbobjects(SHARK_DATA *shark_dat)
 int read_multiligandobjects(SHARK_DATA *shark_dat)
 {
 	int success = 0;
+	
+	if (shark_dat->num_multi_ssao > 0)
+	{
+		//Loop over all multiligand adsorbent objects
+		for (int i=0; i<shark_dat->MultiAdsList.size(); i++)
+		{
+			//Loop over all ligands for the give object
+			for (int l=0; l<shark_dat->MultiAdsList[i].getNumberLigands(); l++)
+			{
+				std::string docname = shark_dat->MultiAdsList[i].getAdsorbentName() + "-" + shark_dat->ssmulti_names[i][l];
+				shark_dat->MultiAdsList[i].setLigandName(l, shark_dat->ssmulti_names[i][l]);
+				try
+				{
+					shark_dat->MultiAdsList[i].setSpecificMolality(l, shark_dat->yaml_object.getYamlWrapper()(docname)["spec_mole"].getDouble() );
+				}
+				catch (std::out_of_range)
+				{
+					mError(missing_information);
+					return -1;
+				}
+				try
+				{
+					shark_dat->MultiAdsList[i].setSurfaceCharge(l, shark_dat->yaml_object.getYamlWrapper()(docname)["ligand_charge"].getDouble() );
+				}
+				catch (std::out_of_range)
+				{
+					shark_dat->MultiAdsList[i].setSurfaceCharge(l, 0.0);
+				}
+				
+				//Check to see what kind of information is given is as headers
+				bool ContainsVolumeFactors;
+				bool ContainsAreaFactors;
+				std::string vol_check;
+				std::string area_check;
+				try
+				{
+					vol_check = shark_dat->yaml_object.getYamlWrapper()(docname)("volume_factors").getName();
+					ContainsVolumeFactors = true;
+				}
+				catch (std::out_of_range)
+				{
+					ContainsVolumeFactors = false;
+				}
+				try
+				{
+					area_check = shark_dat->yaml_object.getYamlWrapper()(docname)("area_factors").getName();
+					ContainsAreaFactors = true;
+				}
+				catch (std::out_of_range)
+				{
+					ContainsAreaFactors = false;
+				}
+				int num_header;
+				try
+				{
+					num_header = (int)shark_dat->yaml_object.getYamlWrapper()(docname).getHeadMap().size();
+				}
+				catch (std::out_of_range)
+				{
+					mError(missing_information);
+					return -1;
+				}
+				
+				//Check for missing information
+				if (ContainsVolumeFactors == true && ContainsAreaFactors == false)
+				{
+					if (num_header != shark_dat->num_multi_ssar[i][l]+1)
+					{
+						mError(missing_information);
+						return -1;
+					}
+				}
+				else if (ContainsVolumeFactors == true && ContainsAreaFactors == true)
+				{
+					if (num_header != shark_dat->num_multi_ssar[i][l]+2)
+					{
+						mError(missing_information);
+						return -1;
+					}
+				}
+				else if (ContainsVolumeFactors == false && ContainsAreaFactors == true)
+				{
+					if (num_header != shark_dat->num_multi_ssar[i][l]+1)
+					{
+						mError(missing_information);
+						return -1;
+					}
+				}
+				else
+				{
+					if (num_header != shark_dat->num_multi_ssar[i][l])
+					{
+						mError(missing_information);
+						return -1;
+					}
+				}
+				
+				//Try to read in any volume and area factors given
+				int num_fact = 0;
+				bool HaveVol = false;
+				try
+				{
+					num_fact = shark_dat->yaml_object.getYamlWrapper()(docname)("volume_factors").getDataMap().size();
+					HaveVol = true;
+					
+					if (num_fact != shark_dat->num_multi_ssar[i][l])
+					{
+						mError(missing_information);
+						return -1;
+					}
+					
+					//Loop overall volume_factors
+					for (auto &x: shark_dat->yaml_object.getYamlWrapper()(docname)("volume_factors").getDataMap().getMap())
+					{
+						int index = shark_dat->MasterList.get_index(x.first);
+						if (index < 0 || index > (shark_dat->numvar-1))
+						{
+							mError(read_error);
+							return -1;
+						}
+						else
+						{
+							try
+							{
+								shark_dat->MultiAdsList[i].setVolumeFactor(index, x.second.getDouble());
+							}
+							catch (std::out_of_range)
+							{
+								mError(read_error);
+								return -1;
+							}
+						}
+						
+					}
+				}
+				catch (std::out_of_range)
+				{
+					HaveVol = false;
+					//Loop to set volumes based on mola object
+					for (int index = 0; index<shark_dat->MasterList.list_size(); index++)
+					{
+						if (shark_dat->MasterList.get_species(index).MolarVolume() <= 0.0)
+							shark_dat->MasterList.get_species(index).setMolarVolume(7.24);
+						shark_dat->MultiAdsList[i].setVolumeFactor(index, shark_dat->MasterList.get_species(index).MolarVolume()*0.602);
+					}
+				}
+				
+				num_fact = 0;
+				try
+				{
+					num_fact = shark_dat->yaml_object.getYamlWrapper()(docname)("area_factors").getDataMap().size();
+					
+					if (num_fact != shark_dat->num_multi_ssar[i][l])
+					{
+						mError(missing_information);
+						return -1;
+					}
+					
+					//Loop overall area_factors
+					for (auto &x: shark_dat->yaml_object.getYamlWrapper()(docname)("area_factors").getDataMap().getMap())
+					{
+						int index = shark_dat->MasterList.get_index(x.first);
+						if (index < 0 || index > (shark_dat->numvar-1))
+						{
+							mError(read_error);
+							return -1;
+						}
+						else
+						{
+							try
+							{
+								shark_dat->MultiAdsList[i].setAreaFactor(index, x.second.getDouble());
+							}
+							catch (std::out_of_range)
+							{
+								mError(read_error);
+								return -1;
+							}
+						}
+						
+					}
+				}
+				catch (std::out_of_range)
+				{
+					if (HaveVol == true)
+						shark_dat->MultiAdsList[i].calculateAreaFactors();
+					else
+					{
+						//Loop to set area factors based on mola object
+						for (int index = 0; index<shark_dat->MasterList.list_size(); index++)
+						{
+							if (shark_dat->MasterList.get_species(index).MolarArea() <= 0.0)
+								shark_dat->MasterList.get_species(index).setMolarArea(18.10);
+							shark_dat->MultiAdsList[i].setAreaFactor(index, shark_dat->MasterList.get_species(index).MolarArea()*6020.0);
+						}
+					}
+				}
+				
+				//Iterate over the headers to input the reaction information
+				int rxn = 0;
+				for (auto &x: shark_dat->yaml_object.getYamlWrapper()(docname).getHeadMap())
+				{
+					if (x.second.getName() != "volume_factors" && x.second.getName() != "area_factors")
+					{
+						try
+						{
+							shark_dat->MultiAdsList[i].setMolarFactor(l, rxn, shark_dat->yaml_object.getYamlWrapper()(docname)(x.first)["mole_factor"].getDouble());
+						}
+						catch (std::out_of_range)
+						{
+							mError(missing_information);
+							return -1;
+						}
+						
+						try
+						{
+							shark_dat->MultiAdsList[i].getAdsorptionObject(l).getReaction(rxn).Set_Equilibrium(shark_dat->yaml_object.getYamlWrapper()(docname)(x.first)["logK"].getDouble());
+						}
+						catch (std::out_of_range)
+						{
+							//At this point, it is unknown as to whether or not this is an actual error
+							//It will be checked later whether or not this causes a problem
+						}
+						
+						int count = 0;
+						double dH, dS;
+						try
+						{
+							dH = shark_dat->yaml_object.getYamlWrapper()(docname)(x.first)["enthalpy"].getDouble();
+							shark_dat->MultiAdsList[i].getAdsorptionObject(l).getReaction(rxn).Set_Enthalpy(dH);
+							count++;
+						}
+						catch (std::out_of_range)
+						{
+							//At this point, it is unknown as to whether or not this is an actual error
+							//It will be checked later whether or not this causes a problem
+						}
+						
+						try
+						{
+							dS = shark_dat->yaml_object.getYamlWrapper()(docname)(x.first)["entropy"].getDouble();
+							shark_dat->MultiAdsList[i].getAdsorptionObject(l).getReaction(rxn).Set_Entropy(dS);
+							count++;
+						}
+						catch (std::out_of_range)
+						{
+							//At this point, it is unknown as to whether or not this is an actual error
+							//It will be checked later whether or not this causes a problem
+						}
+						if (count == 2)
+							shark_dat->MultiAdsList[i].getAdsorptionObject(l).getReaction(rxn).Set_EnthalpyANDEntropy(dH, dS);
+						
+						try
+						{
+							shark_dat->MultiAdsList[i].getAdsorptionObject(l).getReaction(rxn).Set_Energy(shark_dat->yaml_object.getYamlWrapper()(docname)(x.first)["energy"].getDouble());
+						}
+						catch (std::out_of_range)
+						{
+							//At this point, it is unknown as to whether or not this is an actual error
+							//It will be checked later whether or not this causes a problem
+						}
+						
+						int stoich;
+						try
+						{
+							stoich = shark_dat->yaml_object.getYamlWrapper()(docname)(x.first)("stoichiometry").getMap().size();
+						}
+						catch (std::out_of_range)
+						{
+							mError(missing_information);
+							return -1;
+						}
+						if (stoich < 2)
+						{
+							mError(missing_information);
+							return -1;
+						}
+						
+						for (auto &y: shark_dat->yaml_object.getYamlWrapper()(docname)(x.first)("stoichiometry").getMap())
+						{
+							int index = shark_dat->MasterList.get_index(y.first);
+							if (index < 0 || index > (shark_dat->numvar-1))
+							{
+								mError(read_error);
+								return -1;
+							}
+							else
+							{
+								try
+								{
+									shark_dat->MultiAdsList[i].getAdsorptionObject(l).getReaction(rxn).Set_Stoichiometric(index, y.second.getDouble());
+								}
+								catch (std::out_of_range)
+								{
+									mError(read_error);
+									return -1;
+								}
+							}
+						}
+						
+						rxn++;
+					}
+					else
+					{
+						//No Action
+					}
+				}
+
+				
+			}//END ligand loop
+			
+		}//END object loop
+	}
 	
 	return success;
 }
@@ -6932,7 +7523,7 @@ int setup_SHARK_DATA( FILE *file, int (*residual) (const Matrix<double> &x, Matr
 	dat->UnsteadyList.resize(dat->num_usr);
 	dat->AdsorptionList.resize(dat->num_ssao);
 	dat->UnsteadyAdsList.resize(dat->num_usao);
-	dat->MultiAdsList.resize(dat->num_multi_ssao);
+	//dat->MultiAdsList.resize(dat->num_multi_ssao); //Action performed during read
 	dat->OtherList.resize(dat->num_other);
 
 	for (int i=0; i<dat->ReactionList.size(); i++)
@@ -7670,7 +8261,7 @@ int shark_solver(SHARK_DATA *shark_dat)
 		{
 			std::cout << "Adsorbent: " << shark_dat->MultiAdsList[i].getAdsorbentName() << "\n";
 			std::cout << "Specific Surface Area (m^2/kg) = \t" << shark_dat->MultiAdsList[i].getSpecificArea() << std::endl;
-			std::cout << "Surface Charge Density (C/m^2) for =\t" << shark_dat->MultiAdsList[i].getChargeDensity() << std::endl;
+			std::cout << "Surface Charge Density (C/m^2) =\t" << shark_dat->MultiAdsList[i].getChargeDensity() << std::endl;
 			
 			for (int j=0; j<shark_dat->MultiAdsList[i].getNumberLigands(); j++)
 			{

@@ -1224,6 +1224,7 @@ typedef struct SHARK_DATA
 	std::vector< std::vector<int> > num_multi_ssar; ///< List of all multiligand objects -> List of ligands and rxns of that ligand
 	std::vector<std::string> ss_ads_names;			///< List of the steady-state adsorbent object names
 	std::vector<std::string> us_ads_names;			///< List of the unsteady adsorption object names
+	std::vector< std::vector<std::string> > ssmulti_names;	///< List of the names of the ligands in each multiligand object
 	int num_other = 0;								///< Number of other functions to be used (default is always 0)
 	int act_fun = IDEAL;							///< Flag denoting the activity function to use (default is IDEAL)
 	int reactor_type = BATCH;						///< Flag denoting the type of reactor considered for the system (default is BATCH)

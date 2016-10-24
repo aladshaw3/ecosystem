@@ -4,12 +4,12 @@ Scenario:
   numvar: 41
   num_ssr: 29
   num_mbe: 6
-  num_ssao: 1
+  num_multi_ssao: 1
 
-- ss_ads_objs:
+- ss_multiads_objs:
   - obj01:
-    name: HAO (ad)
-    num_rxns: 5 
+    name: AF1
+    num_ligands: 1 
 
 - sys_data:
   act_fun: davies    
@@ -26,6 +26,19 @@ Scenario:
   pH_step: 0.25
   zero_initial_solids: false
   
+...
+
+"AF1":
+---
+spec_area: 15000.0     #Units: m^2/kg
+total_mass: 1.51e-5     #Units: kg
+surf_activity: uniquac
+include_surfcharge: false
+
+- ligand01:
+  name: HAO (ad)
+  num_rxns: 5
+
 ...
 
 SolverOptions:
@@ -427,15 +440,10 @@ EquilRxn:
 
 ...
 
-"HAO (ad)":
+"AF1-HAO (ad)":
 ---
-basis: molar
-spec_area: 15000.0     #Units: m^2/kg
 spec_mole: 2.9       #Units: mol/kg
-total_mass: 1.51e-5     #Units: kg
-surf_activity: uniquac
-include_surfcharge: false
-surf_charge: 0
+ligand_charge: 0
 
 - rxn01:
   logK: 0.39
