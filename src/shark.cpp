@@ -3247,7 +3247,7 @@ void MultiligandAdsorption::calculateEquilibria(double T)
 //Function to calculate and set the appropriate charge density
 void MultiligandAdsorption::setChargeDensity(const Matrix<double> &x)
 {
-	/*
+	
 	this->charge_density = 0.0;
 	for (int l=0; l<this->getNumberLigands(); l++)
 	{
@@ -3256,8 +3256,7 @@ void MultiligandAdsorption::setChargeDensity(const Matrix<double> &x)
 	
 	for (int l=0; l<this->getNumberLigands(); l++)
 		this->getAdsorptionObject(l).setChargeDensityValue(this->charge_density);
-	 */
-	this->charge_density = this->getAdsorptionObject(0).calculateSurfaceChargeDensity(x);
+	 
 }
 
 //Function to set the ionic strength parameter
@@ -7523,7 +7522,7 @@ int setup_SHARK_DATA( FILE *file, int (*residual) (const Matrix<double> &x, Matr
 	dat->UnsteadyList.resize(dat->num_usr);
 	dat->AdsorptionList.resize(dat->num_ssao);
 	dat->UnsteadyAdsList.resize(dat->num_usao);
-	//dat->MultiAdsList.resize(dat->num_multi_ssao); //Action performed during read
+	//dat->MultiAdsList.resize(dat->num_multi_ssao); //Action performed during read (this line may be redundant)
 	dat->OtherList.resize(dat->num_other);
 
 	for (int i=0; i<dat->ReactionList.size(); i++)
@@ -8253,6 +8252,7 @@ int shark_solver(SHARK_DATA *shark_dat)
 				}
 				std::cout << "\tlogK(" << j << ") =\t" << logK << std::endl;
 			}
+			std::cout << std::endl;
 		}
 		
 		if (shark_dat->MultiAdsList.size() > 0)
@@ -8262,9 +8262,10 @@ int shark_solver(SHARK_DATA *shark_dat)
 			std::cout << "Adsorbent: " << shark_dat->MultiAdsList[i].getAdsorbentName() << "\n";
 			std::cout << "Specific Surface Area (m^2/kg) = \t" << shark_dat->MultiAdsList[i].getSpecificArea() << std::endl;
 			std::cout << "Surface Charge Density (C/m^2) =\t" << shark_dat->MultiAdsList[i].getChargeDensity() << std::endl;
-			
+			std::cout << std::endl;
 			for (int j=0; j<shark_dat->MultiAdsList[i].getNumberLigands(); j++)
 			{
+				std::cout << "Specific Molality for " << shark_dat->MultiAdsList[i].getLigandName(j) << " =\t" << shark_dat->MultiAdsList[i].getAdsorptionObject(j).getSpecificMolality() << std::endl;
 				std::cout << "Active Surface Fraction for " << shark_dat->MultiAdsList[i].getLigandName(j) << " =\t" << shark_dat->MultiAdsList[i].getAdsorptionObject(j).calculateActiveFraction(shark_dat->X_new) << std::endl;
 				std::cout << "logK values for this ligand...\n";
 				
@@ -8693,6 +8694,10 @@ int SHARK_SCENARIO(const char *yaml_input)
 	//NOTE: The NULL option between &shark_dat and (void *)&shark_dat needs to reflect the data structure for the PITZER model
 	success = setup_SHARK_DATA(Output,shark_residual, NULL, NULL, &shark_dat, NULL, (void *)&shark_dat, NULL, NULL);
 	if (success != 0) {mError(initial_error); return -1;}
+	
+	//Read and check all Multiligand Adsorbent Objects (NOTE: This is a redundant call to fix initialization issues)
+	success = read_multiligand_scenario(&shark_dat);
+	if (success != 0) {mError(read_error); return -1;}
 
 	//Read options
 	success = read_options(&shark_dat);
