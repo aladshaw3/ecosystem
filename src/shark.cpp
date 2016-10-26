@@ -4121,18 +4121,24 @@ int FloryHuggins_multiligand(const Matrix<double> &x, Matrix<double> &F, const v
 		}
 	}
 	
+	//Main loop to calculate activities
 	for (int l=0; l<dat->getNumberLigands(); l++)
 	{
 		for (int i=0; i<dat->getAdsorptionObject(l).getNumberRxns(); i++)
 		{
 			logp = 0.0;
 			invp = 0.0;
-			for (int j=0; j<dat->getAdsorptionObject(l).getNumberRxns(); j++)
+			
+			for (int k=0; k<dat->getNumberLigands(); k++)
 			{
-				double alpha = (dat->getAdsorptionObject(l).getAreaFactor(dat->getAdsorptionObject(l).getAdsorbIndex(i))/dat->getAdsorptionObject(l).getAreaFactor(dat->getAdsorptionObject(l).getAdsorbIndex(j))) - 1.0;
-				logp = logp + ( (pow(10.0, x(dat->getAdsorptionObject(l).getAdsorbIndex(j),0))/total)/ (alpha + 1.0) );
-				invp = logp;
+				for (int j=0; j<dat->getAdsorptionObject(k).getNumberRxns(); j++)
+				{
+					double alpha = (dat->getAdsorptionObject(l).getAreaFactor(dat->getAdsorptionObject(l).getAdsorbIndex(i))/dat->getAdsorptionObject(k).getAreaFactor(dat->getAdsorptionObject(k).getAdsorbIndex(j))) - 1.0;
+					logp = logp + ( (pow(10.0, x(dat->getAdsorptionObject(k).getAdsorbIndex(j),0))/total)/ (alpha + 1.0) );
+					invp = logp;
+				}
 			}
+			
 			logp = log(logp);
 			invp = 1.0 / invp;
 			lnact = 1.0 - logp - invp;
@@ -4380,7 +4386,7 @@ int UNIQUAC_multiligand(const Matrix<double> &x, Matrix<double> &F, const void *
 		for (int i=0; i<dat->getAdsorptionObject(k).getNumberRxns(); i++)
 			theta[k][i] = (s[k][i]*frac[k][i])/sx_sum;
 	
-	//i Loop to fill in activities
+	//i Loop to fill in activities (-------------------NEEDS TO BE FIXED!!!----------------------)
 	for (int n=0; n<dat->getNumberLigands(); n++)
 	{
 		for (int i=0; i<dat->getAdsorptionObject(n).getNumberRxns(); i++)
@@ -4389,23 +4395,34 @@ int UNIQUAC_multiligand(const Matrix<double> &x, Matrix<double> &F, const void *
 			double theta_tau_rat = 0.0;
 			double lnact = 0.0;
 		
-			//Inner j loop
-			for (int j=0; j<dat->getAdsorptionObject(n).getNumberRxns(); j++)
+			//Loop on m ligands....(note: all i's are associated with n's, while j's would be associated with m's)
+			for (int m=0; m<dat->getNumberLigands(); m++)
 			{
-				theta_tau_i = theta_tau_i + ( theta[n][j]*exp(-(sqrt(fabs(u[n][j]*u[n][i])) - u[n][i])/(Rstd*Temp)) );
-			
-				double theta_tau_k = 0.0;
-				// k loop
-				for (int k=0; k<dat->getAdsorptionObject(n).getNumberRxns(); k++)
+				//Inner j loop
+				for (int j=0; j<dat->getAdsorptionObject(n).getNumberRxns(); j++)
 				{
-					theta_tau_k = theta_tau_k + ( theta[n][k]*exp(-(sqrt(fabs(u[n][k]*u[n][j])) - u[n][j])/(Rstd*Temp)) );
+					theta_tau_i = theta_tau_i + ( theta[n][j]*exp(-(sqrt(fabs(u[n][j]*u[n][i])) - u[n][i])/(Rstd*Temp)) );
+			
+					double theta_tau_k = 0.0;
+					
+					//Loop on p ligands...(note: all i's are associated with n's, while j's would be associated with m's and k's with p's)
+					for (int p=0; p<dat->getNumberLigands(); p++)
+					{
+						// k loop
+						for (int k=0; k<dat->getAdsorptionObject(n).getNumberRxns(); k++)
+						{
+							theta_tau_k = theta_tau_k + ( theta[n][k]*exp(-(sqrt(fabs(u[n][k]*u[n][j])) - u[n][j])/(Rstd*Temp)) );
 				
-				}// End k Loop
+						}// End k Loop
+					
+					}//End p Loop
 			
-				theta_tau_rat = theta_tau_rat + ( (theta[n][j]*exp(-(sqrt(fabs(u[n][i]*u[n][j])) - u[n][j])/(Rstd*Temp)) )/theta_tau_k);
+					theta_tau_rat = theta_tau_rat + ( (theta[n][j]*exp(-(sqrt(fabs(u[n][i]*u[n][j])) - u[n][j])/(Rstd*Temp)) )/theta_tau_k);
 			
-			}// End j loop
-		
+				}// End j loop
+				
+			}//END m loop
+					
 			lnact = log(r[n][i]/rx_sum) + ( (CoordSTD/2.0)*s[n][i]*log((s[n][i]/r[n][i])*(rx_sum/sx_sum)) ) + l[n][i] - ( r[n][i]*(lx_sum/rx_sum) ) - ( s[n][i]*log(theta_tau_i) ) + s[n][i] - ( s[n][i]*theta_tau_rat );
 			F.edit(dat->getAdsorptionObject(n).getAdsorbIndex(i), 0, exp(lnact));
 		

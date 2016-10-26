@@ -509,7 +509,7 @@ EquilRxn:
 ---
 spec_area: 15000.0     #Units: m^2/kg
 total_mass: 1.51e-5     #Units: kg
-surf_activity: uniquac
+surf_activity: floryhuggins
 include_surfcharge: true
 
 - ligand01:
