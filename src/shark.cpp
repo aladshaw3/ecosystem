@@ -3041,8 +3041,8 @@ void MultiligandAdsorption::modifyDeltas(MassBalance &mbo)
 	{
 		this->getAdsorptionObject(l).setTotalMass(this->getTotalMass());
 		this->getAdsorptionObject(l).setTotalVolume(this->getTotalVolume());
-		this->getAdsorptionObject(l).modifyDeltas(mbo);
 	}
+	this->getAdsorptionObject(0).modifyDeltas(mbo);
 }
 
 //Set the adsorb indices for all reactions and ligands
