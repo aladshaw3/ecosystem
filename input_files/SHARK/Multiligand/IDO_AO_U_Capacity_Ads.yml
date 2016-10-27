@@ -524,7 +524,7 @@ include_surfcharge: true
 
 "AF1-HAO (ad)":
 ---
-spec_mole: 1.45       #Units: mol/kg
+spec_mole: 1.65       #Units: mol/kg
 ligand_charge: 0
 
 - rxn01:
@@ -573,7 +573,7 @@ ligand_charge: 0
 
 "AF1-H2IDO (ad)":
 ---
-spec_mole: 1.45       #Units: mol/kg
+spec_mole: 1.65       #Units: mol/kg
 ligand_charge: 0
 
 - rxn01:

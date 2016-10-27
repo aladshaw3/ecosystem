@@ -1511,6 +1511,7 @@ activities()
 {
 	surface_activity = (*ideal_solution);
 	activity_data = nullptr;
+	act_fun = IDEAL_ADS;
 	specific_area = 1.0;
 	specific_molality = 1.0;
 	surface_charge = 0.0;
@@ -1700,6 +1701,29 @@ int AdsorptionReaction::setAqueousIndexAuto()
 		}
 	}
 	return success;
+}
+
+//Set the enum for surface activity
+void AdsorptionReaction::setActivityEnum(int act)
+{
+	switch (act)
+	{
+		case IDEAL_ADS:
+			this->act_fun = IDEAL_ADS;
+			break;
+			
+		case FLORY_HUGGINS:
+			this->act_fun = FLORY_HUGGINS;
+			break;
+			
+		case UNIQUAC_ACT:
+			this->act_fun = UNIQUAC_ACT;
+			break;
+			
+		default:
+			this->act_fun = IDEAL_ADS;
+			break;
+	}
 }
 
 //Set the molar factor for the given reaction
@@ -2234,6 +2258,12 @@ int AdsorptionReaction::getAqueousIndex(int i)
 	return this->aqueous_index[i];
 }
 
+//Return the activity enum
+int AdsorptionReaction::getActivityEnum()
+{
+	return this->act_fun;
+}
+
 //Return true is in Area basis
 bool AdsorptionReaction::isAreaBasis()
 {
@@ -2271,6 +2301,7 @@ UnsteadyAdsorption::UnsteadyAdsorption()
 	molar_factor.resize(0);
 	surface_activity = (*ideal_solution);
 	activity_data = nullptr;
+	act_fun = IDEAL_ADS;
 	specific_area = 1.0;
 	specific_molality = 1.0;
 	surface_charge = 0.0;
@@ -3116,6 +3147,35 @@ int MultiligandAdsorption::setAqueousIndexAuto()
 	return success;
 }
 
+
+//Set the enum for surface activity
+void MultiligandAdsorption::setActivityEnum(int act)
+{
+	switch (act)
+	{
+		case IDEAL_ADS:
+			this->act_fun = IDEAL_ADS;
+			break;
+			
+		case FLORY_HUGGINS:
+			this->act_fun = FLORY_HUGGINS;
+			break;
+			
+		case UNIQUAC_ACT:
+			this->act_fun = UNIQUAC_ACT;
+			break;
+			
+		default:
+			this->act_fun = IDEAL_ADS;
+			break;
+	}
+	
+	for (int l=0; l<this->getNumberLigands(); l++)
+	{
+		this->getAdsorptionObject(l).setActivityEnum(this->act_fun);
+	}
+}
+
 //Set the molar factor
 void MultiligandAdsorption::setMolarFactor(int ligand, int rxn, double m)
 {
@@ -3342,6 +3402,12 @@ AdsorptionReaction& MultiligandAdsorption::getAdsorptionObject(int l)
 int MultiligandAdsorption::getNumberLigands()
 {
 	return this->num_ligands;
+}
+
+//Return the activity enum
+int MultiligandAdsorption::getActivityEnum()
+{
+	return this->act_fun;
 }
 
 //Return the value of activity for the ith species
@@ -3571,6 +3637,25 @@ void print2file_shark_info(SHARK_DATA *shark_dat)
 				fprintf(shark_dat->OutputFile, "Include Surface Charging =\t FALSE\n");
 			else
 				fprintf(shark_dat->OutputFile, "Include Surface Charging =\t TRUE\n");
+			int surf_act = shark_dat->AdsorptionList[n].getActivityEnum();
+			switch (surf_act)
+			{
+				case IDEAL_ADS:
+					fprintf(shark_dat->OutputFile, "Surface Activity =\t IDEAL\n");
+					break;
+					
+				case FLORY_HUGGINS:
+					fprintf(shark_dat->OutputFile, "Surface Activity =\t FLORY-HUGGINS\n");
+					break;
+					
+				case UNIQUAC_ACT:
+					fprintf(shark_dat->OutputFile, "Surface Activity =\t UNIQUAC\n");
+					break;
+					
+				default:
+					fprintf(shark_dat->OutputFile, "Surface Activity =\t IDEAL\n");
+					break;
+			}
 			for (int j=0; j<shark_dat->AdsorptionList[n].getNumberRxns(); j++)
 			{
 				fprintf(shark_dat->OutputFile, "logK = \t%.6g\t:\t",shark_dat->AdsorptionList[n].getReaction(j).Get_Equilibrium());
@@ -3648,8 +3733,27 @@ void print2file_shark_info(SHARK_DATA *shark_dat)
 				fprintf(shark_dat->OutputFile, "Include Surface Charging =\t FALSE\n");
 			else
 				fprintf(shark_dat->OutputFile, "Include Surface Charging =\t TRUE\n");
+			int surf_act = shark_dat->MultiAdsList[k].getActivityEnum();
+			switch (surf_act)
+			{
+				case IDEAL_ADS:
+					fprintf(shark_dat->OutputFile, "Surface Activity =\t IDEAL\n");
+					break;
+					
+				case FLORY_HUGGINS:
+					fprintf(shark_dat->OutputFile, "Surface Activity =\t FLORY-HUGGINS\n");
+					break;
+					
+				case UNIQUAC_ACT:
+					fprintf(shark_dat->OutputFile, "Surface Activity =\t UNIQUAC\n");
+					break;
+					
+				default:
+					fprintf(shark_dat->OutputFile, "Surface Activity =\t IDEAL\n");
+					break;
+			}
 			
-			fprintf(shark_dat->OutputFile, "List of Ligands and Reactions \n-----------------------------------------------------\n");
+			fprintf(shark_dat->OutputFile, "\nList of Ligands and Reactions \n-----------------------------------------------------\n");
 			
 			//Loop through ligands
 			for (int n=0; n<shark_dat->MultiAdsList[k].getNumberLigands(); n++)
@@ -5815,6 +5919,7 @@ int read_multiligand_scenario(SHARK_DATA *shark_dat)
 			try
 			{
 				surf_act = surf_act_choice( shark_dat->yaml_object.getYamlWrapper()(shark_dat->MultiAdsList[i].getAdsorbentName())["surf_activity"].getString() );
+				shark_dat->MultiAdsList[i].setActivityEnum(surf_act);
 				
 				switch (surf_act)
 				{
@@ -6706,7 +6811,8 @@ int read_adsorbobjects(SHARK_DATA *shark_dat)
 			int surf_act;
 			try
 			{
-				surf_act = surf_act_choice( shark_dat->yaml_object.getYamlWrapper()(shark_dat->ss_ads_names[i]).getDataMap().getString("surf_activity") );
+				surf_act = surf_act_choice(shark_dat->yaml_object.getYamlWrapper()(shark_dat->ss_ads_names[i]).getDataMap().getString("surf_activity"));
+				shark_dat->AdsorptionList[i].setActivityEnum(surf_act);
 				
 				switch (surf_act)
 				{

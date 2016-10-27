@@ -602,6 +602,7 @@ public:
 		the primary aqueous index species appears opposite of the adsorbed species in the reactions. Note: This function
 		assumes that the adsorbed indices have already been set. */
 	int setAqueousIndexAuto();
+	void setActivityEnum(int act);						///< Set the surface activity enum value
 	void setMolarFactor(int rxn_i, double m);			///< Set the molar factor for the ith reaction (mol/mol)
 	void setVolumeFactor(int i, double v);				///< Set the ith volume factor for the species list (cm^3/mol)
 	void setAreaFactor(int i, double a);				///< Set the ith area factor for the species list (m^2/mol)
@@ -727,6 +728,7 @@ public:
 	int getNumberRxns();						///< Get the number of reactions involved in the adsorption object
 	int getAdsorbIndex(int i);					///< Get the index of the adsorbed species in the ith reaction
 	int getAqueousIndex(int i);					///< Get the index of the primary aqueous species in the ith reaction
+	int getActivityEnum();						///< Return the enum representing the choosen activity function
 	bool isAreaBasis();							///< Returns true if we are in the Area Basis, False if in Molar Basis
 	bool includeSurfaceCharge();				///< Returns true if we are considering surface charging during adsorption
 	std::string getAdsorbentName();				///< Returns the name of the adsorbent as a string 
@@ -745,6 +747,7 @@ protected:
 	int (*surface_activity) (const Matrix<double>& logq, Matrix<double> &activity, const void *data);
 
 	const void *activity_data;					///< Pointer to the data structure needed for surface activities.
+	int act_fun;								///< Enumeration of the activity function being used for the surface phase
 	std::vector<double> area_factors;			///< List of the van der Waals areas associated with surface species (m^2/mol)
 	std::vector<double> volume_factors;			///< List of the van der Waals volumes of each surface species (cm^3/mol)
 	std::vector<int> adsorb_index;				///< List of the indices for the adsorbed species in the reactions
@@ -1022,14 +1025,12 @@ public:
 		assumes that the adsorbed indices have already been set. */
 	int setAqueousIndexAuto();
 	
-	/// Set the molar factor for the rxn reaction of the ligand ligand to a value of m
-	void setMolarFactor(int ligand, int rxn, double m);
-	
+	void setActivityEnum(int act);					///< Set the activity enum to the value of act
+	void setMolarFactor(int ligand, int rxn, double m);///< Set the molar factor for the rxn reaction of the ligand ligand to a value of m
 	void setVolumeFactor(int i, double v);			///< Set all ith volume factors for the species list (cm^3/mol)
 	void setAreaFactor(int i, double a);			///< Set all ith area factors for the species list (m^2/mol)
 	void setSpecificMolality(int ligand, double a);	///< Set the specific molality for the ligand (mol/kg)
 	void setSurfaceCharge(int ligand, double c);	//< Set the surface charge of the uncomplexed ligand
-	
 	void setAdsorbentName(std::string name);		///< Set the name of the adsorbent material or particle
 	void setLigandName(int i, std::string name);	///< Set the name of the ith ligand
 	void setSpecificArea(double area);				///< Set the specific area of the adsorbent
@@ -1083,6 +1084,7 @@ public:
 	
 	AdsorptionReaction& getAdsorptionObject(int i);	///< Return reference to the adsortpion object corresponding to ligand i
 	int getNumberLigands();							///< Get the number of ligands involved with the surface
+	int getActivityEnum();							///< Get the value of the activity enum set by user
 	double getActivity(int i);						///< Get the ith activity coefficient from the matrix object
 	double getSpecificArea();						///< Get the specific area of the adsorbent (m^2/kg) or (mol/kg)
 	double getBulkDensity();						///< Calculate and return bulk density of adsorbent in system (kg/L)
@@ -1111,6 +1113,7 @@ protected:
 	int (*surface_activity) (const Matrix<double>& logq, Matrix<double> &activity, const void *data);
 	
 	const void *activity_data;					///< Pointer to the data structure needed for surface activities.
+	int act_fun;								///< Enumeration to represent the choosen surface activity function
 	Matrix<double> activities;					///< List of the activities calculated by the activity model
 	double specific_area;						///< Specific surface area of the adsorbent (m^2/kg)
 	double total_mass;							///< Total mass of the adsorbent in the system (kg)
