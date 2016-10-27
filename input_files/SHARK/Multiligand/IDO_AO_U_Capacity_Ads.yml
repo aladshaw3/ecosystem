@@ -509,7 +509,7 @@ EquilRxn:
 ---
 spec_area: 15000.0     #Units: m^2/kg
 total_mass: 1.51e-5     #Units: kg
-surf_activity: floryhuggins
+surf_activity: uniquac
 include_surfcharge: true
 
 - ligand01:
@@ -524,7 +524,7 @@ include_surfcharge: true
 
 "AF1-HAO (ad)":
 ---
-spec_mole: 2.9       #Units: mol/kg
+spec_mole: 1.45       #Units: mol/kg
 ligand_charge: 0
 
 - rxn01:
@@ -573,7 +573,7 @@ ligand_charge: 0
 
 "AF1-H2IDO (ad)":
 ---
-spec_mole: 2.9       #Units: mol/kg
+spec_mole: 1.45       #Units: mol/kg
 ligand_charge: 0
 
 - rxn01:

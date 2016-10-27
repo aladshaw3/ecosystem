@@ -4386,7 +4386,7 @@ int UNIQUAC_multiligand(const Matrix<double> &x, Matrix<double> &F, const void *
 		for (int i=0; i<dat->getAdsorptionObject(k).getNumberRxns(); i++)
 			theta[k][i] = (s[k][i]*frac[k][i])/sx_sum;
 	
-	//i Loop to fill in activities (-------------------NEEDS TO BE FIXED!!!----------------------)
+	//i Loop to fill in activities
 	for (int n=0; n<dat->getNumberLigands(); n++)
 	{
 		for (int i=0; i<dat->getAdsorptionObject(n).getNumberRxns(); i++)
@@ -4399,9 +4399,9 @@ int UNIQUAC_multiligand(const Matrix<double> &x, Matrix<double> &F, const void *
 			for (int m=0; m<dat->getNumberLigands(); m++)
 			{
 				//Inner j loop
-				for (int j=0; j<dat->getAdsorptionObject(n).getNumberRxns(); j++)
+				for (int j=0; j<dat->getAdsorptionObject(m).getNumberRxns(); j++)
 				{
-					theta_tau_i = theta_tau_i + ( theta[n][j]*exp(-(sqrt(fabs(u[n][j]*u[n][i])) - u[n][i])/(Rstd*Temp)) );
+					theta_tau_i = theta_tau_i + ( theta[m][j]*exp(-(sqrt(fabs(u[m][j]*u[n][i])) - u[n][i])/(Rstd*Temp)) );
 			
 					double theta_tau_k = 0.0;
 					
@@ -4409,15 +4409,15 @@ int UNIQUAC_multiligand(const Matrix<double> &x, Matrix<double> &F, const void *
 					for (int p=0; p<dat->getNumberLigands(); p++)
 					{
 						// k loop
-						for (int k=0; k<dat->getAdsorptionObject(n).getNumberRxns(); k++)
+						for (int k=0; k<dat->getAdsorptionObject(p).getNumberRxns(); k++)
 						{
-							theta_tau_k = theta_tau_k + ( theta[n][k]*exp(-(sqrt(fabs(u[n][k]*u[n][j])) - u[n][j])/(Rstd*Temp)) );
+							theta_tau_k = theta_tau_k + ( theta[p][k]*exp(-(sqrt(fabs(u[p][k]*u[m][j])) - u[m][j])/(Rstd*Temp)) );
 				
 						}// End k Loop
 					
 					}//End p Loop
 			
-					theta_tau_rat = theta_tau_rat + ( (theta[n][j]*exp(-(sqrt(fabs(u[n][i]*u[n][j])) - u[n][j])/(Rstd*Temp)) )/theta_tau_k);
+					theta_tau_rat = theta_tau_rat + ( (theta[m][j]*exp(-(sqrt(fabs(u[n][i]*u[m][j])) - u[m][j])/(Rstd*Temp)) )/theta_tau_k);
 			
 				}// End j loop
 				
