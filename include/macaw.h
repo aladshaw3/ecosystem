@@ -653,6 +653,7 @@ Matrix<T> Matrix<T>::operator*(const Matrix &M)
 		temp.num_cols = M.num_cols;
 		temp.Data.resize(num_rows*M.num_cols);
 		
+		/*
 		int j=0;
 		for(int i=0; i<num_rows; i++)
 		{
@@ -667,6 +668,19 @@ Matrix<T> Matrix<T>::operator*(const Matrix &M)
 				}
 			}
 		}
+		 */
+		
+		for (int i=0; i<num_rows; i++)
+		{
+			for (int k=0; k<num_cols; k++)
+			{
+				for (int j=0; j<M.num_cols; j++)
+				{
+					temp.Data[(i*temp.num_cols)+j] += (this->Data[(i*num_cols)+k] * M.Data[(k*M.num_cols)+j]);
+				}
+			}
+		}
+		
 		return temp;
 	}
 }
