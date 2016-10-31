@@ -2110,7 +2110,7 @@ double AdsorptionReaction::Eval_Residual(const Matrix<double> &x, const Matrix<d
 	}
 	
 	double logK = this->getReaction(i).Get_Equilibrium();
-	logK = logK + ((this->calculateEquilibriumCorrection(this->getChargeDensity(), T, this->getIonicStrength(), rel_perm, i)/*/gama(this->getAdsorbIndex(i),0)*/)/log(10.0));
+	logK = logK + ((this->calculateEquilibriumCorrection(this->getChargeDensity(), T, this->getIonicStrength(), rel_perm, i))/log(10.0));
 	
 	res = res - logK;
 	
@@ -2731,7 +2731,7 @@ double UnsteadyAdsorption::Eval_Residual(const Matrix<double> &x, const Matrix<d
 	}
 
 	double logK = this->getReaction(i).Get_Equilibrium();
-	logK = logK + ((this->calculateEquilibriumCorrection(this->getChargeDensity(), T, this->getIonicStrength(), rel_perm, i)/*/gama(this->getAdsorbIndex(i),0)*/)/log(10.0));
+	logK = logK + ((this->calculateEquilibriumCorrection(this->getChargeDensity(), T, this->getIonicStrength(), rel_perm, i))/log(10.0));
 	res = res - logK;
 
 	return res;
@@ -5543,6 +5543,8 @@ int linearsolve_choice(const std::string &input)
 		choice = GMRESR;
 	else if (copy == "kms")
 		choice = KMS;
+	else if (copy == "gmres")
+		choice = GMRESRP;
 	else
 		choice = GMRESRP;
 
@@ -8478,7 +8480,29 @@ int shark_solver(SHARK_DATA *shark_dat)
 					Matrix<double> J(shark_dat->numvar,shark_dat->numvar);
 					NUM_JAC_DATA num_jac;
 					success = NumericalJacobian(shark_dat->Residual, shark_dat->X_new, J, shark_dat->numvar, shark_dat->numvar, &num_jac, shark_dat->residual_data);
-					J.Display("Numerical Jacobian");
+					
+					FILE *Jacobian;
+					
+					Jacobian = fopen("output/SHARK_Jacobian.txt","w+");
+					if (Jacobian == nullptr)
+					{
+						system("mkdir output");
+						Jacobian = fopen("output/SHARK_Jacobian.txt", "w+");
+					}
+					
+					//Loop to print out Jacobian to file
+					fprintf(Jacobian,"Jacobian Matrix = \n\n");
+					for (int i=0; i<shark_dat->numvar; i++)
+					{
+						for (int j=0; j< shark_dat->numvar; j++)
+						{
+							fprintf(Jacobian, "%.6g\t",J(i,j));
+						}
+						fprintf(Jacobian,"\n");
+					}
+					fprintf(Jacobian,"\n");
+					
+					fclose(Jacobian);
 				}
 
 				mError(simulation_fail);
