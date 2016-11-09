@@ -1489,7 +1489,7 @@ Matrix<T> &Matrix<T>::lowerTriangularSolve(const Matrix& L, const Matrix& v)
         mError(arg_matrix_same);
         return *this;
     }
-    //Solves the system Ux=v when U is an upper triangular matrix
+    //Solves the system Lx=v when L is an lower triangular matrix
     this->set_size(v.num_rows, v.num_cols);
     
     //Check dimensions of U and v to ensure they will work out
