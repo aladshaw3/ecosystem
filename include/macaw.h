@@ -1468,7 +1468,7 @@ Matrix<T> &Matrix<T>::upperTriangularSolve(const Matrix& U, const Matrix& v)
         }
         if (U(i,i) == 0.0)
         {
-            mError(singular_matrix)
+			mError(singular_matrix);
             return *this;
         }
         else
@@ -1509,7 +1509,7 @@ Matrix<T> &Matrix<T>::lowerTriangularSolve(const Matrix& L, const Matrix& v)
         }
         if (L(i,i) == 0.0)
         {
-            mError(singular_matrix)
+			mError(singular_matrix);
             return *this;
         }
         else
