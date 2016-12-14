@@ -418,6 +418,18 @@ int Eval_2D_VPA_TEST_Residuals(const Matrix<double> &x, Matrix<double> &F, const
 	return success;
 }
 
+//Example for QR
+int ex1_mult(const Matrix<double>& x, Matrix<double> &Ax, const void *data)
+{
+	int success = 0;
+	
+	QR_EX1 *dat = (QR_EX1 *) data;
+	
+	Ax = dat->M * x;
+	
+	return success;
+}
+
 //Run the sandbox tests
 int RUN_SANDBOX()
 {
@@ -607,6 +619,23 @@ int RUN_SANDBOX()
 	// --------------------------------------------- END VPA Example -----------------------------------------------
 	
 	// ----------------------------- Example of QR Solve ------------------------------
+	QR_DATA qr_dat;
+	QR_EX1 ex1;
+	ex1.M.set_size(10, 10);
+	ex1.M.tridiagonalFill(-1, 2, -1, false);
+	ex1.M.Display("M");
+	Matrix<double> bq;
+	Matrix<double> xq;
+	bq.set_size(10, 1);
+	xq.set_size(10, 1);
+	bq.edit(0, 0, 1.0);
+	bq.Display("b");
+	xq.ladshawSolve(ex1.M, bq);
+	xq.Display("x");
+	
+	success = QRsolve(ex1_mult, bq, &qr_dat, (void *)&ex1);
+	
+	qr_dat.Ro.Display("R");
 	
 	
 	// ------------------------------------- END QR Solve Example -----------------------------------------
