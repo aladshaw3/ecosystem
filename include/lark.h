@@ -440,6 +440,25 @@ typedef struct
 	
 }KMS_DATA;
 
+///Data structure for the implementation of a QR solver given some invertable linear operator
+/** C-style object to be used in conjuction with a QR solver for invertable linear operators. 
+	This method will extract columns from the linear operator and use Householder Reflections
+	to factor the operator into an upper triangular matrix and a unitary reflection matrix. 
+	It is generally less efficient to use this method for sparse systems, but is more stable
+	and occassionally more efficient for dense systems. */
+typedef struct
+{
+	double alpha;					///< Scaling factor for the reflections
+	Matrix<double> ek;				///< Unit vector used to extract columns from the linear operator
+	Matrix<double> w;				///< Extracted column from the linear operator
+	Matrix<double> U;				///< Unitary reflections matrix (U = I - 2ww*)
+	
+	/// User supplied matrix-vector product function
+	int (*matvec) (const Matrix<double> &x, Matrix<double> &Ax, const void *matvec_data);
+	const void *matvec_data;	///< Data structure for the user's matvec function
+	
+}QR_DATA;
+
 /// Data structure for the implementation of a Picard or Fixed-Point iteration for non-linear systems
 /** C-style object used in conjunction with the Picard algorithm for solving a non-linear system of equations.
 	This is an extradorinarily simple iterative method by which a weak or loose form of the non-linear system

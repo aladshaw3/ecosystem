@@ -77,8 +77,10 @@ public:
 	Matrix operator*(const T);				///< Operator to multiply this matrix by a scalar T return the new matrix result
 	Matrix operator/(const T);				///< Operator to divide this matrix by a scalar T and return the new matrix result
 	Matrix operator*(const Matrix& M);		///< Operator to multiply this matrix and matrix M and return the new matrix result
+	Matrix outer_product(const Matrix& M);	///< Operator to perform an outer product between this and M and return result
 	Matrix& transpose(const Matrix& M);		///< Function to convert this matrix to the transpose of the given matrix M
-    Matrix& transpose_multiply(const Matrix& MT, const Matrix& v);	///< Function to convert this matrix into the result of the given matrix M transposed and multiplied by the other given matrix v
+	/// Function to convert this matrix into the result of the given matrix M transposed and multiplied by the other given matrix v
+    Matrix& transpose_multiply(const Matrix& MT, const Matrix& v);
 	Matrix& adjoint(const Matrix &M);		///< Function to convert this matrix to the adjoint of the given matrix
 	Matrix& inverse(const Matrix &M);		///< Function to convert this matrix to the inverse of the given matrix
 	void Display(const std::string Name);	///< Function to display the contents of this matrix given a Name for the matrix
@@ -653,23 +655,6 @@ Matrix<T> Matrix<T>::operator*(const Matrix &M)
 		temp.num_cols = M.num_cols;
 		temp.Data.resize(num_rows*M.num_cols);
 		
-		/*
-		int j=0;
-		for(int i=0; i<num_rows; i++)
-		{
-			for (int J=0; J<M.num_cols; J++)
-			{
-				temp.edit(i, J, 0);
-				j=0;
-				for (int I=0; I<M.num_rows; I++)
-				{
-					temp.edit(i, J,temp(i,J) + (this->Data[(i*num_cols)+j] * M.Data[(I*M.num_cols)+J]) );
-					j++;
-				}
-			}
-		}
-		 */
-		
 		for (int i=0; i<num_rows; i++)
 		{
 			for (int k=0; k<num_cols; k++)
@@ -683,6 +668,37 @@ Matrix<T> Matrix<T>::operator*(const Matrix &M)
 		
 		return temp;
 	}
+}
+
+//Formation of new matrix from an outer product
+template <class T>
+Matrix<T> Matrix<T>::outer_product(const Matrix &M)
+{
+	if (this->num_cols != 1 || M.num_cols != 1)
+	{
+		mError(dim_mis_match);
+		return *this;
+	}
+	if (this->num_rows != M.num_rows)
+	{
+		mError(dim_mis_match);
+		return *this;
+	}
+	
+	Matrix<T> result(this->num_rows, M.num_rows);
+	result.num_rows = this->num_rows;
+	result.num_cols = M.num_rows;
+	result.Data.resize(num_rows*M.num_rows);
+	
+	for (int i=0; i<this->num_rows; i++)
+	{
+		for (int j=0; j<M.num_rows; j++)
+		{
+			result.Data[(i*result.num_cols)+j] = this->Data[i] * M.Data[j];
+		}
+	}
+	
+	return result;
 }
 
 //Transpose of a matrix
