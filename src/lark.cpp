@@ -2620,6 +2620,8 @@ int QRsolve( int (*matvec) (const Matrix<double>& x, Matrix<double> &Ax, const v
 		}
 		qr_dat->ek.edit(k, 0, 0.0);
 	}
+	qr_dat->w.columnExtract(0, qr_dat->Ro);
+	qr_dat->Ro.columnReplace(1, qr_dat->w);
 	
 	//Loop over the columns of R that need modification
 	for (int k=0; k<qr_dat->Ro.columns()-1; k++)

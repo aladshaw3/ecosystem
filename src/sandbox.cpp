@@ -636,6 +636,7 @@ int RUN_SANDBOX()
 	success = QRsolve(ex1_mult, bq, &qr_dat, (void *)&ex1);
 	
 	qr_dat.Ro.Display("R");
+	qr_dat.w.Display("R_1");
 	
 	
 	// ------------------------------------- END QR Solve Example -----------------------------------------
