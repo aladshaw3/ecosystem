@@ -1682,12 +1682,43 @@ Matrix<T> &Matrix<T>::qrSolve(const Matrix& M, const Matrix& b)
 		mError(arg_matrix_same);
 		return *this;
 	}
+	if (M.num_rows != M.num_cols)
+	{
+		mError(non_square_matrix);
+		return *this;
+	}
+	if (M.num_rows != b.num_rows || b.num_cols > 1)
+	{
+		mError(dim_mis_match);
+		return *this;
+	}
 	
 	//Setup temporary variables
 	double alpha;
-	Matrix<T> w, U, R(M);
+	Matrix<T> w, U, R(M), Qt_b(b);
 	w.set_size(this->num_rows,1);
 	U.set_size(this->num_rows,this->num_rows);
+	
+	//Loop over the columns of R
+	for (int j=0; j<R.num_cols-1; j++)
+	{
+		w.columnExtract(j,R);
+		for (int i=0; i<j; i++)
+			w.Data[i] = 0.0;
+		if (w.Data[j] < 0.0)
+			alpha = w.norm();
+		else
+			alpha = -w.norm();
+		w.Data[j] = w.Data[j] - alpha;
+		w = (w/w.norm());
+		U = w.outer_product(w) * -2.0;
+		for (int i=0; i<U.num_rows; i++)
+			U.Data[(i*U.num_cols)+i] = 1.0 + U.Data[(i*U.num_cols)+i];
+		
+		R = U*R;
+		Qt_b = U*Qt_b;
+	}
+	this->upperTriangularSolve(R,Qt_b);
 	
 	return *this;
 }

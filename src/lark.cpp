@@ -2598,9 +2598,7 @@ int QRsolve( int (*matvec) (const Matrix<double>& x, Matrix<double> &Ax, const v
 	
 	//Setup working environment
 	qr_dat->ek.set_size(b.rows(), 1);
-	qr_dat->w.set_size(b.rows(), 1);
 	qr_dat->x.set_size(b.rows(), 1);
-	qr_dat->U.set_size(b.rows(), b.rows());
 	qr_dat->Ro.set_size(b.rows(), b.rows());
 	qr_dat->ek.zeros();
 	
@@ -2608,26 +2606,18 @@ int QRsolve( int (*matvec) (const Matrix<double>& x, Matrix<double> &Ax, const v
 	for (int k=0; k<b.rows(); k++)
 	{
 		qr_dat->ek.edit(k, 0, 1.0);
-		success = (*matvec) (qr_dat->ek, qr_dat->w, matvec_data);
+		success = (*matvec) (qr_dat->ek, qr_dat->x, matvec_data);
 		if (success != 0)
 		{
 			mError(simulation_fail);
 			return success;
 		}
-		for (int j=0; j<b.rows(); j++)
-		{
-			qr_dat->Ro.edit(j, k, qr_dat->w(j,0));
-		}
+		qr_dat->Ro.columnReplace(k, qr_dat->x);
 		qr_dat->ek.edit(k, 0, 0.0);
 	}
-	qr_dat->w.columnExtract(0, qr_dat->Ro);
-	qr_dat->Ro.columnReplace(1, qr_dat->w);
 	
-	//Loop over the columns of R that need modification
-	for (int k=0; k<qr_dat->Ro.columns()-1; k++)
-	{
-		
-	}
+	//Call the QR solve function from macaw
+	qr_dat->x.qrSolve(qr_dat->Ro, b);
 	
 	return success;
 }

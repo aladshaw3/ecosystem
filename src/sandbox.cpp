@@ -631,12 +631,37 @@ int RUN_SANDBOX()
 	bq.edit(0, 0, 1.0);
 	bq.Display("b");
 	xq.ladshawSolve(ex1.M, bq);
-	xq.Display("x");
+	xq.Display("x_tri");
+	
+	xq.zeros();
+	xq.qrSolve(ex1.M, bq);
+	xq.Display("x_macaw");
 	
 	success = QRsolve(ex1_mult, bq, &qr_dat, (void *)&ex1);
 	
 	qr_dat.Ro.Display("R");
-	qr_dat.w.Display("R_1");
+	qr_dat.x.Display("x_lark");
+	
+	Matrix<double> A1, b1, x1;
+	A1.set_size(7, 7);
+	b1.set_size(7, 1);
+	x1.set_size(7, 1);
+	b1(0,0) = 1.0;
+	A1(0,0) = 1; A1(0,1) = 2; A1(0,2) = 5; A1(0,3) = 3; A1(0,4) = 6; A1(0,5) = 1; A1(0,6) = 0;
+	A1(1,0) = 2; A1(1,1) = 6; A1(1,2) = 1; A1(1,3) = 0; A1(1,4) = 1; A1(1,5) = 3; A1(1,6) = 5;
+	A1(2,0) = 5; A1(2,1) = 2; A1(2,2) = 3; A1(2,3) = 1; A1(2,4) = 1; A1(2,5) = 0; A1(2,6) = 6;
+	A1(3,0) = 0; A1(3,1) = 6; A1(3,2) = 1; A1(3,3) = 1; A1(3,4) = 5; A1(3,5) = 3; A1(3,6) = 2;
+	A1(4,0) = 3; A1(4,1) = 0; A1(4,2) = 6; A1(4,3) = 5; A1(4,4) = 1; A1(4,5) = 2; A1(4,6) = 1;
+	A1(5,0) = 1; A1(5,1) = 1; A1(5,2) = 0; A1(5,3) = 3; A1(5,4) = 5; A1(5,5) = 6; A1(5,6) = 2;
+	A1(6,0) = 0; A1(6,1) = 4; A1(6,2) = 5; A1(6,3) = 1; A1(6,4) = 2; A1(6,5) = 3; A1(6,6) = 0;
+	
+	x1.qrSolve(A1, b1);
+	
+	A1.Display("A");
+	b1.Display("b");
+	x1.Display("x");
+	
+	std::cout << "QR solve norm = " << (b1 - A1*x1).norm() << std::endl;
 	
 	
 	// ------------------------------------- END QR Solve Example -----------------------------------------

@@ -448,10 +448,7 @@ typedef struct
 	and occassionally more efficient for dense systems. */
 typedef struct
 {
-	double alpha;					///< Scaling factor for the reflections
 	Matrix<double> ek;				///< Unit vector used to extract columns from the linear operator
-	Matrix<double> w;				///< Extracted column from the linear operator
-	Matrix<double> U;				///< Unitary reflections matrix (U = I - 2ww*)
 	Matrix<double> Ro;				///< Upper triangular matrix formed from factoring the linear operator
 	Matrix<double> x;				///< Solution to the linear system
 	
