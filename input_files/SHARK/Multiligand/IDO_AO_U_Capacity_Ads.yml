@@ -31,8 +31,8 @@ SolverOptions:
 ---
 line_search: true      
 search_type: standard
-linear_solve: fom  
-nl_abstol: 1e-4  
+linear_solve: qr  
+nl_abstol: 1e-8  
 
 - kms_options:
   max_level: 2

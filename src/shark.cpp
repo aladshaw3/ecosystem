@@ -3979,6 +3979,8 @@ void print2file_shark_header(SHARK_DATA *shark_dat)
 		fprintf(shark_dat->OutputFile, "GMRESR\n");
 	else if (shark_dat->Newton_data.linear_solver == KMS)
 		fprintf(shark_dat->OutputFile, "KMS\n");
+	else if (shark_dat->Newton_data.linear_solver == QR)
+		fprintf(shark_dat->OutputFile, "QR\n");
 	else
 		fprintf(shark_dat->OutputFile, "UNDEFINED!\n");
 	if (shark_dat->Newton_data.linear_solver == GMRESR)
@@ -5545,6 +5547,8 @@ int linearsolve_choice(const std::string &input)
 		choice = KMS;
 	else if (copy == "gmres")
 		choice = GMRESRP;
+	else if (copy == "qr")
+		choice = QR;
 	else
 		choice = GMRESRP;
 
@@ -6054,7 +6058,7 @@ int read_options(SHARK_DATA *shark_dat)
 		}
 		else
 		{
-			shark_dat->Newton_data.linear_solver = FOM;
+			shark_dat->Newton_data.linear_solver = QR;
 		}
 	}
 
@@ -6163,7 +6167,7 @@ int read_options(SHARK_DATA *shark_dat)
 	}
 	catch (std::out_of_range)
 	{
-		shark_dat->Newton_data.nl_tol_abs = 1e-5;
+		shark_dat->Newton_data.nl_tol_abs = 1e-6;
 	}
 
 	try
