@@ -8,7 +8,7 @@ Scenario:
 
 - ss_multiads_objs:
   - obj01:
-    name: AF1
+    name: AF160
     num_ligands: 2 
 
 - sys_data:
@@ -22,7 +22,7 @@ Scenario:
 
 - run_time:
   steady: true        
-  specs_curve: true  
+  specs_curve: false  
   pH_step: 0.25
   
 ...
@@ -506,7 +506,7 @@ EquilRxn:
 
 ...
 
-"AF1":
+"AF160":
 ---
 spec_area: 15000.0     #Units: m^2/kg
 total_mass: 1.51e-5     #Units: kg
@@ -523,7 +523,7 @@ include_surfcharge: true
 
 ...
 
-"AF1-HAO (ad)":
+"AF160-HAO (ad)":
 ---
 spec_mole: 1.25      #Units: mol/kg
 ligand_charge: 0
@@ -572,7 +572,7 @@ ligand_charge: 0
 
 ...
 
-"AF1-H2IDO (ad)":
+"AF160-H2IDO (ad)":
 ---
 spec_mole: 2.05     #Units: mol/kg
 ligand_charge: 0
