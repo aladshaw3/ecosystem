@@ -497,7 +497,7 @@ int RUN_SANDBOX()
 	
 	//Run PJFNK optimization
 	PJFNK_DATA jfnk_dat;
-	jfnk_dat.linear_solver = GMRESR;	//Always use GMRESRP, GCR, or GMRESR for these problems!
+	jfnk_dat.linear_solver = QR;	//Always use GMRESRP, GCR, or GMRESR for these problems!
 	jfnk_dat.nl_maxit = 100;			//If you have a bad initial guess, up the max iterations and turn on linesearch
 	success = pjfnk(Speciation_Test01_Function, NULL, dat01.logC, &jfnk_dat, (void *)&dat01, (void *)&dat01);
 	dat01.logC.Display("logC_final");
@@ -587,7 +587,7 @@ int RUN_SANDBOX()
 	Matrix<double> testb(vpa_dat.N,1);
 	
 	PJFNK_DATA vpa_newton;
-	vpa_newton.linear_solver = GMRESRP;
+	vpa_newton.linear_solver = QR;
 	vpa_newton.gmresrp_dat.restart = vpa_dat.N;
 	vpa_newton.LineSearch = true;
 	vpa_newton.nl_tol_abs = 1e-6;

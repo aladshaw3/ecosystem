@@ -513,7 +513,8 @@ typedef enum
 	GMRESRP,
 	GCR,
 	GMRESR,
-	KMS
+	KMS,
+	QR
 } krylov_method;
 
 /// Data structure for the implementation of the PJFNK algorithm for non-linear systems
@@ -561,6 +562,7 @@ typedef struct
 	GCR_DATA gcr_dat;				///< Data structure for the GCR method
 	GMRESR_DATA gmresr_dat;			///< Data structure for the GMRESR method
 	KMS_DATA kms_dat;				///< Data structure for the KMS method
+	QR_DATA qr_dat;					///< Data structure for the QR solve method
 	
 	
 	BACKTRACK_DATA backtrack_dat;	///< Data structure for the Backtracking Linesearch algorithm

@@ -3060,7 +3060,7 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 	}
 	if (pjfnk_dat->nl_maxit <= 0)
 		pjfnk_dat->nl_maxit = std::min(3*x.rows(),1000);
-	if (pjfnk_dat->linear_solver < GMRESLP || pjfnk_dat->linear_solver > KMS)
+	if (pjfnk_dat->linear_solver < GMRESLP || pjfnk_dat->linear_solver > QR)
 	{
 		//Choose the best linear solver based on problem size and availability of preconditioning
 		if (x.rows() >= 100 && (*precon) == NULL)
@@ -3130,6 +3130,8 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 			std::cout << "GMRESR linear solver";
 		else if (pjfnk_dat->linear_solver == KMS)
 			std::cout << "KMS linear solver";
+		else if (pjfnk_dat->linear_solver == QR)
+			std::cout << "QR linear solver";
 		else
 			return -1;
 		if (pjfnk_dat->LineSearch == true)
@@ -3470,6 +3472,39 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 				if (pjfnk_dat->Bounce == true)
 					LS_Flag = false;
 			}
+		}
+		
+		//QR direct solver
+		else if (pjfnk_dat->linear_solver == QR)
+		{
+			success = QRsolve(jacvec, pjfnk_dat->F, &pjfnk_dat->qr_dat, pjfnk_dat);
+			pjfnk_dat->fun_call = pjfnk_dat->fun_call + x.rows();
+			pjfnk_dat->l_iter = pjfnk_dat->l_iter + x.rows();
+			if (success != 0) {mError(simulation_fail); success = -1; break;}
+			
+			if (pjfnk_dat->LineSearch == false)
+			{
+				//Form new solution
+				for (int i=0; i<x.rows(); i++)
+				{
+					pjfnk_dat->x.edit(i, 0, pjfnk_dat->x(i,0) - pjfnk_dat->qr_dat.x(i,0));
+					x.edit(i, 0, pjfnk_dat->x(i,0));
+				}
+			}
+			else
+			{
+				success	= backtrackLineSearch(pjfnk_dat->funeval, pjfnk_dat->F, x, pjfnk_dat->qr_dat.x, pjfnk_dat->nl_res, &pjfnk_dat->backtrack_dat, pjfnk_dat->res_data);
+				pjfnk_dat->fun_call = pjfnk_dat->fun_call + pjfnk_dat->backtrack_dat.fun_call;
+				if (success < 0) {mError(simulation_fail); success = -1; break;}
+				//Form new solution
+				for (int i=0; i<x.rows(); i++)
+				{
+					pjfnk_dat->x.edit(i, 0, x(i,0));
+				}
+				if (pjfnk_dat->Bounce == true)
+					LS_Flag = false;
+			}
+
 		}
 		
 		//No other Krylov Method currently available
