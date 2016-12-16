@@ -15,15 +15,19 @@ Scenario:
   act_fun: davies    
   const_pH: false
   pH: 8	
-  temp: 293.15        
+  temp: 313.15        
   dielec: 78.325     
-  volume: 0.75      
+  volume: 1.0    #0.75  
   reactor: batch
 
 - run_time:
   steady: true        
   specs_curve: false  
   pH_step: 0.25
+  temp_curve: true
+  start_temp: 273.15
+  end_temp: 323.15
+  temp_step: 2.5
   
 ...
 

@@ -5838,6 +5838,15 @@ int read_scenario(SHARK_DATA *shark_dat)
 	{
 		try
 		{
+			shark_dat->TemperatureCurve = shark_dat->yaml_object.getYamlWrapper()("Scenario")("run_time")["temp_curve"].getBool();
+		}
+		catch (std::out_of_range)
+		{
+			shark_dat->TemperatureCurve = false;
+		}
+		
+		try
+		{
 			shark_dat->SpeciationCurve = shark_dat->yaml_object.getYamlWrapper()("Scenario")("run_time")["specs_curve"].getBool();
 		}
 		catch (std::out_of_range)
@@ -5847,6 +5856,7 @@ int read_scenario(SHARK_DATA *shark_dat)
 		
 		if (shark_dat->SpeciationCurve == true)
 		{
+			shark_dat->TemperatureCurve = false;
 			try
 			{
 				shark_dat->pH_step = shark_dat->yaml_object.getYamlWrapper()("Scenario")("run_time")["pH_step"].getDouble();
@@ -5859,6 +5869,37 @@ int read_scenario(SHARK_DATA *shark_dat)
 			{
 				shark_dat->pH_step = 0.5;
 			}
+		}
+		
+		if (shark_dat->TemperatureCurve == true)
+		{
+			shark_dat->SpeciationCurve = false;
+			try
+			{
+				shark_dat->start_temp = shark_dat->yaml_object.getYamlWrapper()("Scenario")("run_time")["start_temp"].getDouble();
+			}
+			catch (std::out_of_range)
+			{
+				shark_dat->start_temp = 277.15;
+			}
+			try
+			{
+				shark_dat->end_temp = shark_dat->yaml_object.getYamlWrapper()("Scenario")("run_time")["end_temp"].getDouble();
+			}
+			catch (std::out_of_range)
+			{
+				shark_dat->end_temp = 323.15;
+			}
+			try
+			{
+				shark_dat->temp_step = shark_dat->yaml_object.getYamlWrapper()("Scenario")("run_time")["temp_step"].getDouble();
+			}
+			catch (std::out_of_range)
+			{
+				shark_dat->temp_step = 10.0;
+			}
+			
+			shark_dat->temperature = shark_dat->start_temp;
 		}
 	}
 	else
@@ -8739,15 +8780,16 @@ int SHARK(SHARK_DATA *shark_dat)
 	if (success != 0) {mError(simulation_fail); return -1;}
 
 	//Iteratively run the simulation cases
+	bool overage = false;
 	do
 	{
 		//Start console messages
 		if (shark_dat->Console_Output == true)
 		{
 			if (shark_dat->const_pH == true)
-				std::cout << "---------------- Performing Simulation @ pH = " << shark_dat->pH << " -----------------\n\n";
+				std::cout << "----- Performing Simulation @ pH = " << shark_dat->pH << " with T = " << shark_dat->temperature << "---------\n\n";
 			else
-				std::cout << "---------------- Performing Simulation with Electro-Neutrality-Equation ------------------\n\n";
+				std::cout << "----- Performing Simulation with Electro-Neutrality-Equation @ T = " << shark_dat->temperature << " K  ------\n\n";
 		}
 
 		//Call the executioner function
@@ -8760,7 +8802,27 @@ int SHARK(SHARK_DATA *shark_dat)
 
 		//Conditionally change options
 		if (shark_dat->SpeciationCurve == true)
+		{
 			shark_dat->pH = shark_dat->pH + shark_dat->pH_step;
+			if (shark_dat->pH > 14.0 && overage == false)
+			{
+				overage = true;
+				shark_dat->pH = 14.0;
+			}
+		}
+		if (shark_dat->TemperatureCurve == true)
+		{
+			shark_dat->temperature = shark_dat->temperature + shark_dat->temp_step;
+			if (shark_dat->temperature > shark_dat->end_temp && overage == false)
+			{
+				overage = true;
+				shark_dat->temperature = shark_dat->end_temp;
+			}
+			
+			//Function to re-calculate equilibrium and rate constants as a function of temperature
+			success = shark_temperature_calculations(shark_dat);
+			if (success != 0) {mError(simulation_fail); return -1;}
+		}
 
 		//End console messages
 		if (shark_dat->Console_Output == true)
@@ -8771,8 +8833,9 @@ int SHARK(SHARK_DATA *shark_dat)
 				std::cout << "\n---------------- End of Simulation -----------------\n\n";
 		}
 
-	} while ((shark_dat->steadystate == false && shark_dat->simulationtime > shark_dat->time)
-			    || (shark_dat->SpeciationCurve == true && shark_dat->pH <= 14.0));
+	} while (	(shark_dat->steadystate == false && shark_dat->simulationtime > shark_dat->time)
+			    || (shark_dat->SpeciationCurve == true && shark_dat->pH <= 14.0)
+				|| (shark_dat->TemperatureCurve == true && shark_dat->temperature <= shark_dat->end_temp) );
 
 	//Call solver one last time to establish the steady-state solution
 	if (shark_dat->steadystate == false)

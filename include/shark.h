@@ -1246,6 +1246,9 @@ typedef struct SHARK_DATA
 	double time_old = 0.0;							///< Previous value of time (start from t = 0.0 hrs)
 	double pH = 7.0;								///< Value of pH if needed (default = 7)
 	double pH_step = 0.5;							///< Value by which to increment pH when doing a speciation curve (default = 0.5)
+	double start_temp = 277.15;						///< Value of the starting temperature used for Temperature Curves (default = 277.15 K)
+	double end_temp = 323.15;						///< Value of the ending temperature used for Temperature Curves (default = 323.15 K)
+	double temp_step = 10.0;						///< Size of the step changes to use for Temperature Curves (default = 10.0 K);
 	double volume = 1.0;							///< Volume of the domain in liters (default = 1 L)
 	double flow_rate = 1.0;							///< Flow rate in the reactor in L/hr (default = 1 L/hr)
 	double xsec_area = 1.0;							///< Cross sectional area of the reactor in m^2 (default = 1 m^2)
@@ -1261,6 +1264,7 @@ typedef struct SHARK_DATA
 	bool TimeAdaptivity = false;					///< True = solve using variable time step
 	bool const_pH = false;							///< True = set pH to a constant; False = solve for pH
 	bool SpeciationCurve = false;					///< True = runs a series of constant pH steady-state problems to produce curves
+	bool TemperatureCurve = false;					///< True = runs a series of constant temperature steady-state problmes to produce curves
 	bool Console_Output = true;						///< True = display output to console
 	bool File_Output = false;						///< True = write output to a file
 	bool Contains_pH = false;						///< True = system contains pH as a variable (set internally)
