@@ -15,7 +15,7 @@ Scenario:
   act_fun: davies    
   const_pH: false
   pH: 8	
-  temp: 313.15        
+  temp: 283.15        
   dielec: 78.325     
   volume: 1.0    #0.75  
   reactor: batch
@@ -534,6 +534,7 @@ ligand_charge: 0
 
 - rxn01:
   logK: 0.39
+  energy: -2188.79
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -542,6 +543,7 @@ ligand_charge: 0
 
 - rxn02:
   logK: -2.72
+  energy: 15265.42
   mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -550,6 +552,7 @@ ligand_charge: 0
 
 - rxn03:
   logK: -11.73
+  energy: 65832.11
   mole_factor: 3.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -558,6 +561,7 @@ ligand_charge: 0
 
 - rxn04:
   logK: 2.59
+  energy: -14535.82
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -567,6 +571,7 @@ ligand_charge: 0
 
 - rxn05:
   logK: -0.92
+  energy: 5163.30
   mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -583,6 +588,7 @@ ligand_charge: 0
 
 - rxn01:
   logK: -4.64
+  energy: 26041.00
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -591,6 +597,7 @@ ligand_charge: 0
 
 - rxn02:
   logK: -0.34
+  energy: 1908.18
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -599,6 +606,7 @@ ligand_charge: 0
 
 - rxn03:
   logK: -18.68
+  energy: 104837.49
   mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -607,6 +615,7 @@ ligand_charge: 0
 
 - rxn04:
   logK: -8.78
+  energy: 49275.87
   mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -615,6 +624,7 @@ ligand_charge: 0
 
 - rxn05:
   logK: -3.48
+  energy: 19530.75
   mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -623,6 +633,7 @@ ligand_charge: 0
 
 - rxn06:
   logK: 1.36
+  energy: -7632.71
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -632,6 +643,7 @@ ligand_charge: 0
 
 - rxn07:
   logK: 5.36
+  energy: -30081.85
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1

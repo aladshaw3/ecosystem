@@ -375,7 +375,7 @@ void Reaction::Set_EnthalpyANDEntropy(double H, double S)
 //Set the Gibb's Energy of the reaction
 void Reaction::Set_Energy(double G)
 {
-	this->entropy = G;
+	this->energy = G;
 	this->HaveG = true;
 	this->HaveEquil = true;
 }
@@ -399,7 +399,6 @@ void Reaction::checkSpeciesEnergies()
 				break;
 		}
 	}
-	this->HaveHS = HS;
 	this->CanCalcHS = HS;
 	
 	for (int i=0; i<this->List->list_size(); i++)
@@ -416,7 +415,6 @@ void Reaction::checkSpeciesEnergies()
 				break;
 		}
 	}
-	this->HaveG = G;
 	this->CanCalcG = G;
 	
 	if (this->CanCalcHS == true || this->CanCalcG == true)
@@ -7435,6 +7433,7 @@ int read_multiligandobjects(SHARK_DATA *shark_dat)
 						try
 						{
 							shark_dat->MultiAdsList[i].getAdsorptionObject(l).getReaction(rxn).Set_Energy(shark_dat->yaml_object.getYamlWrapper()(docname)(x.first)["energy"].getDouble());
+							
 						}
 						catch (std::out_of_range)
 						{
