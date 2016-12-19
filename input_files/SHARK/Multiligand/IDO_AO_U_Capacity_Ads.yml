@@ -24,7 +24,7 @@ Scenario:
   steady: true        
   specs_curve: false  
   pH_step: 0.25
-  temp_curve: true
+  temp_curve: false
   start_temp: 273.15
   end_temp: 323.15
   temp_step: 2.5
@@ -533,8 +533,9 @@ spec_mole: 1.25      #Units: mol/kg
 ligand_charge: 0
 
 - rxn01:
-  logK: 0.39
-  energy: -2188.79
+  #logK: 0.39
+  #energy: -2188.79
+  logK: 0.41
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -542,8 +543,9 @@ ligand_charge: 0
     "H + (aq)": 1
 
 - rxn02:
-  logK: -2.72
-  energy: 15265.42
+  #logK: -2.72
+  #energy: 15265.42
+  logK: -2.9
   mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -551,8 +553,9 @@ ligand_charge: 0
     "H + (aq)": 2
 
 - rxn03:
-  logK: -11.73
-  energy: 65832.11
+  #logK: -11.73
+  #energy: 65832.11
+  logK: -13.0
   mole_factor: 3.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -560,8 +563,9 @@ ligand_charge: 0
     "H + (aq)": 3
 
 - rxn04:
-  logK: 2.59
-  energy: -14535.82
+  #logK: 2.59
+  #energy: -14535.82
+  logK: 2.8
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -570,8 +574,9 @@ ligand_charge: 0
     "H + (aq)": 1
 
 - rxn05:
-  logK: -0.92
-  energy: 5163.30
+  #logK: -0.92
+  #energy: 5163.30
+  logK: -1.0
   mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -587,8 +592,9 @@ spec_mole: 2.05     #Units: mol/kg
 ligand_charge: 0
 
 - rxn01:
-  logK: -4.64
-  energy: 26041.00
+  #logK: -4.64
+  #energy: 26041.00
+  logK: -4.9
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -596,8 +602,9 @@ ligand_charge: 0
     "H + (aq)": 2
 
 - rxn02:
-  logK: -0.34
-  energy: 1908.18
+  #logK: -0.34
+  #energy: 1908.18
+  logK: -0.37
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -605,8 +612,9 @@ ligand_charge: 0
     "H + (aq)": 1
 
 - rxn03:
-  logK: -18.68
-  energy: 104837.49
+  #logK: -18.68
+  #energy: 104837.49
+  logK: -20.5
   mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -614,8 +622,9 @@ ligand_charge: 0
     "H + (aq)": 4
 
 - rxn04:
-  logK: -8.78
-  energy: 49275.87
+  #logK: -8.78
+  #energy: 49275.87
+  logK: -10.0
   mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -623,8 +632,9 @@ ligand_charge: 0
     "H + (aq)": 3
 
 - rxn05:
-  logK: -3.48
-  energy: 19530.75
+  #logK: -3.48
+  #energy: 19530.75
+  logK: -3.7
   mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -632,8 +642,9 @@ ligand_charge: 0
     "H + (aq)": 2
 
 - rxn06:
-  logK: 1.36
-  energy: -7632.71
+  #logK: 1.36
+  #energy: -7632.71
+  logK: 1.5
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -642,8 +653,9 @@ ligand_charge: 0
     "H + (aq)": 2
 
 - rxn07:
-  logK: 5.36
-  energy: -30081.85
+  #logK: 5.36
+  #energy: -30081.85
+  logK: 6.5
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
