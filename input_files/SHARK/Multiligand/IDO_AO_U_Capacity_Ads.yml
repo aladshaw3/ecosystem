@@ -15,7 +15,7 @@ Scenario:
   act_fun: davies    
   const_pH: false
   pH: 8	
-  temp: 283.15        
+  temp: 313.15        
   dielec: 78.325     
   volume: 1.0    #0.75  
   reactor: batch
@@ -24,7 +24,7 @@ Scenario:
   steady: true        
   specs_curve: false  
   pH_step: 0.25
-  temp_curve: false
+  temp_curve: true
   start_temp: 273.15
   end_temp: 323.15
   temp_step: 2.5
@@ -89,9 +89,9 @@ MasterSpecies:
   - 36: 
     formula: UO2AO + (ad)
     charge: 1
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
+    enthalpy: -1023568.7
+    entropy: -106.414
+    have_HS: true
     energy: 0
     have_G: false
     phase: adsorbed
@@ -101,9 +101,9 @@ MasterSpecies:
   - 37: 
     formula: UO2(AO)2 (ad)
     charge: 0
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
+    enthalpy: -972996.9
+    entropy: 7.8759
+    have_HS: true
     energy: 0
     have_G: false
     phase: adsorbed
@@ -113,9 +113,9 @@ MasterSpecies:
   - 38: 
     formula: UO2(AO)3 - (ad)
     charge: -1
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
+    enthalpy: -729241.076
+    entropy: 671.461
+    have_HS: true
     energy: 0
     have_G: false
     phase: adsorbed
@@ -125,9 +125,9 @@ MasterSpecies:
   - 39: 
     formula: UO2CO3AO - (ad)
     charge: -1
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
+    enthalpy: -1741629.98
+    entropy: -261.641
+    have_HS: true
     energy: 0
     have_G: false
     phase: adsorbed
@@ -137,9 +137,9 @@ MasterSpecies:
   - 40: 
     formula: UO2CO3(AO)2 2- (ad)
     charge: -2
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
+    enthalpy: -1667060.92
+    entropy: -72.497
+    have_HS: true
     energy: 0
     have_G: false
     phase: adsorbed
@@ -149,9 +149,9 @@ MasterSpecies:
   - 41: 
     formula: UO2IDO (ad)
     charge: 0
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
+    enthalpy: -955716.98
+    entropy: 30.3998
+    have_HS: true
     energy: 0
     have_G: false
     phase: adsorbed
@@ -161,9 +161,9 @@ MasterSpecies:
   - 42: 
     formula: UO2HIDO + (ad)
     charge: 1
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
+    enthalpy: -1012734.89
+    entropy: -83.236
+    have_HS: true
     energy: 0
     have_G: false
     phase: adsorbed
@@ -173,9 +173,9 @@ MasterSpecies:
   - 43: 
     formula: UO2(IDO)2 2- (ad)
     charge: -2
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
+    enthalpy: -660147.92
+    entropy: 773.1554
+    have_HS: true
     energy: 0
     have_G: false
     phase: adsorbed
@@ -185,9 +185,9 @@ MasterSpecies:
   - 44: 
     formula: UO2(HIDO)IDO - (ad)
     charge: -1
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
+    enthalpy: -748364.334
+    entropy: 662.5315
+    have_HS: true
     energy: 0
     have_G: false
     phase: adsorbed
@@ -197,9 +197,9 @@ MasterSpecies:
   - 45: 
     formula: UO2(HIDO)2 (ad)
     charge: 0
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
+    enthalpy: -973627.99
+    entropy: -9.3683
+    have_HS: true
     energy: 0
     have_G: false
     phase: adsorbed
@@ -209,9 +209,9 @@ MasterSpecies:
   - 46: 
     formula: UO2CO3IDO 2- (ad)
     charge: -2
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
+    enthalpy: -1724192.065
+    entropy: -225.236
+    have_HS: true
     energy: 0
     have_G: false
     phase: adsorbed
@@ -221,9 +221,9 @@ MasterSpecies:
   - 47: 
     formula: UO2CO3HIDO - (ad)
     charge: -1
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
+    enthalpy: -1929112.74
+    entropy: -850.804
+    have_HS: true
     energy: 0
     have_G: false
     phase: adsorbed
@@ -535,7 +535,8 @@ ligand_charge: 0
 - rxn01:
   #logK: 0.39
   #energy: -2188.79
-  logK: 0.41
+  #enthalpy: -4568.7125
+  #entropy: -8.21385
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -545,7 +546,8 @@ ligand_charge: 0
 - rxn02:
   #logK: -2.72
   #energy: 15265.42
-  logK: -2.9
+  #enthalpy: 46003.0746
+  #entropy: 106.07587
   mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -555,7 +557,8 @@ ligand_charge: 0
 - rxn03:
   #logK: -11.73
   #energy: 65832.11
-  logK: -13.0
+  #enthalpy: 289758.924
+  #entropy: 769.66122
   mole_factor: 3.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -565,7 +568,8 @@ ligand_charge: 0
 - rxn04:
   #logK: 2.59
   #energy: -14535.82
-  logK: 2.8
+  #enthalpy: -45529.982
+  #entropy: -106.54148
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -576,7 +580,8 @@ ligand_charge: 0
 - rxn05:
   #logK: -0.92
   #energy: 5163.30
-  logK: -1.0
+  #enthalpy: 29039.0823
+  #entropy: 82.60332
   mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -594,7 +599,8 @@ ligand_charge: 0
 - rxn01:
   #logK: -4.64
   #energy: 26041.00
-  logK: -4.9
+  #enthalpy: 63283.0164
+  #entropy: 128.59975
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -604,7 +610,8 @@ ligand_charge: 0
 - rxn02:
   #logK: -0.34
   #energy: 1908.18
-  logK: -0.37
+  #enthalpy: 6265.11175
+  #entropy: 14.9643647
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -614,7 +621,8 @@ ligand_charge: 0
 - rxn03:
   #logK: -18.68
   #energy: 104837.49
-  logK: -20.5
+  #enthalpy: 358852.085
+  #entropy: 871.355387
   mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -624,7 +632,8 @@ ligand_charge: 0
 - rxn04:
   #logK: -8.78
   #energy: 49275.87
-  logK: -10.0
+  #enthalpy: 270635.666
+  #entropy: 760.731499
   mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -634,7 +643,8 @@ ligand_charge: 0
 - rxn05:
   #logK: -3.48
   #energy: 19530.75
-  logK: -3.7
+  #enthalpy: 45372.0071
+  #entropy: 88.8316885
   mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -644,7 +654,8 @@ ligand_charge: 0
 - rxn06:
   #logK: 1.36
   #energy: -7632.71
-  logK: 1.5
+  #enthalpy: -28092.065
+  #entropy: -70.135794
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -655,7 +666,8 @@ ligand_charge: 0
 - rxn07:
   #logK: 5.36
   #energy: -30081.85
-  logK: 6.5
+  #enthalpy: -233012.74
+  #entropy: -695.70411
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
