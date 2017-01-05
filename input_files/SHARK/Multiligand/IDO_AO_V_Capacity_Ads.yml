@@ -17,12 +17,17 @@ Scenario:
   pH: 8	
   temp: 293.15        
   dielec: 78.325     
-  volume: 0.75       #Units: L
+  volume: 1.0	#0.75  
+  reactor: batch     
 
 - run_time:
   steady: true        
-  specs_curve: true  
+  specs_curve: false  
   pH_step: 0.25
+  temp_curve: false
+  start_temp: 273.15
+  end_temp: 323.15
+  temp_step: 2.5
   
 ...
 
@@ -216,7 +221,8 @@ MassBalance:
     "VO2(CO3)2 3- (aq)": 2
 
 - sodium: 
-  total_conc: 0.432640361
+  #total_conc: 0.432465655
+  total_conc: 0.432612385
   - delta:
     "NaHCO3 (aq)": 1
     "NaCO3 - (aq)": 1
@@ -227,7 +233,8 @@ MassBalance:
     "NaV(IDO_H)2 (ad)": 1
 
 - vanadium:
-  total_conc: 5.8235e-5
+  #total_conc: 5.8235e-5
+  total_conc: 0.000107145
   - delta:
     "VO2 + (aq)": 1
     "H3VO4 (aq)": 1 
