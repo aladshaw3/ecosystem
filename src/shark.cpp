@@ -1944,7 +1944,7 @@ double AdsorptionReaction::calculateActiveFraction(const Matrix<double> &x)
 		}
 		if (sum > this->specific_area)
 			sum = this->specific_area;
-		phi = 1.0 - (sum / (this->specific_area + 0.01)); //Small leeway added to improve convergence
+		phi = 1.0 - (sum / this->specific_area); 
 		if (phi < DBL_MIN)
 			phi = DBL_MIN;
 	}
@@ -1956,7 +1956,7 @@ double AdsorptionReaction::calculateActiveFraction(const Matrix<double> &x)
 		}
 		if (sum > this->specific_molality)
 			sum = this->specific_molality;
-		phi = 1.0 - (sum / (this->specific_molality + 0.01)); //Small leeway added to improve convergence
+		phi = 1.0 - (sum / this->specific_molality); 
 		if (phi < DBL_MIN)
 			phi = DBL_MIN;
 	}
