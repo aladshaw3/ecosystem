@@ -393,11 +393,11 @@ spec_mole: 1.25     #Units: mol/kg
 ligand_charge: 0
 
 - rxn01:
-  #logK: 27.34
+  logK: 27.34
   #logK: 28.30
   #energy: -153440
-  enthalpy: 84358.51
-  entropy: 811.1836
+  #enthalpy: 84358.51
+  #entropy: 811.1836
   mole_factor: 1.0
   - stoichiometry:
     "VO4 3- (aq)": -1
@@ -406,11 +406,11 @@ ligand_charge: 0
     "H2O (l)": 2
 
 - rxn02:
-  #logK: 21.93
+  logK: 21.93
   #logK: 22.89
   #energy: -123077
-  enthalpy: 84358.51
-  entropy: 707.6104
+  #enthalpy: 84358.51
+  #entropy: 707.6104
   mole_factor: 2.0
   - stoichiometry:
     "VO4 3- (aq)": -1
@@ -419,11 +419,11 @@ ligand_charge: 0
     "H2O (l)": 2
 
 - rxn03:
-  #logK: 24.93
+  logK: 24.93
   #logK: 25.89
   #energy: -139914
-  enthalpy: 84358.51
-  entropy: 765.0467
+  #enthalpy: 84358.51
+  #entropy: 765.0467
   mole_factor: 2.0
   - stoichiometry:
     "VO4 3- (aq)": -1
@@ -432,11 +432,11 @@ ligand_charge: 0
     "H2O (l)": 2
 
 - rxn04:
-  #logK: 26.62
+  logK: 26.62
   #logK: 27.58
   #energy: -149399
-  enthalpy: 84358.51
-  entropy: 797.3983
+  #enthalpy: 84358.51
+  #entropy: 797.3983
   mole_factor: 3.0
   - stoichiometry:
     "VO4 3- (aq)": -1
@@ -445,11 +445,11 @@ ligand_charge: 0
     "H2O (l)": 4
 
 - rxn05:
-  #logK: 22.72
+  logK: 22.72
   #logK: 23.68
   #energy: -127511
-  enthalpy: 84358.51
-  entropy: 722.7344
+  #enthalpy: 84358.51
+  #entropy: 722.7344
   mole_factor: 3.0
   - stoichiometry:
     "VO4 3- (aq)": -1
@@ -467,11 +467,11 @@ ligand_charge: 0
 
 
 - rxn01:
-  #logK: 24.61
+  logK: 24.61
   #logK: 25.57
   #energy: -138118
-  enthalpy: 84358.51
-  entropy: 758.9189
+  #enthalpy: 84358.51
+  #entropy: 758.9189
   mole_factor: 1.0
   - stoichiometry:
     "VO4 3- (aq)": -1
@@ -480,11 +480,11 @@ ligand_charge: 0
     "H2O (l)": 2
 
 - rxn02:
-  #logK: 28.06
+  logK: 28.06
   #logK: 29.02
   #energy: -157481
-  enthalpy: 84358.51
-  entropy: 824.969
+  #enthalpy: 84358.51
+  #entropy: 824.969
   mole_factor: 1.0
   - stoichiometry:
     "VO4 3- (aq)": -1
@@ -493,11 +493,11 @@ ligand_charge: 0
     "H2O (l)": 2
 
 - rxn03:
-  #logK: 29.24
+  logK: 29.24
   #logK: 30.20
   #energy: -164103
-  enthalpy: 84358.51
-  entropy: 847.576
+  #enthalpy: 84358.51
+  #entropy: 847.576
   mole_factor: 2.0
   - stoichiometry:
     "VO4 3- (aq)": -1
@@ -507,11 +507,11 @@ ligand_charge: 0
     "NaV(IDO_H)2 (ad)": 1
 
 - rxn04:
-  #logK: 30.07
+  logK: 30.07
   #logK: 31.03
   #energy: -168761
-  enthalpy: 84358.51
-  entropy: 863.4567
+  #enthalpy: 84358.51
+  #entropy: 863.4567
   mole_factor: 2.0
   - stoichiometry:
     "VO4 3- (aq)": -1
@@ -520,11 +520,11 @@ ligand_charge: 0
     "V(IDO)(IDO_H) (ad)": 1
 
 - rxn05:
-  #logK: 26.87
+  logK: 26.87
   #logK: 27.83
   #energy: -150802
-  enthalpy: 84358.51
-  entropy: 802.1874
+  #enthalpy: 84358.51
+  #entropy: 802.1874
   mole_factor: 2.0
   - stoichiometry:
     "VO4 3- (aq)": -1
@@ -533,11 +533,11 @@ ligand_charge: 0
     "V(IDO)2 + (ad)": 1
 
 - rxn06:
-  #logK: 28.67
+  logK: 28.67
   #logK: 29.63
   #energy: -160904
-  enthalpy: 84358.51
-  entropy: 836.6841
+  #enthalpy: 84358.51
+  #entropy: 836.6841
   mole_factor: 2.0
   - stoichiometry:
     "VO4 3- (aq)": -1
