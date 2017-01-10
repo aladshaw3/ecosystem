@@ -15,7 +15,7 @@ Scenario:
   act_fun: davies    
   const_pH: false
   pH: 8	
-  temp: 293.15        
+  temp: 298.15        
   dielec: 78.325     
   volume: 1.0    #0.75  
   reactor: batch
@@ -36,7 +36,8 @@ SolverOptions:
 line_search: true      
 search_type: standard
 linear_solve: qr  
-nl_abstol: 1e-8  
+nl_abstol: 1e-8
+nl_maxit: 1000  
 
 - kms_options:
   max_level: 2
