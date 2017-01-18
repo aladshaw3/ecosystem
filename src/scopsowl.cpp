@@ -1803,7 +1803,7 @@ int SCOPSOWL_TESTS()
 	dat.param_dat[0].Adsorbable = false;		//-
 	dat.param_dat[1].Adsorbable = false;		//-
 	dat.param_dat[2].Adsorbable = false;		//-
-	dat.param_dat[3].Adsorbable = false;		//-
+	dat.param_dat[3].Adsorbable = true;		//-
 	dat.param_dat[4].Adsorbable = true;			//-
 	
 	dat.y[0] = 0.779876175;				//-
