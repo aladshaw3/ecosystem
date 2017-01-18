@@ -43,6 +43,7 @@
 #include <float.h>				  //Line to allow use of machine constants
 #include <string>    			  //Line to allow use of c++ strings
 #include "error.h"				  //Line to allow use of custom error reporting
+#include "lark.h"				  //Line to allow use of custom numerical methods
 
 #ifndef DBL_EPSILON
 #define DBL_EPSILON    2.2204460492503131e-016 		///< Machine precision value used for approximating gradients
