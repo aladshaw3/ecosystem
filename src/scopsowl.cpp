@@ -1778,7 +1778,7 @@ int SCOPSOWL_TESTS()
 	dat.magpie_dat.sys_dat.PT = dat.total_pressure;			//kPa
 	//dat.gas_velocity = 0.36;
 	dat.gas_velocity = 1.833;					//cm/s
-	dat.sim_time = 50.0;						//hrs
+	dat.sim_time = 1.0;						//hrs
 	dat.t_print = 0.1;
 	dat.DirichletBC = false;					//-
 	dat.SurfDiff = false;						//-
@@ -1803,7 +1803,7 @@ int SCOPSOWL_TESTS()
 	dat.param_dat[0].Adsorbable = false;		//-
 	dat.param_dat[1].Adsorbable = false;		//-
 	dat.param_dat[2].Adsorbable = false;		//-
-	dat.param_dat[3].Adsorbable = true;		//-
+	dat.param_dat[3].Adsorbable = false;		//-
 	dat.param_dat[4].Adsorbable = true;			//-
 	
 	dat.y[0] = 0.779876175;				//-
