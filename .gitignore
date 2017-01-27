@@ -5,6 +5,14 @@ output
 doc/doxygen/html
 doc/doxygen/latex
 *.exe
+<<<<<<< HEAD
 eco0
 *.a
 *.so
+=======
+
+
+
+*.stackdump
+eco0
+>>>>>>> d0729400c6b13a61d5753444086957265119e828
