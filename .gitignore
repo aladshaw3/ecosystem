@@ -5,4 +5,8 @@ output
 doc/doxygen/html
 doc/doxygen/latex
 *.exe
+
+
+
+*.stackdump
 eco0
