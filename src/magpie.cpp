@@ -179,8 +179,7 @@ double lnact_mSPD(const double *par, const void *data, int i, volatile double PI
 					lm_control_struct control = lm_control_double;
 					lmmin(1, po, 1, dat, eval_po_PI, &control, &status, lm_printout_std);
 					dat->sys_dat.total_eval = dat->sys_dat.total_eval + status.nfev;
-					if (status.info > 5)
-						{std::cout << "\nWarning! Non-convergent intermediate steps!" << std::endl; return 0.0;}
+					if (status.info > 5) {std::cout << "\nWarning! Non-convergent intermediate steps!" << std::endl; return 0.0;}
 
 					e[j][j] = (2 * (Qst(fabs(po[0]), dat, j) + dat->gsta_dat[j].dHo[0]) ) / (Z * dat->mspd_dat[j].s);
 
@@ -256,8 +255,7 @@ double lnact_mSPD(const double *par, const void *data, int i, volatile double PI
 						control.printflags = 0;
 						lmmin(1, po, 1, dat, eval_po_PI, &control, &status, lm_printout_std);
 						dat->sys_dat.total_eval = dat->sys_dat.total_eval + status.nfev;
-						if (status.info > 5)
-							{std::cout << "\nWarning! Gradient Estimation Failed!" << std::endl; return 0.0;}
+						if (status.info > 5) {std::cout << "\nWarning! Gradient Estimation Failed!" << std::endl; return 0.0;}
 						e[j][j] = (2 * (Qst(fabs(po[0]), dat, j) + dat->gsta_dat[j].dHo[0]) ) / (Z * dat->mspd_dat[j].s);
 					}
 					else
@@ -504,7 +502,7 @@ void eval_GPAST(const double *par, int m_dat, const void *data, double *fvec, in
 	 * n_par = 1 + dat->sys_dat.N; m_dat = n_par
 	 */
 	MAGPIE_DATA *dat = (MAGPIE_DATA *) data;
-
+	
 	if (dat->sys_dat.Recover == false)
 	{
 		double sum1[dat->sys_dat.N], sum2 = 0;
@@ -562,6 +560,12 @@ int MAGPIE(const void *data)
 	lm_status_struct status;
 	status.nfev = 0;
 	lm_control_struct control = lm_control_double;
+	control.epsilon = sqrt(DBL_EPSILON);
+	control.ftol = 1e-6;
+	control.gtol = 1e-6;
+	control.xtol = 1e-6;
+	control.stepbound = 100.0;
+	control.maxcall = 1000;
 	control.printflags = 0;
 
 	//STEP 0: Check and correct for components whose mole fractions are zero at this sample point
@@ -738,7 +742,7 @@ int MAGPIE(const void *data)
                         std::cout << lm_infmsg[status.info] << std::endl;
                         std::cout << "E.Norm: "<< status.fnorm << std::endl;
                     }
-					if (status.info > 5) {mError(simulation_fail); return status.info;}
+					//if (status.info > 5) {mError(simulation_fail); return status.info;}
 					dat->gpast_dat[i].po[j] = fabs(par_po[0]);
 					dat->gpast_dat[i].gama_inf[j] = (dat->gpast_dat[j].qo / (dat->gpast_dat[i].He * dat->gpast_dat[i].po[j]));
 				}
@@ -803,7 +807,7 @@ int MAGPIE(const void *data)
 							std::cout << lm_infmsg[status.info] << std::endl;
 							std::cout << "E.Norm: "<< status.fnorm << std::endl;
 						}
-						if (status.info > 5) {mError(simulation_fail); return status.info;}
+						//if (status.info > 5) {mError(simulation_fail); return status.info;}
 						dat->mspd_dat[i].eta[j] = fabs(par_eta[0]);
 						dat->mspd_dat[j].eta[i] = fabs(par_eta[1]);
 					}
@@ -857,8 +861,8 @@ int MAGPIE(const void *data)
 			std::cout << lm_infmsg[status.info] << std::endl;
 			std::cout << "E.Norm: "<< status.fnorm << std::endl;
 		}
-		if (status.info > 5) {mError(simulation_fail); return status.info;}
-		success = status.info;
+		//if (status.info > 5) {mError(simulation_fail); return status.info;}
+		//success = status.info;
 
 		dat->sys_dat.PI = fabs(par_gpast[0]);
 		xy1.resize(dat->sys_dat.N);
@@ -1034,8 +1038,8 @@ int MAGPIE(const void *data)
 			q1[0] = dat->gpast_dat[0].q;
 			gama1[0] = dat->mspd_dat[0].gama;
 			
-			if (status.info > 5) {mError(simulation_fail); return status.info;}
-			success = status.info;
+			//if (status.info > 5) {mError(simulation_fail); return status.info;}
+			//success = status.info;
 		}
 
 		//Restore original data

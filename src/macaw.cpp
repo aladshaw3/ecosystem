@@ -162,6 +162,9 @@ int MACAW_TESTS()
   	xD.Display("x");
   	std::cout << "norm = " << (b - D*xD).norm() << std::endl;
 	
+	D = xD.outer_product(b);
+	D.Display("D");
+	
 	std::vector<int> iv;
 	iv.resize(3);
 	for (int i=0; i<iv.size(); i++)

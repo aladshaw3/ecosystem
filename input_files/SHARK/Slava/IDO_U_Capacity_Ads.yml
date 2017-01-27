@@ -1,7 +1,7 @@
 Scenario:
 ---
 - vars_fun:
-  numvar: 41
+  numvar: 43
   num_ssr: 29
   num_mbe: 6
   num_ssao: 1
@@ -9,7 +9,7 @@ Scenario:
 - ss_ads_objs:
   - obj01:
     name: H2IDO (ad)
-    num_rxns: 5 
+    num_rxns: 7 
 
 - sys_data:
   act_fun: davies    
@@ -17,11 +17,14 @@ Scenario:
   temp: 293.15        
   dielec: 78.325     
   volume: 0.75       #Units: L
+  reactor: batch
+  flow_rate: 60.0
 
 - run_time:
   steady: true        
   specs_curve: true  
   pH_step: 0.25
+  zero_initial_solids: false
   
 ...
 
@@ -30,7 +33,8 @@ SolverOptions:
 line_search: true      
 search_type: standard
 linear_solve: fom  
-nl_abstol: 1e-4    		
+nl_abstol: 1e-4 
+nl_maxit: 100   		
 
 ...
 
@@ -136,17 +140,50 @@ MasterSpecies:
     name: uranyl-diimide-dioxime
     lin_form: UO2H2
 
+  - 41: 
+    formula: UO2CO3IDO 2- (ad)
+    charge: -2
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: uranyl-carbonate-imide-dioxime
+    lin_form: UO2CO3
+
+  - 42: 
+    formula: UO2CO3HIDO - (ad)
+    charge: -1
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: uranyl-carbonate-imide-dioxime
+    lin_form: UO2CO3H
+
 ...
 
 MassBalance:
 ---
+#Seawater U: 1.386E-8
+#Lab U: 3.227E-5
+#U=2N
+#Sea N: 2.772E-8
+#Lab N: 6.454E-5
 - water:
   total_conc: 1
+  inlet_conc: 1
+  initial_conc: 1
   - delta: 
     "H2O (l)": 1
 
 - carbonate:
   total_conc: 0.002290951
+  inlet_conc: 0.002290951
+  initial_conc: 0.002290951
   - delta: 
     "NaHCO3 (aq)": 1
     "NaCO3 - (aq)": 1 
@@ -157,9 +194,13 @@ MassBalance:
     "UO2CO3 (aq)": 1
     "UO2(CO3)2 2- (aq)": 2
     "UO2(CO3)3 4- (aq)": 3
+    "UO2CO3IDO 2- (ad)": 1
+    "UO2CO3HIDO - (ad)": 1
 
 - nitrate:
-  total_conc: 6.454E-05
+  total_conc: 6.454E-5
+  inlet_conc: 6.454E-5
+  initial_conc: 6.454E-5
   - delta:
     "HNO3 (aq)": 1
     "NO3 - (aq)": 1
@@ -168,6 +209,8 @@ MassBalance:
 
 - sodium: 
   total_conc: 0.432290951
+  inlet_conc: 0.432290951
+  initial_conc: 0.432290951
   - delta:
     "NaHCO3 (aq)": 1
     "NaCO3 - (aq)": 1
@@ -177,7 +220,9 @@ MassBalance:
     "NaOH (aq)": 1
 
 - uranyl:
-  total_conc: 3.227E-05
+  total_conc: 3.227E-5
+  inlet_conc: 3.227E-5
+  initial_conc: 3.227E-5
   - delta:
     "UO2NO3 + (aq)": 1
     "UO2(NO3)2 (aq)": 1
@@ -203,9 +248,13 @@ MassBalance:
     "UO2(IDO)2 2- (ad)": 1
     "UO2(HIDO)IDO - (ad)": 1
     "UO2(HIDO)2 (ad)": 1
+    "UO2CO3IDO 2- (ad)": 1
+    "UO2CO3HIDO - (ad)": 1
 
 - chlorine:
   total_conc: 0.43
+  inlet_conc: 0.43
+  initial_conc: 0.43
   - delta:
     "Cl - (aq)": 1
     "Cl2 (aq)": 2
@@ -408,7 +457,7 @@ EquilRxn:
 "H2IDO (ad)":
 ---
 basis: molar
-spec_area: 45000.0     #Units: m^2/kg
+spec_area: 15000.0     #Units: m^2/kg
 spec_mole: 2.9       #Units: mol/kg
 total_mass: 1.51e-5     #Units: kg
 surf_activity: uniquac
@@ -454,5 +503,23 @@ surf_charge: 0
     "UO2 2+ (aq)": -1
     "UO2(HIDO)2 (ad)": 1
     "H + (aq)": 2
+
+- rxn06:
+  logK: 1.36
+  mole_factor: 1.0
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "CO3 2- (aq)": -1
+    "UO2CO3IDO 2- (ad)": 1
+    "H + (aq)": 2
+
+- rxn07:
+  logK: 5.36
+  mole_factor: 1.0
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "CO3 2- (aq)": -1
+    "UO2CO3HIDO - (ad)": 1
+    "H + (aq)": 1
 
 ...

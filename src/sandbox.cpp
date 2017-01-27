@@ -418,6 +418,18 @@ int Eval_2D_VPA_TEST_Residuals(const Matrix<double> &x, Matrix<double> &F, const
 	return success;
 }
 
+//Example for QR
+int ex1_mult(const Matrix<double>& x, Matrix<double> &Ax, const void *data)
+{
+	int success = 0;
+	
+	QR_EX1 *dat = (QR_EX1 *) data;
+	
+	Ax = dat->M * x;
+	
+	return success;
+}
+
 //Run the sandbox tests
 int RUN_SANDBOX()
 {
@@ -485,13 +497,8 @@ int RUN_SANDBOX()
 	
 	//Run PJFNK optimization
 	PJFNK_DATA jfnk_dat;
-	//jfnk_dat.L_Output = true;
-	jfnk_dat.linear_solver = GMRESR;	//Always use GMRESRP, GCR, or GMRESR for these problems!
+	jfnk_dat.linear_solver = QR;	//Always use GMRESRP, GCR, or GMRESR for these problems!
 	jfnk_dat.nl_maxit = 100;			//If you have a bad initial guess, up the max iterations and turn on linesearch
-	//jfnk_dat.LineSearch = true;			//If you have a bad initial guess, up the max iterations and turn on linesearch
-	//jfnk_dat.lin_tol = 1e-6;			//Slightly better convergence if taking near exact newton step
-	//jfnk_dat.nl_tol_abs = 1e-10;		//All other defaults are fine
-	//jfnk_dat.nl_tol_rel = 1e-10;		//All other defaults are fine
 	success = pjfnk(Speciation_Test01_Function, NULL, dat01.logC, &jfnk_dat, (void *)&dat01, (void *)&dat01);
 	dat01.logC.Display("logC_final");
 	
@@ -529,19 +536,7 @@ int RUN_SANDBOX()
 		else
 			pib_dat.x.edit(i, 0, 1.0 / (pib_dat.x.rows()-1.0));
 	}
-	/*
-	pib_dat.x.edit(0, 0, 4.9348);
-	pib_dat.x.edit(1, 0, 0.00127891);
-	pib_dat.x.edit(2, 0, 2.53624706);
-	pib_dat.x.edit(3, 0, 0.15174395);
-	pib_dat.x.edit(4, 0, -2.9902389);
-	pib_dat.x.edit(5, 0, -0.1474352);
-	pib_dat.x.edit(6, 0, 1.59611461);
-	pib_dat.x.edit(7, 0, 0.03853069);
-	pib_dat.x.edit(8, 0, -0.8377256);
-	pib_dat.x.edit(9, 0, 0.34744869);
-	pib_dat.x.edit(10, 0, 0.0);
-	*/
+
 	Matrix<double> res(pib_dat.N,1);
 	success = Eval_1DPIB_Residuals(pib_dat.x, res, &pib_dat);
 	res.Display("F(x)");
@@ -592,42 +587,13 @@ int RUN_SANDBOX()
 	Matrix<double> testb(vpa_dat.N,1);
 	
 	PJFNK_DATA vpa_newton;
-	vpa_newton.linear_solver = GMRESRP;
+	vpa_newton.linear_solver = QR;
 	vpa_newton.gmresrp_dat.restart = vpa_dat.N;
 	vpa_newton.LineSearch = true;
 	vpa_newton.nl_tol_abs = 1e-6;
 	vpa_newton.nl_tol_rel = 1e-6;
-	//vpa_newton.L_Output = true;
 	
-	//vpa_dat.x.edit(0, 0, 0);
-	//vpa_dat.x.edit(1, 0, 0);
-	//vpa_dat.x.edit(2, 0, 1.0);
-	//vpa_dat.x.edit(3, 0, -1.35);
-	//vpa_dat.x.edit(4, 0, 0.67);
-	
-	/*
-	for (int i=0; i<vpa_dat.m; i++)
-	{
-		for (int j=0; j<vpa_dat.m; j++)
-		{
-			std::cout << "A(" << i << ")(" << j << ") = \t" << Laplacian_Integral_PolyBasis(i, j, 0.0, vpa_dat.L) << "\t";
-		}
-		std::cout << std::endl;
-	}
-	std::cout << std::endl;
-	for (int i=0; i<vpa_dat.m; i++)
-	{
-		for (int j=0; j<vpa_dat.m; j++)
-		{
-			std::cout << "B(" << i << ")(" << j << ") = \t" << Overlap_Integral_PolyBasis(i, j, 0.0, vpa_dat.L) << "\t";
-		}
-		std::cout << std::endl;
-	}
-	std::cout << std::endl;
-	*/
-	 
 	success = pjfnk(Eval_VPA_Test_Residuals, NULL, vpa_dat.x, &vpa_newton, &vpa_dat, &vpa_dat);
-	//success = gmresRightPreconditioned(Eval_VPA_Test_Residuals, NULL, testb, &vpa_newton.gmresrp_dat, &vpa_dat, NULL);
 	vpa_dat.x.Display("Variables");
 	
 	for (int i=0; i<vpa_dat.m; i++)
@@ -652,64 +618,53 @@ int RUN_SANDBOX()
 	
 	// --------------------------------------------- END VPA Example -----------------------------------------------
 	
-	// ----------------------------- Example of VPA in 2D particle in a box ------------------------------
+	// ----------------------------- Example of QR Solve ------------------------------
+	QR_DATA qr_dat;
+	QR_EX1 ex1;
+	ex1.M.set_size(10, 10);
+	ex1.M.tridiagonalFill(-1, 2, -1, false);
+	ex1.M.Display("M");
+	Matrix<double> bq;
+	Matrix<double> xq;
+	bq.set_size(10, 1);
+	xq.set_size(10, 1);
+	bq.edit(0, 0, 1.0);
+	bq.Display("b");
+	xq.ladshawSolve(ex1.M, bq);
+	xq.Display("x_tri");
 	
-	/*
-	std::cout << "Solving a 2D problem with VPA...\n\n";
+	xq.zeros();
+	xq.qrSolve(ex1.M, bq);
+	xq.Display("x_macaw");
 	
-	VPA_2D_TEST_DATA test2d;
-	test2d.m = 4;
-	test2d.bcs = 1 + (2*test2d.m);
-	test2d.N = test2d.bcs + (test2d.m*test2d.m);
-	test2d.D = 1.0;
-	test2d.k = 2.0;
-	test2d.uo = 9.0;
-	test2d.Lx = 1.0;
-	test2d.Ly = 2.0;
-	test2d.c.set_size(test2d.m, test2d.m);
-	test2d.x.set_size(test2d.N, 1);
-	Matrix<double> res2d(test2d.N,1);
+	success = QRsolve(ex1_mult, bq, &qr_dat, (void *)&ex1);
 	
-	PJFNK_DATA newton2d;
-	newton2d.linear_solver = GMRESRP;
-	newton2d.gmresrp_dat.restart = test2d.N;
-	newton2d.LineSearch = true;
+	qr_dat.Ro.Display("R");
+	qr_dat.x.Display("x_lark");
 	
-	success = pjfnk(Eval_2D_VPA_TEST_Residuals, NULL, test2d.x, &newton2d, (void *)&test2d, (void *)&test2d);
-	test2d.x.Display("x");
+	Matrix<double> A1, b1, x1;
+	A1.set_size(7, 7);
+	b1.set_size(7, 1);
+	x1.set_size(7, 1);
+	b1(0,0) = 1.0;
+	A1(0,0) = 1; A1(0,1) = 2; A1(0,2) = 5; A1(0,3) = 3; A1(0,4) = 6; A1(0,5) = 1; A1(0,6) = 0;
+	A1(1,0) = 2; A1(1,1) = 6; A1(1,2) = 1; A1(1,3) = 0; A1(1,4) = 1; A1(1,5) = 3; A1(1,6) = 5;
+	A1(2,0) = 5; A1(2,1) = 2; A1(2,2) = 3; A1(2,3) = 1; A1(2,4) = 1; A1(2,5) = 0; A1(2,6) = 6;
+	A1(3,0) = 0; A1(3,1) = 6; A1(3,2) = 1; A1(3,3) = 1; A1(3,4) = 5; A1(3,5) = 3; A1(3,6) = 2;
+	A1(4,0) = 3; A1(4,1) = 0; A1(4,2) = 6; A1(4,3) = 5; A1(4,4) = 1; A1(4,5) = 2; A1(4,6) = 1;
+	A1(5,0) = 1; A1(5,1) = 1; A1(5,2) = 0; A1(5,3) = 3; A1(5,4) = 5; A1(5,5) = 6; A1(5,6) = 2;
+	A1(6,0) = 0; A1(6,1) = 4; A1(6,2) = 5; A1(6,3) = 1; A1(6,4) = 2; A1(6,5) = 3; A1(6,6) = 0;
 	
-	success = Eval_2D_VPA_TEST_Residuals(test2d.x, res2d, (void *)&test2d);
+	x1.qrSolve(A1, b1);
 	
-	int ij = 0;
-	for (int i=0; i<test2d.m; i++)
-	{
-		for (int j=0; j<test2d.m; j++)
-		{
-			ij = (i*test2d.m)+j+test2d.bcs;
-			test2d.c.edit(i, j, test2d.x(ij,0));
-		}
-	}
+	A1.Display("A");
+	b1.Display("b");
+	x1.Display("x");
 	
-	x = 0.0;
-	dx = test2d.Lx / 20.0;
-	double y = 0.0;
-	double dy = test2d.Ly / 20.0;
-	Matrix<double> Uxy(21,21);
+	std::cout << "QR solve norm = " << (b1 - A1*x1).norm() << std::endl;
 	
-	for (int i=0; i<21; i++)
-	{
-		y = 0.0;
-		for (int j=0; j<21; j++)
-		{
-			Uxy.edit(i, j, PolyBasis_2D_LinearComboAppox(test2d.c, x, y));
-			y = y + dy;
-		}
-		x = x + dx;
-	}
 	
-	Uxy.Display("U(x,y)");
-	*/
-	// ------------------------------------- END 2nd VPA Example -----------------------------------------
+	// ------------------------------------- END QR Solve Example -----------------------------------------
 	
 
 	std::cout << "\nEnd SANDBOX\n\n";

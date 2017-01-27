@@ -1,7 +1,7 @@
 Scenario:
 ---
 - vars_fun:
-  numvar: 28
+  numvar: 30
   num_ssr: 19
   num_mbe: 5
   num_ssao: 1
@@ -9,7 +9,7 @@ Scenario:
 - ss_ads_objs:
   - obj01:
     name: H2IDO (ad)
-    num_rxns: 3       
+    num_rxns: 5       
 
 - sys_data:
   act_fun: davies    
@@ -100,6 +100,30 @@ MasterSpecies:
     name: Vanadium-diamidoximate
     lin_form: V
 
+  - 28: 
+    formula: V(IDO)(IDO_H) (ad)
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Vanadium-diamidoximate
+    lin_form: V
+
+  - 29: 
+    formula: V(IDO)2 + (ad)
+    charge: 1
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Vanadium-diamidoximate
+    lin_form: V
+
 ...
 
 MassBalance:
@@ -131,8 +155,9 @@ MassBalance:
     "NaCl (aq)": 1
     "NaOH (aq)": 1
 
+#V: 5.8235E-05
 - vanadium:
-  total_conc: 5.8235E-05
+  total_conc: 5.8235e-5
   - delta:
     "VO2 + (aq)": 1
     "H4VO4 + (aq)": 1 
@@ -147,6 +172,8 @@ MassBalance:
     "VO2IDO - (ad)": 1
     "VO2HIDO (ad)": 1
     "V(IDO_H)2 - (ad)": 1
+    "V(IDO)(IDO_H) (ad)": 1
+    "V(IDO)2 + (ad)": 1
 
 - chlorine:
   total_conc: 0.43
@@ -285,13 +312,13 @@ EquilRxn:
 "H2IDO (ad)":
 ---
 basis: molar
-spec_area: 45000.0     #Units: m^2/kg
+spec_area: 15000.0     #Units: m^2/kg
 spec_mole: 2.9      #Units: mol/kg
 total_mass: 1.51e-5     #Units: kg
 surf_activity: uniquac
 
 
-- rxn06:
+- rxn01:
   logK: 24.61
   mole_factor: 1.0
   - stoichiometry:
@@ -300,8 +327,8 @@ surf_activity: uniquac
     "VO2IDO - (ad)": 1
     "H2O (l)": 2
 
-- rxn07:
-  logK: 27.66
+- rxn02:
+  logK: 28.06
   mole_factor: 1.0
   - stoichiometry:
     "VO4 3- (aq)": -1
@@ -309,7 +336,7 @@ surf_activity: uniquac
     "VO2HIDO (ad)": 1
     "H2O (l)": 2
 
-- rxn08:
+- rxn03:
   logK: 28.67
   mole_factor: 2.0
   - stoichiometry:
@@ -318,29 +345,22 @@ surf_activity: uniquac
     "H2O (l)": 4
     "V(IDO_H)2 - (ad)": 1
 
-#- rxn06:
-  #logK: -5.54
-  #mole_factor: 1.0
-  #- stoichiometry:
-    #"VO2 + (aq)": -1
-    #"H + (aq)": 2
-    #"VO2IDO - (ad)": 1
+- rxn04:
+  logK: 30.07
+  mole_factor: 2.0
+  - stoichiometry:
+    "VO4 3- (aq)": -1
+    "H + (aq)": -3
+    "H2O (l)": 4
+    "V(IDO)(IDO_H) (ad)": 1
 
-#- rxn07:
-  #logK: -2.49
-  #mole_factor: 1.0
-  #- stoichiometry:
-    #"VO2 + (aq)": -1
-    #"H + (aq)": 1
-    #"VO2HIDO (ad)": 1
-
-#- rxn08:
-  #logK: -1.48
-  #mole_factor: 2.0
-  #- stoichiometry:
-    #"VO2 + (aq)": -1
-    #"H + (aq)": 2
-    #"H2O (l)": 2
-    #"V(IDO_H)2 - (ad)": 1
+- rxn05:
+  logK: 26.87
+  mole_factor: 2.0
+  - stoichiometry:
+    "VO4 3- (aq)": -1
+    "H + (aq)": -4
+    "H2O (l)": 4
+    "V(IDO)2 + (ad)": 1
 
 ...

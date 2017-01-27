@@ -3,14 +3,14 @@
 Scenario:
 ---
 - vars_fun:
-  numvar: 22
-  num_ssr: 15
+  numvar: 21
+  num_ssr: 14
   num_mbe: 6
 
 - sys_data:
-  act_fun: ideal    
+  act_fun: davies    
   const_pH: false	
-  temp: 293.15      
+  temp: 298.15      
 
 - run_time:
   steady: true         
@@ -35,27 +35,26 @@ MasterSpecies:
 ---
 - reg:
   0: VO2 + (aq)
-  1: H4VO4 + (aq)
-  2: H3VO4 (aq)
-  3: H2VO4 - (aq)
-  4: HVO4 2- (aq)
-  5: VO4 3- (aq)
-  6: HV2O7 3- (aq)
-  7: V2O7 4- (aq)
-  8: VO2SO4 - (aq)
-  9: VO2OHCO3 2- (aq)
-  10: VO2(CO3)2 3- (aq)
-  11: H2SO4 (aq)
-  12: HSO4 - (aq)
-  13: SO4 2- (aq)
-  14: H2CO3 (aq)
-  15: HCO3 - (aq)
-  16: CO3 2- (aq)
-  17: H2O (l)
-  18: H + (aq)
-  19: OH - (aq)
-  20: Na + (aq)
-  21: Cl - (aq)
+  1: H3VO4 (aq)
+  2: H2VO4 - (aq)
+  3: HVO4 2- (aq)
+  4: VO4 3- (aq)
+  5: HV2O7 3- (aq)
+  6: V2O7 4- (aq)
+  7: VO2SO4 - (aq)
+  8: VO2OHCO3 2- (aq)
+  9: VO2(CO3)2 3- (aq)
+  10: H2SO4 (aq)
+  11: HSO4 - (aq)
+  12: SO4 2- (aq)
+  13: H2CO3 (aq)
+  14: HCO3 - (aq)
+  15: CO3 2- (aq)
+  16: H2O (l)
+  17: H + (aq)
+  18: OH - (aq)
+  19: Na + (aq)
+  20: Cl - (aq)
 
 ...
 
@@ -97,7 +96,6 @@ MassBalance:
   total_conc: 5e-5
   - delta: 
     "VO2 + (aq)": 1
-    "H4VO4 + (aq)": 1 
     "H3VO4 (aq)": 1 
     "H2VO4 - (aq)": 1 
     "HVO4 2- (aq)": 1
@@ -118,12 +116,19 @@ EquilRxn:
     "OH - (aq)": 1
     "H + (aq)": 1
 
+#- rxn01:
+  #- stoichiometry:
+    #"VO2 + (aq)": -1
+    #"H2O (l)": -2
+    #"VO4 3- (aq)": 1
+    #"H + (aq)": 4
+
 - rxn01:
   - stoichiometry:
     "VO2 + (aq)": -1
     "H2O (l)": -2
-    "VO4 3- (aq)": 1
-    "H + (aq)": 4
+    "H3VO4 (aq)": 1
+    "H + (aq)": 1
 
 - rxn02:
   - stoichiometry:
@@ -134,66 +139,60 @@ EquilRxn:
 
 - rxn03:
   - stoichiometry:
-    "H4VO4 + (aq)": -1
-    "H + (aq)": 1
-    "H3VO4 (aq)": 1
-
-- rxn04:
-  - stoichiometry:
     "H3VO4 (aq)": -1
     "H + (aq)": 1
     "H2VO4 - (aq)": 1
 
-- rxn05:
+- rxn04:
   - stoichiometry:
     "H2VO4 - (aq)": -1
     "H + (aq)": 1
     "HVO4 2- (aq)": 1
 
-- rxn06:
+- rxn05:
   - stoichiometry:
     "HVO4 2- (aq)": -1
     "H + (aq)": 1
     "VO4 3- (aq)": 1
 
-- rxn07:
+- rxn06:
   - stoichiometry:
     "HV2O7 3- (aq)": -1
     "H + (aq)": 1
     "V2O7 4- (aq)": 1
 
-- rxn08:
+- rxn07:
   - stoichiometry:
     "H2SO4 (aq)": -1
     "H + (aq)": 1
     "HSO4 - (aq)": 1
 
-- rxn09:
+- rxn08:
   - stoichiometry:
     "HSO4 - (aq)": -1
     "H + (aq)": 1
     "SO4 2- (aq)": 1
 
-- rxn10:
+- rxn09:
   - stoichiometry:
     "VO2SO4 - (aq)": -1
     "H + (aq)": -1
     "VO2 + (aq)": 1
     "HSO4 - (aq)": 1
 
-- rxn11:
+- rxn10:
   - stoichiometry:
     "H2CO3 (aq)": -1
     "H + (aq)": 1
     "HCO3 - (aq)": 1
 
-- rxn12:
+- rxn11:
   - stoichiometry:
     "HCO3 - (aq)": -1
     "H + (aq)": 1
     "CO3 2- (aq)": 1
 
-- rxn13:
+- rxn12:
   - stoichiometry:
     "H2VO4 - (aq)": -1
     "H + (aq)": -1
@@ -201,7 +200,7 @@ EquilRxn:
     "H2O (l)": 1
     "VO2OHCO3 2- (aq)": 1
 
-- rxn14:
+- rxn13:
   - stoichiometry:
     "H2VO4 - (aq)": -1
     "H + (aq)": -2

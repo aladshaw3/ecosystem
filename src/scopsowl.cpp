@@ -1778,7 +1778,7 @@ int SCOPSOWL_TESTS()
 	dat.magpie_dat.sys_dat.PT = dat.total_pressure;			//kPa
 	//dat.gas_velocity = 0.36;
 	dat.gas_velocity = 1.833;					//cm/s
-	dat.sim_time = 2.0;						//hrs
+	dat.sim_time = 1.0;						//hrs
 	dat.t_print = 0.1;
 	dat.DirichletBC = false;					//-
 	dat.SurfDiff = false;						//-
@@ -1921,7 +1921,7 @@ int SCOPSOWL_TESTS()
 				dat.param_dat[i].ref_temperature = 0.0;			//K
 				dat.param_dat[i].affinity = 0.0;				//-
 				
-				dat.magpie_dat.mspd_dat[i].v = 12.32;			//cm^3/mol
+				dat.magpie_dat.mspd_dat[i].v = 18.8;			//cm^3/mol
 				dat.magpie_dat.gsta_dat[i].qmax = 1.062207984;		//mol/kg
 				dat.magpie_dat.gsta_dat[i].m = 1;				//-
 				dat.magpie_dat.gsta_dat[i].dHo.resize(dat.magpie_dat.gsta_dat[i].m);
@@ -1942,19 +1942,19 @@ int SCOPSOWL_TESTS()
 				dat.param_dat[i].affinity = 0.0;				//-
 			
 				dat.magpie_dat.mspd_dat[i].v = 13.91;			//cm^3/mol
-				dat.magpie_dat.gsta_dat[i].qmax = 3.34;		//mol/kg
+				dat.magpie_dat.gsta_dat[i].qmax = 4.71;		//mol/kg
 				dat.magpie_dat.gsta_dat[i].m = 3;				//-
 				dat.magpie_dat.gsta_dat[i].dHo.resize(dat.magpie_dat.gsta_dat[i].m);
 				dat.magpie_dat.gsta_dat[i].dSo.resize(dat.magpie_dat.gsta_dat[i].m);
 			 
-				dat.magpie_dat.gsta_dat[i].dHo[0] = -39183;	//J/mol
-				dat.magpie_dat.gsta_dat[i].dSo[0] = -21.787;	//J/K/mol
+				dat.magpie_dat.gsta_dat[i].dHo[0] = -43260.13434;	//J/mol
+				dat.magpie_dat.gsta_dat[i].dSo[0] = -38.88589704;	//J/K/mol
 				
-				dat.magpie_dat.gsta_dat[i].dHo[1] = -91175;	//J/mol
-				dat.magpie_dat.gsta_dat[i].dSo[1] = -108.684;	//J/K/mol
+				dat.magpie_dat.gsta_dat[i].dHo[1] = -110183.2213;	//J/mol
+				dat.magpie_dat.gsta_dat[i].dSo[1] = -179.30964;	//J/K/mol
 				
-				dat.magpie_dat.gsta_dat[i].dHo[2] = -140640;	//J/mol
-				dat.magpie_dat.gsta_dat[i].dSo[2] = -195.408;	//J/K/mol
+				dat.magpie_dat.gsta_dat[i].dHo[2] = -125398.6827;	//J/mol
+				dat.magpie_dat.gsta_dat[i].dSo[2] = -180.2574885;	//J/K/mol
 			}
 		}
 		
@@ -1981,8 +1981,8 @@ int SCOPSOWL_TESTS()
 	if (success != 0) {mError(simulation_fail); return -1;}
 		
 	//Call Routine
-	//success = SCOPSOWL(&dat);
-	success = LARGE_CYCLE_TEST(&dat);
+	success = SCOPSOWL(&dat);
+	//success = LARGE_CYCLE_TEST(&dat);
 	if (success != 0) {mError(simulation_fail); return -1;}
 		
 	//END execution

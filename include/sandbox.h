@@ -138,6 +138,14 @@ typedef struct
 
 int Eval_2D_VPA_TEST_Residuals(const Matrix<double> &x, Matrix<double> &F, const void *data);
 
+typedef struct
+{
+	Matrix<double> M;
+	
+} QR_EX1;
+
+int ex1_mult(const Matrix<double>& x, Matrix<double> &Ax, const void *data);
+
 /// \endcond
 
 /// Function to run the methods implemented in the Sandbox

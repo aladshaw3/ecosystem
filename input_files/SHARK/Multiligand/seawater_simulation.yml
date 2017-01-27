@@ -13,6 +13,7 @@ Scenario:
   res_alk: 0.0
   temp: 293.15       
   dielec: 78.325 
+  volume: 75.0
 
 - run_time:
   steady: true         
@@ -24,8 +25,8 @@ SolverOptions:
 ---
 line_search: true     
 search_type: standard
-linear_solve: fom 
-nl_maxit: 1000     
+linear_solve: qr 
+nl_maxit: 100     
 
 ...
 

@@ -1046,11 +1046,11 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "HV2O5 - (aq)")
 		{
-			this->Register(-1, 0.0, 0.0, -1508960.0, true, true, "Aqueous", "Vanadium(IV)-oxide-Acid", formula, "HV2O5");
+			this->Register(-1, 0.0, 0.0, -1508960.0, false, true, "Aqueous", "Vanadium(IV)-oxide-Acid", formula, "HV2O5");
 		}
 		else if (formula == "H4VO4 + (aq)")
 		{
-			this->Register(1, 0.0, 0.0, -1025000.0, false, true, "Aqueous", "Vanadium(V)-oxide-Acid", formula, "H4VO4"); //Correct
+			this->Register(1, 0.0, 0.0, -1030000.0, false, true, "Aqueous", "Vanadium(V)-oxide-Acid", formula, "H4VO4"); //Correct
 		}
 		else if (formula == "H3VO4 (aq)")
 		{

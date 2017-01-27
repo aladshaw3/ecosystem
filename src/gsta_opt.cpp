@@ -560,7 +560,6 @@ int gsta_optimize(const char* fileName)
 
     			//Stops the loop after fit stops improving or if the increase in norms is greater than 2.5% if qmax is known
     					//and 10% if qmax is unknown
-				
     			if((k!=0 && dat.qmax!=0 && (status.fnorm - dat.norms[dat.iso].at((k-1))) >
     					(dat.norms[dat.iso].at((k-1)) * 0.025))
     						|| (k!=0 && dat.qmax==0 && (status.fnorm - dat.norms[dat.iso].at((k-1))) >
