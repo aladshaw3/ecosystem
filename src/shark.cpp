@@ -2620,7 +2620,8 @@ void UnsteadyAdsorption::setIonicStrength(const Matrix<double> &x)
 //Call the activity model passing the logx concentrations of species
 int UnsteadyAdsorption::callSurfaceActivity(const Matrix<double> &x)
 {
-	return this->AdsorptionReaction::callSurfaceActivity(x);
+	int success = this->surface_activity(x,this->activities,this->activity_data);
+	return success;
 }
 
 //Calculation of the active fraction of the surface area
@@ -2636,7 +2637,7 @@ double UnsteadyAdsorption::calculateActiveFraction(const Matrix<double> &x)
 		}
 		if (sum > this->specific_area)
 			sum = this->specific_area;
-		phi = 1.0 - (sum / (this->specific_area + 0.01));
+		phi = 1.0 - (sum / this->specific_area);
 		if (phi < DBL_MIN)
 			phi = DBL_MIN;
 	}
@@ -2648,7 +2649,7 @@ double UnsteadyAdsorption::calculateActiveFraction(const Matrix<double> &x)
 		}
 		if (sum > this->specific_molality)
 			sum = this->specific_molality;
-		phi = 1.0 - (sum / (this->specific_molality + 0.01));
+		phi = 1.0 - (sum / this->specific_molality);
 		if (phi < DBL_MIN)
 			phi = DBL_MIN;
 	}
@@ -2768,7 +2769,7 @@ double UnsteadyAdsorption::Eval_ReactionRate(const Matrix<double> &x, const Matr
 	double reactants = 0.0, products = 0.0;
 	bool first_prod = true, first_reac = true;
 	
-	this->getReaction(n).Set_Equilibrium( this->getReaction(n).Get_Equilibrium() + ((this->calculateEquilibriumCorrection(this->getChargeDensity(), T, this->getIonicStrength(), rel_perm, n)/*/gama(this->getAdsorbIndex(n),0)*/)/log(10.0)) );
+	this->getReaction(n).Set_Equilibrium( this->getReaction(n).Get_Equilibrium() + ((this->calculateEquilibriumCorrection(this->getChargeDensity(), T, this->getIonicStrength(), rel_perm, n))/log(10.0)) );
 
 	if (this->getReaction(n).haveForwardRef() == true)
 	{
@@ -8324,7 +8325,7 @@ int shark_solver(SHARK_DATA *shark_dat)
 	if (shark_dat->steadystate == false && shark_dat->num_usr > 0)
 	{
 		if (shark_dat->Console_Output == true)
-			std::cout << "Explicit Approximation to Unsteady Variables...\n-----------------------------------------------\n";
+			std::cout << "Explicit Approximation to Unsteady Aqueous Species...\n-----------------------------------------------\n";
 		for (int i=0; i<shark_dat->num_usr; i++)
 		{
 			shark_dat->Conc_new.edit(shark_dat->UnsteadyList[i].Get_Species_Index(), 0, shark_dat->UnsteadyList[i].Explicit_Eval(shark_dat->X_old, shark_dat->activity_old));
@@ -8332,6 +8333,27 @@ int shark_solver(SHARK_DATA *shark_dat)
 			if (shark_dat->Console_Output == true)
 			{
 				std::cout << "[ " << shark_dat->MasterList.get_species(shark_dat->UnsteadyList[i].Get_Species_Index()).MolecularFormula() << " ] =\t" << shark_dat->Conc_new(shark_dat->UnsteadyList[i].Get_Species_Index(),0) << std::endl;
+			}
+		}
+		if (shark_dat->Console_Output == true)
+			std::cout << "\n";
+		success = Convert2LogConcentration(shark_dat->Conc_new, shark_dat->X_new);
+		if (success != 0) {mError(simulation_fail); return -1;}
+	}
+	if (shark_dat->steadystate == false && shark_dat->num_usao > 0)
+	{
+		if (shark_dat->Console_Output == true)
+			std::cout << "Explicit Approximation to Unsteady Adsorbed Species...\n-----------------------------------------------\n";
+		for (int i=0; i<shark_dat->num_usao; i++)
+		{
+			for (int j=0; j<shark_dat->UnsteadyAdsList[i].getNumberRxns(); j++)
+			{
+				shark_dat->Conc_new.edit(shark_dat->UnsteadyAdsList[i].getAdsorbIndex(j),0, shark_dat->UnsteadyAdsList[i].Explicit_Eval(shark_dat->X_old, shark_dat->activity_old, shark_dat->temperature, shark_dat->relative_permittivity, j));
+				
+				if (shark_dat->Console_Output == true)
+				{
+					std::cout << "[ " << shark_dat->MasterList.get_species(shark_dat->UnsteadyAdsList[i].getAdsorbIndex(j)).MolecularFormula() << " ] =\t" << shark_dat->Conc_new(shark_dat->UnsteadyAdsList[i].getAdsorbIndex(j),0) << std::endl;
+				}
 			}
 		}
 		if (shark_dat->Console_Output == true)
@@ -8464,6 +8486,7 @@ int shark_solver(SHARK_DATA *shark_dat)
 			else
 			{
 				std::cout << "Time step cannot be reduced further!";
+				shark_dat->LocalMin = false;
 			}
 			
 			if (shark_dat->LocalMin == false)
@@ -8620,9 +8643,9 @@ int shark_reset(SHARK_DATA *shark_dat)
 	shark_dat->time_old = shark_dat->time;
 
 	for (int i=0; i<shark_dat->UnsteadyAdsList.size(); i++)
-		{
-				shark_dat->UnsteadyAdsList[i].updateActivities();
-		}
+	{
+			shark_dat->UnsteadyAdsList[i].updateActivities();
+	}
 
 	return success;
 }
@@ -8981,12 +9004,12 @@ int SHARK_TESTS()
 	shark_dat.num_usr = 0;
 	shark_dat.num_other = 0;
 	shark_dat.act_fun = DAVIES;
-	shark_dat.steadystate = true;
+	shark_dat.steadystate = false;
 	shark_dat.simulationtime = 96.0;
 	shark_dat.dt = 0.1;
 	shark_dat.t_out = shark_dat.simulationtime / 1000.0;
 	shark_dat.const_pH = false;
-	shark_dat.SpeciationCurve = true;
+	shark_dat.SpeciationCurve = false;
 	shark_dat.TimeAdaptivity = true;
 	shark_dat.pH = 7.80;
 	shark_dat.dielectric_const = 78.325;
@@ -9015,8 +9038,8 @@ int SHARK_TESTS()
 	HCl = 0.0;
 	NaCl = 0.43;	  // 25.155 g/L
 	NaHCO3 = 0.00233; // 140 ppm
-	UO2 = 1.386E-8;   // ~3.3 ppb
-	//UO2 = 2.521E-5;		// ~6 ppm
+	//UO2 = 1.386E-8;   // ~3.3 ppb
+	UO2 = 2.521E-5;		// ~6 ppm
 	ads_area = 45000.0; // m^2/kg
 	ads_mol = 1.471;     // mol/kg
 	ads_mass = 1.5E-5;  // kg
@@ -9027,8 +9050,8 @@ int SHARK_TESTS()
 	//logK_UO2CO3 = 0.45;				// area basis - simulated seawater
 	//logK_UO2 = -6.35;					// area basis - simulated seawater
 	
-	logK_UO2CO3 = 4.75;				// molar basis - simulated seawater
-	logK_UO2 = -2.75;					// molar basis - simulated seawater
+	logK_UO2CO3 = 300.0;				// molar basis - simulated seawater
+	logK_UO2 = 300.0;					// molar basis - simulated seawater
 
 
 	shark_dat.dt = 0.001;			 //hours
@@ -9039,12 +9062,13 @@ int SHARK_TESTS()
 	success = setup_SHARK_DATA(TestOutput,NULL, NULL, NULL, &shark_dat, NULL, NULL, NULL, NULL);
 	if (success != 0) {mError(simulation_fail); return -1;}
 
-	//shark_dat.Newton_data.linear_solver = GMRESRP;
+	shark_dat.Newton_data.linear_solver = QR;
 	//shark_dat.Newton_data.Bounce = false;
-	//shark_dat.Newton_data.LineSearch = true;
-	//shark_dat.Newton_data.nl_maxit = 100;
+	shark_dat.Newton_data.LineSearch = true;
+	shark_dat.Newton_data.nl_maxit = 100;
 	//shark_dat.Newton_data.gmresrp_dat.restart = 50;
 	//shark_dat.Newton_data.L_Output = true;
+	shark_dat.Newton_data.NL_Output = true;
 	//shark_dat.Newton_data.backtrack_dat.lambdaMin = DBL_EPSILON;
 	//shark_dat.Newton_data.nl_tol_abs = 1e-10;
 	//shark_dat.Newton_data.nl_tol_rel = 1e-10;
@@ -9627,110 +9651,20 @@ int SHARK_TESTS()
 	shark_dat.MassBalanceList[5].Set_Delta(21, 1);
 	shark_dat.MassBalanceList[5].Set_Delta(22, 0);
 	shark_dat.MassBalanceList[5].Set_Delta(23, 0);
-/*
-	shark_dat.AdsorptionList[0].setSpecificArea(ads_area);
-	shark_dat.AdsorptionList[0].setSpecificMolality(ads_mol);
-	shark_dat.AdsorptionList[0].setTotalMass(ads_mass);
-	shark_dat.AdsorptionList[0].setSurfaceCharge(0.0);
-	shark_dat.AdsorptionList[0].setAdsorbentName("A(OH)2");
-	shark_dat.AdsorptionList[0].setActivityModelInfo(FloryHuggins, &shark_dat.AdsorptionList[0]);
-	shark_dat.AdsorptionList[0].setBasis("area");
-	//shark_dat.AdsorptionList[0].setBasis("molar");
-
-	shark_dat.AdsorptionList[0].setMolarFactor(0, 1.0);
-	shark_dat.AdsorptionList[0].getReaction(0).Set_Equilibrium(logK_UO2);
-	shark_dat.AdsorptionList[0].getReaction(0).Set_Stoichiometric(0, 0);
-	shark_dat.AdsorptionList[0].getReaction(0).Set_Stoichiometric(1, 0);
-	shark_dat.AdsorptionList[0].getReaction(0).Set_Stoichiometric(2, 0);
-	shark_dat.AdsorptionList[0].getReaction(0).Set_Stoichiometric(3, 0);
-	shark_dat.AdsorptionList[0].getReaction(0).Set_Stoichiometric(4, 0);
-	shark_dat.AdsorptionList[0].getReaction(0).Set_Stoichiometric(5, 0);
-	shark_dat.AdsorptionList[0].getReaction(0).Set_Stoichiometric(6, 0);
-	shark_dat.AdsorptionList[0].getReaction(0).Set_Stoichiometric(7, 0);
-	shark_dat.AdsorptionList[0].getReaction(0).Set_Stoichiometric(8, -1);
-	shark_dat.AdsorptionList[0].getReaction(0).Set_Stoichiometric(9, 0);
-	shark_dat.AdsorptionList[0].getReaction(0).Set_Stoichiometric(10, 0);
-	shark_dat.AdsorptionList[0].getReaction(0).Set_Stoichiometric(11, 0);
-	shark_dat.AdsorptionList[0].getReaction(0).Set_Stoichiometric(12, 0);
-	shark_dat.AdsorptionList[0].getReaction(0).Set_Stoichiometric(13, 0);
-	shark_dat.AdsorptionList[0].getReaction(0).Set_Stoichiometric(14, 0);
-	shark_dat.AdsorptionList[0].getReaction(0).Set_Stoichiometric(15, 0);
-	shark_dat.AdsorptionList[0].getReaction(0).Set_Stoichiometric(16, 0);
-	shark_dat.AdsorptionList[0].getReaction(0).Set_Stoichiometric(17, 0);
-	shark_dat.AdsorptionList[0].getReaction(0).Set_Stoichiometric(18, 0);
-	shark_dat.AdsorptionList[0].getReaction(0).Set_Stoichiometric(19, 0);
-	shark_dat.AdsorptionList[0].getReaction(0).Set_Stoichiometric(20, 2);
-	shark_dat.AdsorptionList[0].getReaction(0).Set_Stoichiometric(21, 0);
-	shark_dat.AdsorptionList[0].getReaction(0).Set_Stoichiometric(22, 1);
-	shark_dat.AdsorptionList[0].getReaction(0).Set_Stoichiometric(23, 0);
-
-	shark_dat.AdsorptionList[0].setMolarFactor(1, 1.0);
-	shark_dat.AdsorptionList[0].getReaction(1).Set_Equilibrium(logK_UO2CO3);
-	shark_dat.AdsorptionList[0].getReaction(1).Set_Stoichiometric(0, 0);
-	shark_dat.AdsorptionList[0].getReaction(1).Set_Stoichiometric(1, 0);
-	shark_dat.AdsorptionList[0].getReaction(1).Set_Stoichiometric(2, 0);
-	shark_dat.AdsorptionList[0].getReaction(1).Set_Stoichiometric(3, 0);
-	shark_dat.AdsorptionList[0].getReaction(1).Set_Stoichiometric(4, 0);
-	shark_dat.AdsorptionList[0].getReaction(1).Set_Stoichiometric(5, 0);
-	shark_dat.AdsorptionList[0].getReaction(1).Set_Stoichiometric(6, 0);
-	shark_dat.AdsorptionList[0].getReaction(1).Set_Stoichiometric(7, -1);
-	shark_dat.AdsorptionList[0].getReaction(1).Set_Stoichiometric(8, -1);
-	shark_dat.AdsorptionList[0].getReaction(1).Set_Stoichiometric(9, 0);
-	shark_dat.AdsorptionList[0].getReaction(1).Set_Stoichiometric(10, 0);
-	shark_dat.AdsorptionList[0].getReaction(1).Set_Stoichiometric(11, 0);
-	shark_dat.AdsorptionList[0].getReaction(1).Set_Stoichiometric(12, 0);
-	shark_dat.AdsorptionList[0].getReaction(1).Set_Stoichiometric(13, 0);
-	shark_dat.AdsorptionList[0].getReaction(1).Set_Stoichiometric(14, 0);
-	shark_dat.AdsorptionList[0].getReaction(1).Set_Stoichiometric(15, 0);
-	shark_dat.AdsorptionList[0].getReaction(1).Set_Stoichiometric(16, 0);
-	shark_dat.AdsorptionList[0].getReaction(1).Set_Stoichiometric(17, 0);
-	shark_dat.AdsorptionList[0].getReaction(1).Set_Stoichiometric(18, 0);
-	shark_dat.AdsorptionList[0].getReaction(1).Set_Stoichiometric(19, 0);
-	shark_dat.AdsorptionList[0].getReaction(1).Set_Stoichiometric(20, 2);
-	shark_dat.AdsorptionList[0].getReaction(1).Set_Stoichiometric(21, 0);
-	shark_dat.AdsorptionList[0].getReaction(1).Set_Stoichiometric(22, 0);
-	shark_dat.AdsorptionList[0].getReaction(1).Set_Stoichiometric(23, 1);
-
-	/*
-	shark_dat.AdsorptionList[0].setVolumeFactor(0, 0);
-	shark_dat.AdsorptionList[0].setVolumeFactor(1, 0);
-	shark_dat.AdsorptionList[0].setVolumeFactor(2, 0);
-	shark_dat.AdsorptionList[0].setVolumeFactor(3, 0);
-	shark_dat.AdsorptionList[0].setVolumeFactor(4, 0);
-	shark_dat.AdsorptionList[0].setVolumeFactor(5, 0);
-	shark_dat.AdsorptionList[0].setVolumeFactor(6, 0);
-	shark_dat.AdsorptionList[0].setVolumeFactor(7, 0);
-	shark_dat.AdsorptionList[0].setVolumeFactor(8, 0);
-	shark_dat.AdsorptionList[0].setVolumeFactor(9, 0);
-	shark_dat.AdsorptionList[0].setVolumeFactor(10, 0);
-	shark_dat.AdsorptionList[0].setVolumeFactor(11, 0);
-	shark_dat.AdsorptionList[0].setVolumeFactor(12, 0);
-	shark_dat.AdsorptionList[0].setVolumeFactor(13, 0);
-	shark_dat.AdsorptionList[0].setVolumeFactor(14, 0);
-	shark_dat.AdsorptionList[0].setVolumeFactor(15, 0);
-	shark_dat.AdsorptionList[0].setVolumeFactor(16, 0);
-	shark_dat.AdsorptionList[0].setVolumeFactor(17, 0);
-	shark_dat.AdsorptionList[0].setVolumeFactor(18, 0);
-	shark_dat.AdsorptionList[0].setVolumeFactor(19, 0);
-	shark_dat.AdsorptionList[0].setVolumeFactor(20, 0);
-	shark_dat.AdsorptionList[0].setVolumeFactor(21, 0);
-	 */
-	// Only need to give volume factors for adsorbed species
-	shark_dat.AdsorptionList[0].setVolumeFactor(22, 5.0); //MADE UP NUMBER - given to the adsorbed species
-	shark_dat.AdsorptionList[0].setVolumeFactor(23, 8.0); //MADE UP NUMBER - given to the adsorbed species
 
 	shark_dat.UnsteadyAdsList[0].setSpecificArea(ads_area);
 	shark_dat.UnsteadyAdsList[0].setSpecificMolality(ads_mol);
 	shark_dat.UnsteadyAdsList[0].setTotalMass(ads_mass);
 	shark_dat.UnsteadyAdsList[0].setSurfaceCharge(0.0);
 	shark_dat.UnsteadyAdsList[0].setAdsorbentName("A(OH)2");
-	shark_dat.UnsteadyAdsList[0].setActivityModelInfo(FloryHuggins, &shark_dat.AdsorptionList[0]);
-	shark_dat.UnsteadyAdsList[0].setBasis("area");
+	shark_dat.UnsteadyAdsList[0].setActivityModelInfo(FloryHuggins_unsteady, &shark_dat.UnsteadyAdsList[0]);
 	shark_dat.UnsteadyAdsList[0].setBasis("molar");
 
 
 	shark_dat.UnsteadyAdsList[0].setMolarFactor(0, 1.0);
 	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Equilibrium(logK_UO2);
+	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Forward(1e9);
+	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_InitialValue(0.0);
 	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(0, 0);
 	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(1, 0);
 	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(2, 0);
@@ -9759,6 +9693,8 @@ int SHARK_TESTS()
 
 	shark_dat.UnsteadyAdsList[0].setMolarFactor(1, 1.0);
 	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Equilibrium(logK_UO2CO3);
+	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Forward(1e9);
+	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_InitialValue(0.0);
 	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(0, 0);
 	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(1, 0);
 	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(2, 0);
@@ -9784,30 +9720,6 @@ int SHARK_TESTS()
 	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(22, 0);
 	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(23, 1);
 
-/*
-	shark_dat.UnsteadyAdsList[0].setVolumeFactor(0, 0);
-	shark_dat.UnsteadyAdsList[0].setVolumeFactor(1, 0);
-	shark_dat.UnsteadyAdsList[0].setVolumeFactor(2, 0);
-	shark_dat.UnsteadyAdsList[0].setVolumeFactor(3, 0);
-	shark_dat.UnsteadyAdsList[0].setVolumeFactor(4, 0);
-	shark_dat.UnsteadyAdsList[0].setVolumeFactor(5, 0);
-	shark_dat.UnsteadyAdsList[0].setVolumeFactor(6, 0);
-	shark_dat.UnsteadyAdsList[0].setVolumeFactor(7, 0);
-	shark_dat.UnsteadyAdsList[0].setVolumeFactor(8, 0);
-	shark_dat.UnsteadyAdsList[0].setVolumeFactor(9, 0);
-	shark_dat.UnsteadyAdsList[0].setVolumeFactor(10, 0);
-	shark_dat.UnsteadyAdsList[0].setVolumeFactor(11, 0);
-	shark_dat.UnsteadyAdsList[0].setVolumeFactor(12, 0);
-	shark_dat.UnsteadyAdsList[0].setVolumeFactor(13, 0);
-	shark_dat.UnsteadyAdsList[0].setVolumeFactor(14, 0);
-	shark_dat.UnsteadyAdsList[0].setVolumeFactor(15, 0);
-	shark_dat.UnsteadyAdsList[0].setVolumeFactor(16, 0);
-	shark_dat.UnsteadyAdsList[0].setVolumeFactor(17, 0);
-	shark_dat.UnsteadyAdsList[0].setVolumeFactor(18, 0);
-	shark_dat.UnsteadyAdsList[0].setVolumeFactor(19, 0);
-	shark_dat.UnsteadyAdsList[0].setVolumeFactor(20, 0);
-	shark_dat.UnsteadyAdsList[0].setVolumeFactor(21, 0);
-*/
 	// Only need to give volume factors for adsorbed species
 	shark_dat.UnsteadyAdsList[0].setVolumeFactor(22, 5.0); //MADE UP NUMBER - given to the adsorbed species
 	shark_dat.UnsteadyAdsList[0].setVolumeFactor(23, 8.0); //MADE UP NUMBER - given to the adsorbed species
@@ -9817,29 +9729,6 @@ int SHARK_TESTS()
 	//Call the SHARK routine
 	success = SHARK(&shark_dat);
 	if (success != 0) {mError(simulation_fail); return -1;}
-
-	//Test of Langmuir - No Longer always a valid test
-	/*
-	std::cout << "Langmuir Test 1 = \t" << shark_dat.AdsorptionList[0].calculateLangmuirAdsorption(shark_dat.X_new, shark_dat.activity_new, 0) << std::endl;
-	std::cout << "Newton Test 1 = \t" << pow(10.0, shark_dat.X_new(22,0)) << std::endl;
-	std::cout << "qmax 1 = \t" << shark_dat.AdsorptionList[0].calculateLangmuirMaxCapacity(0) << std::endl;
-	std::cout << "K 1 = \t" << shark_dat.AdsorptionList[0].calculateLangmuirEquParam(shark_dat.X_new, shark_dat.activity_new, 0) << std::endl;
-	std::cout << "act 1 = \t" << shark_dat.AdsorptionList[0].getActivity(22) << std::endl;
-	std::cout << "area_factor 1 = " << shark_dat.AdsorptionList[0].getAreaFactor(22) << std::endl;
-
-	std::cout << std::endl;
-
-	std::cout << "Langmuir Test 2 = \t" << shark_dat.AdsorptionList[0].calculateLangmuirAdsorption(shark_dat.X_new, shark_dat.activity_new, 1) << std::endl;
-	std::cout << "Newton Test 2 = \t" << pow(10.0, shark_dat.X_new(23,0)) << std::endl;
-	std::cout << "qmax 2 = \t" << shark_dat.AdsorptionList[0].calculateLangmuirMaxCapacity(1) << std::endl;
-	std::cout << "K 2 = \t" << shark_dat.AdsorptionList[0].calculateLangmuirEquParam(shark_dat.X_new, shark_dat.activity_new, 1) << std::endl;
-	std::cout << "act 2 = \t" << shark_dat.AdsorptionList[0].getActivity(23) << std::endl;
-	std::cout << "area_factor 2 = " << shark_dat.AdsorptionList[0].getAreaFactor(23) << std::endl;
-	
-	std::cout << std::endl;
-	
-	std::cout << "Surface Charge Density (C/m^2) = " << shark_dat.AdsorptionList[0].getChargeDensity() << std::endl;
-	 */
 
 	//Close files and display end messages
 	fclose(TestOutput);

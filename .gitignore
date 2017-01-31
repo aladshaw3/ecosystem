@@ -9,6 +9,7 @@ doc/doxygen/latex
 eco0
 *.a
 *.so
+dbg/eco0-dbg
 =======
 
 
