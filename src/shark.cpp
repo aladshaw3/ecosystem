@@ -8580,6 +8580,12 @@ int shark_solver(SHARK_DATA *shark_dat)
 				}
 				std::cout << "\tlogK(" << j << ") =\t" << logK << std::endl;
 			}
+			std::cout << "\ngama values for " << shark_dat->AdsorptionList[i].getAdsorbentName() << "...\n";
+			for (int j=0; j<shark_dat->AdsorptionList[i].getNumberRxns(); j++)
+			{
+				double gama = shark_dat->AdsorptionList[i].getActivity(shark_dat->AdsorptionList[i].getAdsorbIndex(j));
+				std::cout << "\tgama(" << j << ") =\t" << gama << std::endl;
+			}
 			std::cout << std::endl;
 		}
 		
@@ -8600,6 +8606,12 @@ int shark_solver(SHARK_DATA *shark_dat)
 					logK = logK + ((shark_dat->UnsteadyAdsList[i].calculateEquilibriumCorrection(shark_dat->UnsteadyAdsList[i].getChargeDensity(), shark_dat->temperature, shark_dat->UnsteadyAdsList[i].getIonicStrength(), shark_dat->relative_permittivity, j))/log(10.0));
 				}
 				std::cout << "\tlogK(" << j << ") =\t" << logK << std::endl;
+			}
+			std::cout << "\ngama values for " << shark_dat->UnsteadyAdsList[i].getAdsorbentName() << "...\n";
+			for (int j=0; j<shark_dat->UnsteadyAdsList[i].getNumberRxns(); j++)
+			{
+				double gama = shark_dat->UnsteadyAdsList[i].getActivity(shark_dat->UnsteadyAdsList[i].getAdsorbIndex(j));
+				std::cout << "\tgama(" << j << ") =\t" << gama << std::endl;
 			}
 			std::cout << std::endl;
 		}
@@ -8628,6 +8640,13 @@ int shark_solver(SHARK_DATA *shark_dat)
 					}
 					std::cout << "\tlogK(" << n << ") =\t" << logK << std::endl;
 				}
+				std::cout << "\ngama values for this ligand...\n";
+				for (int n=0; n<shark_dat->MultiAdsList[i].getAdsorptionObject(j).getNumberRxns(); n++)
+				{
+					double gama = shark_dat->MultiAdsList[i].getAdsorptionObject(j).getActivity(shark_dat->MultiAdsList[i].getAdsorptionObject(j).getAdsorbIndex(n));
+					std::cout << "\tgama(" << n << ") =\t" << gama << std::endl;
+				}
+				std::cout << std::endl;
 			}
 		}
 		
