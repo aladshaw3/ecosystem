@@ -56,7 +56,10 @@ MasterSpecies:
   6: H2CO3 (aq)
   7: HCO3 - (aq)
   8: CO3 2- (aq)
-  9: 
+  9: PbNO3 + (aq)
+  10: PbOH + (aq)
+  11: PbHCO3 + (aq)
+  12: PbCO3 (aq)
 
 
 # Keys for the sub-headers must follow same rules as keys from above
@@ -103,15 +106,10 @@ MassBalance:
   - delta:
     "PbAC (s)": 1
     "Pb 2+ (aq)": 1
-    "UO2NO3 + (aq)": 1
-    "UO2(NO3)2 (aq)": 1
-    "UO2OH + (aq)": 1
-    "UO2(OH)3 - (aq)": 1
-    "(UO2)2(OH)2 2+ (aq)": 2
-    "(UO2)3(OH)5 + (aq)": 3
-    "UO2CO3 (aq)": 1
-    "UO2(CO3)2 2- (aq)": 1
-    "UO2(CO3)3 4- (aq)": 1
+    "PbNO3 + (aq)": 1
+    "PbOH + (aq)": 1
+    "PbHCO3 + (aq)": 1
+    "PbCO3 (aq)": 1
 
 ...
 
