@@ -83,27 +83,29 @@ MassBalance:
 ---
 # Header names under MassBalance are choosen by the user
 # All other keys will be checked
+
+#Pb 2000ppm (2000mg/L)
 - water:
   total_conc: 1
   - delta: 
     "H2O (l)": 1
 
 - carbonate:
-  total_conc: 0.002295082
+  total_conc: 2.941E-04
   - delta:  
     "H2CO3 (aq)": 1 
     "HCO3 - (aq)": 1
     "CO3 2- (aq)": 1
 
 - nitrate:
-  total_conc: 6.50336E-05
+  total_conc: 0.2873
   - delta:
     "HNO3 (aq)": 1
     "NO3 - (aq)": 1
     "PbNO3 + (aq)": 1
 
 - lead:
-  total_conc: 3.25168E-05
+  total_conc: 9.711E-03
   - delta:
     "PbAC (s)": 1
     "Pb 2+ (aq)": 1
@@ -155,39 +157,32 @@ EquilRxn:
     "H + (aq)": 1
 
 - rxn07:
-  logK: ?
+  logK: 1.17
   - stoichiometry:
     "NO3 - (aq)": -1
     "Pb 2+ (aq)": -1
     "PbNO3 + (aq)": 1
 
 - rxn08:
-  logK: ?
-  - stoichiometry:
-    "Pb(NO3)2 (s)": -1
-    "Pb 2+": 1
-    "NO3 - (aq)": 2
-
-- rxn09:
-  logK: ?
+  logK: 7.24
   - stoichiometry:
     "Pb 2+ (aq)": -1
     "CO3 2- (aq)": -1
     "PbCO3 (aq)": 1
 
-- rxn10:
-  logK: ?
+- rxn09:
+  logK: 2.9
   - stoichiometry:
     "Pb 2+ (aq)": -1
-    "H+ (aq)": -1
-    "CO3 2- (aq)": -1
+    "HCO3 - (aq)": -1
     "PbHCO3 + (aq)": 1
 
-- rxn11:
-  logK: ?
+- rxn10:
+  logK: -7.71
   - stoichiometry:
     "Pb 2+ (aq)": -1
-    "OH - (aq)": -1
+    "H2O - (aq)": -1
+    "H + (aq)": 1
     "PbOH + (aq)": 1
 
 ...
@@ -197,8 +192,8 @@ EquilRxn:
 "AC (s)":
 ---
 basis: area
-spec_area: 45000.0     #Units: m^2/kg
-total_mass: 1.51095e-5     #Units: kg
+spec_area: 1    #Units: m^2/kg
+total_mass: 0.0005     #Units: kg
 surf_charge: 0.0
 surf_activity: ideal
 
