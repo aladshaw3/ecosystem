@@ -9237,8 +9237,8 @@ int SHARK_TESTS()
 	//logK_UO2CO3 = -0.92;				// molar basis - slava
 	//logK_UO2 = -2.72;					// molar basis - slava
 	
-	logK_UO2CO3 = 312.0;				// molar basis
-	logK_UO2 = 305.0;					// molar basis
+	logK_UO2CO3 = 3.0;				// molar basis
+	logK_UO2 = 3.0;					// molar basis
 
 
 	shark_dat.dt = 0.001;			 //hours
@@ -9840,8 +9840,8 @@ int SHARK_TESTS()
 	shark_dat.AdsorptionList[0].setTotalMass(ads_mass);
 	shark_dat.AdsorptionList[0].setSurfaceCharge(0.0);
 	shark_dat.AdsorptionList[0].setAdsorbentName("HAO");
-	shark_dat.AdsorptionList[0].setActivityModelInfo(UNIQUAC, &shark_dat.AdsorptionList[0]);
-	shark_dat.AdsorptionList[0].setActivityEnum(UNIQUAC_ACT);
+	shark_dat.AdsorptionList[0].setActivityModelInfo(ideal_solution, &shark_dat.AdsorptionList[0]);
+	shark_dat.AdsorptionList[0].setActivityEnum(IDEAL_ADS);
 	shark_dat.AdsorptionList[0].setBasis("molar");
 	
 	shark_dat.AdsorptionList[0].setMolarFactor(0, 2.0);
