@@ -5,7 +5,7 @@ Scenario:
 - vars_fun:
   numvar: 24
   num_ssr: 15
-  num_mbe: 6
+  num_mbe: 4
   num_ssao: 1
 
 - ss_ads_objs:
@@ -18,7 +18,7 @@ Scenario:
   const_pH: false	
   temp: 293.15       #Units must be in Kelvin 
   dielec: 78.325     #Units must be in (1/Kelvin)
-  volume: 0.75        #Units: L
+  volume: 0.5        #Units: L
 
 - run_time:
   steady: true        
@@ -100,6 +100,7 @@ MassBalance:
   - delta:
     "HNO3 (aq)": 1
     "NO3 - (aq)": 1
+    "PbNO3 + (aq)": 1
 
 - lead:
   total_conc: 3.25168E-05
@@ -154,70 +155,46 @@ EquilRxn:
     "H + (aq)": 1
 
 - rxn07:
-  logK: -12.15
+  logK: ?
   - stoichiometry:
-    "NO3 - (aq)": -2
-    "UO2 2+ (aq)": -1
-    "UO2(NO3)2 (aq)": 1
+    "NO3 - (aq)": -1
+    "Pb 2+ (aq)": -1
+    "PbNO3 + (aq)": 1
 
 - rxn08:
-  logK: -6.2
+  logK: ?
   - stoichiometry:
-    "UO2 2+ (aq)": -1
-    "H2O (l)": -1
-    "UO2OH + (aq)": 1
-    "H + (aq)": 1
+    "Pb(NO3)2 (s)": -1
+    "Pb 2+": 1
+    "NO3 - (aq)": 2
 
 - rxn09:
-  logK: -20.2
+  logK: ?
   - stoichiometry:
-    "UO2 2+ (aq)": -1
-    "H2O (l)": -3
-    "UO2(OH)3 - (aq)": 1
-    "H + (aq)": 3
+    "Pb 2+ (aq)": -1
+    "CO3 2- (aq)": -1
+    "PbCO3 (aq)": 1
 
 - rxn10:
-  logK: -5.87
+  logK: ?
   - stoichiometry:
-    "UO2 2+ (aq)": -2
-    "H2O (l)": -2
-    "(UO2)2(OH)2 2+ (aq)": 1
-    "H + (aq)": 2
+    "Pb 2+ (aq)": -1
+    "H+ (aq)": -1
+    "CO3 2- (aq)": -1
+    "PbHCO3 + (aq)": 1
 
 - rxn11:
-  logK: -16.5
+  logK: ?
   - stoichiometry:
-    "UO2 2+ (aq)": -3
-    "H2O (l)": -5
-    "(UO2)3(OH)5 + (aq)": 1
-    "H + (aq)": 5
-
-- rxn12:
-  logK: 8.4
-  - stoichiometry:
-    "UO2 2+ (aq)": -1
-    "CO3 2- (aq)": -1
-    "UO2CO3 (aq)": 1
-
-- rxn13:
-  logK: 15.7
-  - stoichiometry:
-    "UO2 2+ (aq)": -1
-    "CO3 2- (aq)": -2
-    "UO2(CO3)2 2- (aq)": 1
-
-- rxn14:
-  logK: 21.6
-  - stoichiometry:
-    "UO2 2+ (aq)": -1
-    "CO3 2- (aq)": -3
-    "UO2(CO3)3 4- (aq)": 1
+    "Pb 2+ (aq)": -1
+    "OH - (aq)": -1
+    "PbOH + (aq)": 1
 
 ...
 
 
 #Adsorbent objects are referenced by their names given in the Scenario doc
-"A(OH)2 (s)":
+"AC (s)":
 ---
 basis: area
 spec_area: 45000.0     #Units: m^2/kg
