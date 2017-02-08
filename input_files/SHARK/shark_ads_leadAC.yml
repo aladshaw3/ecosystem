@@ -198,24 +198,14 @@ surf_charge: 0.0
 surf_activity: ideal
 
 - volume_factors:
-  "UO2AO2 (s)": 5
-  "UO2CO3AO2 2- (s)": 8
+  "PbAC (s)": 5
 
 - rxn01:
   logK: -4.00
   mole_factor: 1.0
   - stoichiometry:
-    "UO2 2+ (aq)": -1
+    "Pb 2+ (aq)": -1
     "H + (aq)": 2
-    "UO2AO2 (s)": 1
-
-- rxn02:
-  logK: 9.00
-  mole_factor: 1.0
-  - stoichiometry:
-    "UO2 2+ (aq)": -1
-    "H + (aq)": 2
-    "CO3 2- (aq)": -1
-    "UO2CO3AO2 2- (s)": 1
+    "PbAC (s)": 1
 
 ...
