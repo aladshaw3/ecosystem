@@ -15,16 +15,16 @@ Scenario:
   act_fun: davies    
   const_pH: false
   pH: 8	
-  temp: 313.15        
+  temp: 293.15        
   dielec: 78.325     
-  volume: 1.0	#0.75  
+  volume: 0.75  
   reactor: batch     
 
 - run_time:
   steady: true        
-  specs_curve: false  
+  specs_curve: true  
   pH_step: 0.25
-  temp_curve: true
+  temp_curve: false
   start_temp: 273.15
   end_temp: 323.15
   temp_step: 2.5
@@ -36,7 +36,7 @@ SolverOptions:
 line_search: true      
 search_type: standard
 linear_solve: qr   
-nl_abstol: 1e-8   		
+nl_abstol: 1e-6   		
 
 ...
 
@@ -221,8 +221,7 @@ MassBalance:
     "VO2(CO3)2 3- (aq)": 2
 
 - sodium: 
-  #total_conc: 0.432465655
-  total_conc: 0.43262065
+  total_conc: 0.432466273
   - delta:
     "NaHCO3 (aq)": 1
     "NaCO3 - (aq)": 1
@@ -233,8 +232,7 @@ MassBalance:
     "NaV(IDO_H)2 (ad)": 1
 
 - vanadium:
-  #total_conc: 5.8235e-5
-  total_conc: 0.0001099
+  total_conc: 5.84408E-05
   - delta:
     "VO2 + (aq)": 1
     "H3VO4 (aq)": 1 
@@ -373,7 +371,7 @@ EquilRxn:
 "AF1":
 ---
 spec_area: 15000.0     #Units: m^2/kg
-total_mass: 1.51e-5     #Units: kg
+total_mass: 1.5122e-5     #Units: kg
 surf_activity: uniquac
 include_surfcharge: true
 
@@ -389,12 +387,11 @@ include_surfcharge: true
 
 "AF1-HAO (ad)":
 ---
-spec_mole: 1.25     #Units: mol/kg
+spec_mole: 1.65     #Units: mol/kg
 ligand_charge: 0
 
 - rxn01:
   logK: 27.34
-  #logK: 28.30
   #energy: -153440
   #enthalpy: 84358.51
   #entropy: 811.1836
@@ -407,7 +404,6 @@ ligand_charge: 0
 
 - rxn02:
   logK: 21.93
-  #logK: 22.89
   #energy: -123077
   #enthalpy: 84358.51
   #entropy: 707.6104
@@ -420,7 +416,6 @@ ligand_charge: 0
 
 - rxn03:
   logK: 24.93
-  #logK: 25.89
   #energy: -139914
   #enthalpy: 84358.51
   #entropy: 765.0467
@@ -433,7 +428,6 @@ ligand_charge: 0
 
 - rxn04:
   logK: 26.62
-  #logK: 27.58
   #energy: -149399
   #enthalpy: 84358.51
   #entropy: 797.3983
@@ -446,7 +440,6 @@ ligand_charge: 0
 
 - rxn05:
   logK: 22.72
-  #logK: 23.68
   #energy: -127511
   #enthalpy: 84358.51
   #entropy: 722.7344
@@ -462,13 +455,12 @@ ligand_charge: 0
 
 "AF1-H2IDO (ad)":
 ---
-spec_mole: 2.05      #Units: mol/kg
+spec_mole: 1.65      #Units: mol/kg
 ligand_charge: 0
 
 
 - rxn01:
   logK: 24.61
-  #logK: 25.57
   #energy: -138118
   #enthalpy: 84358.51
   #entropy: 758.9189
@@ -481,7 +473,6 @@ ligand_charge: 0
 
 - rxn02:
   logK: 28.06
-  #logK: 29.02
   #energy: -157481
   #enthalpy: 84358.51
   #entropy: 824.969
@@ -494,7 +485,6 @@ ligand_charge: 0
 
 - rxn03:
   logK: 29.24
-  #logK: 30.20
   #energy: -164103
   #enthalpy: 84358.51
   #entropy: 847.576
@@ -508,7 +498,6 @@ ligand_charge: 0
 
 - rxn04:
   logK: 30.07
-  #logK: 31.03
   #energy: -168761
   #enthalpy: 84358.51
   #entropy: 863.4567
@@ -521,7 +510,6 @@ ligand_charge: 0
 
 - rxn05:
   logK: 26.87
-  #logK: 27.83
   #energy: -150802
   #enthalpy: 84358.51
   #entropy: 802.1874
@@ -534,7 +522,6 @@ ligand_charge: 0
 
 - rxn06:
   logK: 28.67
-  #logK: 29.63
   #energy: -160904
   #enthalpy: 84358.51
   #entropy: 836.6841
