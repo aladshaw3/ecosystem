@@ -1931,11 +1931,13 @@ double AdsorptionReaction::calculateSurfaceChargeDensity( const Matrix<double> &
 {
 	double sigma = 0.0;
 	double sum = 0.0;
+
 	for (int i=0; i<this->getNumberRxns(); i++)
 	{
-		sum = sum + (this->List->charge(this->getAdsorbIndex(i)) * pow(10.0, x(this->getAdsorbIndex(i),0))) - (this->getSurfaceCharge() * this->getAreaFactor(this->getAdsorbIndex(i)) * pow(10.0, x(this->getAdsorbIndex(i),0)));
+		sum = sum + (this->List->charge(this->getAdsorbIndex(i)) * pow(10.0, x(this->getAdsorbIndex(i),0)));
 	}
-	sum = sum + (this->getSurfaceCharge() * this->getSpecificMolality());
+	sum = sum + (this->getSurfaceCharge() * this->getSpecificMolality() * this->calculateActiveFraction(x));
+	
 	sigma = sum * (Faraday/this->getSpecificArea());
 	
 	return sigma;
@@ -2695,11 +2697,13 @@ double UnsteadyAdsorption::calculateSurfaceChargeDensity( const Matrix<double> &
 {
 	double sigma = 0.0;
 	double sum = 0.0;
+	
 	for (int i=0; i<this->getNumberRxns(); i++)
 	{
-		sum = sum + (this->List->charge(this->getAdsorbIndex(i)) * pow(10.0, x(this->getAdsorbIndex(i),0))) - (this->getSurfaceCharge() * this->getAreaFactor(this->getAdsorbIndex(i)) * pow(10.0, x(this->getAdsorbIndex(i),0)));
+		sum = sum + (this->List->charge(this->getAdsorbIndex(i)) * pow(10.0, x(this->getAdsorbIndex(i),0)));
 	}
-	sum = sum + (this->getSurfaceCharge() * this->getSpecificMolality());
+	sum = sum + (this->getSurfaceCharge() * this->getSpecificMolality() * this->calculateActiveFraction(x));
+	
 	sigma = sum * (Faraday/this->getSpecificArea());
 
 	return sigma;
