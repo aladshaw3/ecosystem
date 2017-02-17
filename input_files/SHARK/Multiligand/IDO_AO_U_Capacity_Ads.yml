@@ -22,7 +22,7 @@ Scenario:
 
 - run_time:
   steady: true        
-  specs_curve: true  
+  specs_curve: false  
   pH_step: 0.25
   temp_curve: false
   start_temp: 273.15
