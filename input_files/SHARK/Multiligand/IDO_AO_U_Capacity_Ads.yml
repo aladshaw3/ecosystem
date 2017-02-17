@@ -22,7 +22,7 @@ Scenario:
 
 - run_time:
   steady: true        
-  specs_curve: false  
+  specs_curve: true  
   pH_step: 0.25
   temp_curve: false
   start_temp: 273.15
@@ -541,7 +541,8 @@ ligand_charge: 0
     "H + (aq)": 1
 
 - rxn02:
-  logK: -2.72
+  logK: -2.72   #real
+  #logK: -4.72   #adjust
   #energy: 15265.42
   #enthalpy: 46003.07463
   #entropy: 106.0758781
@@ -552,7 +553,8 @@ ligand_charge: 0
     "H + (aq)": 2
 
 - rxn03:
-  logK: -11.73
+  logK: -11.73   #real
+  #logK: -14.73   #adjusted
   #energy: 65832.11
   #enthalpy: 289758.924
   #entropy: 769.6612292
@@ -627,7 +629,8 @@ ligand_charge: 0
     "H + (aq)": 4
 
 - rxn04:
-  logK: -8.78
+  logK: -8.78   #real
+  #logK: -12.78   #adjusted
   #energy: 49275.87
   #enthalpy: 270635.6665
   #entropy: 760.7314994
