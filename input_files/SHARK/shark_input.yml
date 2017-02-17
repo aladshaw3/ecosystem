@@ -11,8 +11,8 @@ Scenario:
   num_other: 0      #Not required or used in current version
 
 - sys_data:
-  act_fun: davies    
-  const_pH: false	
+  act_fun: ideal    
+  const_pH: true	
   pH: 7              #Only required if we are specifying a const_pH
   temp: 298.15       #Units must be in Kelvin 
   dielec: 78.325     #Units must be in (1/Kelvin)
@@ -32,14 +32,14 @@ SolverOptions:
 ---
 line_search: true      #Default = true, and is recommended to be true
 search_type: standard
-linear_solve: fom      #Note: FOM will be fastest for small problems
+linear_solve: qr      #Note: FOM will be fastest for small problems
 restart: 25            #Note: restart only used if using GMRES or GCR type solvers
 nl_maxit: 50
 nl_abstol: 1e-5
 nl_reltol: 1e-8
 lin_reltol: 1e-10 	#Min Tol = 1e-15
 lin_abstol: 1e-10		#Min Tol = 1e-15
-nl_print: false
+nl_print: true
 l_print: false
 
 ...

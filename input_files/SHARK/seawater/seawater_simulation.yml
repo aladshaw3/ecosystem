@@ -23,7 +23,7 @@ Scenario:
 
 SolverOptions:
 ---
-line_search: true     
+line_search: false     
 search_type: standard
 linear_solve: qr
 l_print: true 
