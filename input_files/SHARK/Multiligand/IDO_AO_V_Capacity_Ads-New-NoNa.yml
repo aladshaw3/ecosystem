@@ -37,7 +37,7 @@ line_search: true
 search_type: standard
 linear_solve: qr   
 nl_abstol: 1e-6   
-nl_maxit: 100		
+nl_maxit: 1000		
 
 ...
 
@@ -497,7 +497,7 @@ ligand_charge: 0
     "H2O (l)": 2
 
 - rxn03:
-  logK: 21.3
+  logK: 20.3
   mole_factor: 1.0
   - stoichiometry:
     "VO4 3- (aq)": -1
@@ -530,7 +530,7 @@ ligand_charge: 0
     "V(IDO)2 + (ad)": 1
 
 - rxn06:
-  logK: 28.5
+  logK: 28.7
   #energy: -160904
   #enthalpy: 84358.51
   #entropy: 836.6841
@@ -542,7 +542,7 @@ ligand_charge: 0
     "V(IDO_H)2 - (ad)": 1
 
 - rxn07:
-  logK: 11.7
+  logK: 11.1
   mole_factor: 2.0
   - stoichiometry:
     "VO4 3- (aq)": -1
