@@ -1,7 +1,7 @@
 Scenario:
 ---
 - vars_fun:
-  numvar: 34
+  numvar: 35
   num_ssr: 16
   num_mbe: 5
   num_multi_ssao: 1
@@ -212,6 +212,18 @@ MasterSpecies:
     name: Vanadium-amidoximate
     lin_form: VO
 
+  - 34: 
+    formula: Na-V(IDO_H)2 (ad)
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Vanadium-diamidoximate
+    lin_form: NaV
+
 ...
 
 MassBalance:
@@ -242,6 +254,7 @@ MassBalance:
     "Na + (aq)": 1
     "NaCl (aq)": 1
     "NaOH (aq)": 1
+    "Na-V(IDO_H)2 (ad)": 1
 
 - vanadium:
   total_conc: 5.84408E-05
@@ -265,6 +278,7 @@ MassBalance:
     "V(IDO)2 + (ad)": 1
     "V(IDO_H)2 - (ad)": 1
     "VO(IDO_H)2 3- (ad)": 1
+    "Na-V(IDO_H)2 (ad)": 1
 
 - chlorine:
   total_conc: 0.43
@@ -394,7 +408,7 @@ include_surfcharge: true
 
 - ligand02:
   name: H2IDO (ad)
-  num_rxns: 7
+  num_rxns: 8
 
 ...
 
@@ -405,9 +419,6 @@ ligand_charge: 0
 
 - rxn01:
   logK: 27.34
-  #energy: -153440
-  #enthalpy: 84358.51
-  #entropy: 811.1836
   mole_factor: 1.0
   - stoichiometry:
     "VO4 3- (aq)": -1
@@ -417,9 +428,6 @@ ligand_charge: 0
 
 - rxn02:
   logK: 21.93
-  #energy: -123077
-  #enthalpy: 84358.51
-  #entropy: 707.6104
   mole_factor: 2.0
   - stoichiometry:
     "VO4 3- (aq)": -1
@@ -429,9 +437,6 @@ ligand_charge: 0
 
 - rxn03:
   logK: 24.93
-  #energy: -139914
-  #enthalpy: 84358.51
-  #entropy: 765.0467
   mole_factor: 2.0
   - stoichiometry:
     "VO4 3- (aq)": -1
@@ -441,9 +446,6 @@ ligand_charge: 0
 
 - rxn04:
   logK: 26.62
-  #energy: -149399
-  #enthalpy: 84358.51
-  #entropy: 797.3983
   mole_factor: 3.0
   - stoichiometry:
     "VO4 3- (aq)": -1
@@ -453,9 +455,6 @@ ligand_charge: 0
 
 - rxn05:
   logK: 22.72
-  #energy: -127511
-  #enthalpy: 84358.51
-  #entropy: 722.7344
   mole_factor: 3.0
   - stoichiometry:
     "VO4 3- (aq)": -1
@@ -468,29 +467,21 @@ ligand_charge: 0
 
 "AF1-H2IDO (ad)":
 ---
-spec_mole: 1.65      #Units: mol/kg
+spec_mole: 1.65     #Units: mol/kg
 ligand_charge: 0
 
 
 - rxn01:
-  #logK: 25.1  #Na-Slava
   logK: 24.61 #Slava
-  #energy: -138118
-  #enthalpy: 84358.51
-  #entropy: 758.9189
   mole_factor: 1.0
   - stoichiometry:
     "VO4 3- (aq)": -1
     "H + (aq)": -2
-    #"Na + (aq)": -1
     "VO2IDO - (ad)": 1
     "H2O (l)": 2
 
 - rxn02:
   logK: 28.06
-  #energy: -157481
-  #enthalpy: 84358.51
-  #entropy: 824.969
   mole_factor: 1.0
   - stoichiometry:
     "VO4 3- (aq)": -1
@@ -499,24 +490,16 @@ ligand_charge: 0
     "H2O (l)": 2
 
 - rxn03:
-  #logK: 22.3 #Na2-Slava
-  #logK: 21.8 #Na-Slava
   logK: 21.3 #Slava
-  #logK: 20.3 #Rao
   mole_factor: 1.0
   - stoichiometry:
     "VO4 3- (aq)": -1
     "H + (aq)": -1
-    #"Na + (aq)": -2
-    #"Na + (aq)": -1
     "H2O (l)": 2
     "VO2IDO_H 2- (ad)": 1
 
 - rxn04:
   logK: 30.07
-  #energy: -168761
-  #enthalpy: 84358.51
-  #entropy: 863.4567
   mole_factor: 2.0
   - stoichiometry:
     "VO4 3- (aq)": -1
@@ -526,9 +509,6 @@ ligand_charge: 0
 
 - rxn05:
   logK: 26.87
-  #energy: -150802
-  #enthalpy: 84358.51
-  #entropy: 802.1874
   mole_factor: 2.0
   - stoichiometry:
     "VO4 3- (aq)": -1
@@ -537,29 +517,30 @@ ligand_charge: 0
     "V(IDO)2 + (ad)": 1
 
 - rxn06:
-  #logK: 29.0 #Na-Slava
   logK: 28.5 #Slava
-  #logK: 28.7 #Rao
-  #energy: -160904
-  #enthalpy: 84358.51
-  #entropy: 836.6841
   mole_factor: 2.0
   - stoichiometry:
     "VO4 3- (aq)": -1
     "H + (aq)": -2
-    #"Na + (aq)": -1
     "H2O (l)": 4
     "V(IDO_H)2 - (ad)": 1
 
 - rxn07:
-  #logK: 12.2 #Na-Slava
   logK: 11.7 #Slava
-  #logK: 11.1 #Rao
   mole_factor: 2.0
   - stoichiometry:
     "VO4 3- (aq)": -1
-    #"Na + (aq)": -1
     "H2O (l)": 3
     "VO(IDO_H)2 3- (ad)": 1
+
+- rxn08:
+  logK: 29.0 #Na-Slava
+  mole_factor: 2.0
+  - stoichiometry:
+    "VO4 3- (aq)": -1
+    "H + (aq)": -2
+    "Na + (aq)": -1
+    "H2O (l)": 4
+    "Na-V(IDO_H)2 (ad)": 1
 
 ...
