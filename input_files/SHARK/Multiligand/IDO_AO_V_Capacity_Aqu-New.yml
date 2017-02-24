@@ -1,18 +1,12 @@
 Scenario:
 ---
 - vars_fun:
-  numvar: 35
-  num_ssr: 16
-  num_mbe: 5
-  num_multi_ssao: 1
-
-- ss_multiads_objs:
-  - obj01:
-    name: AF1
-    num_ligands: 2       
+  numvar: 39
+  num_ssr: 31
+  num_mbe: 7      
 
 - sys_data:
-  act_fun: davies    
+  act_fun: ideal    
   const_pH: false
   pH: 8	
   temp: 293.15        
@@ -69,165 +63,242 @@ MasterSpecies:
 
 - unreg:
   - 22: 
-    formula: VO2AO (ad)
+    formula: VO2AO (aq)
     charge: 0
     enthalpy: 0
     entropy: 0
     have_HS: false
     energy: 0
     have_G: false
-    phase: adsorbed
+    phase: aqueous
     name: Vanadyl-amidoximate
     lin_form: VO2
 
   - 23: 
-    formula: VO2(AO)2 - (ad)
+    formula: VO2(AO)2 - (aq)
     charge: -1
     enthalpy: 0
     entropy: 0
     have_HS: false
     energy: 0
     have_G: false
-    phase: adsorbed
+    phase: aqueous
     name: Vanadium-diamidoximate
     lin_form: VO2
 
   - 24: 
-    formula: VOOH(AO)2 (ad)
+    formula: VOOH(AO)2 (aq)
     charge: 0
     enthalpy: 0
     entropy: 0
     have_HS: false
     energy: 0
     have_G: false
-    phase: adsorbed
+    phase: aqueous
     name: Vanadium-diamidoximate
     lin_form: VO2H
 
   - 25: 
-    formula: V(AO)(AO_H)2 (ad)
+    formula: V(AO)(AO_H)2 (aq)
     charge: 0
     enthalpy: 0
     entropy: 0
     have_HS: false
     energy: 0
     have_G: false
-    phase: adsorbed
+    phase: aqueous
     name: Vanadium-diamidoximate
     lin_form: V
 
   - 26: 
-    formula: V(AO)3 2+ (ad)
+    formula: V(AO)3 2+ (aq)
     charge: 2
     enthalpy: 0
     entropy: 0
     have_HS: false
     energy: 0
     have_G: false
-    phase: adsorbed
+    phase: aqueous
     name: Vanadium-diamidoximate
     lin_form: V
 
   - 27: 
-    formula: VO2IDO - (ad)
+    formula: VO2IDO - (aq)
     charge: -1
     enthalpy: 0
     entropy: 0
     have_HS: false
     energy: 0
     have_G: false
-    phase: adsorbed
+    phase: aqueous
     name: Vanadyl-amidoximate
     lin_form: VO2
 
   - 28: 
-    formula: VO2HIDO (ad)
+    formula: VO2HIDO (aq)
     charge: 0
     enthalpy: 0
     entropy: 0
     have_HS: false
     energy: 0
     have_G: false
-    phase: adsorbed
+    phase: aqueous
     name: Vanadium-diamidoximate
     lin_form: VO2H
 
   - 29: 
-    formula: VO2IDO_H 2- (ad)
+    formula: VO2IDO_H 2- (aq)
     charge: -2
     enthalpy: 0
     entropy: 0
     have_HS: false
     energy: 0
     have_G: false
-    phase: adsorbed
+    phase: aqueous
     name: Vanadium-diamidoximate
     lin_form: VO2
 
   - 30: 
-    formula: V(IDO)(IDO_H) (ad)
+    formula: V(IDO)(IDO_H) (aq)
     charge: 0
     enthalpy: 0
     entropy: 0
     have_HS: false
     energy: 0
     have_G: false
-    phase: adsorbed
+    phase: aqueous
     name: Vanadium-diamidoximate
     lin_form: V
 
   - 31: 
-    formula: V(IDO)2 + (ad)
+    formula: V(IDO)2 + (aq)
     charge: 1
     enthalpy: 0
     entropy: 0
     have_HS: false
     energy: 0
     have_G: false
-    phase: adsorbed
+    phase: aqueous
     name: Vanadium-diamidoximate
     lin_form: V
 
   - 32: 
-    formula: V(IDO_H)2 - (ad)
+    formula: V(IDO_H)2 - (aq)
     charge: -1
     enthalpy: 0
     entropy: 0
     have_HS: false
     energy: 0
     have_G: false
-    phase: adsorbed
+    phase: aqueous
     name: Vanadium-diamidoximate
     lin_form: V
 
   - 33: 
-    formula: VO(IDO_H)2 3- (ad)
+    formula: VO(IDO_H)2 3- (aq)
     charge: -3
     enthalpy: 0
     entropy: 0
     have_HS: false
     energy: 0
     have_G: false
-    phase: adsorbed
+    phase: aqueous
     name: Vanadium-amidoximate
     lin_form: VO
 
   - 34: 
-    formula: Na-V(IDO_H)2 (ad)
+    formula: IDO 2- (aq)
+    charge: -2
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: aqueous
+    name: amidoximate
+    lin_form: none
+
+  - 35: 
+    formula: HIDO - (aq)
+    charge: -1
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: aqueous
+    name: amidoximate
+    lin_form: none
+
+  - 36: 
+    formula: H2IDO (aq)
     charge: 0
     enthalpy: 0
     entropy: 0
     have_HS: false
     energy: 0
     have_G: false
-    phase: adsorbed
-    name: Vanadium-diamidoximate
-    lin_form: NaV
+    phase: aqueous
+    name: amidoximate
+    lin_form: none
+
+  - 37: 
+    formula: AO - (aq)
+    charge: -1
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: aqueous
+    name: amidoximate
+    lin_form: none
+
+  - 38: 
+    formula: HAO (aq)
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: aqueous
+    name: amidoximate
+    lin_form: none
 
 ...
 
 MassBalance:
 ---
+- HAO:
+  total_conc: 1e-25
+  #total_conc: 3.32685e-5
+  #total_conc: 3.32685e-2
+  - delta:
+    "HAO (aq)": 1
+    "AO - (aq)": 1
+    "VO2AO (aq)": 1
+    "VO2(AO)2 - (aq)": 2
+    "VOOH(AO)2 (aq)": 2
+    "V(AO)(AO_H)2 (aq)": 3
+    "V(AO)3 2+ (aq)": 3
+
+- IDO:
+  #total_conc: 6.6537e-5
+  #total_conc: 3.32685e-5
+  total_conc: 6.6537e-2
+  - delta:
+    "H2IDO (aq)": 1
+    "HIDO - (aq)": 1
+    "IDO 2- (aq)": 1
+    "VO2IDO - (aq)": 1
+    "VO2HIDO (aq)": 1
+    "VO2IDO_H 2- (aq)": 1
+    "V(IDO)(IDO_H) (aq)": 2
+    "V(IDO)2 + (aq)": 2
+    "V(IDO_H)2 - (aq)": 2
+    "VO(IDO_H)2 3- (aq)": 2
+
 - water:
   total_conc: 1
   - delta: 
@@ -254,7 +325,6 @@ MassBalance:
     "Na + (aq)": 1
     "NaCl (aq)": 1
     "NaOH (aq)": 1
-    "Na-V(IDO_H)2 (ad)": 1
 
 - vanadium:
   total_conc: 5.84408E-05
@@ -266,19 +336,18 @@ MassBalance:
     "VO4 3- (aq)": 1
     "VO2OHCO3 2- (aq)": 1
     "VO2(CO3)2 3- (aq)": 1
-    "VO2AO (ad)": 1
-    "VO2(AO)2 - (ad)": 1
-    "VOOH(AO)2 (ad)": 1
-    "V(AO)(AO_H)2 (ad)": 1
-    "V(AO)3 2+ (ad)": 1
-    "VO2IDO - (ad)": 1
-    "VO2HIDO (ad)": 1
-    "VO2IDO_H 2- (ad)": 1
-    "V(IDO)(IDO_H) (ad)": 1
-    "V(IDO)2 + (ad)": 1
-    "V(IDO_H)2 - (ad)": 1
-    "VO(IDO_H)2 3- (ad)": 1
-    "Na-V(IDO_H)2 (ad)": 1
+    "VO2AO (aq)": 1
+    "VO2(AO)2 - (aq)": 1
+    "VOOH(AO)2 (aq)": 1
+    "V(AO)(AO_H)2 (aq)": 1
+    "V(AO)3 2+ (aq)": 1
+    "VO2IDO - (aq)": 1
+    "VO2HIDO (aq)": 1
+    "VO2IDO_H 2- (aq)": 1
+    "V(IDO)(IDO_H) (aq)": 1
+    "V(IDO)2 + (aq)": 1
+    "V(IDO_H)2 - (aq)": 1
+    "VO(IDO_H)2 3- (aq)": 1
 
 - chlorine:
   total_conc: 0.43
@@ -393,156 +462,132 @@ EquilRxn:
     "H2O (l)": 2
     "VO2(CO3)2 3- (aq)": 1
 
-...
+- rxn16:
+  logK: 12.85
+  - stoichiometry:
+    "IDO 2- (aq)": -1
+    "H + (aq)": -1
+    "HIDO - (aq)": 1
 
-"AF1":
----
-spec_area: 15000.0     #Units: m^2/kg
-total_mass: 1.5122e-5     #Units: kg
-surf_activity: uniquac
-include_surfcharge: true
+- rxn17:
+  logK: 23.84
+  - stoichiometry:
+    "IDO 2- (aq)": -1
+    "H + (aq)": -2
+    "H2IDO (aq)": 1
 
-- ligand01:
-  name: HAO (ad)
-  num_rxns: 5
+- rxn18:
+  logK: 13.21
+  - stoichiometry:
+    "AO - (aq)": -1
+    "H + (aq)": -1
+    "HAO (aq)": 1
 
-- ligand02:
-  name: H2IDO (ad)
-  num_rxns: 8
-
-...
-
-"AF1-HAO (ad)":
----
-spec_mole: 1.65     #Units: mol/kg
-ligand_charge: 0
-
-- rxn01:
+- rxn19:
   logK: 27.34
-  mole_factor: 1.0
   - stoichiometry:
     "VO4 3- (aq)": -1
     "H + (aq)": -3
-    "VO2AO (ad)": 1
+    "HAO (aq)": -1
+    "VO2AO (aq)": 1
     "H2O (l)": 2
 
-- rxn02:
+- rxn20:
   logK: 21.93
-  mole_factor: 2.0
   - stoichiometry:
     "VO4 3- (aq)": -1
     "H + (aq)": -2
-    "VO2(AO)2 - (ad)": 1
+    "HAO (aq)": -2
+    "VO2(AO)2 - (aq)": 1
     "H2O (l)": 2
 
-- rxn03:
+- rxn21:
   logK: 24.93
-  mole_factor: 2.0
   - stoichiometry:
     "VO4 3- (aq)": -1
     "H + (aq)": -3
-    "VOOH(AO)2 (ad)": 1
+    "HAO (aq)": -2
+    "VOOH(AO)2 (aq)": 1
     "H2O (l)": 2
 
-- rxn04:
+- rxn22:
   logK: 26.62
-  mole_factor: 3.0
   - stoichiometry:
     "VO4 3- (aq)": -1
     "H + (aq)": -3
-    "V(AO)(AO_H)2 (ad)": 1
+    "HAO (aq)": -3
+    "V(AO)(AO_H)2 (aq)": 1
     "H2O (l)": 4
 
-- rxn05:
+- rxn23:
   logK: 22.72
-  mole_factor: 3.0
   - stoichiometry:
     "VO4 3- (aq)": -1
     "H + (aq)": -5
-    "V(AO)3 2+ (ad)": 1
+    "HAO (aq)": -3
+    "V(AO)3 2+ (aq)": 1
     "H2O (l)": 4
 
-...
-
-
-"AF1-H2IDO (ad)":
----
-spec_mole: 1.65     #Units: mol/kg
-ligand_charge: 0
-
-
-- rxn01:
+- rxn24:
   logK: 24.61 #Slava
-  mole_factor: 1.0
   - stoichiometry:
     "VO4 3- (aq)": -1
     "H + (aq)": -2
-    "VO2IDO - (ad)": 1
+    "H2IDO (aq)": -1
+    "VO2IDO - (aq)": 1
     "H2O (l)": 2
 
-- rxn02:
+- rxn25:
   logK: 28.06
-  mole_factor: 1.0
   - stoichiometry:
     "VO4 3- (aq)": -1
     "H + (aq)": -3
-    "VO2HIDO (ad)": 1
+    "H2IDO (aq)": -1
+    "VO2HIDO (aq)": 1
     "H2O (l)": 2
 
-- rxn03:
+- rxn26:
   logK: 21.3 #Slava
-  #logK: 22.3 #Na-Slava
-  mole_factor: 1.0
   - stoichiometry:
     "VO4 3- (aq)": -1
     "H + (aq)": -1
-    #"Na + (aq)": -2
+    "H2IDO (aq)": -1
     "H2O (l)": 2
-    "VO2IDO_H 2- (ad)": 1
+    "VO2IDO_H 2- (aq)": 1
 
-- rxn04:
+- rxn27:
   logK: 30.07
-  mole_factor: 2.0
   - stoichiometry:
     "VO4 3- (aq)": -1
     "H + (aq)": -3
+    "H2IDO (aq)": -2
     "H2O (l)": 4
-    "V(IDO)(IDO_H) (ad)": 1
+    "V(IDO)(IDO_H) (aq)": 1
 
-- rxn05:
+- rxn28:
   logK: 26.87
-  mole_factor: 2.0
   - stoichiometry:
     "VO4 3- (aq)": -1
     "H + (aq)": -4
+    "H2IDO (aq)": -2
     "H2O (l)": 4
-    "V(IDO)2 + (ad)": 1
+    "V(IDO)2 + (aq)": 1
 
-- rxn06:
+- rxn29:
   logK: 28.5 #Slava
-  mole_factor: 2.0
   - stoichiometry:
     "VO4 3- (aq)": -1
     "H + (aq)": -2
+    "H2IDO (aq)": -2
     "H2O (l)": 4
-    "V(IDO_H)2 - (ad)": 1
+    "V(IDO_H)2 - (aq)": 1
 
-- rxn07:
+- rxn30:
   logK: 11.7 #Slava
-  mole_factor: 2.0
   - stoichiometry:
     "VO4 3- (aq)": -1
+    "H2IDO (aq)": -2
     "H2O (l)": 3
-    "VO(IDO_H)2 3- (ad)": 1
-
-- rxn08:
-  logK: 29.0 #Na-Slava
-  mole_factor: 2.0
-  - stoichiometry:
-    "VO4 3- (aq)": -1
-    "H + (aq)": -2
-    "Na + (aq)": -1
-    "H2O (l)": 4
-    "Na-V(IDO_H)2 (ad)": 1
+    "VO(IDO_H)2 3- (aq)": 1
 
 ...
