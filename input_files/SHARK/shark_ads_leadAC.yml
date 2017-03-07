@@ -214,7 +214,7 @@ EquilRxn:
   logK: -7.71
   - stoichiometry:
     "Pb 2+ (aq)": -1
-    "H2O - (aq)": -1
+    "H2O (aq)": -1
     "H + (aq)": 1
     "PbOH + (aq)": 1
 
