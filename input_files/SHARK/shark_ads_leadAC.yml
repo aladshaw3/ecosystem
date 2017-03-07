@@ -4,7 +4,7 @@ Scenario:
 ---
 - vars_fun:
   numvar: 14
-  num_ssr: 11
+  num_ssr: 8
   num_mbe: 4
   num_ssao: 1
 
