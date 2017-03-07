@@ -3,8 +3,8 @@
 Scenario:
 ---
 - vars_fun:
-  numvar: 24
-  num_ssr: 15
+  numvar: 14
+  num_ssr: 8
   num_mbe: 4
   num_ssao: 1
 
@@ -15,7 +15,8 @@ Scenario:
 
 - sys_data:
   act_fun: davies    
-  const_pH: false	
+  const_pH: false
+  pH: 6.0	
   temp: 293.15       #Units must be in Kelvin 
   dielec: 78.325     #Units must be in (1/Kelvin)
   volume: 0.5        #Units: L
@@ -56,16 +57,49 @@ MasterSpecies:
   6: H2CO3 (aq)
   7: HCO3 - (aq)
   8: CO3 2- (aq)
-  9: PbNO3 + (aq)
-  10: PbOH + (aq)
-  11: PbHCO3 + (aq)
-  12: PbCO3 (aq)
+  9: PbOH + (aq)
 
 
 # Keys for the sub-headers must follow same rules as keys from above
 - unreg:
 
-  - 22: 
+  - 10: 
+    formula: PbHCO3 + (aq)
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: aqueous
+    name: LeadAC
+    lin_form: none
+
+  - 11: 
+    formula: PbCO3 (aq)
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: aqueous
+    name: LeadAC
+    lin_form: none
+
+  - 12: 
+    formula: PbNO3 + (aq)
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: aqueous
+    name: LeadAC
+    lin_form: none
+
+  - 13: 
     formula: PbAC (s)
     charge: 0
     enthalpy: 0
@@ -149,39 +183,39 @@ EquilRxn:
     "CO3 2- (aq)": 1
     "H + (aq)": 1
 
-- rxn05:
+- rxn03:
   logK: 1.4
   - stoichiometry:
     "HNO3 (aq)": -1
     "NO3 - (aq)": 1
     "H + (aq)": 1
 
-- rxn07:
+- rxn04:
   logK: 1.17
   - stoichiometry:
     "NO3 - (aq)": -1
     "Pb 2+ (aq)": -1
     "PbNO3 + (aq)": 1
 
-- rxn08:
+- rxn05:
   logK: 7.24
   - stoichiometry:
     "Pb 2+ (aq)": -1
     "CO3 2- (aq)": -1
     "PbCO3 (aq)": 1
 
-- rxn09:
+- rxn06:
   logK: 2.9
   - stoichiometry:
     "Pb 2+ (aq)": -1
     "HCO3 - (aq)": -1
     "PbHCO3 + (aq)": 1
 
-- rxn10:
+- rxn07:
   logK: -7.71
   - stoichiometry:
     "Pb 2+ (aq)": -1
-    "H2O - (aq)": -1
+    "H2O (l)": -1
     "H + (aq)": 1
     "PbOH + (aq)": 1
 
@@ -192,7 +226,7 @@ EquilRxn:
 "AC (s)":
 ---
 basis: area
-spec_area: 1    #Units: m^2/kg
+spec_area: 1.0    #Units: m^2/kg
 total_mass: 0.0005     #Units: kg
 surf_charge: 0.0
 surf_activity: ideal
@@ -201,7 +235,7 @@ surf_activity: ideal
   "PbAC (s)": 5
 
 - rxn01:
-  logK: -4.00
+  logK: -20.00
   mole_factor: 1.0
   - stoichiometry:
     "Pb 2+ (aq)": -1
