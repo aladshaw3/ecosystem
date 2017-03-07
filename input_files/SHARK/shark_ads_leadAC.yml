@@ -3,7 +3,7 @@
 Scenario:
 ---
 - vars_fun:
-  numvar: 13
+  numvar: 14
   num_ssr: 11
   num_mbe: 4
   num_ssao: 1
@@ -182,35 +182,35 @@ EquilRxn:
     "CO3 2- (aq)": 1
     "H + (aq)": 1
 
-- rxn05:
+- rxn03:
   logK: 1.4
   - stoichiometry:
     "HNO3 (aq)": -1
     "NO3 - (aq)": 1
     "H + (aq)": 1
 
-- rxn07:
+- rxn04:
   logK: 1.17
   - stoichiometry:
     "NO3 - (aq)": -1
     "Pb 2+ (aq)": -1
     "PbNO3 + (aq)": 1
 
-- rxn08:
+- rxn05:
   logK: 7.24
   - stoichiometry:
     "Pb 2+ (aq)": -1
     "CO3 2- (aq)": -1
     "PbCO3 (aq)": 1
 
-- rxn09:
+- rxn06:
   logK: 2.9
   - stoichiometry:
     "Pb 2+ (aq)": -1
     "HCO3 - (aq)": -1
     "PbHCO3 + (aq)": 1
 
-- rxn10:
+- rxn07:
   logK: -7.71
   - stoichiometry:
     "Pb 2+ (aq)": -1
