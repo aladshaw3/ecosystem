@@ -124,21 +124,21 @@ MassBalance:
     "H2O (l)": 1
 
 - carbonate:
-  total_conc: 2.117E-05
+  total_conc: 1.973E-05
   - delta:  
     "H2CO3 (aq)": 1 
     "HCO3 - (aq)": 1
     "CO3 2- (aq)": 1
 
 - nitrate:
-  total_conc: 7.150E-02
+  total_conc: 4.287E-02
   - delta:
     "HNO3 (aq)": 1
     "NO3 - (aq)": 1
     "PbNO3 + (aq)": 1
 
 - lead:
-  total_conc: 2.417E-03
+  total_conc: 1.449E-03
   - delta:
     "PbAC (s)": 1
     "Pb 2+ (aq)": 1
