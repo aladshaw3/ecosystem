@@ -64,7 +64,7 @@ MasterSpecies:
 
   - 10: 
     formula: PbHCO3 + (aq)
-    charge: 0
+    charge: +1
     enthalpy: 0
     entropy: 0
     have_HS: false
@@ -88,7 +88,7 @@ MasterSpecies:
     
   - 12: 
     formula: PbNO3 + (aq)
-    charge: 0
+    charge: +1
     enthalpy: 0
     entropy: 0
     have_HS: false
@@ -117,28 +117,28 @@ MassBalance:
 # Header names under MassBalance are choosen by the user
 # All other keys will be checked
 
-#Pb 1000ppm (1000mg/L)
+#Pb 800ppm (800mg/L)
 - water:
   total_conc: 1
   - delta: 
     "H2O (l)": 1
 
 - carbonate:
-  total_conc: 2.359E-05
+  total_conc: 2.275E-05
   - delta:  
     "H2CO3 (aq)": 1 
     "HCO3 - (aq)": 1
     "CO3 2- (aq)": 1
 
 - nitrate:
-  total_conc: 0.1432
+  total_conc: 0.1145
   - delta:
     "HNO3 (aq)": 1
     "NO3 - (aq)": 1
     "PbNO3 + (aq)": 1
 
 - lead:
-  total_conc: 4.841E-03
+  total_conc: 3.870E-03
   - delta:
     "PbAC (s)": 1
     "Pb 2+ (aq)": 1
