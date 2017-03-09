@@ -64,7 +64,7 @@ MasterSpecies:
 
   - 10: 
     formula: PbHCO3 + (aq)
-    charge: 0
+    charge: +1
     enthalpy: 0
     entropy: 0
     have_HS: false
@@ -88,7 +88,7 @@ MasterSpecies:
     
   - 12: 
     formula: PbNO3 + (aq)
-    charge: 0
+    charge: +1
     enthalpy: 0
     entropy: 0
     have_HS: false
