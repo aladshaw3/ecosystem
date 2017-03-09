@@ -1,0 +1,244 @@
+# This is Xenia Wirth's adaption of an example SHARK input file for lead physisorption onto activated carbon 
+
+Scenario:
+---
+- vars_fun:
+  numvar: 14
+  num_ssr: 8
+  num_mbe: 4
+  num_ssao: 1
+
+- ss_ads_objs:
+  - obj01:
+    name: AC (s)
+    num_rxns: 1       
+
+- sys_data:
+  act_fun: davies    
+  const_pH: false	
+  temp: 293.15       #Units must be in Kelvin 
+  dielec: 78.325     #Units must be in (1/Kelvin)
+  volume: 0.5        #Units: L
+
+- run_time:
+  steady: true        
+  specs_curve: true    
+...
+
+#The following header is entirely optional, but is used to set solver options
+SolverOptions:
+---
+line_search: true      #Default = true, and is recommended to be true
+search_type: standard
+linear_solve: QR      #Note: qr will now be the fastest for small problems 
+nl_maxit: 50
+nl_abstol: 1e-5
+nl_reltol: 1e-8
+lin_reltol: 1e-6 	
+lin_abstol: 1e-6		
+
+...
+
+# After the Scenario read, shark will call the setup_function, then read info below
+MasterSpecies:
+---
+# Header names are specific 
+# Keys are chosen by user, but must span numbers 0 through numvar-1
+# Keys will denote the ordering of the variables
+# Note: Currently, the number of reg molecules is very limited
+- reg:
+  0: NO3 - (aq)
+  1: HNO3 (aq)
+  2: H2O (l)
+  3: OH - (aq)
+  4: H + (aq)
+  5: Pb 2+ (aq)
+  6: H2CO3 (aq)
+  7: HCO3 - (aq)
+  8: CO3 2- (aq)
+  9: PbOH + (aq)
+
+
+# Keys for the sub-headers must follow same rules as keys from above
+- unreg:
+
+  - 10: 
+    formula: PbHCO3 + (aq)
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: aqueous
+    name: lead hydrogen carbonate
+    lin_form: PbHCO3
+
+  - 11: 
+    formula: PbCO3 (aq)
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: aqueous
+    name: Lead nitrate ion
+    lin_form: PbCO3
+    
+  - 12: 
+    formula: PbNO3 + (aq)
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: aqueous
+    name: Lead nitrate ion
+    lin_form: PbNO3
+    
+  - 13: 
+    formula: PbAC (s)
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: Solid
+    name: LeadAC
+    lin_form: none
+...
+
+#NOTE: Total concentrations must be given in mol/L
+MassBalance:
+---
+# Header names under MassBalance are choosen by the user
+# All other keys will be checked
+
+#Pb 2000ppm (2000mg/L)
+- water:
+  total_conc: 1
+  - delta: 
+    "H2O (l)": 1
+
+- carbonate:
+  total_conc: 2.941E-04
+  - delta:  
+    "H2CO3 (aq)": 1 
+    "HCO3 - (aq)": 1
+    "CO3 2- (aq)": 1
+
+- nitrate:
+  total_conc: 0.2873
+  - delta:
+    "HNO3 (aq)": 1
+    "NO3 - (aq)": 1
+    "PbNO3 + (aq)": 1
+
+- lead:
+  total_conc: 9.711E-03
+  - delta:
+    "PbAC (s)": 1
+    "Pb 2+ (aq)": 1
+    "PbNO3 + (aq)": 1
+    "PbOH + (aq)": 1
+    "PbHCO3 + (aq)": 1
+    "PbCO3 (aq)": 1
+
+...
+
+#Document for equilibrium or steady reactions
+EquilRxn:
+---
+# Headers under EquilRxn separate out each reaction object
+# Keys for these headers only factor into the order of the equations
+# Stoichiometry follows the convention that products are pos(+) and reactants are neg(-)
+# Note: logK is only required if any species in stoichiometry is unregistered
+# Example: below represents - {H2O (l)} --> {H + (aq)} + {OH - (aq)}
+# Note: a valid reaction statement requires at least 1 stoichiometry args
+
+# Note: You can also provide reaction energies: enthalpy, entropy, and energy
+
+- rxn00:
+  logK: -14
+  - stoichiometry:
+    "H2O (l)": -1
+    "OH - (aq)": 1
+    "H + (aq)": 1
+
+- rxn01:
+  logK: -6.35
+  - stoichiometry:
+    "H2CO3 (aq)": -1
+    "HCO3 - (aq)": 1
+    "H + (aq)": 1
+
+- rxn02:
+  logK: -10.33
+  - stoichiometry:
+    "HCO3 - (aq)": -1
+    "CO3 2- (aq)": 1
+    "H + (aq)": 1
+
+- rxn03:
+  logK: 1.4
+  - stoichiometry:
+    "HNO3 (aq)": -1
+    "NO3 - (aq)": 1
+    "H + (aq)": 1
+
+- rxn04:
+  logK: 1.17
+  - stoichiometry:
+    "NO3 - (aq)": -1
+    "Pb 2+ (aq)": -1
+    "PbNO3 + (aq)": 1
+
+- rxn05:
+  logK: 7.24
+  - stoichiometry:
+    "Pb 2+ (aq)": -1
+    "CO3 2- (aq)": -1
+    "PbCO3 (aq)": 1
+
+- rxn06:
+  logK: 2.9
+  - stoichiometry:
+    "Pb 2+ (aq)": -1
+    "HCO3 - (aq)": -1
+    "PbHCO3 + (aq)": 1
+
+- rxn07:
+  logK: -7.71
+  - stoichiometry:
+    "Pb 2+ (aq)": -1
+    "H2O (l)": -1
+    "H + (aq)": 1
+    "PbOH + (aq)": 1
+
+...
+
+
+#Adsorbent objects are referenced by their names given in the Scenario doc
+"AC (s)":
+---
+basis: area
+spec_area: 1    #Units: m^2/kg
+total_mass: 0.0005     #Units: kg
+surf_charge: 0.0
+surf_activity: ideal
+
+- volume_factors:
+  "PbAC (s)": 5
+
+- rxn01:
+  logK: -20.00
+  mole_factor: 1.0
+  - stoichiometry:
+    "Pb 2+ (aq)": -1
+    "H + (aq)": 2
+    "PbAC (s)": 1
+
+...
