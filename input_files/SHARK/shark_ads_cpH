@@ -15,14 +15,15 @@ Scenario:
 
 - sys_data:
   act_fun: davies    
-  const_pH: false	
+  const_pH: true
+  pH: 6.0
   temp: 293.15       #Units must be in Kelvin 
   dielec: 78.325     #Units must be in (1/Kelvin)
   volume: 0.5        #Units: L
 
 - run_time:
   steady: true        
-  specs_curve: true    
+  specs_curve: false    
 ...
 
 #The following header is entirely optional, but is used to set solver options
