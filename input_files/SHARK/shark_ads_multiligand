@@ -1,12 +1,12 @@
-# This is Xenia Wirth's adaption of an example SHARK input file for lead physisorption onto activated carbon 
+# This is Xenia Wirth's adaption of an example SHARK input file for lead physisorption onto multiple ligands of activated carbon 
 
 Scenario:
 ---
 - vars_fun:
-  numvar: 14
-  num_ssr: 8
+  numvar: 15
+  num_ssr: 9
   num_mbe: 4
-  num_ssao: 1
+  num_ssao: 2
 
 - ss_ads_objs:
   - obj01:
@@ -64,7 +64,7 @@ MasterSpecies:
 
   - 10: 
     formula: PbHCO3 + (aq)
-    charge: 0
+    charge: +1
     enthalpy: 0
     entropy: 0
     have_HS: false
@@ -88,7 +88,7 @@ MasterSpecies:
     
   - 12: 
     formula: PbNO3 + (aq)
-    charge: 0
+    charge: +1
     enthalpy: 0
     entropy: 0
     have_HS: false
@@ -101,6 +101,18 @@ MasterSpecies:
   - 13: 
     formula: PbAC (s)
     charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: Solid
+    name: LeadAC
+    lin_form: none
+    
+  - 13: 
+    formula: PbAC 2+ (s)
+    charge: +2
     enthalpy: 0
     entropy: 0
     have_HS: false
@@ -141,6 +153,7 @@ MassBalance:
   total_conc: 9.711E-03
   - delta:
     "PbAC (s)": 1
+    "PbAC 2+ (s)": 1
     "Pb 2+ (aq)": 1
     "PbNO3 + (aq)": 1
     "PbOH + (aq)": 1
@@ -232,6 +245,7 @@ surf_activity: ideal
 
 - volume_factors:
   "PbAC (s)": 5
+  "PbAC 2+ (s)": 5
 
 - rxn01:
   logK: -20.00
@@ -240,5 +254,12 @@ surf_activity: ideal
     "Pb 2+ (aq)": -1
     "H + (aq)": 2
     "PbAC (s)": 1
+    
+- rxn02:
+  logK: -20.00
+  mole_factor: 1.0
+  - stoichiometry:
+    "Pb 2+ (aq)": -1
+    "PbAC 2+ (s)": 1
 
 ...
