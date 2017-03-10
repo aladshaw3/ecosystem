@@ -1,6 +1,6 @@
 /*!
  *  \file shark.h shark.cpp
- *	\brief Speciation-object Hierarchy for Aqueous Reaction Kinetics
+ *	\brief Speciation-object Hierarchy for Adsorption Reactions and Kinetics
  *	\details This file contains structures and functions associated with solving speciation and kinetic
  *			problems in aqueous systems. The primary aim for the development of these algorithms was to
  *			solve speciation and adsorption problems for the recovery of uranium resources from seawater.

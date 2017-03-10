@@ -1,6 +1,6 @@
 /*!
  *  \file shark.cpp shark.h
- *	\brief Speciation-object Hierarchy for Aqueous Reaction Kinetics
+ *	\brief Speciation-object Hierarchy for Adsorption Reactions and Kinetics
  *
  *  \author Austin Ladshaw
  *	\date 05/27/2015
