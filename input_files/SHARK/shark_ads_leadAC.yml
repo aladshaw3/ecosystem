@@ -15,7 +15,8 @@ Scenario:
 
 - sys_data:
   act_fun: davies    
-  const_pH: false	
+  const_pH: false
+  pH: 6.0	
   temp: 293.15       #Units must be in Kelvin 
   dielec: 78.325     #Units must be in (1/Kelvin)
   volume: 0.5        #Units: L
@@ -64,15 +65,24 @@ MasterSpecies:
 
   - 10: 
     formula: PbHCO3 + (aq)
+<<<<<<< HEAD
     charge: +1
+=======
+    charge: 0
+>>>>>>> devel
     enthalpy: 0
     entropy: 0
     have_HS: false
     energy: 0
     have_G: false
     phase: aqueous
+<<<<<<< HEAD
     name: lead hydrogen carbonate
     lin_form: PbHCO3
+=======
+    name: LeadAC
+    lin_form: none
+>>>>>>> devel
 
   - 11: 
     formula: PbCO3 (aq)
@@ -83,21 +93,36 @@ MasterSpecies:
     energy: 0
     have_G: false
     phase: aqueous
+<<<<<<< HEAD
     name: Lead nitrate ion
     lin_form: PbCO3
     
   - 12: 
     formula: PbNO3 + (aq)
     charge: +1
+=======
+    name: LeadAC
+    lin_form: none
+
+  - 12: 
+    formula: PbNO3 + (aq)
+    charge: 0
+>>>>>>> devel
     enthalpy: 0
     entropy: 0
     have_HS: false
     energy: 0
     have_G: false
     phase: aqueous
+<<<<<<< HEAD
     name: Lead nitrate ion
     lin_form: PbNO3
     
+=======
+    name: LeadAC
+    lin_form: none
+
+>>>>>>> devel
   - 13: 
     formula: PbAC (s)
     charge: 0
@@ -225,7 +250,7 @@ EquilRxn:
 "AC (s)":
 ---
 basis: area
-spec_area: 1    #Units: m^2/kg
+spec_area: 1.0    #Units: m^2/kg
 total_mass: 0.0005     #Units: kg
 surf_charge: 0.0
 surf_activity: ideal

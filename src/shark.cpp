@@ -8637,6 +8637,7 @@ int shark_solver(SHARK_DATA *shark_dat)
 			std::cout << "Adsorbent: " << shark_dat->MultiAdsList[i].getAdsorbentName() << "\n";
 			std::cout << "Specific Surface Area (m^2/kg) = \t" << shark_dat->MultiAdsList[i].getSpecificArea() << std::endl;
 			std::cout << "Surface Charge Density (C/m^2) =\t" << shark_dat->MultiAdsList[i].getChargeDensity() << std::endl;
+			std::cout << "Electric Surface Potential (V) =\t" << shark_dat->MultiAdsList[i].getElectricPotential() << std::endl;
 			std::cout << std::endl;
 			for (int j=0; j<shark_dat->MultiAdsList[i].getNumberLigands(); j++)
 			{

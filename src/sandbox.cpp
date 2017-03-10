@@ -661,11 +661,41 @@ int RUN_SANDBOX()
 	b1.Display("b");
 	x1.Display("x");
 	
-	std::cout << "QR solve norm = " << (b1 - A1*x1).norm() << std::endl;
+	std::cout << "QR solve norm = " << (b1 - A1*x1).norm() << std::endl << std::endl;
 	
 	
 	// ------------------------------------- END QR Solve Example -----------------------------------------
 	
+	// ----------------------------- Example of Gauss-Seidel ------------------------------
+	Matrix<double> r1, U1, L1, s1;
+	r1.set_size(200, 1);
+	s1.set_size(200, 1);
+	A1.set_size(200, 200);
+	U1.set_size(200, 200);
+	L1.set_size(200, 200);
+	x1.set_size(200, 1);
+	b1.set_size(200, 1);
+	A1.tridiagonalFill(-1, 1.9999, -1, false);
+	U1.tridiagonalFill(0, 0, -1, false);
+	L1.tridiagonalFill(-1, 1.9999, 0, false);
+	//A1.Display("A");
+	x1.zeros();
+	b1(0,0) = 1.0;
+	r1 = (b1 - A1*x1);
+	double norm = (b1 - A1*x1).norm();
+	std::cout << "Gauss-Seidel Method" << std::endl;
+	std::cout << 0 << "\t" << norm << std::endl;
+	for (int i=0; i<10; i++)
+	{
+		s1.lowerTriangularSolve(A1, r1);
+		x1 = s1+x1;
+		r1 = (b1 - A1*x1);
+		
+		norm = (b1 - A1*x1).norm();
+		std::cout << i+1 << "\t" << norm << std::endl;
+	}
+	
+	// ------------------------------------- END Gauss-Seidel Example -----------------------------------------
 
 	std::cout << "\nEnd SANDBOX\n\n";
 	
