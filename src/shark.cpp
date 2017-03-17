@@ -9194,16 +9194,13 @@ int SHARK_TESTS()
 	shark_dat.num_ssr = 15;
 	shark_dat.num_mbe = 6;
 	
-	//shark_dat.num_ssao = 1;
-	//shark_dat.num_usao = 0;
-	
 	shark_dat.num_ssao = 0;
 	shark_dat.num_usao = 1;
 	
 	shark_dat.num_usr = 0;
 	shark_dat.num_other = 0;
 	shark_dat.act_fun = DAVIES;
-	shark_dat.steadystate = true;
+	shark_dat.steadystate = false;
 	shark_dat.simulationtime = 96.0;
 	shark_dat.dt = 0.1;
 	shark_dat.t_out = shark_dat.simulationtime / 1000.0;
@@ -9238,6 +9235,7 @@ int SHARK_TESTS()
 	HCl = 0.0;
 	NaCl = 0.43;	  // 25.155 g/L
 	NaHCO3 = 0.00233; // 140 ppm
+	//NaHCO3 = 1e-10; // ~0 ppm
 	UO2 = 3.227E-5;   // ~6 ppm
 	ads_area = 15000.0; // m^2/kg
 	ads_mol = 3.3;     // mol/kg
@@ -9258,7 +9256,7 @@ int SHARK_TESTS()
 
 	shark_dat.Newton_data.linear_solver = QR;
 	shark_dat.Newton_data.LineSearch = true;
-	shark_dat.Newton_data.nl_maxit = 100;
+	shark_dat.Newton_data.nl_maxit = 10;
 	shark_dat.Newton_data.NL_Output = true;
 
 	//Read problem specific info here --------------------------------------------------------
@@ -9851,7 +9849,8 @@ int SHARK_TESTS()
 
 	shark_dat.UnsteadyAdsList[0].setMolarFactor(0, 2.0);
 	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Equilibrium(logK_UO2);
-	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Forward(1.0E10);
+	//shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Forward(1.0E10);
+	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Forward(1.0E6);
 	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_InitialValue(0.0);
 	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(0, 0);
 	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(1, 0);
@@ -9881,7 +9880,8 @@ int SHARK_TESTS()
 
 	shark_dat.UnsteadyAdsList[0].setMolarFactor(1, 2.0);
 	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Equilibrium(logK_UO2CO3);
-	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Forward(1.0E9);
+	//shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Forward(1.0E9);
+	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Forward(1.0E3);
 	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_InitialValue(0.0);
 	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(0, 0);
 	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(1, 0);
