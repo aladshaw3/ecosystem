@@ -1242,6 +1242,7 @@ typedef struct SHARK_DATA
 	double simulationtime = 0.0;					///< Time to simulate unsteady reactions for (default = 0.0 hrs)
 	double dt = 0.1;								///< Time step size (hrs)
 	double dt_min = sqrt(DBL_EPSILON);				///< Minimum allowable step size
+	double dt_max = 744.0;							///< Maximum allowable step size (~1 month in time)
 	double t_out = 0.0;								///< Time increment by which file output is made (default = print all time steps)
 	double t_count = 0.0;							///< Running count of time increments
 	double time = 0.0;								///< Current value of time (starts from t = 0.0 hrs)
