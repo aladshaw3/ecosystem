@@ -1540,6 +1540,13 @@ int read_unsteadyrxn(SHARK_DATA *shark_dat);
 	\note Each adsorption object will have its own document header by the name of that object*/
 int read_adsorbobjects(SHARK_DATA *shark_dat);
 
+/// Function to go through the yaml object for each Unsteady Adsorption Object
+/** This function checks the yaml object for the expected keys and values of the unsteady adsorption object documents
+	to setup the shark simulation for the input given in the input file.
+	
+	\note Each unsteady adsorption object will have its own document header by the name of that object*/
+int read_unsteadyadsorbobjects(SHARK_DATA *shark_dat);
+
 /// Function to go through the yaml object for each MultiligandAdsorption Object
 /** This function checks the yaml object for the expected keys and values of the multiligand object documents
 	to setup the shark simulation for the input given in the input file.

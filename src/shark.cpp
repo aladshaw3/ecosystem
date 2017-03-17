@@ -5774,6 +5774,16 @@ int read_scenario(SHARK_DATA *shark_dat)
 	shark_dat->ss_ads_names.resize(shark_dat->num_ssao);
 	try
 	{
+		shark_dat->num_usao = shark_dat->yaml_object.getYamlWrapper()("Scenario")("vars_fun")["num_usao"].getInt();
+	}
+	catch (std::out_of_range)
+	{
+		shark_dat->num_usao = 0;
+	}
+	shark_dat->num_usar.resize(shark_dat->num_usao);
+	shark_dat->us_ads_names.resize(shark_dat->num_usao);
+	try
+	{
 		shark_dat->num_multi_ssao = shark_dat->yaml_object.getYamlWrapper()("Scenario")("vars_fun")["num_multi_ssao"].getInt();
 	}
 	catch (std::out_of_range)
@@ -5818,6 +5828,42 @@ int read_scenario(SHARK_DATA *shark_dat)
 			{
 				shark_dat->num_ssar[obj] = x.second.getMap().getInt("num_rxns");
 				shark_dat->ss_ads_names[obj] = x.second.getMap().getString("name");
+			}
+			catch (std::out_of_range)
+			{
+				mError(missing_information);
+				return -1;
+			}
+			obj++;
+		}
+	}
+	
+	//Read through unsteady adsorption objects for all adsorption reactions
+	if (shark_dat->num_usao > 0)
+	{
+		int object_check;
+		try
+		{
+			object_check = (int)shark_dat->yaml_object.getYamlWrapper()("Scenario")("us_ads_objs").getSubMap().size();
+		}
+		catch (std::out_of_range)
+		{
+			mError(missing_information);
+			return -1;
+		}
+		if (object_check != shark_dat->num_usao)
+		{
+			mError(missing_information);
+			return -1;
+		}
+		
+		int obj = 0;
+		for (auto &x: shark_dat->yaml_object.getYamlWrapper()("Scenario")("us_ads_objs").getSubMap())
+		{
+			try
+			{
+				shark_dat->num_usar[obj] = x.second.getMap().getInt("num_rxns");
+				shark_dat->us_ads_names[obj] = x.second.getMap().getString("name");
 			}
 			catch (std::out_of_range)
 			{
@@ -7315,6 +7361,488 @@ int read_adsorbobjects(SHARK_DATA *shark_dat)
 							if (shark_dat->MasterList.get_species(index).MolarArea() <= 0.0)
 								shark_dat->MasterList.get_species(index).setMolarArea(18.10);
 							shark_dat->AdsorptionList[i].setAreaFactor(index, shark_dat->MasterList.get_species(index).MolarArea()*6020.0);
+						}
+					}
+				}
+				
+			}
+			
+		}
+	}
+	
+	return success;
+}
+
+/// Function to go through the yaml object for each Unsteady Adsorption Object
+int read_unsteadyadsorbobjects(SHARK_DATA *shark_dat)
+{
+	int success = 0;
+	
+	if (shark_dat->num_usao > 0)
+	{
+		for (int i=0; i<shark_dat->num_usao; i++)
+		{
+			//Check for existance of the necessary object and quit if necessary
+			try
+			{
+				shark_dat->UnsteadyAdsList[i].setAdsorbentName( shark_dat->yaml_object.getYamlWrapper()(shark_dat->us_ads_names[i]).getName() );
+				shark_dat->UnsteadyAdsList[i].setTotalVolume(shark_dat->volume);
+			}
+			catch (std::out_of_range)
+			{
+				mError(missing_information);
+				return -1;
+			}
+			
+			// Other required pieces of information
+			try
+			{
+				shark_dat->UnsteadyAdsList[i].setBasis(shark_dat->yaml_object.getYamlWrapper()(shark_dat->us_ads_names[i]).getDataMap().getString("basis"));
+			}
+			catch (std::out_of_range)
+			{
+				mError(missing_information);
+				return -1;
+			}
+			try
+			{
+				shark_dat->UnsteadyAdsList[i].setTotalMass(shark_dat->yaml_object.getYamlWrapper()(shark_dat->us_ads_names[i]).getDataMap().getDouble("total_mass"));
+			}
+			catch (std::out_of_range)
+			{
+				mError(missing_information);
+				return -1;
+			}
+			try
+			{
+				shark_dat->UnsteadyAdsList[i].setSpecificArea(shark_dat->yaml_object.getYamlWrapper()(shark_dat->us_ads_names[i]).getDataMap().getDouble("spec_area"));
+			}
+			catch (std::out_of_range)
+			{
+				mError(missing_information);
+				return -1;
+			}
+			
+			// Some optional pieces of information
+			try
+			{
+				shark_dat->UnsteadyAdsList[i].setSpecificMolality(shark_dat->yaml_object.getYamlWrapper()(shark_dat->us_ads_names[i]).getDataMap().getDouble("spec_mole"));
+			}
+			catch (std::out_of_range)
+			{
+				shark_dat->UnsteadyAdsList[i].setSpecificMolality(1.0);
+			}
+			try
+			{
+				shark_dat->UnsteadyAdsList[i].setSurfaceCharge(shark_dat->yaml_object.getYamlWrapper()(shark_dat->us_ads_names[i]).getDataMap().getDouble("surf_charge"));
+			}
+			catch (std::out_of_range)
+			{
+				shark_dat->UnsteadyAdsList[i].setSurfaceCharge(0.0);
+			}
+			try
+			{
+				shark_dat->UnsteadyAdsList[i].setSurfaceChargeBool(shark_dat->yaml_object.getYamlWrapper()(shark_dat->us_ads_names[i]).getDataMap().getBool("include_surfcharge"));
+			}
+			catch (std::out_of_range)
+			{
+				shark_dat->UnsteadyAdsList[i].setSurfaceChargeBool(true);
+			}
+			int surf_act;
+			try
+			{
+				surf_act = surf_act_choice(shark_dat->yaml_object.getYamlWrapper()(shark_dat->us_ads_names[i]).getDataMap().getString("surf_activity"));
+				shark_dat->UnsteadyAdsList[i].setActivityEnum(surf_act);
+				
+				switch (surf_act)
+				{
+					case IDEAL_ADS:
+						shark_dat->UnsteadyAdsList[i].setActivityModelInfo(ideal_solution, NULL);
+						break;
+						
+					case FLORY_HUGGINS:
+						shark_dat->UnsteadyAdsList[i].setActivityModelInfo(FloryHuggins_unsteady, &shark_dat->UnsteadyAdsList[i]);
+						break;
+						
+					case UNIQUAC_ACT:
+						shark_dat->UnsteadyAdsList[i].setActivityModelInfo(UNIQUAC_unsteady, &shark_dat->UnsteadyAdsList[i]);
+						break;
+						
+					default:
+						shark_dat->UnsteadyAdsList[i].setActivityModelInfo(ideal_solution, NULL);
+						break;
+				}
+			} catch (std::out_of_range)
+			{
+				shark_dat->UnsteadyAdsList[i].setActivityModelInfo(ideal_solution, NULL);
+				surf_act = IDEAL_ADS;
+			}
+			
+			//Read in all reaction information
+			bool ContainsVolumeFactors;
+			bool ContainsAreaFactors;
+			std::string vol_check;
+			std::string area_check;
+			try
+			{
+				vol_check = shark_dat->yaml_object.getYamlWrapper()(shark_dat->us_ads_names[i])("volume_factors").getName();
+				ContainsVolumeFactors = true;
+			}
+			catch (std::out_of_range)
+			{
+				ContainsVolumeFactors = false;
+			}
+			try
+			{
+				area_check = shark_dat->yaml_object.getYamlWrapper()(shark_dat->us_ads_names[i])("area_factors").getName();
+				ContainsAreaFactors = true;
+			}
+			catch (std::out_of_range)
+			{
+				ContainsAreaFactors = false;
+			}
+			int num_head;
+			try
+			{
+				num_head = (int)shark_dat->yaml_object.getYamlWrapper()(shark_dat->us_ads_names[i]).getHeadMap().size();
+			}
+			catch (std::out_of_range)
+			{
+				mError(missing_information);
+				return -1;
+			}
+			
+			if (ContainsVolumeFactors == true && ContainsAreaFactors == false)
+			{
+				if (num_head != shark_dat->num_usar[i]+1)
+				{
+					mError(missing_information);
+					return -1;
+				}
+			}
+			else if (ContainsVolumeFactors == true && ContainsAreaFactors == true)
+			{
+				if (num_head != shark_dat->num_usar[i]+2)
+				{
+					mError(missing_information);
+					return -1;
+				}
+			}
+			else if (ContainsVolumeFactors == false && ContainsAreaFactors == true)
+			{
+				if (num_head != shark_dat->num_usar[i]+1)
+				{
+					mError(missing_information);
+					return -1;
+				}
+			}
+			else
+			{
+				if (num_head != shark_dat->num_usar[i])
+				{
+					mError(missing_information);
+					return -1;
+				}
+			}
+			
+			//Loop over all headers
+			int rxn = 0;
+			for (auto &x: shark_dat->yaml_object.getYamlWrapper()(shark_dat->us_ads_names[i]).getHeadMap())
+			{
+				if (x.second.getName() != "volume_factors" && x.second.getName() != "area_factors")
+				{
+					if (shark_dat->UnsteadyAdsList[i].isAreaBasis() == false)
+					{
+						try
+						{
+							shark_dat->UnsteadyAdsList[i].setMolarFactor(rxn, shark_dat->yaml_object.getYamlWrapper()(shark_dat->us_ads_names[i])(x.first)["mole_factor"].getDouble());
+						}
+						catch (std::out_of_range)
+						{
+							mError(missing_information);
+							return -1;
+						}
+					}
+					
+					int var_index;
+					try
+					{
+						var_index = shark_dat->MasterList.get_index(shark_dat->yaml_object.getYamlWrapper()(shark_dat->us_ads_names[i])(x.first)["unsteady_var"].getString());
+					}
+					catch (std::out_of_range)
+					{
+						mError(missing_information);
+						return -1;
+					}
+					if (var_index < 0 || var_index > (shark_dat->numvar-1))
+					{
+						mError(read_error);
+						return -1;
+					}
+					shark_dat->UnsteadyAdsList[i].getReaction(rxn).Set_Species_Index(var_index);
+					
+					try
+					{
+						shark_dat->UnsteadyAdsList[i].getReaction(rxn).Set_InitialValue(shark_dat->yaml_object.getYamlWrapper()(shark_dat->us_ads_names[i])(x.first)["initial_condition"].getDouble());
+					}
+					catch (std::out_of_range)
+					{
+						shark_dat->UnsteadyAdsList[i].getReaction(rxn).Set_InitialValue(0.0);
+					}
+					
+					try
+					{
+						shark_dat->UnsteadyAdsList[i].getReaction(rxn).Set_Equilibrium(shark_dat->yaml_object.getYamlWrapper()(shark_dat->us_ads_names[i])(x.first)["logK"].getDouble());
+					}
+					catch (std::out_of_range)
+					{
+						//At this point, it is unknown as to whether or not this is an actual error
+						//It will be checked later whether or not this causes a problem
+					}
+					
+					try
+					{
+						shark_dat->UnsteadyAdsList[i].getReaction(rxn).Set_Forward(shark_dat->yaml_object.getYamlWrapper()(shark_dat->us_ads_names[i])(x.first)["forward"].getDouble());
+					}
+					catch (std::out_of_range)
+					{
+						//At this point, it is unknown as to whether or not this is an actual error
+						//It will be checked later whether or not this causes a problem
+					}
+					
+					try
+					{
+						shark_dat->UnsteadyAdsList[i].getReaction(rxn).Set_Reverse(shark_dat->yaml_object.getYamlWrapper()(shark_dat->us_ads_names[i])(x.first)["reverse"].getDouble());
+					}
+					catch (std::out_of_range)
+					{
+						//At this point, it is unknown as to whether or not this is an actual error
+						//It will be checked later whether or not this causes a problem
+					}
+					
+					try
+					{
+						shark_dat->UnsteadyAdsList[i].getReaction(rxn).Set_ReverseRef(shark_dat->yaml_object.getYamlWrapper()(shark_dat->us_ads_names[i])(x.first)["reverse_ref"].getDouble());
+					}
+					catch (std::out_of_range)
+					{
+						//At this point, it is unknown as to whether or not this is an actual error
+						//It will be checked later whether or not this causes a problem
+					}
+					
+					try
+					{
+						shark_dat->UnsteadyAdsList[i].getReaction(rxn).Set_ForwardRef(shark_dat->yaml_object.getYamlWrapper()(shark_dat->us_ads_names[i])(x.first)["forward_ref"].getDouble());
+					}
+					catch (std::out_of_range)
+					{
+						//At this point, it is unknown as to whether or not this is an actual error
+						//It will be checked later whether or not this causes a problem
+					}
+					
+					try
+					{
+						shark_dat->UnsteadyAdsList[i].getReaction(rxn).Set_ActivationEnergy(shark_dat->yaml_object.getYamlWrapper()(shark_dat->us_ads_names[i])(x.first)["activation_energy"].getDouble());
+					}
+					catch (std::out_of_range)
+					{
+						//At this point, it is unknown as to whether or not this is an actual error
+						//It will be checked later whether or not this causes a problem
+					}
+					
+					try
+					{
+						shark_dat->UnsteadyAdsList[i].getReaction(rxn).Set_Affinity(shark_dat->yaml_object.getYamlWrapper()(shark_dat->us_ads_names[i])(x.first)["temp_affinity"].getDouble());
+					}
+					catch (std::out_of_range)
+					{
+						//At this point, it is unknown as to whether or not this is an actual error
+						//It will be checked later whether or not this causes a problem
+					}
+					
+					int count = 0;
+					double dH, dS;
+					try
+					{
+						dH = shark_dat->yaml_object.getYamlWrapper()(shark_dat->us_ads_names[i])(x.first)["enthalpy"].getDouble();
+						shark_dat->UnsteadyAdsList[i].getReaction(rxn).Set_Enthalpy(dH);
+						count++;
+					}
+					catch (std::out_of_range)
+					{
+						//At this point, it is unknown as to whether or not this is an actual error
+						//It will be checked later whether or not this causes a problem
+					}
+					
+					try
+					{
+						dS = shark_dat->yaml_object.getYamlWrapper()(shark_dat->us_ads_names[i])(x.first)["entropy"].getDouble();
+						shark_dat->UnsteadyAdsList[i].getReaction(rxn).Set_Entropy(dS);
+						count++;
+					}
+					catch (std::out_of_range)
+					{
+						//At this point, it is unknown as to whether or not this is an actual error
+						//It will be checked later whether or not this causes a problem
+					}
+					if (count == 2)
+						shark_dat->UnsteadyAdsList[i].getReaction(rxn).Set_EnthalpyANDEntropy(dH, dS);
+					
+					try
+					{
+						shark_dat->UnsteadyAdsList[i].getReaction(rxn).Set_Energy(shark_dat->yaml_object.getYamlWrapper()(shark_dat->us_ads_names[i])(x.first)["energy"].getDouble());
+					}
+					catch (std::out_of_range)
+					{
+						//At this point, it is unknown as to whether or not this is an actual error
+						//It will be checked later whether or not this causes a problem
+					}
+					
+					int stoich;
+					try
+					{
+						stoich = shark_dat->yaml_object.getYamlWrapper()(shark_dat->us_ads_names[i])(x.first)("stoichiometry").getMap().size();
+					}
+					catch (std::out_of_range)
+					{
+						mError(missing_information);
+						return -1;
+					}
+					if (stoich < 2)
+					{
+						mError(missing_information);
+						return -1;
+					}
+					
+					for (auto &y: shark_dat->yaml_object.getYamlWrapper()(shark_dat->us_ads_names[i])(x.first)("stoichiometry").getMap())
+					{
+						int index = shark_dat->MasterList.get_index(y.first);
+						if (index < 0 || index > (shark_dat->numvar-1))
+						{
+							mError(read_error);
+							return -1;
+						}
+						else
+						{
+							try
+							{
+								shark_dat->UnsteadyAdsList[i].getReaction(rxn).Set_Stoichiometric(index, y.second.getDouble());
+							}
+							catch (std::out_of_range)
+							{
+								mError(read_error);
+								return -1;
+							}
+						}
+					}
+					
+					rxn++;
+				}
+				else
+				{
+					//No Action
+				}
+			}
+			
+			// Read volume factors and check for errors
+			if (surf_act != IDEAL_ADS || shark_dat->UnsteadyAdsList[i].isAreaBasis() == true)
+			{
+				int num_fact = 0;
+				bool HaveVol = false;
+				try
+				{
+					num_fact = shark_dat->yaml_object.getYamlWrapper()(shark_dat->us_ads_names[i])("volume_factors").getDataMap().size();
+					HaveVol = true;
+					
+					if (num_fact != shark_dat->num_usar[i])
+					{
+						mError(missing_information);
+						return -1;
+					}
+					
+					//Loop overall volume_factors
+					for (auto &x: shark_dat->yaml_object.getYamlWrapper()(shark_dat->us_ads_names[i])("volume_factors").getDataMap().getMap())
+					{
+						int index = shark_dat->MasterList.get_index(x.first);
+						if (index < 0 || index > (shark_dat->numvar-1))
+						{
+							mError(read_error);
+							return -1;
+						}
+						else
+						{
+							try
+							{
+								shark_dat->UnsteadyAdsList[i].setVolumeFactor(index, x.second.getDouble());
+							}
+							catch (std::out_of_range)
+							{
+								mError(read_error);
+								return -1;
+							}
+						}
+						
+					}
+				}
+				catch (std::out_of_range)
+				{
+					HaveVol = false;
+					//Loop to set volumes based on mola object
+					for (int index = 0; index<shark_dat->MasterList.list_size(); index++)
+					{
+						if (shark_dat->MasterList.get_species(index).MolarVolume() <= 0.0)
+							shark_dat->MasterList.get_species(index).setMolarVolume(7.24);
+						shark_dat->UnsteadyAdsList[i].setVolumeFactor(index, shark_dat->MasterList.get_species(index).MolarVolume()*0.602);
+					}
+				}
+				
+				num_fact = 0;
+				try
+				{
+					num_fact = shark_dat->yaml_object.getYamlWrapper()(shark_dat->us_ads_names[i])("area_factors").getDataMap().size();
+					
+					if (num_fact != shark_dat->num_usar[i])
+					{
+						mError(missing_information);
+						return -1;
+					}
+					
+					//Loop overall area_factors
+					for (auto &x: shark_dat->yaml_object.getYamlWrapper()(shark_dat->us_ads_names[i])("area_factors").getDataMap().getMap())
+					{
+						int index = shark_dat->MasterList.get_index(x.first);
+						if (index < 0 || index > (shark_dat->numvar-1))
+						{
+							mError(read_error);
+							return -1;
+						}
+						else
+						{
+							try
+							{
+								shark_dat->UnsteadyAdsList[i].setAreaFactor(index, x.second.getDouble());
+							}
+							catch (std::out_of_range)
+							{
+								mError(read_error);
+								return -1;
+							}
+						}
+						
+					}
+				}
+				catch (std::out_of_range)
+				{
+					if (HaveVol == true)
+						shark_dat->UnsteadyAdsList[i].calculateAreaFactors();
+					else
+					{
+						//Loop to set area factors based on mola object
+						for (int index = 0; index<shark_dat->MasterList.list_size(); index++)
+						{
+							if (shark_dat->MasterList.get_species(index).MolarArea() <= 0.0)
+								shark_dat->MasterList.get_species(index).setMolarArea(18.10);
+							shark_dat->UnsteadyAdsList[i].setAreaFactor(index, shark_dat->MasterList.get_species(index).MolarArea()*6020.0);
 						}
 					}
 				}
@@ -9153,6 +9681,10 @@ int SHARK_SCENARIO(const char *yaml_input)
 	success = read_adsorbobjects(&shark_dat);
 	if (success != 0) {mError(read_error); return -1;}
 	
+	//Read and check the unsteady adsorption objects
+	success = read_unsteadyadsorbobjects(&shark_dat);
+	if (success != 0) {mError(read_error); return -1;}
+	
 	//Read and check all steady-state adsorbent-ligand paired documents
 	success = read_multiligandobjects(&shark_dat);
 	if (success != 0) {mError(read_error); return -1;}
@@ -9849,7 +10381,6 @@ int SHARK_TESTS()
 
 	shark_dat.UnsteadyAdsList[0].setMolarFactor(0, 2.0);
 	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Equilibrium(logK_UO2);
-	//shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Forward(1.0E10);
 	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Forward(1.0E6);
 	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_InitialValue(0.0);
 	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(0, 0);
@@ -9880,7 +10411,6 @@ int SHARK_TESTS()
 
 	shark_dat.UnsteadyAdsList[0].setMolarFactor(1, 2.0);
 	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Equilibrium(logK_UO2CO3);
-	//shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Forward(1.0E9);
 	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Forward(1.0E3);
 	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_InitialValue(0.0);
 	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(0, 0);
