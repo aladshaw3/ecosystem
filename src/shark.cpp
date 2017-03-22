@@ -7221,6 +7221,7 @@ int read_adsorbobjects(SHARK_DATA *shark_dat)
 			{
 				int num_fact = 0;
 				bool HaveVol = false;
+				
 				try
 				{
 					num_fact = shark_dat->yaml_object.getYamlWrapper()(shark_dat->ss_ads_names[i])("volume_factors").getDataMap().size();
@@ -7258,7 +7259,7 @@ int read_adsorbobjects(SHARK_DATA *shark_dat)
 				}
 				catch (std::out_of_range)
 				{
-					HaveVol = false;
+					HaveVol = true;
 					//Loop to set volumes based on mola object
 					for (int index = 0; index<shark_dat->MasterList.list_size(); index++)
 					{
@@ -7579,7 +7580,7 @@ int read_multiligandobjects(SHARK_DATA *shark_dat)
 				}
 				catch (std::out_of_range)
 				{
-					HaveVol = false;
+					HaveVol = true;
 					//Loop to set volumes based on mola object
 					for (int index = 0; index<shark_dat->MasterList.list_size(); index++)
 					{
