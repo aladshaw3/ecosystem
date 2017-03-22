@@ -8,10 +8,10 @@ Scenario:
   num_mbe: 4
   num_ssao: 2
 
-- ss_ads_objs:
+- ss_multiads_objs:
   - obj01:
-    name: AC (s)
-    num_rxns: 1       
+    name: AC
+    num_ligands: 2       
 
 - sys_data:
   act_fun: davies    
@@ -19,6 +19,7 @@ Scenario:
   temp: 293.15       #Units must be in Kelvin 
   dielec: 78.325     #Units must be in (1/Kelvin)
   volume: 0.5        #Units: L
+  reactor: batch
 
 - run_time:
   steady: true        
@@ -30,7 +31,7 @@ SolverOptions:
 ---
 line_search: true      #Default = true, and is recommended to be true
 search_type: standard
-linear_solve: QR      #Note: qr will now be the fastest for small problems 
+linear_solve: qr      #Note: qr will now be the fastest for small problems 
 nl_maxit: 50
 nl_abstol: 1e-5
 nl_reltol: 1e-8
@@ -99,7 +100,7 @@ MasterSpecies:
     lin_form: PbNO3
     
   - 13: 
-    formula: PbAC (s)
+    formula: PbAC (ad)
     charge: 0
     enthalpy: 0
     entropy: 0
@@ -111,19 +112,20 @@ MasterSpecies:
     lin_form: none
     
   - 13: 
-    formula: PbAC 2+ (s)
+    formula: PbAC 2+ (ad)
     charge: +2
     enthalpy: 0
     entropy: 0
     have_HS: false
     energy: 0
     have_G: false
-    phase: Solid
+    phase: adsorbed
     name: LeadAC
     lin_form: none
 ...
 
 #NOTE: Total concentrations must be given in mol/L
+
 MassBalance:
 ---
 # Header names under MassBalance are choosen by the user
@@ -152,8 +154,8 @@ MassBalance:
 - lead:
   total_conc: 9.711E-03
   - delta:
-    "PbAC (s)": 1
-    "PbAC 2+ (s)": 1
+    "PbAC (ad)": 1
+    "PbAC 2+ (ad)": 1
     "Pb 2+ (aq)": 1
     "PbNO3 + (aq)": 1
     "PbOH + (aq)": 1
@@ -235,13 +237,36 @@ EquilRxn:
 
 
 #Adsorbent objects are referenced by their names given in the Scenario doc
-"AC (s)":
+"AC (ad)":
 ---
 basis: area
-spec_area: 1    #Units: m^2/kg
-total_mass: 0.0005     #Units: kg
-surf_charge: 0.0
-surf_activity: ideal
+spec_area: 11740    #Units: m^2/kg
+total_mass: 0.00005     #Units: kg
+surf_activity: uniquac
+include_surfcharge: true
+
+- ligand01:
+  name: H0 (ad)
+  num_rxns: 1
+
+- ligand02:
+  name: H2 (ad)
+  num_rxns: 1
+  
+  ...
+  
+  "AC-H0 (ad)":
+---
+spec_mole: ?       #Units: mol/kg
+ligand_charge: 0
+
+- rxn01:
+  logK: -7
+  mole_factor: 1.0
+  - stoichiometry:
+    "Pb 2+ (aq)": -1
+    "UO2AO + (ad)": 1
+    "H + (aq)": 1
 
 - volume_factors:
   "PbAC (s)": 5
