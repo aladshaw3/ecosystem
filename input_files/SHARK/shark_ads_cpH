@@ -235,7 +235,7 @@ surf_activity: ideal
   "PbAC (s)": 5
 
 - rxn01:
-  logK: -9
+  logK: -8
   mole_factor: 1.0
   - stoichiometry:
     "Pb 2+ (aq)": -1
