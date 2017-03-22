@@ -226,14 +226,16 @@ EquilRxn:
 "AC":
 ---
 basis: area
-spec_area: 1   #Units: m^2/kg
+spec_area: 11740.0   #Units: m^2/kg
 total_mass: 0.5   #Units: kg
 surf_charge: 0.0
 surf_activity: ideal
 
+- area_factors:
+  "PbAC (ad)": 108717
+
 - rxn01:
   logK: -7
-  mole_factor: 1.0
   - stoichiometry:
     "Pb 2+ (aq)": -1
     "H + (aq)": 2
