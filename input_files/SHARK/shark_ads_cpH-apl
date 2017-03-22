@@ -1,29 +1,29 @@
-# This is Xenia Wirth's adaption of an example SHARK input file for lead physisorption onto multiple ligands of activated carbon 
+# This is Xenia Wirth's adaption of an example SHARK input file for lead physisorption onto activated carbon 
 
 Scenario:
 ---
 - vars_fun:
-  numvar: 15
-  num_ssr: 9
+  numvar: 14
+  num_ssr: 8
   num_mbe: 4
-  num_ssao: 2
+  num_ssao: 1
 
-- ss_multiads_objs:
+- ss_ads_objs:
   - obj01:
     name: AC
-    num_ligands: 2       
+    num_rxns: 1       
 
 - sys_data:
   act_fun: davies    
-  const_pH: false	
+  const_pH: true
+  pH: 5.0
   temp: 293.15       #Units must be in Kelvin 
   dielec: 78.325     #Units must be in (1/Kelvin)
   volume: 0.5        #Units: L
-  reactor: batch
 
 - run_time:
   steady: true        
-  specs_curve: true    
+  specs_curve: false    
 ...
 
 #The following header is entirely optional, but is used to set solver options
@@ -31,9 +31,9 @@ SolverOptions:
 ---
 line_search: true      #Default = true, and is recommended to be true
 search_type: standard
-linear_solve: qr      #Note: qr will now be the fastest for small problems 
-nl_maxit: 50
-nl_abstol: 1e-5
+linear_solve: QR      #Note: qr will now be the fastest for small problems 
+nl_maxit: 100
+nl_abstol: 1e-6
 nl_reltol: 1e-8
 lin_reltol: 1e-6 	
 lin_abstol: 1e-6		
@@ -65,7 +65,7 @@ MasterSpecies:
 
   - 10: 
     formula: PbHCO3 + (aq)
-    charge: +1
+    charge: 0
     enthalpy: 0
     entropy: 0
     have_HS: false
@@ -89,7 +89,7 @@ MasterSpecies:
     
   - 12: 
     formula: PbNO3 + (aq)
-    charge: +1
+    charge: 0
     enthalpy: 0
     entropy: 0
     have_HS: false
@@ -107,55 +107,41 @@ MasterSpecies:
     have_HS: false
     energy: 0
     have_G: false
-    phase: Solid
-    name: LeadAC
-    lin_form: none
-    
-  - 13: 
-    formula: PbAC 2+ (ad)
-    charge: +2
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
     phase: adsorbed
     name: LeadAC
-    lin_form: none
+    lin_form: Pb
 ...
 
 #NOTE: Total concentrations must be given in mol/L
-
 MassBalance:
 ---
 # Header names under MassBalance are choosen by the user
 # All other keys will be checked
 
-#Pb 2000ppm (2000mg/L)
+#Pb 1200ppm (1200mg/L)
 - water:
   total_conc: 1
   - delta: 
     "H2O (l)": 1
 
 - carbonate:
-  total_conc: 2.941E-04
+  total_conc: 1.46E-05
   - delta:  
     "H2CO3 (aq)": 1 
     "HCO3 - (aq)": 1
     "CO3 2- (aq)": 1
 
 - nitrate:
-  total_conc: 0.2873
+  total_conc: 0.172
   - delta:
     "HNO3 (aq)": 1
     "NO3 - (aq)": 1
     "PbNO3 + (aq)": 1
 
 - lead:
-  total_conc: 9.711E-03
+  total_conc: 5.8E-03
   - delta:
     "PbAC (ad)": 1
-    "PbAC 2+ (ad)": 1
     "Pb 2+ (aq)": 1
     "PbNO3 + (aq)": 1
     "PbOH + (aq)": 1
@@ -237,54 +223,22 @@ EquilRxn:
 
 
 #Adsorbent objects are referenced by their names given in the Scenario doc
-"AC (ad)":
+"AC":
 ---
 basis: area
-spec_area: 11740    #Units: m^2/kg
-total_mass: 0.00005     #Units: kg
-surf_activity: uniquac
-include_surfcharge: true
+spec_area: 11740.0   #Units: m^2/kg
+total_mass: 0.5   #Units: kg
+surf_charge: 0.0
+surf_activity: ideal
 
-- ligand01:
-  name: H0 (ad)
-  num_rxns: 1
-
-- ligand02:
-  name: H2 (ad)
-  num_rxns: 1
-  
-  ...
-  
-  "AC-H0 (ad)":
----
-spec_mole: ?       #Units: mol/kg
-ligand_charge: 0
+- area_factors:
+  "PbAC (ad)": 108717
 
 - rxn01:
   logK: -7
-  mole_factor: 1.0
-  - stoichiometry:
-    "Pb 2+ (aq)": -1
-    "UO2AO + (ad)": 1
-    "H + (aq)": 1
-
-- volume_factors:
-  "PbAC (s)": 5
-  "PbAC 2+ (s)": 5
-
-- rxn01:
-  logK: -20.00
-  mole_factor: 1.0
   - stoichiometry:
     "Pb 2+ (aq)": -1
     "H + (aq)": 2
-    "PbAC (s)": 1
-    
-- rxn02:
-  logK: -20.00
-  mole_factor: 1.0
-  - stoichiometry:
-    "Pb 2+ (aq)": -1
-    "PbAC 2+ (s)": 1
+    "PbAC (ad)": 1
 
 ...
