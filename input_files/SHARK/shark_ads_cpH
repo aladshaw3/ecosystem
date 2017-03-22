@@ -125,21 +125,21 @@ MassBalance:
     "H2O (l)": 1
 
 - carbonate:
-  total_conc: 1.460E-05
+  total_conc: 1.39E-05
   - delta:  
     "H2CO3 (aq)": 1 
     "HCO3 - (aq)": 1
     "CO3 2- (aq)": 1
 
 - nitrate:
-  total_conc: 0.172
+  total_conc: 2.856E-03
   - delta:
     "HNO3 (aq)": 1
     "NO3 - (aq)": 1
     "PbNO3 + (aq)": 1
 
 - lead:
-  total_conc: 5.813E-03
+  total_conc: 9.65E-05
   - delta:
     "PbAC (s)": 1
     "Pb 2+ (aq)": 1
@@ -235,7 +235,7 @@ surf_activity: ideal
   "PbAC (s)": 5
 
 - rxn01:
-  logK: -6
+  logK: -7
   mole_factor: 1.0
   - stoichiometry:
     "Pb 2+ (aq)": -1
