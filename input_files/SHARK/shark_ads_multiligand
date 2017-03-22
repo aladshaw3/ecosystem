@@ -1,12 +1,12 @@
-# This is Xenia Wirth's adaption of an example SHARK input file for lead physisorption onto activated carbon 
+# This is Xenia Wirth's adaption of an example SHARK input file for lead physisorption onto multiple ligands of activated carbon 
 
 Scenario:
 ---
 - vars_fun:
-  numvar: 14
-  num_ssr: 8
+  numvar: 15
+  num_ssr: 9
   num_mbe: 4
-  num_ssao: 1
+  num_ssao: 2
 
 - ss_ads_objs:
   - obj01:
@@ -15,8 +15,7 @@ Scenario:
 
 - sys_data:
   act_fun: davies    
-  const_pH: false
-  pH: 6.0	
+  const_pH: false	
   temp: 293.15       #Units must be in Kelvin 
   dielec: 78.325     #Units must be in (1/Kelvin)
   volume: 0.5        #Units: L
@@ -65,28 +64,15 @@ MasterSpecies:
 
   - 10: 
     formula: PbHCO3 + (aq)
-<<<<<<< HEAD
-<<<<<<< HEAD
     charge: +1
-=======
-    charge: 0
->>>>>>> devel
-=======
-    charge: +1
->>>>>>> Xenia
     enthalpy: 0
     entropy: 0
     have_HS: false
     energy: 0
     have_G: false
     phase: aqueous
-<<<<<<< HEAD
     name: lead hydrogen carbonate
     lin_form: PbHCO3
-=======
-    name: LeadAC
-    lin_form: none
->>>>>>> devel
 
   - 11: 
     formula: PbCO3 (aq)
@@ -97,42 +83,36 @@ MasterSpecies:
     energy: 0
     have_G: false
     phase: aqueous
-<<<<<<< HEAD
     name: Lead nitrate ion
     lin_form: PbCO3
     
   - 12: 
     formula: PbNO3 + (aq)
     charge: +1
-<<<<<<< HEAD
-=======
-    name: LeadAC
-    lin_form: none
-
-  - 12: 
-    formula: PbNO3 + (aq)
-    charge: 0
->>>>>>> devel
-=======
->>>>>>> Xenia
     enthalpy: 0
     entropy: 0
     have_HS: false
     energy: 0
     have_G: false
     phase: aqueous
-<<<<<<< HEAD
     name: Lead nitrate ion
     lin_form: PbNO3
     
-=======
-    name: LeadAC
-    lin_form: none
-
->>>>>>> devel
   - 13: 
     formula: PbAC (s)
     charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: Solid
+    name: LeadAC
+    lin_form: none
+    
+  - 13: 
+    formula: PbAC 2+ (s)
+    charge: +2
     enthalpy: 0
     entropy: 0
     have_HS: false
@@ -149,30 +129,31 @@ MassBalance:
 # Header names under MassBalance are choosen by the user
 # All other keys will be checked
 
-#Pb 800ppm (800mg/L)
+#Pb 2000ppm (2000mg/L)
 - water:
   total_conc: 1
   - delta: 
     "H2O (l)": 1
 
 - carbonate:
-  total_conc: 1.973E-05
+  total_conc: 2.941E-04
   - delta:  
     "H2CO3 (aq)": 1 
     "HCO3 - (aq)": 1
     "CO3 2- (aq)": 1
 
 - nitrate:
-  total_conc: 4.287E-02
+  total_conc: 0.2873
   - delta:
     "HNO3 (aq)": 1
     "NO3 - (aq)": 1
     "PbNO3 + (aq)": 1
 
 - lead:
-  total_conc: 1.449E-03
+  total_conc: 9.711E-03
   - delta:
     "PbAC (s)": 1
+    "PbAC 2+ (s)": 1
     "Pb 2+ (aq)": 1
     "PbNO3 + (aq)": 1
     "PbOH + (aq)": 1
@@ -257,13 +238,14 @@ EquilRxn:
 "AC (s)":
 ---
 basis: area
-spec_area: 1.0    #Units: m^2/kg
+spec_area: 1    #Units: m^2/kg
 total_mass: 0.0005     #Units: kg
 surf_charge: 0.0
 surf_activity: ideal
 
 - volume_factors:
   "PbAC (s)": 5
+  "PbAC 2+ (s)": 5
 
 - rxn01:
   logK: -20.00
@@ -272,5 +254,12 @@ surf_activity: ideal
     "Pb 2+ (aq)": -1
     "H + (aq)": 2
     "PbAC (s)": 1
+    
+- rxn02:
+  logK: -20.00
+  mole_factor: 1.0
+  - stoichiometry:
+    "Pb 2+ (aq)": -1
+    "PbAC 2+ (s)": 1
 
 ...
