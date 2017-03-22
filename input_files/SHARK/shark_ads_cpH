@@ -16,7 +16,7 @@ Scenario:
 - sys_data:
   act_fun: davies    
   const_pH: true
-  pH: 6.0
+  pH: 5.0
   temp: 293.15       #Units must be in Kelvin 
   dielec: 78.325     #Units must be in (1/Kelvin)
   volume: 0.5        #Units: L
