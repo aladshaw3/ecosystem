@@ -226,7 +226,7 @@ EquilRxn:
 "AC (s)":
 ---
 basis: area
-spec_area: 10000   #Units: m^2/kg
+spec_area: 11740   #Units: m^2/kg
 total_mass: 0.00005     #Units: kg
 surf_charge: 0.0
 surf_activity: ideal
