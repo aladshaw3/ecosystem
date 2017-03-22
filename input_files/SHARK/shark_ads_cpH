@@ -227,7 +227,7 @@ EquilRxn:
 ---
 basis: area
 spec_area: 1   #Units: m^2/kg
-total_mass: 0.00005   #Units: kg
+total_mass: 0.0005   #Units: kg
 surf_charge: 0.0
 surf_activity: ideal
 
