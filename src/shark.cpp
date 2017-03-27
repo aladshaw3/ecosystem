@@ -7305,7 +7305,7 @@ int read_adsorbobjects(SHARK_DATA *shark_dat)
 				}
 				catch (std::out_of_range)
 				{
-					HaveVol = true;
+					HaveVol = false;
 					//Loop to set volumes based on mola object
 					for (int index = 0; index<shark_dat->MasterList.list_size(); index++)
 					{
@@ -8108,7 +8108,7 @@ int read_multiligandobjects(SHARK_DATA *shark_dat)
 				}
 				catch (std::out_of_range)
 				{
-					HaveVol = true;
+					HaveVol = false;
 					//Loop to set volumes based on mola object
 					for (int index = 0; index<shark_dat->MasterList.list_size(); index++)
 					{
