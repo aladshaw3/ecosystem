@@ -33,7 +33,7 @@ search_type: standard
 l_print: false
 linear_solve: qr  
 nl_abstol: 1e-6 
-nl_maxit: 100		
+nl_maxit: 1000		
 
 ...
 
