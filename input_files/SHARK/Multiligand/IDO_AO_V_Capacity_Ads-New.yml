@@ -234,7 +234,7 @@ MassBalance:
     "H2O (l)": 1
 
 - carbonate:
-  total_conc: 0.002290951
+  total_conc: 0.002296217
   - delta: 
     "NaHCO3 (aq)": 1
     "NaCO3 - (aq)": 1 
@@ -246,7 +246,7 @@ MassBalance:
     "VO2(CO3)2 3- (aq)": 2
 
 - sodium: 
-  total_conc: 0.432466273
+  total_conc: 0.432471539
   - delta:
     "NaHCO3 (aq)": 1
     "NaCO3 - (aq)": 1
@@ -414,7 +414,7 @@ include_surfcharge: true
 
 "AF1-HAO (ad)":
 ---
-spec_mole: 1.4     #Units: mol/kg
+spec_mole: 1.45     #Units: mol/kg
 ligand_charge: 0
 
 - rxn01:
