@@ -1,0 +1,467 @@
+Scenario:
+---
+- vars_fun:
+  numvar: 40
+  num_ssr: 28
+  num_mbe: 6
+  num_multi_ssao: 1
+
+- ss_multiads_objs:
+  - obj01:
+    name: AF1
+    num_ligands: 2 
+
+- sys_data:
+  act_fun: davies    
+  const_pH: false
+  pH: 8	
+  temp: 293.15        
+  dielec: 78.325     
+  volume: 0.75  
+  reactor: batch
+
+- run_time:
+  steady: true        
+  specs_curve: true  
+  pH_step: 0.25
+  temp_curve: false
+  start_temp: 273.15
+  end_temp: 323.15
+  temp_step: 2.5
+  
+...
+
+SolverOptions:
+---
+line_search: true      
+search_type: standard
+linear_solve: qr  
+nl_abstol: 1e-6
+nl_maxit: 100		
+
+...
+
+MasterSpecies:
+---
+- reg:
+  0: Cl - (aq)
+  1: H2O (l)
+  2: H + (aq)
+  3: OH - (aq)
+  4: H2CO3 (aq)
+  5: HCO3 - (aq)
+  6: CO3 2- (aq)
+  7: HCl (aq)
+  8: NaHCO3 (aq)
+  9: NaCO3 - (aq)
+  10: Na2CO3 (aq)
+  11: Na + (aq)
+  12: NaCl (aq)
+  13: NaOH (aq)
+  14: HNO3 (aq)
+  15: NO3 - (aq)
+  16: UO2 2+ (aq)
+  17: UO2OH + (aq)
+  18: UO2(OH)2 (aq)
+  19: UO2(OH)3 - (aq)
+  20: UO2(OH)4 2- (aq)
+  21: (UO2)2OH 3+ (aq)
+  22: (UO2)2(OH)2 2+ (aq)
+  23: (UO2)3(OH)4 2+ (aq)
+  24: (UO2)3(OH)5 + (aq)
+  25: (UO2)3(OH)7 - (aq)
+  26: (UO2)4(OH)7 + (aq)
+  27: UO2CO3 (aq)
+  28: UO2(CO3)2 2- (aq)
+  29: UO2(CO3)3 4- (aq)
+  30: UO2Cl + (aq)
+  31: UO2Cl2 (aq)
+  32: UO2Cl3 - (aq)
+  33: UO2NO3 + (aq)
+  34: UO2(NO3)2 (aq)
+
+
+- unreg:
+  - 35: 
+    formula: HIDO - (ad)
+    charge: -1
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: cyclic-amidioxime
+    lin_form: H
+
+  - 36: 
+    formula: H2IDO (ad)
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: cyclic-amidioxime
+    lin_form: H2
+
+  - 37: 
+    formula: H3IDO + (ad)
+    charge: 1
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: cyclic-amidioxime
+    lin_form: H3
+
+  - 38: 
+    formula: HAO (ad)
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: acyclic-amidioxime
+    lin_form: H
+
+  - 39: 
+    formula: H2AO + (ad)
+    charge: 1
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: acyclic-amidioxime
+    lin_form: H2
+
+...
+
+MassBalance:
+---
+- water:
+  total_conc: 1
+  - delta: 
+    "H2O (l)": 1
+
+- carbonate:
+  total_conc: 0.002296217
+  - delta: 
+    "NaHCO3 (aq)": 1
+    "NaCO3 - (aq)": 1 
+    "Na2CO3 (aq)": 1
+    "H2CO3 (aq)": 1 
+    "HCO3 - (aq)": 1
+    "CO3 2- (aq)": 1
+    "UO2CO3 (aq)": 1
+    "UO2(CO3)2 2- (aq)": 2
+    "UO2(CO3)3 4- (aq)": 3
+
+- nitrate:
+  total_conc: 6.49166E-05
+  - delta:
+    "HNO3 (aq)": 1
+    "NO3 - (aq)": 1
+    "UO2NO3 + (aq)": 1
+    "UO2(NO3)2 (aq)": 2
+
+- sodium: 
+  total_conc: 0.432296217
+  - delta:
+    "NaHCO3 (aq)": 1
+    "NaCO3 - (aq)": 1
+    "Na2CO3 (aq)": 2
+    "Na + (aq)": 1
+    "NaCl (aq)": 1
+    "NaOH (aq)": 1
+
+- uranyl:
+  total_conc: 3.24583E-05
+  - delta:
+    "UO2NO3 + (aq)": 1
+    "UO2(NO3)2 (aq)": 1
+    "UO2 2+ (aq)": 1
+    "UO2OH + (aq)": 1
+    "UO2(OH)2 (aq)": 1
+    "UO2(OH)3 - (aq)": 1
+    "UO2(OH)4 2- (aq)": 1
+    "(UO2)2OH 3+ (aq)": 2
+    "(UO2)2(OH)2 2+ (aq)": 2
+    "(UO2)3(OH)4 2+ (aq)": 3
+    "(UO2)3(OH)5 + (aq)": 3
+    "(UO2)3(OH)7 - (aq)": 3
+    "(UO2)4(OH)7 + (aq)": 4
+    "UO2CO3 (aq)": 1
+    "UO2(CO3)2 2- (aq)": 1
+    "UO2(CO3)3 4- (aq)": 1
+    "UO2Cl + (aq)": 1
+    "UO2Cl2 (aq)": 1
+    "UO2Cl3 - (aq)": 1
+
+- chlorine:
+  total_conc: 0.43
+  - delta:
+    "Cl - (aq)": 1
+    "HCl (aq)": 1
+    "NaCl (aq)": 1
+    "UO2Cl + (aq)": 1
+    "UO2Cl2 (aq)": 2
+    "UO2Cl3 - (aq)": 3
+
+...
+
+EquilRxn:
+---
+- rxn00:
+  - stoichiometry:
+    "H2O (l)": -1
+    "OH - (aq)": 1
+    "H + (aq)": 1
+
+- rxn01:
+  - stoichiometry:
+    "H2CO3 (aq)": -1
+    "HCO3 - (aq)": 1
+    "H + (aq)": 1
+
+- rxn02:
+  - stoichiometry:
+    "HCO3 - (aq)": -1
+    "CO3 2- (aq)": 1
+    "H + (aq)": 1
+
+- rxn03:
+  - stoichiometry:
+    "NaHCO3 (aq)": -1
+    "Na + (aq)": 1
+    "CO3 2- (aq)": 1
+    "H + (aq)": 1
+
+- rxn04:
+  - stoichiometry:
+    "NaCO3 - (aq)": -1
+    "Na + (aq)": 1
+    "CO3 2- (aq)": 1
+
+- rxn05:
+  - stoichiometry:
+    "NaCl (aq)": -1 
+    "Na + (aq)": 1
+    "Cl - (aq)": 1
+
+- rxn06:
+  - stoichiometry:
+    "HNO3 (aq)": -1
+    "NO3 - (aq)": 1
+    "H + (aq)": 1
+
+- rxn07:
+  - stoichiometry:
+    "NO3 - (aq)": -1
+    "UO2 2+ (aq)": -1
+    "UO2NO3 + (aq)": 1
+
+- rxn08:
+  - stoichiometry:
+    "NO3 - (aq)": -2
+    "UO2 2+ (aq)": -1
+    "UO2(NO3)2 (aq)": 1
+
+- rxn09:
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "H2O (l)": -1
+    "UO2OH + (aq)": 1
+    "H + (aq)": 1
+
+- rxn10:
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "H2O (l)": -3
+    "UO2(OH)3 - (aq)": 1
+    "H + (aq)": 3
+
+- rxn11:
+  - stoichiometry:
+    "UO2 2+ (aq)": -2
+    "H2O (l)": -2
+    "(UO2)2(OH)2 2+ (aq)": 1
+    "H + (aq)": 2
+
+- rxn12:
+  - stoichiometry:
+    "UO2 2+ (aq)": -3
+    "H2O (l)": -5
+    "(UO2)3(OH)5 + (aq)": 1
+    "H + (aq)": 5
+
+- rxn13:
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "CO3 2- (aq)": -1
+    "UO2CO3 (aq)": 1
+
+- rxn14:
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "CO3 2- (aq)": -2
+    "UO2(CO3)2 2- (aq)": 1
+
+- rxn15:
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "CO3 2- (aq)": -3
+    "UO2(CO3)3 4- (aq)": 1
+
+- rxn16:
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "H2O (l)": -2
+    "UO2(OH)2 (aq)": 1
+    "H + (aq)": 2
+
+- rxn17:
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "H2O (l)": -4
+    "UO2(OH)4 2- (aq)": 1
+    "H + (aq)": 4
+
+- rxn18:
+  - stoichiometry:
+    "UO2 2+ (aq)": -2
+    "H2O (l)": -1
+    "(UO2)2OH 3+ (aq)": 1
+    "H + (aq)": 1
+
+- rxn19:
+  - stoichiometry:
+    "UO2 2+ (aq)": -3
+    "H2O (l)": -4
+    "(UO2)3(OH)4 2+ (aq)": 1
+    "H + (aq)": 4
+
+- rxn20:
+  - stoichiometry:
+    "UO2 2+ (aq)": -3
+    "H2O (l)": -7
+    "(UO2)3(OH)7 - (aq)": 1
+    "H + (aq)": 7
+
+- rxn21:
+  - stoichiometry:
+    "UO2 2+ (aq)": -4
+    "H2O (l)": -7
+    "(UO2)4(OH)7 + (aq)": 1
+    "H + (aq)": 7
+
+- rxn22:
+  - stoichiometry:
+    "Na2CO3 (aq)": -1
+    "Na + (aq)": 2
+    "CO3 2- (aq)": 1
+
+- rxn23:
+  - stoichiometry:
+    "HCl (aq)": -1 
+    "H + (aq)": 1
+    "Cl - (aq)": 1
+
+- rxn24:
+  - stoichiometry:
+    "NaOH (aq)": -1 
+    "Na + (aq)": 1
+    "OH - (aq)": 1
+
+- rxn25:
+  - stoichiometry:
+    "Cl - (aq)": -1
+    "UO2 2+ (aq)": -1
+    "UO2Cl + (aq)": 1
+
+- rxn26:
+  - stoichiometry:
+    "Cl - (aq)": -2
+    "UO2 2+ (aq)": -1
+    "UO2Cl2 (aq)": 1
+
+- rxn27:
+  - stoichiometry:
+    "Cl - (aq)": -3
+    "UO2 2+ (aq)": -1
+    "UO2Cl3 - (aq)": 1
+
+...
+
+"AF1":
+---
+spec_area: 15000.0     #Units: m^2/kg
+total_mass: 1.51095e-5     #Units: kg
+surf_activity: uniquac
+include_surfcharge: true
+
+- ligand01:
+  name: AO - (ad)
+  num_rxns: 2
+
+- ligand02:
+  name: IDO 2- (ad)
+  num_rxns: 3
+
+...
+
+"AF1-AO - (ad)":
+---
+spec_mole: 1.45     #Units: mol/kg
+ligand_charge: -1
+
+- rxn06:
+  logK: 13.21
+  mole_factor: 1.0
+  - stoichiometry:
+    "H + (aq)": -1
+    "HAO (ad)": 1
+
+- rxn07:
+  logK: 18.99
+  mole_factor: 1.0
+  - stoichiometry:
+    "H + (aq)": -2
+    "H2AO + (ad)": 1
+
+...
+
+"AF1-IDO 2- (ad)":
+---
+spec_mole: 3.3     #Units: mol/kg
+ligand_charge: -2
+
+- rxn08:
+  logK: 12.85
+  mole_factor: 1.0
+  - stoichiometry:
+    "H + (aq)": -1
+    "HIDO - (ad)": 1
+
+- rxn09:
+  logK: 23.84
+  mole_factor: 1.0
+  - stoichiometry:
+    "H + (aq)": -2
+    "H2IDO (ad)": 1
+
+- rxn10:
+  logK: 25.97
+  mole_factor: 1.0
+  - stoichiometry:
+    "H + (aq)": -3
+    "H3IDO + (ad)": 1
+
+...

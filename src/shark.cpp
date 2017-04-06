@@ -1956,7 +1956,7 @@ double AdsorptionReaction::calculateActiveFraction(const Matrix<double> &x)
 		}
 		if (sum > this->specific_area)
 			sum = this->specific_area;
-		phi = 1.0 - (sum / this->specific_area); 
+		phi = 1.0 - (sum / (this->specific_area));
 		if (phi < DBL_MIN)
 			phi = DBL_MIN;
 	}
@@ -1968,7 +1968,7 @@ double AdsorptionReaction::calculateActiveFraction(const Matrix<double> &x)
 		}
 		if (sum > this->specific_molality)
 			sum = this->specific_molality;
-		phi = 1.0 - (sum / this->specific_molality); 
+		phi = 1.0 - (sum / (this->specific_molality));
 		if (phi < DBL_MIN)
 			phi = DBL_MIN;
 	}
@@ -8665,7 +8665,7 @@ int shark_guess(SHARK_DATA *shark_dat)
 {
 	int success = 0;
 
-	shark_dat->Conc_new.ConstantICFill(0.0);
+	shark_dat->Conc_new.ConstantICFill(0.5);
 	shark_dat->activity_new.ConstantICFill(1.0);
 
 	for (int i=0; i<shark_dat->MassBalanceList.size(); i++)
