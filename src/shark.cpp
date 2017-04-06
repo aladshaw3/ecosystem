@@ -9711,6 +9711,763 @@ int SHARK_TESTS()
 {
 	int success = 0;
 	double time;
+	
+	SHARK_DATA shark_dat;
+	FILE *TestOutput;
+	time = clock();
+	
+	//Read problem size info here
+	TestOutput = fopen("output/SHARK_Test.txt", "w+");
+	if (TestOutput == nullptr)
+	{
+		system("mkdir output");
+		TestOutput = fopen("output/SHARK_Test.txt", "w+");
+	}
+	shark_dat.numvar = 24;
+	shark_dat.num_ssr = 15;
+	shark_dat.num_mbe = 6;
+	
+	shark_dat.num_ssao = 0;
+	shark_dat.num_usao = 1;
+	
+	shark_dat.num_usr = 0;
+	shark_dat.num_other = 0;
+	shark_dat.act_fun = DAVIES;
+	shark_dat.steadystate = false;
+	shark_dat.simulationtime = 96.0;
+	shark_dat.dt = 0.1;
+	shark_dat.t_out = shark_dat.simulationtime / 1000.0;
+	shark_dat.const_pH = false;
+	shark_dat.SpeciationCurve = false;
+	shark_dat.TimeAdaptivity = true;
+	shark_dat.pH = 7.80;
+	shark_dat.dielectric_const = 78.325;
+	shark_dat.temperature = 293.15;
+	shark_dat.volume = 1.0;							//SHOULD BE REQUIRED IF WE HAVE ADSORPTION OBJECTS!!!
+	
+	shark_dat.num_usar.resize(shark_dat.num_usao);	//Required to set this up PRIOR to calling the setup function for shark
+	shark_dat.us_ads_names.resize(shark_dat.num_usao);
+	shark_dat.num_usar[0] = 2;						//Required to set this up PRIOR to calling the setup function for shark
+	
+	
+	//Temporary Variables to modify test case
+	double NaHCO3 = 1.786E-1;
+	double UO2 = 1.079E-6;
+	double NaCl = 0.0;
+	double NaOH = 0.0;
+	double HCl = 0.0;
+	double logK_UO2CO3 = -0.3355;
+	double logK_UO2 = 4.303;
+	double ads_area = 15000.0; // m^2/kg
+	double ads_mol = 8.5;      // mol/kg
+	double ads_mass = 1.5E-5;  // kg
+	double volume = 1.0;       // L
+	
+	// ------------------ 1-L Various Carbonate Concentrations -------------------------
+	NaOH = 0.0;
+	HCl = 0.0;
+	NaCl = 0.43;	  // 25.155 g/L
+	NaHCO3 = 0.00233; // 140 ppm
+	//NaHCO3 = 1e-10; // ~0 ppm
+	UO2 = 3.227E-5;   // ~6 ppm
+	ads_area = 15000.0; // m^2/kg
+	ads_mol = 3.3;     // mol/kg
+	ads_mass = 1.5E-5;  // kg
+	volume = 0.75;       // L
+	shark_dat.simulationtime = 96.0; //hours
+	
+	logK_UO2CO3 = -0.92;				// molar basis - slava
+	logK_UO2 = -2.72;					// molar basis - slava
+	
+	shark_dat.dt = 0.001;			 //hours
+	shark_dat.t_out = shark_dat.simulationtime / 1000.0;
+	shark_dat.volume = volume;
+	
+	//Call the setup function
+	success = setup_SHARK_DATA(TestOutput,shark_residual, NULL, NULL, &shark_dat, NULL, (void *)&shark_dat, NULL, NULL);
+	if (success != 0) {mError(simulation_fail); return -1;}
+	
+	shark_dat.Newton_data.linear_solver = QR;
+	shark_dat.Newton_data.LineSearch = true;
+	shark_dat.Newton_data.nl_maxit = 10;
+	shark_dat.Newton_data.NL_Output = true;
+	
+	//Read problem specific info here --------------------------------------------------------
+	shark_dat.MasterList.set_species(0, "NaHCO3 (aq)");
+	shark_dat.MasterList.set_species(1, "NaCO3 - (aq)");
+	shark_dat.MasterList.set_species(2, "Na + (aq)");
+	shark_dat.MasterList.set_species(3, "HNO3 (aq)");
+	shark_dat.MasterList.set_species(4, "NO3 - (aq)");
+	shark_dat.MasterList.set_species(5, "H2CO3 (aq)");
+	shark_dat.MasterList.set_species(6, "HCO3 - (aq)");
+	shark_dat.MasterList.set_species(7, "CO3 2- (aq)");
+	shark_dat.MasterList.set_species(8, "UO2 2+ (aq)");
+	shark_dat.MasterList.set_species(9, "UO2NO3 + (aq)");
+	shark_dat.MasterList.set_species(10, "UO2(NO3)2 (aq)");
+	shark_dat.MasterList.set_species(11, "UO2OH + (aq)");
+	shark_dat.MasterList.set_species(12, "UO2(OH)3 - (aq)");
+	shark_dat.MasterList.set_species(13, "(UO2)2(OH)2 2+ (aq)");
+	shark_dat.MasterList.set_species(14, "(UO2)3(OH)5 + (aq)");
+	shark_dat.MasterList.set_species(15, "UO2CO3 (aq)");
+	shark_dat.MasterList.set_species(16, "UO2(CO3)2 2- (aq)");
+	shark_dat.MasterList.set_species(17, "UO2(CO3)3 4- (aq)");
+	shark_dat.MasterList.set_species(18, "H2O (l)");
+	shark_dat.MasterList.set_species(19, "OH - (aq)");
+	shark_dat.MasterList.set_species(20, "H + (aq)");
+	shark_dat.MasterList.set_species(21, "Cl - (aq)");
+	
+	shark_dat.MasterList.set_species(22, 0, 0, 0, 0, false, false, "Adsorbed", "Uranyl-amidoxime", "UO2(AO)2 (ad)", "UO2");
+	shark_dat.MasterList.set_species(23, -2, 0, 0, 0, false, false, "Adsorbed", "Uranyl-carbonate-amidoxime", "UO2CO3(AO)2 2- (ad)", "UO2CO3");
+	
+	shark_dat.ReactionList[0].Set_Equilibrium(-14.0);
+	shark_dat.ReactionList[0].Set_Stoichiometric(0, 0);
+	shark_dat.ReactionList[0].Set_Stoichiometric(1, 0);
+	shark_dat.ReactionList[0].Set_Stoichiometric(2, 0);
+	shark_dat.ReactionList[0].Set_Stoichiometric(3, 0);
+	shark_dat.ReactionList[0].Set_Stoichiometric(4, 0);
+	shark_dat.ReactionList[0].Set_Stoichiometric(5, 0);
+	shark_dat.ReactionList[0].Set_Stoichiometric(6, 0);
+	shark_dat.ReactionList[0].Set_Stoichiometric(7, 0);
+	shark_dat.ReactionList[0].Set_Stoichiometric(8, 0);
+	shark_dat.ReactionList[0].Set_Stoichiometric(9, 0);
+	shark_dat.ReactionList[0].Set_Stoichiometric(10, 0);
+	shark_dat.ReactionList[0].Set_Stoichiometric(11, 0);
+	shark_dat.ReactionList[0].Set_Stoichiometric(12, 0);
+	shark_dat.ReactionList[0].Set_Stoichiometric(13, 0);
+	shark_dat.ReactionList[0].Set_Stoichiometric(14, 0);
+	shark_dat.ReactionList[0].Set_Stoichiometric(15, 0);
+	shark_dat.ReactionList[0].Set_Stoichiometric(16, 0);
+	shark_dat.ReactionList[0].Set_Stoichiometric(17, 0);
+	shark_dat.ReactionList[0].Set_Stoichiometric(18, -1);
+	shark_dat.ReactionList[0].Set_Stoichiometric(19, 1);
+	shark_dat.ReactionList[0].Set_Stoichiometric(20, 1);
+	shark_dat.ReactionList[0].Set_Stoichiometric(21, 0);
+	shark_dat.ReactionList[0].Set_Stoichiometric(22, 0);
+	shark_dat.ReactionList[0].Set_Stoichiometric(23, 0);
+	
+	shark_dat.ReactionList[1].Set_Equilibrium(-6.35);
+	shark_dat.ReactionList[1].Set_Stoichiometric(0, 0);
+	shark_dat.ReactionList[1].Set_Stoichiometric(1, 0);
+	shark_dat.ReactionList[1].Set_Stoichiometric(2, 0);
+	shark_dat.ReactionList[1].Set_Stoichiometric(3, 0);
+	shark_dat.ReactionList[1].Set_Stoichiometric(4, 0);
+	shark_dat.ReactionList[1].Set_Stoichiometric(5, -1);
+	shark_dat.ReactionList[1].Set_Stoichiometric(6, 1);
+	shark_dat.ReactionList[1].Set_Stoichiometric(7, 0);
+	shark_dat.ReactionList[1].Set_Stoichiometric(8, 0);
+	shark_dat.ReactionList[1].Set_Stoichiometric(9, 0);
+	shark_dat.ReactionList[1].Set_Stoichiometric(10, 0);
+	shark_dat.ReactionList[1].Set_Stoichiometric(11, 0);
+	shark_dat.ReactionList[1].Set_Stoichiometric(12, 0);
+	shark_dat.ReactionList[1].Set_Stoichiometric(13, 0);
+	shark_dat.ReactionList[1].Set_Stoichiometric(14, 0);
+	shark_dat.ReactionList[1].Set_Stoichiometric(15, 0);
+	shark_dat.ReactionList[1].Set_Stoichiometric(16, 0);
+	shark_dat.ReactionList[1].Set_Stoichiometric(17, 0);
+	shark_dat.ReactionList[1].Set_Stoichiometric(18, 0);
+	shark_dat.ReactionList[1].Set_Stoichiometric(19, 0);
+	shark_dat.ReactionList[1].Set_Stoichiometric(20, 1);
+	shark_dat.ReactionList[1].Set_Stoichiometric(21, 0);
+	shark_dat.ReactionList[1].Set_Stoichiometric(22, 0);
+	shark_dat.ReactionList[1].Set_Stoichiometric(23, 0);
+	
+	shark_dat.ReactionList[2].Set_Equilibrium(-10.33);
+	shark_dat.ReactionList[2].Set_Stoichiometric(0, 0);
+	shark_dat.ReactionList[2].Set_Stoichiometric(1, 0);
+	shark_dat.ReactionList[2].Set_Stoichiometric(2, 0);
+	shark_dat.ReactionList[2].Set_Stoichiometric(3, 0);
+	shark_dat.ReactionList[2].Set_Stoichiometric(4, 0);
+	shark_dat.ReactionList[2].Set_Stoichiometric(5, 0);
+	shark_dat.ReactionList[2].Set_Stoichiometric(6, -1);
+	shark_dat.ReactionList[2].Set_Stoichiometric(7, 1);
+	shark_dat.ReactionList[2].Set_Stoichiometric(8, 0);
+	shark_dat.ReactionList[2].Set_Stoichiometric(9, 0);
+	shark_dat.ReactionList[2].Set_Stoichiometric(10, 0);
+	shark_dat.ReactionList[2].Set_Stoichiometric(11, 0);
+	shark_dat.ReactionList[2].Set_Stoichiometric(12, 0);
+	shark_dat.ReactionList[2].Set_Stoichiometric(13, 0);
+	shark_dat.ReactionList[2].Set_Stoichiometric(14, 0);
+	shark_dat.ReactionList[2].Set_Stoichiometric(15, 0);
+	shark_dat.ReactionList[2].Set_Stoichiometric(16, 0);
+	shark_dat.ReactionList[2].Set_Stoichiometric(17, 0);
+	shark_dat.ReactionList[2].Set_Stoichiometric(18, 0);
+	shark_dat.ReactionList[2].Set_Stoichiometric(19, 0);
+	shark_dat.ReactionList[2].Set_Stoichiometric(20, 1);
+	shark_dat.ReactionList[2].Set_Stoichiometric(21, 0);
+	shark_dat.ReactionList[2].Set_Stoichiometric(22, 0);
+	shark_dat.ReactionList[2].Set_Stoichiometric(23, 0);
+	
+	shark_dat.ReactionList[3].Set_Equilibrium(-10.14);
+	shark_dat.ReactionList[3].Set_Stoichiometric(0, -1);
+	shark_dat.ReactionList[3].Set_Stoichiometric(1, 0);
+	shark_dat.ReactionList[3].Set_Stoichiometric(2, 1);
+	shark_dat.ReactionList[3].Set_Stoichiometric(3, 0);
+	shark_dat.ReactionList[3].Set_Stoichiometric(4, 0);
+	shark_dat.ReactionList[3].Set_Stoichiometric(5, 0);
+	shark_dat.ReactionList[3].Set_Stoichiometric(6, 0);
+	shark_dat.ReactionList[3].Set_Stoichiometric(7, 1);
+	shark_dat.ReactionList[3].Set_Stoichiometric(8, 0);
+	shark_dat.ReactionList[3].Set_Stoichiometric(9, 0);
+	shark_dat.ReactionList[3].Set_Stoichiometric(10, 0);
+	shark_dat.ReactionList[3].Set_Stoichiometric(11, 0);
+	shark_dat.ReactionList[3].Set_Stoichiometric(12, 0);
+	shark_dat.ReactionList[3].Set_Stoichiometric(13, 0);
+	shark_dat.ReactionList[3].Set_Stoichiometric(14, 0);
+	shark_dat.ReactionList[3].Set_Stoichiometric(15, 0);
+	shark_dat.ReactionList[3].Set_Stoichiometric(16, 0);
+	shark_dat.ReactionList[3].Set_Stoichiometric(17, 0);
+	shark_dat.ReactionList[3].Set_Stoichiometric(18, 0);
+	shark_dat.ReactionList[3].Set_Stoichiometric(19, 0);
+	shark_dat.ReactionList[3].Set_Stoichiometric(20, 1);
+	shark_dat.ReactionList[3].Set_Stoichiometric(21, 0);
+	shark_dat.ReactionList[3].Set_Stoichiometric(22, 0);
+	shark_dat.ReactionList[3].Set_Stoichiometric(23, 0);
+	
+	shark_dat.ReactionList[4].Set_Equilibrium(-1.02);
+	shark_dat.ReactionList[4].Set_Stoichiometric(0, 0);
+	shark_dat.ReactionList[4].Set_Stoichiometric(1, -1);
+	shark_dat.ReactionList[4].Set_Stoichiometric(2, 1);
+	shark_dat.ReactionList[4].Set_Stoichiometric(3, 0);
+	shark_dat.ReactionList[4].Set_Stoichiometric(4, 0);
+	shark_dat.ReactionList[4].Set_Stoichiometric(5, 0);
+	shark_dat.ReactionList[4].Set_Stoichiometric(6, 0);
+	shark_dat.ReactionList[4].Set_Stoichiometric(7, 1);
+	shark_dat.ReactionList[4].Set_Stoichiometric(8, 0);
+	shark_dat.ReactionList[4].Set_Stoichiometric(9, 0);
+	shark_dat.ReactionList[4].Set_Stoichiometric(10, 0);
+	shark_dat.ReactionList[4].Set_Stoichiometric(11, 0);
+	shark_dat.ReactionList[4].Set_Stoichiometric(12, 0);
+	shark_dat.ReactionList[4].Set_Stoichiometric(13, 0);
+	shark_dat.ReactionList[4].Set_Stoichiometric(14, 0);
+	shark_dat.ReactionList[4].Set_Stoichiometric(15, 0);
+	shark_dat.ReactionList[4].Set_Stoichiometric(16, 0);
+	shark_dat.ReactionList[4].Set_Stoichiometric(17, 0);
+	shark_dat.ReactionList[4].Set_Stoichiometric(18, 0);
+	shark_dat.ReactionList[4].Set_Stoichiometric(19, 0);
+	shark_dat.ReactionList[4].Set_Stoichiometric(20, 0);
+	shark_dat.ReactionList[4].Set_Stoichiometric(21, 0);
+	shark_dat.ReactionList[4].Set_Stoichiometric(22, 0);
+	shark_dat.ReactionList[4].Set_Stoichiometric(23, 0);
+	
+	shark_dat.ReactionList[5].Set_Equilibrium(1.4);
+	shark_dat.ReactionList[5].Set_Stoichiometric(0, 0);
+	shark_dat.ReactionList[5].Set_Stoichiometric(1, 0);
+	shark_dat.ReactionList[5].Set_Stoichiometric(2, 0);
+	shark_dat.ReactionList[5].Set_Stoichiometric(3, -1);
+	shark_dat.ReactionList[5].Set_Stoichiometric(4, 1);
+	shark_dat.ReactionList[5].Set_Stoichiometric(5, 0);
+	shark_dat.ReactionList[5].Set_Stoichiometric(6, 0);
+	shark_dat.ReactionList[5].Set_Stoichiometric(7, 0);
+	shark_dat.ReactionList[5].Set_Stoichiometric(8, 0);
+	shark_dat.ReactionList[5].Set_Stoichiometric(9, 0);
+	shark_dat.ReactionList[5].Set_Stoichiometric(10, 0);
+	shark_dat.ReactionList[5].Set_Stoichiometric(11, 0);
+	shark_dat.ReactionList[5].Set_Stoichiometric(12, 0);
+	shark_dat.ReactionList[5].Set_Stoichiometric(13, 0);
+	shark_dat.ReactionList[5].Set_Stoichiometric(14, 0);
+	shark_dat.ReactionList[5].Set_Stoichiometric(15, 0);
+	shark_dat.ReactionList[5].Set_Stoichiometric(16, 0);
+	shark_dat.ReactionList[5].Set_Stoichiometric(17, 0);
+	shark_dat.ReactionList[5].Set_Stoichiometric(18, 0);
+	shark_dat.ReactionList[5].Set_Stoichiometric(19, 0);
+	shark_dat.ReactionList[5].Set_Stoichiometric(20, 1);
+	shark_dat.ReactionList[5].Set_Stoichiometric(21, 0);
+	shark_dat.ReactionList[5].Set_Stoichiometric(22, 0);
+	shark_dat.ReactionList[5].Set_Stoichiometric(23, 0);
+	
+	shark_dat.ReactionList[6].Set_Equilibrium(-0.3);
+	shark_dat.ReactionList[6].Set_Stoichiometric(0, 0);
+	shark_dat.ReactionList[6].Set_Stoichiometric(1, 0);
+	shark_dat.ReactionList[6].Set_Stoichiometric(2, 0);
+	shark_dat.ReactionList[6].Set_Stoichiometric(3, 0);
+	shark_dat.ReactionList[6].Set_Stoichiometric(4, -1);
+	shark_dat.ReactionList[6].Set_Stoichiometric(5, 0);
+	shark_dat.ReactionList[6].Set_Stoichiometric(6, 0);
+	shark_dat.ReactionList[6].Set_Stoichiometric(7, 0);
+	shark_dat.ReactionList[6].Set_Stoichiometric(8, -1);
+	shark_dat.ReactionList[6].Set_Stoichiometric(9, 1);
+	shark_dat.ReactionList[6].Set_Stoichiometric(10, 0);
+	shark_dat.ReactionList[6].Set_Stoichiometric(11, 0);
+	shark_dat.ReactionList[6].Set_Stoichiometric(12, 0);
+	shark_dat.ReactionList[6].Set_Stoichiometric(13, 0);
+	shark_dat.ReactionList[6].Set_Stoichiometric(14, 0);
+	shark_dat.ReactionList[6].Set_Stoichiometric(15, 0);
+	shark_dat.ReactionList[6].Set_Stoichiometric(16, 0);
+	shark_dat.ReactionList[6].Set_Stoichiometric(17, 0);
+	shark_dat.ReactionList[6].Set_Stoichiometric(18, 0);
+	shark_dat.ReactionList[6].Set_Stoichiometric(19, 0);
+	shark_dat.ReactionList[6].Set_Stoichiometric(20, 0);
+	shark_dat.ReactionList[6].Set_Stoichiometric(21, 0);
+	shark_dat.ReactionList[6].Set_Stoichiometric(22, 0);
+	shark_dat.ReactionList[6].Set_Stoichiometric(23, 0);
+	
+	shark_dat.ReactionList[7].Set_Equilibrium(-12.15);
+	shark_dat.ReactionList[7].Set_Stoichiometric(0, 0);
+	shark_dat.ReactionList[7].Set_Stoichiometric(1, 0);
+	shark_dat.ReactionList[7].Set_Stoichiometric(2, 0);
+	shark_dat.ReactionList[7].Set_Stoichiometric(3, 0);
+	shark_dat.ReactionList[7].Set_Stoichiometric(4, -2);
+	shark_dat.ReactionList[7].Set_Stoichiometric(5, 0);
+	shark_dat.ReactionList[7].Set_Stoichiometric(6, 0);
+	shark_dat.ReactionList[7].Set_Stoichiometric(7, 0);
+	shark_dat.ReactionList[7].Set_Stoichiometric(8, -1);
+	shark_dat.ReactionList[7].Set_Stoichiometric(9, 0);
+	shark_dat.ReactionList[7].Set_Stoichiometric(10, 1);
+	shark_dat.ReactionList[7].Set_Stoichiometric(11, 0);
+	shark_dat.ReactionList[7].Set_Stoichiometric(12, 0);
+	shark_dat.ReactionList[7].Set_Stoichiometric(13, 0);
+	shark_dat.ReactionList[7].Set_Stoichiometric(14, 0);
+	shark_dat.ReactionList[7].Set_Stoichiometric(15, 0);
+	shark_dat.ReactionList[7].Set_Stoichiometric(16, 0);
+	shark_dat.ReactionList[7].Set_Stoichiometric(17, 0);
+	shark_dat.ReactionList[7].Set_Stoichiometric(18, 0);
+	shark_dat.ReactionList[7].Set_Stoichiometric(19, 0);
+	shark_dat.ReactionList[7].Set_Stoichiometric(20, 0);
+	shark_dat.ReactionList[7].Set_Stoichiometric(21, 0);
+	shark_dat.ReactionList[7].Set_Stoichiometric(22, 0);
+	shark_dat.ReactionList[7].Set_Stoichiometric(23, 0);
+	
+	shark_dat.ReactionList[8].Set_Equilibrium(-6.2);
+	shark_dat.ReactionList[8].Set_Stoichiometric(0, 0);
+	shark_dat.ReactionList[8].Set_Stoichiometric(1, 0);
+	shark_dat.ReactionList[8].Set_Stoichiometric(2, 0);
+	shark_dat.ReactionList[8].Set_Stoichiometric(3, 0);
+	shark_dat.ReactionList[8].Set_Stoichiometric(4, 0);
+	shark_dat.ReactionList[8].Set_Stoichiometric(5, 0);
+	shark_dat.ReactionList[8].Set_Stoichiometric(6, 0);
+	shark_dat.ReactionList[8].Set_Stoichiometric(7, 0);
+	shark_dat.ReactionList[8].Set_Stoichiometric(8, -1);
+	shark_dat.ReactionList[8].Set_Stoichiometric(9, 0);
+	shark_dat.ReactionList[8].Set_Stoichiometric(10, 0);
+	shark_dat.ReactionList[8].Set_Stoichiometric(11, 1);
+	shark_dat.ReactionList[8].Set_Stoichiometric(12, 0);
+	shark_dat.ReactionList[8].Set_Stoichiometric(13, 0);
+	shark_dat.ReactionList[8].Set_Stoichiometric(14, 0);
+	shark_dat.ReactionList[8].Set_Stoichiometric(15, 0);
+	shark_dat.ReactionList[8].Set_Stoichiometric(16, 0);
+	shark_dat.ReactionList[8].Set_Stoichiometric(17, 0);
+	shark_dat.ReactionList[8].Set_Stoichiometric(18, -1);
+	shark_dat.ReactionList[8].Set_Stoichiometric(19, 0);
+	shark_dat.ReactionList[8].Set_Stoichiometric(20, 1);
+	shark_dat.ReactionList[8].Set_Stoichiometric(21, 0);
+	shark_dat.ReactionList[8].Set_Stoichiometric(22, 0);
+	shark_dat.ReactionList[8].Set_Stoichiometric(23, 0);
+	
+	shark_dat.ReactionList[9].Set_Equilibrium(-20.2);
+	shark_dat.ReactionList[9].Set_Stoichiometric(0, 0);
+	shark_dat.ReactionList[9].Set_Stoichiometric(1, 0);
+	shark_dat.ReactionList[9].Set_Stoichiometric(2, 0);
+	shark_dat.ReactionList[9].Set_Stoichiometric(3, 0);
+	shark_dat.ReactionList[9].Set_Stoichiometric(4, 0);
+	shark_dat.ReactionList[9].Set_Stoichiometric(5, 0);
+	shark_dat.ReactionList[9].Set_Stoichiometric(6, 0);
+	shark_dat.ReactionList[9].Set_Stoichiometric(7, 0);
+	shark_dat.ReactionList[9].Set_Stoichiometric(8, -1);
+	shark_dat.ReactionList[9].Set_Stoichiometric(9, 0);
+	shark_dat.ReactionList[9].Set_Stoichiometric(10, 0);
+	shark_dat.ReactionList[9].Set_Stoichiometric(11, 0);
+	shark_dat.ReactionList[9].Set_Stoichiometric(12, 1);
+	shark_dat.ReactionList[9].Set_Stoichiometric(13, 0);
+	shark_dat.ReactionList[9].Set_Stoichiometric(14, 0);
+	shark_dat.ReactionList[9].Set_Stoichiometric(15, 0);
+	shark_dat.ReactionList[9].Set_Stoichiometric(16, 0);
+	shark_dat.ReactionList[9].Set_Stoichiometric(17, 0);
+	shark_dat.ReactionList[9].Set_Stoichiometric(18, -3);
+	shark_dat.ReactionList[9].Set_Stoichiometric(19, 0);
+	shark_dat.ReactionList[9].Set_Stoichiometric(20, 3);
+	shark_dat.ReactionList[9].Set_Stoichiometric(21, 0);
+	shark_dat.ReactionList[9].Set_Stoichiometric(22, 0);
+	shark_dat.ReactionList[9].Set_Stoichiometric(23, 0);
+	
+	shark_dat.ReactionList[10].Set_Equilibrium(-5.87);
+	shark_dat.ReactionList[10].Set_Stoichiometric(0, 0);
+	shark_dat.ReactionList[10].Set_Stoichiometric(1, 0);
+	shark_dat.ReactionList[10].Set_Stoichiometric(2, 0);
+	shark_dat.ReactionList[10].Set_Stoichiometric(3, 0);
+	shark_dat.ReactionList[10].Set_Stoichiometric(4, 0);
+	shark_dat.ReactionList[10].Set_Stoichiometric(5, 0);
+	shark_dat.ReactionList[10].Set_Stoichiometric(6, 0);
+	shark_dat.ReactionList[10].Set_Stoichiometric(7, 0);
+	shark_dat.ReactionList[10].Set_Stoichiometric(8, -2);
+	shark_dat.ReactionList[10].Set_Stoichiometric(9, 0);
+	shark_dat.ReactionList[10].Set_Stoichiometric(10, 0);
+	shark_dat.ReactionList[10].Set_Stoichiometric(11, 0);
+	shark_dat.ReactionList[10].Set_Stoichiometric(12, 0);
+	shark_dat.ReactionList[10].Set_Stoichiometric(13, 1);
+	shark_dat.ReactionList[10].Set_Stoichiometric(14, 0);
+	shark_dat.ReactionList[10].Set_Stoichiometric(15, 0);
+	shark_dat.ReactionList[10].Set_Stoichiometric(16, 0);
+	shark_dat.ReactionList[10].Set_Stoichiometric(17, 0);
+	shark_dat.ReactionList[10].Set_Stoichiometric(18, -2);
+	shark_dat.ReactionList[10].Set_Stoichiometric(19, 0);
+	shark_dat.ReactionList[10].Set_Stoichiometric(20, 2);
+	shark_dat.ReactionList[10].Set_Stoichiometric(21, 0);
+	shark_dat.ReactionList[10].Set_Stoichiometric(22, 0);
+	shark_dat.ReactionList[10].Set_Stoichiometric(23, 0);
+	
+	shark_dat.ReactionList[11].Set_Equilibrium(-16.5);
+	shark_dat.ReactionList[11].Set_Stoichiometric(0, 0);
+	shark_dat.ReactionList[11].Set_Stoichiometric(1, 0);
+	shark_dat.ReactionList[11].Set_Stoichiometric(2, 0);
+	shark_dat.ReactionList[11].Set_Stoichiometric(3, 0);
+	shark_dat.ReactionList[11].Set_Stoichiometric(4, 0);
+	shark_dat.ReactionList[11].Set_Stoichiometric(5, 0);
+	shark_dat.ReactionList[11].Set_Stoichiometric(6, 0);
+	shark_dat.ReactionList[11].Set_Stoichiometric(7, 0);
+	shark_dat.ReactionList[11].Set_Stoichiometric(8, -3);
+	shark_dat.ReactionList[11].Set_Stoichiometric(9, 0);
+	shark_dat.ReactionList[11].Set_Stoichiometric(10, 0);
+	shark_dat.ReactionList[11].Set_Stoichiometric(11, 0);
+	shark_dat.ReactionList[11].Set_Stoichiometric(12, 0);
+	shark_dat.ReactionList[11].Set_Stoichiometric(13, 0);
+	shark_dat.ReactionList[11].Set_Stoichiometric(14, 1);
+	shark_dat.ReactionList[11].Set_Stoichiometric(15, 0);
+	shark_dat.ReactionList[11].Set_Stoichiometric(16, 0);
+	shark_dat.ReactionList[11].Set_Stoichiometric(17, 0);
+	shark_dat.ReactionList[11].Set_Stoichiometric(18, -5);
+	shark_dat.ReactionList[11].Set_Stoichiometric(19, 0);
+	shark_dat.ReactionList[11].Set_Stoichiometric(20, 5);
+	shark_dat.ReactionList[11].Set_Stoichiometric(21, 0);
+	shark_dat.ReactionList[11].Set_Stoichiometric(22, 0);
+	shark_dat.ReactionList[11].Set_Stoichiometric(23, 0);
+	
+	shark_dat.ReactionList[12].Set_Equilibrium(8.4);
+	shark_dat.ReactionList[12].Set_Stoichiometric(0, 0);
+	shark_dat.ReactionList[12].Set_Stoichiometric(1, 0);
+	shark_dat.ReactionList[12].Set_Stoichiometric(2, 0);
+	shark_dat.ReactionList[12].Set_Stoichiometric(3, 0);
+	shark_dat.ReactionList[12].Set_Stoichiometric(4, 0);
+	shark_dat.ReactionList[12].Set_Stoichiometric(5, 0);
+	shark_dat.ReactionList[12].Set_Stoichiometric(6, 0);
+	shark_dat.ReactionList[12].Set_Stoichiometric(7, -1);
+	shark_dat.ReactionList[12].Set_Stoichiometric(8, -1);
+	shark_dat.ReactionList[12].Set_Stoichiometric(9, 0);
+	shark_dat.ReactionList[12].Set_Stoichiometric(10, 0);
+	shark_dat.ReactionList[12].Set_Stoichiometric(11, 0);
+	shark_dat.ReactionList[12].Set_Stoichiometric(12, 0);
+	shark_dat.ReactionList[12].Set_Stoichiometric(13, 0);
+	shark_dat.ReactionList[12].Set_Stoichiometric(14, 0);
+	shark_dat.ReactionList[12].Set_Stoichiometric(15, 1);
+	shark_dat.ReactionList[12].Set_Stoichiometric(16, 0);
+	shark_dat.ReactionList[12].Set_Stoichiometric(17, 0);
+	shark_dat.ReactionList[12].Set_Stoichiometric(18, 0);
+	shark_dat.ReactionList[12].Set_Stoichiometric(19, 0);
+	shark_dat.ReactionList[12].Set_Stoichiometric(20, 0);
+	shark_dat.ReactionList[12].Set_Stoichiometric(21, 0);
+	shark_dat.ReactionList[12].Set_Stoichiometric(22, 0);
+	shark_dat.ReactionList[12].Set_Stoichiometric(23, 0);
+	
+	shark_dat.ReactionList[13].Set_Equilibrium(15.7);
+	shark_dat.ReactionList[13].Set_Stoichiometric(0, 0);
+	shark_dat.ReactionList[13].Set_Stoichiometric(1, 0);
+	shark_dat.ReactionList[13].Set_Stoichiometric(2, 0);
+	shark_dat.ReactionList[13].Set_Stoichiometric(3, 0);
+	shark_dat.ReactionList[13].Set_Stoichiometric(4, 0);
+	shark_dat.ReactionList[13].Set_Stoichiometric(5, 0);
+	shark_dat.ReactionList[13].Set_Stoichiometric(6, 0);
+	shark_dat.ReactionList[13].Set_Stoichiometric(7, -2);
+	shark_dat.ReactionList[13].Set_Stoichiometric(8, -1);
+	shark_dat.ReactionList[13].Set_Stoichiometric(9, 0);
+	shark_dat.ReactionList[13].Set_Stoichiometric(10, 0);
+	shark_dat.ReactionList[13].Set_Stoichiometric(11, 0);
+	shark_dat.ReactionList[13].Set_Stoichiometric(12, 0);
+	shark_dat.ReactionList[13].Set_Stoichiometric(13, 0);
+	shark_dat.ReactionList[13].Set_Stoichiometric(14, 0);
+	shark_dat.ReactionList[13].Set_Stoichiometric(15, 0);
+	shark_dat.ReactionList[13].Set_Stoichiometric(16, 1);
+	shark_dat.ReactionList[13].Set_Stoichiometric(17, 0);
+	shark_dat.ReactionList[13].Set_Stoichiometric(18, 0);
+	shark_dat.ReactionList[13].Set_Stoichiometric(19, 0);
+	shark_dat.ReactionList[13].Set_Stoichiometric(20, 0);
+	shark_dat.ReactionList[13].Set_Stoichiometric(21, 0);
+	shark_dat.ReactionList[13].Set_Stoichiometric(22, 0);
+	shark_dat.ReactionList[13].Set_Stoichiometric(23, 0);
+	
+	shark_dat.ReactionList[14].Set_Equilibrium(21.6);
+	shark_dat.ReactionList[14].Set_Stoichiometric(0, 0);
+	shark_dat.ReactionList[14].Set_Stoichiometric(1, 0);
+	shark_dat.ReactionList[14].Set_Stoichiometric(2, 0);
+	shark_dat.ReactionList[14].Set_Stoichiometric(3, 0);
+	shark_dat.ReactionList[14].Set_Stoichiometric(4, 0);
+	shark_dat.ReactionList[14].Set_Stoichiometric(5, 0);
+	shark_dat.ReactionList[14].Set_Stoichiometric(6, 0);
+	shark_dat.ReactionList[14].Set_Stoichiometric(7, -3);
+	shark_dat.ReactionList[14].Set_Stoichiometric(8, -1);
+	shark_dat.ReactionList[14].Set_Stoichiometric(9, 0);
+	shark_dat.ReactionList[14].Set_Stoichiometric(10, 0);
+	shark_dat.ReactionList[14].Set_Stoichiometric(11, 0);
+	shark_dat.ReactionList[14].Set_Stoichiometric(12, 0);
+	shark_dat.ReactionList[14].Set_Stoichiometric(13, 0);
+	shark_dat.ReactionList[14].Set_Stoichiometric(14, 0);
+	shark_dat.ReactionList[14].Set_Stoichiometric(15, 0);
+	shark_dat.ReactionList[14].Set_Stoichiometric(16, 0);
+	shark_dat.ReactionList[14].Set_Stoichiometric(17, 1);
+	shark_dat.ReactionList[14].Set_Stoichiometric(18, 0);
+	shark_dat.ReactionList[14].Set_Stoichiometric(19, 0);
+	shark_dat.ReactionList[14].Set_Stoichiometric(20, 0);
+	shark_dat.ReactionList[14].Set_Stoichiometric(21, 0);
+	shark_dat.ReactionList[14].Set_Stoichiometric(22, 0);
+	shark_dat.ReactionList[14].Set_Stoichiometric(23, 0);
+	
+	shark_dat.MassBalanceList[0].Set_Name("Water Balance");
+	shark_dat.MassBalanceList[0].Set_TotalConcentration(1.0);
+	shark_dat.MassBalanceList[0].Set_Delta(0, 0);
+	shark_dat.MassBalanceList[0].Set_Delta(1, 0);
+	shark_dat.MassBalanceList[0].Set_Delta(2, 0);
+	shark_dat.MassBalanceList[0].Set_Delta(3, 0);
+	shark_dat.MassBalanceList[0].Set_Delta(4, 0);
+	shark_dat.MassBalanceList[0].Set_Delta(5, 0);
+	shark_dat.MassBalanceList[0].Set_Delta(6, 0);
+	shark_dat.MassBalanceList[0].Set_Delta(7, 0);
+	shark_dat.MassBalanceList[0].Set_Delta(8, 0);
+	shark_dat.MassBalanceList[0].Set_Delta(9, 0);
+	shark_dat.MassBalanceList[0].Set_Delta(10, 0);
+	shark_dat.MassBalanceList[0].Set_Delta(11, 0);
+	shark_dat.MassBalanceList[0].Set_Delta(12, 0);
+	shark_dat.MassBalanceList[0].Set_Delta(13, 0);
+	shark_dat.MassBalanceList[0].Set_Delta(14, 0);
+	shark_dat.MassBalanceList[0].Set_Delta(15, 0);
+	shark_dat.MassBalanceList[0].Set_Delta(16, 0);
+	shark_dat.MassBalanceList[0].Set_Delta(17, 0);
+	shark_dat.MassBalanceList[0].Set_Delta(18, 1);
+	shark_dat.MassBalanceList[0].Set_Delta(19, 0);
+	shark_dat.MassBalanceList[0].Set_Delta(20, 0);
+	shark_dat.MassBalanceList[0].Set_Delta(21, 0);
+	shark_dat.MassBalanceList[0].Set_Delta(22, 0);
+	shark_dat.MassBalanceList[0].Set_Delta(23, 0);
+	
+	shark_dat.MassBalanceList[1].Set_Name("Carbonate Balance");
+	shark_dat.MassBalanceList[1].Set_TotalConcentration(NaHCO3);
+	shark_dat.MassBalanceList[1].Set_Delta(0, 1);
+	shark_dat.MassBalanceList[1].Set_Delta(1, 1);
+	shark_dat.MassBalanceList[1].Set_Delta(2, 0);
+	shark_dat.MassBalanceList[1].Set_Delta(3, 0);
+	shark_dat.MassBalanceList[1].Set_Delta(4, 0);
+	shark_dat.MassBalanceList[1].Set_Delta(5, 1);
+	shark_dat.MassBalanceList[1].Set_Delta(6, 1);
+	shark_dat.MassBalanceList[1].Set_Delta(7, 1);
+	shark_dat.MassBalanceList[1].Set_Delta(8, 0);
+	shark_dat.MassBalanceList[1].Set_Delta(9, 0);
+	shark_dat.MassBalanceList[1].Set_Delta(10, 0);
+	shark_dat.MassBalanceList[1].Set_Delta(11, 0);
+	shark_dat.MassBalanceList[1].Set_Delta(12, 0);
+	shark_dat.MassBalanceList[1].Set_Delta(13, 0);
+	shark_dat.MassBalanceList[1].Set_Delta(14, 0);
+	shark_dat.MassBalanceList[1].Set_Delta(15, 1);
+	shark_dat.MassBalanceList[1].Set_Delta(16, 2);
+	shark_dat.MassBalanceList[1].Set_Delta(17, 3);
+	shark_dat.MassBalanceList[1].Set_Delta(18, 0);
+	shark_dat.MassBalanceList[1].Set_Delta(19, 0);
+	shark_dat.MassBalanceList[1].Set_Delta(20, 0);
+	shark_dat.MassBalanceList[1].Set_Delta(21, 0);
+	shark_dat.MassBalanceList[1].Set_Delta(22, 0);
+	shark_dat.MassBalanceList[1].Set_Delta(23, 1);
+	
+	shark_dat.MassBalanceList[2].Set_Name("Nitrate Balance");
+	shark_dat.MassBalanceList[2].Set_TotalConcentration(2.0 * UO2);
+	shark_dat.MassBalanceList[2].Set_Delta(0, 0);
+	shark_dat.MassBalanceList[2].Set_Delta(1, 0);
+	shark_dat.MassBalanceList[2].Set_Delta(2, 0);
+	shark_dat.MassBalanceList[2].Set_Delta(3, 1);
+	shark_dat.MassBalanceList[2].Set_Delta(4, 1);
+	shark_dat.MassBalanceList[2].Set_Delta(5, 0);
+	shark_dat.MassBalanceList[2].Set_Delta(6, 0);
+	shark_dat.MassBalanceList[2].Set_Delta(7, 0);
+	shark_dat.MassBalanceList[2].Set_Delta(8, 0);
+	shark_dat.MassBalanceList[2].Set_Delta(9, 1);
+	shark_dat.MassBalanceList[2].Set_Delta(10, 2);
+	shark_dat.MassBalanceList[2].Set_Delta(11, 0);
+	shark_dat.MassBalanceList[2].Set_Delta(12, 0);
+	shark_dat.MassBalanceList[2].Set_Delta(13, 0);
+	shark_dat.MassBalanceList[2].Set_Delta(14, 0);
+	shark_dat.MassBalanceList[2].Set_Delta(15, 0);
+	shark_dat.MassBalanceList[2].Set_Delta(16, 0);
+	shark_dat.MassBalanceList[2].Set_Delta(17, 0);
+	shark_dat.MassBalanceList[2].Set_Delta(18, 0);
+	shark_dat.MassBalanceList[2].Set_Delta(19, 0);
+	shark_dat.MassBalanceList[2].Set_Delta(20, 0);
+	shark_dat.MassBalanceList[2].Set_Delta(21, 0);
+	shark_dat.MassBalanceList[2].Set_Delta(22, 0);
+	shark_dat.MassBalanceList[2].Set_Delta(23, 0);
+	
+	shark_dat.MassBalanceList[3].Set_Name("Sodium Balance");
+	shark_dat.MassBalanceList[3].Set_TotalConcentration(NaHCO3+NaCl+NaOH);
+	shark_dat.MassBalanceList[3].Set_Delta(0, 1);
+	shark_dat.MassBalanceList[3].Set_Delta(1, 1);
+	shark_dat.MassBalanceList[3].Set_Delta(2, 1);
+	shark_dat.MassBalanceList[3].Set_Delta(3, 0);
+	shark_dat.MassBalanceList[3].Set_Delta(4, 0);
+	shark_dat.MassBalanceList[3].Set_Delta(5, 0);
+	shark_dat.MassBalanceList[3].Set_Delta(6, 0);
+	shark_dat.MassBalanceList[3].Set_Delta(7, 0);
+	shark_dat.MassBalanceList[3].Set_Delta(8, 0);
+	shark_dat.MassBalanceList[3].Set_Delta(9, 0);
+	shark_dat.MassBalanceList[3].Set_Delta(10, 0);
+	shark_dat.MassBalanceList[3].Set_Delta(11, 0);
+	shark_dat.MassBalanceList[3].Set_Delta(12, 0);
+	shark_dat.MassBalanceList[3].Set_Delta(13, 0);
+	shark_dat.MassBalanceList[3].Set_Delta(14, 0);
+	shark_dat.MassBalanceList[3].Set_Delta(15, 0);
+	shark_dat.MassBalanceList[3].Set_Delta(16, 0);
+	shark_dat.MassBalanceList[3].Set_Delta(17, 0);
+	shark_dat.MassBalanceList[3].Set_Delta(18, 0);
+	shark_dat.MassBalanceList[3].Set_Delta(19, 0);
+	shark_dat.MassBalanceList[3].Set_Delta(20, 0);
+	shark_dat.MassBalanceList[3].Set_Delta(21, 0);
+	shark_dat.MassBalanceList[3].Set_Delta(22, 0);
+	shark_dat.MassBalanceList[3].Set_Delta(23, 0);
+	
+	shark_dat.MassBalanceList[4].Set_Name("Uranium Balance");
+	shark_dat.MassBalanceList[4].Set_TotalConcentration(UO2);
+	shark_dat.MassBalanceList[4].Set_Delta(0, 0);
+	shark_dat.MassBalanceList[4].Set_Delta(1, 0);
+	shark_dat.MassBalanceList[4].Set_Delta(2, 0);
+	shark_dat.MassBalanceList[4].Set_Delta(3, 0);
+	shark_dat.MassBalanceList[4].Set_Delta(4, 0);
+	shark_dat.MassBalanceList[4].Set_Delta(5, 0);
+	shark_dat.MassBalanceList[4].Set_Delta(6, 0);
+	shark_dat.MassBalanceList[4].Set_Delta(7, 0);
+	shark_dat.MassBalanceList[4].Set_Delta(8, 1);
+	shark_dat.MassBalanceList[4].Set_Delta(9, 1);
+	shark_dat.MassBalanceList[4].Set_Delta(10, 1);
+	shark_dat.MassBalanceList[4].Set_Delta(11, 1);
+	shark_dat.MassBalanceList[4].Set_Delta(12, 1);
+	shark_dat.MassBalanceList[4].Set_Delta(13, 2);
+	shark_dat.MassBalanceList[4].Set_Delta(14, 3);
+	shark_dat.MassBalanceList[4].Set_Delta(15, 1);
+	shark_dat.MassBalanceList[4].Set_Delta(16, 1);
+	shark_dat.MassBalanceList[4].Set_Delta(17, 1);
+	shark_dat.MassBalanceList[4].Set_Delta(18, 0);
+	shark_dat.MassBalanceList[4].Set_Delta(19, 0);
+	shark_dat.MassBalanceList[4].Set_Delta(20, 0);
+	shark_dat.MassBalanceList[4].Set_Delta(21, 0);
+	shark_dat.MassBalanceList[4].Set_Delta(22, 1);
+	shark_dat.MassBalanceList[4].Set_Delta(23, 1);
+	
+	shark_dat.MassBalanceList[5].Set_Name("Chlorine Balance");
+	shark_dat.MassBalanceList[5].Set_TotalConcentration(NaCl+HCl);
+	shark_dat.MassBalanceList[5].Set_Delta(0, 0);
+	shark_dat.MassBalanceList[5].Set_Delta(1, 0);
+	shark_dat.MassBalanceList[5].Set_Delta(2, 0);
+	shark_dat.MassBalanceList[5].Set_Delta(3, 0);
+	shark_dat.MassBalanceList[5].Set_Delta(4, 0);
+	shark_dat.MassBalanceList[5].Set_Delta(5, 0);
+	shark_dat.MassBalanceList[5].Set_Delta(6, 0);
+	shark_dat.MassBalanceList[5].Set_Delta(7, 0);
+	shark_dat.MassBalanceList[5].Set_Delta(8, 0);
+	shark_dat.MassBalanceList[5].Set_Delta(9, 0);
+	shark_dat.MassBalanceList[5].Set_Delta(10, 0);
+	shark_dat.MassBalanceList[5].Set_Delta(11, 0);
+	shark_dat.MassBalanceList[5].Set_Delta(12, 0);
+	shark_dat.MassBalanceList[5].Set_Delta(13, 0);
+	shark_dat.MassBalanceList[5].Set_Delta(14, 0);
+	shark_dat.MassBalanceList[5].Set_Delta(15, 0);
+	shark_dat.MassBalanceList[5].Set_Delta(16, 0);
+	shark_dat.MassBalanceList[5].Set_Delta(17, 0);
+	shark_dat.MassBalanceList[5].Set_Delta(18, 0);
+	shark_dat.MassBalanceList[5].Set_Delta(19, 0);
+	shark_dat.MassBalanceList[5].Set_Delta(20, 0);
+	shark_dat.MassBalanceList[5].Set_Delta(21, 1);
+	shark_dat.MassBalanceList[5].Set_Delta(22, 0);
+	shark_dat.MassBalanceList[5].Set_Delta(23, 0);
+	
+	shark_dat.UnsteadyAdsList[0].setSpecificArea(ads_area);
+	shark_dat.UnsteadyAdsList[0].setSpecificMolality(ads_mol);
+	shark_dat.UnsteadyAdsList[0].setTotalMass(ads_mass);
+	shark_dat.UnsteadyAdsList[0].setSurfaceCharge(0.0);
+	shark_dat.UnsteadyAdsList[0].setAdsorbentName("HAO");
+	shark_dat.UnsteadyAdsList[0].setActivityModelInfo(UNIQUAC_unsteady, &shark_dat.UnsteadyAdsList[0]);
+	shark_dat.UnsteadyAdsList[0].setActivityEnum(UNIQUAC_ACT);
+	shark_dat.UnsteadyAdsList[0].setBasis("molar");
+	
+	shark_dat.UnsteadyAdsList[0].setMolarFactor(0, 2.0);
+	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Equilibrium(logK_UO2);
+	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Forward(1.0E6);
+	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_InitialValue(0.0);
+	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(0, 0);
+	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(1, 0);
+	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(2, 0);
+	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(3, 0);
+	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(4, 0);
+	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(5, 0);
+	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(6, 0);
+	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(7, 0);
+	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(8, -1);
+	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(9, 0);
+	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(10, 0);
+	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(11, 0);
+	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(12, 0);
+	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(13, 0);
+	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(14, 0);
+	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(15, 0);
+	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(16, 0);
+	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(17, 0);
+	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(18, 0);
+	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(19, 0);
+	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(20, 2);
+	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(21, 0);
+	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(22, 1);
+	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(23, 0);
+	
+	
+	shark_dat.UnsteadyAdsList[0].setMolarFactor(1, 2.0);
+	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Equilibrium(logK_UO2CO3);
+	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Forward(1.0E3);
+	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_InitialValue(0.0);
+	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(0, 0);
+	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(1, 0);
+	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(2, 0);
+	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(3, 0);
+	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(4, 0);
+	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(5, 0);
+	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(6, 0);
+	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(7, -1);
+	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(8, -1);
+	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(9, 0);
+	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(10, 0);
+	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(11, 0);
+	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(12, 0);
+	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(13, 0);
+	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(14, 0);
+	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(15, 0);
+	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(16, 0);
+	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(17, 0);
+	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(18, 0);
+	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(19, 0);
+	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(20, 2);
+	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(21, 0);
+	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(22, 0);
+	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(23, 1);
+	
+	shark_dat.UnsteadyAdsList[0].setVolumeFactor(22, 5);
+	shark_dat.UnsteadyAdsList[0].setVolumeFactor(23, 8);
+	shark_dat.UnsteadyAdsList[0].calculateAreaFactors();    //NOTE: Required here because this is done during the reading step
+	
+	
+	// END problem specific info here --------------------------------------------------------
+	
+	//Call the SHARK routine
+	success = SHARK(&shark_dat);
+	if (success != 0) {mError(simulation_fail); return -1;}
+	
+	//Close files and display end messages
+	fclose(TestOutput);
+	time = clock() - time;
+	std::cout << "\nSimulation Runtime: " << (time / CLOCKS_PER_SEC) << " seconds\n";
+	std::cout << "Total Time Steps: " << shark_dat.timesteps << "\n";
+	std::cout << "Total Iterations: " << shark_dat.totalsteps << "\n";
+	std::cout << "Total Function Calls: " << shark_dat.totalcalls << "\n";
+	std::cout << "Evaluations/sec: " << shark_dat.totalcalls/(time / CLOCKS_PER_SEC) << "\n";
+	
+	return success;
+}
+
+
+//Test of Shark (old version)
+int SHARK_TESTS_OLD()
+{
+	int success = 0;
+	double time;
 
 	SHARK_DATA shark_dat;
 	FILE *TestOutput;
