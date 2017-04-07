@@ -3528,6 +3528,532 @@ std::string MultiligandAdsorption::getAdsorbentName()
  *								End: MultiligandAdsorption
  */
 
+/*
+ *								Start: ChemisorptionReaction
+ *	-------------------------------------------------------------------------------------
+ */
+//Default Constructor for Chemisorption Reaction
+ChemisorptionReaction::ChemisorptionReaction()
+{
+	ads_rxn.resize(0);
+	area_factors.resize(0);
+	volume_factors.resize(0);
+	adsorb_index.resize(0);
+	surface_activity = (*ideal_solution);
+	activity_data = nullptr;
+	act_fun = IDEAL_ADS;
+	specific_area = 1.0;
+	specific_molality = 1.0;
+	surface_charge = 0.0;
+	total_mass = 0.0;
+	total_volume = 1.0;
+	charge_density = 0.0;
+	ionic_strength = 0.0;
+	num_rxns = 0;
+	AreaBasis = false;
+	IncludeSurfCharge = true;
+	adsorbent_name = "HA";
+	ligand_index = -1;
+	Delta.resize(0);
+}
+
+//Default destructor for Chemisorption Reaction
+ChemisorptionReaction::~ChemisorptionReaction()
+{
+	ads_rxn.clear();
+	area_factors.clear();
+	volume_factors.clear();
+	adsorb_index.clear();
+	Delta.clear();
+}
+
+//Initialize the object
+void ChemisorptionReaction::Initialize_Object(MasterSpeciesList &List, int n)
+{
+	this->List = &List;
+	this->num_rxns = n;
+	this->area_factors.resize(this->List->list_size());
+	this->volume_factors.resize(this->List->list_size());
+	this->activities.set_size(this->List->list_size(),1);
+	this->Delta.resize(this->List->list_size());
+	for (int i=0; i<this->List->list_size(); i++)
+	{
+		this->area_factors[i] = 0.0;
+		this->volume_factors[i] = 0.0;
+		this->activities(i,0) = 1.0;
+		this->Delta[i] = 0.0;
+	}
+	
+	this->ads_rxn.resize(this->num_rxns);
+	this->adsorb_index.resize(this->num_rxns);
+	for (int i=0; i<this->num_rxns; i++)
+	{
+		this->ads_rxn[i].Initialize_Object(List);
+		this->adsorb_index[i] = -1;
+	}
+
+}
+
+//Display information about the object to the console
+void ChemisorptionReaction::Display_Info()
+{
+	std::cout << "Ligand/Adsorbent Name = " << this->getAdsorbentName() << std::endl;
+	std::cout << "Ligand Conc (mol/kg) = " << this->getSpecificMolality() << " = ";
+	bool first = true;
+	for (int i=0; i<this->List->list_size(); i++)
+	{
+		if (i == 0 || first == true)
+		{
+			if (this->getDelta(i) != 0.0)
+			{
+				if (this->getDelta(i) > 1.0)
+					std::cout << this->getDelta(i) << " x [ " << this->List->get_species(i).MolecularFormula() << " ]";
+				else
+					std::cout << "[ " << this->List->get_species(i).MolecularFormula() << " ]";
+				first = false;
+			}
+		}
+		else
+		{
+			if (this->getDelta(i) != 0.0)
+			{
+				if (this->getDelta(i) > 1.0)
+					std::cout << " + " << this->getDelta(i) << " x [ " << this->List->get_species(i).MolecularFormula() << " ]";
+				else
+					std::cout << " + [ " << this->List->get_species(i).MolecularFormula() << " ]";
+			}
+		}
+	}
+
+	std::cout << "\nReactions Involved...\n";
+	for (int i=0; i<this->ads_rxn.size(); i++)
+		this->getReaction(i).Display_Info();
+}
+
+//Modify the deltas of the system mass balance
+void ChemisorptionReaction::modifyMBEdeltas(MassBalance &mbo)
+{
+	this->AdsorptionReaction::modifyDeltas(mbo);
+}
+
+//Set the adsorbed species index automatically
+int ChemisorptionReaction::setAdsorbIndices()
+{
+	int success = 0;
+	
+	//Loop through all reactions to find solid/adsorbed species that are NOT the named ligand
+	for (int i=0; i<this->getNumberRxns(); i++)
+	{
+		this->adsorb_index[i] = -1;
+		for (int j=0; j<this->List->list_size(); j++)
+		{
+			//Check to see if jth species is involved with the ith reaction
+			if (this->getReaction(i).Get_Stoichiometric(j) != 0.0)
+			{
+				//Check to see if species is solid or adsorbed
+				if (this->List->get_species(j).MoleculePhaseID() == SOLID || this->List->get_species(j).MoleculePhaseID() == ADSORBED)
+				{
+					//Check to see if species is NOT the named ligand
+					if (this->List->get_species(i).MolecularFormula() != this->getAdsorbentName())
+					{
+						this->adsorb_index[i] = j;
+					}
+				}
+			}
+		}
+		if (this->adsorb_index[i] == -1)
+		{
+			mError(invalid_species);
+			return -1;
+		}
+	}
+	
+	return success;
+}
+
+//Set the ligand species index automatically
+int ChemisorptionReaction::setLigandIndex()
+{
+	int success = 0;
+	
+	//Loop through all reactions to find solid/adsorbed species that IS the named ligand
+	for (int i=0; i<this->getNumberRxns(); i++)
+	{
+		this->ligand_index = -1;
+		for (int j=0; j<this->List->list_size(); j++)
+		{
+			//Check to see if jth species is involved with the ith reaction
+			if (this->getReaction(i).Get_Stoichiometric(j) != 0.0)
+			{
+				//Check to see if species is solid or adsorbed
+				if (this->List->get_species(j).MoleculePhaseID() == SOLID || this->List->get_species(j).MoleculePhaseID() == ADSORBED)
+				{
+					//Check to see if species IS the named ligand
+					if (this->List->get_species(i).MolecularFormula() == this->getAdsorbentName())
+					{
+						if (i == 0)
+							this->ligand_index = j;
+						else
+						{
+							if (j != this->ligand_index)
+							{
+								this->ligand_index = -1;
+								mError(invalid_species);
+								return -1;
+							}
+						}
+					}
+				}
+			}
+		}
+		if (this->ligand_index == -1)
+		{
+			mError(invalid_species);
+			return -1;
+		}
+	}
+	
+	return success;
+}
+
+//Set the activity model
+void ChemisorptionReaction::setActivityModelInfo(int (*act) (const Matrix<double>& logq, Matrix<double> &activity, const void *data),
+											  const void *act_data)
+{
+	this->AdsorptionReaction::setActivityModelInfo(act, act_data);
+}
+
+//Set the activity enum choice
+void ChemisorptionReaction::setActivityEnum(int act)
+{
+	this->AdsorptionReaction::setActivityEnum(act);
+}
+
+//Set the delta value for the site balance
+void ChemisorptionReaction::setDelta(int i, double v)
+{
+	//Check args
+	if (i >= this->Delta.size() || i < 0)
+	{
+		mError(out_of_bounds);
+		return;
+	}
+	
+	this->Delta[i] = v;
+}
+
+//Set the volume factor of the given species
+void ChemisorptionReaction::setVolumeFactor(int i, double v)
+{
+	this->AdsorptionReaction::setVolumeFactor(i, v);
+}
+
+//Set the area factor of the given species
+void ChemisorptionReaction::setAreaFactor(int i, double a)
+{
+	this->AdsorptionReaction::setAreaFactor(i, a);
+}
+
+//Set the specific area of the adsorbent
+void ChemisorptionReaction::setSpecificArea(double a)
+{
+	this->AdsorptionReaction::setSpecificArea(a);
+}
+
+//Set the specific molality of the adsorbent
+void ChemisorptionReaction::setSpecificMolality(double a)
+{
+	this->AdsorptionReaction::setSpecificMolality(a);
+}
+
+//Set the surface charge of the adsorbent
+void ChemisorptionReaction::setSurfaceCharge(double c)
+{
+	this->AdsorptionReaction::setSurfaceCharge(c);
+}
+
+//Set the total mass of the adsorbent
+void ChemisorptionReaction::setTotalMass(double m)
+{
+	this->AdsorptionReaction::setTotalMass(m);
+}
+
+//Set the total volume of the system
+void ChemisorptionReaction::setTotalVolume(double v)
+{
+	this->AdsorptionReaction::setTotalVolume(v);
+}
+
+//Set the surface charge boolean arg
+void ChemisorptionReaction::setSurfaceChargeBool(bool opt)
+{
+	this->AdsorptionReaction::setSurfaceChargeBool(opt);
+}
+
+//Set the name of the ligand/adsorbent
+void ChemisorptionReaction::setAdsorbentName(std::string name)
+{
+	this->AdsorptionReaction::setAdsorbentName(name);
+}
+
+//Set the value of charge density
+void ChemisorptionReaction::setChargeDensityValue(double a)
+{
+	this->AdsorptionReaction::setChargeDensityValue(a);
+}
+
+//Set the value of ionic strength
+void ChemisorptionReaction::setIonicStrengthValue(double a)
+{
+	this->AdsorptionReaction::setIonicStrengthValue(a);
+}
+
+//Set the activities to the given matrix
+void ChemisorptionReaction::setActivities(Matrix<double> &x)
+{
+	this->AdsorptionReaction::setActivities(x);
+}
+
+//Calculate the area factors for adsorption
+void ChemisorptionReaction::calculateAreaFactors()
+{
+	this->AdsorptionReaction::calculateAreaFactors();
+}
+
+//Calculate the reaction equilibria constants based on temperature
+void ChemisorptionReaction::calculateEquilibria(double T)
+{
+	this->AdsorptionReaction::calculateEquilibria(T);
+}
+
+//Set the value of surface charge density based on the calculation function
+void ChemisorptionReaction::setChargeDensity(const Matrix<double> &x)
+{
+	this->charge_density = this->calculateSurfaceChargeDensity(x);
+}
+
+//Set the value of ionic strength based on the calculation function
+void ChemisorptionReaction::setIonicStrength(const Matrix<double> &x)
+{
+	this->AdsorptionReaction::setIonicStrength(x);
+}
+
+//Function call to the surface activity function
+int ChemisorptionReaction::callSurfaceActivity(const Matrix<double> &x)
+{
+	return this->AdsorptionReaction::callSurfaceActivity(x);
+}
+
+//Return the calculation of the surface charge density
+double ChemisorptionReaction::calculateSurfaceChargeDensity(const Matrix<double> &x)
+{
+	double sigma = 0.0;
+	double sum = 0.0;
+	
+	for (int i=0; i<this->getNumberRxns(); i++)
+	{
+		sum = sum + (this->List->charge(this->getAdsorbIndex(i)) * pow(10.0, x(this->getAdsorbIndex(i),0)));
+	}
+	sum = sum + (this->List->charge(this->getLigandIndex()) * pow(10.0, x(this->getLigandIndex(),0)));
+	sigma = sum * (Faraday/this->getSpecificArea());
+	
+	return sigma;
+}
+
+//Return the calculation of the electric surface potential
+double ChemisorptionReaction::calculateElecticPotential(double sigma, double T, double I, double rel_epsilon)
+{
+	return this->AdsorptionReaction::calculatePsi(sigma, T, I, rel_epsilon);
+}
+
+//Return the calculation of the net charge exchange term for the ith reaction
+double ChemisorptionReaction::calculateAqueousChargeExchange(int i)
+{
+	return this->AdsorptionReaction::calculateAqueousChargeExchange(i);
+}
+
+//Return the calculation of the equilibrium correction term of the ith reaction
+double ChemisorptionReaction::calculateEquilibriumCorrection(double sigma, double T, double I, double rel_epsilon, int i)
+{
+	return this->AdsorptionReaction::calculateEquilibriumCorrection(sigma, T, I, rel_epsilon, i);
+}
+
+//Return the residual contributed by the ith reaction
+double ChemisorptionReaction::Eval_RxnResidual(const Matrix<double> &x, const Matrix<double> &gama, double T, double rel_perm, int i)
+{
+	double res = 0.0;
+	
+	/*
+	res = this->getReaction(i).Get_Stoichiometric(this->getAdsorbIndex(i)) * ( log10(this->getActivity(this->getAdsorbIndex(i))) + x(this->getAdsorbIndex(i),0) );
+	
+	if (this->getReaction(i).Get_Stoichiometric(this->getAdsorbIndex(i)) > 0.0)
+	{
+		if (this->isAreaBasis() == true)
+			res = res - log10(this->getSpecificArea()*this->calculateActiveFraction(x));
+		else
+			res = res - (this->getMolarFactor(i) * log10(this->getSpecificMolality()*this->calculateActiveFraction(x)));
+	}
+	else
+	{
+		if (this->isAreaBasis() == true)
+			res = res + log10(this->getSpecificArea()*this->calculateActiveFraction(x));
+		else
+			res = res + (this->getMolarFactor(i) * log10(this->getSpecificMolality()*this->calculateActiveFraction(x)));
+	}
+	 */
+	
+	//Residual contributions from all aqueous species
+	for (int j=0; j<this->List->list_size(); j++)
+	{
+		if (this->List->get_species(j).MoleculePhaseID() == AQUEOUS || this->List->get_species(j).MoleculePhaseID() == LIQUID)
+			res = res + ( this->getReaction(i).Get_Stoichiometric(j)*( log10(gama(j,0))+x(j,0) ) );
+	}
+	
+	//double logK = this->getReaction(i).Get_Equilibrium();
+	//logK = logK + ((this->calculateEquilibriumCorrection(this->getChargeDensity(), T, this->getIonicStrength(), rel_perm, i))/log(10.0));
+	
+	//res = res - logK;
+	
+	return res;
+}
+
+//Return the residual contributed the the site balance
+double ChemisorptionReaction::Eval_SiteBalanceResidual(const Matrix<double> &x)
+{
+	double res = 0.0;
+	
+	return res;
+}
+
+//Return reference to the ith reaction object
+Reaction& ChemisorptionReaction::getReaction(int i)
+{
+	if (i >= this->num_rxns || i < 0)
+	{
+		mError(out_of_bounds);
+		i = 0;
+	}
+	return this->ads_rxn[i];
+}
+
+//Return the delta of the ith species
+double ChemisorptionReaction::getDelta(int i)
+{
+	if (i >= this->List->list_size() || i < 0)
+	{
+		mError(out_of_bounds);
+		i = 0;
+	}
+	return this->Delta[i];
+}
+
+//Return the volume factor of the ith species
+double ChemisorptionReaction::getVolumeFactor(int i)
+{
+	return this->AdsorptionReaction::getVolumeFactor(i);
+}
+
+//Return the area factor of the ith species
+double ChemisorptionReaction::getAreaFactor(int i)
+{
+	return this->AdsorptionReaction::getAreaFactor(i);
+}
+
+//Return the activity coefficient of the ith species
+double ChemisorptionReaction::getActivity(int i)
+{
+	return this->AdsorptionReaction::getActivity(i);
+}
+
+//Return the specific area of the adsorbent
+double ChemisorptionReaction::getSpecificArea()
+{
+	return this->AdsorptionReaction::getSpecificArea();
+}
+
+//Return the specific area of the adsorbent
+double ChemisorptionReaction::getSpecificMolality()
+{
+	return this->AdsorptionReaction::getSpecificMolality();
+}
+
+//Return the surface charge of the adsorbent
+double ChemisorptionReaction::getSurfaceCharge()
+{
+	return this->AdsorptionReaction::getSurfaceCharge();
+}
+
+//Return the bulk density of the adsorbent in the system
+double ChemisorptionReaction::getBulkDensity()
+{
+	return this->AdsorptionReaction::getBulkDensity();
+}
+
+//Return the total mass of the adsorbent
+double ChemisorptionReaction::getTotalMass()
+{
+	return this->AdsorptionReaction::getTotalMass();
+}
+
+//Return the total volume of the system
+double ChemisorptionReaction::getTotalVolume()
+{
+	return this->AdsorptionReaction::getTotalVolume();
+}
+
+//Return the charge density of the adsorbent
+double ChemisorptionReaction::getChargeDensity()
+{
+	return this->AdsorptionReaction::getChargeDensity();
+}
+
+//Return the ionic strength of the system
+double ChemisorptionReaction::getIonicStrength()
+{
+	return this->AdsorptionReaction::getIonicStrength();
+}
+
+//Return the number of reactions involved
+int ChemisorptionReaction::getNumberRxns()
+{
+	return this->AdsorptionReaction::getNumberRxns();
+}
+
+//Return the adsorbed species index of the ith reaction
+int ChemisorptionReaction::getAdsorbIndex(int i)
+{
+	return this->AdsorptionReaction::getAdsorbIndex(i);
+}
+
+//Return the ligand species index of the ith reaction
+int ChemisorptionReaction::getLigandIndex()
+{
+	return this->ligand_index;
+}
+
+//Return the activity enum value
+int ChemisorptionReaction::getActivityEnum()
+{
+	return this->AdsorptionReaction::getActivityEnum();
+}
+
+//Return the boolean for inclusion of surface charging
+bool ChemisorptionReaction::includeSurfaceCharge()
+{
+	return this->AdsorptionReaction::includeSurfaceCharge();
+}
+
+//Return the name of the ligand/adsorbent
+std::string ChemisorptionReaction::getAdsorbentName()
+{
+	return this->AdsorptionReaction::getAdsorbentName();
+}
+
+/*
+ *	-------------------------------------------------------------------------------------
+ *								End: ChemisorptionReaction
+ */
+
 //Print SHARK info to output file
 void print2file_shark_info(SHARK_DATA *shark_dat)
 {
@@ -9733,12 +10259,12 @@ int SHARK_TESTS()
 	shark_dat.num_usr = 0;
 	shark_dat.num_other = 0;
 	shark_dat.act_fun = DAVIES;
-	shark_dat.steadystate = false;
+	shark_dat.steadystate = true;
 	shark_dat.simulationtime = 96.0;
 	shark_dat.dt = 0.1;
 	shark_dat.t_out = shark_dat.simulationtime / 1000.0;
 	shark_dat.const_pH = false;
-	shark_dat.SpeciationCurve = false;
+	shark_dat.SpeciationCurve = true;
 	shark_dat.TimeAdaptivity = true;
 	shark_dat.pH = 7.80;
 	shark_dat.dielectric_const = 78.325;

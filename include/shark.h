@@ -1144,7 +1144,7 @@ public:
 	~ChemisorptionReaction();								///< Default Destructor
 	
 	void Initialize_Object(MasterSpeciesList &List, int n); ///< Function to call the initialization of objects sequentially
-	void Display_Info();								///< Display the adsorption reaction information (PLACE HOLDER)
+	void Display_Info();									///< Display the adsorption reaction information (PLACE HOLDER)
 	
 	/// Modify the Deltas in the MassBalance Object
 	/** This function will take a mass balance object as an argument and modify the deltas in that object to
@@ -1152,13 +1152,19 @@ public:
 		mass balances, this function must be called for each mass balance in the system.
 	 
 		\param mbo reference to the MassBalance Object the adsorption is acting on*/
-	void modifyDeltas(MassBalance &mbo);
+	void modifyMBEdeltas(MassBalance &mbo);
 	
 	/// Find and set the adsorbed species indices for each reaction object
 	/** This function searches through the Reaction objects in ChemisorptionReaction to find the adsorbed species
 		and their indices to set that information in the adsorb_index structure. Function will return 0 if successful 
 		and -1 on a failure.*/
 	int setAdsorbIndices();
+	
+	/// Find and set the ligand species index
+	/** This function searches through the Reaction objects in ChemisorptionReaction to find the ligand species
+		and its index to set that information in the ligand_index structure. Function will return 0 if successful
+		and -1 on a failure.*/
+	int setLigandIndex();
 	
 	/// Function to set the surface activity model and data pointer
 	/** This function will setup the surface activity model based on the given pointer arguments. If no arguments
@@ -1167,6 +1173,7 @@ public:
 							  const void *act_data);
 	
 	void setActivityEnum(int act);						///< Set the surface activity enum value
+	void setDelta(int i, double v);						///< Set the ith delta factor for the site balance
 	void setVolumeFactor(int i, double v);				///< Set the ith volume factor for the species list (cm^3/mol)
 	void setAreaFactor(int i, double a);				///< Set the ith area factor for the species list (m^2/mol)
 	void setSpecificArea(double a);						///< Set the specific area for the adsorbent (m^2/kg)
@@ -1251,6 +1258,7 @@ public:
 	double Eval_SiteBalanceResidual(const Matrix<double> &x);
 	
 	Reaction& getReaction(int i);				///< Return reference to the ith reaction object in the adsorption object
+	double getDelta(int i);						///< Get the ith delta factor for the site balance
 	double getVolumeFactor(int i);				///< Get the ith volume factor (species not involved return zeros) (cm^3/mol)
 	double getAreaFactor(int i);				///< Get the ith area factor (species not involved return zeros) (m^2/mol)
 	double getActivity(int i);					///< Get the ith activity factor for the surface species
@@ -1264,44 +1272,14 @@ public:
 	double getIonicStrength();					///< Get the value of the ionic strength of solution (mol/L)
 	int getNumberRxns();						///< Get the number of reactions involved in the adsorption object
 	int getAdsorbIndex(int i);					///< Get the index of the adsorbed species in the ith reaction
+	int getLigandIndex();						///< Get the index of the ligand species
 	int getActivityEnum();						///< Return the enum representing the choosen activity function
 	bool includeSurfaceCharge();				///< Returns true if we are considering surface charging during adsorption
 	std::string getAdsorbentName();				///< Returns the name of the adsorbent as a string
 	
 protected:
-	//MasterSpeciesList *List;					///< Pointer to the MasterSpeciesList object
-	
-	/// Pointer to a surface activity model
-	/** This is a function pointer for a surface activity model. The function must accept the log of the
-		surface concentrations as an argument (logq) and provide the activities for each species (activity).
-		The pointer data is used to pass any additional arguments needed.
-	 
-		\param logq matrix of the log (base 10) of surface concentrations of all species
-		\param activity matrix of activity coefficients for all surface species (must be overriden)
-		\param data pointer to a data structure needed to calculate activities*/
-	//int (*surface_activity) (const Matrix<double>& logq, Matrix<double> &activity, const void *data);
-	
-	/*
-	const void *activity_data;					///< Pointer to the data structure needed for surface activities.
-	int act_fun;								///< Enumeration of the activity function being used for the surface phase
-	std::vector<double> area_factors;			///< List of the van der Waals areas associated with surface species (m^2/mol)
-	std::vector<double> volume_factors;			///< List of the van der Waals volumes of each surface species (cm^3/mol)
-	std::vector<int> adsorb_index;				///< List of the indices for the adsorbed species in the reactions
-	std::vector<int> aqueous_index;				///< List of the indices for the primary aqueous species in the reactions
-	std::vector<double> molar_factor;			///< List of the number of ligands needed to form one mole of adsorption in each reaction
-	Matrix<double> activities;					///< List of the activities calculated by the activity model
-	double specific_area;						///< Specific surface area of the adsorbent (m^2/kg)
-	double specific_molality;					///< Specific molality of the adsorbent - moles of ligand per kg sorbent (mol/kg)
-	double surface_charge;						///< Charge of the uncomplexed surface ligand species
-	double total_mass;							///< Total mass of the adsorbent in the system (kg)
-	double total_volume;						///< Total volume of the system (L)
-	double ionic_strength;						///< Ionic Strength of the system used to adjust equilibria constants (mol/L)
-	double charge_density;						///< Surface charge density of the adsorbent used to adjust equilbria (C/m^2)
-	int num_rxns;								///< Number of reactions involved in the adsorption equilibria
-	bool AreaBasis;								///< True = Adsorption on an area basis, False = Adsorption on a ligand basis
-	bool IncludeSurfCharge;						///< True = Includes surface charging corrections, False = Does not consider surface charge
-	std::string adsorbent_name;					///< Name of the adsorbent for this object
-	 */
+	int ligand_index;						///< Index of the ligand for all reactions
+	std::vector<double> Delta;				///< Vector of weights (i.e., deltas) used in the site balance
 	
 private:
 	std::vector<Reaction> ads_rxn;				///< List of reactions involved with adsorption
