@@ -3883,36 +3883,20 @@ double ChemisorptionReaction::Eval_RxnResidual(const Matrix<double> &x, const Ma
 {
 	double res = 0.0;
 	
-	/*
-	res = this->getReaction(i).Get_Stoichiometric(this->getAdsorbIndex(i)) * ( log10(this->getActivity(this->getAdsorbIndex(i))) + x(this->getAdsorbIndex(i),0) );
-	
-	if (this->getReaction(i).Get_Stoichiometric(this->getAdsorbIndex(i)) > 0.0)
-	{
-		if (this->isAreaBasis() == true)
-			res = res - log10(this->getSpecificArea()*this->calculateActiveFraction(x));
-		else
-			res = res - (this->getMolarFactor(i) * log10(this->getSpecificMolality()*this->calculateActiveFraction(x)));
-	}
-	else
-	{
-		if (this->isAreaBasis() == true)
-			res = res + log10(this->getSpecificArea()*this->calculateActiveFraction(x));
-		else
-			res = res + (this->getMolarFactor(i) * log10(this->getSpecificMolality()*this->calculateActiveFraction(x)));
-	}
-	 */
-	
 	//Residual contributions from all aqueous species
 	for (int j=0; j<this->List->list_size(); j++)
 	{
 		if (this->List->get_species(j).MoleculePhaseID() == AQUEOUS || this->List->get_species(j).MoleculePhaseID() == LIQUID)
 			res = res + ( this->getReaction(i).Get_Stoichiometric(j)*( log10(gama(j,0))+x(j,0) ) );
 	}
+	//Add residual contribution from the adsorbed species and ligand species
+	res = res + this->getReaction(i).Get_Stoichiometric(this->getAdsorbIndex(i)) * ( log10(this->getActivity(this->getAdsorbIndex(i))) +  x(this->getAdsorbIndex(i),0));
+	res = res + this->getReaction(i).Get_Stoichiometric(this->getLigandIndex()) * x(this->getLigandIndex(),0);
 	
-	//double logK = this->getReaction(i).Get_Equilibrium();
-	//logK = logK + ((this->calculateEquilibriumCorrection(this->getChargeDensity(), T, this->getIonicStrength(), rel_perm, i))/log(10.0));
-	
-	//res = res - logK;
+	//Subtract residual contribution from the binding constant
+	double logK = this->getReaction(i).Get_Equilibrium();
+	logK = logK + ((this->calculateEquilibriumCorrection(this->getChargeDensity(), T, this->getIonicStrength(), rel_perm, i))/log(10.0));
+	res = res - logK;
 	
 	return res;
 }
@@ -3921,6 +3905,20 @@ double ChemisorptionReaction::Eval_RxnResidual(const Matrix<double> &x, const Ma
 double ChemisorptionReaction::Eval_SiteBalanceResidual(const Matrix<double> &x)
 {
 	double res = 0.0;
+	
+	//Loop for all species in list
+	for (int i=0; i<this->List->list_size(); i++)
+	{
+		res = res + ( this->getDelta(i) * pow(10.0, x(i,0)) );
+	}
+	
+	if (this->getSpecificMolality() <= DBL_MIN)
+		res = (res - this->getSpecificMolality())/pow(DBL_EPSILON, 2.0);
+	else
+		res = (res / this->getSpecificMolality()) - 1.0;
+	
+	if (isnan(res) || isinf(res))
+		res = sqrt(DBL_MAX)/this->List->list_size();
 	
 	return res;
 }
