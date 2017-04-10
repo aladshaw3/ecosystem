@@ -3817,7 +3817,30 @@ void ChemisorptionReaction::setActivities(Matrix<double> &x)
 //Calculate the area factors for adsorption
 void ChemisorptionReaction::calculateAreaFactors()
 {
-	this->AdsorptionReaction::calculateAreaFactors();
+	for (int r=0; r<this->getNumberRxns(); r++)
+	{
+		for (int i=0; i<this->List->list_size(); i++)
+		{
+			
+			if (this->volume_factors[i] == 0.0 || (this->List->get_species(i).MoleculePhaseID() != SOLID && this->List->get_species(i).MoleculePhaseID() != ADSORBED))
+			{
+				this->area_factors[i] = 0.0;
+			}
+			else if (this->volume_factors[i] == 0.0 && (this->List->get_species(i).MoleculePhaseID() == SOLID || this->List->get_species(i).MoleculePhaseID() == ADSORBED))
+			{
+				this->area_factors[i] = 4.0 * M_PI * pow((3.0/(4.0*M_PI))*(4.33/Na), (2.0/3.0)) / 10000.0 * Na;
+			}
+			else
+			{
+				if (this->AreaBasis == false)
+				{
+					this->volume_factors[i] = this->volume_factors[i] * this->getReaction(r).Get_Stoichiometric(this->getLigandIndex());
+				}
+				this->area_factors[i] = 4.0 * M_PI * pow((3.0/(4.0*M_PI))*(this->volume_factors[i]/Na), (2.0/3.0)) / 10000.0 * Na;
+			}
+		}
+	}
+
 }
 
 //Calculate the reaction equilibria constants based on temperature
@@ -8775,8 +8798,19 @@ int setup_SHARK_DATA( FILE *file, int (*residual) (const Matrix<double> &x, Matr
 			multiligand_sum += dat->num_multi_ssar[i][j];
 		}
 	}
+	
+	int chem_sum=0;
+	for (int i=0; i<dat->num_sschem; i++)
+	{
+		if (dat->num_sschem_rxns[i] == 0)
+		{
+			mError(missing_information);
+			return -1;
+		}
+		chem_sum += dat->num_sschem_rxns[i];
+	}
 
-	if (dat->numvar != (dat->num_mbe+dat->num_ssr+dat->num_usr+dat->num_other+1+ssao_sum+usao_sum+multiligand_sum))
+	if (dat->numvar != (dat->num_mbe+dat->num_ssr+dat->num_usr+dat->num_other+1+ssao_sum+usao_sum+multiligand_sum+chem_sum))
 	{
 		mError(dim_mis_match);
 		std::cout << "Number of equations and variables do not match!\n";
@@ -8897,6 +8931,7 @@ int setup_SHARK_DATA( FILE *file, int (*residual) (const Matrix<double> &x, Matr
 	dat->UnsteadyList.resize(dat->num_usr);
 	dat->AdsorptionList.resize(dat->num_ssao);
 	dat->UnsteadyAdsList.resize(dat->num_usao);
+	dat->ChemisorptionList.resize(dat->num_sschem);
 	//dat->MultiAdsList.resize(dat->num_multi_ssao); //Action performed during read (this line may be redundant)
 	dat->OtherList.resize(dat->num_other);
 
@@ -8938,6 +8973,11 @@ int setup_SHARK_DATA( FILE *file, int (*residual) (const Matrix<double> &x, Matr
 		{
 			dat->MultiAdsList[i].Initialize_Object(dat->MasterList, (int)dat->num_multi_ssar[i].size(), dat->num_multi_ssar[i]);
 		}
+	}
+	
+	for (int i=0; i<dat->ChemisorptionList.size(); i++)
+	{
+		dat->ChemisorptionList[i].Initialize_Object(dat->MasterList, dat->num_sschem_rxns[i]);
 	}
 
 	return success;
@@ -10116,6 +10156,10 @@ int SHARK(SHARK_DATA *shark_dat)
 		shark_dat->steadystate = true;
 		shark_dat->Newton_data.nl_maxit = 2 * shark_dat->numvar;
 		shark_dat->time = -1;
+		for (int i=0; i<shark_dat->MassBalanceList.size(); i++)
+		{
+			shark_dat->MassBalanceList[i].Set_SteadyState(shark_dat->steadystate);
+		}
 
 		//Call the executioner function
 		success = shark_executioner(shark_dat);
@@ -10252,7 +10296,8 @@ int SHARK_TESTS()
 	shark_dat.num_mbe = 6;
 	
 	shark_dat.num_ssao = 0;
-	shark_dat.num_usao = 1;
+	shark_dat.num_usao = 0;
+	shark_dat.num_sschem = 1;
 	
 	shark_dat.num_usr = 0;
 	shark_dat.num_other = 0;
@@ -10267,12 +10312,12 @@ int SHARK_TESTS()
 	shark_dat.pH = 7.80;
 	shark_dat.dielectric_const = 78.325;
 	shark_dat.temperature = 293.15;
-	shark_dat.volume = 1.0;							//SHOULD BE REQUIRED IF WE HAVE ADSORPTION OBJECTS!!!
+	shark_dat.volume = 1.0;
 	
-	shark_dat.num_usar.resize(shark_dat.num_usao);	//Required to set this up PRIOR to calling the setup function for shark
-	shark_dat.us_ads_names.resize(shark_dat.num_usao);
-	shark_dat.num_usar[0] = 2;						//Required to set this up PRIOR to calling the setup function for shark
-	
+	//Done before setup
+	shark_dat.num_sschem_rxns.resize(shark_dat.num_sschem);
+	shark_dat.ss_chem_names.resize(shark_dat.num_sschem);
+	shark_dat.num_sschem_rxns[0] = 2;
 	
 	//Temporary Variables to modify test case
 	double NaHCO3 = 1.786E-1;
@@ -10313,7 +10358,7 @@ int SHARK_TESTS()
 	
 	shark_dat.Newton_data.linear_solver = QR;
 	shark_dat.Newton_data.LineSearch = true;
-	shark_dat.Newton_data.nl_maxit = 10;
+	shark_dat.Newton_data.nl_maxit = 100;
 	shark_dat.Newton_data.NL_Output = true;
 	
 	//Read problem specific info here --------------------------------------------------------
@@ -10895,77 +10940,72 @@ int SHARK_TESTS()
 	shark_dat.MassBalanceList[5].Set_Delta(22, 0);
 	shark_dat.MassBalanceList[5].Set_Delta(23, 0);
 	
-	shark_dat.UnsteadyAdsList[0].setSpecificArea(ads_area);
-	shark_dat.UnsteadyAdsList[0].setSpecificMolality(ads_mol);
-	shark_dat.UnsteadyAdsList[0].setTotalMass(ads_mass);
-	shark_dat.UnsteadyAdsList[0].setSurfaceCharge(0.0);
-	shark_dat.UnsteadyAdsList[0].setAdsorbentName("HAO");
-	shark_dat.UnsteadyAdsList[0].setActivityModelInfo(UNIQUAC_unsteady, &shark_dat.UnsteadyAdsList[0]);
-	shark_dat.UnsteadyAdsList[0].setActivityEnum(UNIQUAC_ACT);
-	shark_dat.UnsteadyAdsList[0].setBasis("molar");
 	
-	shark_dat.UnsteadyAdsList[0].setMolarFactor(0, 2.0);
-	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Equilibrium(logK_UO2);
-	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Forward(1.0E6);
-	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_InitialValue(0.0);
-	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(0, 0);
-	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(1, 0);
-	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(2, 0);
-	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(3, 0);
-	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(4, 0);
-	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(5, 0);
-	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(6, 0);
-	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(7, 0);
-	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(8, -1);
-	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(9, 0);
-	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(10, 0);
-	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(11, 0);
-	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(12, 0);
-	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(13, 0);
-	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(14, 0);
-	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(15, 0);
-	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(16, 0);
-	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(17, 0);
-	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(18, 0);
-	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(19, 0);
-	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(20, 2);
-	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(21, 0);
-	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(22, 1);
-	shark_dat.UnsteadyAdsList[0].getReaction(0).Set_Stoichiometric(23, 0);
+	shark_dat.ChemisorptionList[0].setSpecificArea(ads_area);
+	shark_dat.ChemisorptionList[0].setSpecificMolality(ads_mol);
+	shark_dat.ChemisorptionList[0].setTotalMass(ads_mass);
+	shark_dat.ChemisorptionList[0].setSurfaceCharge(0.0);
+	shark_dat.ChemisorptionList[0].setAdsorbentName("HAO");
+	shark_dat.ChemisorptionList[0].setActivityModelInfo(ideal_solution, &shark_dat.ChemisorptionList[0]);
+	shark_dat.ChemisorptionList[0].setActivityEnum(IDEAL_ADS);
+	
+	shark_dat.ChemisorptionList[0].getReaction(0).Set_Equilibrium(logK_UO2);
+	shark_dat.ChemisorptionList[0].getReaction(0).Set_Stoichiometric(0, 0);
+	shark_dat.ChemisorptionList[0].getReaction(0).Set_Stoichiometric(1, 0);
+	shark_dat.ChemisorptionList[0].getReaction(0).Set_Stoichiometric(2, 0);
+	shark_dat.ChemisorptionList[0].getReaction(0).Set_Stoichiometric(3, 0);
+	shark_dat.ChemisorptionList[0].getReaction(0).Set_Stoichiometric(4, 0);
+	shark_dat.ChemisorptionList[0].getReaction(0).Set_Stoichiometric(5, 0);
+	shark_dat.ChemisorptionList[0].getReaction(0).Set_Stoichiometric(6, 0);
+	shark_dat.ChemisorptionList[0].getReaction(0).Set_Stoichiometric(7, 0);
+	shark_dat.ChemisorptionList[0].getReaction(0).Set_Stoichiometric(8, -1);
+	shark_dat.ChemisorptionList[0].getReaction(0).Set_Stoichiometric(9, 0);
+	shark_dat.ChemisorptionList[0].getReaction(0).Set_Stoichiometric(10, 0);
+	shark_dat.ChemisorptionList[0].getReaction(0).Set_Stoichiometric(11, 0);
+	shark_dat.ChemisorptionList[0].getReaction(0).Set_Stoichiometric(12, 0);
+	shark_dat.ChemisorptionList[0].getReaction(0).Set_Stoichiometric(13, 0);
+	shark_dat.ChemisorptionList[0].getReaction(0).Set_Stoichiometric(14, 0);
+	shark_dat.ChemisorptionList[0].getReaction(0).Set_Stoichiometric(15, 0);
+	shark_dat.ChemisorptionList[0].getReaction(0).Set_Stoichiometric(16, 0);
+	shark_dat.ChemisorptionList[0].getReaction(0).Set_Stoichiometric(17, 0);
+	shark_dat.ChemisorptionList[0].getReaction(0).Set_Stoichiometric(18, 0);
+	shark_dat.ChemisorptionList[0].getReaction(0).Set_Stoichiometric(19, 0);
+	shark_dat.ChemisorptionList[0].getReaction(0).Set_Stoichiometric(20, 2);
+	shark_dat.ChemisorptionList[0].getReaction(0).Set_Stoichiometric(21, 0);
+	shark_dat.ChemisorptionList[0].getReaction(0).Set_Stoichiometric(22, 1);
+	shark_dat.ChemisorptionList[0].getReaction(0).Set_Stoichiometric(23, 0);
 	
 	
-	shark_dat.UnsteadyAdsList[0].setMolarFactor(1, 2.0);
-	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Equilibrium(logK_UO2CO3);
-	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Forward(1.0E3);
-	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_InitialValue(0.0);
-	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(0, 0);
-	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(1, 0);
-	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(2, 0);
-	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(3, 0);
-	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(4, 0);
-	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(5, 0);
-	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(6, 0);
-	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(7, -1);
-	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(8, -1);
-	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(9, 0);
-	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(10, 0);
-	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(11, 0);
-	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(12, 0);
-	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(13, 0);
-	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(14, 0);
-	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(15, 0);
-	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(16, 0);
-	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(17, 0);
-	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(18, 0);
-	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(19, 0);
-	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(20, 2);
-	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(21, 0);
-	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(22, 0);
-	shark_dat.UnsteadyAdsList[0].getReaction(1).Set_Stoichiometric(23, 1);
+	shark_dat.ChemisorptionList[0].getReaction(1).Set_Equilibrium(logK_UO2CO3);
+	shark_dat.ChemisorptionList[0].getReaction(1).Set_Stoichiometric(0, 0);
+	shark_dat.ChemisorptionList[0].getReaction(1).Set_Stoichiometric(1, 0);
+	shark_dat.ChemisorptionList[0].getReaction(1).Set_Stoichiometric(2, 0);
+	shark_dat.ChemisorptionList[0].getReaction(1).Set_Stoichiometric(3, 0);
+	shark_dat.ChemisorptionList[0].getReaction(1).Set_Stoichiometric(4, 0);
+	shark_dat.ChemisorptionList[0].getReaction(1).Set_Stoichiometric(5, 0);
+	shark_dat.ChemisorptionList[0].getReaction(1).Set_Stoichiometric(6, 0);
+	shark_dat.ChemisorptionList[0].getReaction(1).Set_Stoichiometric(7, -1);
+	shark_dat.ChemisorptionList[0].getReaction(1).Set_Stoichiometric(8, -1);
+	shark_dat.ChemisorptionList[0].getReaction(1).Set_Stoichiometric(9, 0);
+	shark_dat.ChemisorptionList[0].getReaction(1).Set_Stoichiometric(10, 0);
+	shark_dat.ChemisorptionList[0].getReaction(1).Set_Stoichiometric(11, 0);
+	shark_dat.ChemisorptionList[0].getReaction(1).Set_Stoichiometric(12, 0);
+	shark_dat.ChemisorptionList[0].getReaction(1).Set_Stoichiometric(13, 0);
+	shark_dat.ChemisorptionList[0].getReaction(1).Set_Stoichiometric(14, 0);
+	shark_dat.ChemisorptionList[0].getReaction(1).Set_Stoichiometric(15, 0);
+	shark_dat.ChemisorptionList[0].getReaction(1).Set_Stoichiometric(16, 0);
+	shark_dat.ChemisorptionList[0].getReaction(1).Set_Stoichiometric(17, 0);
+	shark_dat.ChemisorptionList[0].getReaction(1).Set_Stoichiometric(18, 0);
+	shark_dat.ChemisorptionList[0].getReaction(1).Set_Stoichiometric(19, 0);
+	shark_dat.ChemisorptionList[0].getReaction(1).Set_Stoichiometric(20, 2);
+	shark_dat.ChemisorptionList[0].getReaction(1).Set_Stoichiometric(21, 0);
+	shark_dat.ChemisorptionList[0].getReaction(1).Set_Stoichiometric(22, 0);
+	shark_dat.ChemisorptionList[0].getReaction(1).Set_Stoichiometric(23, 1);
 	
-	shark_dat.UnsteadyAdsList[0].setVolumeFactor(22, 5);
-	shark_dat.UnsteadyAdsList[0].setVolumeFactor(23, 8);
-	shark_dat.UnsteadyAdsList[0].calculateAreaFactors();    //NOTE: Required here because this is done during the reading step
+	shark_dat.ChemisorptionList[0].setVolumeFactor(22, 5);
+	shark_dat.ChemisorptionList[0].setVolumeFactor(23, 8);
+	shark_dat.ChemisorptionList[0].calculateAreaFactors();    //NOTE: Required here because this is done during the reading step
+	 
 	
 	
 	// END problem specific info here --------------------------------------------------------
