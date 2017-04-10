@@ -1351,13 +1351,14 @@ typedef enum {IDEAL_ADS, FLORY_HUGGINS, UNIQUAC_ACT} valid_surf_act;
 	through the "OtherList" vector object. Those residual function must all have the same format. */
 typedef struct SHARK_DATA
 {
-	MasterSpeciesList MasterList;					///< Master List of species object
-	std::vector<Reaction> ReactionList;				///< Equilibrium reaction objects
-	std::vector<MassBalance> MassBalanceList;		///< Mass balance objects
-	std::vector<UnsteadyReaction> UnsteadyList;		///< Unsteady Reaction objects
-	std::vector<AdsorptionReaction> AdsorptionList;	///< Equilibrium Adsorption Reaction Objects
-	std::vector<UnsteadyAdsorption> UnsteadyAdsList;///< Unsteady Adsorption Reaction Objects
-	std::vector<MultiligandAdsorption> MultiAdsList;///< Multiligand Adsorptioin Objects
+	MasterSpeciesList MasterList;							///< Master List of species object
+	std::vector<Reaction> ReactionList;						///< Equilibrium reaction objects
+	std::vector<MassBalance> MassBalanceList;				///< Mass balance objects
+	std::vector<UnsteadyReaction> UnsteadyList;				///< Unsteady Reaction objects
+	std::vector<AdsorptionReaction> AdsorptionList;			///< Equilibrium Adsorption Reaction Objects
+	std::vector<UnsteadyAdsorption> UnsteadyAdsList;		///< Unsteady Adsorption Reaction Objects
+	std::vector<MultiligandAdsorption> MultiAdsList;		///< Multiligand Adsorptioin Objects
+	std::vector<ChemisorptionReaction> ChemisorptionList;	///< Chemisorption Reaction objects
 
 	/// Array of Other Residual functions to be defined by user
 	/** This list of function pointers can be declared and set up by the user in order to add to or change
@@ -1380,11 +1381,14 @@ typedef struct SHARK_DATA
 	int num_ssao = 0;								///< Number of steady-state adsorption objects
 	int num_usao = 0;								///< Number of unsteady adsorption objects
 	int num_multi_ssao = 0;							///< Number of multiligand steady-state adsorption objects
+	int num_sschem = 0;								///< Number of steady-state chemisorption objects
 	std::vector<int> num_ssar;						///< List of the numbers of reactions in each adsorption object
 	std::vector<int> num_usar;						///< List of the numbers of reactions in each unsteady adsorption object
+	std::vector<int> num_sschem_rxns;				///< List of the numbers of reactions in each steady-state chemisorption object
 	std::vector< std::vector<int> > num_multi_ssar; ///< List of all multiligand objects -> List of ligands and rxns of that ligand
 	std::vector<std::string> ss_ads_names;			///< List of the steady-state adsorbent object names
 	std::vector<std::string> us_ads_names;			///< List of the unsteady adsorption object names
+	std::vector<std::string> ss_chem_names;			///< List of the steady-state chemisorption object names
 	std::vector< std::vector<std::string> > ssmulti_names;	///< List of the names of the ligands in each multiligand object
 	int num_other = 0;								///< Number of other functions to be used (default is always 0)
 	int act_fun = IDEAL;							///< Flag denoting the activity function to use (default is IDEAL)

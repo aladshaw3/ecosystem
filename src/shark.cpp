@@ -10971,8 +10971,8 @@ int SHARK_TESTS()
 	// END problem specific info here --------------------------------------------------------
 	
 	//Call the SHARK routine
-	success = SHARK(&shark_dat);
-	if (success != 0) {mError(simulation_fail); return -1;}
+	//success = SHARK(&shark_dat);
+	//if (success != 0) {mError(simulation_fail); return -1;}
 	
 	//Close files and display end messages
 	fclose(TestOutput);
