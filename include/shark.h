@@ -1178,7 +1178,6 @@ public:
 	void setAreaFactor(int i, double a);				///< Set the ith area factor for the species list (m^2/mol)
 	void setSpecificArea(double a);						///< Set the specific area for the adsorbent (m^2/kg)
 	void setSpecificMolality(double a);					///< Set the specific molality for the adsorbent (mol/kg)
-	void setSurfaceCharge(double c);					///< Set the surface charge of the uncomplexed ligands
 	void setTotalMass(double m);						///< Set the total mass of the adsorbent (kg)
 	void setTotalVolume(double v);						///< Set the total volume of the system (L)
 	void setSurfaceChargeBool(bool opt);				///< Set the boolean for inclusion of surface charging
@@ -1264,7 +1263,6 @@ public:
 	double getActivity(int i);					///< Get the ith activity factor for the surface species
 	double getSpecificArea();					///< Get the specific area of the adsorbent (m^2/kg) or (mol/kg)
 	double getSpecificMolality();				///< Get the specific molality of the adsorbent (mol/kg)
-	double getSurfaceCharge();					///< Get the surface charge of the adsorbent
 	double getBulkDensity();					///< Calculate and return bulk density of adsorbent in system (kg/L)
 	double getTotalMass();						///< Get the total mass of adsorbent in the system (kg)
 	double getTotalVolume();					///< Get the total volume of the system (L)

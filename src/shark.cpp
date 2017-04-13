@@ -3598,7 +3598,8 @@ void ChemisorptionReaction::Initialize_Object(MasterSpeciesList &List, int n)
 void ChemisorptionReaction::Display_Info()
 {
 	std::cout << "Ligand/Adsorbent Name = " << this->getAdsorbentName() << std::endl;
-	std::cout << "Ligand Conc (mol/kg) = " << this->getSpecificMolality() << " = ";
+	std::cout << "Site Balance (mol/kg) = " << this->getSpecificMolality() << " = ";
+	//Loop through for site balance
 	bool first = true;
 	for (int i=0; i<this->List->list_size(); i++)
 	{
@@ -3654,7 +3655,7 @@ int ChemisorptionReaction::setAdsorbIndices()
 				if (this->List->get_species(j).MoleculePhaseID() == SOLID || this->List->get_species(j).MoleculePhaseID() == ADSORBED)
 				{
 					//Check to see if species is NOT the named ligand
-					if (this->List->get_species(i).MolecularFormula() != this->getAdsorbentName())
+					if (this->List->get_species(j).MolecularFormula() != this->getAdsorbentName())
 					{
 						this->adsorb_index[i] = j;
 					}
@@ -3679,7 +3680,6 @@ int ChemisorptionReaction::setLigandIndex()
 	//Loop through all reactions to find solid/adsorbed species that IS the named ligand
 	for (int i=0; i<this->getNumberRxns(); i++)
 	{
-		this->ligand_index = -1;
 		for (int j=0; j<this->List->list_size(); j++)
 		{
 			//Check to see if jth species is involved with the ith reaction
@@ -3689,7 +3689,7 @@ int ChemisorptionReaction::setLigandIndex()
 				if (this->List->get_species(j).MoleculePhaseID() == SOLID || this->List->get_species(j).MoleculePhaseID() == ADSORBED)
 				{
 					//Check to see if species IS the named ligand
-					if (this->List->get_species(i).MolecularFormula() == this->getAdsorbentName())
+					if (this->List->speciesName(j) == this->getAdsorbentName())
 					{
 						if (i == 0)
 							this->ligand_index = j;
@@ -3712,6 +3712,7 @@ int ChemisorptionReaction::setLigandIndex()
 			return -1;
 		}
 	}
+	this->setDelta(this->ligand_index, 1.0);
 	
 	return success;
 }
@@ -3764,12 +3765,6 @@ void ChemisorptionReaction::setSpecificArea(double a)
 void ChemisorptionReaction::setSpecificMolality(double a)
 {
 	this->AdsorptionReaction::setSpecificMolality(a);
-}
-
-//Set the surface charge of the adsorbent
-void ChemisorptionReaction::setSurfaceCharge(double c)
-{
-	this->AdsorptionReaction::setSurfaceCharge(c);
 }
 
 //Set the total mass of the adsorbent
@@ -3996,12 +3991,6 @@ double ChemisorptionReaction::getSpecificArea()
 double ChemisorptionReaction::getSpecificMolality()
 {
 	return this->AdsorptionReaction::getSpecificMolality();
-}
-
-//Return the surface charge of the adsorbent
-double ChemisorptionReaction::getSurfaceCharge()
-{
-	return this->AdsorptionReaction::getSurfaceCharge();
 }
 
 //Return the bulk density of the adsorbent in the system
@@ -4523,6 +4512,129 @@ void print2file_shark_info(SHARK_DATA *shark_dat)
 			
 		}//END Obj Loop
 	}
+	
+	//Loop for all ChemisorptionReaction Objects (steady-state)
+	if (shark_dat->ChemisorptionList.size() > 0)
+	{
+		fprintf(shark_dat->OutputFile, "Steady-State Chemisorption Reactions\n-----------------------------------------------------\n");
+		fprintf(shark_dat->OutputFile, "Number of Different Adsorbents = %i\n\n", (int) shark_dat->ChemisorptionList.size());
+		for (int n=0; n<shark_dat->ChemisorptionList.size(); n++)
+		{
+			fprintf(shark_dat->OutputFile, "Site Balance for Adsorbent %i \n-----------------------------------------------------\n", n+1);
+			
+			/*
+			bool first = true;
+			for (int i=0; i<this->List->list_size(); i++)
+			{
+				if (i == 0 || first == true)
+				{
+					if (this->getDelta(i) != 0.0)
+					{
+						if (this->getDelta(i) > 1.0)
+							std::cout << this->getDelta(i) << " x [ " << this->List->get_species(i).MolecularFormula() << " ]";
+						else
+							std::cout << "[ " << this->List->get_species(i).MolecularFormula() << " ]";
+						first = false;
+					}
+				}
+				else
+				{
+					if (this->getDelta(i) != 0.0)
+					{
+						if (this->getDelta(i) > 1.0)
+							std::cout << " + " << this->getDelta(i) << " x [ " << this->List->get_species(i).MolecularFormula() << " ]";
+						else
+							std::cout << " + [ " << this->List->get_species(i).MolecularFormula() << " ]";
+					}
+				}
+			}
+			 */
+			
+			fprintf(shark_dat->OutputFile, "Reactions for Adsorbent %i \n-----------------------------------------------------\n", n+1);
+			fprintf(shark_dat->OutputFile, "Specific Molality (mol/kg) = \t%.6g\n", shark_dat->ChemisorptionList[n].getSpecificMolality());
+			fprintf(shark_dat->OutputFile, "Total Mass (kg) = \t%.6g\n", shark_dat->ChemisorptionList[n].getTotalMass());
+			
+			if (shark_dat->ChemisorptionList[n].includeSurfaceCharge() == false)
+				fprintf(shark_dat->OutputFile, "Include Surface Charging =\t FALSE\n");
+			else
+				fprintf(shark_dat->OutputFile, "Include Surface Charging =\t TRUE\n");
+			int surf_act = shark_dat->ChemisorptionList[n].getActivityEnum();
+			switch (surf_act)
+			{
+				case IDEAL_ADS:
+					fprintf(shark_dat->OutputFile, "Surface Activity =\t IDEAL\n");
+					break;
+					
+				case FLORY_HUGGINS:
+					fprintf(shark_dat->OutputFile, "Surface Activity =\t FLORY-HUGGINS\n");
+					break;
+					
+				case UNIQUAC_ACT:
+					fprintf(shark_dat->OutputFile, "Surface Activity =\t UNIQUAC\n");
+					break;
+					
+				default:
+					fprintf(shark_dat->OutputFile, "Surface Activity =\t IDEAL\n");
+					break;
+			}
+			
+			for (int j=0; j<shark_dat->ChemisorptionList[n].getNumberRxns(); j++)
+			{
+				fprintf(shark_dat->OutputFile, "logK = \t%.6g\t:\t",shark_dat->ChemisorptionList[n].getReaction(j).Get_Equilibrium());
+				bool first = true;
+				for (int i=0; i<shark_dat->numvar; i++)
+				{
+					if (shark_dat->ChemisorptionList[n].getReaction(j).Get_Stoichiometric(i) < 0.0)
+					{
+						if (i == 0 || first == true)
+						{
+							if (fabs(shark_dat->ChemisorptionList[n].getReaction(j).Get_Stoichiometric(i)) > 1.0)
+								fprintf(shark_dat->OutputFile, "%g x { %s }",fabs(shark_dat->ChemisorptionList[n].getReaction(j).Get_Stoichiometric(i)),shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
+							else
+								fprintf(shark_dat->OutputFile, "{ %s }",shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
+							first = false;
+						}
+						else
+						{
+							if (fabs(shark_dat->ChemisorptionList[n].getReaction(j).Get_Stoichiometric(i)) > 1.0)
+								fprintf(shark_dat->OutputFile, " + %g x { %s }",fabs(shark_dat->ChemisorptionList[n].getReaction(j).Get_Stoichiometric(i)),shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
+							else
+								fprintf(shark_dat->OutputFile, " + { %s }",shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
+						}
+					}
+					if (i == shark_dat->numvar-1)
+						fprintf(shark_dat->OutputFile, " = ");
+				}
+				
+				first = true;
+				for (int i=0; i<shark_dat->numvar; i++)
+				{
+					if (shark_dat->ChemisorptionList[n].getReaction(j).Get_Stoichiometric(i) > 0.0)
+					{
+						if (i == 0 || first == true)
+						{
+							if (fabs(shark_dat->ChemisorptionList[n].getReaction(j).Get_Stoichiometric(i)) > 1.0)
+								fprintf(shark_dat->OutputFile, "%g x { %s }",fabs(shark_dat->ChemisorptionList[n].getReaction(j).Get_Stoichiometric(i)),shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
+							else
+								fprintf(shark_dat->OutputFile, "{ %s }",shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
+							first = false;
+						}
+						else
+						{
+							if (fabs(shark_dat->ChemisorptionList[n].getReaction(j).Get_Stoichiometric(i)) > 1.0)
+								fprintf(shark_dat->OutputFile, " + %g x { %s }",fabs(shark_dat->ChemisorptionList[n].getReaction(j).Get_Stoichiometric(i)),shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
+							else
+								fprintf(shark_dat->OutputFile, " + { %s }",shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
+						}
+					}
+					if (i == shark_dat->numvar-1)
+						fprintf(shark_dat->OutputFile, "\n\n");
+				}
+				
+			}//END RXN LOOP
+		}
+	}//End if Chemisorption
+
 
 
 	//Loop for all Mass Balances
@@ -8807,7 +8919,7 @@ int setup_SHARK_DATA( FILE *file, int (*residual) (const Matrix<double> &x, Matr
 			mError(missing_information);
 			return -1;
 		}
-		chem_sum += dat->num_sschem_rxns[i];
+		chem_sum += dat->num_sschem_rxns[i] + 1;
 	}
 
 	if (dat->numvar != (dat->num_mbe+dat->num_ssr+dat->num_usr+dat->num_other+1+ssao_sum+usao_sum+multiligand_sum+chem_sum))
@@ -10291,7 +10403,7 @@ int SHARK_TESTS()
 		system("mkdir output");
 		TestOutput = fopen("output/SHARK_Test.txt", "w+");
 	}
-	shark_dat.numvar = 24;
+	shark_dat.numvar = 25;
 	shark_dat.num_ssr = 15;
 	shark_dat.num_mbe = 6;
 	
@@ -10387,6 +10499,7 @@ int SHARK_TESTS()
 	
 	shark_dat.MasterList.set_species(22, 0, 0, 0, 0, false, false, "Adsorbed", "Uranyl-amidoxime", "UO2(AO)2 (ad)", "UO2");
 	shark_dat.MasterList.set_species(23, -2, 0, 0, 0, false, false, "Adsorbed", "Uranyl-carbonate-amidoxime", "UO2CO3(AO)2 2- (ad)", "UO2CO3");
+	shark_dat.MasterList.set_species(24, 0, 0, 0, 0, false, false, "Adsorbed", "amidoxime", "HAO (ad)", "H");
 	
 	shark_dat.ReactionList[0].Set_Equilibrium(-14.0);
 	shark_dat.ReactionList[0].Set_Stoichiometric(0, 0);
@@ -10944,8 +11057,7 @@ int SHARK_TESTS()
 	shark_dat.ChemisorptionList[0].setSpecificArea(ads_area);
 	shark_dat.ChemisorptionList[0].setSpecificMolality(ads_mol);
 	shark_dat.ChemisorptionList[0].setTotalMass(ads_mass);
-	shark_dat.ChemisorptionList[0].setSurfaceCharge(0.0);
-	shark_dat.ChemisorptionList[0].setAdsorbentName("HAO");
+	shark_dat.ChemisorptionList[0].setAdsorbentName("HAO (ad)");
 	shark_dat.ChemisorptionList[0].setActivityModelInfo(ideal_solution, &shark_dat.ChemisorptionList[0]);
 	shark_dat.ChemisorptionList[0].setActivityEnum(IDEAL_ADS);
 	
@@ -10974,6 +11086,7 @@ int SHARK_TESTS()
 	shark_dat.ChemisorptionList[0].getReaction(0).Set_Stoichiometric(21, 0);
 	shark_dat.ChemisorptionList[0].getReaction(0).Set_Stoichiometric(22, 1);
 	shark_dat.ChemisorptionList[0].getReaction(0).Set_Stoichiometric(23, 0);
+	shark_dat.ChemisorptionList[0].getReaction(0).Set_Stoichiometric(24, -1);
 	
 	
 	shark_dat.ChemisorptionList[0].getReaction(1).Set_Equilibrium(logK_UO2CO3);
@@ -11001,11 +11114,35 @@ int SHARK_TESTS()
 	shark_dat.ChemisorptionList[0].getReaction(1).Set_Stoichiometric(21, 0);
 	shark_dat.ChemisorptionList[0].getReaction(1).Set_Stoichiometric(22, 0);
 	shark_dat.ChemisorptionList[0].getReaction(1).Set_Stoichiometric(23, 1);
+	shark_dat.ChemisorptionList[0].getReaction(1).Set_Stoichiometric(24, -1);
 	
 	shark_dat.ChemisorptionList[0].setVolumeFactor(22, 5);
 	shark_dat.ChemisorptionList[0].setVolumeFactor(23, 8);
+	shark_dat.ChemisorptionList[0].setVolumeFactor(24, 1);
+	
+	shark_dat.ChemisorptionList[0].setDelta(22, 2); //Done in the input file
+	shark_dat.ChemisorptionList[0].setDelta(23, 2);
+	
+	shark_dat.ChemisorptionList[0].setAdsorbIndices();
+	shark_dat.ChemisorptionList[0].setLigandIndex();
+	
+	shark_dat.ChemisorptionList[0].Display_Info();
 	shark_dat.ChemisorptionList[0].calculateAreaFactors();    //NOTE: Required here because this is done during the reading step
-	 
+	
+	//Function to check for missing information
+	success = shark_parameter_check(&shark_dat);
+	if (success != 0) {mError(simulation_fail); return -1;}
+	
+	//Function to establish temperature independent constants
+	success = shark_energy_calculations(&shark_dat);
+	if (success != 0) {mError(simulation_fail); return -1;}
+	
+	//Function to calculate equilibrium and rate constants as a function of temperature
+	success = shark_temperature_calculations(&shark_dat);
+	if (success != 0) {mError(simulation_fail); return -1;}
+	
+	//Print out the header
+	print2file_shark_info(&shark_dat);
 	
 	
 	// END problem specific info here --------------------------------------------------------
