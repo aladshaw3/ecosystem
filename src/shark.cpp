@@ -4521,37 +4521,35 @@ void print2file_shark_info(SHARK_DATA *shark_dat)
 		for (int n=0; n<shark_dat->ChemisorptionList.size(); n++)
 		{
 			fprintf(shark_dat->OutputFile, "Site Balance for Adsorbent %i \n-----------------------------------------------------\n", n+1);
-			
-			/*
+			fprintf(shark_dat->OutputFile, "Specific Molality (mol/kg) = \t%.6g\t = \t", shark_dat->ChemisorptionList[n].getSpecificMolality());
 			bool first = true;
-			for (int i=0; i<this->List->list_size(); i++)
+			for (int i=0; i<shark_dat->numvar; i++)
 			{
-				if (i == 0 || first == true)
+				if (i==0 || first==true)
 				{
-					if (this->getDelta(i) != 0.0)
+					if (shark_dat->ChemisorptionList[n].getDelta(i) != 0.0)
 					{
-						if (this->getDelta(i) > 1.0)
-							std::cout << this->getDelta(i) << " x [ " << this->List->get_species(i).MolecularFormula() << " ]";
+						if (shark_dat->ChemisorptionList[n].getDelta(i) > 1.0)
+							fprintf(shark_dat->OutputFile,"%.6g x [%s]", shark_dat->ChemisorptionList[n].getDelta(i),shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
 						else
-							std::cout << "[ " << this->List->get_species(i).MolecularFormula() << " ]";
+							fprintf(shark_dat->OutputFile,"[%s]", shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
 						first = false;
 					}
 				}
 				else
 				{
-					if (this->getDelta(i) != 0.0)
+					if (shark_dat->ChemisorptionList[n].getDelta(i) != 0.0)
 					{
-						if (this->getDelta(i) > 1.0)
-							std::cout << " + " << this->getDelta(i) << " x [ " << this->List->get_species(i).MolecularFormula() << " ]";
+						if (shark_dat->ChemisorptionList[n].getDelta(i) > 1.0)
+							fprintf(shark_dat->OutputFile," + %.6g x [%s]", shark_dat->ChemisorptionList[n].getDelta(i),shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
 						else
-							std::cout << " + [ " << this->List->get_species(i).MolecularFormula() << " ]";
+							fprintf(shark_dat->OutputFile," + [%s]", shark_dat->MasterList.get_species(i).MolecularFormula().c_str());
 					}
 				}
 			}
-			 */
+			fprintf(shark_dat->OutputFile,"\n\n");
 			
 			fprintf(shark_dat->OutputFile, "Reactions for Adsorbent %i \n-----------------------------------------------------\n", n+1);
-			fprintf(shark_dat->OutputFile, "Specific Molality (mol/kg) = \t%.6g\n", shark_dat->ChemisorptionList[n].getSpecificMolality());
 			fprintf(shark_dat->OutputFile, "Total Mass (kg) = \t%.6g\n", shark_dat->ChemisorptionList[n].getTotalMass());
 			
 			if (shark_dat->ChemisorptionList[n].includeSurfaceCharge() == false)
@@ -4581,7 +4579,7 @@ void print2file_shark_info(SHARK_DATA *shark_dat)
 			for (int j=0; j<shark_dat->ChemisorptionList[n].getNumberRxns(); j++)
 			{
 				fprintf(shark_dat->OutputFile, "logK = \t%.6g\t:\t",shark_dat->ChemisorptionList[n].getReaction(j).Get_Equilibrium());
-				bool first = true;
+				first = true;
 				for (int i=0; i<shark_dat->numvar; i++)
 				{
 					if (shark_dat->ChemisorptionList[n].getReaction(j).Get_Stoichiometric(i) < 0.0)
@@ -10387,7 +10385,7 @@ int SHARK_SCENARIO(const char *yaml_input)
 }
 
 //Test of Shark
-int SHARK_TESTS()
+int SHARK_TESTS_OLD()
 {
 	int success = 0;
 	double time;
@@ -11165,7 +11163,7 @@ int SHARK_TESTS()
 
 
 //Test of Shark (old version)
-int SHARK_TESTS_OLD()
+int SHARK_TESTS()
 {
 	int success = 0;
 	double time;
@@ -11191,13 +11189,14 @@ int SHARK_TESTS_OLD()
 	shark_dat.num_usr = 0;
 	shark_dat.num_other = 0;
 	shark_dat.act_fun = DAVIES;
-	shark_dat.steadystate = false;
+	shark_dat.steadystate = true;
 	shark_dat.simulationtime = 96.0;
 	shark_dat.dt = 0.1;
 	shark_dat.t_out = shark_dat.simulationtime / 1000.0;
 	shark_dat.const_pH = false;
 	shark_dat.SpeciationCurve = false;
-	shark_dat.TimeAdaptivity = true;
+	shark_dat.TimeAdaptivity = false;
+	//shark_dat.reactor_type = CSTR;
 	shark_dat.pH = 7.80;
 	shark_dat.dielectric_const = 78.325;
 	shark_dat.temperature = 293.15;
@@ -11247,7 +11246,7 @@ int SHARK_TESTS_OLD()
 
 	shark_dat.Newton_data.linear_solver = QR;
 	shark_dat.Newton_data.LineSearch = true;
-	shark_dat.Newton_data.nl_maxit = 10;
+	shark_dat.Newton_data.nl_maxit = 100;
 	shark_dat.Newton_data.NL_Output = true;
 
 	//Read problem specific info here --------------------------------------------------------
