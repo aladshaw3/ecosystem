@@ -3841,7 +3841,8 @@ void ChemisorptionReaction::calculateAreaFactors()
 //Calculate the reaction equilibria constants based on temperature
 void ChemisorptionReaction::calculateEquilibria(double T)
 {
-	this->AdsorptionReaction::calculateEquilibria(T);
+	for (int i=0; i<this->num_rxns; i++)
+		this->getReaction(i).calculateEquilibrium(T);
 }
 
 //Set the value of surface charge density based on the calculation function
@@ -9215,6 +9216,26 @@ int shark_parameter_check(SHARK_DATA *shark_dat)
 			}
 		}
 	}
+	
+	for (int i=0; i<shark_dat->ChemisorptionList.size(); i++)
+	{
+		for (int n=0; n<shark_dat->ChemisorptionList[i].getNumberRxns(); n++)
+		{
+			shark_dat->ChemisorptionList[i].getReaction(n).checkSpeciesEnergies();
+			if (shark_dat->ChemisorptionList[i].getReaction(n).haveEquilibrium() == false)
+			{
+				mError(missing_information);
+				return -1;
+			}
+		}
+		success = shark_dat->ChemisorptionList[i].setAdsorbIndices();
+		if (success != 0) {mError(missing_information); return -1;}
+		shark_dat->ChemisorptionList[i].setTotalVolume(shark_dat->volume);
+		for (int m=0; m<shark_dat->MassBalanceList.size(); m++)
+		{
+			shark_dat->ChemisorptionList[i].modifyMBEdeltas(shark_dat->MassBalanceList[m]);
+		}
+	}
 
 
 	return success;
@@ -9259,6 +9280,13 @@ int shark_energy_calculations(SHARK_DATA *shark_dat)
 		}
 
 	}
+	for (int i=0; i<shark_dat->ChemisorptionList.size(); i++)
+	{
+		for (int n=0; n<shark_dat->ChemisorptionList[i].getNumberRxns(); n++)
+		{
+			shark_dat->ChemisorptionList[i].getReaction(n).calculateEnergies();
+		}
+	}
 
 	return success;
 }
@@ -9292,6 +9320,10 @@ int shark_temperature_calculations(SHARK_DATA *shark_dat)
 			shark_dat->MultiAdsList[i].getAdsorptionObject(j).calculateEquilibria(shark_dat->temperature);
 		}
 		
+	}
+	for (int i=0; i<shark_dat->ChemisorptionList.size(); i++)
+	{
+		shark_dat->ChemisorptionList[i].calculateEquilibria(shark_dat->temperature);
 	}
 
 	return success;
@@ -10385,7 +10417,7 @@ int SHARK_SCENARIO(const char *yaml_input)
 }
 
 //Test of Shark
-int SHARK_TESTS_OLD()
+int SHARK_TESTS()
 {
 	int success = 0;
 	double time;
@@ -11121,11 +11153,10 @@ int SHARK_TESTS_OLD()
 	shark_dat.ChemisorptionList[0].setDelta(22, 2); //Done in the input file
 	shark_dat.ChemisorptionList[0].setDelta(23, 2);
 	
-	shark_dat.ChemisorptionList[0].setAdsorbIndices();
-	shark_dat.ChemisorptionList[0].setLigandIndex();
+	shark_dat.ChemisorptionList[0].setLigandIndex();			//NOTE: Required here because this is done during the reading step
+	shark_dat.ChemisorptionList[0].calculateAreaFactors();    //NOTE: Required here because this is done during the reading step
 	
 	shark_dat.ChemisorptionList[0].Display_Info();
-	shark_dat.ChemisorptionList[0].calculateAreaFactors();    //NOTE: Required here because this is done during the reading step
 	
 	//Function to check for missing information
 	success = shark_parameter_check(&shark_dat);
@@ -11163,7 +11194,7 @@ int SHARK_TESTS_OLD()
 
 
 //Test of Shark (old version)
-int SHARK_TESTS()
+int SHARK_TESTS_OLD()
 {
 	int success = 0;
 	double time;
