@@ -5081,6 +5081,44 @@ int FloryHuggins_multiligand(const Matrix<double> &x, Matrix<double> &F, const v
 	return success;
 }
 
+//Flory-Huggins Surface Activity Model (for ChemisorptionReaction)
+int FloryHuggins_chemi(const Matrix<double> &x, Matrix<double> &F, const void *data)
+{
+	int success = 0;
+	ChemisorptionReaction *dat = (ChemisorptionReaction *) data;
+	double logp = 0.0, invp = 0.0;
+	double total = 0.0, lnact = 0.0;
+	
+	for (int i=0; i<F.rows(); i++)
+		F.edit(i, 0, 1.0);
+	
+	for (int i=0; i<dat->getNumberRxns(); i++)
+	{
+		total = total + pow(10.0, x(dat->getAdsorbIndex(i),0));
+	}
+	
+	for (int i=0; i<dat->getNumberRxns(); i++)
+	{
+		logp = 0.0;
+		invp = 0.0;
+		for (int j=0; j<dat->getNumberRxns(); j++)
+		{
+			double alpha = (dat->getAreaFactor(dat->getAdsorbIndex(i))/dat->getAreaFactor(dat->getAdsorbIndex(j))) - 1.0;
+			logp = logp + ( (pow(10.0, x(dat->getAdsorbIndex(j),0))/total)/ (alpha + 1.0) );
+			invp = logp;
+		}
+		logp = log(logp);
+		invp = 1.0 / invp;
+		lnact = 1.0 - logp - invp;
+		
+		F.edit(dat->getAdsorbIndex(i), 0, exp(lnact));
+		if (isinf(F(dat->getAdsorbIndex(i),0)) || isnan(F(dat->getAdsorbIndex(i),0)))
+			F.edit(dat->getAdsorbIndex(i), 0, DBL_MAX);
+	}
+	
+	return success;
+}
+
 //UNIQUAC Surface Activity Model (for AdsorptionReaction)
 int UNIQUAC(const Matrix<double> &x, Matrix<double> &F, const void *data)
 {
@@ -5362,6 +5400,90 @@ int UNIQUAC_multiligand(const Matrix<double> &x, Matrix<double> &F, const void *
 		
 		}// End i Loop
 	}
+	
+	return success;
+}
+
+//UNIQUAC Surface Activity Model (for ChemisorptionReaction)
+int UNIQUAC_chemi(const Matrix<double> &x, Matrix<double> &F, const void *data)
+{
+	int success = 0;
+	ChemisorptionReaction *dat = (ChemisorptionReaction *) data;
+	double total = 0.0;
+	double Temp = 0.0;
+	std::vector<double> r;
+	std::vector<double> s;
+	std::vector<double> l;
+	std::vector<double> u;
+	std::vector<double> frac;
+	std::vector<double> theta;
+	r.resize(dat->getNumberRxns());
+	s.resize(dat->getNumberRxns());
+	l.resize(dat->getNumberRxns());
+	u.resize(dat->getNumberRxns());
+	frac.resize(dat->getNumberRxns());
+	theta.resize(dat->getNumberRxns());
+	Temp = -dat->getReaction(0).Get_Energy()/(Rstd*log(pow(10.0,dat->getReaction(0).Get_Equilibrium())));
+	
+	//Loop to calculate total adsorption and calculate surface area and volume constants
+	for (int i=0; i<dat->getNumberRxns(); i++)
+	{
+		total = total + pow(10.0, x(dat->getAdsorbIndex(i),0));
+	}
+	
+	//Loop to calculate fractions and fraction dependent functions
+	double rx_sum = 0.0;
+	double sx_sum = 0.0;
+	double lx_sum = 0.0;
+	for (int i=0; i<dat->getNumberRxns(); i++)
+	{
+		frac[i] = pow(10.0, x(dat->getAdsorbIndex(i),0)) / total;
+		r[i] = dat->getVolumeFactor(dat->getAdsorbIndex(i)) / VolumeSTD;
+		s[i] = dat->getAreaFactor(dat->getAdsorbIndex(i)) / AreaSTD;
+		l[i] = LengthFactor(CoordSTD, r[i], s[i]);
+		u[i] = -dat->getReaction(i).Get_Energy()/s[i]/CoordSTD/CoordSTD;
+		rx_sum = rx_sum + (r[i]*frac[i]);
+		sx_sum = sx_sum + (s[i]*frac[i]);
+		lx_sum = lx_sum + (l[i]*frac[i]);
+	}
+	
+	//Loop to gather the thetas
+	for (int i=0; i<dat->getNumberRxns(); i++)
+		theta[i] = (s[i]*frac[i])/sx_sum;
+	
+	//i Loop to fill in activities
+	for (int i=0; i<dat->getNumberRxns(); i++)
+	{
+		double theta_tau_i = 0.0;
+		double theta_tau_rat = 0.0;
+		double lnact = 0.0;
+		
+		//Inner j loop
+		for (int j=0; j<dat->getNumberRxns(); j++)
+		{
+			theta_tau_i = theta_tau_i + ( theta[j]*exp(-(sqrt(fabs(u[j]*u[i])) - u[i])/(Rstd*Temp)) );
+			
+			double theta_tau_k = 0.0;
+			// k loop
+			for (int k=0; k<dat->getNumberRxns(); k++)
+			{
+				theta_tau_k = theta_tau_k + ( theta[k]*exp(-(sqrt(fabs(u[k]*u[j])) - u[j])/(Rstd*Temp)) );
+				
+			}// End k Loop
+			
+			theta_tau_rat = theta_tau_rat + ( (theta[j]*exp(-(sqrt(fabs(u[i]*u[j])) - u[j])/(Rstd*Temp)) )/theta_tau_k);
+			
+		}// End j loop
+		
+		lnact = log(r[i]/rx_sum) + ( (CoordSTD/2.0)*s[i]*log((s[i]/r[i])*(rx_sum/sx_sum)) ) + l[i] - ( r[i]*(lx_sum/rx_sum) ) - ( s[i]*log(theta_tau_i) ) + s[i] - ( s[i]*theta_tau_rat );
+		F.edit(dat->getAdsorbIndex(i), 0, exp(lnact));
+		
+		if (isinf(F(dat->getAdsorbIndex(i),0)) || isnan(F(dat->getAdsorbIndex(i),0)))
+			F.edit(dat->getAdsorbIndex(i), 0, DBL_MAX);
+		if (F(dat->getAdsorbIndex(i),0) <= sqrt(DBL_MIN))
+			F.edit(dat->getAdsorbIndex(i), 0, sqrt(DBL_MIN));
+		
+	}// End i Loop
 	
 	return success;
 }
@@ -11150,8 +11272,8 @@ int SHARK_TESTS()
 	shark_dat.ChemisorptionList[0].setSpecificMolality(ads_mol);
 	shark_dat.ChemisorptionList[0].setTotalMass(ads_mass);
 	shark_dat.ChemisorptionList[0].setAdsorbentName("HAO (ad)");
-	shark_dat.ChemisorptionList[0].setActivityModelInfo(ideal_solution, &shark_dat.ChemisorptionList[0]);
-	shark_dat.ChemisorptionList[0].setActivityEnum(IDEAL_ADS);
+	shark_dat.ChemisorptionList[0].setActivityModelInfo(UNIQUAC_chemi, &shark_dat.ChemisorptionList[0]);
+	shark_dat.ChemisorptionList[0].setActivityEnum(UNIQUAC_ACT);
 	
 	shark_dat.ChemisorptionList[0].getReaction(0).Set_Equilibrium(logK_UO2);
 	shark_dat.ChemisorptionList[0].getReaction(0).Set_Stoichiometric(0, 0);
@@ -11927,8 +12049,8 @@ int SHARK_TESTS_OLD()
 	shark_dat.UnsteadyAdsList[0].setTotalMass(ads_mass);
 	shark_dat.UnsteadyAdsList[0].setSurfaceCharge(0.0);
 	shark_dat.UnsteadyAdsList[0].setAdsorbentName("HAO");
-	shark_dat.UnsteadyAdsList[0].setActivityModelInfo(ideal_solution, &shark_dat.UnsteadyAdsList[0]);
-	shark_dat.UnsteadyAdsList[0].setActivityEnum(IDEAL_ADS);
+	shark_dat.UnsteadyAdsList[0].setActivityModelInfo(UNIQUAC_unsteady, &shark_dat.UnsteadyAdsList[0]);
+	shark_dat.UnsteadyAdsList[0].setActivityEnum(UNIQUAC_ACT);
 	shark_dat.UnsteadyAdsList[0].setBasis("molar");
 
 	shark_dat.UnsteadyAdsList[0].setMolarFactor(0, 2.0);

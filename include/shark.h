@@ -1534,6 +1534,17 @@ int FloryHuggins_unsteady(const Matrix<double> &x, Matrix<double> &F, const void
 	\param data pointer to the MultiligandAdsorption object holding parameter information*/
 int FloryHuggins_multiligand(const Matrix<double> &x, Matrix<double> &F, const void *data);
 
+///Surface Activity function for simple non-ideal adsorption (for chemisorption reaction object)
+/** This is a simple surface activity model to be used with the Adsorption objects to evaluate the non-ideal
+	behavoir of the surface phase. The model's only parameters are the shape factors in adsorption and the
+	relative concentrations of each surface species. Therefore, we will pass the Adsorption Object itself
+	as the const void *data structure. NOTE: Only for ChemisorptionReaction!
+ 
+	\param x matrix of the log(C) concentration values at the current non-linear step
+	\param F matrix of activity coefficients that are to be altered by this function
+	\param data pointer to the AdsorptionReaction object holding parameter information*/
+int FloryHuggins_chemi(const Matrix<double> &x, Matrix<double> &F, const void *data);
+
 ///Surface Activity function for the UNIQUAC model for non-ideal adsorption (for adsorption reaction object)
 /** This is a more complex surface activity model to be used with the Adsorption objects to evaluate the non-ideal
 	behavoir of the surface phase. The model's primary parameters are the shape factors in adsorption and the
@@ -1569,6 +1580,18 @@ int UNIQUAC_unsteady(const Matrix<double> &x, Matrix<double> &F, const void *dat
 	\param F matrix of activity coefficients that are to be altered by this function
 	\param data pointer to the MultiligandAdsorption object holding parameter information*/
 int UNIQUAC_multiligand(const Matrix<double> &x, Matrix<double> &F, const void *data);
+
+///Surface Activity function for the UNIQUAC model for non-ideal adsorption (for chemisorption reaction object)
+/** This is a more complex surface activity model to be used with the Adsorption objects to evaluate the non-ideal
+	behavoir of the surface phase. The model's primary parameters are the shape factors in adsorption and the
+	relative concentrations of each surface species. Therefore, we will pass the Adsorption Object itself
+	as the const void *data structure. However, future development may require some additional parameters, which
+	will be accessed later. NOTE: Only for ChemisorptionReaction!
+ 
+	\param x matrix of the log(C) concentration values at the current non-linear step
+	\param F matrix of activity coefficients that are to be altered by this function
+	\param data pointer to the AdsorptionReaction object holding parameter information*/
+int UNIQUAC_chemi(const Matrix<double> &x, Matrix<double> &F, const void *data);
 
 /// Activity function for Ideal Solution
 /** This is one of the default activity models available. It assumes the system behaves ideally and sets the
