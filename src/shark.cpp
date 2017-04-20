@@ -3717,6 +3717,19 @@ int ChemisorptionReaction::setLigandIndex()
 	return success;
 }
 
+//Set the deltas of the site balance automatically (given ligand index and stoicheometry)
+int ChemisorptionReaction::setDeltas()
+{
+	int success = 0;
+	
+	for (int i=0; i<this->getNumberRxns(); i++)
+	{
+		this->setDelta( this->getAdsorbIndex(i), fabs(this->getReaction(i).Get_Stoichiometric(this->getLigandIndex())) );
+	}
+	
+	return success;
+}
+
 //Set the activity model
 void ChemisorptionReaction::setActivityModelInfo(int (*act) (const Matrix<double>& logq, Matrix<double> &activity, const void *data),
 											  const void *act_data)
@@ -6589,6 +6602,16 @@ int read_scenario(SHARK_DATA *shark_dat)
 	shark_dat->MultiAdsList.resize(shark_dat->num_multi_ssao);
 	try
 	{
+		shark_dat->num_sschem = shark_dat->yaml_object.getYamlWrapper()("Scenario")("vars_fun")["num_sschem"].getInt();
+	}
+	catch (std::out_of_range)
+	{
+		shark_dat->num_sschem = 0;
+	}
+	shark_dat->num_sschem_rxns.resize(shark_dat->num_sschem);
+	shark_dat->ss_chem_names.resize(shark_dat->num_sschem);
+	try
+	{
 		shark_dat->num_other = shark_dat->yaml_object.getYamlWrapper()("Scenario")("vars_fun")["num_other"].getInt();
 	}
 	catch (std::out_of_range)
@@ -6695,6 +6718,42 @@ int read_scenario(SHARK_DATA *shark_dat)
 				shark_dat->MultiAdsList[obj].setAdsorbentName( x.second.getMap().getString("name") );
 				shark_dat->num_multi_ssar[obj].resize(x.second.getMap().getInt("num_ligands"));
 				shark_dat->ssmulti_names[obj].resize(x.second.getMap().getInt("num_ligands"));
+			}
+			catch (std::out_of_range)
+			{
+				mError(missing_information);
+				return -1;
+			}
+			obj++;
+		}
+	}
+	
+	//Read through chemisorption objects for all adsorption reactions
+	if (shark_dat->num_sschem > 0)
+	{
+		int object_check;
+		try
+		{
+			object_check = (int)shark_dat->yaml_object.getYamlWrapper()("Scenario")("ss_chem_objs").getSubMap().size();
+		}
+		catch (std::out_of_range)
+		{
+			mError(missing_information);
+			return -1;
+		}
+		if (object_check != shark_dat->num_sschem)
+		{
+			mError(missing_information);
+			return -1;
+		}
+		
+		int obj = 0;
+		for (auto &x: shark_dat->yaml_object.getYamlWrapper()("Scenario")("ss_chem_objs").getSubMap())
+		{
+			try
+			{
+				shark_dat->num_sschem_rxns[obj] = x.second.getMap().getInt("num_rxns");
+				shark_dat->ss_chem_names[obj] = x.second.getMap().getString("ligand");
 			}
 			catch (std::out_of_range)
 			{
@@ -8650,7 +8709,7 @@ int read_unsteadyadsorbobjects(SHARK_DATA *shark_dat)
 	return success;
 }
 
-//Function to read in multiligand object information from input file (PLACE HOLDER)
+//Function to read in multiligand object information from input file
 int read_multiligandobjects(SHARK_DATA *shark_dat)
 {
 	int success = 0;
@@ -8967,6 +9026,381 @@ int read_multiligandobjects(SHARK_DATA *shark_dat)
 			}//END ligand loop
 			
 		}//END object loop
+	}
+	
+	return success;
+}
+
+//Read in chemisorption document
+int read_chemisorbobjects(SHARK_DATA *shark_dat)
+{
+	int success = 0;
+	
+	if (shark_dat->num_sschem > 0)
+	{
+		for (int i=0; i<shark_dat->num_sschem; i++)
+		{
+			//Check for existance of the necessary object and quit if necessary
+			try
+			{
+				shark_dat->ChemisorptionList[i].setAdsorbentName( shark_dat->yaml_object.getYamlWrapper()(shark_dat->ss_chem_names[i]).getName() );
+				shark_dat->ChemisorptionList[i].setTotalVolume(shark_dat->volume);
+			}
+			catch (std::out_of_range)
+			{
+				mError(missing_information);
+				return -1;
+			}
+			
+			// Other required pieces of information
+			try
+			{
+				shark_dat->ChemisorptionList[i].setTotalMass(shark_dat->yaml_object.getYamlWrapper()(shark_dat->ss_chem_names[i]).getDataMap().getDouble("total_mass"));
+			}
+			catch (std::out_of_range)
+			{
+				mError(missing_information);
+				return -1;
+			}
+			try
+			{
+				shark_dat->ChemisorptionList[i].setSpecificArea(shark_dat->yaml_object.getYamlWrapper()(shark_dat->ss_chem_names[i]).getDataMap().getDouble("spec_area"));
+			}
+			catch (std::out_of_range)
+			{
+				mError(missing_information);
+				return -1;
+			}
+			try
+			{
+				shark_dat->ChemisorptionList[i].setSpecificMolality(shark_dat->yaml_object.getYamlWrapper()(shark_dat->ss_chem_names[i]).getDataMap().getDouble("spec_mole"));
+			}
+			catch (std::out_of_range)
+			{
+				mError(missing_information);
+				return -1;
+			}
+
+			//Set some optional information
+			try
+			{
+				shark_dat->ChemisorptionList[i].setSurfaceChargeBool(shark_dat->yaml_object.getYamlWrapper()(shark_dat->ss_chem_names[i]).getDataMap().getBool("include_surfcharge"));
+			}
+			catch (std::out_of_range)
+			{
+				shark_dat->ChemisorptionList[i].setSurfaceChargeBool(true);
+			}
+			int surf_act;
+			try
+			{
+				surf_act=surf_act_choice(shark_dat->yaml_object.getYamlWrapper()(shark_dat->ss_chem_names[i]).getDataMap().getString("surf_activity"));
+				shark_dat->ChemisorptionList[i].setActivityEnum(surf_act);
+				
+				switch (surf_act)
+				{
+					case IDEAL_ADS:
+						shark_dat->ChemisorptionList[i].setActivityModelInfo(ideal_solution, NULL);
+						break;
+						
+					case FLORY_HUGGINS:
+						shark_dat->ChemisorptionList[i].setActivityModelInfo(FloryHuggins_chemi, &shark_dat->ChemisorptionList[i]);
+						break;
+						
+					case UNIQUAC_ACT:
+						shark_dat->ChemisorptionList[i].setActivityModelInfo(UNIQUAC_chemi, &shark_dat->ChemisorptionList[i]);
+						break;
+						
+					default:
+						shark_dat->ChemisorptionList[i].setActivityModelInfo(ideal_solution, NULL);
+						break;
+				}
+			} catch (std::out_of_range)
+			{
+				shark_dat->ChemisorptionList[i].setActivityModelInfo(ideal_solution, NULL);
+				surf_act = IDEAL_ADS;
+			}
+			
+			//Read in all reaction information
+			bool ContainsVolumeFactors;
+			bool ContainsAreaFactors;
+			std::string vol_check;
+			std::string area_check;
+			try
+			{
+				vol_check = shark_dat->yaml_object.getYamlWrapper()(shark_dat->ss_chem_names[i])("volume_factors").getName();
+				ContainsVolumeFactors = true;
+			}
+			catch (std::out_of_range)
+			{
+				ContainsVolumeFactors = false;
+			}
+			try
+			{
+				area_check = shark_dat->yaml_object.getYamlWrapper()(shark_dat->ss_chem_names[i])("area_factors").getName();
+				ContainsAreaFactors = true;
+			}
+			catch (std::out_of_range)
+			{
+				ContainsAreaFactors = false;
+			}
+			int num_head;
+			try
+			{
+				num_head = (int)shark_dat->yaml_object.getYamlWrapper()(shark_dat->ss_chem_names[i]).getHeadMap().size();
+			}
+			catch (std::out_of_range)
+			{
+				mError(missing_information);
+				return -1;
+			}
+			
+			if (ContainsVolumeFactors == true && ContainsAreaFactors == false)
+			{
+				if (num_head != shark_dat->num_sschem_rxns[i]+1)
+				{
+					mError(missing_information);
+					return -1;
+				}
+			}
+			else if (ContainsVolumeFactors == true && ContainsAreaFactors == true)
+			{
+				if (num_head != shark_dat->num_sschem_rxns[i]+2)
+				{
+					mError(missing_information);
+					return -1;
+				}
+			}
+			else if (ContainsVolumeFactors == false && ContainsAreaFactors == true)
+			{
+				if (num_head != shark_dat->num_sschem_rxns[i]+1)
+				{
+					mError(missing_information);
+					return -1;
+				}
+			}
+			else
+			{
+				if (num_head != shark_dat->num_sschem_rxns[i])
+				{
+					mError(missing_information);
+					return -1;
+				}
+			}
+			
+			//Loop over all headers
+			int rxn = 0;
+			for (auto &x: shark_dat->yaml_object.getYamlWrapper()(shark_dat->ss_chem_names[i]).getHeadMap())
+			{
+				if (x.second.getName() != "volume_factors" && x.second.getName() != "area_factors")
+				{
+					
+					try
+					{
+						shark_dat->ChemisorptionList[i].getReaction(rxn).Set_Equilibrium(shark_dat->yaml_object.getYamlWrapper()(shark_dat->ss_chem_names[i])(x.first)["logK"].getDouble());
+					}
+					catch (std::out_of_range)
+					{
+						//At this point, it is unknown as to whether or not this is an actual error
+						//It will be checked later whether or not this causes a problem
+					}
+					
+					int count = 0;
+					double dH, dS;
+					try
+					{
+						dH = shark_dat->yaml_object.getYamlWrapper()(shark_dat->ss_chem_names[i])(x.first)["enthalpy"].getDouble();
+						shark_dat->ChemisorptionList[i].getReaction(rxn).Set_Enthalpy(dH);
+						count++;
+					}
+					catch (std::out_of_range)
+					{
+						//At this point, it is unknown as to whether or not this is an actual error
+						//It will be checked later whether or not this causes a problem
+					}
+					
+					try
+					{
+						dS = shark_dat->yaml_object.getYamlWrapper()(shark_dat->ss_chem_names[i])(x.first)["entropy"].getDouble();
+						shark_dat->ChemisorptionList[i].getReaction(rxn).Set_Entropy(dS);
+						count++;
+					}
+					catch (std::out_of_range)
+					{
+						//At this point, it is unknown as to whether or not this is an actual error
+						//It will be checked later whether or not this causes a problem
+					}
+					if (count == 2)
+						shark_dat->ChemisorptionList[i].getReaction(rxn).Set_EnthalpyANDEntropy(dH, dS);
+					
+					try
+					{
+						shark_dat->ChemisorptionList[i].getReaction(rxn).Set_Energy(shark_dat->yaml_object.getYamlWrapper()(shark_dat->ss_chem_names[i])(x.first)["energy"].getDouble());
+					}
+					catch (std::out_of_range)
+					{
+						//At this point, it is unknown as to whether or not this is an actual error
+						//It will be checked later whether or not this causes a problem
+					}
+					
+					int stoich;
+					try
+					{
+						stoich = shark_dat->yaml_object.getYamlWrapper()(shark_dat->ss_chem_names[i])(x.first)("stoichiometry").getMap().size();
+					}
+					catch (std::out_of_range)
+					{
+						mError(missing_information);
+						return -1;
+					}
+					if (stoich < 2)
+					{
+						mError(missing_information);
+						return -1;
+					}
+					
+					for (auto &y: shark_dat->yaml_object.getYamlWrapper()(shark_dat->ss_chem_names[i])(x.first)("stoichiometry").getMap())
+					{
+						int index = shark_dat->MasterList.get_index(y.first);
+						if (index < 0 || index > (shark_dat->numvar-1))
+						{
+							mError(read_error);
+							return -1;
+						}
+						else
+						{
+							try
+							{
+								shark_dat->ChemisorptionList[i].getReaction(rxn).Set_Stoichiometric(index, y.second.getDouble());
+							}
+							catch (std::out_of_range)
+							{
+								mError(read_error);
+								return -1;
+							}
+						}
+					}
+					
+					rxn++;
+				}
+				else
+				{
+					//No Action
+				}
+			}
+			
+			//Set the Ligand Index Here
+			success = shark_dat->ChemisorptionList[i].setLigandIndex();
+			if (success != 0) {mError(missing_information); return -1;}
+			
+			//Set the adsorb indices here
+			success = shark_dat->ChemisorptionList[i].setAdsorbIndices();
+			if (success != 0) {mError(missing_information); return -1;}
+			
+			//Set the Site Balance info for the object
+			success = shark_dat->ChemisorptionList[i].setDeltas();
+			if (success != 0) {mError(missing_information); return -1;}
+			
+			// Read volume factors and check for errors
+			int num_fact = 0;
+			bool HaveVol = false;
+			try
+			{
+				num_fact = shark_dat->yaml_object.getYamlWrapper()(shark_dat->ss_chem_names[i])("volume_factors").getDataMap().size();
+				HaveVol = true;
+					
+				if (num_fact != shark_dat->num_sschem_rxns[i])
+				{
+					mError(missing_information);
+					return -1;
+				}
+					
+				//Loop overall volume_factors
+				for (auto &x: shark_dat->yaml_object.getYamlWrapper()(shark_dat->ss_chem_names[i])("volume_factors").getDataMap().getMap())
+				{
+					int index = shark_dat->MasterList.get_index(x.first);
+					if (index < 0 || index > (shark_dat->numvar-1))
+					{
+						mError(read_error);
+						return -1;
+					}
+					else
+					{
+						try
+						{
+							shark_dat->ChemisorptionList[i].setVolumeFactor(index, x.second.getDouble());
+						}
+						catch (std::out_of_range)
+						{
+							mError(read_error);
+							return -1;
+						}
+					}
+						
+				}
+			}
+			catch (std::out_of_range)
+			{
+				HaveVol = false;
+				//Loop to set volumes based on mola object
+				for (int index = 0; index<shark_dat->MasterList.list_size(); index++)
+				{
+					if (shark_dat->MasterList.get_species(index).MolarVolume() <= 0.0)
+						shark_dat->MasterList.get_species(index).setMolarVolume(7.24);
+					shark_dat->ChemisorptionList[i].setVolumeFactor(index, shark_dat->MasterList.get_species(index).MolarVolume()*0.602);
+				}
+			}
+				
+			num_fact = 0;
+			try
+			{
+				num_fact = shark_dat->yaml_object.getYamlWrapper()(shark_dat->ss_chem_names[i])("area_factors").getDataMap().size();
+					
+				if (num_fact != shark_dat->num_sschem_rxns[i])
+				{
+					mError(missing_information);
+					return -1;
+				}
+					
+				//Loop overall area_factors
+				for (auto &x: shark_dat->yaml_object.getYamlWrapper()(shark_dat->ss_chem_names[i])("area_factors").getDataMap().getMap())
+				{
+					int index = shark_dat->MasterList.get_index(x.first);
+					if (index < 0 || index > (shark_dat->numvar-1))
+					{
+						mError(read_error);
+						return -1;
+					}
+					else
+					{
+						try
+						{
+							shark_dat->ChemisorptionList[i].setAreaFactor(index, x.second.getDouble());
+						}
+						catch (std::out_of_range)
+						{
+							mError(read_error);
+							return -1;
+						}
+					}
+						
+				}
+			}
+			catch (std::out_of_range)
+			{
+				if (HaveVol == true)
+					shark_dat->ChemisorptionList[i].calculateAreaFactors();
+				else
+				{
+					//Loop to set area factors based on mola object
+					for (int index = 0; index<shark_dat->MasterList.list_size(); index++)
+					{
+						if (shark_dat->MasterList.get_species(index).MolarArea() <= 0.0)
+							shark_dat->MasterList.get_species(index).setMolarArea(18.10);
+						shark_dat->ChemisorptionList[i].setAreaFactor(index, shark_dat->MasterList.get_species(index).MolarArea()*6020.0);
+					}
+				}
+			}
+		}
 	}
 	
 	return success;
@@ -10583,6 +11017,10 @@ int SHARK_SCENARIO(const char *yaml_input)
 	//Read and check all steady-state adsorbent-ligand paired documents
 	success = read_multiligandobjects(&shark_dat);
 	if (success != 0) {mError(read_error); return -1;}
+	
+	//Read and check all steady-state chemisorption objects
+	success = read_chemisorbobjects(&shark_dat);
+	if (success != 0) {mError(read_error); return -1;}
 
 	//Call the SHARK routine
 	success = SHARK(&shark_dat);
@@ -11334,10 +11772,12 @@ int SHARK_TESTS()
 	shark_dat.ChemisorptionList[0].setVolumeFactor(23, 8);
 	shark_dat.ChemisorptionList[0].setVolumeFactor(24, 1);
 	
-	shark_dat.ChemisorptionList[0].setDelta(22, 2);			//Done in the input file and linked to stoicheometry
-	shark_dat.ChemisorptionList[0].setDelta(23, 2);
+	//shark_dat.ChemisorptionList[0].setDelta(22, 2);			//Done in the input file and linked to stoicheometry
+	//shark_dat.ChemisorptionList[0].setDelta(23, 2);
 	
 	shark_dat.ChemisorptionList[0].setLigandIndex();			//NOTE: Required here because this is done during the reading step
+	shark_dat.ChemisorptionList[0].setAdsorbIndices();
+	shark_dat.ChemisorptionList[0].setDeltas();
 	shark_dat.ChemisorptionList[0].calculateAreaFactors();    //NOTE: Required here because this is done during the reading step
 	
 	/*

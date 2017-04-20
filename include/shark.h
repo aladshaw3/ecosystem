@@ -1166,6 +1166,14 @@ public:
 		and -1 on a failure.*/
 	int setLigandIndex();
 	
+	/// Find and set all the delta values for the site balance
+	/** This function searches through all reaction object instances for the stoicheometry of the ligand in each 
+		adsorption reaction. That stoicheometry serves as the basis for determining the site balance. NOTE: the
+		delta for the ligand is set automatically in the setLigandIndex() function, so we can ignore that species.
+		In addition, this function must be called after setLigandIndex() and setAdsorbIndices() are called and 
+		after the stoicheometry of each reaction has been determined.*/
+	int setDeltas();
+	
 	/// Function to set the surface activity model and data pointer
 	/** This function will setup the surface activity model based on the given pointer arguments. If no arguments
 		are given, or are given as NULL, then the activity model will default to ideal solution assumption.*/
@@ -1734,6 +1742,13 @@ int read_unsteadyadsorbobjects(SHARK_DATA *shark_dat);
 	
 	\note Each ligand object will have its own document header by the name of that object*/
 int read_multiligandobjects(SHARK_DATA *shark_dat);
+
+/// Function to go through the yaml object for each Chemisorption Object
+/** This function checks the yaml object for the expected keys and values of the chemisorption object documents
+	to setup the shark simulation for the input given in the input file.
+	
+	\note Each adsorption object will have its own document header by the name of that object*/
+int read_chemisorbobjects(SHARK_DATA *shark_dat);
 
 /// Function to setup the memory and pointers for the SHARK_DATA structure for the current simulation
 /** This function will be called after reading the scenario file and is used to setup the memory and other pointers
