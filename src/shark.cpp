@@ -3597,7 +3597,7 @@ void ChemisorptionReaction::Initialize_Object(MasterSpeciesList &List, int n)
 //Display information about the object to the console
 void ChemisorptionReaction::Display_Info()
 {
-	std::cout << "Ligand/Adsorbent Name = " << this->getAdsorbentName() << std::endl;
+	std::cout << "Ligand Name = " << this->getAdsorbentName() << std::endl;
 	std::cout << "Site Balance (mol/kg) = " << this->getSpecificMolality() << " = ";
 	//Loop through for site balance
 	bool first = true;
@@ -4090,6 +4090,252 @@ std::string ChemisorptionReaction::getAdsorbentName()
 /*
  *	-------------------------------------------------------------------------------------
  *								End: ChemisorptionReaction
+ */
+
+/*
+ *								Start: MultiligandChemisorption
+ *	-------------------------------------------------------------------------------------
+ */
+//Default constructor
+MultiligandChemisorption::MultiligandChemisorption()
+:
+ligand_obj(0),
+activities()
+{
+	num_ligands = 0;
+	adsorbent_name = "Adsorbent A";
+	
+	surface_activity = (*ideal_solution);
+	activity_data = nullptr;
+	specific_area = 1.0;
+	total_mass = 0.0;
+	total_volume = 1.0;
+	charge_density = 0.0;
+	ionic_strength = 0.0;
+	electric_potential = 0.0;
+	IncludeSurfCharge = true;
+	
+}
+
+//Default destructor
+MultiligandChemisorption::~MultiligandChemisorption()
+{
+	ligand_obj.clear();
+}
+
+//Initialization of the object
+void MultiligandChemisorption::Initialize_Object(MasterSpeciesList &List, int ligand, std::vector<int> n)
+{
+	this->List = &List;
+	this->num_ligands = ligand;
+	this->ligand_obj.resize(ligand);
+	this->activities.set_size(this->List->list_size(), 1);
+	
+	if (n.size() != ligand)
+	{
+		this->num_ligands = 0;
+		mError(invalid_size);
+		return;
+	}
+	
+	for (int l=0; l<this->num_ligands; l++)
+	{
+		this->getChemisorptionObject(l).Initialize_Object(List, n[l]);
+	}
+
+}
+
+//Display info function
+void MultiligandChemisorption::Display_Info()
+{
+	std::cout << "Adsorbent Name: " << this->adsorbent_name << std::endl;
+	std::cout << "---------------------------------\n\n";
+	for (int i=0; i<this->num_ligands; i++)
+	{
+		this->getChemisorptionObject(i).Display_Info();
+	}
+}
+
+//Modify the deltas in the mass balance object given
+void MultiligandChemisorption::modifyMBEdeltas(MassBalance &mbo)
+{
+	for (int l=0; l<this->getNumberLigands(); l++)
+	{
+		this->getChemisorptionObject(l).setTotalMass(this->getTotalMass());
+		this->getChemisorptionObject(l).setTotalVolume(this->getTotalVolume());
+	}
+	this->getChemisorptionObject(0).modifyMBEdeltas(mbo);
+}
+
+//Automatically set the adsorbed species indices for all chemisorption objects and reactions
+int MultiligandChemisorption::setAdsorbIndices()
+{
+	int success = 0;
+	
+	for (int l=0; l<this->getNumberLigands(); l++)
+	{
+		success = this->getChemisorptionObject(l).setAdsorbIndices();
+		if (success == -1)
+			return success;
+	}
+	
+	return success;
+}
+
+//Automatically set the ligand species indices for all chemisorption objects
+int MultiligandChemisorption::setLigandIndices()
+{
+	int success = 0;
+	
+	for (int l=0; l<this->getNumberLigands(); l++)
+	{
+		success = this->getChemisorptionObject(l).setLigandIndex();
+		if (success == -1)
+			return success;
+	}
+	
+	return success;
+}
+
+//Automatically set the deltas for the site balances of all chemisorption objects
+int MultiligandChemisorption::setDeltas()
+{
+	int success = 0;
+	
+	for (int l=0; l<this->getNumberLigands(); l++)
+	{
+		success = this->getChemisorptionObject(l).setDeltas();
+		if (success == -1)
+			return success;
+	}
+	
+	return success;
+}
+
+//Set the information necessary for the activity model
+void MultiligandChemisorption::setActivityModelInfo(int (*act) (const Matrix<double>& logq, Matrix<double> &activity, const void *data),
+													const void *act_data)
+{
+	if ( (*act) == NULL )
+	{
+		this->surface_activity = (*ideal_solution);
+	}
+	else
+	{
+		this->surface_activity = (*act);
+	}
+	if ( (act_data) == NULL	)
+	{
+		this->activity_data = this;
+	}
+	else
+	{
+		this->activity_data = act_data;
+	}
+	
+	for (int l=0; l<this->getNumberLigands(); l++)
+	{
+		this->getChemisorptionObject(l).setActivityModelInfo(NULL,NULL);
+	}
+}
+
+//Get the chemisorption object at the index
+ChemisorptionReaction& MultiligandChemisorption::getChemisorptionObject(int ligand)
+{
+	if (ligand >= this->num_ligands || ligand < 0)
+	{
+		mError(out_of_bounds);
+		ligand = 0;
+	}
+	return this->ligand_obj[ligand];
+}
+
+//Get the number of ligands for the object
+int MultiligandChemisorption::getNumberLigands()
+{
+	return this->num_ligands;
+}
+
+//Get the activity enum for the object
+int MultiligandChemisorption::getActivityEnum()
+{
+	return this->act_fun;
+}
+
+//Get the activity coefficient for the ith species
+double MultiligandChemisorption::getActivity(int i)
+{
+	if (i >= this->List->list_size() || i < 0)
+	{
+		mError(out_of_bounds);
+		i = 0;
+	}
+	return this->activities(i,0);
+}
+
+//Get the specific area of the adsorbent
+double MultiligandChemisorption::getSpecificArea()
+{
+	return this->specific_area;
+}
+
+//Get the bulk density of the adsorbent in solution
+double MultiligandChemisorption::getBulkDensity()
+{
+	return this->total_mass/this->total_volume;
+}
+
+//Get the total mass of adsorbent in the system
+double MultiligandChemisorption::getTotalMass()
+{
+	return this->total_mass;
+}
+
+//Get the total volume of the system
+double MultiligandChemisorption::getTotalVolume()
+{
+	return this->total_volume;
+}
+
+//Get the charge density for the adsorbent
+double MultiligandChemisorption::getChargeDensity()
+{
+	return this->charge_density;
+}
+
+//Get the ionic strength of the solution
+double MultiligandChemisorption::getIonicStrength()
+{
+	return this->ionic_strength;
+}
+
+//Get the electric potential of the adsorbent surface
+double MultiligandChemisorption::getElectricPotential()
+{
+	return this->electric_potential;
+}
+
+//Return boolean to determine whether or not to include surface charge
+bool MultiligandChemisorption::includeSurfaceCharge()
+{
+	return this->IncludeSurfCharge;
+}
+
+//Get the name of the ligand at the given index
+std::string MultiligandChemisorption::getLigandName(int ligand)
+{
+	return this->getChemisorptionObject(ligand).getAdsorbentName();
+}
+
+//Get the name of the adsorbent
+std::string MultiligandChemisorption::getAdsorbentName()
+{
+	return this->adsorbent_name;
+}
+
+/*
+ *	-------------------------------------------------------------------------------------
+ *								End: MultiligandChemisorption
  */
 
 //Print SHARK info to output file
