@@ -4239,6 +4239,221 @@ void MultiligandChemisorption::setActivityModelInfo(int (*act) (const Matrix<dou
 	}
 }
 
+//Set the activity enum for the object
+void MultiligandChemisorption::setActivityEnum(int act)
+{
+	switch (act)
+	{
+		case IDEAL_ADS:
+			this->act_fun = IDEAL_ADS;
+			break;
+			
+		case FLORY_HUGGINS:
+			this->act_fun = FLORY_HUGGINS;
+			break;
+			
+		case UNIQUAC_ACT:
+			this->act_fun = UNIQUAC_ACT;
+			break;
+			
+		default:
+			this->act_fun = IDEAL_ADS;
+			break;
+	}
+	
+	for (int l=0; l<this->getNumberLigands(); l++)
+	{
+		this->getChemisorptionObject(l).setActivityEnum(this->act_fun);
+	}
+}
+
+//Set the volume factor for the ith species
+void MultiligandChemisorption::setVolumeFactor(int i, double v)
+{
+	for (int l=0; l<this->getNumberLigands(); l++)
+	{
+		this->getChemisorptionObject(l).setVolumeFactor(i, v);
+	}
+}
+
+//Set the area factor for the ith species
+void MultiligandChemisorption::setAreaFactor(int i, double a)
+{
+	for (int l=0; l<this->getNumberLigands(); l++)
+	{
+		this->getChemisorptionObject(l).setAreaFactor(i, a);
+	}
+}
+
+//Set the specific molality of the given ligand
+void MultiligandChemisorption::setSpecificMolality(int ligand, double a)
+{
+	if (ligand >= this->getNumberLigands() || ligand < 0)
+	{
+		mError(out_of_bounds);
+		ligand = 0;
+	}
+	
+	this->getChemisorptionObject(ligand).setSpecificMolality(a);
+}
+
+//Set the adsorbent name
+void MultiligandChemisorption::setAdsorbentName(std::string name)
+{
+	this->adsorbent_name = name;
+}
+
+//Set the name of the given ligand
+void MultiligandChemisorption::setLigandName(int ligand, std::string name)
+{
+	this->getChemisorptionObject(ligand).setAdsorbentName(name);
+}
+
+//Set the specific area of the adsorbent
+void MultiligandChemisorption::setSpecificArea(double area)
+{
+	if (area < 0)
+		area = DBL_MIN;
+	this->specific_area = area;
+	
+	for (int l=0; l<this->getNumberLigands(); l++)
+		this->getChemisorptionObject(l).setSpecificArea(area);
+}
+
+//Set the total mass of the adsorbent in the system
+void MultiligandChemisorption::setTotalMass(double mass)
+{
+	if (mass < 0)
+		mass = DBL_MIN;
+	this->total_mass = mass;
+	
+	for (int l=0; l<this->getNumberLigands(); l++)
+		this->getChemisorptionObject(l).setTotalMass(mass);
+}
+
+//Set the total volume of the system
+void MultiligandChemisorption::setTotalVolume(double volume)
+{
+	if (volume < 0)
+		volume = DBL_MIN;
+	this->total_volume = volume;
+	
+	for (int l=0; l<this->getNumberLigands(); l++)
+		this->getChemisorptionObject(l).setTotalVolume(volume);
+}
+
+//Set the boolean value for surface charging
+void MultiligandChemisorption::setSurfaceChargeBool(bool opt)
+{
+	this->IncludeSurfCharge = opt;
+	
+	for (int l=0; l<this->getNumberLigands(); l++)
+		this->getChemisorptionObject(l).setSurfaceChargeBool(opt);
+}
+
+//Set the electric surface potential of the adsorbent to a given value
+void MultiligandChemisorption::setElectricPotential(double a)
+{
+	this->electric_potential = a;
+}
+
+//Calculate the area factors needed by the chemisorption object
+void MultiligandChemisorption::calculateAreaFactors()
+{
+	for (int l=0; l<this->getNumberLigands(); l++)
+		this->getChemisorptionObject(l).calculateAreaFactors();
+}
+
+//Calculate the equilibria constants for all reactions with all ligands given the temperature
+void MultiligandChemisorption::calculateEquilibria(double T)
+{
+	for (int l=0; l<this->getNumberLigands(); l++)
+		this->getChemisorptionObject(l).calculateEquilibria(T);
+}
+
+//Calculation of the charge density of the adsorbent given the vector of non-linear system variables
+void MultiligandChemisorption::setChargeDensity(const Matrix<double> &x)
+{
+	this->charge_density = 0.0;
+	for (int l=0; l<this->getNumberLigands(); l++)
+	{
+		this->charge_density = this->charge_density + this->getChemisorptionObject(l).calculateSurfaceChargeDensity(x);
+	}
+	
+	for (int l=0; l<this->getNumberLigands(); l++)
+		this->getChemisorptionObject(l).setChargeDensityValue(this->charge_density);
+}
+
+//Calculation of the ionic strength of the system given the vector of non-linear system variables
+void MultiligandChemisorption::setIonicStrength(const Matrix<double> &x)
+{
+	this->ionic_strength = calculate_ionic_strength(x, *this->List);
+	
+	for (int l=0; l<this->getNumberLigands(); l++)
+		this->getChemisorptionObject(l).setIonicStrengthValue(this->ionic_strength);
+}
+
+//Call the surface activity function for the object
+int MultiligandChemisorption::callSurfaceActivity(const Matrix<double> &x)
+{
+	int success = this->surface_activity(x,this->activities,this->activity_data);
+	
+	for (int l=0; l<this->getNumberLigands(); l++)
+		this->getChemisorptionObject(l).setActivities(this->activities);
+	
+	return success;
+}
+
+//Calculation of the electric surface potential for the adsorbent
+void MultiligandChemisorption::calculateElecticPotential(double sigma, double T, double I, double rel_epsilon)
+{
+	I = I * 1000.0;//First, convert ionic strength to mol/m^3
+	double coeff = sigma / sqrt(8.0*AbsPerm(rel_epsilon)*Rstd*T*I);
+	double inv = log(coeff + sqrt((coeff*coeff)+1.0));
+	this->electric_potential = (2.0 * kB * T * inv) / e;
+}
+
+//Calculation of the equilibrium constant's correction factor
+double MultiligandChemisorption::calculateEquilibriumCorrection(double sigma, double T, double I, double rel_epsilon, int rxn, int ligand)
+{
+	this->calculateElecticPotential(sigma, T, I, rel_epsilon);
+	
+	if (this->includeSurfaceCharge() == true)
+		return -(this->getChemisorptionObject(ligand).calculateAqueousChargeExchange(rxn)*e*this->getElectricPotential())/(kB*T);
+	else
+		return 0.0;
+}
+
+//Evaluation of a reaction residual for the given rxn index and ligand index
+double MultiligandChemisorption::Eval_RxnResidual(const Matrix<double> &x, const Matrix<double> &gama, double T, double rel_perm, int rxn, int ligand)
+{
+	double res = 0.0;
+	
+	//Residual constributions from all aqueous species
+	for (int j=0; j<this->List->list_size(); j++)
+	{
+		if (this->List->get_species(j).MoleculePhaseID() == AQUEOUS || this->List->get_species(j).MoleculePhaseID() == LIQUID)
+			res = res + ( this->getChemisorptionObject(ligand).getReaction(rxn).Get_Stoichiometric(j)*( log10(gama(j,0))+x(j,0) ) );
+	}
+	
+	//Add residual contribution from the adsorbed species and ligand species
+	res = res + this->getChemisorptionObject(ligand).getReaction(rxn).Get_Stoichiometric(this->getChemisorptionObject(ligand).getAdsorbIndex(rxn)) * ( log10(this->getActivity(this->getChemisorptionObject(ligand).getAdsorbIndex(rxn))) +  x(this->getChemisorptionObject(ligand).getAdsorbIndex(rxn),0));
+	res = res + this->getChemisorptionObject(ligand).getReaction(rxn).Get_Stoichiometric(this->getChemisorptionObject(ligand).getLigandIndex()) * x(this->getChemisorptionObject(ligand).getLigandIndex(),0);
+	
+	//Subtract residual contribution from the binding constant
+	double logK = this->getChemisorptionObject(ligand).getReaction(rxn).Get_Equilibrium();
+	logK = logK + ((this->calculateEquilibriumCorrection(this->getChargeDensity(), T, this->getIonicStrength(), rel_perm, rxn, ligand))/log(10.0));
+	res = res - logK;
+	
+	return res;
+}
+
+//Evaluation of the site balance residual for the given ligand
+double MultiligandChemisorption::Eval_SiteBalanceResidual(const Matrix<double> &x, int ligand)
+{
+	return this->getChemisorptionObject(ligand).Eval_SiteBalanceResidual(x);
+}
+
 //Get the chemisorption object at the index
 ChemisorptionReaction& MultiligandChemisorption::getChemisorptionObject(int ligand)
 {
