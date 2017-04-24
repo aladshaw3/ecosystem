@@ -11985,6 +11985,7 @@ int shark_postprocesses(SHARK_DATA *shark_dat)
 			else
 			{
 				std::cout << "\nWARNING! BAD LOCAL MINIMUM!\n\n";
+				success = -1;
 			}
 		}
 	}
@@ -12222,7 +12223,7 @@ int SHARK(SHARK_DATA *shark_dat)
 		if (shark_dat->Console_Output == true)
 		{
 			if (shark_dat->const_pH == true)
-				std::cout << "----- Performing Simulation @ pH = " << shark_dat->pH << " with T = " << shark_dat->temperature << "---------\n\n";
+				std::cout << "----- Performing Simulation @ pH = " << shark_dat->pH << " @ T = " << shark_dat->temperature << " K  ---------\n\n";
 			else
 				std::cout << "----- Performing Simulation with Electro-Neutrality-Equation @ T = " << shark_dat->temperature << " K  ------\n\n";
 		}
@@ -12239,7 +12240,7 @@ int SHARK(SHARK_DATA *shark_dat)
 		if (shark_dat->SpeciationCurve == true)
 		{
 			shark_dat->pH = shark_dat->pH + shark_dat->pH_step;
-			if (shark_dat->pH > 14.0 && overage == false)
+			if (shark_dat->pH >= 14.0 && overage == false)
 			{
 				overage = true;
 				shark_dat->pH = 14.0;
@@ -12248,7 +12249,7 @@ int SHARK(SHARK_DATA *shark_dat)
 		if (shark_dat->TemperatureCurve == true)
 		{
 			shark_dat->temperature = shark_dat->temperature + shark_dat->temp_step;
-			if (shark_dat->temperature > shark_dat->end_temp && overage == false)
+			if (shark_dat->temperature >= shark_dat->end_temp && overage == false)
 			{
 				overage = true;
 				shark_dat->temperature = shark_dat->end_temp;
@@ -12263,12 +12264,12 @@ int SHARK(SHARK_DATA *shark_dat)
 		if (shark_dat->Console_Output == true)
 		{
 			if (shark_dat->steadystate == false)
-				std::cout << "\n---------------- End of Simulation @ t = " << shark_dat->time << " -----------------\n\n";
+				std::cout << "\n---------------- End of Simulation @ t = " << shark_dat->time << " hours  -----------------\n\n";
 			else
 				std::cout << "\n---------------- End of Simulation -----------------\n\n";
 		}
 
-	} while (	(shark_dat->steadystate == false && shark_dat->simulationtime > shark_dat->time)
+	} while (	(shark_dat->steadystate == false && shark_dat->simulationtime > (shark_dat->time+DBL_EPSILON))
 			    || (shark_dat->SpeciationCurve == true && shark_dat->pH <= 14.0)
 				|| (shark_dat->TemperatureCurve == true && shark_dat->temperature <= shark_dat->end_temp) );
 
