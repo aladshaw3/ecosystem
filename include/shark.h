@@ -1723,8 +1723,19 @@ int FloryHuggins_multiligand(const Matrix<double> &x, Matrix<double> &F, const v
  
 	\param x matrix of the log(C) concentration values at the current non-linear step
 	\param F matrix of activity coefficients that are to be altered by this function
-	\param data pointer to the AdsorptionReaction object holding parameter information*/
+	\param data pointer to the ChemisorptionReaction object holding parameter information*/
 int FloryHuggins_chemi(const Matrix<double> &x, Matrix<double> &F, const void *data);
+
+///Surface Activity function for simple non-ideal adsorption (for multiligand chemisorption object)
+/** This is a simple surface activity model to be used with the Chemisorption objects to evaluate the non-ideal
+	behavoir of the surface phase. The model's only parameters are the shape factors in adsorption and the
+	relative concentrations of each surface species. Therefore, we will pass the Chemisorption Object itself
+	as the const void *data structure. NOTE: Only for MultiligandChemisorption!
+ 
+	\param x matrix of the log(C) concentration values at the current non-linear step
+	\param F matrix of activity coefficients that are to be altered by this function
+	\param data pointer to the MultiligandChemisorption object holding parameter information*/
+int FloryHuggins_multichemi(const Matrix<double> &x, Matrix<double> &F, const void *data);
 
 ///Surface Activity function for the UNIQUAC model for non-ideal adsorption (for adsorption reaction object)
 /** This is a more complex surface activity model to be used with the Adsorption objects to evaluate the non-ideal
@@ -1771,8 +1782,20 @@ int UNIQUAC_multiligand(const Matrix<double> &x, Matrix<double> &F, const void *
  
 	\param x matrix of the log(C) concentration values at the current non-linear step
 	\param F matrix of activity coefficients that are to be altered by this function
-	\param data pointer to the AdsorptionReaction object holding parameter information*/
+	\param data pointer to the ChemisorptionReaction object holding parameter information*/
 int UNIQUAC_chemi(const Matrix<double> &x, Matrix<double> &F, const void *data);
+
+///Surface Activity function for the UNIQUAC model for non-ideal adsorption (for multiligand chemisorption object)
+/** This is a more complex surface activity model to be used with the Chemisorption objects to evaluate the non-ideal
+	behavoir of the surface phase. The model's primary parameters are the shape factors in adsorption and the
+	relative concentrations of each surface species. Therefore, we will pass the Chemisorption Object itself
+	as the const void *data structure. However, future development may require some additional parameters, which
+	will be accessed later. NOTE: Only for MultiligandChemisorption!
+ 
+	\param x matrix of the log(C) concentration values at the current non-linear step
+	\param F matrix of activity coefficients that are to be altered by this function
+	\param data pointer to the MultiligandChemisorption object holding parameter information*/
+int UNIQUAC_multichemi(const Matrix<double> &x, Matrix<double> &F, const void *data);
 
 /// Activity function for Ideal Solution
 /** This is one of the default activity models available. It assumes the system behaves ideally and sets the
@@ -1870,6 +1893,12 @@ int read_scenario(SHARK_DATA *shark_dat);
 	*/
 int read_multiligand_scenario(SHARK_DATA *shark_dat);
 
+/// Function to go through the yaml object to setup memory space for multiligand chemisorption objects
+/** This function checks the yaml object for the expected keys and values of the multiligand chemisorption scenario 
+	documents to setup the shark simulation for the input given in the input file.
+	*/
+int read_multichemi_scenario(SHARK_DATA *shark_dat);
+
 /// Function to go through the yaml object for the solver options document
 /** This function checks the yaml object for the expected keys and values of the solver options document
 	to setup the shark simulation for the input given in the input file. */
@@ -1922,6 +1951,13 @@ int read_multiligandobjects(SHARK_DATA *shark_dat);
 	
 	\note Each adsorption object will have its own document header by the name of that object*/
 int read_chemisorbobjects(SHARK_DATA *shark_dat);
+
+/// Function to go through the yaml object for each MultiligandChemisorption Object
+/** This function checks the yaml object for the expected keys and values of the multiligand chemisorption object 
+	documents to setup the shark simulation for the input given in the input file.
+	
+	\note Each ligand object will have its own document header by the name of that object*/
+int read_multichemiobjects(SHARK_DATA *shark_dat);
 
 /// Function to setup the memory and pointers for the SHARK_DATA structure for the current simulation
 /** This function will be called after reading the scenario file and is used to setup the memory and other pointers
