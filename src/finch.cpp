@@ -3975,7 +3975,7 @@ int FINCH_TESTS()
   	dat.s = 1.0;
 	dat.T = 0.2;
 	//dat.T = 60.0;
-	dat.LN = 1000;
+	dat.LN = 100;
 	dat.t_old = 0.0;
 	dat.dt_old = 0.0;
   	dat.d = 0;
@@ -3990,6 +3990,8 @@ int FINCH_TESTS()
 	
   	//Iterative Methods
 	dat.nl_method = FINCH_Picard; //0 = FINCH_Picard, 1 = LARK_Picard, 2 = LARK_PJFNK
+	dat.tol_abs = 1e-10;
+	dat.tol_rel = 1e-10;
 	dat.pjfnk_dat.nl_tol_rel = 1e-6;
 	dat.pjfnk_dat.nl_tol_abs = 1e-6;
 	dat.pjfnk_dat.linear_solver = QR;
