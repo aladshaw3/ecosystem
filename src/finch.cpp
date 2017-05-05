@@ -3975,7 +3975,7 @@ int FINCH_TESTS()
   	dat.s = 1.0;
 	dat.T = 0.2;
 	//dat.T = 60.0;
-	dat.LN = 40;
+	dat.LN = 1000;
 	dat.t_old = 0.0;
 	dat.dt_old = 0.0;
   	dat.d = 0;
@@ -3986,9 +3986,10 @@ int FINCH_TESTS()
   	dat.Iterative = true;
   	dat.SteadyState = false;
   	dat.NormTrack = true;
+	dat.CN = true;
 	
   	//Iterative Methods
-	dat.nl_method = LARK_PJFNK; //0 = FINCH_Picard, 1 = LARK_Picard, 2 = LARK_PJFNK
+	dat.nl_method = FINCH_Picard; //0 = FINCH_Picard, 1 = LARK_Picard, 2 = LARK_PJFNK
 	dat.pjfnk_dat.nl_tol_rel = 1e-6;
 	dat.pjfnk_dat.nl_tol_abs = 1e-6;
 	dat.pjfnk_dat.linear_solver = QR;
@@ -4016,7 +4017,7 @@ int FINCH_TESTS()
 	//Set up the FINCH_DATA
 	
 	//Buckley-Leverett Non-Linear Tests with Default Dirichlet BCs
-	success = setup_FINCH_DATA(default_execution,buckley_leverett_ic,default_timestep,default_preprocess,default_solve,buckley_leverett_params,vanAlbada_discretization,default_bcs,default_res,default_precon,default_postprocess,default_reset,&dat,(void *)&dat);
+	success = setup_FINCH_DATA(default_execution,buckley_leverett_ic,default_timestep,default_preprocess,default_solve,buckley_leverett_params,minmod_discretization,default_bcs,default_res,default_precon,default_postprocess,default_reset,&dat,(void *)&dat);
 	
 	//Inviscous Burger's Non-Linear Tests with Periodic BCs
 	//success = setup_FINCH_DATA(default_execution,burgers_ic,default_timestep,default_preprocess,default_solve,burgers_params,minmod_discretization,burgers_bcs,default_res,default_precon,default_postprocess,default_reset,&dat,(void *)&dat);
