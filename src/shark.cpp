@@ -9636,7 +9636,7 @@ int SHARK_TESTS()
 	shark_dat.AdsorptionList[0].setActivityModelInfo(FloryHuggins, &shark_dat.AdsorptionList[0]);
 	shark_dat.AdsorptionList[0].setBasis("area");
 	//shark_dat.AdsorptionList[0].setBasis("molar");
-
+/*
 	shark_dat.AdsorptionList[0].setMolarFactor(0, 1.0);
 	shark_dat.AdsorptionList[0].getReaction(0).Set_Equilibrium(logK_UO2);
 	shark_dat.AdsorptionList[0].getReaction(0).Set_Stoichiometric(0, 0);
@@ -9716,8 +9716,8 @@ int SHARK_TESTS()
 	shark_dat.AdsorptionList[0].setVolumeFactor(21, 0);
 	 */
 	// Only need to give volume factors for adsorbed species
-	shark_dat.AdsorptionList[0].setVolumeFactor(22, 5.0); //MADE UP NUMBER - given to the adsorbed species
-	shark_dat.AdsorptionList[0].setVolumeFactor(23, 8.0); //MADE UP NUMBER - given to the adsorbed species
+	//shark_dat.AdsorptionList[0].setVolumeFactor(22, 5.0); //MADE UP NUMBER - given to the adsorbed species
+	//shark_dat.AdsorptionList[0].setVolumeFactor(23, 8.0); //MADE UP NUMBER - given to the adsorbed species
 
 	shark_dat.UnsteadyAdsList[0].setSpecificArea(ads_area);
 	shark_dat.UnsteadyAdsList[0].setSpecificMolality(ads_mol);
