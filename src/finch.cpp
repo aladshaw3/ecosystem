@@ -3858,7 +3858,7 @@ int burgers_ic(const void *user_data)
 	return success;
 }
 
-//Function for the custom parameters for the inviscous Burger's Problem
+//Function for the custom parameters for the Inviscous Burgers' Problem
 int burgers_params(const void *user_data)
 {
 	int success = 0;
