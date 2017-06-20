@@ -399,8 +399,8 @@ EquilRxn:
 ---
 spec_area: 15000.0     #Units: m^2/kg
 total_mass: 1.5122e-5     #Units: kg
-surf_activity: ideal
-include_surfcharge: false
+surf_activity: uniquac
+include_surfcharge: true
 
 - ligand01:
   name: HAO (ad)
@@ -467,7 +467,7 @@ ligand_charge: 0
 
 "AF1-H2IDO (ad)":
 ---
-spec_mole: 5.0     #Units: mol/kg
+spec_mole: 3.3     #Units: mol/kg
 ligand_charge: 0
 
 
@@ -536,7 +536,7 @@ ligand_charge: 0
     "VO(IDO_H)2 3- (ad)": 1
 
 - rxn08:
-  logK: -29.0 #Na-Slava
+  logK: 29.0 #Na-Slava
   mole_factor: 2.0
   - stoichiometry:
     "VO4 3- (aq)": -1

@@ -623,7 +623,7 @@ spec_mole: 3.3     #Units: mol/kg
     "V(IDO)2 + (ad)": 1
 
 - rxn08:
-  logK: 76.7 #Na
+  logK: -76.7 #Na
   - stoichiometry:
     "VO4 3- (aq)": -1
     "H + (aq)": -6

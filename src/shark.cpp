@@ -11245,7 +11245,7 @@ int shark_guess(SHARK_DATA *shark_dat)
 {
 	int success = 0;
 
-	shark_dat->Conc_new.ConstantICFill(0.5);
+	shark_dat->Conc_new.ConstantICFill(0.0);
 	shark_dat->activity_new.ConstantICFill(1.0);
 
 	for (int i=0; i<shark_dat->MassBalanceList.size(); i++)
@@ -11281,16 +11281,41 @@ int shark_guess(SHARK_DATA *shark_dat)
 		}
 	}
 	
+	double chemi_sum = 0.0;
 	for (int i=0; i<shark_dat->ChemisorptionList.size(); i++)
 	{
-		shark_dat->Conc_new.edit(shark_dat->ChemisorptionList[i].getLigandIndex(),0,shark_dat->ChemisorptionList[i].getSpecificMolality()/2.0);
+		chemi_sum = 1.0;
+		for (int j=0; j<shark_dat->MasterList.list_size(); j++)
+		{
+			chemi_sum = chemi_sum + shark_dat->ChemisorptionList[i].getDelta(j);
+		}
+		double dist = shark_dat->ChemisorptionList[i].getSpecificMolality() / chemi_sum;
+		shark_dat->Conc_new.edit(shark_dat->ChemisorptionList[i].getLigandIndex(),0,dist);
+		for (int j=0; j<shark_dat->MasterList.list_size(); j++)
+		{
+			if (shark_dat->ChemisorptionList[i].getDelta(j) > 0.0 && shark_dat->Conc_new(j,0) == 0.0)
+				shark_dat->Conc_new.edit(j, 0, dist);
+		}
+		chemi_sum = 0.0;
 	}
 	
 	for (int i=0; i<shark_dat->MultiChemList.size(); i++)
 	{
 		for (int l=0; l<shark_dat->MultiChemList[i].getNumberLigands(); l++)
 		{
-			shark_dat->Conc_new.edit(shark_dat->MultiChemList[i].getChemisorptionObject(l).getLigandIndex(),0,shark_dat->MultiChemList[i].getChemisorptionObject(l).getSpecificMolality()/2.0);
+			chemi_sum = 1.0;
+			for (int j=0; j<shark_dat->MasterList.list_size(); j++)
+			{
+				chemi_sum = chemi_sum + shark_dat->MultiChemList[i].getChemisorptionObject(l).getDelta(j);
+			}
+			double dist = shark_dat->MultiChemList[i].getChemisorptionObject(l).getSpecificMolality() / chemi_sum;
+			shark_dat->Conc_new.edit(shark_dat->MultiChemList[i].getChemisorptionObject(l).getLigandIndex(),0,dist);
+			for (int j=0; j<shark_dat->MasterList.list_size(); j++)
+			{
+				if (shark_dat->MultiChemList[i].getChemisorptionObject(l).getDelta(j) > 0.0 && shark_dat->Conc_new(j,0) == 0.0)
+					shark_dat->Conc_new.edit(j, 0, dist);
+			}
+			chemi_sum = 0.0;
 		}
 	}
 
