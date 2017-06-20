@@ -11979,7 +11979,7 @@ int shark_solver(SHARK_DATA *shark_dat)
 			}
 			else
 			{
-				std::cout << "\nLocal minimum was found. Continue simulations...\n\n";
+				std::cout << "\nLocal minimum was found...\n\n";
 				success = 0;
 				
 			}
@@ -12005,7 +12005,7 @@ int shark_postprocesses(SHARK_DATA *shark_dat)
 			std::cout << "\nSHARK CONVERGENCE FAILURE!\n\n";
 		else
 		{
-			if ((shark_dat->Newton_data.nl_res/10.0) <= shark_dat->Newton_data.nl_tol_abs)
+			if (shark_dat->Newton_data.nl_relres <= 0.1)
 				std::cout << "\nLOCAL MINIMUM ACCEPTED AS SUCCESS!\n\n";
 			else
 			{
