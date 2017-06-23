@@ -1,7 +1,7 @@
 Scenario:
 ---
 - vars_fun:
-  numvar: 74
+  numvar: 69
   num_ssr: 34
   num_mbe: 7
   num_multi_sschem: 1
@@ -86,30 +86,6 @@ MasterSpecies:
 
 - unreg:
   - 42: 
-    formula: IDO 2- (ad)
-    charge: -2
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: adsorbed
-    name: cyclic-amidioxime
-    lin_form: none
-
-  - 43: 
-    formula: HIDO - (ad)
-    charge: -1
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: adsorbed
-    name: cyclic-amidioxime
-    lin_form: H
-
-  - 44: 
     formula: H2IDO (ad)
     charge: 0
     enthalpy: 0
@@ -121,31 +97,7 @@ MasterSpecies:
     name: cyclic-amidioxime
     lin_form: H2
 
-  - 45: 
-    formula: H3IDO + (ad)
-    charge: 1
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: adsorbed
-    name: cyclic-amidioxime
-    lin_form: H3
-
-  - 46: 
-    formula: AO - (ad)
-    charge: -1
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: adsorbed
-    name: acyclic-amidioxime
-    lin_form: none
-
-  - 47: 
+  - 43: 
     formula: HAO (ad)
     charge: 0
     enthalpy: 0
@@ -157,19 +109,7 @@ MasterSpecies:
     name: acyclic-amidioxime
     lin_form: H
 
-  - 48: 
-    formula: H2AO + (ad)
-    charge: 1
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: adsorbed
-    name: acyclic-amidioxime
-    lin_form: H2
-
-  - 49: 
+  - 44: 
     formula: UO2AO + (ad)
     charge: 1
     enthalpy: -1023568.7
@@ -181,7 +121,7 @@ MasterSpecies:
     name: uranyl-amidioxime
     lin_form: UO2
 
-  - 50: 
+  - 45: 
     formula: UO2(AO)2 (ad)
     charge: 0
     enthalpy: -972996.9
@@ -193,7 +133,7 @@ MasterSpecies:
     name: uranyl-di-amidioxime
     lin_form: UO2
 
-  - 51: 
+  - 46: 
     formula: UO2(AO)3 - (ad)
     charge: -1
     enthalpy: -729241.076
@@ -205,7 +145,7 @@ MasterSpecies:
     name: uranyl-tri-amidioxime
     lin_form: UO2
 
-  - 52: 
+  - 47: 
     formula: UO2CO3AO - (ad)
     charge: -1
     enthalpy: -1741629.98
@@ -217,7 +157,7 @@ MasterSpecies:
     name: uranyl-carbonate-amidioxime
     lin_form: UO2CO3
 
-  - 53: 
+  - 48: 
     formula: UO2CO3(AO)2 2- (ad)
     charge: -2
     enthalpy: -1667060.92
@@ -229,7 +169,7 @@ MasterSpecies:
     name: uranyl-carbonate-diamidioxime
     lin_form: UO2CO3
 
-  - 54: 
+  - 49: 
     formula: UO2IDO (ad)
     charge: 0
     enthalpy: -955716.98
@@ -241,7 +181,7 @@ MasterSpecies:
     name: uranyl-imide-dioxime
     lin_form: UO2
 
-  - 55: 
+  - 50: 
     formula: UO2HIDO + (ad)
     charge: 1
     enthalpy: -1012734.89
@@ -253,7 +193,7 @@ MasterSpecies:
     name: uranyl-imide-dioxime
     lin_form: UO2H
 
-  - 56: 
+  - 51: 
     formula: UO2(IDO)2 2- (ad)
     charge: -2
     enthalpy: -660147.92
@@ -265,7 +205,7 @@ MasterSpecies:
     name: uranyl-diimide-dioxime
     lin_form: UO2
 
-  - 57: 
+  - 52: 
     formula: UO2(HIDO)IDO - (ad)
     charge: -1
     enthalpy: -748364.334
@@ -277,7 +217,7 @@ MasterSpecies:
     name: uranyl-diimide-dioxime
     lin_form: UO2H
 
-  - 58: 
+  - 53: 
     formula: UO2(HIDO)2 (ad)
     charge: 0
     enthalpy: -973627.99
@@ -289,7 +229,7 @@ MasterSpecies:
     name: uranyl-diimide-dioxime
     lin_form: UO2H2
 
-  - 59: 
+  - 54: 
     formula: UO2CO3IDO 2- (ad)
     charge: -2
     enthalpy: -1724192.065
@@ -301,7 +241,7 @@ MasterSpecies:
     name: uranyl-carbonate-imide-dioxime
     lin_form: UO2CO3
 
-  - 60: 
+  - 55: 
     formula: UO2CO3HIDO - (ad)
     charge: -1
     enthalpy: -1929112.74
@@ -313,7 +253,7 @@ MasterSpecies:
     name: uranyl-carbonate-imide-dioxime
     lin_form: UO2CO3H
 
-  - 61: 
+  - 56: 
     formula: VO2AO (ad)
     charge: 0
     enthalpy: 0
@@ -325,7 +265,7 @@ MasterSpecies:
     name: Vanadyl-amidoximate
     lin_form: VO2
 
-  - 62: 
+  - 57: 
     formula: VO2(AO)2 - (ad)
     charge: -1
     enthalpy: 0
@@ -337,7 +277,7 @@ MasterSpecies:
     name: Vanadium-diamidoximate
     lin_form: VO2
 
-  - 63: 
+  - 58: 
     formula: VOOH(AO)2 (ad)
     charge: 0
     enthalpy: 0
@@ -349,7 +289,7 @@ MasterSpecies:
     name: Vanadium-diamidoximate
     lin_form: VO2H
 
-  - 64: 
+  - 59: 
     formula: V(AO)(AO_H)2 (ad)
     charge: 0
     enthalpy: 0
@@ -361,7 +301,7 @@ MasterSpecies:
     name: Vanadium-diamidoximate
     lin_form: V
 
-  - 65: 
+  - 60: 
     formula: V(AO)3 2+ (ad)
     charge: 2
     enthalpy: 0
@@ -373,7 +313,7 @@ MasterSpecies:
     name: Vanadium-diamidoximate
     lin_form: V
 
-  - 66: 
+  - 61: 
     formula: VO2IDO - (ad)
     charge: -1
     enthalpy: 0
@@ -385,7 +325,7 @@ MasterSpecies:
     name: Vanadyl-amidoximate
     lin_form: VO2
 
-  - 67: 
+  - 62: 
     formula: VO2HIDO (ad)
     charge: 0
     enthalpy: 0
@@ -397,7 +337,7 @@ MasterSpecies:
     name: Vanadium-diamidoximate
     lin_form: VO2H
 
-  - 68: 
+  - 63: 
     formula: VO2IDO_H 2- (ad)
     charge: -2
     enthalpy: 0
@@ -409,7 +349,7 @@ MasterSpecies:
     name: Vanadium-diamidoximate
     lin_form: VO2
 
-  - 69: 
+  - 64: 
     formula: V(IDO)(IDO_H) (ad)
     charge: 0
     enthalpy: 0
@@ -421,7 +361,7 @@ MasterSpecies:
     name: Vanadium-diamidoximate
     lin_form: V
 
-  - 70: 
+  - 65: 
     formula: V(IDO)2 + (ad)
     charge: 1
     enthalpy: 0
@@ -433,7 +373,7 @@ MasterSpecies:
     name: Vanadium-diamidoximate
     lin_form: V
 
-  - 71: 
+  - 66: 
     formula: V(IDO_H)2 - (ad)
     charge: -1
     enthalpy: 0
@@ -445,7 +385,7 @@ MasterSpecies:
     name: Vanadium-diamidoximate
     lin_form: V
 
-  - 72: 
+  - 67: 
     formula: VO(IDO_H)2 3- (ad)
     charge: -3
     enthalpy: 0
@@ -457,7 +397,7 @@ MasterSpecies:
     name: Vanadium-amidoximate
     lin_form: VO
 
-  - 73: 
+  - 68: 
     formula: Na-V(IDO_H)2 (ad)
     charge: 0
     enthalpy: 0
@@ -817,268 +757,240 @@ surf_activity: uniquac
 include_surfcharge: true
 
 - ligand01:
-  name: AO - (ad)
-  num_rxns: 12
+  name: HAO (ad)
+  num_rxns: 10
 
 - ligand02:
-  name: IDO 2- (ad)
-  num_rxns: 18
+  name: H2IDO (ad)
+  num_rxns: 15
 
 ...
 
-"AF1-AO - (ad)":
+"AF1-HAO (ad)":
 ---
 spec_mole: 1.45       #Units: mol/kg
 
 - rxn01:
-  logK: 13.6
+  logK: 0.39
   - stoichiometry:
     "UO2 2+ (aq)": -1
-    "AO - (ad)": -1
+    "HAO (ad)": -1
     "UO2AO + (ad)": 1
+    "H + (aq)": 1
 
 - rxn02:
-  logK: 23.7
+  logK: -2.72   
   - stoichiometry:
     "UO2 2+ (aq)": -1
-    "AO - (ad)": -2
+    "HAO (ad)": -2
     "UO2(AO)2 (ad)": 1
+    "H + (aq)": 2
 
 - rxn03:
-  logK: 27.9
+  logK: -11.73   
   - stoichiometry:
     "UO2 2+ (aq)": -1
-    "AO - (ad)": -3
+    "HAO (ad)": -3
     "UO2(AO)3 - (ad)": 1
+    "H + (aq)": 3
 
 - rxn04:
-  logK: 15.8
+  logK: 2.59
   - stoichiometry:
     "UO2 2+ (aq)": -1
     "CO3 2- (aq)": -1
-    "AO - (ad)": -1
+    "HAO (ad)": -1
     "UO2CO3AO - (ad)": 1
+    "H + (aq)": 1
 
 - rxn05:
-  logK: 25.5
+  logK: -0.92
   - stoichiometry:
     "UO2 2+ (aq)": -1
     "CO3 2- (aq)": -1
-    "AO - (ad)": -2
+    "HAO (ad)": -2
     "UO2CO3(AO)2 2- (ad)": 1
+    "H + (aq)": 2
 
 - rxn06:
-  logK: 40.55
+  logK: 27.3
   - stoichiometry:
     "VO4 3- (aq)": -1
-    "H + (aq)": -4
-    "AO - (ad)": -1
+    "H + (aq)": -3
+    "HAO (ad)": -1
     "VO2AO (ad)": 1
     "H2O (l)": 2
 
 - rxn07:
-  logK: 48.35
+  logK: 21.9
   - stoichiometry:
     "VO4 3- (aq)": -1
-    "H + (aq)": -4
-    "AO - (ad)": -2
+    "H + (aq)": -2
+    "HAO (ad)": -2
     "VO2(AO)2 - (ad)": 1
     "H2O (l)": 2
 
 - rxn08:
-  logK: 51.35
+  logK: 24.9
   - stoichiometry:
     "VO4 3- (aq)": -1
-    "H + (aq)": -5
-    "AO - (ad)": -2
+    "H + (aq)": -3
+    "HAO (ad)": -2
     "VOOH(AO)2 (ad)": 1
     "H2O (l)": 2
 
 - rxn09:
-  logK: 66.25
+  logK: 26.6
   - stoichiometry:
     "VO4 3- (aq)": -1
-    "H + (aq)": -6
-    "AO - (ad)": -3
+    "H + (aq)": -3
+    "HAO (ad)": -3
     "V(AO)(AO_H)2 (ad)": 1
     "H2O (l)": 4
 
 - rxn10:
-  logK: 62.35
+  logK: 22.7
   - stoichiometry:
     "VO4 3- (aq)": -1
-    "H + (aq)": -8
-    "AO - (ad)": -3
+    "H + (aq)": -5
+    "HAO (ad)": -3
     "V(AO)3 2+ (ad)": 1
     "H2O (l)": 4
 
-- rxn11:
-  logK: 13.21
-  - stoichiometry:
-    "H + (aq)": -1
-    "AO - (ad)": -1
-    "HAO (ad)": 1
-
-- rxn12:
-  logK: 18.99
-  - stoichiometry:
-    "H + (aq)": -2
-    "AO - (ad)": -1
-    "H2AO + (ad)": 1
-
 ...
 
-"AF1-IDO 2- (ad)":
+"AF1-H2IDO (ad)":
 ---
 spec_mole: 3.3       #Units: mol/kg
 
 - rxn01:
-  logK: 19.2
+  logK: -4.64
   - stoichiometry:
     "UO2 2+ (aq)": -1
-    "IDO 2- (ad)": -1
+    "H2IDO (ad)": -1
     "UO2IDO (ad)": 1
+    "H + (aq)": 2
 
 - rxn02:
-  logK: 23.5
+  logK: -0.34
   - stoichiometry:
     "UO2 2+ (aq)": -1
-    "H + (aq)": -1
-    "IDO 2- (ad)": -1
+    "H2IDO (ad)": -1
     "UO2HIDO + (ad)": 1
+    "H + (aq)": 1
 
 - rxn03:
-  logK: 29.0
+  logK: -18.68
   - stoichiometry:
     "UO2 2+ (aq)": -1
-    "IDO 2- (ad)": -2
+    "H2IDO (ad)": -2
     "UO2(IDO)2 2- (ad)": 1
+    "H + (aq)": 4
 
 - rxn04:
-  logK: 38.9
+  logK: -8.78
   - stoichiometry:
     "UO2 2+ (aq)": -1
-    "H + (aq)": -1
-    "IDO 2- (ad)": -2
+    "H2IDO (ad)": -2
     "UO2(HIDO)IDO - (ad)": 1
+    "H + (aq)": 3
 
 - rxn05:
-  logK: 44.2
+  logK: -3.48
   - stoichiometry:
     "UO2 2+ (aq)": -1
-    "H + (aq)": -2
-    "IDO 2- (ad)": -2
+    "H2IDO (ad)": -2
     "UO2(HIDO)2 (ad)": 1
+    "H + (aq)": 2
 
 - rxn06:
-  logK: 25.2
+  logK: 1.36
   - stoichiometry:
     "UO2 2+ (aq)": -1
     "CO3 2- (aq)": -1
-    "IDO 2- (ad)": -1
+    "H2IDO (ad)": -1
     "UO2CO3IDO 2- (ad)": 1
+    "H + (aq)": 2
 
 - rxn07:
-  logK: 29.2
+  logK: 5.36
   - stoichiometry:
     "UO2 2+ (aq)": -1
     "CO3 2- (aq)": -1
-    "H + (aq)": -1
-    "IDO 2- (ad)": -1
+    "H2IDO (ad)": -1
     "UO2CO3HIDO - (ad)": 1
+    "H + (aq)": 1
 
 - rxn08:
-  logK: 45.1 
+  logK: 21.3 
   - stoichiometry:
     "VO4 3- (aq)": -1
-    "H + (aq)": -3
-    "IDO 2- (ad)": -1
+    "H + (aq)": -1
+    "H2IDO (ad)": -1
     "VO2IDO_H 2- (ad)": 1
     "H2O (l)": 2
 
 - rxn09:
-  logK: 48.5
+  logK: 24.6
   - stoichiometry:
     "VO4 3- (aq)": -1
-    "H + (aq)": -4
-    "IDO 2- (ad)": -1
+    "H + (aq)": -2
+    "H2IDO (ad)": -1
     "VO2IDO - (ad)": 1
     "H2O (l)": 2
 
 - rxn10:
-  logK: 51.9
+  logK: 28.1
   - stoichiometry:
     "VO4 3- (aq)": -1
-    "H + (aq)": -5
-    "IDO 2- (ad)": -1
+    "H + (aq)": -3
+    "H2IDO (ad)": -1
     "H2O (l)": 2
     "VO2HIDO (ad)": 1
 
 - rxn11:
-  logK: 59.4
+  logK: 11.7
   - stoichiometry:
     "VO4 3- (aq)": -1
-    "H + (aq)": -4
-    "IDO 2- (ad)": -2
+    "H2IDO (ad)": -2
     "H2O (l)": 3
     "VO(IDO_H)2 3- (ad)": 1
 
 - rxn12:
-  logK: 76.2
+  logK: 28.5
   - stoichiometry:
     "VO4 3- (aq)": -1
-    "H + (aq)": -6
-    "IDO 2- (ad)": -2
+    "H + (aq)": -2
+    "H2IDO (ad)": -2
     "H2O (l)": 4
     "V(IDO_H)2 - (ad)": 1
 
 - rxn13:
-  logK: 77.8 
+  logK: 30.1 
   - stoichiometry:
     "VO4 3- (aq)": -1
-    "H + (aq)": -7
-    "IDO 2- (ad)": -2
+    "H + (aq)": -3
+    "H2IDO (ad)": -2
     "H2O (l)": 4
     "V(IDO)(IDO_H) (ad)": 1
 
 - rxn14:
-  logK: 74.6 
+  logK: 26.9 
   - stoichiometry:
     "VO4 3- (aq)": -1
-    "H + (aq)": -8
-    "IDO 2- (ad)": -2
+    "H + (aq)": -4
+    "H2IDO (ad)": -2
     "H2O (l)": 4
     "V(IDO)2 + (ad)": 1
 
 - rxn15:
-  logK: 76.7 #Na
+  logK: 29.0 #Na
   - stoichiometry:
     "VO4 3- (aq)": -1
-    "H + (aq)": -6
-    "IDO 2- (ad)": -2
+    "H + (aq)": -2
+    "H2IDO (ad)": -2
     "Na + (aq)": -1
     "H2O (l)": 4
     "Na-V(IDO_H)2 (ad)": 1
-
-- rxn16:
-  logK: 12.85
-  - stoichiometry:
-    "H + (aq)": -1
-    "IDO 2- (ad)": -1
-    "HIDO - (ad)": 1
-
-- rxn17:
-  logK: 23.84
-  - stoichiometry:
-    "H + (aq)": -2
-    "IDO 2- (ad)": -1
-    "H2IDO (ad)": 1
-
-- rxn18:
-  logK: 25.97
-  - stoichiometry:
-    "H + (aq)": -3
-    "IDO 2- (ad)": -1
-    "H3IDO + (ad)": 1
 
 ...
