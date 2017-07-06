@@ -1,3 +1,5 @@
+#NOTE: This input file has been updated for Temperature Effects
+
 Scenario:
 ---
 - vars_fun:
@@ -14,17 +16,17 @@ Scenario:
 - sys_data:
   act_fun: davies    
   const_pH: false
-  pH: 8	
+  pH: 7.5	
   temp: 293.15        
   dielec: 78.325     
-  volume: 0.75  
+  volume: 1.0 
   reactor: batch
 
 - run_time:
   steady: true        
-  specs_curve: true  
+  specs_curve: false  
   pH_step: 0.25
-  temp_curve: false
+  temp_curve: true
   start_temp: 273.15
   end_temp: 323.15
   temp_step: 2.5
@@ -169,8 +171,8 @@ MasterSpecies:
   - 42: 
     formula: UO2AO + (ad)
     charge: 1
-    enthalpy: -1023568.7
-    entropy: -106.414
+    enthalpy: 0
+    entropy: 0
     have_HS: false
     energy: 0
     have_G: false
@@ -181,8 +183,8 @@ MasterSpecies:
   - 43: 
     formula: UO2(AO)2 (ad)
     charge: 0
-    enthalpy: -972996.9
-    entropy: 7.8759
+    enthalpy: 0
+    entropy: 0
     have_HS: false
     energy: 0
     have_G: false
@@ -193,8 +195,8 @@ MasterSpecies:
   - 44: 
     formula: UO2(AO)3 - (ad)
     charge: -1
-    enthalpy: -729241.076
-    entropy: 671.461
+    enthalpy: 0
+    entropy: 0
     have_HS: false
     energy: 0
     have_G: false
@@ -205,8 +207,8 @@ MasterSpecies:
   - 45: 
     formula: UO2CO3AO - (ad)
     charge: -1
-    enthalpy: -1741629.98
-    entropy: -261.641
+    enthalpy: 0
+    entropy: 0
     have_HS: false
     energy: 0
     have_G: false
@@ -217,8 +219,8 @@ MasterSpecies:
   - 46: 
     formula: UO2CO3(AO)2 2- (ad)
     charge: -2
-    enthalpy: -1667060.92
-    entropy: -72.497
+    enthalpy: 0
+    entropy: 0
     have_HS: false
     energy: 0
     have_G: false
@@ -229,8 +231,8 @@ MasterSpecies:
   - 47: 
     formula: UO2IDO (ad)
     charge: 0
-    enthalpy: -955716.98
-    entropy: 30.3998
+    enthalpy: 0
+    entropy: 0
     have_HS: false
     energy: 0
     have_G: false
@@ -241,8 +243,8 @@ MasterSpecies:
   - 48: 
     formula: UO2HIDO + (ad)
     charge: 1
-    enthalpy: -1012734.89
-    entropy: -83.236
+    enthalpy: 0
+    entropy: 0
     have_HS: false
     energy: 0
     have_G: false
@@ -253,8 +255,8 @@ MasterSpecies:
   - 49: 
     formula: UO2(IDO)2 2- (ad)
     charge: -2
-    enthalpy: -660147.92
-    entropy: 773.1554
+    enthalpy: 0
+    entropy: 0
     have_HS: false
     energy: 0
     have_G: false
@@ -265,8 +267,8 @@ MasterSpecies:
   - 50: 
     formula: UO2(HIDO)IDO - (ad)
     charge: -1
-    enthalpy: -748364.334
-    entropy: 662.5315
+    enthalpy: 0
+    entropy: 0
     have_HS: false
     energy: 0
     have_G: false
@@ -277,8 +279,8 @@ MasterSpecies:
   - 51: 
     formula: UO2(HIDO)2 (ad)
     charge: 0
-    enthalpy: -973627.99
-    entropy: -9.3683
+    enthalpy: 0
+    entropy: 0
     have_HS: false
     energy: 0
     have_G: false
@@ -289,8 +291,8 @@ MasterSpecies:
   - 52: 
     formula: UO2CO3IDO 2- (ad)
     charge: -2
-    enthalpy: -1724192.065
-    entropy: -225.236
+    enthalpy: 0
+    entropy: 0
     have_HS: false
     energy: 0
     have_G: false
@@ -301,8 +303,8 @@ MasterSpecies:
   - 53: 
     formula: UO2CO3HIDO - (ad)
     charge: -1
-    enthalpy: -1929112.74
-    entropy: -850.804
+    enthalpy: 0
+    entropy: 0
     have_HS: false
     energy: 0
     have_G: false
@@ -337,7 +339,7 @@ MassBalance:
     "UO2CO3HIDO - (ad)": 1
 
 - nitrate:
-  total_conc: 6.49166E-05
+  total_conc: 6.38907E-05
   - delta:
     "HNO3 (aq)": 1
     "NO3 - (aq)": 1
@@ -355,7 +357,7 @@ MassBalance:
     "NaOH (aq)": 1
 
 - uranyl:
-  total_conc: 3.24583E-05
+  total_conc: 3.19453E-05
   - delta:
     "UO2NO3 + (aq)": 1
     "UO2(NO3)2 (aq)": 1
@@ -587,7 +589,7 @@ EquilRxn:
 "AF1":
 ---
 spec_area: 15000.0     #Units: m^2/kg
-total_mass: 1.51095e-5     #Units: kg
+total_mass: 1.506e-5     #Units: kg
 surf_activity: uniquac
 include_surfcharge: true
 
