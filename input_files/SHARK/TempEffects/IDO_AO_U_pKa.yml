@@ -603,12 +603,15 @@ include_surfcharge: true
 
 ...
 
+#Keywords are energy, enthalpy, and entropy
+
 "AF1-AO - (ad)":
 ---
 spec_mole: 1.45     #Units: mol/kg
 
 - rxn01:
   logK: 13.6
+  energy: -77628.90292
   - stoichiometry:
     "UO2 2+ (aq)": -1
     "AO - (ad)": -1
@@ -616,6 +619,7 @@ spec_mole: 1.45     #Units: mol/kg
 
 - rxn02:
   logK: 23.7
+  energy: -135279.7794
   - stoichiometry:
     "UO2 2+ (aq)": -1
     "AO - (ad)": -2
@@ -623,6 +627,7 @@ spec_mole: 1.45     #Units: mol/kg
 
 - rxn03:
   logK: 27.9
+  energy: -159253.4111
   - stoichiometry:
     "UO2 2+ (aq)": -1
     "AO - (ad)": -3
@@ -630,6 +635,7 @@ spec_mole: 1.45     #Units: mol/kg
 
 - rxn04:
   logK: 15.8
+  energy: -90186.51957
   - stoichiometry:
     "UO2 2+ (aq)": -1
     "CO3 2- (aq)": -1
@@ -638,6 +644,7 @@ spec_mole: 1.45     #Units: mol/kg
 
 - rxn05:
   logK: 25.5
+  energy: -145554.193
   - stoichiometry:
     "UO2 2+ (aq)": -1
     "CO3 2- (aq)": -1
@@ -646,6 +653,7 @@ spec_mole: 1.45     #Units: mol/kg
 
 - rxn06:
   logK: 13.21
+  energy: -75402.77997
   - stoichiometry:
     "H + (aq)": -1
     "AO - (ad)": -1
@@ -653,6 +661,7 @@ spec_mole: 1.45     #Units: mol/kg
 
 - rxn07:
   logK: 18.99
+  energy: -108395.0637
   - stoichiometry:
     "H + (aq)": -2
     "AO - (ad)": -1
@@ -666,6 +675,7 @@ spec_mole: 3.3     #Units: mol/kg
 
 - rxn01:
   logK: 19.2
+  energy: -109593.7453
   - stoichiometry:
     "UO2 2+ (aq)": -1
     "IDO 2- (ad)": -1
@@ -673,6 +683,7 @@ spec_mole: 3.3     #Units: mol/kg
 
 - rxn02:
   logK: 23.5
+  energy: -134138.1778
   - stoichiometry:
     "UO2 2+ (aq)": -1
     "H + (aq)": -1
@@ -681,6 +692,7 @@ spec_mole: 3.3     #Units: mol/kg
 
 - rxn03:
   logK: 29.0
+  energy: -165532.2195
   - stoichiometry:
     "UO2 2+ (aq)": -1
     "IDO 2- (ad)": -2
@@ -688,6 +700,7 @@ spec_mole: 3.3     #Units: mol/kg
 
 - rxn04:
   logK: 38.9
+  energy: -222041.4944
   - stoichiometry:
     "UO2 2+ (aq)": -1
     "H + (aq)": -1
@@ -696,6 +709,7 @@ spec_mole: 3.3     #Units: mol/kg
 
 - rxn05:
   logK: 44.2
+  energy: -252293.9345
   - stoichiometry:
     "UO2 2+ (aq)": -1
     "H + (aq)": -2
@@ -704,6 +718,7 @@ spec_mole: 3.3     #Units: mol/kg
 
 - rxn06:
   logK: 25.2
+  energy: -143841.7907
   - stoichiometry:
     "UO2 2+ (aq)": -1
     "CO3 2- (aq)": -1
@@ -712,6 +727,7 @@ spec_mole: 3.3     #Units: mol/kg
 
 - rxn07:
   logK: 29.2
+  energy: -166673.821
   - stoichiometry:
     "UO2 2+ (aq)": -1
     "CO3 2- (aq)": -1
@@ -721,6 +737,7 @@ spec_mole: 3.3     #Units: mol/kg
 
 - rxn08:
   logK: 12.85
+  energy: -73347.89725
   - stoichiometry:
     "H + (aq)": -1
     "IDO 2- (ad)": -1
@@ -728,6 +745,7 @@ spec_mole: 3.3     #Units: mol/kg
 
 - rxn09:
   logK: 23.84
+  energy: -136078.9004
   - stoichiometry:
     "H + (aq)": -2
     "IDO 2- (ad)": -1
@@ -735,6 +753,7 @@ spec_mole: 3.3     #Units: mol/kg
 
 - rxn10:
   logK: 25.97
+  energy: -148236.9565
   - stoichiometry:
     "H + (aq)": -3
     "IDO 2- (ad)": -1
