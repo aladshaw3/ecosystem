@@ -17,7 +17,7 @@ Scenario:
   act_fun: davies    
   const_pH: false
   pH: 7.5	
-  temp: 293.15        
+  temp: 313.15        
   dielec: 78.325     
   volume: 1.0 
   reactor: batch
@@ -618,8 +618,10 @@ spec_mole: 1.45     #Units: mol/kg
     "UO2AO + (ad)": 1
 
 - rxn02:
-  logK: 23.7
-  energy: -135279.7794
+  #logK: 23.7  #Slava 
+  #energy: -135279.7794    #Slava
+  enthalpy: -45900
+  entropy: 297
   - stoichiometry:
     "UO2 2+ (aq)": -1
     "AO - (ad)": -2
@@ -699,8 +701,10 @@ spec_mole: 3.3     #Units: mol/kg
     "UO2(IDO)2 2- (ad)": 1
 
 - rxn04:
-  logK: 38.9
-  energy: -222041.4944
+  #logK: 38.9 #Slava
+  #energy: -222041.4944   #Slava
+  enthalpy: -133000
+  entropy: 297
   - stoichiometry:
     "UO2 2+ (aq)": -1
     "H + (aq)": -1
@@ -708,8 +712,10 @@ spec_mole: 3.3     #Units: mol/kg
     "UO2(HIDO)IDO - (ad)": 1
 
 - rxn05:
-  logK: 44.2
-  energy: -252293.9345
+  #logK: 44.2  #Slava 
+  #energy: -252293.9345   #Slava
+  enthalpy: -163000
+  entropy: 297
   - stoichiometry:
     "UO2 2+ (aq)": -1
     "H + (aq)": -2
