@@ -3,9 +3,9 @@
 Scenario:
 ---
 - vars_fun:
-  numvar: 54
-  num_ssr: 28
-  num_mbe: 6
+  numvar: 33
+  num_ssr: 14
+  num_mbe: 3
   num_multi_sschem: 1
 
 - ss_multichemi_objs:
@@ -16,11 +16,12 @@ Scenario:
 - sys_data:
   act_fun: davies    
   const_pH: false
-  pH: 7.5	
+  pH: 6.0	
   temp: 283.15        
   dielec: 78.325     
   volume: 1.0 
   reactor: batch
+  res_alk: 6.4e-5
 
 - run_time:
   steady: true        
@@ -39,52 +40,35 @@ line_search: true
 search_type: standard
 linear_solve: qr  
 nl_abstol: 1e-6
-nl_maxit: 100		
+nl_maxit: 10000	
 
 ...
 
 MasterSpecies:
 ---
 - reg:
-  0: Cl - (aq)
-  1: H2O (l)
-  2: H + (aq)
-  3: OH - (aq)
-  4: H2CO3 (aq)
-  5: HCO3 - (aq)
-  6: CO3 2- (aq)
-  7: HCl (aq)
-  8: NaHCO3 (aq)
-  9: NaCO3 - (aq)
-  10: Na2CO3 (aq)
-  11: Na + (aq)
-  12: NaCl (aq)
-  13: NaOH (aq)
-  14: HNO3 (aq)
-  15: NO3 - (aq)
-  16: UO2 2+ (aq)
-  17: UO2OH + (aq)
-  18: UO2(OH)2 (aq)
-  19: UO2(OH)3 - (aq)
-  20: UO2(OH)4 2- (aq)
-  21: (UO2)2OH 3+ (aq)
-  22: (UO2)2(OH)2 2+ (aq)
-  23: (UO2)3(OH)4 2+ (aq)
-  24: (UO2)3(OH)5 + (aq)
-  25: (UO2)3(OH)7 - (aq)
-  26: (UO2)4(OH)7 + (aq)
-  27: UO2CO3 (aq)
-  28: UO2(CO3)2 2- (aq)
-  29: UO2(CO3)3 4- (aq)
-  30: UO2Cl + (aq)
-  31: UO2Cl2 (aq)
-  32: UO2Cl3 - (aq)
-  33: UO2NO3 + (aq)
-  34: UO2(NO3)2 (aq)
+  0: H2O (l)
+  1: H + (aq)
+  2: OH - (aq)
+  3: HNO3 (aq)
+  4: NO3 - (aq)
+  5: UO2 2+ (aq)
+  6: UO2OH + (aq)
+  7: UO2(OH)2 (aq)
+  8: UO2(OH)3 - (aq)
+  9: UO2(OH)4 2- (aq)
+  10: (UO2)2OH 3+ (aq)
+  11: (UO2)2(OH)2 2+ (aq)
+  12: (UO2)3(OH)4 2+ (aq)
+  13: (UO2)3(OH)5 + (aq)
+  14: (UO2)3(OH)7 - (aq)
+  15: (UO2)4(OH)7 + (aq)
+  16: UO2NO3 + (aq)
+  17: UO2(NO3)2 (aq)
 
 
 - unreg:
-  - 35: 
+  - 18: 
     formula: IDO 2- (ad)
     charge: -2
     enthalpy: 0
@@ -96,7 +80,7 @@ MasterSpecies:
     name: cyclic-amidioxime
     lin_form: none
 
-  - 36: 
+  - 19: 
     formula: HIDO - (ad)
     charge: -1
     enthalpy: 0
@@ -108,7 +92,7 @@ MasterSpecies:
     name: cyclic-amidioxime
     lin_form: H
 
-  - 37: 
+  - 20: 
     formula: H2IDO (ad)
     charge: 0
     enthalpy: 0
@@ -120,7 +104,7 @@ MasterSpecies:
     name: cyclic-amidioxime
     lin_form: H2
 
-  - 38: 
+  - 21: 
     formula: H3IDO + (ad)
     charge: 1
     enthalpy: 0
@@ -132,7 +116,7 @@ MasterSpecies:
     name: cyclic-amidioxime
     lin_form: H3
 
-  - 39: 
+  - 22: 
     formula: AO - (ad)
     charge: -1
     enthalpy: 0
@@ -144,7 +128,7 @@ MasterSpecies:
     name: acyclic-amidioxime
     lin_form: none
 
-  - 40: 
+  - 23: 
     formula: HAO (ad)
     charge: 0
     enthalpy: 0
@@ -156,7 +140,7 @@ MasterSpecies:
     name: acyclic-amidioxime
     lin_form: H
 
-  - 41: 
+  - 24: 
     formula: H2AO + (ad)
     charge: 1
     enthalpy: 0
@@ -168,7 +152,7 @@ MasterSpecies:
     name: acyclic-amidioxime
     lin_form: H2
 
-  - 42: 
+  - 25: 
     formula: UO2AO + (ad)
     charge: 1
     enthalpy: 0
@@ -180,7 +164,7 @@ MasterSpecies:
     name: uranyl-amidioxime
     lin_form: UO2
 
-  - 43: 
+  - 26: 
     formula: UO2(AO)2 (ad)
     charge: 0
     enthalpy: 0
@@ -192,7 +176,7 @@ MasterSpecies:
     name: uranyl-di-amidioxime
     lin_form: UO2
 
-  - 44: 
+  - 27: 
     formula: UO2(AO)3 - (ad)
     charge: -1
     enthalpy: 0
@@ -204,31 +188,7 @@ MasterSpecies:
     name: uranyl-tri-amidioxime
     lin_form: UO2
 
-  - 45: 
-    formula: UO2CO3AO - (ad)
-    charge: -1
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: adsorbed
-    name: uranyl-carbonate-amidioxime
-    lin_form: UO2CO3
-
-  - 46: 
-    formula: UO2CO3(AO)2 2- (ad)
-    charge: -2
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: adsorbed
-    name: uranyl-carbonate-diamidioxime
-    lin_form: UO2CO3
-
-  - 47: 
+  - 28: 
     formula: UO2IDO (ad)
     charge: 0
     enthalpy: 0
@@ -240,7 +200,7 @@ MasterSpecies:
     name: uranyl-imide-dioxime
     lin_form: UO2
 
-  - 48: 
+  - 29: 
     formula: UO2HIDO + (ad)
     charge: 1
     enthalpy: 0
@@ -252,7 +212,7 @@ MasterSpecies:
     name: uranyl-imide-dioxime
     lin_form: UO2H
 
-  - 49: 
+  - 30: 
     formula: UO2(IDO)2 2- (ad)
     charge: -2
     enthalpy: 0
@@ -264,7 +224,7 @@ MasterSpecies:
     name: uranyl-diimide-dioxime
     lin_form: UO2
 
-  - 50: 
+  - 31: 
     formula: UO2(HIDO)IDO - (ad)
     charge: -1
     enthalpy: 0
@@ -276,7 +236,7 @@ MasterSpecies:
     name: uranyl-diimide-dioxime
     lin_form: UO2H
 
-  - 51: 
+  - 32: 
     formula: UO2(HIDO)2 (ad)
     charge: 0
     enthalpy: 0
@@ -287,30 +247,6 @@ MasterSpecies:
     phase: adsorbed
     name: uranyl-diimide-dioxime
     lin_form: UO2H2
-
-  - 52: 
-    formula: UO2CO3IDO 2- (ad)
-    charge: -2
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: adsorbed
-    name: uranyl-carbonate-imide-dioxime
-    lin_form: UO2CO3
-
-  - 53: 
-    formula: UO2CO3HIDO - (ad)
-    charge: -1
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: adsorbed
-    name: uranyl-carbonate-imide-dioxime
-    lin_form: UO2CO3H
 
 ...
 
@@ -323,51 +259,20 @@ MassBalance:
   - delta: 
     "H2O (l)": 1
 
-- carbonate:
-  total_conc: 0.002296217
-  initial_conc: 0.002296217
-  inlet_conc: 0.002296217
-  - delta: 
-    "NaHCO3 (aq)": 1
-    "NaCO3 - (aq)": 1 
-    "Na2CO3 (aq)": 1
-    "H2CO3 (aq)": 1 
-    "HCO3 - (aq)": 1
-    "CO3 2- (aq)": 1
-    "UO2CO3 (aq)": 1
-    "UO2(CO3)2 2- (aq)": 2
-    "UO2(CO3)3 4- (aq)": 3
-    "UO2CO3AO - (ad)": 1
-    "UO2CO3(AO)2 2- (ad)": 1
-    "UO2CO3IDO 2- (ad)": 1
-    "UO2CO3HIDO - (ad)": 1
-
 - nitrate:
   total_conc: 6.38907E-05
-  initial_conc: 8.38824E-05
-  inlet_conc: 8.38824E-05
+  initial_conc: 8.38824E-09
+  inlet_conc: 8.38824E-09
   - delta:
     "HNO3 (aq)": 1
     "NO3 - (aq)": 1
     "UO2NO3 + (aq)": 1
     "UO2(NO3)2 (aq)": 2
 
-- sodium: 
-  total_conc: 0.432296217
-  initial_conc: 0.432296217
-  inlet_conc: 0.432296217
-  - delta:
-    "NaHCO3 (aq)": 1
-    "NaCO3 - (aq)": 1
-    "Na2CO3 (aq)": 2
-    "Na + (aq)": 1
-    "NaCl (aq)": 1
-    "NaOH (aq)": 1
-
 - uranyl:
   total_conc: 3.19453E-05
-  initial_conc: 4.19412E-05
-  inlet_conc: 4.19412E-05
+  initial_conc: 4.19412E-09
+  inlet_conc: 4.19412E-09
   - delta:
     "UO2NO3 + (aq)": 1
     "UO2(NO3)2 (aq)": 1
@@ -382,36 +287,14 @@ MassBalance:
     "(UO2)3(OH)5 + (aq)": 3
     "(UO2)3(OH)7 - (aq)": 3
     "(UO2)4(OH)7 + (aq)": 4
-    "UO2CO3 (aq)": 1
-    "UO2(CO3)2 2- (aq)": 1
-    "UO2(CO3)3 4- (aq)": 1
-    "UO2Cl + (aq)": 1
-    "UO2Cl2 (aq)": 1
-    "UO2Cl3 - (aq)": 1
     "UO2AO + (ad)": 1
     "UO2(AO)2 (ad)": 1
     "UO2(AO)3 - (ad)": 1
-    "UO2CO3AO - (ad)": 1
-    "UO2CO3(AO)2 2- (ad)": 1
     "UO2IDO (ad)": 1
     "UO2HIDO + (ad)": 1
     "UO2(IDO)2 2- (ad)": 1
     "UO2(HIDO)IDO - (ad)": 1
     "UO2(HIDO)2 (ad)": 1
-    "UO2CO3IDO 2- (ad)": 1
-    "UO2CO3HIDO - (ad)": 1
-
-- chlorine:
-  total_conc: 0.43
-  initial_conc: 0.43
-  inlet_conc: 0.43
-  - delta:
-    "Cl - (aq)": 1
-    "HCl (aq)": 1
-    "NaCl (aq)": 1
-    "UO2Cl + (aq)": 1
-    "UO2Cl2 (aq)": 2
-    "UO2Cl3 - (aq)": 3
 
 ...
 
@@ -425,176 +308,91 @@ EquilRxn:
 
 - rxn01:
   - stoichiometry:
-    "H2CO3 (aq)": -1
-    "HCO3 - (aq)": 1
-    "H + (aq)": 1
-
-- rxn02:
-  - stoichiometry:
-    "HCO3 - (aq)": -1
-    "CO3 2- (aq)": 1
-    "H + (aq)": 1
-
-- rxn03:
-  - stoichiometry:
-    "NaHCO3 (aq)": -1
-    "Na + (aq)": 1
-    "CO3 2- (aq)": 1
-    "H + (aq)": 1
-
-- rxn04:
-  - stoichiometry:
-    "NaCO3 - (aq)": -1
-    "Na + (aq)": 1
-    "CO3 2- (aq)": 1
-
-- rxn05:
-  - stoichiometry:
-    "NaCl (aq)": -1 
-    "Na + (aq)": 1
-    "Cl - (aq)": 1
-
-- rxn06:
-  - stoichiometry:
     "HNO3 (aq)": -1
     "NO3 - (aq)": 1
     "H + (aq)": 1
 
-- rxn07:
+- rxn02:
   - stoichiometry:
     "NO3 - (aq)": -1
     "UO2 2+ (aq)": -1
     "UO2NO3 + (aq)": 1
 
-- rxn08:
+- rxn03:
   - stoichiometry:
     "NO3 - (aq)": -2
     "UO2 2+ (aq)": -1
     "UO2(NO3)2 (aq)": 1
 
-- rxn09:
+- rxn04:
   - stoichiometry:
     "UO2 2+ (aq)": -1
     "H2O (l)": -1
     "UO2OH + (aq)": 1
     "H + (aq)": 1
 
-- rxn10:
+- rxn05:
   - stoichiometry:
     "UO2 2+ (aq)": -1
     "H2O (l)": -3
     "UO2(OH)3 - (aq)": 1
     "H + (aq)": 3
 
-- rxn11:
+- rxn06:
   - stoichiometry:
     "UO2 2+ (aq)": -2
     "H2O (l)": -2
     "(UO2)2(OH)2 2+ (aq)": 1
     "H + (aq)": 2
 
-- rxn12:
+- rxn07:
   - stoichiometry:
     "UO2 2+ (aq)": -3
     "H2O (l)": -5
     "(UO2)3(OH)5 + (aq)": 1
     "H + (aq)": 5
 
-- rxn13:
-  - stoichiometry:
-    "UO2 2+ (aq)": -1
-    "CO3 2- (aq)": -1
-    "UO2CO3 (aq)": 1
-
-- rxn14:
-  - stoichiometry:
-    "UO2 2+ (aq)": -1
-    "CO3 2- (aq)": -2
-    "UO2(CO3)2 2- (aq)": 1
-
-- rxn15:
-  - stoichiometry:
-    "UO2 2+ (aq)": -1
-    "CO3 2- (aq)": -3
-    "UO2(CO3)3 4- (aq)": 1
-
-- rxn16:
+- rxn08:
   - stoichiometry:
     "UO2 2+ (aq)": -1
     "H2O (l)": -2
     "UO2(OH)2 (aq)": 1
     "H + (aq)": 2
 
-- rxn17:
+- rxn09:
   - stoichiometry:
     "UO2 2+ (aq)": -1
     "H2O (l)": -4
     "UO2(OH)4 2- (aq)": 1
     "H + (aq)": 4
 
-- rxn18:
+- rxn10:
   - stoichiometry:
     "UO2 2+ (aq)": -2
     "H2O (l)": -1
     "(UO2)2OH 3+ (aq)": 1
     "H + (aq)": 1
 
-- rxn19:
+- rxn11:
   - stoichiometry:
     "UO2 2+ (aq)": -3
     "H2O (l)": -4
     "(UO2)3(OH)4 2+ (aq)": 1
     "H + (aq)": 4
 
-- rxn20:
+- rxn12:
   - stoichiometry:
     "UO2 2+ (aq)": -3
     "H2O (l)": -7
     "(UO2)3(OH)7 - (aq)": 1
     "H + (aq)": 7
 
-- rxn21:
+- rxn13:
   - stoichiometry:
     "UO2 2+ (aq)": -4
     "H2O (l)": -7
     "(UO2)4(OH)7 + (aq)": 1
     "H + (aq)": 7
-
-- rxn22:
-  - stoichiometry:
-    "Na2CO3 (aq)": -1
-    "Na + (aq)": 2
-    "CO3 2- (aq)": 1
-
-- rxn23:
-  - stoichiometry:
-    "HCl (aq)": -1 
-    "H + (aq)": 1
-    "Cl - (aq)": 1
-
-- rxn24:
-  - stoichiometry:
-    "NaOH (aq)": -1 
-    "Na + (aq)": 1
-    "OH - (aq)": 1
-
-- rxn25:
-  - stoichiometry:
-    "Cl - (aq)": -1
-    "UO2 2+ (aq)": -1
-    "UO2Cl + (aq)": 1
-
-- rxn26:
-  - stoichiometry:
-    "Cl - (aq)": -2
-    "UO2 2+ (aq)": -1
-    "UO2Cl2 (aq)": 1
-
-- rxn27:
-  - stoichiometry:
-    "Cl - (aq)": -3
-    "UO2 2+ (aq)": -1
-    "UO2Cl3 - (aq)": 1
 
 ...
 
@@ -607,11 +405,11 @@ include_surfcharge: true
 
 - ligand01:
   name: AO - (ad)
-  num_rxns: 7
+  num_rxns: 5
 
 - ligand02:
   name: IDO 2- (ad)
-  num_rxns: 10
+  num_rxns: 8
 
 ...
 
@@ -648,24 +446,6 @@ spec_mole: 1.45     #Units: mol/kg
     "UO2(AO)3 - (ad)": 1
 
 - rxn04:
-  logK: 15.8
-  energy: -90186.51957
-  - stoichiometry:
-    "UO2 2+ (aq)": -1
-    "CO3 2- (aq)": -1
-    "AO - (ad)": -1
-    "UO2CO3AO - (ad)": 1
-
-- rxn05:
-  logK: 25.5
-  energy: -145554.193
-  - stoichiometry:
-    "UO2 2+ (aq)": -1
-    "CO3 2- (aq)": -1
-    "AO - (ad)": -2
-    "UO2CO3(AO)2 2- (ad)": 1
-
-- rxn06:
   logK: 13.21
   energy: -75402.77997
   - stoichiometry:
@@ -673,7 +453,7 @@ spec_mole: 1.45     #Units: mol/kg
     "AO - (ad)": -1
     "HAO (ad)": 1
 
-- rxn07:
+- rxn05:
   logK: 18.99
   energy: -108395.0637
   - stoichiometry:
@@ -735,25 +515,6 @@ spec_mole: 3.3     #Units: mol/kg
     "UO2(HIDO)2 (ad)": 1
 
 - rxn06:
-  logK: 25.2
-  energy: -143841.7907
-  - stoichiometry:
-    "UO2 2+ (aq)": -1
-    "CO3 2- (aq)": -1
-    "IDO 2- (ad)": -1
-    "UO2CO3IDO 2- (ad)": 1
-
-- rxn07:
-  logK: 29.2
-  energy: -166673.821
-  - stoichiometry:
-    "UO2 2+ (aq)": -1
-    "CO3 2- (aq)": -1
-    "H + (aq)": -1
-    "IDO 2- (ad)": -1
-    "UO2CO3HIDO - (ad)": 1
-
-- rxn08:
   logK: 12.85
   energy: -73347.89725
   - stoichiometry:
@@ -761,7 +522,7 @@ spec_mole: 3.3     #Units: mol/kg
     "IDO 2- (ad)": -1
     "HIDO - (ad)": 1
 
-- rxn09:
+- rxn07:
   logK: 23.84
   energy: -136078.9004
   - stoichiometry:
@@ -769,7 +530,7 @@ spec_mole: 3.3     #Units: mol/kg
     "IDO 2- (ad)": -1
     "H2IDO (ad)": 1
 
-- rxn10:
+- rxn08:
   logK: 25.97
   energy: -148236.9565
   - stoichiometry:
