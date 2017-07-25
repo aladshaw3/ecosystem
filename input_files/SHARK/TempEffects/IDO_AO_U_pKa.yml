@@ -17,7 +17,7 @@ Scenario:
   act_fun: davies    
   const_pH: false
   pH: 7.5	
-  temp: 283.15        
+  temp: 323.15        
   dielec: 78.325     
   volume: 1.0 
   reactor: batch
@@ -344,8 +344,8 @@ MassBalance:
 
 - nitrate:
   total_conc: 6.38907E-05
-  initial_conc: 8.38824E-05
-  inlet_conc: 8.38824E-05
+  initial_conc: 6.38907E-05
+  inlet_conc: 6.38907E-05
   - delta:
     "HNO3 (aq)": 1
     "NO3 - (aq)": 1
@@ -366,8 +366,8 @@ MassBalance:
 
 - uranyl:
   total_conc: 3.19453E-05
-  initial_conc: 4.19412E-05
-  inlet_conc: 4.19412E-05
+  initial_conc: 3.19453E-05
+  inlet_conc: 3.19453E-05
   - delta:
     "UO2NO3 + (aq)": 1
     "UO2(NO3)2 (aq)": 1
@@ -630,8 +630,8 @@ spec_mole: 1.45     #Units: mol/kg
     "UO2AO + (ad)": 1
 
 - rxn02:
-  #logK: 23.7  #Slava 
-  #energy: -135279.7794    #Slava
+  logK: 23.7  
+  energy: -135279.7794    
   enthalpy: -45900
   entropy: 297
   - stoichiometry:
@@ -690,6 +690,8 @@ spec_mole: 3.3     #Units: mol/kg
 - rxn01:
   logK: 19.2
   energy: -109593.7453
+  enthalpy: -67256      #Rao
+  entropy: 143          #Rao
   - stoichiometry:
     "UO2 2+ (aq)": -1
     "IDO 2- (ad)": -1
@@ -698,6 +700,8 @@ spec_mole: 3.3     #Units: mol/kg
 - rxn02:
   logK: 23.5
   energy: -134138.1778
+  enthalpy: -75403      #Rao
+  entropy: 197          #Rao
   - stoichiometry:
     "UO2 2+ (aq)": -1
     "H + (aq)": -1
@@ -707,16 +711,20 @@ spec_mole: 3.3     #Units: mol/kg
 - rxn03:
   logK: 29.0
   energy: -165532.2195
+  enthalpy: -109480      #Rao
+  entropy: 188          #Rao
   - stoichiometry:
     "UO2 2+ (aq)": -1
     "IDO 2- (ad)": -2
     "UO2(IDO)2 2- (ad)": 1
 
 - rxn04:
-  #logK: 38.9 #Slava
-  #energy: -222041.4944   #Slava
-  enthalpy: -133000
-  entropy: 297
+  #logK: 38.9 #
+  #energy: -222041.4944   
+  #enthalpy: -133000
+  #entropy: 297
+  enthalpy: -129913   #Rao
+  entropy: 309        #Rao
   - stoichiometry:
     "UO2 2+ (aq)": -1
     "H + (aq)": -1
@@ -724,10 +732,12 @@ spec_mole: 3.3     #Units: mol/kg
     "UO2(HIDO)IDO - (ad)": 1
 
 - rxn05:
-  #logK: 44.2  #Slava 
-  #energy: -252293.9345   #Slava
-  enthalpy: -163000
-  entropy: 297
+  #logK: 44.2  
+  #energy: -252293.9345   
+  #enthalpy: -163000
+  #entropy: 297
+  enthalpy: -160761  #Rao
+  entropy: 307       #Rao
   - stoichiometry:
     "UO2 2+ (aq)": -1
     "H + (aq)": -2
@@ -756,6 +766,8 @@ spec_mole: 3.3     #Units: mol/kg
 - rxn08:
   logK: 12.85
   energy: -73347.89725
+  #enthalpy: -40551      #Rao
+  #entropy: 110          #Rao
   - stoichiometry:
     "H + (aq)": -1
     "IDO 2- (ad)": -1
@@ -764,6 +776,8 @@ spec_mole: 3.3     #Units: mol/kg
 - rxn09:
   logK: 23.84
   energy: -136078.9004
+  #enthalpy: -75853      #Rao
+  #entropy: 202          #Rao
   - stoichiometry:
     "H + (aq)": -2
     "IDO 2- (ad)": -1
@@ -772,6 +786,8 @@ spec_mole: 3.3     #Units: mol/kg
 - rxn10:
   logK: 25.97
   energy: -148236.9565
+  #enthalpy: -83240     #Rao
+  #entropy: 218         #Rao
   - stoichiometry:
     "H + (aq)": -3
     "IDO 2- (ad)": -1
