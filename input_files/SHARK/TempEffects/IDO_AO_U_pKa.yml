@@ -17,7 +17,7 @@ Scenario:
   act_fun: davies    
   const_pH: false
   pH: 7.5	
-  temp: 323.15        
+  temp: 283.15        
   dielec: 78.325     
   volume: 1.0 
   reactor: batch
@@ -631,9 +631,10 @@ spec_mole: 1.45     #Units: mol/kg
 
 - rxn02:
   logK: 23.7  
-  energy: -135279.7794    
-  enthalpy: -45900
-  entropy: 297
+  #energy: -135279.7794  #298 K 
+  energy: -70000   
+  #enthalpy: -45900	#old opt
+  #entropy: 297		#old opt
   - stoichiometry:
     "UO2 2+ (aq)": -1
     "AO - (ad)": -2
@@ -667,7 +668,8 @@ spec_mole: 1.45     #Units: mol/kg
 
 - rxn06:
   logK: 13.21
-  energy: -75402.77997
+  #energy: -75402.77997		#298 K
+  energy: -20000
   - stoichiometry:
     "H + (aq)": -1
     "AO - (ad)": -1
@@ -675,7 +677,8 @@ spec_mole: 1.45     #Units: mol/kg
 
 - rxn07:
   logK: 18.99
-  energy: -108395.0637
+  #energy: -108395.0637		#298 K
+  energy: -40000	
   - stoichiometry:
     "H + (aq)": -2
     "AO - (ad)": -1
@@ -719,10 +722,10 @@ spec_mole: 3.3     #Units: mol/kg
     "UO2(IDO)2 2- (ad)": 1
 
 - rxn04:
-  #logK: 38.9 #
-  #energy: -222041.4944   
-  #enthalpy: -133000
-  #entropy: 297
+  logK: 38.9 
+  energy: -222041.4944   
+  #enthalpy: -133000	#old opt
+  #entropy: 297		#old opt
   enthalpy: -129913   #Rao
   entropy: 309        #Rao
   - stoichiometry:
@@ -732,10 +735,10 @@ spec_mole: 3.3     #Units: mol/kg
     "UO2(HIDO)IDO - (ad)": 1
 
 - rxn05:
-  #logK: 44.2  
-  #energy: -252293.9345   
-  #enthalpy: -163000
-  #entropy: 297
+  logK: 44.2  
+  energy: -252293.9345   
+  #enthalpy: -163000	#old opt
+  #entropy: 297		#old opt
   enthalpy: -160761  #Rao
   entropy: 307       #Rao
   - stoichiometry:
@@ -766,8 +769,8 @@ spec_mole: 3.3     #Units: mol/kg
 - rxn08:
   logK: 12.85
   energy: -73347.89725
-  #enthalpy: -40551      #Rao
-  #entropy: 110          #Rao
+  enthalpy: -40551      #Rao
+  entropy: 110          #Rao
   - stoichiometry:
     "H + (aq)": -1
     "IDO 2- (ad)": -1
@@ -776,8 +779,8 @@ spec_mole: 3.3     #Units: mol/kg
 - rxn09:
   logK: 23.84
   energy: -136078.9004
-  #enthalpy: -75853      #Rao
-  #entropy: 202          #Rao
+  enthalpy: -75853      #Rao
+  entropy: 202          #Rao
   - stoichiometry:
     "H + (aq)": -2
     "IDO 2- (ad)": -1
@@ -786,8 +789,8 @@ spec_mole: 3.3     #Units: mol/kg
 - rxn10:
   logK: 25.97
   energy: -148236.9565
-  #enthalpy: -83240     #Rao
-  #entropy: 218         #Rao
+  enthalpy: -83240     #Rao
+  entropy: 218         #Rao
   - stoichiometry:
     "H + (aq)": -3
     "IDO 2- (ad)": -1
