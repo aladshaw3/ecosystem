@@ -13,10 +13,11 @@ Scenario:
 
 - sys_data:
   act_fun: davies    
-  const_pH: false	
+  const_pH: false
+  pH: 8.0	
   temp: 293.15        
   dielec: 78.325     
-  volume: 0.75      
+  volume: 0.75    
   reactor: batch
 
 - run_time:
@@ -392,11 +393,15 @@ MassBalance:
 ---
 - water:
   total_conc: 1
+  inlet_conc: 1
+  initial_conc: 1
   - delta: 
     "H2O (l)": 1
 
 - carbonate:
   total_conc: 0.002296217
+  inlet_conc: 0.002296217
+  initial_conc: 0.002296217
   - delta: 
     "NaHCO3 (aq)": 1
     "NaCO3 - (aq)": 1 
@@ -414,6 +419,8 @@ MassBalance:
 
 - nitrate:
   total_conc: 6.29313E-05
+  inlet_conc: 6.29313E-05
+  initial_conc: 6.29313E-05
   - delta:
     "HNO3 (aq)": 1
     "NO3 - (aq)": 1
@@ -422,6 +429,8 @@ MassBalance:
 
 - sodium: 
   total_conc: 0.432470304
+  inlet_conc: 0.432470304
+  initial_conc: 0.432470304
   - delta:
     "NaHCO3 (aq)": 1
     "NaCO3 - (aq)": 1
@@ -432,6 +441,8 @@ MassBalance:
 
 - uranyl:
   total_conc: 3.14657E-05
+  inlet_conc: 3.14657E-05
+  initial_conc: 3.14657E-05
   - delta:
     "UO2NO3 + (aq)": 1
     "UO2(NO3)2 (aq)": 1
@@ -467,6 +478,8 @@ MassBalance:
 
 - vanadium:
   total_conc: 5.803E-05
+  inlet_conc: 5.803E-05
+  initial_conc: 5.803E-05
   - delta:
     "VO2 + (aq)": 1
     "H3VO4 (aq)": 1 
@@ -491,6 +504,8 @@ MassBalance:
 
 - chlorine:
   total_conc: 0.43
+  inlet_conc: 0.43
+  initial_conc: 0.43
   - delta:
     "Cl - (aq)": 1
     "Cl2 (aq)": 2
@@ -844,7 +859,7 @@ ligand_charge: 0
 
 "AF1-H2IDO (ad)":
 ---
-spec_mole: 3.3       #Units: mol/kg
+spec_mole: 3.33     #Units: mol/kg
 ligand_charge: 0
 
 - rxn01:
