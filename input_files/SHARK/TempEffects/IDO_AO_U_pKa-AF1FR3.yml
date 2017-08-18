@@ -600,7 +600,7 @@ EquilRxn:
 
 "AF1":
 ---
-spec_area: 15000.0     #Units: m^2/kg
+spec_area: 1350.0     #Units: m^2/kg
 total_mass: 0.485e-5     #Units: kg
 surf_activity: uniquac
 include_surfcharge: true
