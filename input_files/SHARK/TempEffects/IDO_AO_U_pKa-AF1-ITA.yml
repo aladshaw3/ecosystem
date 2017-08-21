@@ -379,9 +379,9 @@ MassBalance:
     "UO2CO3HIDO - (ad)": 1
 
 - nitrate:
-  total_conc: 5.91E-05
-  initial_conc: 5.91E-05
-  inlet_conc: 5.91E-05
+  total_conc: 6.38907E-05
+  initial_conc: 6.38907E-05
+  inlet_conc: 6.38907E-05
   - delta:
     "HNO3 (aq)": 1
     "NO3 - (aq)": 1
@@ -401,9 +401,9 @@ MassBalance:
     "NaOH (aq)": 1
 
 - uranyl:
-  total_conc: 2.96E-05
-  initial_conc: 2.96E-05
-  inlet_conc: 2.96E-05
+  total_conc: 3.19453E-05
+  initial_conc: 3.19453E-05
+  inlet_conc: 3.19453E-05
   - delta:
     "UO2NO3 + (aq)": 1
     "UO2(NO3)2 (aq)": 1
@@ -672,8 +672,6 @@ spec_mole: 1.45     #Units: mol/kg
 - rxn02:
   logK: 23.7  
   energy: -135279.7794  	#298 K 
-  enthalpy: -45900          #opt
-  entropy: 297               #opt  
   - stoichiometry:
     "UO2 2+ (aq)": -1
     "AO - (ad)": -2
