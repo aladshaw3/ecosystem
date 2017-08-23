@@ -17,7 +17,7 @@ Scenario:
   act_fun: davies    
   const_pH: false
   pH: 7.5	
-  temp: 298.15        
+  temp: 293.15        
   dielec: 78.325     
   volume: 1.0 
   reactor: batch
@@ -672,6 +672,8 @@ spec_mole: 1.45     #Units: mol/kg
 - rxn02:
   logK: 23.7    
   energy: -135279.7794  	#298 K 
+  enthalpy: -242880      #opt
+  entropy: -329          #opt
   - stoichiometry:
     "UO2 2+ (aq)": -1
     "AO - (ad)": -2

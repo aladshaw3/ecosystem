@@ -647,7 +647,7 @@ include_surfcharge: true
 
 "38H-AO - (ad)":
 ---
-spec_mole: 4.4285     #MAX: 4.4285 mol/kg
+spec_mole: 0.246425     #MAX: 4.4285 mol/kg
 
 - rxn01:
   logK: 13.6
@@ -660,6 +660,8 @@ spec_mole: 4.4285     #MAX: 4.4285 mol/kg
 - rxn02:
   logK: 23.7  
   energy: -135279.7794  	#298 K  
+  enthalpy: -242880      #opt
+  entropy: -329          #opt
   - stoichiometry:
     "UO2 2+ (aq)": -1
     "AO - (ad)": -2
@@ -711,7 +713,7 @@ spec_mole: 4.4285     #MAX: 4.4285 mol/kg
 
 "38H-IDO 2- (ad)":
 ---
-spec_mole: 1e-6     #MAX: 2.952333 mol/kg
+spec_mole: 3.121383333     #MAX: 2.952333 mol/kg
 
 - rxn01:
   logK: 19.2
@@ -813,11 +815,11 @@ spec_mole: 1e-6     #MAX: 2.952333 mol/kg
 
 "38H-MAA - (ad)":
 ---
-spec_mole: 4.66     #lower: 4.47  upper: 4.66
+spec_mole: 5.48     #lower: 4.47  upper: 4.66
 
 - rxn01:
   logK: 4.66
-  energy: -26599.3127	   #298 K
+  energy: -26153.24	   #293 K
   - stoichiometry:
     "H + (aq)": -1
     "MAA - (ad)": -1
