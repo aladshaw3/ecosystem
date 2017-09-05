@@ -54,4 +54,4 @@ This README file outlines how to get setup using the ecosystem codes and executa
 ### How to cite this repository ###
 
 * Please refer to the citation guidelines for your particular journal or publisher for citing software. If no guidelines are available, you may cite this work as the following:
-* Ladshaw, A., Wiechert, A., Tsouris, C., Yiacoumi, S., "Ecosystem Software - A C/C++ library for environmental chemistry and adsorption," Version <"version #">, Available at https://bitbucket.org/gitecosystem/ecosystem, Accessed on Month Day, Year. 
+* Ladshaw, A., Wiechert, A., Tsouris, C., Yiacoumi, S., "Ecosystem Software - A C/C++ library for environmental chemistry and adsorption," Version <(version #)>, Available at https://bitbucket.org/gitecosystem/ecosystem, Accessed on (Month) (Day), (Year). 
