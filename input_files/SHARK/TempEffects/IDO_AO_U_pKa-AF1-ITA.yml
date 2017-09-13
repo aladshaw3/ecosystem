@@ -802,6 +802,8 @@ spec_mole: 3.3     #Units: mol/kg
 - rxn08:
   logK: 12.85
   energy: -73347.89725   #298 K
+  #enthalpy: -37800      #Rao - doesn't work
+  #entropy: 110          #Rao - doesn't work
   - stoichiometry:
     "H + (aq)": -1
     "IDO 2- (ad)": -1
@@ -810,6 +812,8 @@ spec_mole: 3.3     #Units: mol/kg
 - rxn09:
   logK: 23.84
   energy: -136078.9004   #298 K
+  #enthalpy: -73200      #Rao - doesn't work
+  #entropy: 202          #Rao - doesn't work
   - stoichiometry:
     "H + (aq)": -2
     "IDO 2- (ad)": -1
@@ -818,6 +822,8 @@ spec_mole: 3.3     #Units: mol/kg
 - rxn10:
   logK: 25.97
   energy: -148236.9565  #298 K
+  #enthalpy: -82300    #Rao - doesn't work
+  #entropy: 218         #Rao - doesn't work
   - stoichiometry:
     "H + (aq)": -3
     "IDO 2- (ad)": -1
