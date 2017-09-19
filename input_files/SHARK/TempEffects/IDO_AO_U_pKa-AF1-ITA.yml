@@ -17,7 +17,7 @@ Scenario:
   act_fun: davies    
   const_pH: false
   pH: 7.5	
-  temp: 293.15        
+  temp: 298.15        
   dielec: 78.325     
   volume: 1.0 
   reactor: batch
@@ -379,9 +379,9 @@ MassBalance:
     "UO2CO3HIDO - (ad)": 1
 
 - nitrate:
-  total_conc: 6.20478E-05
-  initial_conc: 6.20478E-05
-  inlet_conc: 6.20478E-05
+  total_conc: 6.38907E-05
+  initial_conc: 6.38907E-05
+  inlet_conc: 6.38907E-05
   - delta:
     "HNO3 (aq)": 1
     "NO3 - (aq)": 1
@@ -401,9 +401,9 @@ MassBalance:
     "NaOH (aq)": 1
 
 - uranyl:
-  total_conc: 3.10239E-05
-  initial_conc: 3.10239E-05
-  inlet_conc: 3.10239E-05
+  total_conc: 3.19453E-05
+  initial_conc: 3.19453E-05
+  inlet_conc: 3.19453E-05
   - delta:
     "UO2NO3 + (aq)": 1
     "UO2(NO3)2 (aq)": 1
@@ -637,7 +637,7 @@ EquilRxn:
 "AF1":
 ---
 spec_area: 1350.0     #Units: m^2/kg
-total_mass: 0.485e-5     #Units: kg
+total_mass: 1.506e-5     #Units: kg
 surf_activity: uniquac
 include_surfcharge: true
 
@@ -708,6 +708,8 @@ spec_mole: 1.45     #Units: mol/kg
 - rxn06:
   logK: 13.21
   energy: -75402.77997		#298 K
+  #enthalpy: -105200      
+  #entropy: -100
   - stoichiometry:
     "H + (aq)": -1
     "AO - (ad)": -1
@@ -716,6 +718,8 @@ spec_mole: 1.45     #Units: mol/kg
 - rxn07:
   logK: 18.99
   energy: -108395.0637		#298 K
+  #enthalpy: -168000     
+  #entropy: -200
   - stoichiometry:
     "H + (aq)": -2
     "AO - (ad)": -1
@@ -802,7 +806,7 @@ spec_mole: 3.3     #Units: mol/kg
 - rxn08:
   logK: 12.85
   energy: -73347.89725   #298 K
-  #enthalpy: -37800      #Rao - doesn't work
+  #enthalpy: -40600      #Rao - doesn't work
   #entropy: 110          #Rao - doesn't work
   - stoichiometry:
     "H + (aq)": -1
@@ -812,7 +816,7 @@ spec_mole: 3.3     #Units: mol/kg
 - rxn09:
   logK: 23.84
   energy: -136078.9004   #298 K
-  #enthalpy: -73200      #Rao - doesn't work
+  #enthalpy: -75900      #Rao - doesn't work
   #entropy: 202          #Rao - doesn't work
   - stoichiometry:
     "H + (aq)": -2
@@ -822,7 +826,7 @@ spec_mole: 3.3     #Units: mol/kg
 - rxn10:
   logK: 25.97
   energy: -148236.9565  #298 K
-  #enthalpy: -82300    #Rao - doesn't work
+  #enthalpy: -83200    #Rao - doesn't work
   #entropy: 218         #Rao - doesn't work
   - stoichiometry:
     "H + (aq)": -3
@@ -838,6 +842,8 @@ spec_mole: 2.0175     #lower: 0.95625  upper: 2.0175
 - rxn01:
   logK: 5.45
   energy: -31108.63825	   #298 K
+  #enthalpy: -46000      
+  #entropy: -50          
   - stoichiometry:
     "H + (aq)": -1
     "ITA 2- (ad)": -1
@@ -846,6 +852,8 @@ spec_mole: 2.0175     #lower: 0.95625  upper: 2.0175
 - rxn02:
   logK: 9.3  
   energy: -53084.46527  	#298 K 
+  #enthalpy: -82900      
+  #entropy: -100
   - stoichiometry:
     "H + (aq)": -2
     "ITA 2- (ad)": -1
