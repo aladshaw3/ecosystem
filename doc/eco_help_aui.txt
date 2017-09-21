@@ -3,7 +3,7 @@ The following message provides information on running this software with the adv
          ADVANCED USER INTERFACE (AUI)         
 -----------------------------------------------
 
-Usage: eco0 [ --run_option {opt_name} ] [ --add_option {variables} ]
+Usage: eco [ --run_option {opt_name} ] [ --add_option {variables} ]
 
 run_option
 ----------
@@ -27,19 +27,19 @@ The actual option values, i.e., path and/or input files necessary to run the spe
 
 Usage Examples
 --------------
-eco0 -t lark
+eco -t lark
 
 	Directs the program to run the LARK tests for the linear algebra library
 
-eco0 --version
+eco --version
 
 	Directs the program to print out the version information for the software
 
-eco0 --execute gsta_opt -i input/data.txt
+eco --execute gsta_opt -i input/data.txt
 
 	Directs the program to run the GSTA optimization routine on a set of data located in a sub-directory called input in the file named data.txt
 
-eco0 -e scopsowl -p path/to/input/ --input scene.txt sorbent.txt comp.txt sorbate.txt
+eco -e scopsowl -p path/to/input/ --input scene.txt sorbent.txt comp.txt sorbate.txt
 
 	Directs the program to run a SCOPSOWL simulation given a series of input files all located in the common path denoted by path/to/input/ with the names and extenstions of the files given after the -i flag
 

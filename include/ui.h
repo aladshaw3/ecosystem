@@ -51,9 +51,9 @@
 #define UI_HPP_
 
 /// Macro expansion for executable current version number
-#define ECO_VERSION "0.0 alpha"
+#define ECO_VERSION "1.0.0"
 /// Macro expansion for executable current name
-#define ECO_EXECUTABLE "eco0"
+#define ECO_EXECUTABLE "eco"
 
 /// Valid options available upon execution of the code.
 /** Enumeration of valid options for executing the ecosystem code.

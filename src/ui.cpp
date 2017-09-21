@@ -17,7 +17,7 @@ void aui_help()
 	puts("The following message provides information on running this software with the advanced ui...\n");
 	puts("         ADVANCED USER INTERFACE (AUI)         ");
 	puts("-----------------------------------------------\n");
-	puts("Usage: eco0 [ --run_option {opt_name} ] [ --add_option {variables} ]\n");
+	puts("Usage: eco [ --run_option {opt_name} ] [ --add_option {variables} ]\n");
 	
 	puts("run_option");
 	puts("----------");
@@ -42,11 +42,11 @@ void aui_help()
 	
 	puts("Usage Examples");
 	puts("--------------");
-	puts("eco0 -t lark\n\n\tDirects the program to run the LARK tests for the linear algebra library\n");
-	puts("eco0 --version\n\n\tDirects the program to print out the version information for the software\n");
-	puts("eco0 --execute gsta_opt -i input/data.txt\n");
+	puts("eco -t lark\n\n\tDirects the program to run the LARK tests for the linear algebra library\n");
+	puts("eco --version\n\n\tDirects the program to print out the version information for the software\n");
+	puts("eco --execute gsta_opt -i input/data.txt\n");
 	puts("\tDirects the program to run the GSTA optimization routine on a set of data located in a sub-directory called input in the file named data.txt\n");
-	puts("eco0 -e scopsowl -p path/to/input/ --input scene.txt sorbent.txt comp.txt sorbate.txt\n");
+	puts("eco -e scopsowl -p path/to/input/ --input scene.txt sorbent.txt comp.txt sorbate.txt\n");
 	puts("\tDirects the program to run a SCOPSOWL simulation given a series of input files all located in the common path denoted by path/to/input/ with the names and extenstions of the files given after the -i flag\n");
 	
 	puts("Usage Notes");

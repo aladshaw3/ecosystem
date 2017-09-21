@@ -3,7 +3,7 @@
  *	\brief Main Function
  *	\details User input provided at time of execution is used to call the ui functions
  *  \author Austin Ladshaw
- *	\version 0.0 beta
+ *	\version 1.0.0
  *	\date 08/25/2015
  *	\copyright This software was designed and built at the Georgia Institute
  *             of Technology by Austin Ladshaw for PhD research in the area

@@ -9,7 +9,7 @@ CXXFLAGS= -I$(IDIR) -Wwrite-strings -Wconversion-null -std=c++11 -fpermissive
 
 ODIR=obj
 
-DBG=eco0-dbg
+DBG=eco-dbg
 
 _DEPS = config.h lmmin.h lmcurve.h dogfish.h eel.h egret.h error.h \
 	finch.h flock.h gsta_opt.h lark.h macaw.h magpie.h mola.h \

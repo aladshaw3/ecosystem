@@ -13,7 +13,7 @@ INSDIR=/usr/local/bin
 #mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 #current_dir := $(notdir $(patsubst %/,%,$(dir $(mkfile_path))))
 
-EXE=eco0
+EXE=eco
 LIB=libeco.so
 
 _DEPS = config.h lmmin.h lmcurve.h dogfish.h eel.h egret.h error.h \
