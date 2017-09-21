@@ -85,6 +85,8 @@ double Eval_2ndDerivative_PolyBasisFunc(int i, double x);
 
 double Eval_ApproximatePolySolution(Matrix<double> &c, double x);
 
+double Gradient_Integral_PolyBasis(int i, int j, double lower, double upper);
+
 double Laplacian_Integral_PolyBasis(int i, int j, double lower, double upper);
 
 double Overlap_Integral_PolyBasis(int i, int j, double lower, double upper);
@@ -102,6 +104,23 @@ typedef struct
 } VPA_Test_DATA;
 
 int Eval_VPA_Test_Residuals(const Matrix<double> &x, Matrix<double> &F, const void *data);
+
+typedef struct
+{
+	int m;						//Size of the basis
+	int N;						//Size of the problem
+	double v;					//Velocity parameter
+	double L;					//Length of the domain
+	double D;					//Diffusivity parameter
+	double uo;					//Boundary value
+	double dt;					//Size of the time step
+	Matrix<double> cnp1;		//Coefficient Matrix for n+1 time level (size = m)
+	Matrix<double> cn;			//Coefficient Matrix for n time level (size = m)
+	Matrix<double> xnp1;		//Non-linear variable matrix for n+1 level (size = N) (x(0) = lambda_0 && x(1) = lambda_1)
+	Matrix<double> xn;			//Non-linear variable matrix for n level (size = N) (x(0) = lambda_0 && x(1) = lambda_1)
+} VPA_Test02_DATA;
+
+int Eval_VPA_Test02_Residuals(const Matrix<double> &x, Matrix<double> &F, const void *data);
 
 double PolyBasis_2D(int i, int j, double x, double y);
 

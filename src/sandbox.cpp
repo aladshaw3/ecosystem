@@ -207,6 +207,23 @@ double Eval_ApproximatePolySolution(Matrix<double> &c, double x)
 	return sum;
 }
 
+//Gradient integration
+double Gradient_Integral_PolyBasis(int i, int j, double lower, double upper)
+{
+	double Bij = 0.0;
+	
+	if (j == 0)
+		return Bij;
+	else
+	{
+		double exp = (double)(i+j);
+		double pre = (double)(j);
+		Bij = pre * ((pow(upper, exp)/exp) - (pow(lower, exp)/exp));
+	}
+	
+	return Bij;
+}
+
 //Laplacian integration
 double Laplacian_Integral_PolyBasis(int i, int j, double lower, double upper)
 {
@@ -235,7 +252,7 @@ double Overlap_Integral_PolyBasis(int i, int j, double lower, double upper)
 	return Oij;
 }
 
-//Residuals for Variational Polynomial Approximation method
+//Residuals for Variational Polynomial Approximation method Test 1
 int Eval_VPA_Test_Residuals(const Matrix<double> &x, Matrix<double> &F, const void *data)
 {
 	int success = 0;
@@ -264,6 +281,45 @@ int Eval_VPA_Test_Residuals(const Matrix<double> &x, Matrix<double> &F, const vo
 		}
 		F.edit(i+2, 0, Lap_sum - ((dat->k/dat->D)*Over_sum) + (x(0,0)*Eval_PolyBasisFunc(i, 0.0)) + (x(1,0)*Eval_1stDerivative_PolyBasisFunc(i, dat->L)));
 	}
+	
+	return success;
+}
+
+//Residuals for Variational Polynomial Approximation method Test 2
+int Eval_VPA_Test02_Residuals(const Matrix<double> &x, Matrix<double> &F, const void *data)
+{
+	int success = 0;
+	VPA_Test02_DATA *dat = (VPA_Test02_DATA *) data;
+	
+	//Note: x(0) = lambda_0 and x(1) = lambda_1
+	
+	//First two residuals are derivative of lambda for constraints
+	double res0 = 0.0, res1 = 0.0;
+	for (int i=0; i<dat->m; i++)
+	{
+		res0 = res0 + (x(i+2,0)*Eval_PolyBasisFunc(i, 0.0));
+		res1 = res1 + (x(i+2,0)*Eval_1stDerivative_PolyBasisFunc(i, dat->L));
+	}
+	F.edit(0, 0, res0 - dat->uo);
+	F.edit(1, 0, res1);
+	
+	double Grad_sum = 0.0, Over_sum_np1 = 0.0, Over_sum_n = 0.0, Lap_sum = 0.0;
+	for (int i=0; i<dat->m; i++)
+	{
+		Grad_sum = 0.0;
+		Lap_sum = 0.0;
+		Over_sum_np1 = 0.0;
+		Over_sum_n = 0.0;
+		for (int j=0; j<dat->m; j++)
+		{
+			Grad_sum = Grad_sum + (x(j+2,0)*Gradient_Integral_PolyBasis(i, j, 0.0, dat->L));
+			Over_sum_np1 = Over_sum_np1 + (x(j+2,0)*Overlap_Integral_PolyBasis(i, j, 0.0, dat->L));
+			Over_sum_n = Over_sum_n + (dat->xn(j+2,0)*Overlap_Integral_PolyBasis(i, j, 0.0, dat->L));
+			Lap_sum = Lap_sum + (x(j+2,0)*Laplacian_Integral_PolyBasis(i, j, 0.0, dat->L));
+		}
+		F.edit(i+2, 0, Over_sum_np1 - Over_sum_n + (dat->dt*dat->v*Grad_sum) - (dat->dt*dat->D*Lap_sum) + (x(0,0)*Eval_PolyBasisFunc(i, 0.0)) + (x(1,0)*Eval_1stDerivative_PolyBasisFunc(i, dat->L)));
+	}
+
 	
 	return success;
 }
@@ -694,8 +750,71 @@ int RUN_SANDBOX()
 		norm = (b1 - A1*x1).norm();
 		std::cout << i+1 << "\t" << norm << std::endl;
 	}
+	std::cout << "\n\n";
 	
 	// ------------------------------------- END Gauss-Seidel Example -----------------------------------------
+	
+	// ----------------------------- Example of Varitational Polynomial Approximation ------------------------------
+	
+	std::cout << "Solve {du/dt + v*du/dx = 0} Approximately with a constrained variational method and implicit integration...\n\n";
+	
+	VPA_Test02_DATA vpa_dat02;
+	vpa_dat02.m = 10; //Polynomial order - this may be a bad basis set for advection problems
+	vpa_dat02.N = vpa_dat02.m + 2;
+	vpa_dat02.L = 1.0;
+	vpa_dat02.D = 0.2;
+	vpa_dat02.v = 1.0;
+	vpa_dat02.dt = 0.01;
+	vpa_dat02.uo = 1.0;
+	vpa_dat02.cnp1.set_size(vpa_dat02.m, 1);
+	vpa_dat02.xnp1.set_size(vpa_dat02.N, 1);
+	
+	//Initial Conditions
+	vpa_dat02.cn.set_size(vpa_dat02.m, 1);
+	vpa_dat02.xn.set_size(vpa_dat02.N, 1);
+	vpa_dat02.cn.zeros();
+	vpa_dat02.cnp1.zeros();
+	vpa_dat02.xn.zeros();
+	vpa_dat02.xnp1.zeros();
+	
+	PJFNK_DATA vpa_newton02;
+	vpa_newton02.linear_solver = QR;
+	vpa_newton02.LineSearch = true;
+	vpa_newton02.nl_tol_abs = 1e-4;
+	vpa_newton02.nl_tol_rel = 1e-6;
+	
+	double end_time = 1.0;
+	double current_time = 0.0;
+	do
+	{
+		success = pjfnk(Eval_VPA_Test02_Residuals, NULL, vpa_dat02.xnp1, &vpa_newton02, &vpa_dat02, &vpa_dat02);
+	
+		for (int i=0; i<vpa_dat02.m; i++)
+		{
+			vpa_dat02.cnp1.edit(i, 0, vpa_dat02.xnp1(i+2,0));
+		}
+	
+		x = 0.0;
+		dx = vpa_dat02.L/20.0;
+		std::cout << "Time = " << current_time+vpa_dat02.dt << "\n";
+		std::cout << "x\tu(x,t)\n";
+		for (int i=0; i<21; i++)
+		{
+			x = ((double)i*dx);
+			std::cout << x << "\t" << Eval_ApproximatePolySolution(vpa_dat02.cnp1,x) << std::endl;
+		}
+		std::cout << "\n";
+		
+		//Reset n = n+1 level
+		vpa_dat02.cn = vpa_dat02.cnp1;
+		vpa_dat02.xn = vpa_dat02.xnp1;
+		vpa_dat02.xnp1.zeros(); //Note: these are zeroed out because the method seems more efficient this way
+		current_time += vpa_dat02.dt;
+	} while (current_time < end_time);
+	
+	
+	// --------------------------------------------- END VPA Example -----------------------------------------------
+
 
 	std::cout << "\nEnd SANDBOX\n\n";
 	
