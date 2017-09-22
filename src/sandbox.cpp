@@ -361,6 +361,22 @@ double Overlap_Integral_TrigBasis(int i, int j, double lower, double upper)
 {
 	double Oij = 0.0;
 	
+	/*
+		Cases:
+		(1) - (4) i & j > 0
+		(5) - (6) i=0 & j>0
+		(7) - (8) i>0 & j=0
+	 
+		(1) i even & j even
+		(2) i even & j odd
+		(3) i odd  & j even
+		(4) i odd  & j odd
+	    (5) i=0    & j even
+		(6) i=0    & j odd
+		(7) i even & j=0
+		(8) i odd  & j=0
+	 */
+	
 	return Oij;
 }
 
