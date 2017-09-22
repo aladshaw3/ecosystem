@@ -114,11 +114,26 @@ typedef struct
 	double D;					//Diffusivity parameter
 	double uo;					//Boundary value
 	double dt;					//Size of the time step
+	double beta;				//Param to change b/t CN and imp (1 = imp; 0.5 = CN)
 	Matrix<double> cnp1;		//Coefficient Matrix for n+1 time level (size = m)
 	Matrix<double> cn;			//Coefficient Matrix for n time level (size = m)
 	Matrix<double> xnp1;		//Non-linear variable matrix for n+1 level (size = N) (x(0) = lambda_0 && x(1) = lambda_1)
 	Matrix<double> xn;			//Non-linear variable matrix for n level (size = N) (x(0) = lambda_0 && x(1) = lambda_1)
 } VPA_Test02_DATA;
+
+double Eval_TrigBasisFunc(int i, double x);
+
+double Eval_1stDerivative_TrigBasisFunc(int i, double x);
+
+double Eval_2ndDerivative_TrigBasisFunc(int i, double x);
+
+double Eval_ApproximateTrigSolution(Matrix<double> &c, double x);
+
+double Gradient_Integral_TrigBasis(int i, int j, double lower, double upper);
+
+double Laplacian_Integral_TrigBasis(int i, int j, double lower, double upper);
+
+double Overlap_Integral_TrigBasis(int i, int j, double lower, double upper);
 
 int Eval_VPA_Test02_Residuals(const Matrix<double> &x, Matrix<double> &F, const void *data);
 
