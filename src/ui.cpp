@@ -71,6 +71,7 @@ void aui_help()
 	puts("(10) SCOPSOWL (Simultaneously Coupled Objects for Pore and Surface diffusion Operations With Linear systems)");
 	puts("(11) SHARK (Speciation-object Hierarchy for Aqueous Reaction Kinetics)");
 	puts("(12) SKUA (Surface Kinetics for Uptake by Adsorption)\n");
+	puts("(13) DOVE (Dynamic Ode solver with Various Established methods)\n");
 	
 	puts("        CURRENTLY AVAILABLE EXECUTABLES        ");
 	puts("-----------------------------------------------\n");
@@ -132,6 +133,9 @@ void bui_help()
 	
 	puts("(12) SKUA (Surface Kinetics for Uptake by Adsorption)\n");
 	puts("\tThis test runs an example problem for gasoues, multi-species adsorption via a surface diffusion mechanism spherical adsorbent pellet. The SKUA object is coupled to the MAGPIE object, which resolves the multi-species adsorption equilibria between gas and solid phases. There is an executable available for the user to interface with to run simulations and optimizations.\n");
+	
+	puts("(13) DOVE (Dynamic Ode solver with Various Established methods)\n");
+	puts("\tThis test runs an example problem for solving Ordinary Differential Equations. There is an output file associated with this test. However, this kernel is generally not used by itself. Instead, the user will interface with this kernel by writing his/her own code to represent the system of ODEs being solved.\n");
 	
 	puts("        CURRENTLY AVAILABLE EXECUTABLES        ");
 	puts("-----------------------------------------------\n");
@@ -296,6 +300,11 @@ bool valid_test_string(const std::string &input, UI_DATA *ui_dat)
 	else if (allLower(input) == "trajectory")
 	{
 		ui_dat->option = trajectory;
+		valid_input = true;
+	}
+	else if (allLower(input) == "dove")
+	{
+		ui_dat->option = dove;
 		valid_input = true;
 	}
 	else
@@ -631,6 +640,7 @@ bool valid_input_tests(UI_DATA *ui_dat)
 	std::cout << "(4)  FINCH       (5)  LARK         (6)  MACAW\n";
 	std::cout << "(7)  MOLA        (8)  MONKFISH     (9)  SANDBOX\n";
 	std::cout << "(10) SCOPSOWL    (11) SHARK        (12) SKUA\n";
+	std::cout << "(13) DOVE\n";
 	std::cout << "\nChoice: ";
 	std::cin >> ui_dat->user_input[0];
 	std::cout << std::endl;
@@ -742,6 +752,13 @@ bool valid_input_tests(UI_DATA *ui_dat)
 			case 12:
 			{
 				ui_dat->option = skua;
+				valid_input = true;
+				break;
+			}
+				
+			case 13:
+			{
+				ui_dat->option = dove;
 				valid_input = true;
 				break;
 			}
@@ -980,6 +997,10 @@ int run_test(UI_DATA *ui_dat)
 			
 		case trajectory:
 			success = Run_Trajectory();
+			break;
+			
+		case dove:
+			success = DOVE_TESTS();
 			break;
 			
 		default:

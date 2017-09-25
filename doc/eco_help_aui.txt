@@ -64,6 +64,7 @@ Usage Notes
 (10) SCOPSOWL (Simultaneously Coupled Objects for Pore and Surface diffusion Operations With Linear systems)
 (11) SHARK (Speciation-object Hierarchy for Aqueous Reaction Kinetics)
 (12) SKUA (Surface Kinetics for Uptake by Adsorption)
+(13) DOVE (Dynamic Ode solver with Various Established methods)
 
         CURRENTLY AVAILABLE EXECUTABLES        
 -----------------------------------------------

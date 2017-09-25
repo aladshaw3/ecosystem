@@ -9,6 +9,7 @@
  *			-----------------------
  *			macaw.h	egret.h	finch.h	lark.h	skua.h	scopsowl.h
  *			gsta_opt.h	magpie.h	skua_opt.h	scopsowl_opt.h	yaml_wrapper.h
+ *			dove.h
  *
  *  \author Austin Ladshaw
  *	\date 04/28/2014
@@ -32,5 +33,6 @@
 #include "skua_opt.h"
 #include "scopsowl_opt.h"
 #include "yaml_wrapper.h"
+#include "dove.h"
 
 #endif

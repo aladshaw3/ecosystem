@@ -121,6 +121,9 @@ typedef struct
 	Matrix<double> xn;			//Non-linear variable matrix for n level (size = N) (x(0) = lambda_0 && x(1) = lambda_1)
 } VPA_Test02_DATA;
 
+/// Enumeration for the list of sine functions for the basis
+typedef enum {SIN, COS, CONST} trig_type;
+
 double Eval_TrigBasisFunc(int i, double x);
 
 double Eval_1stDerivative_TrigBasisFunc(int i, double x);
@@ -135,7 +138,11 @@ double Laplacian_Integral_TrigBasis(int i, int j, double lower, double upper);
 
 double Overlap_Integral_TrigBasis(int i, int j, double lower, double upper);
 
+double TrigBasis_Integrals(trig_type type_i, trig_type type_j, int n, int m, double lower, double upper);
+
 int Eval_VPA_Test02_Residuals(const Matrix<double> &x, Matrix<double> &F, const void *data);
+
+int Eval_VPA_Test03_Residuals(const Matrix<double> &x, Matrix<double> &F, const void *data);
 
 double PolyBasis_2D(int i, int j, double x, double y);
 

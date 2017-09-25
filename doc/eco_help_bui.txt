@@ -55,6 +55,10 @@ The following message provides information on running this software with the bas
 
 	This test runs an example problem for gasoues, multi-species adsorption via a surface diffusion mechanism spherical adsorbent pellet. The SKUA object is coupled to the MAGPIE object, which resolves the multi-species adsorption equilibria between gas and solid phases. There is an executable available for the user to interface with to run simulations and optimizations.
 
+(13) DOVE (Dynamic Ode solver with Various Established methods)
+
+	This test runs an example problem for solving Ordinary Differential Equations. There is an output file associated with this test. However, this kernel is generally not used by itself. Instead, the user will interface with this kernel by writing his/her own code to represent the system of ODEs being solved.
+
         CURRENTLY AVAILABLE EXECUTABLES        
 -----------------------------------------------
 
