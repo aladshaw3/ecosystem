@@ -2589,7 +2589,7 @@ int QRsolve( int (*matvec) (const Matrix<double>& x, Matrix<double> &Ax, const v
 		mError(nullptr_func);
 		return -1;
 	}
-	if (b.rows() < 2)
+	if (b.rows() < 1)
 	{
 		success = -1;
 		mError(matrix_too_small);
@@ -2827,7 +2827,7 @@ int backtrackLineSearch( int (*feval) (const Matrix<double>& x, Matrix<double> &
 		mError(nullptr_func);
 		return -1;
 	}
-	if (Fkp1.rows() < 2 || xkp1.rows() < 2 || pk.rows() < 2)
+	if (Fkp1.rows() < 1 || xkp1.rows() < 1 || pk.rows() < 1)
 	{
 		mError(matrix_too_small);
 		return -1;
@@ -3030,12 +3030,14 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 		pjfnk_dat->funeval = (*res);
 	}
 	pjfnk_dat->precon = (*precon);
-	if (x.rows() < 2)
+	if (x.rows() < 1)
 	{
 		success = -1;
       	mError(matrix_too_small);
       	return success;
 	}
+	if (x.rows() == 1)
+		pjfnk_dat->linear_solver = QR;
 	pjfnk_dat->res_data = res_data;
 	pjfnk_dat->precon_data = precon_data;
 	pjfnk_dat->nl_iter = 0;
