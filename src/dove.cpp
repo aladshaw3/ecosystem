@@ -23,11 +23,14 @@ Dove::Dove()
 	dt_old = 0.0;
 	time_end = 0.0;
 	time = 0.0;
+	dtmin = sqrt(DBL_EPSILON);
+	dtmax = 100.0;
 	int_type = IMPLICIT;
 	int_sub = BE;
 	timestepper = CONSTANT;
 	Output = nullptr;
 	num_func = 1;
+	Converged = false;
 	user_data = NULL;
 	residual = residual_BE;
 	precon = NULL;
@@ -73,6 +76,24 @@ void Dove::set_timestep(double d)
 		this->dt = sqrt(DBL_EPSILON);
 	else
 		this->dt = d;
+}
+
+//Set min dt
+void Dove::set_timestepmin(double dmin)
+{
+	if (dmin <= sqrt(DBL_EPSILON))
+		this->dtmin = sqrt(DBL_EPSILON);
+	else
+		this->dtmin = dmin;
+}
+
+//Set max dt
+void Dove::set_timestepmax(double dmax)
+{
+	if (dmax <= sqrt(DBL_EPSILON))
+		this->dtmax = sqrt(DBL_EPSILON);
+	else
+		this->dtmax = dmax;
 }
 
 //Set the end time
@@ -253,6 +274,24 @@ double Dove::getCurrentTime()
 	return this->time;
 }
 
+//Return dtmin
+double Dove::getMinTimeStep()
+{
+	return this->dtmin;
+}
+
+//Return dtmax
+double Dove::getMaxTimeStep()
+{
+	return this->dtmax;
+}
+
+//Return bool for convergence
+bool Dove::hasConverged()
+{
+	return this->Converged;
+}
+
 //Eval user function i
 double Dove::Eval_Func(int i, const Matrix<double>& u)
 {
@@ -278,12 +317,21 @@ int Dove::solve_timestep()
 	if (this->int_type == IMPLICIT)
 	{
 		success = pjfnk(this->residual, this->precon, this->unp1, &this->newton_dat, this, this);
+		this->Converged = this->newton_dat.Converged;
 	}
 	else
 	{
 		
 	}
 	return success;
+}
+
+//Update solution states
+void Dove::update_states()
+{
+	this->unm1 = this->un;
+	this->un = this->unp1;
+	this->dt_old = this->dt;
 }
 
 /*

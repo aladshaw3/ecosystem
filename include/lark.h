@@ -546,6 +546,7 @@ typedef struct
 	bool L_Output = false;		///< True = print Linear messages to console
 	bool LineSearch = false;	///< True = use Backtracking Linesearch for global convergence
 	bool Bounce = false;		///< True = allow Linesearch to go outside local well, False = Strict local convergence
+	bool Converged = false;		///< True = solution has converged, False = solution has not converged
 	
 	Matrix<double> F;					///< Stored fuction evaluation at x (also the residual)
 	Matrix<double> Fv;					///< Stored function evaluation at x+eps*v

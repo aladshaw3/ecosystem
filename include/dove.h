@@ -84,6 +84,8 @@ public:
 	
 	void set_numfunc(int i);							///< Set the number of functions to solve and reserve necessary space
 	void set_timestep(double d);						///< Set the value of the time step
+	void set_timestepmin(double dmin);					///< Set the value of the minimum time step
+	void set_timestepmax(double dmax);					///< Set the value of the maximum time step
 	void set_endtime(double e);							///< Set the value of the end time
 	void set_integrationtype(integrate_subtype type);	///< Set the type of integration scheme to use
 	void set_timestepper(timestep_type type);			///< Set the time stepper scheme type
@@ -107,12 +109,17 @@ public:
 	double getTimeStepOld();						///< Return the old time step
 	double getEndTime();							///< Return value of end time
 	double getCurrentTime();						///< Return the value of current time
+	double getMinTimeStep();						///< Return the value of the minimum time step
+	double getMaxTimeStep();						///< Return the value of the maximum time step
+	bool hasConverged();							///< Returns state of convergence
 	
 	double Eval_Func(int i, const Matrix<double>& u);	///< Evaluate user function i at given u matrix
 	double Eval_Coeff(int i, const Matrix<double>& u);	///< Evaluate user time coefficient function i at given u matrix
 	double Eval_Jacobi(int i, int j, const Matrix<double>& u);	///< Evaluate user jacobian function for (i,j) at given u matrix
 	
 	int solve_timestep();							///< Function to solve a single time step
+	
+	void update_states();							///< Function to update the stateful information
 	
 protected:
 	Matrix<double> un;								///< Matrix for nth level solution vector
@@ -122,11 +129,14 @@ protected:
 	double dt_old;									///< Time step between n and n-1 time levels
 	double time_end;								///< Time on which to end the ODE simulations
 	double time;									///< Value of current time
+	double dtmin;									///< Minimum allowable time step
+	double dtmax;									///< Maximum allowable time step
 	integrate_type int_type;						///< Type of time integration to use
 	integrate_subtype int_sub;						///< Subtype of time integration scheme to use
 	timestep_type timestepper;						///< Type of time stepper to be used
 	FILE *Output;									///< File to where simulation results will be place
 	int num_func;									///< Number of functions in the system of ODEs
+	bool Converged;									///< Boolean to hold information on whether or not last step converged
 	
 	Matrix<double (*) (const Matrix<double> &u, const void *data)> user_func;	///< Matrix object for user defined rate functions
 	Matrix<double (*) (const Matrix<double> &u, const void *data)> user_coeff;	///< Matrix object for user defined time coefficients (optional)
@@ -157,14 +167,6 @@ double default_coeff(const Matrix<double> &u, const void *data);
 
 /// Default Jacobian element function
 double default_jacobi(const Matrix<double> &u, const void *data);
-
-double f0(const Matrix<double> &x, const void *res_data);
-
-double f1(const Matrix<double> &x, const void *res_data);
-
-int test_matvec(const Matrix<double> &x, Matrix<double> &Mx, const void *data);
-
-int test_res(const Matrix<double> &x, Matrix<double> &Mx, const void *data);
 
 /// Test function for DOVE kernel
 /** This function sets up and solves a test problem for DOVE. It is callable from the UI. */
