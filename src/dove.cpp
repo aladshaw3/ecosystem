@@ -23,6 +23,7 @@ Dove::Dove()
 	dt_old = 0.0;
 	time_end = 0.0;
 	time = 0.0;
+	time_old = 0.0;
 	dtmin = sqrt(DBL_EPSILON);
 	dtmax = 100.0;
 	int_type = IMPLICIT;
@@ -30,15 +31,19 @@ Dove::Dove()
 	timestepper = CONSTANT;
 	Output = nullptr;
 	num_func = 1;
-	Converged = false;
+	Converged = true;
 	user_data = NULL;
 	residual = residual_BE;
 	precon = NULL;
+	newton_dat.LineSearch = true;
+	newton_dat.NL_Output = false;
+	DoveOutput = false;
 }
 
 //Default destructor
 Dove::~Dove()
 {
+	this->user_jacobi.clear();
 	if (this->Output != nullptr)
 		fclose(Output);
 }
@@ -54,7 +59,7 @@ void Dove::set_numfunc(int i)
 		this->unm1.set_size(1, 1);
 		this->user_func.set_size(1, 1);
 		this->user_coeff.set_size(1, 1);
-		this->user_jacobi.set_size(1, 1);
+		this->user_jacobi.reserve(1);
 		this->num_func = 1;
 	}
 	else
@@ -64,7 +69,10 @@ void Dove::set_numfunc(int i)
 		this->unm1.set_size(i, 1);
 		this->user_func.set_size(i, 1);
 		this->user_coeff.set_size(i, 1);
-		this->user_jacobi.set_size(i, i);
+		if (i <= 32)
+			this->user_jacobi.reserve(i*i);
+		else
+			this->user_jacobi.reserve(i*32);
 		this->num_func = i;
 	}
 }
@@ -118,10 +126,12 @@ void Dove::set_integrationtype(integrate_subtype type)
 			
 		case FE:
 			this->int_type = EXPLICIT;
+			this->residual = nullptr;
 			break;
 			
 		case CN:
 			this->int_type = IMPLICIT;
+			this->residual = residual_CN;
 			break;
 			
 		case BDF2:
@@ -130,6 +140,11 @@ void Dove::set_integrationtype(integrate_subtype type)
 			
 		case RK4:
 			this->int_type = EXPLICIT;
+			break;
+			
+		default:
+			this->int_type = IMPLICIT;
+			this->residual = residual_BE;
 			break;
 	}
 }
@@ -156,6 +171,73 @@ void Dove::set_userdata(const void *data)
 void Dove::set_initialcondition(int i, double ic)
 {
 	this->un.edit(i, 0, ic);
+	this->unp1.edit(i, 0, ic);
+	this->unm1.edit(i, 0, ic);
+}
+
+//Set output conditions for Dove
+void Dove::set_output(bool choice)
+{
+	this->DoveOutput = choice;
+}
+
+//Set the default coeffs
+void Dove::set_defaultCoeffs()
+{
+	for (int i=0; i<this->num_func; i++)
+		this->registerCoeff(i, default_coeff);
+}
+
+//Set the default jacobi
+void Dove::set_defaultJacobis()
+{
+	for (int i=0; i<this->num_func; i++)
+		this->registerJacobi(i, i, default_jacobi);
+}
+
+//Set NL output
+void Dove::set_NonlinearOutput(bool choice)
+{
+	this->newton_dat.NL_Output = choice;
+}
+
+//Set L output
+void Dove::set_LinearOutput(bool choice)
+{
+	this->newton_dat.L_Output = choice;
+}
+
+//Set linear method
+void Dove::set_LinearMethod(krylov_method choice)
+{
+	this->newton_dat.linear_solver = choice;
+}
+
+//Set the line search method
+void Dove::set_LineSearchMethod(linesearch_type choice)
+{
+	switch (choice)
+	{
+		case BT:
+			this->newton_dat.LineSearch = true;
+			this->newton_dat.Bounce = false;
+			break;
+			
+		case ABT:
+			this->newton_dat.LineSearch = true;
+			this->newton_dat.Bounce = true;
+			break;
+			
+		case NO_LS:
+			this->newton_dat.LineSearch = false;
+			this->newton_dat.Bounce = false;
+			break;
+			
+		default:
+			this->newton_dat.LineSearch = false;
+			this->newton_dat.Bounce = false;
+			break;
+	}
 }
 
 //Register user function
@@ -182,16 +264,14 @@ void Dove::registerCoeff(int i, double (*coeff) (const Matrix<double> &u, const 
 //Register jacobians
 void Dove::registerJacobi(int i, int j, double (*jac) (const Matrix<double> &u, const void *data) )
 {
+	int key = (i*this->num_func)+j;
 	if ((*jac) == NULL)
 	{
-		if (i == j)
-			this->user_jacobi.edit(i, j, default_coeff);
-		else
-			this->user_jacobi.edit(i, j, default_jacobi);
+		this->user_jacobi[key] = default_jacobi;
 	}
 	else
 	{
-		this->user_jacobi.edit(i, j, jac);
+		this->user_jacobi[key] = jac;
 	}
 }
 
@@ -205,7 +285,48 @@ void Dove::print_header()
 		system("mkdir output");
 		this->Output = fopen("output/DOVE_Result.txt", "w+");
 	}
-	fprintf(this->Output,"\nTime");
+	fprintf(this->Output,"\nIntegration type =\t");
+	switch (this->int_type)
+	{
+		case IMPLICIT:
+			fprintf(this->Output,"IMPLICIT\n");
+			break;
+			
+		case EXPLICIT:
+			fprintf(this->Output,"EXPLICIT\n");
+			break;
+			
+		default:
+			fprintf(this->Output,"IMPLICIT\n");
+			break;
+	}
+	fprintf(this->Output,"Integration scheme =\t");
+	switch (this->int_sub)
+	{
+		case BE:
+			fprintf(this->Output,"Backward-Euler\n");
+			break;
+			
+		case FE:
+			fprintf(this->Output,"Forward-Euler\n");
+			break;
+			
+		case CN:
+			fprintf(this->Output,"Crank-Nicholson\n");
+			break;
+			
+		case BDF2:
+			fprintf(this->Output,"Backward-Differentiation-Formula-2\n");
+			break;
+			
+		case RK4:
+			fprintf(this->Output,"Runge-Kutta-4\n");
+			break;
+			
+		default:
+			break;
+	}
+	fprintf(this->Output,"Time");
 	for (int i=0; i<this->num_func; i++)
 		fprintf(this->Output,"\tu[%i]",i);
 	fprintf(this->Output,"\n");
@@ -217,6 +338,15 @@ void Dove::print_newresult()
 	fprintf(this->Output,"%.6g",this->time);
 	for (int i=0; i<this->num_func; i++)
 		fprintf(this->Output,"\t%.6g",this->unp1(i,0));
+	fprintf(this->Output,"\n");
+}
+
+//Print result
+void Dove::print_result()
+{
+	fprintf(this->Output,"%.6g",this->time);
+	for (int i=0; i<this->num_func; i++)
+		fprintf(this->Output,"\t%.6g",this->un(i,0));
 	fprintf(this->Output,"\n");
 }
 
@@ -274,6 +404,12 @@ double Dove::getCurrentTime()
 	return this->time;
 }
 
+//Return time old
+double Dove::getOldTime()
+{
+	return this->time_old;
+}
+
 //Return dtmin
 double Dove::getMinTimeStep()
 {
@@ -292,6 +428,47 @@ bool Dove::hasConverged()
 	return this->Converged;
 }
 
+//Compute next time step
+double Dove::ComputeTimeStep()
+{
+	double step = 0.0;
+	if (this->Converged == true)
+	{
+		switch (this->timestepper)
+		{
+			case CONSTANT:
+				step = this->dt;
+				break;
+				
+			case ADAPTIVE:
+				this->dt = 1.5 * this->dt;
+				if (this->dt >= this->dtmax)
+					this->dt = this->dtmax;
+				break;
+				
+			default:
+				step = this->dt;
+				break;
+		}
+	}
+	else
+	{
+		if (this->timestepper == CONSTANT)
+		{
+			this->dtmax = this->dt;
+			this->timestepper = ADAPTIVE;
+		}
+		this->dt = 0.5 * this->dt;
+		if (this->dt <= this->dtmin)
+			this->dt = this->dtmin;
+	}
+	if (this->time_end >= this->dt + this->time_old)
+		step = this->dt;
+	else
+		step = this->time_end - this->time_old;
+	return step;
+}
+
 //Eval user function i
 double Dove::Eval_Func(int i, const Matrix<double>& u)
 {
@@ -307,7 +484,15 @@ double Dove::Eval_Coeff(int i, const Matrix<double>& u)
 //Eval user time coefficient function i
 double Dove::Eval_Jacobi(int i, int j, const Matrix<double>& u)
 {
-	return this->user_jacobi(i,j)(u,this->user_data);
+	std::unordered_map<int, double (*) (const Matrix<double> &u, const void *data)>::iterator it = this->user_jacobi.find((i*this->num_func)+j);
+	if (it == this->user_jacobi.end())
+	{
+		return default_jacobi(u,this->user_data);
+	}
+	else
+	{
+		return it->second(u,this->user_data);
+	}
 }
 
 //Function to solve a single timestep
@@ -321,7 +506,19 @@ int Dove::solve_timestep()
 	}
 	else
 	{
-		
+		switch (this->int_sub)
+		{
+			case FE:
+				success = this->solve_FE();
+				break;
+				
+			case RK4:
+				break;
+				
+			default:
+				success = this->solve_FE();
+				break;
+		}
 	}
 	return success;
 }
@@ -332,6 +529,61 @@ void Dove::update_states()
 	this->unm1 = this->un;
 	this->un = this->unp1;
 	this->dt_old = this->dt;
+	this->time_old = this->time;
+}
+
+//Update the time step
+void Dove::update_timestep()
+{
+	this->dt = this->ComputeTimeStep();
+	this->time = this->time_old + this->dt;
+}
+
+//Reset all states
+void Dove::reset_all()
+{
+	this->time = 0.0;
+	this->time_old = 0.0;
+	this->dt_old = 0.0;
+	this->Converged = true;
+}
+
+//Function to solve all states and print output to file
+int Dove::solve_all()
+{
+	int success = 0;
+	this->reset_all();
+	this->print_header();
+	this->print_result();
+	do
+	{
+		this->update_timestep();
+		if (this->DoveOutput == true)
+			std::cout << "Dove solving time " << this->time << " at a time step of " << this->dt << ". Please wait...\n\n";
+		success = this->solve_timestep();
+		if (success != 0)
+		{
+			mError(simulation_fail);
+			return -1;
+		}
+		this->print_newresult();
+		this->update_states();
+	} while (this->time_end > (this->time+this->dtmin));
+	
+	return success;
+}
+
+//Function to solve with Forward-Euler
+int Dove::solve_FE()
+{
+	int success = 0;
+	
+	for (int i=0; i<this->num_func; i++)
+	{
+		this->unp1.edit(i, 0, ((this->Eval_Coeff(i, this->un)*this->un(i,0) + (this->getTimeStep()*this->Eval_Func(i, this->un))))/this->Eval_Coeff(i, this->un) );
+	}
+	
+	return success;
 }
 
 /*
@@ -348,6 +600,20 @@ int residual_BE(const Matrix<double> &u, Matrix<double> &Res, const void *data)
 	for (int i=0; i<dat->getNumFunc(); i++)
 	{
 		Res(i,0) = (dat->Eval_Coeff(i, u)*u(i,0)) - (dat->Eval_Coeff(i, dat->getCurrentU())*dat->getCurrentU()(i,0)) - (dat->getTimeStep()*dat->Eval_Func(i, u));
+	}
+	
+	return success;
+}
+
+//Function for implicit-CN method residual
+int residual_CN(const Matrix<double> &u, Matrix<double> &Res, const void *data)
+{
+	int success = 0;
+	Dove *dat = (Dove *) data;
+	
+	for (int i=0; i<dat->getNumFunc(); i++)
+	{
+		Res(i,0) = (dat->Eval_Coeff(i, u)*u(i,0)) - (dat->Eval_Coeff(i, dat->getCurrentU())*dat->getCurrentU()(i,0)) - (0.5*dat->getTimeStep()*dat->Eval_Func(i, u)) - (0.5*dat->getTimeStep()*dat->Eval_Func(i, dat->getCurrentU()));
 	}
 	
 	return success;
@@ -388,6 +654,11 @@ int test_res(const Matrix<double> &x, Matrix<double> &Mx, const void *data)
 	Mx(0,0) = 5.0*x(0,0)*x(0,0) - 1.0;
 	return 0;
 }
+
+double first_order_decay(const Matrix<double> &u, const void *res_data)
+{
+	return -u(0,0);
+}
 // -------------------- End temporary testing --------------------------
 
 //Test function
@@ -396,10 +667,6 @@ int DOVE_TESTS()
 	int success = 0;
 	std::cout << "\nThis test is currently blank\n";
 	
-	//std::vector<double (*) (const Matrix<double> &x, const void *res_data)> list_func;
-	//list_func.resize(2);
-	//list_func[0] = f0;
-	//list_func[1] = f1;
 	Matrix<double (*) (const Matrix<double> &x, const void *res_data)> list_func;
 	list_func.set_size(2, 1);
 	list_func.edit(0, 0, f0);
@@ -451,6 +718,30 @@ int DOVE_TESTS()
 	newtest.LineSearch = true;
 	success = pjfnk(test_res, NULL, x, &newtest, NULL, NULL);
 	newtest.x.Display("nonlin x"); //PJFNK now works with a single equation!!
+	
+	
+	Dove test01;
+	test01.set_numfunc(1);
+	test01.registerFunction(0, first_order_decay);
+	test01.set_defaultJacobis();
+	test01.set_defaultCoeffs();
+	test01.set_timestep(0.05);
+	test01.set_endtime(1.0);
+	test01.set_timestepper(CONSTANT);
+	test01.set_NonlinearOutput(false);
+	test01.set_output(true);
+	
+	test01.set_initialcondition(0, 1);
+	test01.set_integrationtype(BE);
+	test01.solve_all();
+	
+	test01.set_initialcondition(0, 1);
+	test01.set_integrationtype(FE);
+	test01.solve_all();
+	
+	test01.set_initialcondition(0, 1);
+	test01.set_integrationtype(CN);
+	test01.solve_all();
 	
 	
 	return success;

@@ -1,6 +1,6 @@
 /*!
  *  \file dove.h
- *	\brief Dynamic Ode solver with Various Established methods
+ *	\brief Dynamic ODE solver with Various Established methods
  *	\details This file creates objects and subroutines for solving systems of Ordinary Differential
  *			Equations using various established methods. The basic idea is that a user will create
  *			a function to calculate all the right-hand sides of a system of ODEs, then pass that
@@ -23,6 +23,7 @@
 #include "macaw.h"
 #include "lark.h"
 #include "yaml_wrapper.h"
+#include <unordered_map>        //Line to allow use of unordered_map structure
 
 #ifndef DOVE_HPP_
 #define DOVE_HPP_
@@ -49,6 +50,14 @@ typedef enum {BE, FE, CN, BDF2, RK4} integrate_subtype;
 	\param CONSTANT time stepper will use a constant dt value for all time steps.
 	\param ADAPTIVE time stepper will adjust the time step according to simulation success.*/
 typedef enum {CONSTANT, ADAPTIVE} timestep_type;
+
+/// Enumeration for the list of valid line search methods
+/** Type of line search method to be used by Dove.
+ 
+	\param BT uses a basic backtracking linesearch algorithm.
+	\param ABT uses an adaptive backtracking linesearch method.
+	\param NO_LS no line searching will be used. */
+typedef enum {BT, ABT, NO_LS} linesearch_type;
 
 /// Dynamic ODE-solver with Various Established methods (DOVE) object
 /** This class structure creates a C++ object that can be used to solve coupled systems of 
@@ -92,6 +101,17 @@ public:
 	void set_outputfile(FILE *file);					///< Set the output file for simulation results
 	void set_userdata(const void *data);				///< Set the user defined data structure
 	void set_initialcondition(int i, double ic);		///< Set the initial condition of variable i to value ic
+	void set_output(bool choice);						///< Set the value of DoveOutput (True if you want console messages)
+	
+	//Set some default conditions
+	void set_defaultCoeffs();							///< Set all coeff functions to the default
+	void set_defaultJacobis();							///< Set all Jacobians to the default (only does the diagonals!)
+	
+	// Set conditions for PJFNK
+	void set_NonlinearOutput(bool choice);				///< Sets the non-linear output information according to user choice
+	void set_LinearOutput(bool choice);					///< Sets the linear output information according to user choice
+	void set_LinearMethod(krylov_method choice);		///< Sets the linear solver method to user choice
+	void set_LineSearchMethod(linesearch_type choice);	///< Sets the line search method to the user choice
 	
 	void registerFunction(int i, double (*func) (const Matrix<double> &u, const void *data) );		///< Register the ith user function
 	void registerCoeff(int i, double (*coeff) (const Matrix<double> &u, const void *data) );		///< Register the ith time coeff function
@@ -99,6 +119,7 @@ public:
 	
 	void print_header();								///< Function to print out a header to output file
 	void print_newresult();								///< Function to print out the new result of n+1 time level
+	void print_result();								///< Function to print out the old result of n time level
 	
 	Matrix<double>& getCurrentU();					///< Return reference to the n level solution
 	Matrix<double>& getOldU();						///< Return reference to the n-1 level solution
@@ -109,17 +130,35 @@ public:
 	double getTimeStepOld();						///< Return the old time step
 	double getEndTime();							///< Return value of end time
 	double getCurrentTime();						///< Return the value of current time
+	double getOldTime();							///< Return the value of the previous time
 	double getMinTimeStep();						///< Return the value of the minimum time step
 	double getMaxTimeStep();						///< Return the value of the maximum time step
 	bool hasConverged();							///< Returns state of convergence
+	
+	double ComputeTimeStep();						///< Returns a computed value for the next time step
 	
 	double Eval_Func(int i, const Matrix<double>& u);	///< Evaluate user function i at given u matrix
 	double Eval_Coeff(int i, const Matrix<double>& u);	///< Evaluate user time coefficient function i at given u matrix
 	double Eval_Jacobi(int i, int j, const Matrix<double>& u);	///< Evaluate user jacobian function for (i,j) at given u matrix
 	
 	int solve_timestep();							///< Function to solve a single time step
-	
 	void update_states();							///< Function to update the stateful information
+	void update_timestep();							///< Function to update the timestep for the simulation
+	void reset_all();								///< Reset all the states
+	
+	/// Function to solve the system of equations and print results to file (returns 0 on success)
+	/** This function will iteratively go through and solve the system for all time steps until either failure occurs or 
+		the final time has been reached. Output will be placed into the user's output file or a default output file. This
+		function will assume that the initial conditions have already been set for each variable by the user. */
+	int solve_all();
+	
+	/// Solver function for explicit-FE method
+	/** This function will solve the Dove system of equations using the standard Forward-Euler method. In this
+	 function, DOVE will call the user defined rate functions and use that information at the previous time
+	 level to solve for the next time level directly.
+	 
+	 unp1[i] = (Rn[i]*un[i] + dt*func[i](unp1)) / Rnp1[i]   */
+	int solve_FE();
 	
 protected:
 	Matrix<double> un;								///< Matrix for nth level solution vector
@@ -129,6 +168,7 @@ protected:
 	double dt_old;									///< Time step between n and n-1 time levels
 	double time_end;								///< Time on which to end the ODE simulations
 	double time;									///< Value of current time
+	double time_old;								///< Value of previous time
 	double dtmin;									///< Minimum allowable time step
 	double dtmax;									///< Maximum allowable time step
 	integrate_type int_type;						///< Type of time integration to use
@@ -137,10 +177,11 @@ protected:
 	FILE *Output;									///< File to where simulation results will be place
 	int num_func;									///< Number of functions in the system of ODEs
 	bool Converged;									///< Boolean to hold information on whether or not last step converged
+	bool DoveOutput;								///< Boolean to determine whether or not to print Dove messages to console
 	
 	Matrix<double (*) (const Matrix<double> &u, const void *data)> user_func;	///< Matrix object for user defined rate functions
 	Matrix<double (*) (const Matrix<double> &u, const void *data)> user_coeff;	///< Matrix object for user defined time coefficients (optional)
-	Matrix<double (*) (const Matrix<double> &u, const void *data)> user_jacobi;	///< Matrix object for user defined Jacobian elements (optional)
+	std::unordered_map<int, double (*) (const Matrix<double> &u, const void *data)> user_jacobi;///< Map for user defined Jacobian elements (optional)
 	const void *user_data;														///< Pointer for user defined data structure
 	
 	PJFNK_DATA newton_dat;							///< Data structure for the PJFNK iterative method
@@ -155,12 +196,21 @@ private:
 
 /// Residual function for implicit-BE method
 /** This function will be passed to PJFNK as the residual function for the Dove object. In this function,
- DOVE will call the user defined rate functions to create a vector of residuals at the current iterate. That
- information will be passed into the pjfnk function (see lark.h) to iteratively solve the system of equations
- at a single time step.
+	DOVE will call the user defined rate functions to create a vector of residuals at the current iterate. That
+	information will be passed into the pjfnk function (see lark.h) to iteratively solve the system of equations
+	at a single time step.
  
- Res[i] = Rnp1[i]*unp1[i] - Rn[i]*un[i] - dt*func[i](unp1)   */
+	Res[i] = Rnp1[i]*unp1[i] - Rn[i]*un[i] - dt*func[i](unp1)   */
 int residual_BE(const Matrix<double> &u, Matrix<double> &Res, const void *data);
+
+/// Residual function for implicit-CN method
+/** This function will be passed to PJFNK as the residual function for the Dove object. In this function,
+	DOVE will call the user defined rate functions to create a vector of residuals at the current iterate. That
+	information will be passed into the pjfnk function (see lark.h) to iteratively solve the system of equations
+	at a single time step.
+ 
+	Res[i] = Rnp1[i]*unp1[i] - Rn[i]*un[i] - 0.5*dt*func[i](unp1) - 0.5*dt*func[i](un)   */
+int residual_CN(const Matrix<double> &u, Matrix<double> &Res, const void *data);
 
 /// Default time coefficient function
 double default_coeff(const Matrix<double> &u, const void *data);
