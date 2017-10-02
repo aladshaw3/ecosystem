@@ -23,7 +23,7 @@
 #include "macaw.h"
 #include "lark.h"
 #include "yaml_wrapper.h"
-#include <unordered_map>        //Line to allow use of unordered_map structure
+//#include <unordered_map>        //Line to allow use of unordered_map structure
 
 #ifndef DOVE_HPP_
 #define DOVE_HPP_
@@ -113,9 +113,9 @@ public:
 	void set_LinearMethod(krylov_method choice);		///< Sets the linear solver method to user choice
 	void set_LineSearchMethod(linesearch_type choice);	///< Sets the line search method to the user choice
 	
-	void registerFunction(int i, double (*func) (const Matrix<double> &u, const void *data) );		///< Register the ith user function
-	void registerCoeff(int i, double (*coeff) (const Matrix<double> &u, const void *data) );		///< Register the ith time coeff function
-	void registerJacobi(int i, int j, double (*jac) (const Matrix<double> &u, const void *data) );	///< Register the i-jth element of jacobian
+	void registerFunction(int i, double (*func) (const Matrix<double> &u, double t, const void *data) );		///< Register the ith user function
+	void registerCoeff(int i, double (*coeff) (const Matrix<double> &u, double t, const void *data) );		///< Register the ith time coeff function
+	void registerJacobi(int i, int j, double (*jac) (const Matrix<double> &u, double t, const void *data) );	///< Register the i-jth element of jacobian
 	
 	void print_header();								///< Function to print out a header to output file
 	void print_newresult();								///< Function to print out the new result of n+1 time level
@@ -131,15 +131,16 @@ public:
 	double getEndTime();							///< Return value of end time
 	double getCurrentTime();						///< Return the value of current time
 	double getOldTime();							///< Return the value of the previous time
+	double getOlderTime();							///< Return the value of the older previous time
 	double getMinTimeStep();						///< Return the value of the minimum time step
 	double getMaxTimeStep();						///< Return the value of the maximum time step
 	bool hasConverged();							///< Returns state of convergence
 	
 	double ComputeTimeStep();						///< Returns a computed value for the next time step
 	
-	double Eval_Func(int i, const Matrix<double>& u);	///< Evaluate user function i at given u matrix
-	double Eval_Coeff(int i, const Matrix<double>& u);	///< Evaluate user time coefficient function i at given u matrix
-	double Eval_Jacobi(int i, int j, const Matrix<double>& u);	///< Evaluate user jacobian function for (i,j) at given u matrix
+	double Eval_Func(int i, const Matrix<double>& u, double t);	///< Evaluate user function i at given u matrix
+	double Eval_Coeff(int i, const Matrix<double>& u, double t);	///< Evaluate user time coefficient function i at given u matrix
+	double Eval_Jacobi(int i, int j, const Matrix<double>& u, double t);	///< Evaluate user jacobian function for (i,j) at given u matrix
 	
 	int solve_timestep();							///< Function to solve a single time step
 	void update_states();							///< Function to update the stateful information
@@ -169,6 +170,7 @@ protected:
 	double time_end;								///< Time on which to end the ODE simulations
 	double time;									///< Value of current time
 	double time_old;								///< Value of previous time
+	double time_older;								///< Value of older previous time
 	double dtmin;									///< Minimum allowable time step
 	double dtmax;									///< Maximum allowable time step
 	integrate_type int_type;						///< Type of time integration to use
@@ -179,9 +181,17 @@ protected:
 	bool Converged;									///< Boolean to hold information on whether or not last step converged
 	bool DoveOutput;								///< Boolean to determine whether or not to print Dove messages to console
 	
-	Matrix<double (*) (const Matrix<double> &u, const void *data)> user_func;	///< Matrix object for user defined rate functions
-	Matrix<double (*) (const Matrix<double> &u, const void *data)> user_coeff;	///< Matrix object for user defined time coefficients (optional)
-	std::unordered_map<int, double (*) (const Matrix<double> &u, const void *data)> user_jacobi;///< Map for user defined Jacobian elements (optional)
+	Matrix<double (*) (const Matrix<double> &u, double t, const void *data)> user_func;	///< Matrix object for user defined rate functions
+	Matrix<double (*) (const Matrix<double> &u, double t, const void *data)> user_coeff;	///< Matrix object for user defined time coefficients (optional)
+	/// A vector of Maps for user defined Jacobian elements (optional)
+	/** This structure creates a Sparse Matrix of functions whose sparcity pattern is unknown at creation.
+		Each "vector" index denotes a row in the full matrix. In each row, there is a map of the non-zero
+		elements. Doing the mapping in this way allows for the sparcity of the matrix to easily change 
+		while also allowing for relatively fast access to the non-zero elements. 
+	 
+		\note An unordered map would allow for faster access of specific elements, but may be slower when
+		iterating through that map. May consider changing to unordered map in the future. */
+	std::vector< std::map<int, double (*) (const Matrix<double> &u, double t, const void *data)> > user_jacobi;
 	const void *user_data;														///< Pointer for user defined data structure
 	
 	PJFNK_DATA newton_dat;							///< Data structure for the PJFNK iterative method
@@ -212,11 +222,26 @@ int residual_BE(const Matrix<double> &u, Matrix<double> &Res, const void *data);
 	Res[i] = Rnp1[i]*unp1[i] - Rn[i]*un[i] - 0.5*dt*func[i](unp1) - 0.5*dt*func[i](un)   */
 int residual_CN(const Matrix<double> &u, Matrix<double> &Res, const void *data);
 
+/// Residual function for implicit-BDF2 method
+/** This function will be passed to PJFNK as the residual function for the Dove object. In this function,
+	DOVE will call the user defined rate functions to create a vector of residuals at the current iterate. That
+	information will be passed into the pjfnk function (see lark.h) to iteratively solve the system of equations
+	at a single time step. Note that the first time step will be the same as the BE method, then each subsequent 
+	time step will be made as a function of un+1, un, and un-1 time levels.
+ 
+	Res[i] = an*Rnp1[i]*unp1[i] - bn*Rn[i]*un[i] + cn*Rnnm1[i]*unm1[i] - dt*func[i](unp1) 
+ 
+	where an = (1+2*rn)/(1+rn) ; bn = (1+rn) ; cn = (rn*rn)/(1+rn) 
+	and where rn = dt/dt_old
+ 
+	\note if rn = 0 (i.e. for first step) then this is same as BE method*/
+int residual_BDF2(const Matrix<double> &u, Matrix<double> &Res, const void *data);
+
 /// Default time coefficient function
-double default_coeff(const Matrix<double> &u, const void *data);
+double default_coeff(const Matrix<double> &u, double t, const void *data);
 
 /// Default Jacobian element function
-double default_jacobi(const Matrix<double> &u, const void *data);
+double default_jacobi(const Matrix<double> &u, double t, const void *data);
 
 /// Test function for DOVE kernel
 /** This function sets up and solves a test problem for DOVE. It is callable from the UI. */

@@ -24,6 +24,7 @@ Dove::Dove()
 	time_end = 0.0;
 	time = 0.0;
 	time_old = 0.0;
+	time_older = 0.0;
 	dtmin = sqrt(DBL_EPSILON);
 	dtmax = 100.0;
 	int_type = IMPLICIT;
@@ -59,7 +60,8 @@ void Dove::set_numfunc(int i)
 		this->unm1.set_size(1, 1);
 		this->user_func.set_size(1, 1);
 		this->user_coeff.set_size(1, 1);
-		this->user_jacobi.reserve(1);
+		//this->user_jacobi.reserve(1);
+		this->user_jacobi.resize(1);
 		this->num_func = 1;
 	}
 	else
@@ -69,10 +71,11 @@ void Dove::set_numfunc(int i)
 		this->unm1.set_size(i, 1);
 		this->user_func.set_size(i, 1);
 		this->user_coeff.set_size(i, 1);
-		if (i <= 32)
-			this->user_jacobi.reserve(i*i);
-		else
-			this->user_jacobi.reserve(i*32);
+		//if (i <= 32)
+		//	this->user_jacobi.reserve(i*i);
+		//else
+		//	this->user_jacobi.reserve(i*32);
+		this->user_jacobi.resize(i);
 		this->num_func = i;
 	}
 }
@@ -136,6 +139,7 @@ void Dove::set_integrationtype(integrate_subtype type)
 			
 		case BDF2:
 			this->int_type = IMPLICIT;
+			this->residual = residual_BDF2;
 			break;
 			
 		case RK4:
@@ -241,7 +245,7 @@ void Dove::set_LineSearchMethod(linesearch_type choice)
 }
 
 //Register user function
-void Dove::registerFunction(int i, double (*func) (const Matrix<double> &u, const void *data) )
+void Dove::registerFunction(int i, double (*func) (const Matrix<double> &u, double t, const void *data) )
 {
 	if ((*func) == NULL)
 	{
@@ -253,7 +257,7 @@ void Dove::registerFunction(int i, double (*func) (const Matrix<double> &u, cons
 }
 
 //Register time coeff functions
-void Dove::registerCoeff(int i, double (*coeff) (const Matrix<double> &u, const void *data) )
+void Dove::registerCoeff(int i, double (*coeff) (const Matrix<double> &u, double t, const void *data) )
 {
 	if ((*coeff) == NULL)
 		this->user_coeff.edit(i, 0, default_coeff);
@@ -262,16 +266,15 @@ void Dove::registerCoeff(int i, double (*coeff) (const Matrix<double> &u, const 
 }
 
 //Register jacobians
-void Dove::registerJacobi(int i, int j, double (*jac) (const Matrix<double> &u, const void *data) )
+void Dove::registerJacobi(int i, int j, double (*jac) (const Matrix<double> &u, double t, const void *data) )
 {
-	int key = (i*this->num_func)+j;
 	if ((*jac) == NULL)
 	{
-		this->user_jacobi[key] = default_jacobi;
+		this->user_jacobi[i][j] = default_jacobi;
 	}
 	else
 	{
-		this->user_jacobi[key] = jac;
+		this->user_jacobi[i][j] = jac;
 	}
 }
 
@@ -410,6 +413,12 @@ double Dove::getOldTime()
 	return this->time_old;
 }
 
+//Return older time
+double Dove::getOlderTime()
+{
+	return this->time_older;
+}
+
 //Return dtmin
 double Dove::getMinTimeStep()
 {
@@ -470,28 +479,28 @@ double Dove::ComputeTimeStep()
 }
 
 //Eval user function i
-double Dove::Eval_Func(int i, const Matrix<double>& u)
+double Dove::Eval_Func(int i, const Matrix<double>& u, double t)
 {
-	return this->user_func(i,0)(u,this->user_data);
+	return this->user_func(i,0)(u,t,this->user_data);
 }
 
 //Eval user time coefficient function i
-double Dove::Eval_Coeff(int i, const Matrix<double>& u)
+double Dove::Eval_Coeff(int i, const Matrix<double>& u, double t)
 {
-	return this->user_coeff(i,0)(u,this->user_data);
+	return this->user_coeff(i,0)(u,t,this->user_data);
 }
 
 //Eval user time coefficient function i
-double Dove::Eval_Jacobi(int i, int j, const Matrix<double>& u)
+double Dove::Eval_Jacobi(int i, int j, const Matrix<double>& u, double t)
 {
-	std::unordered_map<int, double (*) (const Matrix<double> &u, const void *data)>::iterator it = this->user_jacobi.find((i*this->num_func)+j);
-	if (it == this->user_jacobi.end())
+	std::map<int, double (*) (const Matrix<double> &u, double t, const void *data)>::iterator it = this->user_jacobi[i].find(j);
+	if (it == this->user_jacobi[i].end())
 	{
-		return default_jacobi(u,this->user_data);
+		return default_jacobi(u,t,this->user_data);
 	}
 	else
 	{
-		return it->second(u,this->user_data);
+		return it->second(u,t,this->user_data);
 	}
 }
 
@@ -529,6 +538,7 @@ void Dove::update_states()
 	this->unm1 = this->un;
 	this->un = this->unp1;
 	this->dt_old = this->dt;
+	this->time_older = this->time_old;
 	this->time_old = this->time;
 }
 
@@ -544,6 +554,7 @@ void Dove::reset_all()
 {
 	this->time = 0.0;
 	this->time_old = 0.0;
+	this->time_older = 0.0;
 	this->dt_old = 0.0;
 	this->Converged = true;
 }
@@ -580,7 +591,7 @@ int Dove::solve_FE()
 	
 	for (int i=0; i<this->num_func; i++)
 	{
-		this->unp1.edit(i, 0, ((this->Eval_Coeff(i, this->un)*this->un(i,0) + (this->getTimeStep()*this->Eval_Func(i, this->un))))/this->Eval_Coeff(i, this->un) );
+		this->unp1.edit(i, 0, ((this->Eval_Coeff(i, this->un, this->time_old)*this->un(i,0) + (this->getTimeStep()*this->Eval_Func(i, this->un, this->time_old))))/this->Eval_Coeff(i, this->un, this->time_old) );
 	}
 	
 	return success;
@@ -599,7 +610,7 @@ int residual_BE(const Matrix<double> &u, Matrix<double> &Res, const void *data)
 	
 	for (int i=0; i<dat->getNumFunc(); i++)
 	{
-		Res(i,0) = (dat->Eval_Coeff(i, u)*u(i,0)) - (dat->Eval_Coeff(i, dat->getCurrentU())*dat->getCurrentU()(i,0)) - (dat->getTimeStep()*dat->Eval_Func(i, u));
+		Res(i,0) = (dat->Eval_Coeff(i, u, dat->getCurrentTime())*u(i,0)) - (dat->Eval_Coeff(i, dat->getCurrentU(),dat->getOldTime())*dat->getCurrentU()(i,0)) - (dat->getTimeStep()*dat->Eval_Func(i, u,dat->getCurrentTime()));
 	}
 	
 	return success;
@@ -613,32 +624,55 @@ int residual_CN(const Matrix<double> &u, Matrix<double> &Res, const void *data)
 	
 	for (int i=0; i<dat->getNumFunc(); i++)
 	{
-		Res(i,0) = (dat->Eval_Coeff(i, u)*u(i,0)) - (dat->Eval_Coeff(i, dat->getCurrentU())*dat->getCurrentU()(i,0)) - (0.5*dat->getTimeStep()*dat->Eval_Func(i, u)) - (0.5*dat->getTimeStep()*dat->Eval_Func(i, dat->getCurrentU()));
+		Res(i,0) = (dat->Eval_Coeff(i, u, dat->getCurrentTime())*u(i,0)) - (dat->Eval_Coeff(i, dat->getCurrentU(), dat->getOldTime())*dat->getCurrentU()(i,0)) - (0.5*dat->getTimeStep()*dat->Eval_Func(i, u, dat->getCurrentTime())) - (0.5*dat->getTimeStep()*dat->Eval_Func(i, dat->getCurrentU(), dat->getOldTime()));
+	}
+	
+	return success;
+}
+
+//Function for implicit-BDF2 method residual
+int residual_BDF2(const Matrix<double> &u, Matrix<double> &Res, const void *data)
+{
+	int success = 0;
+	Dove *dat = (Dove *) data;
+	
+	double rn = 0.0;
+	if (dat->getOldTime() > 0.0)
+		rn = dat->getTimeStep()/dat->getTimeStepOld();
+	
+	double an, bn, cn;
+	an = (1.0 + (2.0*rn)) / (1.0 + rn);
+	bn = (1.0 + rn);
+	cn = (rn*rn)/(1.0+rn);
+	
+	for (int i=0; i<dat->getNumFunc(); i++)
+	{
+		Res(i,0) = (an*dat->Eval_Coeff(i, u, dat->getCurrentTime())*u(i,0)) - (bn*dat->Eval_Coeff(i, dat->getCurrentU(), dat->getOldTime())*dat->getCurrentU()(i,0)) + (cn*dat->Eval_Coeff(i, dat->getOldU(), dat->getOlderTime())*dat->getOldU()(i,0)) - (dat->getTimeStep()*dat->Eval_Func(i, u, dat->getCurrentTime()));
 	}
 	
 	return success;
 }
 
 /// Default time coefficient function
-double default_coeff(const Matrix<double> &u, const void *data)
+double default_coeff(const Matrix<double> &u, double t, const void *data)
 {
 	return 1.0;
 }
 
 /// Default Jacobian element function
-double default_jacobi(const Matrix<double> &u, const void *data)
+double default_jacobi(const Matrix<double> &u, double t, const void *data)
 {
 	return 0.0;
 }
 
 
 // -------------------- Begin temporary testing --------------------------
-double f0(const Matrix<double> &x, const void *res_data)
+double f0(const Matrix<double> &x, double t, const void *res_data)
 {
 	return x(0,0) + 1;
 }
 
-double f1(const Matrix<double> &x, const void *res_data)
+double f1(const Matrix<double> &x, double t, const void *res_data)
 {
 	return x(1,0) - x(0,0);
 }
@@ -655,7 +689,7 @@ int test_res(const Matrix<double> &x, Matrix<double> &Mx, const void *data)
 	return 0;
 }
 
-double first_order_decay(const Matrix<double> &u, const void *res_data)
+double first_order_decay(const Matrix<double> &u, double t, const void *res_data)
 {
 	return -u(0,0);
 }
@@ -667,7 +701,7 @@ int DOVE_TESTS()
 	int success = 0;
 	std::cout << "\nThis test is currently blank\n";
 	
-	Matrix<double (*) (const Matrix<double> &x, const void *res_data)> list_func;
+	Matrix<double (*) (const Matrix<double> &x, double t, const void *res_data)> list_func;
 	list_func.set_size(2, 1);
 	list_func.edit(0, 0, f0);
 	list_func.edit(1, 0, f1);
@@ -678,8 +712,8 @@ int DOVE_TESTS()
 	xtest.edit(1, 0, 2);
 	xtest.Display("x");
 	
-	std::cout << "f0 = " << list_func(0,0)(xtest,NULL) << std::endl;
-	std::cout << "f1 = " << list_func(1,0)(xtest,NULL) << std::endl;
+	std::cout << "f0 = " << list_func(0,0)(xtest,0,NULL) << std::endl;
+	std::cout << "f1 = " << list_func(1,0)(xtest,0,NULL) << std::endl;
 	
 	Dove test;
 	FILE *testfile;
@@ -725,22 +759,29 @@ int DOVE_TESTS()
 	test01.registerFunction(0, first_order_decay);
 	test01.set_defaultJacobis();
 	test01.set_defaultCoeffs();
-	test01.set_timestep(0.05);
 	test01.set_endtime(1.0);
-	test01.set_timestepper(CONSTANT);
+	test01.set_timestepper(ADAPTIVE);
 	test01.set_NonlinearOutput(false);
 	test01.set_output(true);
 	
 	test01.set_initialcondition(0, 1);
+	test01.set_timestep(0.05);
 	test01.set_integrationtype(BE);
 	test01.solve_all();
 	
 	test01.set_initialcondition(0, 1);
+	test01.set_timestep(0.05);
 	test01.set_integrationtype(FE);
 	test01.solve_all();
 	
 	test01.set_initialcondition(0, 1);
+	test01.set_timestep(0.05);
 	test01.set_integrationtype(CN);
+	test01.solve_all();
+	
+	test01.set_initialcondition(0, 1);
+	test01.set_timestep(0.05);
+	test01.set_integrationtype(BDF2);
 	test01.solve_all();
 	
 	
