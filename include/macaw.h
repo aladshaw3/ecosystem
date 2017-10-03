@@ -76,6 +76,8 @@ public:
 	Matrix operator-(const Matrix& M);		///< Operator to subtract this matrix and matrix M and return the new matrix result
 	Matrix operator*(const T);				///< Operator to multiply this matrix by a scalar T return the new matrix result
 	Matrix operator/(const T);				///< Operator to divide this matrix by a scalar T and return the new matrix result
+	Matrix operator+(const T);				///< Operator to add this matrix to a scalar T and return the new matrix result
+	Matrix operator-(const T);				///< Operator to subtract this matrix to a scalar T and return the new matrix result
 	Matrix operator*(const Matrix& M);		///< Operator to multiply this matrix and matrix M and return the new matrix result
 	Matrix outer_product(const Matrix& M);	///< Operator to perform an outer product between this and M and return result
 	Matrix& transpose(const Matrix& M);		///< Function to convert this matrix to the transpose of the given matrix M
@@ -637,6 +639,36 @@ Matrix<T> Matrix<T>::operator/(const T a)
 		for (int j=0; j<num_cols; j++)
 		{
 			temp.Data[(i*num_cols)+j] = this->Data[(i*num_cols)+j] / a;
+		}
+	}
+	return temp;
+}
+
+//Matrix scalar addition
+template <class T>
+Matrix<T> Matrix<T>::operator+(const T a)
+{
+	Matrix<T> temp(num_rows,num_cols);
+	for (int i=0; i<num_rows; i++)
+	{
+		for (int j=0; j<num_cols; j++)
+		{
+			temp.Data[(i*num_cols)+j] = this->Data[(i*num_cols)+j] + a;
+		}
+	}
+	return temp;
+}
+
+//Matrix scalar subtraction
+template <class T>
+Matrix<T> Matrix<T>::operator-(const T a)
+{
+	Matrix<T> temp(num_rows,num_cols);
+	for (int i=0; i<num_rows; i++)
+	{
+		for (int j=0; j<num_cols; j++)
+		{
+			temp.Data[(i*num_cols)+j] = this->Data[(i*num_cols)+j] - a;
 		}
 	}
 	return temp;

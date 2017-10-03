@@ -8,7 +8,11 @@
  *
  *			Methods for Integration
  *			-----------------------
- *			(None available - still under construction)
+ *			BE = Backwards-Euler
+ *			FE = Forwards-Euler
+ *			CN = Crank-Nicholson
+ *			BDF2 = Backwards-Differentiation-Formula-2
+ *			RK4 = Runge-Kutta-4
  *
  *	\note This kernel is still under construction.
  *
@@ -113,9 +117,46 @@ public:
 	void set_LinearMethod(krylov_method choice);		///< Sets the linear solver method to user choice
 	void set_LineSearchMethod(linesearch_type choice);	///< Sets the line search method to the user choice
 	
-	void registerFunction(int i, double (*func) (const Matrix<double> &u, double t, const void *data) );		///< Register the ith user function
-	void registerCoeff(int i, double (*coeff) (const Matrix<double> &u, double t, const void *data) );		///< Register the ith time coeff function
-	void registerJacobi(int i, int j, double (*jac) (const Matrix<double> &u, double t, const void *data) );	///< Register the i-jth element of jacobian
+	/// Register the ith user function
+	/** This function will register the ith user function into the object. That function must accept as arguments the function
+		identifier i, a constant Matrix for variables u, a double for time t, and a void data pointer. All of this information
+		is required to be in the function parameters, but is not required to be used by the function. The indentifier i can be 
+		used to conveniently define coupling between nieghboring elements/variables in the system. In other words, the int i
+		denotes not only the function being registered, but also the primary coupled variable for the function.
+	 
+		i.e., du_i/dt = Func(u_i all other u)   
+	 
+		This will allow for this framework to also handle PDEs, whose coupling between ith and jth variables is usually done
+		via nieghboring variables (i.e., u_i in a 1-D PDE couples with u_i-1 and u_i+1). A similar relational scheme is workable
+		with multiple dimensions. Additional information about the coupling between the ith variable and other variables can be
+		passed to the function via the void data pointer. 
+	 
+		\note You are allowed to point to the same user function for all i, but you must make sure that the resulting system is
+		non-singular (i.e., use argument i passed to the function to denote interally which function you are at). */
+	void registerFunction(int i, double (*func) (int i, const Matrix<double> &u, double t, const void *data) );
+	
+	/// Register the ith time coeff function
+	/** This function will register the ith coeff function into the object. That function must accept as arguments the coefficient
+		identifier i, a constant Matrix for variables u, a double for time t, and a void data pointer. All of this information
+		is required to be in the function parameters, but is not required to be used by the function. The indentifier i can be
+		used to conveniently define identify where the coefficient may be applied spatially. In other words, if solving a PDE,
+		the time coefficient may be a function of location in space, which can be potentially identified by int i.
+	 
+		For example, in 1-D space, the distance x can be computed as x = dx*i for a regular grid. */
+	void registerCoeff(int i, double (*coeff) (int i, const Matrix<double> &u, double t, const void *data) );
+	
+	/// Register the i-jth element of jacobian
+	/** This function will register the (i,j) jacobian function into the object. That function must accept as arguments the jacobi
+		identifiers (i and j), a constant Matrix for variables u, a double for time t, and a void data pointer. All of this information
+		is required to be in the function parameters, but is not required to be used by the function. The indentifiers i and j can be
+		used to determine which Jacobian function this should be, thus allowing a user to potentially reference the same function for
+		all Jacobi elements, but return different results based on matrix location.
+	 
+		Jacobian elements are as follows:  J_ij = d(func_i)/d(u_j)   derivative of ith function with respect to jth variable.
+	 
+		\note The jacobian information is used only in preconditioning actions taken by DOVE. The type of preconditioning can
+		be choosen by the user. There are standard types of preconditioning available. */
+	void registerJacobi(int i, int j, double (*jac) (int i, int j, const Matrix<double> &u, double t, const void *data) );
 	
 	void print_header();								///< Function to print out a header to output file
 	void print_newresult();								///< Function to print out the new result of n+1 time level
@@ -138,9 +179,9 @@ public:
 	
 	double ComputeTimeStep();						///< Returns a computed value for the next time step
 	
-	double Eval_Func(int i, const Matrix<double>& u, double t);	///< Evaluate user function i at given u matrix
-	double Eval_Coeff(int i, const Matrix<double>& u, double t);	///< Evaluate user time coefficient function i at given u matrix
-	double Eval_Jacobi(int i, int j, const Matrix<double>& u, double t);	///< Evaluate user jacobian function for (i,j) at given u matrix
+	double Eval_Func(int i, const Matrix<double>& u, double t);			///< Evaluate user function i at given u matrix and time t
+	double Eval_Coeff(int i, const Matrix<double>& u, double t);		///< Evaluate user time coefficient function i at given u matrix and time t
+	double Eval_Jacobi(int i, int j, const Matrix<double>& u, double t);///< Evaluate user jacobian function for (i,j) at given u matrix and time t
 	
 	int solve_timestep();							///< Function to solve a single time step
 	void update_states();							///< Function to update the stateful information
@@ -160,6 +201,12 @@ public:
 	 
 	 unp1[i] = (Rn[i]*un[i] + dt*func[i](unp1)) / Rnp1[i]   */
 	int solve_FE();
+	
+	/// Solver function for explicit-RK4 method
+	/** This function will solve the Dove system of equations using the Runge-Kutta 4th order method. In this
+		function, DOVE will call user defined rate functions as necessary and use that information at the previous
+		time level to provide an estimate to the solution at the next time level. */
+	int solve_RK4();
 	
 protected:
 	Matrix<double> un;								///< Matrix for nth level solution vector
@@ -181,8 +228,10 @@ protected:
 	bool Converged;									///< Boolean to hold information on whether or not last step converged
 	bool DoveOutput;								///< Boolean to determine whether or not to print Dove messages to console
 	
-	Matrix<double (*) (const Matrix<double> &u, double t, const void *data)> user_func;	///< Matrix object for user defined rate functions
-	Matrix<double (*) (const Matrix<double> &u, double t, const void *data)> user_coeff;	///< Matrix object for user defined time coefficients (optional)
+	/// Matrix object for user defined rate functions
+	Matrix<double (*) (int i, const Matrix<double> &u, double t, const void *data)> user_func;
+	/// Matrix object for user defined time coefficients (optional)
+	Matrix<double (*) (int i, const Matrix<double> &u, double t, const void *data)> user_coeff;
 	/// A vector of Maps for user defined Jacobian elements (optional)
 	/** This structure creates a Sparse Matrix of functions whose sparcity pattern is unknown at creation.
 		Each "vector" index denotes a row in the full matrix. In each row, there is a map of the non-zero
@@ -191,7 +240,7 @@ protected:
 	 
 		\note An unordered map would allow for faster access of specific elements, but may be slower when
 		iterating through that map. May consider changing to unordered map in the future. */
-	std::vector< std::map<int, double (*) (const Matrix<double> &u, double t, const void *data)> > user_jacobi;
+	std::vector< std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data)> > user_jacobi;
 	const void *user_data;														///< Pointer for user defined data structure
 	
 	PJFNK_DATA newton_dat;							///< Data structure for the PJFNK iterative method
@@ -237,11 +286,14 @@ int residual_CN(const Matrix<double> &u, Matrix<double> &Res, const void *data);
 	\note if rn = 0 (i.e. for first step) then this is same as BE method*/
 int residual_BDF2(const Matrix<double> &u, Matrix<double> &Res, const void *data);
 
+/// Default function
+double default_func(int i, const Matrix<double> &u, double t, const void *data);
+
 /// Default time coefficient function
-double default_coeff(const Matrix<double> &u, double t, const void *data);
+double default_coeff(int i, const Matrix<double> &u, double t, const void *data);
 
 /// Default Jacobian element function
-double default_jacobi(const Matrix<double> &u, double t, const void *data);
+double default_jacobi(int i, int j, const Matrix<double> &u, double t, const void *data);
 
 /// Test function for DOVE kernel
 /** This function sets up and solves a test problem for DOVE. It is callable from the UI. */
