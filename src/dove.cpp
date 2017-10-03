@@ -660,7 +660,7 @@ int Dove::solve_timestep()
 			this->dt = this->ComputeTimeStep();
 			this->time = this->time_old + this->dt;
 			if (this->DoveOutput == true)
-				std::cout << this->dt << ") --> for time = " << this->time << "\n\n";
+				std::cout << this->dt << ") --> for time (" << this->time << ")\n\n";
 			success = solve_timestep();
 		}
 		else
@@ -751,7 +751,7 @@ int Dove::solve_all()
 		this->update_timestep();
 		if (this->DoveOutput == true)
 		{
-			std::cout << "\nSolving time " << this->time << " with time step " << this->dt << ". Please wait...\n";
+			std::cout << "\nSolving time (" << this->time << ") with time step (" << this->dt << "). Please wait...\n";
 		}
 		success = this->solve_timestep();
 		if (success != 0)
@@ -799,11 +799,11 @@ int Dove::solve_RK4()
 		double k1,k2,k3,k4;
 		temp = this->un;
 		k1 = this->dt*this->Eval_Func(i, temp, this->time_old);
-		temp = this->un + (k1/2.0);
+		temp(i,0) = this->un(i,0) + (k1/2.0);
 		k2 = this->dt*this->Eval_Func(i, temp, this->time_old+(this->dt/2.0));
-		temp = this->un + (k2/2.0);
+		temp(i,0) = this->un(i,0) + (k2/2.0);
 		k3 = this->dt*this->Eval_Func(i, temp, this->time_old+(this->dt/2.0));
-		temp = this->un + k3;
+		temp(i,0) = this->un(i,0) + k3;
 		k4 = this->dt*this->Eval_Func(i, temp, this->time);
 		
 		double value = ( (this->Eval_Coeff(i, this->un, this->time_old)*this->un(i,0)) + ((k1+(2.0*(k2+k3))+k4)/6.0) )/this->Eval_Coeff(i, this->un, this->time_old);
@@ -832,15 +832,15 @@ int Dove::solve_RKF()
 		double k1,k2,k3,k4,k5,k6;
 		temp = this->un;
 		k1 = this->dt*this->Eval_Func(i, temp, this->time_old);
-		temp = this->un + (k1/4.0);
+		temp(i,0) = this->un(i,0) + (k1/4.0);
 		k2 = this->dt*this->Eval_Func(i, temp, this->time_old+(this->dt/4.0));
-		temp = this->un + (3.0*k1/32.0) + (9.0*k2/32.0);
+		temp(i,0) = this->un(i,0) + (3.0*k1/32.0) + (9.0*k2/32.0);
 		k3 = this->dt*this->Eval_Func(i, temp, this->time_old+(3.0*this->dt/8.0));
-		temp = this->un + (1932.0*k1/2197.0) - (7200.0*k2/2197.0) + (7296.0*k3/2197.0);
+		temp(i,0) = this->un(i,0) + (1932.0*k1/2197.0) - (7200.0*k2/2197.0) + (7296.0*k3/2197.0);
 		k4 = this->dt*this->Eval_Func(i, temp, this->time_old+(12.0*this->dt/13.0));
-		temp = this->un + (439.0*k1/216.0) - (8.0*k2) + (3680.0*k3/513.0) - (845.0*k4/4104.0);
+		temp(i,0) = this->un(i,0) + (439.0*k1/216.0) - (8.0*k2) + (3680.0*k3/513.0) - (845.0*k4/4104.0);
 		k5 = this->dt*this->Eval_Func(i, temp, this->time);
-		temp = this->un - (8.0*k1/27.0) + (2.0*k2) - (3544.0*k3/2565.0) + (1859.0*k4/4104.0) - (11.0*k5/40.0);
+		temp(i,0) = this->un(i,0) - (8.0*k1/27.0) + (2.0*k2) - (3544.0*k3/2565.0) + (1859.0*k4/4104.0) - (11.0*k5/40.0);
 		k6 = this->dt*this->Eval_Func(i, temp, this->time_old+(this->dt/2.0));
 		
 		double value = ( (this->Eval_Coeff(i, this->un, this->time_old)*this->un(i,0)) + ( (25.0*k1/216.0)+(1408.0*k3/2565.0)+(2197.0*k4/4104.0)-(k5/5.0) ) )/this->Eval_Coeff(i, this->un, this->time_old);
@@ -962,9 +962,14 @@ int test_res(const Matrix<double> &x, Matrix<double> &Mx, const void *data)
 	return 0;
 }
 
-double first_order_decay(int i, const Matrix<double> &u, double t, const void *res_data)
+double first_order_decay(int i, const Matrix<double> &u, double t, const void *data)
 {
-	return -u(0,0);
+	return -u(i,0);
+}
+
+double nonlinear_first_order_decay(int i, const Matrix<double> &u, double t, const void *data)
+{
+	return u(0,0)*u(1,0);
 }
 // -------------------- End temporary testing --------------------------
 
@@ -1077,8 +1082,61 @@ int DOVE_TESTS()
 	test01.set_integrationtype(RKF);
 	test01.solve_all();
 	
-	fprintf(file,"\n --------------- End of Test01 ---------------- \n");
+	fprintf(file,"\n --------------- End of Test01 ---------------- \n\n");
 	/**  ------------------------------    END Test01   ---------------------------------- */
+	
+	/**  ---------    Test 02: Various methods for Nonlinear Coupled ODEs-------------- */
+	Dove test02;
+	test02.set_outputfile(file);
+	fprintf(file,"Test02: Two variable Nonlinear Decay\n---------------------------------\ndu1/dt = -u1\ndu2/dt = u1*u2\n");
+	
+	test02.set_numfunc(2);
+	test02.registerFunction(0, first_order_decay);
+	test02.registerFunction(1, nonlinear_first_order_decay);
+	test02.set_endtime(4.0);
+	test02.set_timestepper(ADAPTIVE);
+	test02.set_timestepmax(0.2);
+	test02.set_NonlinearOutput(true);
+	test02.set_output(true);
+	
+	test02.set_initialcondition(0, 1);
+	test02.set_initialcondition(1, 1);
+	test02.set_timestep(0.01);
+	test02.set_integrationtype(BE);
+	test02.solve_all();
+	
+	test02.set_initialcondition(0, 1);
+	test02.set_initialcondition(1, 1);
+	test02.set_timestep(0.1);
+	test02.set_integrationtype(FE);
+	test02.solve_all();
+	
+	test02.set_initialcondition(0, 1);
+	test02.set_initialcondition(1, 1);
+	test02.set_timestep(0.1);
+	test02.set_integrationtype(CN);
+	test02.solve_all();
+	
+	test02.set_initialcondition(0, 1);
+	test02.set_initialcondition(1, 1);
+	test02.set_timestep(0.1);
+	test02.set_integrationtype(BDF2);
+	test02.solve_all();
+	
+	test02.set_initialcondition(0, 1);
+	test02.set_initialcondition(1, 1);
+	test02.set_timestep(0.1);
+	test02.set_integrationtype(RK4);
+	test02.solve_all();
+	
+	test02.set_initialcondition(0, 1);
+	test02.set_initialcondition(1, 1);
+	test02.set_timestep(0.1);
+	test02.set_integrationtype(RKF);
+	test02.solve_all();
+
+	fprintf(file,"\n --------------- End of Test02 ---------------- \n\n");
+	/**  ------------------------------    END Test02   ---------------------------------- */
 	
 	return success;
 }
