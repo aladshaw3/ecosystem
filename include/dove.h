@@ -13,8 +13,20 @@
  *			CN = Crank-Nicholson
  *			BDF2 = Backwards-Differentiation-Formula-2
  *			RK4 = Runge-Kutta-4
+ *			RKF = Runge-Kutta-Fehlberg
  *
- *	\note This kernel is still under construction.
+ *			References for Various Methods
+ *			------------------------------
+ *			BE and BDF2 => S. Eckert, H. Baaser, D. Gross, O. Scherf, "A BDF2 integration method with step
+ *							size control for elasto-plasticity," Comp. Mech., 34, 377-386, 2004. 
+ *
+ *			CN and FE => J.W. Thomas, Introduction to Numerical Methods for Partial Differential Equations, Springer,
+ *							ISBN 0-387-97999-9
+ *
+ *			RK4 and RKF => B.S. Desale, N.R. Dasre, "Numerical Solution of the System of Six Coupled Nonlinear ODEs by
+ *							Runge-Kutta Fourth Order Method," Applied Math. Sci., 7, 287 - 305, 2013.
+ *
+ *	\note This kernel is still under construction, but basic functionality is available.
  *
  *  \author Austin Ladshaw
  *	\date 09/25/2017
@@ -45,15 +57,17 @@ typedef enum {IMPLICIT, EXPLICIT} integrate_type;
 	\param FE Forwards-Euler: Standard explicit method.
 	\param CN Crank-Nicholson: Time averaged, 2nd order implicit scheme.
 	\param BDF2 Backwards-Differentiation-Formula-2: 2nd order implicit method.
-	\param RK4 Runge-Kutta-4: 4th order explicit method. */
-typedef enum {BE, FE, CN, BDF2, RK4} integrate_subtype;
+	\param RK4 Runge-Kutta-4: 4th order explicit method. 
+	\param RKF Runge-Kutta-Fehlberg: 4th order explicit method with 5th order error control. */
+typedef enum {BE, FE, CN, BDF2, RK4, RKF} integrate_subtype;
 
 /// Enumeration for the list of valid time stepper types
 /** Type of time stepper to be used by Dove.
  
 	\param CONSTANT time stepper will use a constant dt value for all time steps.
-	\param ADAPTIVE time stepper will adjust the time step according to simulation success.*/
-typedef enum {CONSTANT, ADAPTIVE} timestep_type;
+	\param ADAPTIVE time stepper will adjust the time step according to simulation success.
+	\param FEHLBERG time stepper will adjust time step according to desired error tolerance. */
+typedef enum {CONSTANT, ADAPTIVE, FEHLBERG} timestep_type;
 
 /// Enumeration for the list of valid line search methods
 /** Type of line search method to be used by Dove.
@@ -106,6 +120,11 @@ public:
 	void set_userdata(const void *data);				///< Set the user defined data structure
 	void set_initialcondition(int i, double ic);		///< Set the initial condition of variable i to value ic
 	void set_output(bool choice);						///< Set the value of DoveOutput (True if you want console messages)
+	void set_tolerance(double tol);						///< Set the value of residual/error tolerance desired
+	void set_NonlinearAbsTol(double tol);				///< Set the value of nonlinear absolute tolerance
+	void set_NonlinearRelTol(double tol);				///< Set the value of nonlinear relative tolerance
+	void set_LinearAbsTol(double tol);					///< Set the value of linear absolute tolerance
+	void set_LinearRelTol(double tol);					///< Set the value of linear relative tolerance
 	
 	//Set some default conditions
 	void set_defaultCoeffs();							///< Set all coeff functions to the default
@@ -176,9 +195,10 @@ public:
 	double getMinTimeStep();						///< Return the value of the minimum time step
 	double getMaxTimeStep();						///< Return the value of the maximum time step
 	bool hasConverged();							///< Returns state of convergence
+	double getNonlinearResidual();					///< Returns the current value of the non-linear residual
+	double getNonlinearRelativeRes();				///< Returns the current value of the non-linear relative residual
 	
 	double ComputeTimeStep();						///< Returns a computed value for the next time step
-	
 	double Eval_Func(int i, const Matrix<double>& u, double t);			///< Evaluate user function i at given u matrix and time t
 	double Eval_Coeff(int i, const Matrix<double>& u, double t);		///< Evaluate user time coefficient function i at given u matrix and time t
 	double Eval_Jacobi(int i, int j, const Matrix<double>& u, double t);///< Evaluate user jacobian function for (i,j) at given u matrix and time t
@@ -208,6 +228,12 @@ public:
 		time level to provide an estimate to the solution at the next time level. */
 	int solve_RK4();
 	
+	/// Solver function for explicit-RKF method
+	/** This function will solve the Dove system of equations using the Runge-Kutta-Fehlberg method. In this
+		function, DOVE will call user defined rate runctions as necessary and use that information at the previous
+		time level to provide an estimate to the solution at the next time level. */
+	int solve_RKF();
+	
 protected:
 	Matrix<double> un;								///< Matrix for nth level solution vector
 	Matrix<double> unp1;							///< Matrix for n+1 level solution vector
@@ -220,6 +246,7 @@ protected:
 	double time_older;								///< Value of older previous time
 	double dtmin;									///< Minimum allowable time step
 	double dtmax;									///< Maximum allowable time step
+	double tolerance;								///< Residual tolerance desired
 	integrate_type int_type;						///< Type of time integration to use
 	integrate_subtype int_sub;						///< Subtype of time integration scheme to use
 	timestep_type timestepper;						///< Type of time stepper to be used

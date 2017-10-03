@@ -27,6 +27,7 @@ Dove::Dove()
 	time_older = 0.0;
 	dtmin = sqrt(DBL_EPSILON);
 	dtmax = 100.0;
+	tolerance = 1e-6;
 	int_type = IMPLICIT;
 	int_sub = BE;
 	timestepper = CONSTANT;
@@ -60,7 +61,6 @@ void Dove::set_numfunc(int i)
 		this->unm1.set_size(1, 1);
 		this->user_func.set_size(1, 1);
 		this->user_coeff.set_size(1, 1);
-		//this->user_jacobi.reserve(1);
 		this->user_jacobi.resize(1);
 		this->num_func = 1;
 	}
@@ -71,13 +71,11 @@ void Dove::set_numfunc(int i)
 		this->unm1.set_size(i, 1);
 		this->user_func.set_size(i, 1);
 		this->user_coeff.set_size(i, 1);
-		//if (i <= 32)
-		//	this->user_jacobi.reserve(i*i);
-		//else
-		//	this->user_jacobi.reserve(i*32);
 		this->user_jacobi.resize(i);
 		this->num_func = i;
 	}
+	this->set_defaultCoeffs();
+	this->set_defaultJacobis();
 }
 
 //Set time step to value
@@ -144,6 +142,12 @@ void Dove::set_integrationtype(integrate_subtype type)
 			
 		case RK4:
 			this->int_type = EXPLICIT;
+			this->residual = nullptr;
+			break;
+			
+		case RKF:
+			this->int_type = EXPLICIT;
+			this->residual = nullptr;
 			break;
 			
 		default:
@@ -183,6 +187,39 @@ void Dove::set_initialcondition(int i, double ic)
 void Dove::set_output(bool choice)
 {
 	this->DoveOutput = choice;
+}
+
+//Set the tolerance
+void Dove::set_tolerance(double tol)
+{
+	if (tol < MIN_TOL)
+		tol = MIN_TOL;
+	this->tolerance = tol;
+	this->newton_dat.nl_tol_abs = tol;
+}
+
+//Set nl_abs_tol
+void Dove::set_NonlinearAbsTol(double tol)
+{
+	this->newton_dat.nl_tol_abs = tol;
+}
+
+//Set nl_rel_tol
+void Dove::set_NonlinearRelTol(double tol)
+{
+	this->newton_dat.nl_tol_rel	= tol;
+}
+
+//Set l_abs_tol
+void Dove::set_LinearAbsTol(double tol)
+{
+	this->newton_dat.lin_tol_abs = tol;
+}
+
+//Set l_rel_tol
+void Dove::set_LinearRelTol(double tol)
+{
+	this->newton_dat.lin_tol_rel = tol;
 }
 
 //Set the default coeffs
@@ -326,6 +363,10 @@ void Dove::print_header()
 			fprintf(this->Output,"Runge-Kutta-4\n");
 			break;
 			
+		case RKF:
+			fprintf(this->Output,"Runge-Kutta-Fehlberg\n");
+			break;
+			
 		default:
 			break;
 	}
@@ -437,6 +478,43 @@ bool Dove::hasConverged()
 	return this->Converged;
 }
 
+//Return non-linear res
+double Dove::getNonlinearResidual()
+{
+	switch (this->int_sub)
+	{
+		case BE:
+			return this->newton_dat.nl_res;
+			break;
+			
+		case FE:
+			return this->tolerance*pow((1.0/0.84),-4.0);
+			break;
+			
+		case CN:
+			return this->newton_dat.nl_res;
+			break;
+			
+		case BDF2:
+			return this->newton_dat.nl_res;
+			break;
+			
+		case RK4:
+			return this->tolerance*pow((1.0/0.84),-4.0);
+			break;
+			
+		default:
+			return this->newton_dat.nl_res;
+			break;
+	}
+}
+
+//Return non-linear rel res
+double Dove::getNonlinearRelativeRes()
+{
+	return this->newton_dat.nl_relres;
+}
+
 //Compute next time step
 double Dove::ComputeTimeStep()
 {
@@ -452,9 +530,17 @@ double Dove::ComputeTimeStep()
 				break;
 				
 			case ADAPTIVE:
-				this->dt = 1.5 * this->dt;
-				if (this->dt >= this->dtmax)
-					this->dt = this->dtmax;
+				step = 1.5 * this->dt;
+				if (step >= this->dtmax)
+					step = this->dtmax;
+				break;
+				
+			case FEHLBERG:
+				step = 0.84*pow((this->tolerance/this->getNonlinearResidual()),0.25)*this->dt;
+				if (step >= this->dtmax)
+					step = this->dtmax;
+				if (step <= this->dtmin)
+					step = this->dtmin;
 				break;
 				
 			default:
@@ -464,19 +550,39 @@ double Dove::ComputeTimeStep()
 	}
 	else
 	{
-		if (this->timestepper == CONSTANT)
+		switch (this->timestepper)
 		{
-			this->dtmax = this->dt;
-			this->timestepper = ADAPTIVE;
+			case CONSTANT:
+				this->dtmax = this->dt;
+				this->timestepper = ADAPTIVE;
+				step = 0.5 * this->dt;
+				if (step <= this->dtmin)
+					step = this->dtmin;
+				break;
+				
+			case ADAPTIVE:
+				step = 0.5 * this->dt;
+				if (step <= this->dtmin)
+					step = this->dtmin;
+				break;
+				
+			case FEHLBERG:
+				step = 0.84*pow((this->tolerance/this->getNonlinearResidual()),0.25)*this->dt;
+				if (step >= this->dtmax)
+					step = this->dtmax;
+				if (step <= this->dtmin)
+					step = this->dtmin;
+				break;
+				
+			default:
+				step = this->dt;
+				break;
 		}
-		this->dt = 0.5 * this->dt;
-		if (this->dt <= this->dtmin)
-			this->dt = this->dtmin;
 	}
-	if (this->time_end >= this->dt + this->time_old)
-		step = this->dt;
-	else
+	
+	if (this->time_end < step + this->time_old)
 		step = this->time_end - this->time_old;
+	
 	return step;
 }
 
@@ -524,12 +630,46 @@ int Dove::solve_timestep()
 				break;
 				
 			case RK4:
+				success = this->solve_RK4();
+				break;
+				
+			case RKF:
+				success = this->solve_RKF();
 				break;
 				
 			default:
 				success = this->solve_FE();
 				break;
 		}
+	}
+	
+	//What to do on failure
+	if (this->Converged == false)
+	{
+		if (this->dt > this->dtmin)
+		{
+			if (this->DoveOutput == true)
+			{
+				if (this->int_sub == RKF)
+					std::cout << "Failed to converge: Residual(" << this->newton_dat.nl_res << ") > Tolerance(" << this->tolerance << ")\n";
+				else
+					std::cout << "Failed to converge: Residual(" << this->newton_dat.nl_res << ") > Tolerance(" << this->newton_dat.nl_tol_abs << ")\n";
+			}
+			if (this->DoveOutput == true)
+				std::cout << "Retrying simulation with with new time step: dt_old(" << this->dt << ") --> dt_new(";
+			this->dt = this->ComputeTimeStep();
+			this->time = this->time_old + this->dt;
+			if (this->DoveOutput == true)
+				std::cout << this->dt << ") --> for time = " << this->time << "\n\n";
+			success = solve_timestep();
+		}
+		else
+		{
+			if (this->DoveOutput == true)
+				std::cout << "Unable to further reduce time step. CRITICAL ERROR!!!\n";
+			success = -1;
+		}
+		
 	}
 	return success;
 }
@@ -568,11 +708,51 @@ int Dove::solve_all()
 	this->reset_all();
 	this->print_header();
 	this->print_result();
+	if (this->DoveOutput == true)
+	{
+		std::cout << "Dove Scheme: ";
+		switch (this->int_sub)
+		{
+			case BE:
+				std::cout << "Backwards-Euler method.";
+				break;
+				
+			case FE:
+				std::cout << "Forwards-Euler method.";
+				break;
+				
+			case CN:
+				std::cout << "Crank-Nicholson method. ";
+				break;
+				
+			case BDF2:
+				std::cout << "Backwards-Differentiation 2nd Order method.";
+				break;
+				
+			case RK4:
+				std::cout << "Runge-Kutta 4th Order method.";
+				break;
+				
+			case RKF:
+				std::cout << "Runge-Kutta-Fehlberg method.";
+				break;
+				
+			default:
+				std::cout << "Backwards-Euler method.";
+				break;
+				
+		}
+		std::cout << "\n------------------------------------------------------";
+	}
+	
+	//Do-while loop
 	do
 	{
 		this->update_timestep();
 		if (this->DoveOutput == true)
-			std::cout << "Dove solving time " << this->time << " at a time step of " << this->dt << ". Please wait...\n\n";
+		{
+			std::cout << "\nSolving time " << this->time << " with time step " << this->dt << ". Please wait...\n";
+		}
 		success = this->solve_timestep();
 		if (success != 0)
 		{
@@ -582,6 +762,8 @@ int Dove::solve_all()
 		this->print_newresult();
 		this->update_states();
 	} while (this->time_end > (this->time+this->dtmin));
+	if (this->DoveOutput == true)
+		std::cout << "------------------------------------------------------\n\n";
 	
 	return success;
 }
@@ -602,7 +784,7 @@ int Dove::solve_FE()
 			return -1;
 		}
 	}
-	
+	this->Converged = true;
 	return success;
 }
 
@@ -610,11 +792,19 @@ int Dove::solve_FE()
 int Dove::solve_RK4()
 {
 	int success = 0;
-	
+	Matrix<double> temp;
+	temp.set_size(this->num_func, 1);
 	for (int i=0; i<this->num_func; i++)
 	{
 		double k1,k2,k3,k4;
-		
+		temp = this->un;
+		k1 = this->dt*this->Eval_Func(i, temp, this->time_old);
+		temp = this->un + (k1/2.0);
+		k2 = this->dt*this->Eval_Func(i, temp, this->time_old+(this->dt/2.0));
+		temp = this->un + (k2/2.0);
+		k3 = this->dt*this->Eval_Func(i, temp, this->time_old+(this->dt/2.0));
+		temp = this->un + k3;
+		k4 = this->dt*this->Eval_Func(i, temp, this->time);
 		
 		double value = ( (this->Eval_Coeff(i, this->un, this->time_old)*this->un(i,0)) + ((k1+(2.0*(k2+k3))+k4)/6.0) )/this->Eval_Coeff(i, this->un, this->time_old);
 		
@@ -626,7 +816,51 @@ int Dove::solve_RK4()
 			return -1;
 		}
 	}
-	
+	this->Converged = true;
+	return success;
+}
+
+//Function to solve with Runge-Kutta-Fehlberg
+int Dove::solve_RKF()
+{
+	int success = 0;
+	double res = 0.0;
+	Matrix<double> temp;
+	temp.set_size(this->num_func, 1);
+	for (int i=0; i<this->num_func; i++)
+	{
+		double k1,k2,k3,k4,k5,k6;
+		temp = this->un;
+		k1 = this->dt*this->Eval_Func(i, temp, this->time_old);
+		temp = this->un + (k1/4.0);
+		k2 = this->dt*this->Eval_Func(i, temp, this->time_old+(this->dt/4.0));
+		temp = this->un + (3.0*k1/32.0) + (9.0*k2/32.0);
+		k3 = this->dt*this->Eval_Func(i, temp, this->time_old+(3.0*this->dt/8.0));
+		temp = this->un + (1932.0*k1/2197.0) - (7200.0*k2/2197.0) + (7296.0*k3/2197.0);
+		k4 = this->dt*this->Eval_Func(i, temp, this->time_old+(12.0*this->dt/13.0));
+		temp = this->un + (439.0*k1/216.0) - (8.0*k2) + (3680.0*k3/513.0) - (845.0*k4/4104.0);
+		k5 = this->dt*this->Eval_Func(i, temp, this->time);
+		temp = this->un - (8.0*k1/27.0) + (2.0*k2) - (3544.0*k3/2565.0) + (1859.0*k4/4104.0) - (11.0*k5/40.0);
+		k6 = this->dt*this->Eval_Func(i, temp, this->time_old+(this->dt/2.0));
+		
+		double value = ( (this->Eval_Coeff(i, this->un, this->time_old)*this->un(i,0)) + ( (25.0*k1/216.0)+(1408.0*k3/2565.0)+(2197.0*k4/4104.0)-(k5/5.0) ) )/this->Eval_Coeff(i, this->un, this->time_old);
+		double value_til = ( (this->Eval_Coeff(i, this->un, this->time_old)*this->un(i,0)) + ( (16.0*k1/135.0)+(6656.0*k3/12825.0)+(28561.0*k4/56430.0)-(9.0*k5/50.0)+(2.0*k6/55.0) ) )/this->Eval_Coeff(i, this->un, this->time_old);
+		
+		this->unp1.edit(i, 0, value );
+		if (fabs(value_til - value)/this->dt > res)
+			res = fabs(value_til - value)/this->dt;
+		
+		if (isinf(value) || isnan(value))
+		{
+			this->Converged = false;
+			return -1;
+		}
+	}
+	this->newton_dat.nl_res = res;
+	if (res > this->tolerance)
+		this->Converged = false;
+	else
+		this->Converged = true;
 	return success;
 }
 
@@ -738,8 +972,8 @@ double first_order_decay(int i, const Matrix<double> &u, double t, const void *r
 int DOVE_TESTS()
 {
 	int success = 0;
-	std::cout << "\nThis test is currently blank\n";
 	
+	/*  MISC Tests of Various Ideas
 	Matrix<double (*) (int i, const Matrix<double> &x, double t, const void *res_data)> list_func;
 	list_func.set_size(2, 1);
 	list_func.edit(0, 0, f0);
@@ -791,13 +1025,23 @@ int DOVE_TESTS()
 	newtest.LineSearch = true;
 	success = pjfnk(test_res, NULL, x, &newtest, NULL, NULL);
 	newtest.x.Display("nonlin x"); //PJFNK now works with a single equation!!
+	*/
 	
-	
+	/**  ---------    Test 01: Various methods for First Order Decay (No Coupling) -------------- */
 	Dove test01;
+	FILE *file;
+	file = fopen("output/DOVE_Tests.txt", "w+");
+	if (file == nullptr)
+	{
+		system("mkdir output");
+		file = fopen("output/DOVE_Tests.txt", "w+");
+	}
+	test01.set_outputfile(file);
+	
+	fprintf(file,"Test01: Single variable 1st Order Decay\n---------------------------------\ndu/dt = -u\n");
+	
 	test01.set_numfunc(1);
 	test01.registerFunction(0, first_order_decay);
-	test01.set_defaultJacobis();
-	test01.set_defaultCoeffs();
 	test01.set_endtime(1.0);
 	test01.set_timestepper(CONSTANT);
 	test01.set_NonlinearOutput(false);
@@ -822,6 +1066,19 @@ int DOVE_TESTS()
 	test01.set_timestep(0.05);
 	test01.set_integrationtype(BDF2);
 	test01.solve_all();
+	
+	test01.set_initialcondition(0, 1);
+	test01.set_timestep(0.05);
+	test01.set_integrationtype(RK4);
+	test01.solve_all();
+	
+	test01.set_initialcondition(0, 1);
+	test01.set_timestep(0.05);
+	test01.set_integrationtype(RKF);
+	test01.solve_all();
+	
+	fprintf(file,"\n --------------- End of Test01 ---------------- \n");
+	/**  ------------------------------    END Test01   ---------------------------------- */
 	
 	return success;
 }
