@@ -31,6 +31,7 @@ Dove::Dove()
 	int_type = IMPLICIT;
 	int_sub = BE;
 	timestepper = CONSTANT;
+	preconditioner = JACOBI;
 	Output = nullptr;
 	num_func = 1;
 	Converged = true;
@@ -40,6 +41,7 @@ Dove::Dove()
 	newton_dat.LineSearch = true;
 	newton_dat.NL_Output = false;
 	DoveOutput = false;
+	Preconditioner = false;
 }
 
 //Default destructor
@@ -127,7 +129,7 @@ void Dove::set_integrationtype(integrate_subtype type)
 			
 		case FE:
 			this->int_type = EXPLICIT;
-			this->residual = nullptr;
+			this->residual = NULL;
 			break;
 			
 		case CN:
@@ -142,12 +144,12 @@ void Dove::set_integrationtype(integrate_subtype type)
 			
 		case RK4:
 			this->int_type = EXPLICIT;
-			this->residual = nullptr;
+			this->residual = NULL;
 			break;
 			
 		case RKF:
 			this->int_type = EXPLICIT;
-			this->residual = nullptr;
+			this->residual = NULL;
 			break;
 			
 		default:
@@ -161,6 +163,12 @@ void Dove::set_integrationtype(integrate_subtype type)
 void Dove::set_timestepper(timestep_type type)
 {
 	this->timestepper = type;
+}
+
+//Set the preconditioner type
+void Dove::set_preconditioner(precond_type type)
+{
+	this->preconditioner = type;
 }
 
 //Set the output file
@@ -246,6 +254,12 @@ void Dove::set_NonlinearOutput(bool choice)
 void Dove::set_LinearOutput(bool choice)
 {
 	this->newton_dat.L_Output = choice;
+}
+
+//Set preconditioning
+void Dove::set_Preconditioning(bool choice)
+{
+	this->Preconditioner = choice;
 }
 
 //Set linear method
@@ -618,6 +632,7 @@ int Dove::solve_timestep()
 	int success = 0;
 	if (this->int_type == IMPLICIT)
 	{
+		this->validate_precond();
 		success = pjfnk(this->residual, this->precon, this->unp1, &this->newton_dat, this, this);
 		this->Converged = this->newton_dat.Converged;
 	}
@@ -672,6 +687,222 @@ int Dove::solve_timestep()
 		
 	}
 	return success;
+}
+
+//Validate and set precond
+void Dove::validate_precond()
+{
+	if (this->Preconditioner == true)
+	{
+		switch (this->preconditioner)
+		{
+			case JACOBI:
+				switch (this->int_sub)
+				{
+					case BE:
+						this->precon = precond_Jac_BE;
+						break;
+						
+					case FE:
+						this->precon = NULL;
+						break;
+						
+					case CN:
+						this->precon = NULL;
+						break;
+						
+					case BDF2:
+						this->precon = NULL;
+						break;
+						
+					case RK4:
+						this->precon = NULL;
+						break;
+						
+					case RKF:
+						this->precon = NULL;
+						break;
+						
+					default:
+						this->precon = precond_Jac_BE;
+						break;
+
+				}
+				break;
+				
+			case TRIDIAG:
+				switch (this->int_sub)
+				{
+					case BE:
+						this->precon = precond_Tridiag_BE;
+						break;
+					
+					case FE:
+						this->precon = NULL;
+						break;
+					
+					case CN:
+						this->precon = NULL;
+						break;
+					
+					case BDF2:
+						this->precon = NULL;
+						break;
+					
+					case RK4:
+						this->precon = NULL;
+						break;
+					
+					case RKF:
+						this->precon = NULL;
+						break;
+					
+					default:
+						this->precon = NULL;
+						break;
+					
+				}
+				break;
+				
+			case UGS:
+				switch (this->int_sub)
+				{
+					case BE:
+						this->precon = NULL;
+						break;
+					
+					case FE:
+						this->precon = NULL;
+						break;
+					
+					case CN:
+						this->precon = NULL;
+						break;
+					
+					case BDF2:
+						this->precon = NULL;
+						break;
+					
+					case RK4:
+						this->precon = NULL;
+						break;
+					
+					case RKF:
+						this->precon = NULL;
+						break;
+					
+					default:
+						this->precon = NULL;
+						break;
+					
+				}
+				break;
+				
+			case LGS:
+				switch (this->int_sub)
+				{
+					case BE:
+						this->precon = NULL;
+						break;
+					
+					case FE:
+						this->precon = NULL;
+						break;
+					
+					case CN:
+						this->precon = NULL;
+						break;
+					
+					case BDF2:
+						this->precon = NULL;
+						break;
+					
+					case RK4:
+						this->precon = NULL;
+						break;
+					
+					case RKF:
+						this->precon = NULL;
+						break;
+					
+					default:
+						this->precon = NULL;
+						break;
+					
+				}
+				break;
+				
+			case SGS:
+				switch (this->int_sub)
+				{
+					case BE:
+						this->precon = NULL;
+						break;
+					
+					case FE:
+						this->precon = NULL;
+						break;
+					
+					case CN:
+						this->precon = NULL;
+						break;
+					
+					case BDF2:
+						this->precon = NULL;
+						break;
+					
+					case RK4:
+						this->precon = NULL;
+						break;
+					
+					case RKF:
+						this->precon = NULL;
+						break;
+						
+					default:
+						this->precon = NULL;
+						break;
+					
+				}
+				break;
+				
+			default:
+				switch (this->int_sub)
+				{
+					case BE:
+						this->precon = precond_Jac_BE;
+						break;
+					
+					case FE:
+						this->precon = NULL;
+						break;
+					
+					case CN:
+						this->precon = NULL;
+						break;
+					
+					case BDF2:
+						this->precon = NULL;
+						break;
+					
+					case RK4:
+						this->precon = NULL;
+						break;
+					
+					case RKF:
+						this->precon = NULL;
+						break;
+					
+					default:
+						this->precon = precond_Jac_BE;
+						break;
+					
+				}
+				break;
+		}
+	}
+	else
+		this->precon = NULL;
 }
 
 //Update solution states
@@ -883,6 +1114,83 @@ int residual_BE(const Matrix<double> &u, Matrix<double> &Res, const void *data)
 	return success;
 }
 
+//Jacobi preconditioning for BE
+int precond_Jac_BE(const Matrix<double> &v, Matrix<double> &p, const void *data)
+{
+	int success = 0;
+	Dove *dat = (Dove *) data;
+	for (int i=0; i<dat->getNumFunc(); i++)
+	{
+		double Dii = (dat->Eval_Coeff(i, v, dat->getCurrentTime()) - (dat->getTimeStep()*dat->Eval_Jacobi(i,i, v,dat->getCurrentTime())));
+		if (fabs(Dii) <= MIN_TOL)
+			Dii = 1.0;
+		p.edit(i, 0, v(i,0) / Dii);
+	}
+	return success;
+}
+
+//Tridiagonal preconditioning for BE
+int precond_Tridiag_BE(const Matrix<double> &v, Matrix<double> &p, const void *data)
+{
+	int success = 0;
+	Dove *dat = (Dove *) data;
+	double d[dat->getNumFunc()], a[dat->getNumFunc()], c[dat->getNumFunc()];
+	double dp[dat->getNumFunc()], ap[dat->getNumFunc()];
+	
+	//Forward Sweep
+	for (int i=0; i<dat->getNumFunc(); i++)
+	{
+		double Dii = (dat->Eval_Coeff(i, v, dat->getCurrentTime()) - (dat->getTimeStep()*dat->Eval_Jacobi(i,i, v,dat->getCurrentTime())));
+		d[i] = v(i,0) / Dii;
+		if (i == 0)
+		{
+			a[i] = 0.0;
+			c[i] = -(dat->getTimeStep()*dat->Eval_Jacobi(i,i+1, v,dat->getCurrentTime()))/Dii;
+		}
+		else if (i == dat->getNumFunc()-1)
+		{
+			c[i] = 0.0;
+			a[i] = -(dat->getTimeStep()*dat->Eval_Jacobi(i,i-1, v,dat->getCurrentTime()))/Dii;
+		}
+		else
+		{
+			a[i] = -(dat->getTimeStep()*dat->Eval_Jacobi(i,i-1, v,dat->getCurrentTime()))/Dii;
+			c[i] = -(dat->getTimeStep()*dat->Eval_Jacobi(i,i+1, v,dat->getCurrentTime()))/Dii;
+		}
+	}
+	
+	//Reverse Sweep
+	for (int i=(dat->getNumFunc()-1); i>=0; i--)
+	{
+		if (i==(dat->getNumFunc()-1))
+		{
+			dp[i] = d[i];
+			ap[i] = a[i];
+		}
+		else if (i==0)
+		{
+			dp[i] = (d[i] - (c[i]*dp[(i+1)])) / (1 - (c[i]*ap[(i+1)]));
+			ap[i] = 0;
+		}
+		else
+		{
+			dp[i] = (d[i] - (c[i]*dp[(i+1)])) / (1 - (c[i]*ap[(i+1)]));
+			ap[i] = a[i] / (1 - (c[i]*ap[(i+1)]));
+		}
+	}
+	
+	//Final Forward Sweep
+	for (int i=0; i<dat->getNumFunc(); i++)
+	{
+		if (i==0)
+			p.edit(i, 0, dp[i]);
+		else
+			p.edit(i, 0, dp[i] - (ap[i] * p(i-1,0)));
+	}
+
+	return success;
+}
+
 //Function for implicit-CN method residual
 int residual_CN(const Matrix<double> &u, Matrix<double> &Res, const void *data)
 {
@@ -971,6 +1279,78 @@ double nonlinear_first_order_decay(int i, const Matrix<double> &u, double t, con
 {
 	return u(0,0)*u(1,0);
 }
+
+typedef struct
+{
+	int N;
+	double L;
+	double dx;
+	double D;
+	double uo;
+}Test03_data;
+
+double Lap1D_BC0(int i, const Matrix<double> &u, double t, const void *data)
+{
+	return 0.0;
+}
+
+double Lap1D_Jac_BC0(int i, int j, const Matrix<double> &u, double t, const void *data)
+{
+	return 0.0;
+}
+
+double Lap1D_BC1(int i, const Matrix<double> &u, double t, const void *data)
+{
+	Test03_data *dat = (Test03_data *) data;
+	return (dat->D/dat->dx/dat->dx)*(u(i+1,0) - 2*u(i,0) + dat->uo);
+}
+
+double Lap1D_Jac_BC1(int i, int j, const Matrix<double> &u, double t, const void *data)
+{
+	Test03_data *dat = (Test03_data *) data;
+	if (i == j)
+		return -2.0*(dat->D/dat->dx/dat->dx);
+	else if (i+1==j)
+		return (dat->D/dat->dx/dat->dx);
+	else
+		return 0.0;
+}
+
+double Lap1D_Interior(int i, const Matrix<double> &u, double t, const void *data)
+{
+	Test03_data *dat = (Test03_data *) data;
+	return (dat->D/dat->dx/dat->dx)*(u(i+1,0) - 2*u(i,0) + u(i-1,0));
+}
+
+double Lap1D_Jac_Interior(int i, int j, const Matrix<double> &u, double t, const void *data)
+{
+	Test03_data *dat = (Test03_data *) data;
+	if (i == j)
+		return -2.0*(dat->D/dat->dx/dat->dx);
+	else if (i+1==j)
+		return (dat->D/dat->dx/dat->dx);
+	else if (i-1==j)
+		return (dat->D/dat->dx/dat->dx);
+	else
+		return 0.0;
+}
+
+double Lap1D_BCN(int i, const Matrix<double> &u, double t, const void *data)
+{
+	Test03_data *dat = (Test03_data *) data;
+	return (dat->D/dat->dx/dat->dx)*(u(i-1,0) - 2*u(i,0) + u(i-1,0));
+}
+
+double Lap1D_Jac_BCN(int i, int j, const Matrix<double> &u, double t, const void *data)
+{
+	Test03_data *dat = (Test03_data *) data;
+	if (i == j)
+		return -2.0*(dat->D/dat->dx/dat->dx);
+	else if (i-1==j)
+		return 2.0*(dat->D/dat->dx/dat->dx);
+	else
+		return 0.0;
+}
 // -------------------- End temporary testing --------------------------
 
 //Test function
@@ -1032,8 +1412,6 @@ int DOVE_TESTS()
 	newtest.x.Display("nonlin x"); //PJFNK now works with a single equation!!
 	*/
 	
-	/**  ---------    Test 01: Various methods for First Order Decay (No Coupling) -------------- */
-	Dove test01;
 	FILE *file;
 	file = fopen("output/DOVE_Tests.txt", "w+");
 	if (file == nullptr)
@@ -1041,6 +1419,10 @@ int DOVE_TESTS()
 		system("mkdir output");
 		file = fopen("output/DOVE_Tests.txt", "w+");
 	}
+	
+	/**  ---------    Test 01: Various methods for First Order Decay (No Coupling) -------------- */
+	/*
+	Dove test01;
 	test01.set_outputfile(file);
 	
 	fprintf(file,"Test01: Single variable 1st Order Decay\n---------------------------------\ndu/dt = -u\n");
@@ -1083,9 +1465,11 @@ int DOVE_TESTS()
 	test01.solve_all();
 	
 	fprintf(file,"\n --------------- End of Test01 ---------------- \n\n");
+	 */
 	/**  ------------------------------    END Test01   ---------------------------------- */
 	
 	/**  ---------    Test 02: Various methods for Nonlinear Coupled ODEs-------------- */
+	/*
 	Dove test02;
 	test02.set_outputfile(file);
 	fprintf(file,"Test02: Two variable Nonlinear Decay\n---------------------------------\ndu1/dt = -u1\ndu2/dt = u1*u2\n");
@@ -1136,7 +1520,124 @@ int DOVE_TESTS()
 	test02.solve_all();
 
 	fprintf(file,"\n --------------- End of Test02 ---------------- \n\n");
+	 */
 	/**  ------------------------------    END Test02   ---------------------------------- */
+	
+	/**  ---------    Test 03: Various methods for Linear Coupled ODEs as a PDE -------------- */
+	/*
+	Dove test03;
+	test03.set_outputfile(file);
+	fprintf(file,"Test03: Single Variable Linear PDE\n---------------------------------\ndu/dt = D*d^2u/dx^2\n");
+	
+	Test03_data data03;
+	data03.N = 11;
+	data03.L = 1.0;
+	data03.uo = 1.0;
+	data03.D = 2.0;
+	data03.dx = data03.L/(data03.N-1);
+	test03.set_userdata((void*)&data03);
+	
+	test03.set_numfunc(data03.N);
+	test03.registerFunction(0, Lap1D_BC0);
+	test03.registerFunction(1, Lap1D_BC1);
+	for (int i=2; i<data03.N-1; i++)
+		test03.registerFunction(i, Lap1D_Interior);
+	test03.registerFunction(data03.N-1, Lap1D_BCN);
+	test03.set_endtime(1.0);
+	test03.set_timestepper(CONSTANT);
+	test03.set_timestepmax(0.2);
+	test03.set_NonlinearOutput(true);
+	test03.set_LinearOutput(false);
+	test03.set_LinearMethod(QR);
+	test03.set_output(true);
+	
+	test03.set_initialcondition(0, 1);
+	for (int i=1; i<data03.N; i++)
+		test03.set_initialcondition(i, 0);
+	test03.set_timestep(0.05);
+	test03.set_integrationtype(BE);
+	test03.solve_all();
+	
+	test03.set_initialcondition(0, 1);
+	for (int i=1; i<data03.N; i++)
+		test03.set_initialcondition(i, 0);
+	test03.set_timestep(0.05);
+	test03.set_integrationtype(CN);
+	test03.solve_all();
+	
+	test03.set_initialcondition(0, 1);
+	for (int i=1; i<data03.N; i++)
+		test03.set_initialcondition(i, 0);
+	test03.set_timestep(0.05);
+	test03.set_integrationtype(BDF2);
+	test03.solve_all();
+	
+	fprintf(file,"\n --------------- End of Test03 ---------------- \n\n");
+	 */
+	/**  ------------------------------    END Test03   ---------------------------------- */
+	
+	/**  ---------    Test 04: Preconditioning for Linear Coupled ODEs as a PDE -------------- */
+	Dove test04;
+	test04.set_outputfile(file);
+	fprintf(file,"Test04: Single Variable Linear PDE with Precond\n---------------------------------\ndu/dt = D*d^2u/dx^2\n");
+	
+	Test03_data data04;
+	data04.N = 11;
+	data04.L = 1.0;
+	data04.uo = 1.0;
+	data04.D = 2.0;
+	data04.dx = data04.L/(data04.N-1);
+	test04.set_userdata((void*)&data04);
+	
+	test04.set_numfunc(data04.N);
+	test04.registerFunction(0, Lap1D_BC0);
+	test04.registerFunction(1, Lap1D_BC1);
+	for (int i=2; i<data04.N-1; i++)
+		test04.registerFunction(i, Lap1D_Interior);
+	test04.registerFunction(data04.N-1, Lap1D_BCN);
+	test04.set_endtime(0.1);
+	test04.set_timestepper(CONSTANT);
+	test04.set_timestepmax(0.2);
+	test04.set_NonlinearOutput(true);
+	test04.set_LinearOutput(true);
+	
+	test04.registerJacobi(0, 0, Lap1D_Jac_BC0);
+	test04.registerJacobi(1, 0, Lap1D_Jac_BC1);
+	test04.registerJacobi(1, 1, Lap1D_Jac_BC1);
+	for (int i=2; i<data04.N-1; i++)
+		for (int j=i-1; j<=i+1; j++)
+			test04.registerJacobi(i, j, Lap1D_Jac_Interior);
+	test04.registerJacobi(data04.N-1, data04.N-2, Lap1D_Jac_BCN);
+	test04.registerJacobi(data04.N-1, data04.N-1, Lap1D_Jac_BCN);
+	
+	test04.set_LinearMethod(GMRESRP);
+	test04.set_preconditioner(TRIDIAG);
+	test04.set_Preconditioning(true);
+	test04.set_output(true);
+	
+	test04.set_initialcondition(0, 1);
+	for (int i=1; i<data04.N; i++)
+		test04.set_initialcondition(i, 0);
+	test04.set_timestep(0.05);
+	test04.set_integrationtype(BE);
+	test04.solve_all();
+	
+	/*
+	std::cout << "\n";
+	for (int i=0; i<data04.N; i++)
+	{
+		for (int j=0; j<data04.N; j++)
+		{
+			if (i==j)
+				std::cout << test04.Eval_Coeff(i, test04.getNewU(), 0)-test04.getTimeStep()*test04.Eval_Jacobi(i, j, test04.getNewU(), 0) << "\t";
+			else
+				std::cout << -test04.getTimeStep()*test04.Eval_Jacobi(i, j, test04.getNewU(), 0) << "\t";
+		}
+		std::cout << "\n";
+	}
+	*/
+	fprintf(file,"\n --------------- End of Test04 ---------------- \n\n");
+	/**  ------------------------------    END Test04   ---------------------------------- */
 	
 	return success;
 }

@@ -77,6 +77,16 @@ typedef enum {CONSTANT, ADAPTIVE, FEHLBERG} timestep_type;
 	\param NO_LS no line searching will be used. */
 typedef enum {BT, ABT, NO_LS} linesearch_type;
 
+/// Enumeration for the list of valid preconditioning options
+/** Type of preconditioner to apply to linear iterations.
+ 
+	\param JACOBI uses a simple Jacobi iteration as preconditioning.
+	\param TRIDIAG uses a Tridiagonal solve as preconditioning.
+	\param UGS uses an Upper-Gauss-Seidel iteration as preconditioning.
+	\param LGS uses a Lower-Gauss-Seidel iteration as preconditioning.
+	\param SGS uses a Symetric-Gauss-Seidel iteration as preconditioning.*/
+typedef enum {JACOBI, TRIDIAG, UGS, LGS, SGS} precond_type;
+
 /// Dynamic ODE-solver with Various Established methods (DOVE) object
 /** This class structure creates a C++ object that can be used to solve coupled systems of 
 	Ordinary Differential Equations. A user will interface with this object by creating functions
@@ -116,6 +126,7 @@ public:
 	void set_endtime(double e);							///< Set the value of the end time
 	void set_integrationtype(integrate_subtype type);	///< Set the type of integration scheme to use
 	void set_timestepper(timestep_type type);			///< Set the time stepper scheme type
+	void set_preconditioner(precond_type type);			///< Set the type of preconditioner to use
 	void set_outputfile(FILE *file);					///< Set the output file for simulation results
 	void set_userdata(const void *data);				///< Set the user defined data structure
 	void set_initialcondition(int i, double ic);		///< Set the initial condition of variable i to value ic
@@ -133,6 +144,7 @@ public:
 	// Set conditions for PJFNK
 	void set_NonlinearOutput(bool choice);				///< Sets the non-linear output information according to user choice
 	void set_LinearOutput(bool choice);					///< Sets the linear output information according to user choice
+	void set_Preconditioning(bool choice);				///< Sets the boolean to determine whether or not to include preconditioning
 	void set_LinearMethod(krylov_method choice);		///< Sets the linear solver method to user choice
 	void set_LineSearchMethod(linesearch_type choice);	///< Sets the line search method to the user choice
 	
@@ -204,6 +216,7 @@ public:
 	double Eval_Jacobi(int i, int j, const Matrix<double>& u, double t);///< Evaluate user jacobian function for (i,j) at given u matrix and time t
 	
 	int solve_timestep();							///< Function to solve a single time step
+	void validate_precond();						///< Function to validate and set preconditioning pointer
 	void update_states();							///< Function to update the stateful information
 	void update_timestep();							///< Function to update the timestep for the simulation
 	void reset_all();								///< Reset all the states
@@ -250,10 +263,12 @@ protected:
 	integrate_type int_type;						///< Type of time integration to use
 	integrate_subtype int_sub;						///< Subtype of time integration scheme to use
 	timestep_type timestepper;						///< Type of time stepper to be used
+	precond_type preconditioner;					///< Type of preconditioner to use
 	FILE *Output;									///< File to where simulation results will be place
 	int num_func;									///< Number of functions in the system of ODEs
 	bool Converged;									///< Boolean to hold information on whether or not last step converged
 	bool DoveOutput;								///< Boolean to determine whether or not to print Dove messages to console
+	bool Preconditioner;							///< Boolean to determine whether or not to use a preconditioner
 	
 	/// Matrix object for user defined rate functions
 	Matrix<double (*) (int i, const Matrix<double> &u, double t, const void *data)> user_func;
@@ -288,6 +303,30 @@ private:
  
 	Res[i] = Rnp1[i]*unp1[i] - Rn[i]*un[i] - dt*func[i](unp1)   */
 int residual_BE(const Matrix<double> &u, Matrix<double> &Res, const void *data);
+
+/// Preconditioning function for a Jacobi preconditioner on the implicit-BE method
+/** This function will be passed to PJFNK as the preconditioning operation for the Dove object. In this function,
+	DOVE will call user defined coefficient and Jacobi functions to apply a preconditioning operation on the linear
+	system. Note that each implicit method in DOVE must have its own preconditioner because the residuals are different.
+	Also, each type of preconditioning will have its own function.
+ 
+	Jacobi preconditioning:  Solve  Dp=v for p using input vector v and the diagonals (D) of the full jacobian.
+ 
+	Diagonals for BE are of the form: dR_i/du_i = Rnp1[i] - dt*jacobi[i][i](unp1)  */
+int precond_Jac_BE(const Matrix<double> &v, Matrix<double> &p, const void *data);
+
+/// Preconditioning function for a Tridiagonal preconditioner on the implicit-BE method
+/** This function will be passed to PJFNK as the preconditioning operation for the Dove object. In this function,
+	DOVE will call user defined coefficient and Jacobi functions to apply a preconditioning operation on the linear
+	system. Note that each implicit method in DOVE must have its own preconditioner because the residuals are different.
+	Also, each type of preconditioning will have its own function.
+ 
+	Tridiagonal preconditioning:  Solve  (TD)p=v for p using input vector v and a Tridiagonal (TD) of the full jacobian.
+ 
+	Diagonals for BE are of the form: dR_i/du_i = Rnp1[i] - dt*jacobi[i][i](unp1)  
+	Off-Diagonals for BE are of form: dR_i/du_j = Rnp1[i] - dt*jacobi[i][j](unp1) for i==j
+								and	  dR_i/du_j = -dt*jacobi[i][j](unp1)          for i!=j*/
+int precond_Tridiag_BE(const Matrix<double> &v, Matrix<double> &p, const void *data);
 
 /// Residual function for implicit-CN method
 /** This function will be passed to PJFNK as the residual function for the Dove object. In this function,
