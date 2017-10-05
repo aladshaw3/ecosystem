@@ -84,7 +84,7 @@ typedef enum {BT, ABT, NO_LS} linesearch_type;
 	\param TRIDIAG uses a Tridiagonal solve as preconditioning.
 	\param UGS uses an Upper-Gauss-Seidel iteration as preconditioning.
 	\param LGS uses a Lower-Gauss-Seidel iteration as preconditioning.
-	\param SGS uses a Symetric-Gauss-Seidel iteration as preconditioning.*/
+	\param SGS uses a Symmetric-Gauss-Seidel iteration as preconditioning.*/
 typedef enum {JACOBI, TRIDIAG, UGS, LGS, SGS} precond_type;
 
 /// Dynamic ODE-solver with Various Established methods (DOVE) object
@@ -119,6 +119,7 @@ public:
 	Dove();												///< Default constructor
 	~Dove();											///< Default destructor
 	
+	//Set some Dove conditions
 	void set_numfunc(int i);							///< Set the number of functions to solve and reserve necessary space
 	void set_timestep(double d);						///< Set the value of the time step
 	void set_timestepmin(double dmin);					///< Set the value of the minimum time step
@@ -132,21 +133,23 @@ public:
 	void set_initialcondition(int i, double ic);		///< Set the initial condition of variable i to value ic
 	void set_output(bool choice);						///< Set the value of DoveOutput (True if you want console messages)
 	void set_tolerance(double tol);						///< Set the value of residual/error tolerance desired
-	void set_NonlinearAbsTol(double tol);				///< Set the value of nonlinear absolute tolerance
-	void set_NonlinearRelTol(double tol);				///< Set the value of nonlinear relative tolerance
-	void set_LinearAbsTol(double tol);					///< Set the value of linear absolute tolerance
-	void set_LinearRelTol(double tol);					///< Set the value of linear relative tolerance
 	
 	//Set some default conditions
 	void set_defaultCoeffs();							///< Set all coeff functions to the default
 	void set_defaultJacobis();							///< Set all Jacobians to the default (only does the diagonals!)
 	
 	// Set conditions for PJFNK
+	void set_NonlinearAbsTol(double tol);				///< Set the value of nonlinear absolute tolerance
+	void set_NonlinearRelTol(double tol);				///< Set the value of nonlinear relative tolerance
+	void set_LinearAbsTol(double tol);					///< Set the value of linear absolute tolerance
+	void set_LinearRelTol(double tol);					///< Set the value of linear relative tolerance
 	void set_NonlinearOutput(bool choice);				///< Sets the non-linear output information according to user choice
 	void set_LinearOutput(bool choice);					///< Sets the linear output information according to user choice
 	void set_Preconditioning(bool choice);				///< Sets the boolean to determine whether or not to include preconditioning
 	void set_LinearMethod(krylov_method choice);		///< Sets the linear solver method to user choice
 	void set_LineSearchMethod(linesearch_type choice);	///< Sets the line search method to the user choice
+	void set_MaximumIterations(int it);					///< Set the maximum number of iterations
+	void set_LinearStatus(bool choice);					///< Sets the boolean to determine whether or not to treat as linear (true = Linear)
 	
 	/// Register the ith user function
 	/** This function will register the ith user function into the object. That function must accept as arguments the function
@@ -210,6 +213,9 @@ public:
 	double getNonlinearResidual();					///< Returns the current value of the non-linear residual
 	double getNonlinearRelativeRes();				///< Returns the current value of the non-linear relative residual
 	
+	/// Function to return a reference to the Jacobian Matrix map at the ith row of the matrix
+	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data)> & getJacobiMap(int i);
+	
 	double ComputeTimeStep();						///< Returns a computed value for the next time step
 	double Eval_Func(int i, const Matrix<double>& u, double t);			///< Evaluate user function i at given u matrix and time t
 	double Eval_Coeff(int i, const Matrix<double>& u, double t);		///< Evaluate user time coefficient function i at given u matrix and time t
@@ -269,6 +275,7 @@ protected:
 	bool Converged;									///< Boolean to hold information on whether or not last step converged
 	bool DoveOutput;								///< Boolean to determine whether or not to print Dove messages to console
 	bool Preconditioner;							///< Boolean to determine whether or not to use a preconditioner
+	bool Linear;									///< Boolean to determine whether or not to treat problem as linear
 	
 	/// Matrix object for user defined rate functions
 	Matrix<double (*) (int i, const Matrix<double> &u, double t, const void *data)> user_func;
@@ -327,6 +334,48 @@ int precond_Jac_BE(const Matrix<double> &v, Matrix<double> &p, const void *data)
 	Off-Diagonals for BE are of form: dR_i/du_j = Rnp1[i] - dt*jacobi[i][j](unp1) for i==j
 								and	  dR_i/du_j = -dt*jacobi[i][j](unp1)          for i!=j*/
 int precond_Tridiag_BE(const Matrix<double> &v, Matrix<double> &p, const void *data);
+
+/// Preconditioning function for an Upper-Gauss-Seidel preconditioner on the implicit-BE method
+/** This function will be passed to PJFNK as the preconditioning operation for the Dove object. In this function,
+	DOVE will call user defined coefficient and Jacobi functions to apply a preconditioning operation on the linear
+	system. Note that each implicit method in DOVE must have its own preconditioner because the residuals are different.
+	Also, each type of preconditioning will have its own function.
+ 
+	UGS preconditioning:  Solve  (U*)p=v+Lp for p using input vector v with an Upper Triangular (U*) of the full jacobian
+												and a strict lower triangular (L) of the full jacobian.
+ 
+	Diagonals for BE are of the form: dR_i/du_i = Rnp1[i] - dt*jacobi[i][i](unp1)
+	Off-Diagonals for BE are of form: dR_i/du_j = Rnp1[i] - dt*jacobi[i][j](unp1) for i==j
+								and	  dR_i/du_j = -dt*jacobi[i][j](unp1)          for i!=j*/
+int precond_UpperGS_BE(const Matrix<double> &v, Matrix<double> &p, const void *data);
+
+/// Preconditioning function for a Lower-Gauss-Seidel preconditioner on the implicit-BE method
+/** This function will be passed to PJFNK as the preconditioning operation for the Dove object. In this function,
+	DOVE will call user defined coefficient and Jacobi functions to apply a preconditioning operation on the linear
+	system. Note that each implicit method in DOVE must have its own preconditioner because the residuals are different.
+	Also, each type of preconditioning will have its own function.
+ 
+	LGS preconditioning:  Solve  (L*)p=v+Up for p using input vector v and a Lower Triangular (L*) of the full jacobian.
+ 												and a strict upper triangular (U) of the full jacobian.
+ 
+	Diagonals for BE are of the form: dR_i/du_i = Rnp1[i] - dt*jacobi[i][i](unp1)
+	Off-Diagonals for BE are of form: dR_i/du_j = Rnp1[i] - dt*jacobi[i][j](unp1) for i==j
+								and	  dR_i/du_j = -dt*jacobi[i][j](unp1)          for i!=j*/
+int precond_LowerGS_BE(const Matrix<double> &v, Matrix<double> &p, const void *data);
+
+/// Preconditioning function for a Symmetric-Gauss-Seidel preconditioner on the implicit-BE method
+/** This function will be passed to PJFNK as the preconditioning operation for the Dove object. In this function,
+	DOVE will call user defined coefficient and Jacobi functions to apply a preconditioning operation on the linear
+	system. Note that each implicit method in DOVE must have its own preconditioner because the residuals are different.
+	Also, each type of preconditioning will have its own function.
+ 
+	SGS preconditioning:  Solve  (J)p=v for p using input vector v with the Jacobian matrix (J) approximately by first
+										solving as an Upper-Gauss-Seidel, then as a Lower-Gauss-Seidel.
+ 
+	Diagonals for BE are of the form: dR_i/du_i = Rnp1[i] - dt*jacobi[i][i](unp1)
+	Off-Diagonals for BE are of form: dR_i/du_j = Rnp1[i] - dt*jacobi[i][j](unp1) for i==j
+								and	  dR_i/du_j = -dt*jacobi[i][j](unp1)          for i!=j*/
+int precond_SymmetricGS_BE(const Matrix<double> &v, Matrix<double> &p, const void *data);
 
 /// Residual function for implicit-CN method
 /** This function will be passed to PJFNK as the residual function for the Dove object. In this function,

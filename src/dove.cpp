@@ -27,7 +27,7 @@ Dove::Dove()
 	time_older = 0.0;
 	dtmin = sqrt(DBL_EPSILON);
 	dtmax = 100.0;
-	tolerance = 1e-6;
+	tolerance = 1e-4;
 	int_type = IMPLICIT;
 	int_sub = BE;
 	timestepper = CONSTANT;
@@ -42,6 +42,12 @@ Dove::Dove()
 	newton_dat.NL_Output = false;
 	DoveOutput = false;
 	Preconditioner = false;
+	newton_dat.lin_tol_abs = 1e-4;
+	newton_dat.lin_tol_rel = 0.01;
+	newton_dat.nl_tol_abs = 1e-4;
+	newton_dat.nl_tol_rel = 1e-6;
+	newton_dat.kms_dat.max_level = 1;
+	Linear = false;
 }
 
 //Default destructor
@@ -295,6 +301,24 @@ void Dove::set_LineSearchMethod(linesearch_type choice)
 	}
 }
 
+//Set number of iterations
+void Dove::set_MaximumIterations(int it)
+{
+	this->newton_dat.nl_maxit = it;
+}
+
+//Set Linear Status
+void Dove::set_LinearStatus(bool choice)
+{
+	this->Linear = choice;
+	if (choice == true)
+	{
+		this->newton_dat.nl_maxit = 1;
+		this->newton_dat.lin_tol_rel = 1e-6;
+		this->newton_dat.lin_tol_abs = 1e-4;
+	}
+}
+
 //Register user function
 void Dove::registerFunction(int i, double (*func) (int i, const Matrix<double> &u, double t, const void *data) )
 {
@@ -521,6 +545,12 @@ double Dove::getNonlinearResidual()
 			return this->newton_dat.nl_res;
 			break;
 	}
+}
+
+//Return map
+std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data)> & Dove::getJacobiMap(int i)
+{
+	return this->user_jacobi[i];
 }
 
 //Return non-linear rel res
@@ -768,7 +798,7 @@ void Dove::validate_precond()
 				switch (this->int_sub)
 				{
 					case BE:
-						this->precon = NULL;
+						this->precon = precond_UpperGS_BE;
 						break;
 					
 					case FE:
@@ -802,7 +832,7 @@ void Dove::validate_precond()
 				switch (this->int_sub)
 				{
 					case BE:
-						this->precon = NULL;
+						this->precon = precond_LowerGS_BE;
 						break;
 					
 					case FE:
@@ -836,7 +866,7 @@ void Dove::validate_precond()
 				switch (this->int_sub)
 				{
 					case BE:
-						this->precon = NULL;
+						this->precon = precond_SymmetricGS_BE;
 						break;
 					
 					case FE:
@@ -913,6 +943,10 @@ void Dove::update_states()
 	this->dt_old = this->dt;
 	this->time_older = this->time_old;
 	this->time_old = this->time;
+	if (this->Linear == true)
+		this->unp1.zeros();
+	else
+		this->unp1 = this->un*1.5 - this->unm1*0.5;
 }
 
 //Update the time step
@@ -1121,7 +1155,7 @@ int precond_Jac_BE(const Matrix<double> &v, Matrix<double> &p, const void *data)
 	Dove *dat = (Dove *) data;
 	for (int i=0; i<dat->getNumFunc(); i++)
 	{
-		double Dii = (dat->Eval_Coeff(i, v, dat->getCurrentTime()) - (dat->getTimeStep()*dat->Eval_Jacobi(i,i, v,dat->getCurrentTime())));
+		double Dii = (dat->Eval_Coeff(i, dat->getNewU(), dat->getCurrentTime()) - (dat->getTimeStep()*dat->Eval_Jacobi(i,i, dat->getNewU(),dat->getCurrentTime())));
 		if (fabs(Dii) <= MIN_TOL)
 			Dii = 1.0;
 		p.edit(i, 0, v(i,0) / Dii);
@@ -1140,22 +1174,22 @@ int precond_Tridiag_BE(const Matrix<double> &v, Matrix<double> &p, const void *d
 	//Forward Sweep
 	for (int i=0; i<dat->getNumFunc(); i++)
 	{
-		double Dii = (dat->Eval_Coeff(i, v, dat->getCurrentTime()) - (dat->getTimeStep()*dat->Eval_Jacobi(i,i, v,dat->getCurrentTime())));
+		double Dii = (dat->Eval_Coeff(i, dat->getNewU(), dat->getCurrentTime()) - (dat->getTimeStep()*dat->Eval_Jacobi(i,i, dat->getNewU(),dat->getCurrentTime())));
 		d[i] = v(i,0) / Dii;
 		if (i == 0)
 		{
 			a[i] = 0.0;
-			c[i] = -(dat->getTimeStep()*dat->Eval_Jacobi(i,i+1, v,dat->getCurrentTime()))/Dii;
+			c[i] = -(dat->getTimeStep()*dat->Eval_Jacobi(i,i+1, dat->getNewU(),dat->getCurrentTime()))/Dii;
 		}
 		else if (i == dat->getNumFunc()-1)
 		{
 			c[i] = 0.0;
-			a[i] = -(dat->getTimeStep()*dat->Eval_Jacobi(i,i-1, v,dat->getCurrentTime()))/Dii;
+			a[i] = -(dat->getTimeStep()*dat->Eval_Jacobi(i,i-1, dat->getNewU(),dat->getCurrentTime()))/Dii;
 		}
 		else
 		{
-			a[i] = -(dat->getTimeStep()*dat->Eval_Jacobi(i,i-1, v,dat->getCurrentTime()))/Dii;
-			c[i] = -(dat->getTimeStep()*dat->Eval_Jacobi(i,i+1, v,dat->getCurrentTime()))/Dii;
+			a[i] = -(dat->getTimeStep()*dat->Eval_Jacobi(i,i-1, dat->getNewU(),dat->getCurrentTime()))/Dii;
+			c[i] = -(dat->getTimeStep()*dat->Eval_Jacobi(i,i+1, dat->getNewU(),dat->getCurrentTime()))/Dii;
 		}
 	}
 	
@@ -1188,6 +1222,86 @@ int precond_Tridiag_BE(const Matrix<double> &v, Matrix<double> &p, const void *d
 			p.edit(i, 0, dp[i] - (ap[i] * p(i-1,0)));
 	}
 
+	return success;
+}
+
+//Upper Gauss Seidel Preconditioner (solve Up=v)
+int precond_UpperGS_BE(const Matrix<double> &v, Matrix<double> &p, const void *data)
+{
+	int success = 0;
+	Dove *dat = (Dove *) data;
+	
+	double sum_upper = 0.0, sum_lower = 0.0;
+	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data)>::reverse_iterator rit;
+	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data)>::iterator it;
+	
+	//Loop over rows
+	for (int i=dat->getNumFunc()-1; i>=0; i--)
+	{
+		sum_upper = 0.0;
+		sum_lower = 0.0;
+		
+		//Forward iterator
+		for (it = dat->getJacobiMap(i).begin(); it->first<i; it++)
+		{
+			sum_lower = sum_lower + (-dat->getTimeStep()*dat->Eval_Jacobi(i, it->first, dat->getNewU(), dat->getCurrentTime())*p(it->first,0));
+		}
+		
+		//Iterate through the Jacobian map for the ith row (reverse iterator)
+		for (rit = dat->getJacobiMap(i).rbegin(); rit->first>i; rit++)
+		{
+			sum_upper = sum_upper + (-dat->getTimeStep()*dat->Eval_Jacobi(i, rit->first, dat->getNewU(), dat->getCurrentTime())*p(rit->first,0));
+		}
+		
+		double value = (dat->Eval_Coeff(i, dat->getNewU(), dat->getCurrentTime()) - (dat->getTimeStep()*dat->Eval_Jacobi(i,i, dat->getNewU(),dat->getCurrentTime())));
+		p.edit(i, 0, (v(i,0)-sum_upper-sum_lower)/value);
+	}
+	
+	return success;
+}
+
+//Lower Gauss Seidel Preconditioner (Lp=v)
+int precond_LowerGS_BE(const Matrix<double> &v, Matrix<double> &p, const void *data)
+{
+	int success = 0;
+	Dove *dat = (Dove *) data;
+	double sum_lower = 0.0, sum_upper = 0.0;
+	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data)>::iterator it;
+	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data)>::reverse_iterator rit;
+	
+	//Loop over rows
+	for (int i=0; i<dat->getNumFunc(); i++)
+	{
+		sum_lower = 0.0;
+		sum_upper = 0.0;
+		
+		//Reverse iterator
+		for (rit = dat->getJacobiMap(i).rbegin(); rit->first>i; rit++)
+		{
+			sum_upper = sum_upper + (-dat->getTimeStep()*dat->Eval_Jacobi(i, rit->first, dat->getNewU(), dat->getCurrentTime())*p(rit->first,0));
+		}
+		
+		//Iterate through the Jacobian map for the ith row (forward iterator)
+		for (it = dat->getJacobiMap(i).begin(); it->first<i; it++)
+		{
+			sum_lower = sum_lower + (-dat->getTimeStep()*dat->Eval_Jacobi(i, it->first, dat->getNewU(), dat->getCurrentTime())*p(it->first,0));
+		}
+		
+		double value = (dat->Eval_Coeff(i, dat->getNewU(), dat->getCurrentTime()) - (dat->getTimeStep()*dat->Eval_Jacobi(i,i, dat->getNewU(),dat->getCurrentTime())));
+		p.edit(i, 0, (v(i,0)-sum_lower-sum_upper)/value);
+	}
+	
+	return success;
+}
+
+//Symmetric Gauss Seidel Preconditioner
+int precond_SymmetricGS_BE(const Matrix<double> &v, Matrix<double> &p, const void *data)
+{
+	int success = 0;
+	
+	success = precond_UpperGS_BE(v, p, data);
+	success = precond_LowerGS_BE(v, p, data);
+	
 	return success;
 }
 
@@ -1358,60 +1472,6 @@ int DOVE_TESTS()
 {
 	int success = 0;
 	
-	/*  MISC Tests of Various Ideas
-	Matrix<double (*) (int i, const Matrix<double> &x, double t, const void *res_data)> list_func;
-	list_func.set_size(2, 1);
-	list_func.edit(0, 0, f0);
-	list_func.edit(1, 0, f1);
-	
-	Matrix<double> xtest;
-	xtest.set_size(2, 1);
-	xtest.edit(0, 0, 1);
-	xtest.edit(1, 0, 2);
-	xtest.Display("x");
-	
-	std::cout << "f0 = " << list_func(0,0)(0,xtest,0,NULL) << std::endl;
-	std::cout << "f1 = " << list_func(1,0)(1,xtest,0,NULL) << std::endl;
-	
-	Dove test;
-	FILE *testfile;
-	testfile = fopen("output/Here_is_test.txt","w+");
-	fprintf(testfile,"Here is a line of text.");
-	test.set_outputfile(testfile);
-	test.set_numfunc(2);
-	test.registerFunction(0, f0);
-	test.registerFunction(1, f1);
-	test.registerCoeff(0, default_func);
-	test.registerCoeff(1, default_func);
-	test.set_timestep(1.0);
-	test.set_initialcondition(0, 1);
-	test.set_initialcondition(1, 0);
-	test.getCurrentU().Display("un");
-	
-	test.print_header();
-	test.solve_timestep();
-	test.print_newresult();
-	test.getNewU().Display("unp1"); //Working!!!
-	
-	Matrix<double> M(1,1), x(1,1), b(1,1);
-	M(0,0) = 5;
-	b(0,0) = 1;
-	x.qrSolve(M, b);
-	x.Display("x"); //Can use QR for 1-D system
-	
-	QR_DATA qrtest;
-	success = QRsolve(test_matvec,b,&qrtest,NULL);
-	qrtest.x.Display("another x");
-	
-	x.zeros();
-	x.edit(0, 0, 0);
-	PJFNK_DATA newtest;
-	newtest.nl_maxit = 30;
-	newtest.LineSearch = true;
-	success = pjfnk(test_res, NULL, x, &newtest, NULL, NULL);
-	newtest.x.Display("nonlin x"); //PJFNK now works with a single equation!!
-	*/
-	
 	FILE *file;
 	file = fopen("output/DOVE_Tests.txt", "w+");
 	if (file == nullptr)
@@ -1579,10 +1639,10 @@ int DOVE_TESTS()
 	/**  ---------    Test 04: Preconditioning for Linear Coupled ODEs as a PDE -------------- */
 	Dove test04;
 	test04.set_outputfile(file);
-	fprintf(file,"Test04: Single Variable Linear PDE with Precond\n---------------------------------\ndu/dt = D*d^2u/dx^2\n");
+	fprintf(file,"Test04: Single Variable Linear PDE with Preconditioning\n---------------------------------\ndu/dt = D*d^2u/dx^2\n");
 	
 	Test03_data data04;
-	data04.N = 11;
+	data04.N = 51;
 	data04.L = 1.0;
 	data04.uo = 1.0;
 	data04.D = 2.0;
@@ -1595,23 +1655,26 @@ int DOVE_TESTS()
 	for (int i=2; i<data04.N-1; i++)
 		test04.registerFunction(i, Lap1D_Interior);
 	test04.registerFunction(data04.N-1, Lap1D_BCN);
-	test04.set_endtime(0.1);
-	test04.set_timestepper(CONSTANT);
+	test04.set_endtime(1.0);
+	test04.set_timestepper(ADAPTIVE);
 	test04.set_timestepmax(0.2);
 	test04.set_NonlinearOutput(true);
-	test04.set_LinearOutput(true);
+	test04.set_LinearOutput(false);
+	test04.set_LineSearchMethod(BT);
+	test04.set_LinearStatus(false);
 	
 	test04.registerJacobi(0, 0, Lap1D_Jac_BC0);
 	test04.registerJacobi(1, 0, Lap1D_Jac_BC1);
 	test04.registerJacobi(1, 1, Lap1D_Jac_BC1);
+	test04.registerJacobi(1, 2, Lap1D_Jac_BC1);
 	for (int i=2; i<data04.N-1; i++)
 		for (int j=i-1; j<=i+1; j++)
 			test04.registerJacobi(i, j, Lap1D_Jac_Interior);
 	test04.registerJacobi(data04.N-1, data04.N-2, Lap1D_Jac_BCN);
 	test04.registerJacobi(data04.N-1, data04.N-1, Lap1D_Jac_BCN);
 	
-	test04.set_LinearMethod(GMRESRP);
-	test04.set_preconditioner(TRIDIAG);
+	test04.set_LinearMethod(KMS);
+	test04.set_preconditioner(SGS);
 	test04.set_Preconditioning(true);
 	test04.set_output(true);
 	
@@ -1622,20 +1685,6 @@ int DOVE_TESTS()
 	test04.set_integrationtype(BE);
 	test04.solve_all();
 	
-	/*
-	std::cout << "\n";
-	for (int i=0; i<data04.N; i++)
-	{
-		for (int j=0; j<data04.N; j++)
-		{
-			if (i==j)
-				std::cout << test04.Eval_Coeff(i, test04.getNewU(), 0)-test04.getTimeStep()*test04.Eval_Jacobi(i, j, test04.getNewU(), 0) << "\t";
-			else
-				std::cout << -test04.getTimeStep()*test04.Eval_Jacobi(i, j, test04.getNewU(), 0) << "\t";
-		}
-		std::cout << "\n";
-	}
-	*/
 	fprintf(file,"\n --------------- End of Test04 ---------------- \n\n");
 	/**  ------------------------------    END Test04   ---------------------------------- */
 	
