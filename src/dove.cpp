@@ -47,6 +47,7 @@ Dove::Dove()
 	newton_dat.nl_tol_abs = 1e-4;
 	newton_dat.nl_tol_rel = 1e-6;
 	newton_dat.kms_dat.max_level = 1;
+	newton_dat.l_maxit = 1000;
 	Linear = false;
 }
 
@@ -302,9 +303,15 @@ void Dove::set_LineSearchMethod(linesearch_type choice)
 }
 
 //Set number of iterations
-void Dove::set_MaximumIterations(int it)
+void Dove::set_MaxNonLinearIterations(int it)
 {
 	this->newton_dat.nl_maxit = it;
+}
+
+//Set number of iterations
+void Dove::set_MaxLinearIterations(int it)
+{
+	this->newton_dat.l_maxit = it;
 }
 
 //Set Linear Status
@@ -738,11 +745,11 @@ void Dove::validate_precond()
 						break;
 						
 					case CN:
-						this->precon = NULL;
+						this->precon = precond_Jac_CN;
 						break;
 						
 					case BDF2:
-						this->precon = NULL;
+						this->precon = precond_Jac_BDF2;
 						break;
 						
 					case RK4:
@@ -772,11 +779,11 @@ void Dove::validate_precond()
 						break;
 					
 					case CN:
-						this->precon = NULL;
+						this->precon = precond_Tridiag_CN;
 						break;
 					
 					case BDF2:
-						this->precon = NULL;
+						this->precon = precond_Tridiag_BDF2;
 						break;
 					
 					case RK4:
@@ -806,11 +813,11 @@ void Dove::validate_precond()
 						break;
 					
 					case CN:
-						this->precon = NULL;
+						this->precon = precond_UpperGS_CN;
 						break;
 					
 					case BDF2:
-						this->precon = NULL;
+						this->precon = precond_UpperGS_BDF2;
 						break;
 					
 					case RK4:
@@ -840,11 +847,11 @@ void Dove::validate_precond()
 						break;
 					
 					case CN:
-						this->precon = NULL;
+						this->precon = precond_LowerGS_CN;
 						break;
 					
 					case BDF2:
-						this->precon = NULL;
+						this->precon = precond_LowerGS_BDF2;
 						break;
 					
 					case RK4:
@@ -874,11 +881,11 @@ void Dove::validate_precond()
 						break;
 					
 					case CN:
-						this->precon = NULL;
+						this->precon = precond_SymmetricGS_CN;
 						break;
 					
 					case BDF2:
-						this->precon = NULL;
+						this->precon = precond_SymmetricGS_BDF2;
 						break;
 					
 					case RK4:
@@ -908,11 +915,11 @@ void Dove::validate_precond()
 						break;
 					
 					case CN:
-						this->precon = NULL;
+						this->precon = precond_Jac_CN;
 						break;
 					
 					case BDF2:
-						this->precon = NULL;
+						this->precon = precond_Jac_BDF2;
 						break;
 					
 					case RK4:
@@ -1319,6 +1326,163 @@ int residual_CN(const Matrix<double> &u, Matrix<double> &Res, const void *data)
 	return success;
 }
 
+//Jacobi preconditioning for CN
+int precond_Jac_CN(const Matrix<double> &v, Matrix<double> &p, const void *data)
+{
+	int success = 0;
+	Dove *dat = (Dove *) data;
+	for (int i=0; i<dat->getNumFunc(); i++)
+	{
+		double Dii = (dat->Eval_Coeff(i, dat->getNewU(), dat->getCurrentTime()) - (0.5*dat->getTimeStep()*dat->Eval_Jacobi(i,i, dat->getNewU(),dat->getCurrentTime())));
+		if (fabs(Dii) <= MIN_TOL)
+			Dii = 1.0;
+		p.edit(i, 0, v(i,0) / Dii);
+	}
+	return success;
+}
+
+//Tridiagonal preconditioning for CN
+int precond_Tridiag_CN(const Matrix<double> &v, Matrix<double> &p, const void *data)
+{
+	int success = 0;
+	Dove *dat = (Dove *) data;
+	double d[dat->getNumFunc()], a[dat->getNumFunc()], c[dat->getNumFunc()];
+	double dp[dat->getNumFunc()], ap[dat->getNumFunc()];
+	
+	//Forward Sweep
+	for (int i=0; i<dat->getNumFunc(); i++)
+	{
+		double Dii = (dat->Eval_Coeff(i, dat->getNewU(), dat->getCurrentTime()) - (0.5*dat->getTimeStep()*dat->Eval_Jacobi(i,i, dat->getNewU(),dat->getCurrentTime())));
+		d[i] = v(i,0) / Dii;
+		if (i == 0)
+		{
+			a[i] = 0.0;
+			c[i] = -(0.5*dat->getTimeStep()*dat->Eval_Jacobi(i,i+1, dat->getNewU(),dat->getCurrentTime()))/Dii;
+		}
+		else if (i == dat->getNumFunc()-1)
+		{
+			c[i] = 0.0;
+			a[i] = -(0.5*dat->getTimeStep()*dat->Eval_Jacobi(i,i-1, dat->getNewU(),dat->getCurrentTime()))/Dii;
+		}
+		else
+		{
+			a[i] = -(0.5*dat->getTimeStep()*dat->Eval_Jacobi(i,i-1, dat->getNewU(),dat->getCurrentTime()))/Dii;
+			c[i] = -(0.5*dat->getTimeStep()*dat->Eval_Jacobi(i,i+1, dat->getNewU(),dat->getCurrentTime()))/Dii;
+		}
+	}
+	
+	//Reverse Sweep
+	for (int i=(dat->getNumFunc()-1); i>=0; i--)
+	{
+		if (i==(dat->getNumFunc()-1))
+		{
+			dp[i] = d[i];
+			ap[i] = a[i];
+		}
+		else if (i==0)
+		{
+			dp[i] = (d[i] - (c[i]*dp[(i+1)])) / (1 - (c[i]*ap[(i+1)]));
+			ap[i] = 0;
+		}
+		else
+		{
+			dp[i] = (d[i] - (c[i]*dp[(i+1)])) / (1 - (c[i]*ap[(i+1)]));
+			ap[i] = a[i] / (1 - (c[i]*ap[(i+1)]));
+		}
+	}
+	
+	//Final Forward Sweep
+	for (int i=0; i<dat->getNumFunc(); i++)
+	{
+		if (i==0)
+			p.edit(i, 0, dp[i]);
+		else
+			p.edit(i, 0, dp[i] - (ap[i] * p(i-1,0)));
+	}
+	
+	return success;
+}
+
+//Upper Gauss Seidel Preconditioner (solve Up=v)
+int precond_UpperGS_CN(const Matrix<double> &v, Matrix<double> &p, const void *data)
+{
+	int success = 0;
+	Dove *dat = (Dove *) data;
+	
+	double sum_upper = 0.0, sum_lower = 0.0;
+	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data)>::reverse_iterator rit;
+	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data)>::iterator it;
+	
+	//Loop over rows
+	for (int i=dat->getNumFunc()-1; i>=0; i--)
+	{
+		sum_upper = 0.0;
+		sum_lower = 0.0;
+		
+		//Forward iterator
+		for (it = dat->getJacobiMap(i).begin(); it->first<i; it++)
+		{
+			sum_lower = sum_lower + (-0.5*dat->getTimeStep()*dat->Eval_Jacobi(i, it->first, dat->getNewU(), dat->getCurrentTime())*p(it->first,0));
+		}
+		
+		//Iterate through the Jacobian map for the ith row (reverse iterator)
+		for (rit = dat->getJacobiMap(i).rbegin(); rit->first>i; rit++)
+		{
+			sum_upper = sum_upper + (-0.5*dat->getTimeStep()*dat->Eval_Jacobi(i, rit->first, dat->getNewU(), dat->getCurrentTime())*p(rit->first,0));
+		}
+		
+		double value = (dat->Eval_Coeff(i, dat->getNewU(), dat->getCurrentTime()) - (0.5*dat->getTimeStep()*dat->Eval_Jacobi(i,i, dat->getNewU(),dat->getCurrentTime())));
+		p.edit(i, 0, (v(i,0)-sum_upper-sum_lower)/value);
+	}
+	
+	return success;
+}
+
+//Lower Gauss Seidel Preconditioner (Lp=v)
+int precond_LowerGS_CN(const Matrix<double> &v, Matrix<double> &p, const void *data)
+{
+	int success = 0;
+	Dove *dat = (Dove *) data;
+	double sum_lower = 0.0, sum_upper = 0.0;
+	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data)>::iterator it;
+	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data)>::reverse_iterator rit;
+	
+	//Loop over rows
+	for (int i=0; i<dat->getNumFunc(); i++)
+	{
+		sum_lower = 0.0;
+		sum_upper = 0.0;
+		
+		//Reverse iterator
+		for (rit = dat->getJacobiMap(i).rbegin(); rit->first>i; rit++)
+		{
+			sum_upper = sum_upper + (-0.5*dat->getTimeStep()*dat->Eval_Jacobi(i, rit->first, dat->getNewU(), dat->getCurrentTime())*p(rit->first,0));
+		}
+		
+		//Iterate through the Jacobian map for the ith row (forward iterator)
+		for (it = dat->getJacobiMap(i).begin(); it->first<i; it++)
+		{
+			sum_lower = sum_lower + (-0.5*dat->getTimeStep()*dat->Eval_Jacobi(i, it->first, dat->getNewU(), dat->getCurrentTime())*p(it->first,0));
+		}
+		
+		double value = (dat->Eval_Coeff(i, dat->getNewU(), dat->getCurrentTime()) - (0.5*dat->getTimeStep()*dat->Eval_Jacobi(i,i, dat->getNewU(),dat->getCurrentTime())));
+		p.edit(i, 0, (v(i,0)-sum_lower-sum_upper)/value);
+	}
+	
+	return success;
+}
+
+//Symmetric Gauss Seidel Preconditioner
+int precond_SymmetricGS_CN(const Matrix<double> &v, Matrix<double> &p, const void *data)
+{
+	int success = 0;
+	
+	success = precond_UpperGS_CN(v, p, data);
+	success = precond_LowerGS_CN(v, p, data);
+	
+	return success;
+}
+
 //Function for implicit-BDF2 method residual
 int residual_BDF2(const Matrix<double> &u, Matrix<double> &Res, const void *data)
 {
@@ -1338,6 +1502,192 @@ int residual_BDF2(const Matrix<double> &u, Matrix<double> &Res, const void *data
 	{
 		Res(i,0) = (an*dat->Eval_Coeff(i, u, dat->getCurrentTime())*u(i,0)) - (bn*dat->Eval_Coeff(i, dat->getCurrentU(), dat->getOldTime())*dat->getCurrentU()(i,0)) + (cn*dat->Eval_Coeff(i, dat->getOldU(), dat->getOlderTime())*dat->getOldU()(i,0)) - (dat->getTimeStep()*dat->Eval_Func(i, u, dat->getCurrentTime()));
 	}
+	
+	return success;
+}
+
+//Jacobi preconditioning for BDF2
+int precond_Jac_BDF2(const Matrix<double> &v, Matrix<double> &p, const void *data)
+{
+	int success = 0;
+	Dove *dat = (Dove *) data;
+	
+	double rn = 0.0;
+	if (dat->getOldTime() > 0.0)
+		rn = dat->getTimeStep()/dat->getTimeStepOld();
+	
+	double an;
+	an = (1.0 + (2.0*rn)) / (1.0 + rn);
+	
+	for (int i=0; i<dat->getNumFunc(); i++)
+	{
+		double Dii = (an*dat->Eval_Coeff(i, dat->getNewU(), dat->getCurrentTime()) - (dat->getTimeStep()*dat->Eval_Jacobi(i,i, dat->getNewU(),dat->getCurrentTime())));
+		if (fabs(Dii) <= MIN_TOL)
+			Dii = 1.0;
+		p.edit(i, 0, v(i,0) / Dii);
+	}
+	return success;
+}
+
+//Tridiagonal preconditioning for BDF2
+int precond_Tridiag_BDF2(const Matrix<double> &v, Matrix<double> &p, const void *data)
+{
+	int success = 0;
+	Dove *dat = (Dove *) data;
+	double d[dat->getNumFunc()], a[dat->getNumFunc()], c[dat->getNumFunc()];
+	double dp[dat->getNumFunc()], ap[dat->getNumFunc()];
+	
+	double rn = 0.0;
+	if (dat->getOldTime() > 0.0)
+		rn = dat->getTimeStep()/dat->getTimeStepOld();
+	
+	double an;
+	an = (1.0 + (2.0*rn)) / (1.0 + rn);
+	
+	//Forward Sweep
+	for (int i=0; i<dat->getNumFunc(); i++)
+	{
+		double Dii = (an*dat->Eval_Coeff(i, dat->getNewU(), dat->getCurrentTime()) - (dat->getTimeStep()*dat->Eval_Jacobi(i,i, dat->getNewU(),dat->getCurrentTime())));
+		d[i] = v(i,0) / Dii;
+		if (i == 0)
+		{
+			a[i] = 0.0;
+			c[i] = -(dat->getTimeStep()*dat->Eval_Jacobi(i,i+1, dat->getNewU(),dat->getCurrentTime()))/Dii;
+		}
+		else if (i == dat->getNumFunc()-1)
+		{
+			c[i] = 0.0;
+			a[i] = -(dat->getTimeStep()*dat->Eval_Jacobi(i,i-1, dat->getNewU(),dat->getCurrentTime()))/Dii;
+		}
+		else
+		{
+			a[i] = -(dat->getTimeStep()*dat->Eval_Jacobi(i,i-1, dat->getNewU(),dat->getCurrentTime()))/Dii;
+			c[i] = -(dat->getTimeStep()*dat->Eval_Jacobi(i,i+1, dat->getNewU(),dat->getCurrentTime()))/Dii;
+		}
+	}
+	
+	//Reverse Sweep
+	for (int i=(dat->getNumFunc()-1); i>=0; i--)
+	{
+		if (i==(dat->getNumFunc()-1))
+		{
+			dp[i] = d[i];
+			ap[i] = a[i];
+		}
+		else if (i==0)
+		{
+			dp[i] = (d[i] - (c[i]*dp[(i+1)])) / (1 - (c[i]*ap[(i+1)]));
+			ap[i] = 0;
+		}
+		else
+		{
+			dp[i] = (d[i] - (c[i]*dp[(i+1)])) / (1 - (c[i]*ap[(i+1)]));
+			ap[i] = a[i] / (1 - (c[i]*ap[(i+1)]));
+		}
+	}
+	
+	//Final Forward Sweep
+	for (int i=0; i<dat->getNumFunc(); i++)
+	{
+		if (i==0)
+			p.edit(i, 0, dp[i]);
+		else
+			p.edit(i, 0, dp[i] - (ap[i] * p(i-1,0)));
+	}
+	
+	return success;
+}
+
+//Upper Gauss Seidel Preconditioner (solve Up=v)
+int precond_UpperGS_BDF2(const Matrix<double> &v, Matrix<double> &p, const void *data)
+{
+	int success = 0;
+	Dove *dat = (Dove *) data;
+	
+	double rn = 0.0;
+	if (dat->getOldTime() > 0.0)
+		rn = dat->getTimeStep()/dat->getTimeStepOld();
+	
+	double an;
+	an = (1.0 + (2.0*rn)) / (1.0 + rn);
+	
+	double sum_upper = 0.0, sum_lower = 0.0;
+	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data)>::reverse_iterator rit;
+	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data)>::iterator it;
+	
+	//Loop over rows
+	for (int i=dat->getNumFunc()-1; i>=0; i--)
+	{
+		sum_upper = 0.0;
+		sum_lower = 0.0;
+		
+		//Forward iterator
+		for (it = dat->getJacobiMap(i).begin(); it->first<i; it++)
+		{
+			sum_lower = sum_lower + (-dat->getTimeStep()*dat->Eval_Jacobi(i, it->first, dat->getNewU(), dat->getCurrentTime())*p(it->first,0));
+		}
+		
+		//Iterate through the Jacobian map for the ith row (reverse iterator)
+		for (rit = dat->getJacobiMap(i).rbegin(); rit->first>i; rit++)
+		{
+			sum_upper = sum_upper + (-dat->getTimeStep()*dat->Eval_Jacobi(i, rit->first, dat->getNewU(), dat->getCurrentTime())*p(rit->first,0));
+		}
+		
+		double value = (an*dat->Eval_Coeff(i, dat->getNewU(), dat->getCurrentTime()) - (dat->getTimeStep()*dat->Eval_Jacobi(i,i, dat->getNewU(),dat->getCurrentTime())));
+		p.edit(i, 0, (v(i,0)-sum_upper-sum_lower)/value);
+	}
+	
+	return success;
+}
+
+//Lower Gauss Seidel Preconditioner (Lp=v)
+int precond_LowerGS_BDF2(const Matrix<double> &v, Matrix<double> &p, const void *data)
+{
+	int success = 0;
+	Dove *dat = (Dove *) data;
+	double sum_lower = 0.0, sum_upper = 0.0;
+	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data)>::iterator it;
+	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data)>::reverse_iterator rit;
+	
+	double rn = 0.0;
+	if (dat->getOldTime() > 0.0)
+		rn = dat->getTimeStep()/dat->getTimeStepOld();
+	
+	double an;
+	an = (1.0 + (2.0*rn)) / (1.0 + rn);
+	
+	//Loop over rows
+	for (int i=0; i<dat->getNumFunc(); i++)
+	{
+		sum_lower = 0.0;
+		sum_upper = 0.0;
+		
+		//Reverse iterator
+		for (rit = dat->getJacobiMap(i).rbegin(); rit->first>i; rit++)
+		{
+			sum_upper = sum_upper + (-dat->getTimeStep()*dat->Eval_Jacobi(i, rit->first, dat->getNewU(), dat->getCurrentTime())*p(rit->first,0));
+		}
+		
+		//Iterate through the Jacobian map for the ith row (forward iterator)
+		for (it = dat->getJacobiMap(i).begin(); it->first<i; it++)
+		{
+			sum_lower = sum_lower + (-dat->getTimeStep()*dat->Eval_Jacobi(i, it->first, dat->getNewU(), dat->getCurrentTime())*p(it->first,0));
+		}
+		
+		double value = (an*dat->Eval_Coeff(i, dat->getNewU(), dat->getCurrentTime()) - (dat->getTimeStep()*dat->Eval_Jacobi(i,i, dat->getNewU(),dat->getCurrentTime())));
+		p.edit(i, 0, (v(i,0)-sum_lower-sum_upper)/value);
+	}
+	
+	return success;
+}
+
+//Symmetric Gauss Seidel Preconditioner
+int precond_SymmetricGS_BDF2(const Matrix<double> &v, Matrix<double> &p, const void *data)
+{
+	int success = 0;
+	
+	success = precond_UpperGS_BDF2(v, p, data);
+	success = precond_LowerGS_BDF2(v, p, data);
 	
 	return success;
 }
@@ -1618,13 +1968,15 @@ int DOVE_TESTS()
 	test03.set_integrationtype(BE);
 	test03.solve_all();
 	
+	//NOTE: CN is only L2 stable!!! Timestep control aids stability.
 	test03.set_initialcondition(0, 1);
 	for (int i=1; i<data03.N; i++)
 		test03.set_initialcondition(i, 0);
-	test03.set_timestep(0.05);
+	test03.set_timestep(0.01);
 	test03.set_integrationtype(CN);
 	test03.solve_all();
 	
+	//NOTE: BDF2 has very good stability, but can have some instability (especially when accelerating the time step)
 	test03.set_initialcondition(0, 1);
 	for (int i=1; i<data03.N; i++)
 		test03.set_initialcondition(i, 0);
@@ -1642,7 +1994,7 @@ int DOVE_TESTS()
 	fprintf(file,"Test04: Single Variable Linear PDE with Preconditioning\n---------------------------------\ndu/dt = D*d^2u/dx^2\n");
 	
 	Test03_data data04;
-	data04.N = 51;
+	data04.N = 10001;
 	data04.L = 1.0;
 	data04.uo = 1.0;
 	data04.D = 2.0;
@@ -1659,9 +2011,10 @@ int DOVE_TESTS()
 	test04.set_timestepper(ADAPTIVE);
 	test04.set_timestepmax(0.2);
 	test04.set_NonlinearOutput(true);
-	test04.set_LinearOutput(false);
+	test04.set_LinearOutput(true);
 	test04.set_LineSearchMethod(BT);
 	test04.set_LinearStatus(false);
+	test04.set_MaxLinearIterations(1); //Need to do something about the restarts. They are adding to iteration count!
 	
 	test04.registerJacobi(0, 0, Lap1D_Jac_BC0);
 	test04.registerJacobi(1, 0, Lap1D_Jac_BC1);
@@ -1673,7 +2026,7 @@ int DOVE_TESTS()
 	test04.registerJacobi(data04.N-1, data04.N-2, Lap1D_Jac_BCN);
 	test04.registerJacobi(data04.N-1, data04.N-1, Lap1D_Jac_BCN);
 	
-	test04.set_LinearMethod(KMS);
+	test04.set_LinearMethod(GMRESRP);
 	test04.set_preconditioner(SGS);
 	test04.set_Preconditioning(true);
 	test04.set_output(true);

@@ -148,7 +148,8 @@ public:
 	void set_Preconditioning(bool choice);				///< Sets the boolean to determine whether or not to include preconditioning
 	void set_LinearMethod(krylov_method choice);		///< Sets the linear solver method to user choice
 	void set_LineSearchMethod(linesearch_type choice);	///< Sets the line search method to the user choice
-	void set_MaximumIterations(int it);					///< Set the maximum number of iterations
+	void set_MaxNonLinearIterations(int it);			///< Set the maximum number of non-linear iterations
+	void set_MaxLinearIterations(int it);				///< Set the maximum number of linear iterations
 	void set_LinearStatus(bool choice);					///< Sets the boolean to determine whether or not to treat as linear (true = Linear)
 	
 	/// Register the ith user function
@@ -386,6 +387,72 @@ int precond_SymmetricGS_BE(const Matrix<double> &v, Matrix<double> &p, const voi
 	Res[i] = Rnp1[i]*unp1[i] - Rn[i]*un[i] - 0.5*dt*func[i](unp1) - 0.5*dt*func[i](un)   */
 int residual_CN(const Matrix<double> &u, Matrix<double> &Res, const void *data);
 
+/// Preconditioning function for a Jacobi preconditioner on the implicit-CN method
+/** This function will be passed to PJFNK as the preconditioning operation for the Dove object. In this function,
+	DOVE will call user defined coefficient and Jacobi functions to apply a preconditioning operation on the linear
+	system. Note that each implicit method in DOVE must have its own preconditioner because the residuals are different.
+	Also, each type of preconditioning will have its own function.
+ 
+	Jacobi preconditioning:  Solve  Dp=v for p using input vector v and the diagonals (D) of the full jacobian.
+ 
+	Diagonals for CN are of the form: dR_i/du_i = Rnp1[i] - 0.5*dt*jacobi[i][i](unp1)  */
+int precond_Jac_CN(const Matrix<double> &v, Matrix<double> &p, const void *data);
+
+/// Preconditioning function for a Tridiagonal preconditioner on the implicit-CN method
+/** This function will be passed to PJFNK as the preconditioning operation for the Dove object. In this function,
+	DOVE will call user defined coefficient and Jacobi functions to apply a preconditioning operation on the linear
+	system. Note that each implicit method in DOVE must have its own preconditioner because the residuals are different.
+	Also, each type of preconditioning will have its own function.
+ 
+	Tridiagonal preconditioning:  Solve  (TD)p=v for p using input vector v and a Tridiagonal (TD) of the full jacobian.
+ 
+	Diagonals for CN are of the form: dR_i/du_i = Rnp1[i] - 0.5*dt*jacobi[i][i](unp1)
+	Off-Diagonals for CN are of form: dR_i/du_j = Rnp1[i] - 0.5*dt*jacobi[i][j](unp1) for i==j
+								and	  dR_i/du_j = -0.5*dt*jacobi[i][j](unp1)          for i!=j*/
+int precond_Tridiag_CN(const Matrix<double> &v, Matrix<double> &p, const void *data);
+
+/// Preconditioning function for an Upper-Gauss-Seidel preconditioner on the implicit-CN method
+/** This function will be passed to PJFNK as the preconditioning operation for the Dove object. In this function,
+	DOVE will call user defined coefficient and Jacobi functions to apply a preconditioning operation on the linear
+	system. Note that each implicit method in DOVE must have its own preconditioner because the residuals are different.
+	Also, each type of preconditioning will have its own function.
+ 
+	UGS preconditioning:  Solve  (U*)p=v+Lp for p using input vector v with an Upper Triangular (U*) of the full jacobian
+											and a strict lower triangular (L) of the full jacobian.
+ 
+	Diagonals for CN are of the form: dR_i/du_i = Rnp1[i] - 0.5*dt*jacobi[i][i](unp1)
+	Off-Diagonals for CN are of form: dR_i/du_j = Rnp1[i] - 0.5*dt*jacobi[i][j](unp1) for i==j
+								and	  dR_i/du_j = -0.5*dt*jacobi[i][j](unp1)          for i!=j*/
+int precond_UpperGS_CN(const Matrix<double> &v, Matrix<double> &p, const void *data);
+
+/// Preconditioning function for a Lower-Gauss-Seidel preconditioner on the implicit-CN method
+/** This function will be passed to PJFNK as the preconditioning operation for the Dove object. In this function,
+	DOVE will call user defined coefficient and Jacobi functions to apply a preconditioning operation on the linear
+	system. Note that each implicit method in DOVE must have its own preconditioner because the residuals are different.
+	Also, each type of preconditioning will have its own function.
+ 
+	LGS preconditioning:  Solve  (L*)p=v+Up for p using input vector v and a Lower Triangular (L*) of the full jacobian.
+											and a strict upper triangular (U) of the full jacobian.
+ 
+	Diagonals for CN are of the form: dR_i/du_i = Rnp1[i] - 0.5*dt*jacobi[i][i](unp1)
+	Off-Diagonals for CN are of form: dR_i/du_j = Rnp1[i] - 0.5*dt*jacobi[i][j](unp1) for i==j
+								and	  dR_i/du_j = -0.5*dt*jacobi[i][j](unp1)          for i!=j*/
+int precond_LowerGS_CN(const Matrix<double> &v, Matrix<double> &p, const void *data);
+
+/// Preconditioning function for a Symmetric-Gauss-Seidel preconditioner on the implicit-CN method
+/** This function will be passed to PJFNK as the preconditioning operation for the Dove object. In this function,
+	DOVE will call user defined coefficient and Jacobi functions to apply a preconditioning operation on the linear
+	system. Note that each implicit method in DOVE must have its own preconditioner because the residuals are different.
+	Also, each type of preconditioning will have its own function.
+ 
+	SGS preconditioning:  Solve  (J)p=v for p using input vector v with the Jacobian matrix (J) approximately by first
+											solving as an Upper-Gauss-Seidel, then as a Lower-Gauss-Seidel.
+ 
+	Diagonals for CN are of the form: dR_i/du_i = Rnp1[i] - 0.5*dt*jacobi[i][i](unp1)
+	Off-Diagonals for CN are of form: dR_i/du_j = Rnp1[i] - 0.5*dt*jacobi[i][j](unp1) for i==j
+								and	  dR_i/du_j = -0.5*dt*jacobi[i][j](unp1)          for i!=j*/
+int precond_SymmetricGS_CN(const Matrix<double> &v, Matrix<double> &p, const void *data);
+
 /// Residual function for implicit-BDF2 method
 /** This function will be passed to PJFNK as the residual function for the Dove object. In this function,
 	DOVE will call the user defined rate functions to create a vector of residuals at the current iterate. That
@@ -400,6 +467,72 @@ int residual_CN(const Matrix<double> &u, Matrix<double> &Res, const void *data);
  
 	\note if rn = 0 (i.e. for first step) then this is same as BE method*/
 int residual_BDF2(const Matrix<double> &u, Matrix<double> &Res, const void *data);
+
+/// Preconditioning function for a Jacobi preconditioner on the implicit-BDF2 method
+/** This function will be passed to PJFNK as the preconditioning operation for the Dove object. In this function,
+	DOVE will call user defined coefficient and Jacobi functions to apply a preconditioning operation on the linear
+	system. Note that each implicit method in DOVE must have its own preconditioner because the residuals are different.
+	Also, each type of preconditioning will have its own function.
+ 
+	Jacobi preconditioning:  Solve  Dp=v for p using input vector v and the diagonals (D) of the full jacobian.
+ 
+	Diagonals for BDF2 are of the form: dR_i/du_i = an*Rnp1[i] - dt*jacobi[i][i](unp1)  */
+int precond_Jac_BDF2(const Matrix<double> &v, Matrix<double> &p, const void *data);
+
+/// Preconditioning function for a Tridiagonal preconditioner on the implicit-BDF2 method
+/** This function will be passed to PJFNK as the preconditioning operation for the Dove object. In this function,
+	DOVE will call user defined coefficient and Jacobi functions to apply a preconditioning operation on the linear
+	system. Note that each implicit method in DOVE must have its own preconditioner because the residuals are different.
+	Also, each type of preconditioning will have its own function.
+ 
+	Tridiagonal preconditioning:  Solve  (TD)p=v for p using input vector v and a Tridiagonal (TD) of the full jacobian.
+ 
+	Diagonals for BDF2 are of the form: dR_i/du_i = an*Rnp1[i] - dt*jacobi[i][i](unp1)
+	Off-Diagonals for BDF2 are of form: dR_i/du_j = an*Rnp1[i] - dt*jacobi[i][j](unp1) for i==j
+									and	  dR_i/du_j = -dt*jacobi[i][j](unp1)          for i!=j*/
+int precond_Tridiag_BDF2(const Matrix<double> &v, Matrix<double> &p, const void *data);
+
+/// Preconditioning function for an Upper-Gauss-Seidel preconditioner on the implicit-BDF2 method
+/** This function will be passed to PJFNK as the preconditioning operation for the Dove object. In this function,
+	DOVE will call user defined coefficient and Jacobi functions to apply a preconditioning operation on the linear
+	system. Note that each implicit method in DOVE must have its own preconditioner because the residuals are different.
+	Also, each type of preconditioning will have its own function.
+ 
+	UGS preconditioning:  Solve  (U*)p=v+Lp for p using input vector v with an Upper Triangular (U*) of the full jacobian
+											and a strict lower triangular (L) of the full jacobian.
+ 
+	Diagonals for BDF2 are of the form: dR_i/du_i = an*Rnp1[i] - dt*jacobi[i][i](unp1)
+	Off-Diagonals for BDF2 are of form: dR_i/du_j = an*Rnp1[i] - dt*jacobi[i][j](unp1) for i==j
+									and	dR_i/du_j = -dt*jacobi[i][j](unp1)          for i!=j*/
+int precond_UpperGS_BDF2(const Matrix<double> &v, Matrix<double> &p, const void *data);
+
+/// Preconditioning function for a Lower-Gauss-Seidel preconditioner on the implicit-BDF2 method
+/** This function will be passed to PJFNK as the preconditioning operation for the Dove object. In this function,
+	DOVE will call user defined coefficient and Jacobi functions to apply a preconditioning operation on the linear
+	system. Note that each implicit method in DOVE must have its own preconditioner because the residuals are different.
+	Also, each type of preconditioning will have its own function.
+ 
+	LGS preconditioning:  Solve  (L*)p=v+Up for p using input vector v and a Lower Triangular (L*) of the full jacobian.
+											and a strict upper triangular (U) of the full jacobian.
+ 
+	Diagonals for BDF2 are of the form: dR_i/du_i = an*Rnp1[i] - dt*jacobi[i][i](unp1)
+	Off-Diagonals for BDF2 are of form: dR_i/du_j = an*Rnp1[i] - dt*jacobi[i][j](unp1) for i==j
+									and	dR_i/du_j = -dt*jacobi[i][j](unp1)          for i!=j*/
+int precond_LowerGS_BDF2(const Matrix<double> &v, Matrix<double> &p, const void *data);
+
+/// Preconditioning function for a Symmetric-Gauss-Seidel preconditioner on the implicit-BDF2 method
+/** This function will be passed to PJFNK as the preconditioning operation for the Dove object. In this function,
+	DOVE will call user defined coefficient and Jacobi functions to apply a preconditioning operation on the linear
+	system. Note that each implicit method in DOVE must have its own preconditioner because the residuals are different.
+	Also, each type of preconditioning will have its own function.
+ 
+	SGS preconditioning:  Solve  (J)p=v for p using input vector v with the Jacobian matrix (J) approximately by first
+										solving as an Upper-Gauss-Seidel, then as a Lower-Gauss-Seidel.
+ 
+	Diagonals for BDF2 are of the form: dR_i/du_i = an*Rnp1[i] - dt*jacobi[i][i](unp1)
+	Off-Diagonals for BDF2 are of form: dR_i/du_j = an*Rnp1[i] - dt*jacobi[i][j](unp1) for i==j
+									and	dR_i/du_j = -dt*jacobi[i][j](unp1)          for i!=j*/
+int precond_SymmetricGS_BDF2(const Matrix<double> &v, Matrix<double> &p, const void *data);
 
 /// Default function
 double default_func(int i, const Matrix<double> &u, double t, const void *data);
