@@ -26,7 +26,6 @@
  *			RK4 and RKF => B.S. Desale, N.R. Dasre, "Numerical Solution of the System of Six Coupled Nonlinear ODEs by
  *							Runge-Kutta Fourth Order Method," Applied Math. Sci., 7, 287 - 305, 2013.
  *
- *	\note This kernel is still under construction, but basic functionality is available.
  *
  *  \author Austin Ladshaw
  *	\date 09/25/2017

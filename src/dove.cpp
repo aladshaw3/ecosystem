@@ -2125,7 +2125,6 @@ int DOVE_TESTS()
 	}
 	
 	/**  ---------    Test 01: Various methods for First Order Decay (No Coupling) -------------- */
-	/*
 	Dove test01;
 	test01.set_outputfile(file);
 	
@@ -2169,11 +2168,9 @@ int DOVE_TESTS()
 	test01.solve_all();
 	
 	fprintf(file,"\n --------------- End of Test01 ---------------- \n\n");
-	 */
 	/**  ------------------------------    END Test01   ---------------------------------- */
 	
 	/**  ---------    Test 02: Various methods for Nonlinear Coupled ODEs-------------- */
-	/*
 	Dove test02;
 	test02.set_outputfile(file);
 	fprintf(file,"Test02: Two variable Nonlinear Decay\n---------------------------------\ndu1/dt = -u1\ndu2/dt = u1*u2\n");
@@ -2224,11 +2221,9 @@ int DOVE_TESTS()
 	test02.solve_all();
 
 	fprintf(file,"\n --------------- End of Test02 ---------------- \n\n");
-	 */
 	/**  ------------------------------    END Test02   ---------------------------------- */
 	
 	/**  ---------    Test 03: Various methods for Linear Coupled ODEs as a PDE -------------- */
-	/*
 	Dove test03;
 	test03.set_outputfile(file);
 	fprintf(file,"Test03: Single Variable Linear PDE\n---------------------------------\ndu/dt = D*d^2u/dx^2\n");
@@ -2279,11 +2274,9 @@ int DOVE_TESTS()
 	test03.solve_all();
 	
 	fprintf(file,"\n --------------- End of Test03 ---------------- \n\n");
-	 */
 	/**  ------------------------------    END Test03   ---------------------------------- */
 	
 	/**  ---------    Test 04: Preconditioning for Linear Coupled ODEs as a PDE -------------- */
-	/*
 	Dove test04;
 	test04.set_outputfile(file);
 	fprintf(file,"Test04: Single Variable Linear PDE with Preconditioning\n---------------------------------\ndu/dt = D*d^2u/dx^2\n");
@@ -2308,7 +2301,7 @@ int DOVE_TESTS()
 	test04.set_NonlinearOutput(true);
 	test04.set_LinearOutput(false);
 	test04.set_LineSearchMethod(BT);
-	test04.set_LinearStatus(false);
+	test04.set_LinearStatus(true);
 	test04.set_MaxLinearIterations(1); //Need to do something about the restarts. They are adding to iteration count!
 	test04.set_RestartLimit(100);
 	test04.set_RecursionLevel(2);
@@ -2323,8 +2316,8 @@ int DOVE_TESTS()
 	test04.registerJacobi(data04.N-1, data04.N-2, Lap1D_Jac_BCN);
 	test04.registerJacobi(data04.N-1, data04.N-1, Lap1D_Jac_BCN);
 	
-	test04.set_LinearMethod(KMS);
-	test04.set_preconditioner(SGS);
+	test04.set_LinearMethod(GMRESRP);
+	test04.set_preconditioner(TRIDIAG);
 	test04.set_Preconditioning(true);
 	test04.set_output(true);
 	
@@ -2332,11 +2325,10 @@ int DOVE_TESTS()
 	for (int i=1; i<data04.N; i++)
 		test04.set_initialcondition(i, 0);
 	test04.set_timestep(0.05);
-	test04.set_integrationtype(BDF2);
+	test04.set_integrationtype(BE);
 	test04.solve_all();
 	
 	fprintf(file,"\n --------------- End of Test04 ---------------- \n\n");
-	 */
 	/**  ------------------------------    END Test04   ---------------------------------- */
 	
 	/**  ---------    Test 05: Preconditioning for NonLinear Coupled ODEs -------------- */
@@ -2345,8 +2337,8 @@ int DOVE_TESTS()
 	fprintf(file,"Test05: Single Variable Non-Linear 2D PDE with Preconditioning\n---------------------------------\ndu/dt = u*Lap(u)\n");
 	 
 	Test05_data data05;
-	data05.N = 2000;
-	data05.m = 80;	//NOTE: for this test, m should be between 2 and N-2
+	data05.N = 20000;
+	data05.m = 800;	//NOTE: for this test, m should be between 2 and N-2
 	test05.set_userdata((void*)&data05);
 	test05.set_output(true);
 	test05.set_numfunc(data05.N);
