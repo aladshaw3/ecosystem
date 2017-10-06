@@ -1311,13 +1311,13 @@ int precond_UpperGS_BE(const Matrix<double> &v, Matrix<double> &p, const void *d
 		//Forward iterator
 		for (it = dat->getJacobiMap(i).begin(); it->first<i; it++)
 		{
-			sum_lower = sum_lower + (-dat->getTimeStep()*dat->Eval_Jacobi(i, it->first, dat->getNewU(), dat->getCurrentTime())*p(it->first,0));
+			sum_lower = sum_lower + (-dat->getTimeStep()*it->second(i, it->first, dat->getNewU(), dat->getCurrentTime(),dat->getUserData())*p(it->first,0));
 		}
 		
 		//Iterate through the Jacobian map for the ith row (reverse iterator)
 		for (rit = dat->getJacobiMap(i).rbegin(); rit->first>i; rit++)
 		{
-			sum_upper = sum_upper + (-dat->getTimeStep()*dat->Eval_Jacobi(i, rit->first, dat->getNewU(), dat->getCurrentTime())*p(rit->first,0));
+			sum_upper = sum_upper + (-dat->getTimeStep()*rit->second(i, rit->first, dat->getNewU(), dat->getCurrentTime(),dat->getUserData())*p(rit->first,0));
 		}
 		
 		double value = (dat->Eval_Coeff(i, dat->getNewU(), dat->getCurrentTime()) - (dat->getTimeStep()*dat->Eval_Jacobi(i,i, dat->getNewU(),dat->getCurrentTime())));
@@ -1345,13 +1345,13 @@ int precond_LowerGS_BE(const Matrix<double> &v, Matrix<double> &p, const void *d
 		//Reverse iterator
 		for (rit = dat->getJacobiMap(i).rbegin(); rit->first>i; rit++)
 		{
-			sum_upper = sum_upper + (-dat->getTimeStep()*dat->Eval_Jacobi(i, rit->first, dat->getNewU(), dat->getCurrentTime())*p(rit->first,0));
+			sum_upper = sum_upper + (-dat->getTimeStep()*rit->second(i, rit->first, dat->getNewU(), dat->getCurrentTime(),dat->getUserData())*p(rit->first,0));
 		}
 		
 		//Iterate through the Jacobian map for the ith row (forward iterator)
 		for (it = dat->getJacobiMap(i).begin(); it->first<i; it++)
 		{
-			sum_lower = sum_lower + (-dat->getTimeStep()*dat->Eval_Jacobi(i, it->first, dat->getNewU(), dat->getCurrentTime())*p(it->first,0));
+			sum_lower = sum_lower + (-dat->getTimeStep()*it->second(i, it->first, dat->getNewU(), dat->getCurrentTime(),dat->getUserData())*p(it->first,0));
 		}
 		
 		double value = (dat->Eval_Coeff(i, dat->getNewU(), dat->getCurrentTime()) - (dat->getTimeStep()*dat->Eval_Jacobi(i,i, dat->getNewU(),dat->getCurrentTime())));
@@ -1482,13 +1482,13 @@ int precond_UpperGS_CN(const Matrix<double> &v, Matrix<double> &p, const void *d
 		//Forward iterator
 		for (it = dat->getJacobiMap(i).begin(); it->first<i; it++)
 		{
-			sum_lower = sum_lower + (-0.5*dat->getTimeStep()*dat->Eval_Jacobi(i, it->first, dat->getNewU(), dat->getCurrentTime())*p(it->first,0));
+			sum_lower = sum_lower + (-0.5*dat->getTimeStep()*it->second(i, it->first, dat->getNewU(), dat->getCurrentTime(),dat->getUserData())*p(it->first,0));
 		}
 		
 		//Iterate through the Jacobian map for the ith row (reverse iterator)
 		for (rit = dat->getJacobiMap(i).rbegin(); rit->first>i; rit++)
 		{
-			sum_upper = sum_upper + (-0.5*dat->getTimeStep()*dat->Eval_Jacobi(i, rit->first, dat->getNewU(), dat->getCurrentTime())*p(rit->first,0));
+			sum_upper = sum_upper + (-0.5*dat->getTimeStep()*rit->second(i, rit->first, dat->getNewU(), dat->getCurrentTime(),dat->getUserData())*p(rit->first,0));
 		}
 		
 		double value = (dat->Eval_Coeff(i, dat->getNewU(), dat->getCurrentTime()) - (0.5*dat->getTimeStep()*dat->Eval_Jacobi(i,i, dat->getNewU(),dat->getCurrentTime())));
@@ -1516,13 +1516,13 @@ int precond_LowerGS_CN(const Matrix<double> &v, Matrix<double> &p, const void *d
 		//Reverse iterator
 		for (rit = dat->getJacobiMap(i).rbegin(); rit->first>i; rit++)
 		{
-			sum_upper = sum_upper + (-0.5*dat->getTimeStep()*dat->Eval_Jacobi(i, rit->first, dat->getNewU(), dat->getCurrentTime())*p(rit->first,0));
+			sum_upper = sum_upper + (-0.5*dat->getTimeStep()*rit->second(i, rit->first, dat->getNewU(), dat->getCurrentTime(),dat->getUserData())*p(rit->first,0));
 		}
 		
 		//Iterate through the Jacobian map for the ith row (forward iterator)
 		for (it = dat->getJacobiMap(i).begin(); it->first<i; it++)
 		{
-			sum_lower = sum_lower + (-0.5*dat->getTimeStep()*dat->Eval_Jacobi(i, it->first, dat->getNewU(), dat->getCurrentTime())*p(it->first,0));
+			sum_lower = sum_lower + (-0.5*dat->getTimeStep()*it->second(i, it->first, dat->getNewU(), dat->getCurrentTime(),dat->getUserData())*p(it->first,0));
 		}
 		
 		double value = (dat->Eval_Coeff(i, dat->getNewU(), dat->getCurrentTime()) - (0.5*dat->getTimeStep()*dat->Eval_Jacobi(i,i, dat->getNewU(),dat->getCurrentTime())));
@@ -1684,13 +1684,13 @@ int precond_UpperGS_BDF2(const Matrix<double> &v, Matrix<double> &p, const void 
 		//Forward iterator
 		for (it = dat->getJacobiMap(i).begin(); it->first<i; it++)
 		{
-			sum_lower = sum_lower + (-dat->getTimeStep()*dat->Eval_Jacobi(i, it->first, dat->getNewU(), dat->getCurrentTime())*p(it->first,0));
+			sum_lower = sum_lower + (-dat->getTimeStep()*it->second(i, it->first, dat->getNewU(), dat->getCurrentTime(), dat->getUserData())*p(it->first,0));
 		}
 		
 		//Iterate through the Jacobian map for the ith row (reverse iterator)
 		for (rit = dat->getJacobiMap(i).rbegin(); rit->first>i; rit++)
 		{
-			sum_upper = sum_upper + (-dat->getTimeStep()*dat->Eval_Jacobi(i, rit->first, dat->getNewU(), dat->getCurrentTime())*p(rit->first,0));
+			sum_upper = sum_upper + (-dat->getTimeStep()*rit->second(i, rit->first, dat->getNewU(), dat->getCurrentTime(),dat->getUserData())*p(rit->first,0));
 		}
 		
 		double value = (an*dat->Eval_Coeff(i, dat->getNewU(), dat->getCurrentTime()) - (dat->getTimeStep()*dat->Eval_Jacobi(i,i, dat->getNewU(),dat->getCurrentTime())));
@@ -1725,13 +1725,13 @@ int precond_LowerGS_BDF2(const Matrix<double> &v, Matrix<double> &p, const void 
 		//Reverse iterator
 		for (rit = dat->getJacobiMap(i).rbegin(); rit->first>i; rit++)
 		{
-			sum_upper = sum_upper + (-dat->getTimeStep()*dat->Eval_Jacobi(i, rit->first, dat->getNewU(), dat->getCurrentTime())*p(rit->first,0));
+			sum_upper = sum_upper + (-dat->getTimeStep()*rit->second(i, rit->first, dat->getNewU(), dat->getCurrentTime(), dat->getUserData())*p(rit->first,0));
 		}
 		
 		//Iterate through the Jacobian map for the ith row (forward iterator)
 		for (it = dat->getJacobiMap(i).begin(); it->first<i; it++)
 		{
-			sum_lower = sum_lower + (-dat->getTimeStep()*dat->Eval_Jacobi(i, it->first, dat->getNewU(), dat->getCurrentTime())*p(it->first,0));
+			sum_lower = sum_lower + (-dat->getTimeStep()*it->second(i, it->first, dat->getNewU(), dat->getCurrentTime(), dat->getUserData())*p(it->first, 0));
 		}
 		
 		double value = (an*dat->Eval_Coeff(i, dat->getNewU(), dat->getCurrentTime()) - (dat->getTimeStep()*dat->Eval_Jacobi(i,i, dat->getNewU(),dat->getCurrentTime())));
