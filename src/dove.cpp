@@ -41,6 +41,7 @@ Dove::Dove()
 	newton_dat.LineSearch = true;
 	newton_dat.NL_Output = false;
 	DoveOutput = false;
+	DoveFileOutput = true;
 	Preconditioner = false;
 	newton_dat.lin_tol_abs = 1e-4;
 	newton_dat.lin_tol_rel = 0.01;
@@ -48,6 +49,7 @@ Dove::Dove()
 	newton_dat.nl_tol_rel = 1e-6;
 	newton_dat.kms_dat.max_level = 1;
 	newton_dat.l_maxit = 100;
+	linmax = 100;
 	newton_dat.nl_maxit = 10;
 	Linear = false;
 	newton_dat.l_restart = 100;
@@ -206,6 +208,12 @@ void Dove::set_output(bool choice)
 	this->DoveOutput = choice;
 }
 
+//Set file output
+void Dove::set_fileoutput(bool choice)
+{
+	this->DoveFileOutput = choice;
+}
+
 //Set the tolerance
 void Dove::set_tolerance(double tol)
 {
@@ -314,6 +322,7 @@ void Dove::set_MaxNonLinearIterations(int it)
 void Dove::set_MaxLinearIterations(int it)
 {
 	this->newton_dat.l_maxit = it;
+	this->linmax = it;
 }
 
 //Set restarts
@@ -683,6 +692,7 @@ int Dove::solve_timestep()
 	int success = 0;
 	if (this->int_type == IMPLICIT)
 	{
+		this->validate_linearsteps();
 		this->validate_precond();
 		success = pjfnk(this->residual, this->precon, this->unp1, &this->newton_dat, this, this);
 		this->Converged = this->newton_dat.Converged;
@@ -956,6 +966,38 @@ void Dove::validate_precond()
 		this->precon = NULL;
 }
 
+//Validate linear iterations
+void Dove::validate_linearsteps()
+{
+	//Check the method requested and set max iterations appropriately
+	switch (this->newton_dat.linear_solver)
+	{
+		case KMS:
+			this->newton_dat.l_maxit = this->linmax/this->newton_dat.l_restart/(1+this->newton_dat.kms_dat.max_level);
+			break;
+			
+		case GMRESRP:
+			this->newton_dat.l_maxit = this->linmax/this->newton_dat.l_restart;
+			break;
+			
+		case GMRESLP:
+			this->newton_dat.l_maxit = this->linmax/this->newton_dat.l_restart;
+			break;
+			
+		case GCR:
+			this->newton_dat.l_maxit = this->linmax/this->newton_dat.l_restart;
+			break;
+			
+		case GMRESR:
+			this->newton_dat.l_maxit = this->linmax/this->newton_dat.l_restart/2;
+			break;
+			
+		default:
+			break;
+	}
+	
+}
+
 //Update solution states
 void Dove::update_states()
 {
@@ -992,8 +1034,11 @@ int Dove::solve_all()
 {
 	int success = 0;
 	this->reset_all();
-	this->print_header();
-	this->print_result();
+	if (this->DoveFileOutput == true)
+	{
+		this->print_header();
+		this->print_result();
+	}
 	if (this->DoveOutput == true)
 	{
 		std::cout << "Dove Scheme: ";
@@ -1045,7 +1090,8 @@ int Dove::solve_all()
 			mError(simulation_fail);
 			return -1;
 		}
-		this->print_newresult();
+		if (this->DoveFileOutput == true)
+			this->print_newresult();
 		this->update_states();
 	} while (this->time_end > (this->time+this->dtmin));
 	if (this->DoveOutput == true)
@@ -1829,6 +1875,240 @@ double Lap1D_Jac_BCN(int i, int j, const Matrix<double> &u, double t, const void
 	else
 		return 0.0;
 }
+
+typedef struct
+{
+	int m;
+	int N;
+}Test05_data;
+
+double Lap2D_Nonlinear(int i, const Matrix<double> &u, double t, const void *data)
+{
+	Test05_data *dat = (Test05_data *) data;
+	
+	int upper = i+dat->m;
+	int lower = i-dat->m;
+	
+	if (upper >= dat->N)
+		upper = dat->N-1;
+	if (lower < 0)
+		lower = 0;
+	
+	int ub = i+1;
+	int lb = i-1;
+	
+	if (ub >= dat->N)
+		ub = dat->N-1;
+	if (lb < 0)
+		lb = 0;
+	
+	return u(i,0)*u(upper,0) + u(i,0)*u(ub,0) - 4.0*u(i,0)*u(i,0) + u(i,0)*u(lb,0) + u(i,0)*u(lower,0);
+}
+
+double Lap2D_NonlinearJac(int i, int j, const Matrix<double> &u, double t, const void *data)
+{
+	Test05_data *dat = (Test05_data *) data;
+	
+	int upper_i = i+dat->m;
+	int lower_i = i-dat->m;
+	
+	if (upper_i >= dat->N)
+		upper_i = dat->N-1;
+	if (lower_i < 0)
+		lower_i = 0;
+	
+	int ub_i = i+1;
+	int lb_i = i-1;
+	
+	if (ub_i >= dat->N)
+		ub_i = dat->N-1;
+	if (lb_i < 0)
+		lb_i = 0;
+	
+	int upper_j = j+dat->m;
+	int lower_j = j-dat->m;
+	
+	if (upper_j >= dat->N)
+		upper_j = dat->N-1;
+	if (lower_j < 0)
+		lower_j = 0;
+	
+	int ub_j = j+1;
+	int lb_j = j-1;
+	
+	if (ub_j >= dat->N)
+		ub_j = dat->N-1;
+	if (lb_j < 0)
+		lb_j = 0;
+	
+	double jac = 0.0;
+	if (i == 0)
+	{
+		if (j == i)
+		{
+			jac = u(upper_i,0) + u(ub_i,0) - 4.0*u(i,0);
+		}
+		else if (j == upper_i)
+		{
+			jac = u(i,0);
+		}
+		else if (j == ub_i)
+		{
+			jac = u(i,0);
+		}
+		else
+			jac = 0.0;
+	}
+	else if (i == 1)
+	{
+		if (j == 0)
+		{
+			jac = 2*u(i,0);
+		}
+		else if (j == i)
+		{
+			jac = u(upper_i,0) + u(ub_i,0) - 8.0*u(i,0) + u(lb_i,0) + u(lower_i,0);
+		}
+		else if (j == upper_i)
+		{
+			jac = u(i,0);
+		}
+		else if (j == ub_i)
+		{
+			jac = u(i,0);
+		}
+		else if (j == lb_i)
+		{
+			jac = u(i,0);
+		}
+		else
+			jac = 0.0;
+	}
+	else if (i < dat->m)
+	{
+		if (j == i)
+		{
+			jac = u(upper_i,0) + u(ub_i,0) - 8.0*u(i,0) + u(lb_i,0) + u(lower_i,0);
+		}
+		else if (j == upper_i)
+		{
+			jac = u(i,0);
+		}
+		else if (j == ub_i)
+		{
+			jac = u(i,0);
+		}
+		else if (j == lb_i)
+		{
+			jac = u(i,0);
+		}
+		else if (j == 0)
+		{
+			jac = u(i,0);
+		}
+		else
+			jac = 0.0;
+	}
+	else if (i >= dat->m && i < (dat->N-dat->m))
+	{
+		if (j == i)
+		{
+			jac = u(upper_i,0) + u(ub_i,0) - 8.0*u(i,0) + u(lb_i,0) + u(lower_i,0);
+		}
+		else if (j == upper_i)
+		{
+			jac = u(i,0);
+		}
+		else if (j == ub_i)
+		{
+			jac = u(i,0);
+		}
+		else if (j == lb_i)
+		{
+			jac = u(i,0);
+		}
+		else if (j == lower_i)
+		{
+			jac = u(i,0);
+		}
+		else
+			jac = 0.0;
+	}
+	else if (i >= (dat->N-dat->m) && i < (dat->N-2))
+	{
+		if (j == i)
+		{
+			jac = u(upper_i,0) + u(ub_i,0) - 8.0*u(i,0) + u(lb_i,0) + u(lower_i,0);
+		}
+		else if (j == upper_i)
+		{
+			jac = u(i,0);
+		}
+		else if (j == ub_i)
+		{
+			jac = u(i,0);
+		}
+		else if (j == lb_i)
+		{
+			jac = u(i,0);
+		}
+		else if (j == lower_i)
+		{
+			jac = u(i,0);
+		}
+		else
+			jac = 0.0;
+
+	}
+	else if (i == (dat->N-2))
+	{
+		if (j == (dat->N-1))
+		{
+			jac = 2*u(i,0);
+		}
+		else if (j == i)
+		{
+			jac = u(lower_i,0) + u(lb_i,0) - 8.0*u(i,0) + u(ub_i,0) + u(upper_i,0);
+		}
+		else if (j == lower_i)
+		{
+			jac = u(i,0);
+		}
+		else if (j == lb_i)
+		{
+			jac = u(i,0);
+		}
+		else if (j == ub_i)
+		{
+			jac = u(i,0);
+		}
+		else
+			jac = 0.0;
+	}
+	else if (i == (dat->N-1))
+	{
+		if (j == i)
+		{
+			jac = u(lower_i,0) + u(lb_i,0) - 4.0*u(i,0);
+		}
+		else if (j == lower_i)
+		{
+			jac = u(i,0);
+		}
+		else if (j == lb_i)
+		{
+			jac = u(i,0);
+		}
+		else
+			jac = 0.0;
+	}
+	else
+	{
+		jac = 0.0;
+	}
+	
+	return jac;
+}
 // -------------------- End temporary testing --------------------------
 
 //Test function
@@ -2003,6 +2283,7 @@ int DOVE_TESTS()
 	/**  ------------------------------    END Test03   ---------------------------------- */
 	
 	/**  ---------    Test 04: Preconditioning for Linear Coupled ODEs as a PDE -------------- */
+	/*
 	Dove test04;
 	test04.set_outputfile(file);
 	fprintf(file,"Test04: Single Variable Linear PDE with Preconditioning\n---------------------------------\ndu/dt = D*d^2u/dx^2\n");
@@ -2055,7 +2336,63 @@ int DOVE_TESTS()
 	test04.solve_all();
 	
 	fprintf(file,"\n --------------- End of Test04 ---------------- \n\n");
+	 */
 	/**  ------------------------------    END Test04   ---------------------------------- */
+	
+	/**  ---------    Test 05: Preconditioning for NonLinear Coupled ODEs -------------- */
+	Dove test05;
+	test05.set_outputfile(file);
+	fprintf(file,"Test05: Single Variable Non-Linear 2D PDE with Preconditioning\n---------------------------------\ndu/dt = u*Lap(u)\n");
+	 
+	Test05_data data05;
+	data05.N = 2000;
+	data05.m = 80;	//NOTE: for this test, m should be between 2 and N-2
+	test05.set_userdata((void*)&data05);
+	test05.set_output(true);
+	test05.set_numfunc(data05.N);
+	for (int i=0; i<data05.N; i++)
+		test05.registerFunction(i, Lap2D_Nonlinear);
+	test05.set_endtime(1.0);
+	test05.set_timestepper(CONSTANT);
+	test05.set_timestepmax(0.2);
+	test05.set_NonlinearOutput(true);
+	test05.set_LinearOutput(true);
+	test05.set_LineSearchMethod(BT);
+	test05.set_LinearStatus(false);
+	test05.set_LinearRelTol(1e-6);
+	test05.set_LinearAbsTol(1e-6);
+	test05.set_MaxLinearIterations(100);  //May want to tie MaxLinearIterations with RestartLimit somehow
+	test05.set_RestartLimit(100);
+	test05.set_RecursionLevel(2);
+	if (data05.N > 1000)
+	{
+		test05.set_fileoutput(false);
+		fprintf(file,"Test results to large to print to file\n");
+	}
+	
+	//Register only the jacobian elements in the bandwidth (this still contains many zeros)
+	for (int i=0; i<data05.N; i++)
+		for (int j=i-data05.m; j<=i+data05.m; j++)
+			if (j >= 0 && j < data05.N)
+			{
+				//Register only the Non-zero jacobian elements in the bandwidth (should be fully sparse)
+				if (j==i-data05.m || j==i+data05.m || j==i+1 || j==i-1 || j == i || j == 0 || j == data05.N-1)
+					test05.registerJacobi(i, j, Lap2D_NonlinearJac);
+			}
+	
+	test05.set_LinearMethod(GMRESRP);
+	test05.set_preconditioner(SGS);
+	test05.set_Preconditioning(true);
+	 
+	for (int i=0; i<data05.N; i++)
+		test05.set_initialcondition(i, (double)(i+1)/(double)data05.N*10.0);
+	test05.set_timestep(0.05);
+	test05.set_integrationtype(BDF2);
+	test05.solve_all();
+	
+	fprintf(file,"\n --------------- End of Test05 ---------------- \n\n");
+	
+	/**  ------------------------------    END Test05   ---------------------------------- */
 	
 	return success;
 }

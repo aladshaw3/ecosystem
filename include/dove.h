@@ -132,6 +132,7 @@ public:
 	void set_userdata(const void *data);				///< Set the user defined data structure
 	void set_initialcondition(int i, double ic);		///< Set the initial condition of variable i to value ic
 	void set_output(bool choice);						///< Set the value of DoveOutput (True if you want console messages)
+	void set_fileoutput(bool choice);					///< Set the value of DoveFileOuput (True if you want results printed to file)
 	void set_tolerance(double tol);						///< Set the value of residual/error tolerance desired
 	
 	//Set some default conditions
@@ -226,6 +227,7 @@ public:
 	
 	int solve_timestep();							///< Function to solve a single time step
 	void validate_precond();						///< Function to validate and set preconditioning pointer
+	void validate_linearsteps();					///< Function to check and validate the number of linear iterations
 	void update_states();							///< Function to update the stateful information
 	void update_timestep();							///< Function to update the timestep for the simulation
 	void reset_all();								///< Reset all the states
@@ -277,8 +279,10 @@ protected:
 	int num_func;									///< Number of functions in the system of ODEs
 	bool Converged;									///< Boolean to hold information on whether or not last step converged
 	bool DoveOutput;								///< Boolean to determine whether or not to print Dove messages to console
+	bool DoveFileOutput;							///< Boolean to determine whether or not to print Dove ouput to the file
 	bool Preconditioner;							///< Boolean to determine whether or not to use a preconditioner
 	bool Linear;									///< Boolean to determine whether or not to treat problem as linear
+	int linmax;										///< Users requested maximum number of linear steps
 	
 	/// Matrix object for user defined rate functions
 	Matrix<double (*) (int i, const Matrix<double> &u, double t, const void *data)> user_func;
