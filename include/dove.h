@@ -149,7 +149,9 @@ public:
 	void set_LinearMethod(krylov_method choice);		///< Sets the linear solver method to user choice
 	void set_LineSearchMethod(linesearch_type choice);	///< Sets the line search method to the user choice
 	void set_MaxNonLinearIterations(int it);			///< Set the maximum number of non-linear iterations
-	void set_MaxLinearIterations(int it);				///< Set the maximum number of linear iterations
+	void set_MaxLinearIterations(int it);				///< Set the maximum number of linear iterations (or number of restarts)
+	void set_RestartLimit(int it);						///< Sets the number of iterations before restarting
+	void set_RecursionLevel(int level);					///< Sets the maximum level of recursion for the KMS method
 	void set_LinearStatus(bool choice);					///< Sets the boolean to determine whether or not to treat as linear (true = Linear)
 	
 	/// Register the ith user function

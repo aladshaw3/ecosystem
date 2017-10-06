@@ -531,6 +531,7 @@ typedef struct
 	int fun_call = 0;			///< Actual number of function calls made
 	int nl_maxit = 0;			///< Maximum allowable non-linear steps
 	int l_maxit = 0;			///< Maximum allowable linear steps
+	int l_restart = -1;			///< Number of inner linear steps before restarting (for GMRES, GCR, KMS, etc)
 	int linear_solver = -1;		///< Flag to denote which linear solver to use - default = PJFNK Chooses
 	
 	double nl_tol_abs = 1e-6;   ///< Absolute Convergence tolerance for non-linear system - default = 1e-6

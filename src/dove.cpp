@@ -47,8 +47,10 @@ Dove::Dove()
 	newton_dat.nl_tol_abs = 1e-4;
 	newton_dat.nl_tol_rel = 1e-6;
 	newton_dat.kms_dat.max_level = 1;
-	newton_dat.l_maxit = 1000;
+	newton_dat.l_maxit = 100;
+	newton_dat.nl_maxit = 10;
 	Linear = false;
+	newton_dat.l_restart = 100;
 }
 
 //Default destructor
@@ -314,14 +316,26 @@ void Dove::set_MaxLinearIterations(int it)
 	this->newton_dat.l_maxit = it;
 }
 
+//Set restarts
+void Dove::set_RestartLimit(int it)
+{
+	this->newton_dat.l_restart = it;
+}
+
+//Set max level of recursion
+void Dove::set_RecursionLevel(int level)
+{
+	this->newton_dat.kms_dat.max_level = level;
+}
+
 //Set Linear Status
 void Dove::set_LinearStatus(bool choice)
 {
 	this->Linear = choice;
 	if (choice == true)
 	{
-		this->newton_dat.nl_maxit = 1;
-		this->newton_dat.lin_tol_rel = 1e-6;
+		this->newton_dat.nl_maxit = 5;
+		this->newton_dat.lin_tol_rel = 1e-5;
 		this->newton_dat.lin_tol_abs = 1e-4;
 	}
 }
@@ -1023,7 +1037,7 @@ int Dove::solve_all()
 		this->update_timestep();
 		if (this->DoveOutput == true)
 		{
-			std::cout << "\nSolving time (" << this->time << ") with time step (" << this->dt << "). Please wait...\n";
+			std::cout << "\nSolving (" << this->getNumFunc() << ") equation(s) at time (" << this->time << ") with time step (" << this->dt << "). Please wait...\n";
 		}
 		success = this->solve_timestep();
 		if (success != 0)
@@ -1994,7 +2008,7 @@ int DOVE_TESTS()
 	fprintf(file,"Test04: Single Variable Linear PDE with Preconditioning\n---------------------------------\ndu/dt = D*d^2u/dx^2\n");
 	
 	Test03_data data04;
-	data04.N = 10001;
+	data04.N = 101;
 	data04.L = 1.0;
 	data04.uo = 1.0;
 	data04.D = 2.0;
@@ -2011,10 +2025,12 @@ int DOVE_TESTS()
 	test04.set_timestepper(ADAPTIVE);
 	test04.set_timestepmax(0.2);
 	test04.set_NonlinearOutput(true);
-	test04.set_LinearOutput(true);
+	test04.set_LinearOutput(false);
 	test04.set_LineSearchMethod(BT);
 	test04.set_LinearStatus(false);
 	test04.set_MaxLinearIterations(1); //Need to do something about the restarts. They are adding to iteration count!
+	test04.set_RestartLimit(100);
+	test04.set_RecursionLevel(2);
 	
 	test04.registerJacobi(0, 0, Lap1D_Jac_BC0);
 	test04.registerJacobi(1, 0, Lap1D_Jac_BC1);
@@ -2026,7 +2042,7 @@ int DOVE_TESTS()
 	test04.registerJacobi(data04.N-1, data04.N-2, Lap1D_Jac_BCN);
 	test04.registerJacobi(data04.N-1, data04.N-1, Lap1D_Jac_BCN);
 	
-	test04.set_LinearMethod(GMRESRP);
+	test04.set_LinearMethod(KMS);
 	test04.set_preconditioner(SGS);
 	test04.set_Preconditioning(true);
 	test04.set_output(true);
@@ -2035,7 +2051,7 @@ int DOVE_TESTS()
 	for (int i=1; i<data04.N; i++)
 		test04.set_initialcondition(i, 0);
 	test04.set_timestep(0.05);
-	test04.set_integrationtype(BE);
+	test04.set_integrationtype(BDF2);
 	test04.solve_all();
 	
 	fprintf(file,"\n --------------- End of Test04 ---------------- \n\n");
