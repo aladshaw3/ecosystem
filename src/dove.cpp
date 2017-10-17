@@ -1319,8 +1319,9 @@ int precond_UpperGS_BE(const Matrix<double> &v, Matrix<double> &p, const void *d
 		{
 			sum_upper = sum_upper + (-dat->getTimeStep()*rit->second(i, rit->first, dat->getNewU(), dat->getCurrentTime(),dat->getUserData())*p(rit->first,0));
 		}
-		
-		double value = (dat->Eval_Coeff(i, dat->getNewU(), dat->getCurrentTime()) - (dat->getTimeStep()*dat->Eval_Jacobi(i,i, dat->getNewU(),dat->getCurrentTime())));
+		double value = dat->Eval_Coeff(i, dat->getNewU(), dat->getCurrentTime());
+		if (rit->first == i)
+			value += -(dat->getTimeStep()*rit->second(i,rit->first, dat->getNewU(),dat->getCurrentTime(), dat->getUserData()));
 		p.edit(i, 0, (v(i,0)-sum_upper-sum_lower)/value);
 	}
 	
@@ -1353,8 +1354,9 @@ int precond_LowerGS_BE(const Matrix<double> &v, Matrix<double> &p, const void *d
 		{
 			sum_lower = sum_lower + (-dat->getTimeStep()*it->second(i, it->first, dat->getNewU(), dat->getCurrentTime(),dat->getUserData())*p(it->first,0));
 		}
-		
-		double value = (dat->Eval_Coeff(i, dat->getNewU(), dat->getCurrentTime()) - (dat->getTimeStep()*dat->Eval_Jacobi(i,i, dat->getNewU(),dat->getCurrentTime())));
+		double value = dat->Eval_Coeff(i, dat->getNewU(), dat->getCurrentTime());
+		if (it->first == i)
+			value += -(dat->getTimeStep()*it->second(i,it->first, dat->getNewU(),dat->getCurrentTime(), dat->getUserData()));
 		p.edit(i, 0, (v(i,0)-sum_lower-sum_upper)/value);
 	}
 	
@@ -1490,8 +1492,9 @@ int precond_UpperGS_CN(const Matrix<double> &v, Matrix<double> &p, const void *d
 		{
 			sum_upper = sum_upper + (-0.5*dat->getTimeStep()*rit->second(i, rit->first, dat->getNewU(), dat->getCurrentTime(),dat->getUserData())*p(rit->first,0));
 		}
-		
-		double value = (dat->Eval_Coeff(i, dat->getNewU(), dat->getCurrentTime()) - (0.5*dat->getTimeStep()*dat->Eval_Jacobi(i,i, dat->getNewU(),dat->getCurrentTime())));
+		double value = dat->Eval_Coeff(i, dat->getNewU(), dat->getCurrentTime());
+		if (rit->first == i)
+			value += -(0.5*dat->getTimeStep()*rit->second(i,rit->first, dat->getNewU(),dat->getCurrentTime(), dat->getUserData()));
 		p.edit(i, 0, (v(i,0)-sum_upper-sum_lower)/value);
 	}
 	
@@ -1524,8 +1527,9 @@ int precond_LowerGS_CN(const Matrix<double> &v, Matrix<double> &p, const void *d
 		{
 			sum_lower = sum_lower + (-0.5*dat->getTimeStep()*it->second(i, it->first, dat->getNewU(), dat->getCurrentTime(),dat->getUserData())*p(it->first,0));
 		}
-		
-		double value = (dat->Eval_Coeff(i, dat->getNewU(), dat->getCurrentTime()) - (0.5*dat->getTimeStep()*dat->Eval_Jacobi(i,i, dat->getNewU(),dat->getCurrentTime())));
+		double value = dat->Eval_Coeff(i, dat->getNewU(), dat->getCurrentTime());
+		if (it->first == i)
+			value += -(0.5*dat->getTimeStep()*it->second(i,it->first, dat->getNewU(),dat->getCurrentTime(), dat->getUserData()));
 		p.edit(i, 0, (v(i,0)-sum_lower-sum_upper)/value);
 	}
 	
@@ -1692,8 +1696,9 @@ int precond_UpperGS_BDF2(const Matrix<double> &v, Matrix<double> &p, const void 
 		{
 			sum_upper = sum_upper + (-dat->getTimeStep()*rit->second(i, rit->first, dat->getNewU(), dat->getCurrentTime(),dat->getUserData())*p(rit->first,0));
 		}
-		
-		double value = (an*dat->Eval_Coeff(i, dat->getNewU(), dat->getCurrentTime()) - (dat->getTimeStep()*dat->Eval_Jacobi(i,i, dat->getNewU(),dat->getCurrentTime())));
+		double value = an*dat->Eval_Coeff(i, dat->getNewU(), dat->getCurrentTime());
+		if (rit->first == i)
+			value += -(dat->getTimeStep()*rit->second(i,rit->first, dat->getNewU(),dat->getCurrentTime(), dat->getUserData()));
 		p.edit(i, 0, (v(i,0)-sum_upper-sum_lower)/value);
 	}
 	
@@ -1733,8 +1738,9 @@ int precond_LowerGS_BDF2(const Matrix<double> &v, Matrix<double> &p, const void 
 		{
 			sum_lower = sum_lower + (-dat->getTimeStep()*it->second(i, it->first, dat->getNewU(), dat->getCurrentTime(), dat->getUserData())*p(it->first, 0));
 		}
-		
-		double value = (an*dat->Eval_Coeff(i, dat->getNewU(), dat->getCurrentTime()) - (dat->getTimeStep()*dat->Eval_Jacobi(i,i, dat->getNewU(),dat->getCurrentTime())));
+		double value = an*dat->Eval_Coeff(i, dat->getNewU(), dat->getCurrentTime());
+		if (it->first == i)
+			value += -(dat->getTimeStep()*it->second(i,it->first, dat->getNewU(),dat->getCurrentTime(), dat->getUserData()));
 		p.edit(i, 0, (v(i,0)-sum_lower-sum_upper)/value);
 	}
 	
