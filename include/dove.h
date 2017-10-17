@@ -170,7 +170,7 @@ public:
 	 
 		\note You are allowed to point to the same user function for all i, but you must make sure that the resulting system is
 		non-singular (i.e., use argument i passed to the function to denote interally which function you are at). */
-	void registerFunction(int i, double (*func) (int i, const Matrix<double> &u, double t, const void *data) );
+	void registerFunction(int i, double (*func) (int i, const Matrix<double> &u, double t, const void *data, const Dove &dove) );
 	
 	/// Register the ith time coeff function
 	/** This function will register the ith coeff function into the object. That function must accept as arguments the coefficient
@@ -180,7 +180,7 @@ public:
 		the time coefficient may be a function of location in space, which can be potentially identified by int i.
 	 
 		For example, in 1-D space, the distance x can be computed as x = dx*i for a regular grid. */
-	void registerCoeff(int i, double (*coeff) (int i, const Matrix<double> &u, double t, const void *data) );
+	void registerCoeff(int i, double (*coeff) (int i, const Matrix<double> &u, double t, const void *data, const Dove &dove) );
 	
 	/// Register the i-jth element of jacobian
 	/** This function will register the (i,j) jacobian function into the object. That function must accept as arguments the jacobi
@@ -193,7 +193,7 @@ public:
 	 
 		\note The jacobian information is used only in preconditioning actions taken by DOVE. The type of preconditioning can
 		be choosen by the user. There are standard types of preconditioning available. */
-	void registerJacobi(int i, int j, double (*jac) (int i, int j, const Matrix<double> &u, double t, const void *data) );
+	void registerJacobi(int i, int j, double (*jac) (int i, int j, const Matrix<double> &u, double t, const void *data, const Dove &dove) );
 	
 	void print_header();								///< Function to print out a header to output file
 	void print_newresult();								///< Function to print out the new result of n+1 time level
@@ -217,7 +217,7 @@ public:
 	double getNonlinearRelativeRes();				///< Returns the current value of the non-linear relative residual
 	
 	/// Function to return a reference to the Jacobian Matrix map at the ith row of the matrix
-	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data)> & getJacobiMap(int i);
+	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data, const Dove &dove)> & getJacobiMap(int i);
 	
 	double ComputeTimeStep();						///< Returns a computed value for the next time step
 	double Eval_Func(int i, const Matrix<double>& u, double t);			///< Evaluate user function i at given u matrix and time t
@@ -284,9 +284,9 @@ protected:
 	int linmax;										///< Users requested maximum number of linear steps
 	
 	/// Matrix object for user defined rate functions
-	Matrix<double (*) (int i, const Matrix<double> &u, double t, const void *data)> user_func;
+	Matrix<double (*) (int i, const Matrix<double> &u, double t, const void *data, const Dove &dove)> user_func;
 	/// Matrix object for user defined time coefficients (optional)
-	Matrix<double (*) (int i, const Matrix<double> &u, double t, const void *data)> user_coeff;
+	Matrix<double (*) (int i, const Matrix<double> &u, double t, const void *data, const Dove &dove)> user_coeff;
 	/// A vector of Maps for user defined Jacobian elements (optional)
 	/** This structure creates a Sparse Matrix of functions whose sparcity pattern is unknown at creation.
 		Each "vector" index denotes a row in the full matrix. In each row, there is a map of the non-zero
@@ -295,7 +295,7 @@ protected:
 	 
 		\note An unordered map would allow for faster access of specific elements, but may be slower when
 		iterating through that map. May consider changing to unordered map in the future. */
-	std::vector< std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data)> > user_jacobi;
+	std::vector< std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data, const Dove &dove)> > user_jacobi;
 	const void *user_data;														///< Pointer for user defined data structure
 	
 	PJFNK_DATA newton_dat;							///< Data structure for the PJFNK iterative method
@@ -540,13 +540,13 @@ int precond_LowerGS_BDF2(const Matrix<double> &v, Matrix<double> &p, const void 
 int precond_SymmetricGS_BDF2(const Matrix<double> &v, Matrix<double> &p, const void *data);
 
 /// Default function
-double default_func(int i, const Matrix<double> &u, double t, const void *data);
+double default_func(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
 
 /// Default time coefficient function
-double default_coeff(int i, const Matrix<double> &u, double t, const void *data);
+double default_coeff(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
 
 /// Default Jacobian element function
-double default_jacobi(int i, int j, const Matrix<double> &u, double t, const void *data);
+double default_jacobi(int i, int j, const Matrix<double> &u, double t, const void *data, const Dove &dove);
 
 /// Test function for DOVE kernel
 /** This function sets up and solves a test problem for DOVE. It is callable from the UI. */

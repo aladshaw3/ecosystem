@@ -350,7 +350,7 @@ void Dove::set_LinearStatus(bool choice)
 }
 
 //Register user function
-void Dove::registerFunction(int i, double (*func) (int i, const Matrix<double> &u, double t, const void *data) )
+void Dove::registerFunction(int i, double (*func) (int i, const Matrix<double> &u, double t, const void *data, const Dove &dove) )
 {
 	if ((*func) == NULL)
 	{
@@ -362,7 +362,7 @@ void Dove::registerFunction(int i, double (*func) (int i, const Matrix<double> &
 }
 
 //Register time coeff functions
-void Dove::registerCoeff(int i, double (*coeff) (int i, const Matrix<double> &u, double t, const void *data) )
+void Dove::registerCoeff(int i, double (*coeff) (int i, const Matrix<double> &u, double t, const void *data, const Dove &dove) )
 {
 	if ((*coeff) == NULL)
 		this->user_coeff.edit(i, 0, default_coeff);
@@ -371,7 +371,7 @@ void Dove::registerCoeff(int i, double (*coeff) (int i, const Matrix<double> &u,
 }
 
 //Register jacobians
-void Dove::registerJacobi(int i, int j, double (*jac) (int i, int j, const Matrix<double> &u, double t, const void *data) )
+void Dove::registerJacobi(int i, int j, double (*jac) (int i, int j, const Matrix<double> &u, double t, const void *data, const Dove &dove) )
 {
 	if ((*jac) == NULL)
 	{
@@ -578,7 +578,7 @@ double Dove::getNonlinearResidual()
 }
 
 //Return map
-std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data)> & Dove::getJacobiMap(int i)
+std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data, const Dove &dove)> & Dove::getJacobiMap(int i)
 {
 	return this->user_jacobi[i];
 }
@@ -663,26 +663,26 @@ double Dove::ComputeTimeStep()
 //Eval user function i
 double Dove::Eval_Func(int i, const Matrix<double>& u, double t)
 {
-	return this->user_func(i,0)(i,u,t,this->user_data);
+	return this->user_func(i,0)(i,u,t,this->user_data, *this);
 }
 
 //Eval user time coefficient function i
 double Dove::Eval_Coeff(int i, const Matrix<double>& u, double t)
 {
-	return this->user_coeff(i,0)(i,u,t,this->user_data);
+	return this->user_coeff(i,0)(i,u,t,this->user_data, *this);
 }
 
 //Eval user time coefficient function i
 double Dove::Eval_Jacobi(int i, int j, const Matrix<double>& u, double t)
 {
-	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data)>::iterator it = this->user_jacobi[i].find(j);
+	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data, const Dove &dove)>::iterator it = this->user_jacobi[i].find(j);
 	if (it == this->user_jacobi[i].end())
 	{
-		return default_jacobi(i,j,u,t,this->user_data);
+		return default_jacobi(i,j,u,t,this->user_data, *this);
 	}
 	else
 	{
-		return it->second(i,j,u,t,this->user_data);
+		return it->second(i,j,u,t,this->user_data, *this);
 	}
 }
 
@@ -1299,8 +1299,8 @@ int precond_UpperGS_BE(const Matrix<double> &v, Matrix<double> &p, const void *d
 	Dove *dat = (Dove *) data;
 	
 	double sum_upper = 0.0, sum_lower = 0.0;
-	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data)>::reverse_iterator rit;
-	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data)>::iterator it;
+	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data, const Dove &dove)>::reverse_iterator rit;
+	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data, const Dove &dove)>::iterator it;
 	
 	//Loop over rows
 	for (int i=dat->getNumFunc()-1; i>=0; i--)
@@ -1311,17 +1311,17 @@ int precond_UpperGS_BE(const Matrix<double> &v, Matrix<double> &p, const void *d
 		//Forward iterator
 		for (it = dat->getJacobiMap(i).begin(); it->first<i; it++)
 		{
-			sum_lower = sum_lower + (-dat->getTimeStep()*it->second(i, it->first, dat->getNewU(), dat->getCurrentTime(),dat->getUserData())*p(it->first,0));
+			sum_lower = sum_lower + (-dat->getTimeStep()*it->second(i, it->first, dat->getNewU(), dat->getCurrentTime(),dat->getUserData(),*dat)*p(it->first,0));
 		}
 		
 		//Iterate through the Jacobian map for the ith row (reverse iterator)
 		for (rit = dat->getJacobiMap(i).rbegin(); rit->first>i; rit++)
 		{
-			sum_upper = sum_upper + (-dat->getTimeStep()*rit->second(i, rit->first, dat->getNewU(), dat->getCurrentTime(),dat->getUserData())*p(rit->first,0));
+			sum_upper = sum_upper + (-dat->getTimeStep()*rit->second(i, rit->first, dat->getNewU(), dat->getCurrentTime(),dat->getUserData(),*dat)*p(rit->first,0));
 		}
 		double value = dat->Eval_Coeff(i, dat->getNewU(), dat->getCurrentTime());
 		if (rit->first == i)
-			value += -(dat->getTimeStep()*rit->second(i,rit->first, dat->getNewU(),dat->getCurrentTime(), dat->getUserData()));
+			value += -(dat->getTimeStep()*rit->second(i,rit->first, dat->getNewU(),dat->getCurrentTime(), dat->getUserData(),*dat));
 		p.edit(i, 0, (v(i,0)-sum_upper-sum_lower)/value);
 	}
 	
@@ -1334,8 +1334,8 @@ int precond_LowerGS_BE(const Matrix<double> &v, Matrix<double> &p, const void *d
 	int success = 0;
 	Dove *dat = (Dove *) data;
 	double sum_lower = 0.0, sum_upper = 0.0;
-	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data)>::iterator it;
-	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data)>::reverse_iterator rit;
+	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data, const Dove &dove)>::iterator it;
+	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data, const Dove &dove)>::reverse_iterator rit;
 	
 	//Loop over rows
 	for (int i=0; i<dat->getNumFunc(); i++)
@@ -1346,17 +1346,17 @@ int precond_LowerGS_BE(const Matrix<double> &v, Matrix<double> &p, const void *d
 		//Reverse iterator
 		for (rit = dat->getJacobiMap(i).rbegin(); rit->first>i; rit++)
 		{
-			sum_upper = sum_upper + (-dat->getTimeStep()*rit->second(i, rit->first, dat->getNewU(), dat->getCurrentTime(),dat->getUserData())*p(rit->first,0));
+			sum_upper = sum_upper + (-dat->getTimeStep()*rit->second(i, rit->first, dat->getNewU(), dat->getCurrentTime(),dat->getUserData(),*dat)*p(rit->first,0));
 		}
 		
 		//Iterate through the Jacobian map for the ith row (forward iterator)
 		for (it = dat->getJacobiMap(i).begin(); it->first<i; it++)
 		{
-			sum_lower = sum_lower + (-dat->getTimeStep()*it->second(i, it->first, dat->getNewU(), dat->getCurrentTime(),dat->getUserData())*p(it->first,0));
+			sum_lower = sum_lower + (-dat->getTimeStep()*it->second(i, it->first, dat->getNewU(), dat->getCurrentTime(),dat->getUserData(),*dat)*p(it->first,0));
 		}
 		double value = dat->Eval_Coeff(i, dat->getNewU(), dat->getCurrentTime());
 		if (it->first == i)
-			value += -(dat->getTimeStep()*it->second(i,it->first, dat->getNewU(),dat->getCurrentTime(), dat->getUserData()));
+			value += -(dat->getTimeStep()*it->second(i,it->first, dat->getNewU(),dat->getCurrentTime(), dat->getUserData(),*dat));
 		p.edit(i, 0, (v(i,0)-sum_lower-sum_upper)/value);
 	}
 	
@@ -1472,8 +1472,8 @@ int precond_UpperGS_CN(const Matrix<double> &v, Matrix<double> &p, const void *d
 	Dove *dat = (Dove *) data;
 	
 	double sum_upper = 0.0, sum_lower = 0.0;
-	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data)>::reverse_iterator rit;
-	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data)>::iterator it;
+	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data, const Dove &dove)>::reverse_iterator rit;
+	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data, const Dove &dove)>::iterator it;
 	
 	//Loop over rows
 	for (int i=dat->getNumFunc()-1; i>=0; i--)
@@ -1484,17 +1484,17 @@ int precond_UpperGS_CN(const Matrix<double> &v, Matrix<double> &p, const void *d
 		//Forward iterator
 		for (it = dat->getJacobiMap(i).begin(); it->first<i; it++)
 		{
-			sum_lower = sum_lower + (-0.5*dat->getTimeStep()*it->second(i, it->first, dat->getNewU(), dat->getCurrentTime(),dat->getUserData())*p(it->first,0));
+			sum_lower = sum_lower + (-0.5*dat->getTimeStep()*it->second(i, it->first, dat->getNewU(), dat->getCurrentTime(),dat->getUserData(),*dat)*p(it->first,0));
 		}
 		
 		//Iterate through the Jacobian map for the ith row (reverse iterator)
 		for (rit = dat->getJacobiMap(i).rbegin(); rit->first>i; rit++)
 		{
-			sum_upper = sum_upper + (-0.5*dat->getTimeStep()*rit->second(i, rit->first, dat->getNewU(), dat->getCurrentTime(),dat->getUserData())*p(rit->first,0));
+			sum_upper = sum_upper + (-0.5*dat->getTimeStep()*rit->second(i, rit->first, dat->getNewU(), dat->getCurrentTime(),dat->getUserData(),*dat)*p(rit->first,0));
 		}
 		double value = dat->Eval_Coeff(i, dat->getNewU(), dat->getCurrentTime());
 		if (rit->first == i)
-			value += -(0.5*dat->getTimeStep()*rit->second(i,rit->first, dat->getNewU(),dat->getCurrentTime(), dat->getUserData()));
+			value += -(0.5*dat->getTimeStep()*rit->second(i,rit->first, dat->getNewU(),dat->getCurrentTime(), dat->getUserData(),*dat));
 		p.edit(i, 0, (v(i,0)-sum_upper-sum_lower)/value);
 	}
 	
@@ -1507,8 +1507,8 @@ int precond_LowerGS_CN(const Matrix<double> &v, Matrix<double> &p, const void *d
 	int success = 0;
 	Dove *dat = (Dove *) data;
 	double sum_lower = 0.0, sum_upper = 0.0;
-	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data)>::iterator it;
-	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data)>::reverse_iterator rit;
+	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data, const Dove &dove)>::iterator it;
+	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data, const Dove &dove)>::reverse_iterator rit;
 	
 	//Loop over rows
 	for (int i=0; i<dat->getNumFunc(); i++)
@@ -1519,17 +1519,17 @@ int precond_LowerGS_CN(const Matrix<double> &v, Matrix<double> &p, const void *d
 		//Reverse iterator
 		for (rit = dat->getJacobiMap(i).rbegin(); rit->first>i; rit++)
 		{
-			sum_upper = sum_upper + (-0.5*dat->getTimeStep()*rit->second(i, rit->first, dat->getNewU(), dat->getCurrentTime(),dat->getUserData())*p(rit->first,0));
+			sum_upper = sum_upper + (-0.5*dat->getTimeStep()*rit->second(i, rit->first, dat->getNewU(), dat->getCurrentTime(),dat->getUserData(),*dat)*p(rit->first,0));
 		}
 		
 		//Iterate through the Jacobian map for the ith row (forward iterator)
 		for (it = dat->getJacobiMap(i).begin(); it->first<i; it++)
 		{
-			sum_lower = sum_lower + (-0.5*dat->getTimeStep()*it->second(i, it->first, dat->getNewU(), dat->getCurrentTime(),dat->getUserData())*p(it->first,0));
+			sum_lower = sum_lower + (-0.5*dat->getTimeStep()*it->second(i, it->first, dat->getNewU(), dat->getCurrentTime(),dat->getUserData(),*dat)*p(it->first,0));
 		}
 		double value = dat->Eval_Coeff(i, dat->getNewU(), dat->getCurrentTime());
 		if (it->first == i)
-			value += -(0.5*dat->getTimeStep()*it->second(i,it->first, dat->getNewU(),dat->getCurrentTime(), dat->getUserData()));
+			value += -(0.5*dat->getTimeStep()*it->second(i,it->first, dat->getNewU(),dat->getCurrentTime(), dat->getUserData(),*dat));
 		p.edit(i, 0, (v(i,0)-sum_lower-sum_upper)/value);
 	}
 	
@@ -1676,8 +1676,8 @@ int precond_UpperGS_BDF2(const Matrix<double> &v, Matrix<double> &p, const void 
 	an = (1.0 + (2.0*rn)) / (1.0 + rn);
 	
 	double sum_upper = 0.0, sum_lower = 0.0;
-	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data)>::reverse_iterator rit;
-	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data)>::iterator it;
+	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data, const Dove &dove)>::reverse_iterator rit;
+	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data, const Dove &dove)>::iterator it;
 	
 	//Loop over rows
 	for (int i=dat->getNumFunc()-1; i>=0; i--)
@@ -1688,17 +1688,17 @@ int precond_UpperGS_BDF2(const Matrix<double> &v, Matrix<double> &p, const void 
 		//Forward iterator
 		for (it = dat->getJacobiMap(i).begin(); it->first<i; it++)
 		{
-			sum_lower = sum_lower + (-dat->getTimeStep()*it->second(i, it->first, dat->getNewU(), dat->getCurrentTime(), dat->getUserData())*p(it->first,0));
+			sum_lower = sum_lower + (-dat->getTimeStep()*it->second(i, it->first, dat->getNewU(), dat->getCurrentTime(), dat->getUserData(),*dat)*p(it->first,0));
 		}
 		
 		//Iterate through the Jacobian map for the ith row (reverse iterator)
 		for (rit = dat->getJacobiMap(i).rbegin(); rit->first>i; rit++)
 		{
-			sum_upper = sum_upper + (-dat->getTimeStep()*rit->second(i, rit->first, dat->getNewU(), dat->getCurrentTime(),dat->getUserData())*p(rit->first,0));
+			sum_upper = sum_upper + (-dat->getTimeStep()*rit->second(i, rit->first, dat->getNewU(), dat->getCurrentTime(),dat->getUserData(),*dat)*p(rit->first,0));
 		}
 		double value = an*dat->Eval_Coeff(i, dat->getNewU(), dat->getCurrentTime());
 		if (rit->first == i)
-			value += -(dat->getTimeStep()*rit->second(i,rit->first, dat->getNewU(),dat->getCurrentTime(), dat->getUserData()));
+			value += -(dat->getTimeStep()*rit->second(i,rit->first, dat->getNewU(),dat->getCurrentTime(), dat->getUserData(),*dat));
 		p.edit(i, 0, (v(i,0)-sum_upper-sum_lower)/value);
 	}
 	
@@ -1711,8 +1711,8 @@ int precond_LowerGS_BDF2(const Matrix<double> &v, Matrix<double> &p, const void 
 	int success = 0;
 	Dove *dat = (Dove *) data;
 	double sum_lower = 0.0, sum_upper = 0.0;
-	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data)>::iterator it;
-	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data)>::reverse_iterator rit;
+	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data, const Dove &dove)>::iterator it;
+	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data, const Dove &dove)>::reverse_iterator rit;
 	
 	double rn = 0.0;
 	if (dat->getOldTime() > 0.0)
@@ -1730,17 +1730,17 @@ int precond_LowerGS_BDF2(const Matrix<double> &v, Matrix<double> &p, const void 
 		//Reverse iterator
 		for (rit = dat->getJacobiMap(i).rbegin(); rit->first>i; rit++)
 		{
-			sum_upper = sum_upper + (-dat->getTimeStep()*rit->second(i, rit->first, dat->getNewU(), dat->getCurrentTime(), dat->getUserData())*p(rit->first,0));
+			sum_upper = sum_upper + (-dat->getTimeStep()*rit->second(i, rit->first, dat->getNewU(), dat->getCurrentTime(), dat->getUserData(),*dat)*p(rit->first,0));
 		}
 		
 		//Iterate through the Jacobian map for the ith row (forward iterator)
 		for (it = dat->getJacobiMap(i).begin(); it->first<i; it++)
 		{
-			sum_lower = sum_lower + (-dat->getTimeStep()*it->second(i, it->first, dat->getNewU(), dat->getCurrentTime(), dat->getUserData())*p(it->first, 0));
+			sum_lower = sum_lower + (-dat->getTimeStep()*it->second(i, it->first, dat->getNewU(), dat->getCurrentTime(), dat->getUserData(),*dat)*p(it->first, 0));
 		}
 		double value = an*dat->Eval_Coeff(i, dat->getNewU(), dat->getCurrentTime());
 		if (it->first == i)
-			value += -(dat->getTimeStep()*it->second(i,it->first, dat->getNewU(),dat->getCurrentTime(), dat->getUserData()));
+			value += -(dat->getTimeStep()*it->second(i,it->first, dat->getNewU(),dat->getCurrentTime(), dat->getUserData(),*dat));
 		p.edit(i, 0, (v(i,0)-sum_lower-sum_upper)/value);
 	}
 	
@@ -1759,31 +1759,31 @@ int precond_SymmetricGS_BDF2(const Matrix<double> &v, Matrix<double> &p, const v
 }
 
 /// Default  function
-double default_func(int i, const Matrix<double> &u, double t, const void *data)
+double default_func(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove)
 {
 	return 0.0;
 }
 
 /// Default time coefficient function
-double default_coeff(int i, const Matrix<double> &u, double t, const void *data)
+double default_coeff(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove)
 {
 	return 1.0;
 }
 
 /// Default Jacobian element function
-double default_jacobi(int i, int j, const Matrix<double> &u, double t, const void *data)
+double default_jacobi(int i, int j, const Matrix<double> &u, double t, const void *data, const Dove &dove)
 {
 	return 0.0;
 }
 
 
 // -------------------- Begin temporary testing --------------------------
-double f0(int i, const Matrix<double> &x, double t, const void *res_data)
+double f0(int i, const Matrix<double> &x, double t, const void *res_data, const Dove &dove)
 {
 	return x(0,0) + 1;
 }
 
-double f1(int i, const Matrix<double> &x, double t, const void *res_data)
+double f1(int i, const Matrix<double> &x, double t, const void *res_data, const Dove &dove)
 {
 	return x(1,0) - x(0,0);
 }
@@ -1800,12 +1800,12 @@ int test_res(const Matrix<double> &x, Matrix<double> &Mx, const void *data)
 	return 0;
 }
 
-double first_order_decay(int i, const Matrix<double> &u, double t, const void *data)
+double first_order_decay(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove)
 {
 	return -u(i,0);
 }
 
-double nonlinear_first_order_decay(int i, const Matrix<double> &u, double t, const void *data)
+double nonlinear_first_order_decay(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove)
 {
 	return u(0,0)*u(1,0);
 }
@@ -1819,23 +1819,23 @@ typedef struct
 	double uo;
 }Test03_data;
 
-double Lap1D_BC0(int i, const Matrix<double> &u, double t, const void *data)
+double Lap1D_BC0(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove)
 {
 	return 0.0;
 }
 
-double Lap1D_Jac_BC0(int i, int j, const Matrix<double> &u, double t, const void *data)
+double Lap1D_Jac_BC0(int i, int j, const Matrix<double> &u, double t, const void *data, const Dove &dove)
 {
 	return 0.0;
 }
 
-double Lap1D_BC1(int i, const Matrix<double> &u, double t, const void *data)
+double Lap1D_BC1(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove)
 {
 	Test03_data *dat = (Test03_data *) data;
 	return (dat->D/dat->dx/dat->dx)*(u(i+1,0) - 2*u(i,0) + dat->uo);
 }
 
-double Lap1D_Jac_BC1(int i, int j, const Matrix<double> &u, double t, const void *data)
+double Lap1D_Jac_BC1(int i, int j, const Matrix<double> &u, double t, const void *data, const Dove &dove)
 {
 	Test03_data *dat = (Test03_data *) data;
 	if (i == j)
@@ -1846,13 +1846,13 @@ double Lap1D_Jac_BC1(int i, int j, const Matrix<double> &u, double t, const void
 		return 0.0;
 }
 
-double Lap1D_Interior(int i, const Matrix<double> &u, double t, const void *data)
+double Lap1D_Interior(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove)
 {
 	Test03_data *dat = (Test03_data *) data;
 	return (dat->D/dat->dx/dat->dx)*(u(i+1,0) - 2*u(i,0) + u(i-1,0));
 }
 
-double Lap1D_Jac_Interior(int i, int j, const Matrix<double> &u, double t, const void *data)
+double Lap1D_Jac_Interior(int i, int j, const Matrix<double> &u, double t, const void *data, const Dove &dove)
 {
 	Test03_data *dat = (Test03_data *) data;
 	if (i == j)
@@ -1865,13 +1865,13 @@ double Lap1D_Jac_Interior(int i, int j, const Matrix<double> &u, double t, const
 		return 0.0;
 }
 
-double Lap1D_BCN(int i, const Matrix<double> &u, double t, const void *data)
+double Lap1D_BCN(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove)
 {
 	Test03_data *dat = (Test03_data *) data;
 	return (dat->D/dat->dx/dat->dx)*(u(i-1,0) - 2*u(i,0) + u(i-1,0));
 }
 
-double Lap1D_Jac_BCN(int i, int j, const Matrix<double> &u, double t, const void *data)
+double Lap1D_Jac_BCN(int i, int j, const Matrix<double> &u, double t, const void *data, const Dove &dove)
 {
 	Test03_data *dat = (Test03_data *) data;
 	if (i == j)
@@ -1888,7 +1888,7 @@ typedef struct
 	int N;
 }Test05_data;
 
-double Lap2D_Nonlinear(int i, const Matrix<double> &u, double t, const void *data)
+double Lap2D_Nonlinear(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove)
 {
 	Test05_data *dat = (Test05_data *) data;
 	
@@ -1911,7 +1911,7 @@ double Lap2D_Nonlinear(int i, const Matrix<double> &u, double t, const void *dat
 	return u(i,0)*u(upper,0) + u(i,0)*u(ub,0) - 4.0*u(i,0)*u(i,0) + u(i,0)*u(lb,0) + u(i,0)*u(lower,0);
 }
 
-double Lap2D_NonlinearJac(int i, int j, const Matrix<double> &u, double t, const void *data)
+double Lap2D_NonlinearJac(int i, int j, const Matrix<double> &u, double t, const void *data, const Dove &dove)
 {
 	Test05_data *dat = (Test05_data *) data;
 	
@@ -2121,6 +2121,7 @@ double Lap2D_NonlinearJac(int i, int j, const Matrix<double> &u, double t, const
 int DOVE_TESTS()
 {
 	int success = 0;
+	double time;
 	
 	FILE *file;
 	file = fopen("output/DOVE_Tests.txt", "w+");
@@ -2386,7 +2387,11 @@ int DOVE_TESTS()
 		test05.set_initialcondition(i, (double)(i+1)/(double)data05.N*10.0);
 	test05.set_timestep(0.05);
 	test05.set_integrationtype(BDF2);
+	time = clock();
 	test05.solve_all();
+	
+	time = clock() - time;
+	std::cout << "\nSimulation Runtime: " << (time / CLOCKS_PER_SEC) << " seconds\n";
 	
 	fprintf(file,"\n --------------- End of Test05 ---------------- \n\n");
 	
