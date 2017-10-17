@@ -206,6 +206,7 @@ public:
 	double getOldU(int i) const;					///< Return the value of the n-1 level solution for variable i
 	double getNewU(int i) const;					///< Return the value of the n+1 level solution for variable i
 	double coupledTimeDerivative(int i) const;		///< Return the value of the ith variable's time derivative
+	double coupledDerivativeTimeDerivative(int i, int j) const; ///< Return the value of the ith variable's time derivative's jth derivative
 	const void *getUserData();						///< Return pointer to user data
 	int getNumFunc() const;							///< Return the number of functions
 	double getTimeStep() const;						///< Return the current time step

@@ -501,10 +501,21 @@ double Dove::getNewU(int i) const
 //Return du_i/dt
 double Dove::coupledTimeDerivative(int i) const
 {
-	if (this->getOldTime() > 0.0)
-		return (this->getNewU(i)-this->getOldU(i))/(this->getTimeStep()+this->getTimeStepOld());
+	return this->user_func(i,0)(i,this->unp1,this->getCurrentTime(),this->user_data, *this);
+}
+
+//Return d(du_i/dt)/du_j
+double Dove::coupledDerivativeTimeDerivative(int i, int j) const
+{
+	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data, const Dove &dove)>::const_iterator it = this->user_jacobi[i].find(j);
+	if (it == this->user_jacobi[i].end())
+	{
+		return default_jacobi(i,j,this->unp1,this->getCurrentTime(),this->user_data, *this);
+	}
 	else
-		return (this->getNewU(i)-this->getCurrentU(i))/this->getTimeStep();
+	{
+		return it->second(i,j,this->unp1,this->getCurrentTime(),this->user_data, *this);
+	}
 }
 
 //Return pointer to user data
