@@ -480,6 +480,33 @@ Matrix<double>& Dove::getNewU()
 	return this->unp1;
 }
 
+//Return u_n for i
+double Dove::getCurrentU(int i) const
+{
+	return this->un(i,0);
+}
+
+//Return u_n-1 for i
+double Dove::getOldU(int i) const
+{
+	return this->unm1(i,0);
+}
+
+//Return u_n+1 for i
+double Dove::getNewU(int i) const
+{
+	return this->unp1(i,0);
+}
+
+//Return du_i/dt
+double Dove::coupledTimeDerivative(int i) const
+{
+	if (this->getOldTime() > 0.0)
+		return (this->getNewU(i)-this->getOldU(i))/(this->getTimeStep()+this->getTimeStepOld());
+	else
+		return (this->getNewU(i)-this->getCurrentU(i))/this->getTimeStep();
+}
+
 //Return pointer to user data
 const void* Dove::getUserData()
 {
@@ -487,43 +514,43 @@ const void* Dove::getUserData()
 }
 
 //Return number of functions
-int Dove::getNumFunc()
+int Dove::getNumFunc() const
 {
 	return this->num_func;
 }
 
 //Return dt
-double Dove::getTimeStep()
+double Dove::getTimeStep() const
 {
 	return this->dt;
 }
 
 //Return dt_old
-double Dove::getTimeStepOld()
+double Dove::getTimeStepOld() const
 {
 	return this->dt_old;
 }
 
 //Return end time
-double Dove::getEndTime()
+double Dove::getEndTime() const
 {
 	return this->time_end;
 }
 
 //Return time
-double Dove::getCurrentTime()
+double Dove::getCurrentTime() const
 {
 	return this->time;
 }
 
 //Return time old
-double Dove::getOldTime()
+double Dove::getOldTime() const
 {
 	return this->time_old;
 }
 
 //Return older time
-double Dove::getOlderTime()
+double Dove::getOlderTime() const
 {
 	return this->time_older;
 }
@@ -2115,6 +2142,34 @@ double Lap2D_NonlinearJac(int i, int j, const Matrix<double> &u, double t, const
 	
 	return jac;
 }
+
+typedef struct
+{
+	double kldf;
+	double K;
+	double co;
+	double Q;
+	double eps;
+	double rho;
+} Test06_data;
+
+double ldf_kinetics(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove)
+{
+	Test06_data *dat = (Test06_data *) data;
+	return dat->kldf*(dat->K*u(1,0) - u(0,0));
+}
+
+double mb_timecoef(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove)
+{
+	Test06_data *dat = (Test06_data *) data;
+	return dat->eps;
+}
+
+double mb_cstr(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove)
+{
+	Test06_data *dat = (Test06_data *) data;
+	return dat->Q*dat->co - dat->Q*u(1,0) - dat->rho*dove.coupledTimeDerivative(0);
+}
 // -------------------- End temporary testing --------------------------
 
 //Test function
@@ -2132,6 +2187,7 @@ int DOVE_TESTS()
 	}
 	
 	/**  ---------    Test 01: Various methods for First Order Decay (No Coupling) -------------- */
+	
 	Dove test01;
 	test01.set_outputfile(file);
 	
@@ -2175,9 +2231,11 @@ int DOVE_TESTS()
 	test01.solve_all();
 	
 	fprintf(file,"\n --------------- End of Test01 ---------------- \n\n");
+	
 	/**  ------------------------------    END Test01   ---------------------------------- */
 	
 	/**  ---------    Test 02: Various methods for Nonlinear Coupled ODEs-------------- */
+	
 	Dove test02;
 	test02.set_outputfile(file);
 	fprintf(file,"Test02: Two variable Nonlinear Decay\n---------------------------------\ndu1/dt = -u1\ndu2/dt = u1*u2\n");
@@ -2228,9 +2286,11 @@ int DOVE_TESTS()
 	test02.solve_all();
 
 	fprintf(file,"\n --------------- End of Test02 ---------------- \n\n");
+	
 	/**  ------------------------------    END Test02   ---------------------------------- */
 	
 	/**  ---------    Test 03: Various methods for Linear Coupled ODEs as a PDE -------------- */
+	
 	Dove test03;
 	test03.set_outputfile(file);
 	fprintf(file,"Test03: Single Variable Linear PDE\n---------------------------------\ndu/dt = D*d^2u/dx^2\n");
@@ -2281,9 +2341,11 @@ int DOVE_TESTS()
 	test03.solve_all();
 	
 	fprintf(file,"\n --------------- End of Test03 ---------------- \n\n");
+	
 	/**  ------------------------------    END Test03   ---------------------------------- */
 	
 	/**  ---------    Test 04: Preconditioning for Linear Coupled ODEs as a PDE -------------- */
+
 	Dove test04;
 	test04.set_outputfile(file);
 	fprintf(file,"Test04: Single Variable Linear PDE with Preconditioning\n---------------------------------\ndu/dt = D*d^2u/dx^2\n");
@@ -2336,9 +2398,51 @@ int DOVE_TESTS()
 	test04.solve_all();
 	
 	fprintf(file,"\n --------------- End of Test04 ---------------- \n\n");
+	
 	/**  ------------------------------    END Test04   ---------------------------------- */
 	
+	/**  ---------    Test 06: Coupled Time Derivatives -------------- */
+	Dove test06;
+	test06.set_outputfile(file);
+	fprintf(file,"Test06: Multi-variable test for coupled Time Derivatives\n---------------------------------\n(eps)*dc/dt = Q*co - Q*c - (rho)*dq/dt\ndq/dt=k*(K*c-q)\n");
+	
+	Test06_data data06;
+	data06.kldf = 100.0;
+	data06.K = 5.0;
+	data06.eps = 0.5;
+	data06.co = 1.0;
+	data06.rho = 2.0;
+	data06.Q = 1.0;
+	test06.set_userdata((void*)&data06);
+	test06.set_output(true);
+	test06.set_numfunc(2);
+	test06.registerFunction(1, mb_cstr);
+	test06.registerFunction(0, ldf_kinetics);
+	test06.registerCoeff(1, mb_timecoef);
+	test06.set_endtime(10.0);
+	test06.set_timestepper(ADAPTIVE);
+	test06.set_timestepmax(0.5);
+	test06.set_NonlinearOutput(true);
+	test06.set_LinearOutput(false);
+	test06.set_LineSearchMethod(BT);
+	test06.set_LinearStatus(false);
+	test06.set_MaxNonLinearIterations(100);
+	
+	test06.set_LinearMethod(QR);
+	
+	test06.set_initialcondition(0, 0);
+	test06.set_initialcondition(1, 0);
+	test06.set_timestep(0.05);
+	test06.set_integrationtype(BDF2);
+	test06.solve_all();
+	
+	fprintf(file,"\n --------------- End of Test06 ---------------- \n\n");
+	
+	/**  ------------------------------    END Test06   ---------------------------------- */
+
+	
 	/**  ---------    Test 05: Preconditioning for NonLinear Coupled ODEs -------------- */
+	
 	Dove test05;
 	test05.set_outputfile(file);
 	fprintf(file,"Test05: Single Variable Non-Linear 2D PDE with Preconditioning\n---------------------------------\ndu/dt = u*Lap(u)\n");

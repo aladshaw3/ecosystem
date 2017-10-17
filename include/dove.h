@@ -202,14 +202,18 @@ public:
 	Matrix<double>& getCurrentU();					///< Return reference to the n level solution
 	Matrix<double>& getOldU();						///< Return reference to the n-1 level solution
 	Matrix<double>& getNewU();						///< Return reference to the n+1 level solution
+	double getCurrentU(int i) const;				///< Return the value of the n level solution for variable i
+	double getOldU(int i) const;					///< Return the value of the n-1 level solution for variable i
+	double getNewU(int i) const;					///< Return the value of the n+1 level solution for variable i
+	double coupledTimeDerivative(int i) const;		///< Return the value of the ith variable's time derivative
 	const void *getUserData();						///< Return pointer to user data
-	int getNumFunc();								///< Return the number of functions
-	double getTimeStep();							///< Return the current time step
-	double getTimeStepOld();						///< Return the old time step
-	double getEndTime();							///< Return value of end time
-	double getCurrentTime();						///< Return the value of current time
-	double getOldTime();							///< Return the value of the previous time
-	double getOlderTime();							///< Return the value of the older previous time
+	int getNumFunc() const;							///< Return the number of functions
+	double getTimeStep() const;						///< Return the current time step
+	double getTimeStepOld() const;					///< Return the old time step
+	double getEndTime() const;						///< Return value of end time
+	double getCurrentTime() const;					///< Return the value of current time
+	double getOldTime() const;						///< Return the value of the previous time
+	double getOlderTime() const;					///< Return the value of the older previous time
 	double getMinTimeStep();						///< Return the value of the minimum time step
 	double getMaxTimeStep();						///< Return the value of the maximum time step
 	bool hasConverged();							///< Returns state of convergence
@@ -219,7 +223,7 @@ public:
 	/// Function to return a reference to the Jacobian Matrix map at the ith row of the matrix
 	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data, const Dove &dove)> & getJacobiMap(int i);
 	
-	double ComputeTimeStep();						///< Returns a computed value for the next time step
+	double ComputeTimeStep();											///< Returns a computed value for the next time step
 	double Eval_Func(int i, const Matrix<double>& u, double t);			///< Evaluate user function i at given u matrix and time t
 	double Eval_Coeff(int i, const Matrix<double>& u, double t);		///< Evaluate user time coefficient function i at given u matrix and time t
 	double Eval_Jacobi(int i, int j, const Matrix<double>& u, double t);///< Evaluate user jacobian function for (i,j) at given u matrix and time t
