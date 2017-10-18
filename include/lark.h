@@ -530,6 +530,8 @@ typedef struct
 	int l_iter = 0;				///< Number of linear iterations
 	int fun_call = 0;			///< Actual number of function calls made
 	int nl_maxit = 0;			///< Maximum allowable non-linear steps
+	int l_maxit = 0;			///< Maximum allowable linear steps
+	int l_restart = -1;			///< Number of inner linear steps before restarting (for GMRES, GCR, KMS, etc)
 	int linear_solver = -1;		///< Flag to denote which linear solver to use - default = PJFNK Chooses
 	
 	double nl_tol_abs = 1e-6;   ///< Absolute Convergence tolerance for non-linear system - default = 1e-6
@@ -546,6 +548,7 @@ typedef struct
 	bool L_Output = false;		///< True = print Linear messages to console
 	bool LineSearch = false;	///< True = use Backtracking Linesearch for global convergence
 	bool Bounce = false;		///< True = allow Linesearch to go outside local well, False = Strict local convergence
+	bool Converged = false;		///< True = solution has converged, False = solution has not converged
 	
 	Matrix<double> F;					///< Stored fuction evaluation at x (also the residual)
 	Matrix<double> Fv;					///< Stored function evaluation at x+eps*v

@@ -1,0 +1,541 @@
+#NOTE: This input file has been updated for Temperature Effects
+
+Scenario:
+---
+- vars_fun:
+  numvar: 33
+  num_ssr: 14
+  num_mbe: 3
+  num_multi_sschem: 1
+
+- ss_multichemi_objs:
+  - obj01:
+    name: AF1
+    num_ligands: 2 
+
+- sys_data:
+  act_fun: davies    
+  const_pH: false
+  pH: 6.0	
+  temp: 283.15        
+  dielec: 78.325     
+  volume: 1.0 
+  reactor: batch
+  res_alk: 6.4e-5
+
+- run_time:
+  steady: true        
+  specs_curve: false  
+  pH_step: 0.25
+  temp_curve: false
+  start_temp: 273.15
+  end_temp: 323.15
+  temp_step: 2.5
+  
+...
+
+SolverOptions:
+---
+line_search: true      
+search_type: standard
+linear_solve: qr  
+nl_abstol: 1e-6
+nl_maxit: 10000	
+
+...
+
+MasterSpecies:
+---
+- reg:
+  0: H2O (l)
+  1: H + (aq)
+  2: OH - (aq)
+  3: HNO3 (aq)
+  4: NO3 - (aq)
+  5: UO2 2+ (aq)
+  6: UO2OH + (aq)
+  7: UO2(OH)2 (aq)
+  8: UO2(OH)3 - (aq)
+  9: UO2(OH)4 2- (aq)
+  10: (UO2)2OH 3+ (aq)
+  11: (UO2)2(OH)2 2+ (aq)
+  12: (UO2)3(OH)4 2+ (aq)
+  13: (UO2)3(OH)5 + (aq)
+  14: (UO2)3(OH)7 - (aq)
+  15: (UO2)4(OH)7 + (aq)
+  16: UO2NO3 + (aq)
+  17: UO2(NO3)2 (aq)
+
+
+- unreg:
+  - 18: 
+    formula: IDO 2- (ad)
+    charge: -2
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: cyclic-amidioxime
+    lin_form: none
+
+  - 19: 
+    formula: HIDO - (ad)
+    charge: -1
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: cyclic-amidioxime
+    lin_form: H
+
+  - 20: 
+    formula: H2IDO (ad)
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: cyclic-amidioxime
+    lin_form: H2
+
+  - 21: 
+    formula: H3IDO + (ad)
+    charge: 1
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: cyclic-amidioxime
+    lin_form: H3
+
+  - 22: 
+    formula: AO - (ad)
+    charge: -1
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: acyclic-amidioxime
+    lin_form: none
+
+  - 23: 
+    formula: HAO (ad)
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: acyclic-amidioxime
+    lin_form: H
+
+  - 24: 
+    formula: H2AO + (ad)
+    charge: 1
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: acyclic-amidioxime
+    lin_form: H2
+
+  - 25: 
+    formula: UO2AO + (ad)
+    charge: 1
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: uranyl-amidioxime
+    lin_form: UO2
+
+  - 26: 
+    formula: UO2(AO)2 (ad)
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: uranyl-di-amidioxime
+    lin_form: UO2
+
+  - 27: 
+    formula: UO2(AO)3 - (ad)
+    charge: -1
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: uranyl-tri-amidioxime
+    lin_form: UO2
+
+  - 28: 
+    formula: UO2IDO (ad)
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: uranyl-imide-dioxime
+    lin_form: UO2
+
+  - 29: 
+    formula: UO2HIDO + (ad)
+    charge: 1
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: uranyl-imide-dioxime
+    lin_form: UO2H
+
+  - 30: 
+    formula: UO2(IDO)2 2- (ad)
+    charge: -2
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: uranyl-diimide-dioxime
+    lin_form: UO2
+
+  - 31: 
+    formula: UO2(HIDO)IDO - (ad)
+    charge: -1
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: uranyl-diimide-dioxime
+    lin_form: UO2H
+
+  - 32: 
+    formula: UO2(HIDO)2 (ad)
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: uranyl-diimide-dioxime
+    lin_form: UO2H2
+
+...
+
+MassBalance:
+---
+- water:
+  total_conc: 1
+  initial_conc: 1
+  inlet_conc: 1
+  - delta: 
+    "H2O (l)": 1
+
+- nitrate:
+  total_conc: 6.38907E-05
+  initial_conc: 8.38824E-09
+  inlet_conc: 8.38824E-09
+  - delta:
+    "HNO3 (aq)": 1
+    "NO3 - (aq)": 1
+    "UO2NO3 + (aq)": 1
+    "UO2(NO3)2 (aq)": 2
+
+- uranyl:
+  total_conc: 3.19453E-05
+  initial_conc: 4.19412E-09
+  inlet_conc: 4.19412E-09
+  - delta:
+    "UO2NO3 + (aq)": 1
+    "UO2(NO3)2 (aq)": 1
+    "UO2 2+ (aq)": 1
+    "UO2OH + (aq)": 1
+    "UO2(OH)2 (aq)": 1
+    "UO2(OH)3 - (aq)": 1
+    "UO2(OH)4 2- (aq)": 1
+    "(UO2)2OH 3+ (aq)": 2
+    "(UO2)2(OH)2 2+ (aq)": 2
+    "(UO2)3(OH)4 2+ (aq)": 3
+    "(UO2)3(OH)5 + (aq)": 3
+    "(UO2)3(OH)7 - (aq)": 3
+    "(UO2)4(OH)7 + (aq)": 4
+    "UO2AO + (ad)": 1
+    "UO2(AO)2 (ad)": 1
+    "UO2(AO)3 - (ad)": 1
+    "UO2IDO (ad)": 1
+    "UO2HIDO + (ad)": 1
+    "UO2(IDO)2 2- (ad)": 1
+    "UO2(HIDO)IDO - (ad)": 1
+    "UO2(HIDO)2 (ad)": 1
+
+...
+
+EquilRxn:
+---
+- rxn00:
+  - stoichiometry:
+    "H2O (l)": -1
+    "OH - (aq)": 1
+    "H + (aq)": 1
+
+- rxn01:
+  - stoichiometry:
+    "HNO3 (aq)": -1
+    "NO3 - (aq)": 1
+    "H + (aq)": 1
+
+- rxn02:
+  - stoichiometry:
+    "NO3 - (aq)": -1
+    "UO2 2+ (aq)": -1
+    "UO2NO3 + (aq)": 1
+
+- rxn03:
+  - stoichiometry:
+    "NO3 - (aq)": -2
+    "UO2 2+ (aq)": -1
+    "UO2(NO3)2 (aq)": 1
+
+- rxn04:
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "H2O (l)": -1
+    "UO2OH + (aq)": 1
+    "H + (aq)": 1
+
+- rxn05:
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "H2O (l)": -3
+    "UO2(OH)3 - (aq)": 1
+    "H + (aq)": 3
+
+- rxn06:
+  - stoichiometry:
+    "UO2 2+ (aq)": -2
+    "H2O (l)": -2
+    "(UO2)2(OH)2 2+ (aq)": 1
+    "H + (aq)": 2
+
+- rxn07:
+  - stoichiometry:
+    "UO2 2+ (aq)": -3
+    "H2O (l)": -5
+    "(UO2)3(OH)5 + (aq)": 1
+    "H + (aq)": 5
+
+- rxn08:
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "H2O (l)": -2
+    "UO2(OH)2 (aq)": 1
+    "H + (aq)": 2
+
+- rxn09:
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "H2O (l)": -4
+    "UO2(OH)4 2- (aq)": 1
+    "H + (aq)": 4
+
+- rxn10:
+  - stoichiometry:
+    "UO2 2+ (aq)": -2
+    "H2O (l)": -1
+    "(UO2)2OH 3+ (aq)": 1
+    "H + (aq)": 1
+
+- rxn11:
+  - stoichiometry:
+    "UO2 2+ (aq)": -3
+    "H2O (l)": -4
+    "(UO2)3(OH)4 2+ (aq)": 1
+    "H + (aq)": 4
+
+- rxn12:
+  - stoichiometry:
+    "UO2 2+ (aq)": -3
+    "H2O (l)": -7
+    "(UO2)3(OH)7 - (aq)": 1
+    "H + (aq)": 7
+
+- rxn13:
+  - stoichiometry:
+    "UO2 2+ (aq)": -4
+    "H2O (l)": -7
+    "(UO2)4(OH)7 + (aq)": 1
+    "H + (aq)": 7
+
+...
+
+"AF1":
+---
+spec_area: 15000.0     #Units: m^2/kg
+total_mass: 1.506e-5     #Units: kg
+surf_activity: uniquac
+include_surfcharge: true
+
+- ligand01:
+  name: AO - (ad)
+  num_rxns: 5
+
+- ligand02:
+  name: IDO 2- (ad)
+  num_rxns: 8
+
+...
+
+#Keywords are energy, enthalpy, and entropy
+
+"AF1-AO - (ad)":
+---
+spec_mole: 1.45     #Units: mol/kg
+
+- rxn01:
+  logK: 13.6
+  energy: -77628.90292
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "AO - (ad)": -1
+    "UO2AO + (ad)": 1
+
+- rxn02:
+  #logK: 23.7  #Slava 
+  #energy: -135279.7794    #Slava
+  enthalpy: -45900
+  entropy: 297
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "AO - (ad)": -2
+    "UO2(AO)2 (ad)": 1
+
+- rxn03:
+  logK: 27.9
+  energy: -159253.4111
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "AO - (ad)": -3
+    "UO2(AO)3 - (ad)": 1
+
+- rxn04:
+  logK: 13.21
+  energy: -75402.77997
+  - stoichiometry:
+    "H + (aq)": -1
+    "AO - (ad)": -1
+    "HAO (ad)": 1
+
+- rxn05:
+  logK: 18.99
+  energy: -108395.0637
+  - stoichiometry:
+    "H + (aq)": -2
+    "AO - (ad)": -1
+    "H2AO + (ad)": 1
+
+...
+
+"AF1-IDO 2- (ad)":
+---
+spec_mole: 3.3     #Units: mol/kg
+
+- rxn01:
+  logK: 19.2
+  energy: -109593.7453
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "IDO 2- (ad)": -1
+    "UO2IDO (ad)": 1
+
+- rxn02:
+  logK: 23.5
+  energy: -134138.1778
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "H + (aq)": -1
+    "IDO 2- (ad)": -1
+    "UO2HIDO + (ad)": 1
+
+- rxn03:
+  logK: 29.0
+  energy: -165532.2195
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "IDO 2- (ad)": -2
+    "UO2(IDO)2 2- (ad)": 1
+
+- rxn04:
+  #logK: 38.9 #Slava
+  #energy: -222041.4944   #Slava
+  enthalpy: -133000
+  entropy: 297
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "H + (aq)": -1
+    "IDO 2- (ad)": -2
+    "UO2(HIDO)IDO - (ad)": 1
+
+- rxn05:
+  #logK: 44.2  #Slava 
+  #energy: -252293.9345   #Slava
+  enthalpy: -163000
+  entropy: 297
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "H + (aq)": -2
+    "IDO 2- (ad)": -2
+    "UO2(HIDO)2 (ad)": 1
+
+- rxn06:
+  logK: 12.85
+  energy: -73347.89725
+  - stoichiometry:
+    "H + (aq)": -1
+    "IDO 2- (ad)": -1
+    "HIDO - (ad)": 1
+
+- rxn07:
+  logK: 23.84
+  energy: -136078.9004
+  - stoichiometry:
+    "H + (aq)": -2
+    "IDO 2- (ad)": -1
+    "H2IDO (ad)": 1
+
+- rxn08:
+  logK: 25.97
+  energy: -148236.9565
+  - stoichiometry:
+    "H + (aq)": -3
+    "IDO 2- (ad)": -1
+    "H3IDO + (ad)": 1
+
+...

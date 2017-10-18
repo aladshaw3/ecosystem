@@ -32,12 +32,8 @@ line_search: true
 search_type: standard
 l_print: false
 linear_solve: qr  
-nl_abstol: 1e-4 
-local_min: true 
-
-- kms_options:
-  max_level: 0
-  inner_tol: 0.1  		
+nl_abstol: 1e-6 
+nl_maxit: 100		
 
 ...
 
@@ -95,7 +91,7 @@ MasterSpecies:
     charge: 1
     enthalpy: -1023568.7
     entropy: -106.414
-    have_HS: true
+    have_HS: false
     energy: 0
     have_G: false
     phase: adsorbed
@@ -107,7 +103,7 @@ MasterSpecies:
     charge: 0
     enthalpy: -972996.9
     entropy: 7.8759
-    have_HS: true
+    have_HS: false
     energy: 0
     have_G: false
     phase: adsorbed
@@ -119,7 +115,7 @@ MasterSpecies:
     charge: -1
     enthalpy: -729241.076
     entropy: 671.461
-    have_HS: true
+    have_HS: false
     energy: 0
     have_G: false
     phase: adsorbed
@@ -131,7 +127,7 @@ MasterSpecies:
     charge: -1
     enthalpy: -1741629.98
     entropy: -261.641
-    have_HS: true
+    have_HS: false
     energy: 0
     have_G: false
     phase: adsorbed
@@ -143,7 +139,7 @@ MasterSpecies:
     charge: -2
     enthalpy: -1667060.92
     entropy: -72.497
-    have_HS: true
+    have_HS: false
     energy: 0
     have_G: false
     phase: adsorbed
@@ -155,7 +151,7 @@ MasterSpecies:
     charge: 0
     enthalpy: -955716.98
     entropy: 30.3998
-    have_HS: true
+    have_HS: false
     energy: 0
     have_G: false
     phase: adsorbed
@@ -167,7 +163,7 @@ MasterSpecies:
     charge: 1
     enthalpy: -1012734.89
     entropy: -83.236
-    have_HS: true
+    have_HS: false
     energy: 0
     have_G: false
     phase: adsorbed
@@ -179,7 +175,7 @@ MasterSpecies:
     charge: -2
     enthalpy: -660147.92
     entropy: 773.1554
-    have_HS: true
+    have_HS: false
     energy: 0
     have_G: false
     phase: adsorbed
@@ -191,7 +187,7 @@ MasterSpecies:
     charge: -1
     enthalpy: -748364.334
     entropy: 662.5315
-    have_HS: true
+    have_HS: false
     energy: 0
     have_G: false
     phase: adsorbed
@@ -203,7 +199,7 @@ MasterSpecies:
     charge: 0
     enthalpy: -973627.99
     entropy: -9.3683
-    have_HS: true
+    have_HS: false
     energy: 0
     have_G: false
     phase: adsorbed
@@ -215,7 +211,7 @@ MasterSpecies:
     charge: -2
     enthalpy: -1724192.065
     entropy: -225.236
-    have_HS: true
+    have_HS: false
     energy: 0
     have_G: false
     phase: adsorbed
@@ -227,7 +223,7 @@ MasterSpecies:
     charge: -1
     enthalpy: -1929112.74
     entropy: -850.804
-    have_HS: true
+    have_HS: false
     energy: 0
     have_G: false
     phase: adsorbed
@@ -394,7 +390,7 @@ MassBalance:
     "UO2CO3HIDO - (ad)": 1
 
 - nitrate:
-  total_conc: 6.292E-05
+  total_conc: 6.29313E-05
   - delta:
     "HNO3 (aq)": 1
     "NO3 - (aq)": 1
@@ -402,7 +398,7 @@ MassBalance:
     "UO2(NO3)2 (aq)": 2
 
 - sodium: 
-  total_conc: 0.432640361
+  total_conc: 0.432465038
   - delta:
     "NaHCO3 (aq)": 1
     "NaCO3 - (aq)": 1
@@ -412,7 +408,7 @@ MassBalance:
     "NaOH (aq)": 1
 
 - uranyl:
-  total_conc: 3.146E-05
+  total_conc: 3.14657E-05
   - delta:
     "UO2NO3 + (aq)": 1
     "UO2(NO3)2 (aq)": 1
@@ -447,7 +443,7 @@ MassBalance:
     "UO2CO3HIDO - (ad)": 1
 
 - vanadium:
-  total_conc: 5.8235E-05
+  total_conc: 5.803E-05
   - delta:
     "VO2 + (aq)": 1
     "H3VO4 (aq)": 1 
@@ -713,7 +709,7 @@ EquilRxn:
 "AF1":
 ---
 spec_area: 15000.0     #Units: m^2/kg
-total_mass: 1.51e-5     #Units: kg
+total_mass: 1.5075e-5     #Units: kg
 surf_activity: uniquac
 include_surfcharge: true
 
@@ -729,12 +725,11 @@ include_surfcharge: true
 
 "AF1-HAO (ad)":
 ---
-spec_mole: 1.25       #Units: mol/kg
+spec_mole: 1.65       #Units: mol/kg
 ligand_charge: 0
 
 - rxn01:
-  #logK: 0.39
-  logK: 0.4
+  logK: 0.39
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -742,8 +737,7 @@ ligand_charge: 0
     "H + (aq)": 1
 
 - rxn02:
-  #logK: -2.72
-  logK: -2.85
+  logK: -2.72
   mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -751,8 +745,7 @@ ligand_charge: 0
     "H + (aq)": 2
 
 - rxn03:
-  #logK: -11.73
-  logK: -12.5
+  logK: -11.73
   mole_factor: 3.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -760,8 +753,7 @@ ligand_charge: 0
     "H + (aq)": 3
 
 - rxn04:
-  #logK: 2.59
-  logK: 2.7
+  logK: 2.59
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -770,8 +762,7 @@ ligand_charge: 0
     "H + (aq)": 1
 
 - rxn05:
-  #logK: -0.92
-  logK: -0.95
+  logK: -0.92
   mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -828,12 +819,11 @@ ligand_charge: 0
 
 "AF1-H2IDO (ad)":
 ---
-spec_mole: 2.05       #Units: mol/kg
+spec_mole: 1.65       #Units: mol/kg
 ligand_charge: 0
 
 - rxn01:
-  #logK: -4.64
-  logK: -4.85
+  logK: -4.64
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -841,8 +831,7 @@ ligand_charge: 0
     "H + (aq)": 2
 
 - rxn02:
-  #logK: -0.34
-  logK: -0.37
+  logK: -0.34
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -850,8 +839,7 @@ ligand_charge: 0
     "H + (aq)": 1
 
 - rxn03:
-  #logK: -18.68
-  logK: -20
+  logK: -18.68
   mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -859,8 +847,7 @@ ligand_charge: 0
     "H + (aq)": 4
 
 - rxn04:
-  #logK: -8.78
-  logK: -9.5
+  logK: -8.78
   mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -868,8 +855,7 @@ ligand_charge: 0
     "H + (aq)": 3
 
 - rxn05:
-  #logK: -3.48
-  logK: -3.65
+  logK: -3.48
   mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -877,8 +863,7 @@ ligand_charge: 0
     "H + (aq)": 2
 
 - rxn06:
-  #logK: 1.36
-  logK: 1.45
+  logK: 1.36
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -887,8 +872,7 @@ ligand_charge: 0
     "H + (aq)": 2
 
 - rxn07:
-  #logK: 5.36
-  logK: 6.25
+  logK: 5.36
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1

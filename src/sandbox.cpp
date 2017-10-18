@@ -207,6 +207,23 @@ double Eval_ApproximatePolySolution(Matrix<double> &c, double x)
 	return sum;
 }
 
+//Gradient integration
+double Gradient_Integral_PolyBasis(int i, int j, double lower, double upper)
+{
+	double Bij = 0.0;
+	
+	if (j == 0)
+		return Bij;
+	else
+	{
+		double exp = (double)(i+j);
+		double pre = (double)(j);
+		Bij = pre * ((pow(upper, exp)/exp) - (pow(lower, exp)/exp));
+	}
+	
+	return Bij;
+}
+
 //Laplacian integration
 double Laplacian_Integral_PolyBasis(int i, int j, double lower, double upper)
 {
@@ -235,7 +252,7 @@ double Overlap_Integral_PolyBasis(int i, int j, double lower, double upper)
 	return Oij;
 }
 
-//Residuals for Variational Polynomial Approximation method
+//Residuals for Variational Polynomial Approximation method Test 1
 int Eval_VPA_Test_Residuals(const Matrix<double> &x, Matrix<double> &F, const void *data)
 {
 	int success = 0;
@@ -264,6 +281,350 @@ int Eval_VPA_Test_Residuals(const Matrix<double> &x, Matrix<double> &F, const vo
 		}
 		F.edit(i+2, 0, Lap_sum - ((dat->k/dat->D)*Over_sum) + (x(0,0)*Eval_PolyBasisFunc(i, 0.0)) + (x(1,0)*Eval_1stDerivative_PolyBasisFunc(i, dat->L)));
 	}
+	
+	return success;
+}
+
+//Evaluate Trig Basis at x
+/*
+	Basis: 
+ 
+	phi_i(x) = 
+				cos(n*x)	with n=i/2			for i=0,2,4,6...
+				sin(n*x)	with n=(i+1)/2		for i=1,3,5,7...
+ */
+double Eval_TrigBasisFunc(int i, double x)
+{
+	double phi = 0.0;
+	
+	if (i == 0)
+		phi = 1.0;
+	else
+		(i % 2 == 0) ? phi = cos((double)(i/2)*x): phi = sin((double)((i+1)/2)*x);
+	
+	return phi;
+}
+
+//Evaluation of the 1st derivative of the trig basis
+double Eval_1stDerivative_TrigBasisFunc(int i, double x)
+{
+	double der = 0.0;
+	if (i < 1)
+		der = 0.0;
+	else
+		(i % 2 == 0) ? der = -(double)(i/2)*sin((double)(i/2)*x): der = (double)((i+1)/2)*cos((double)((i+1)/2)*x);
+	
+	return der;
+}
+
+//Evaluation of the 2nd derivative of the trig basis
+double Eval_2ndDerivative_TrigBasisFunc(int i, double x)
+{
+	double der = 0.0;
+	if (i < 1)
+		der = 0.0;
+	else
+		(i % 2 == 0) ? der= -(double)(i/2)*(double)(i/2)*cos((double)(i/2)*x):der= -(double)((i+1)/2)*(double)((i+1)/2)*sin((double)((i+1)/2)*x);
+	
+	return der;
+}
+
+//Evaluate the trig function
+double Eval_ApproximateTrigSolution(Matrix<double> &c, double x)
+{
+	double sum = 0.0;
+	for (int i=0; i<c.rows(); i++)
+	{
+		sum = sum + (c(i,0)*Eval_TrigBasisFunc(i, x));
+	}
+	return sum;
+}
+
+//Gradient integration
+double Gradient_Integral_TrigBasis(int i, int j, double lower, double upper)
+{
+	// Calculate n and m and determine function type
+	int n = 0, m = 0;
+	trig_type type_i, type_j;
+	if (i > 0) (i % 2 == 0) ? n = (i/2): n = ((i+1)/2);
+	if (j > 0) (j % 2 == 0) ? m = (j/2): m = ((j+1)/2);
+	
+	if (i > 0) (i % 2 == 0) ? type_i = COS: type_i = SIN;
+	else type_i = CONST;
+	if (j > 0) (j % 2 == 0) ? type_j = SIN: type_j = COS;
+	else type_j = CONST;
+	
+	//Note: if type_j == CONST, then Bij = 0, otherwise Bij = Oij*coeff, coeff = +/-m
+	double coeff = 0.0;
+	switch (type_j)
+	{
+		case CONST:
+			coeff = 0.0;
+			break;
+			
+		case SIN:
+			coeff = (double)m;
+			break;
+			
+		case COS:
+			coeff = -(double)m;
+			break;
+	}
+	
+	return coeff*TrigBasis_Integrals(type_i, type_j, n, m, lower, upper);
+}
+
+//Laplacian integration
+double Laplacian_Integral_TrigBasis(int i, int j, double lower, double upper)
+{
+	// Calculate n and m and determine function type
+	int n = 0, m = 0;
+	trig_type type_i, type_j;
+	if (i > 0) (i % 2 == 0) ? n = (i/2): n = ((i+1)/2);
+	if (j > 0) (j % 2 == 0) ? m = (j/2): m = ((j+1)/2);
+	
+	if (i > 0) (i % 2 == 0) ? type_i = COS: type_i = SIN;
+	else type_i = CONST;
+	if (j > 0) (j % 2 == 0) ? type_j = COS: type_j = SIN;
+	else type_j = CONST;
+	
+	//Note: if type_j == CONST, then Bij = 0, otherwise Bij = Oij*coeff, coeff = -m*m
+	double coeff = 0.0;
+	switch (type_j)
+	{
+		case CONST:
+			coeff = 0.0;
+			break;
+			
+		case SIN:
+			coeff = -(double)(m*m);
+			break;
+			
+		case COS:
+			coeff = -(double)(m*m);
+			break;
+	}
+	
+	return coeff*TrigBasis_Integrals(type_i, type_j, n, m, lower, upper);
+}
+
+//Overlap integrals
+double Overlap_Integral_TrigBasis(int i, int j, double lower, double upper)
+{
+	// Calculate n and m and determine function type
+	int n = 0, m = 0;
+	trig_type type_i, type_j;
+	if (i > 0) (i % 2 == 0) ? n = (i/2): n = ((i+1)/2);
+	if (j > 0) (j % 2 == 0) ? m = (j/2): m = ((j+1)/2);
+	
+	if (i > 0) (i % 2 == 0) ? type_i = COS: type_i = SIN;
+	else type_i = CONST;
+	if (j > 0) (j % 2 == 0) ? type_j = COS: type_j = SIN;
+	else type_j = CONST;
+	
+	/*
+	std::cout << n << "\t" << m << std::endl;
+	switch (type_i)
+	{
+		case CONST:
+			std::cout << "CONST\t";
+			break;
+			
+		case COS:
+			std::cout << "COS\t";
+			break;
+			
+		case SIN:
+			std::cout << "SIN\t";
+			break;
+	}
+	switch (type_j)
+	{
+		case CONST:
+			std::cout << "CONST\n";
+			break;
+			
+		case COS:
+			std::cout << "COS\n";
+			break;
+			
+		case SIN:
+			std::cout << "SIN\n";
+			break;
+	}
+	*/
+	return TrigBasis_Integrals(type_i, type_j, n, m, lower, upper);
+}
+
+//Function to compute a trig*trig integral from lower to upper bound in 1-D
+double TrigBasis_Integrals(trig_type type_i, trig_type type_j, int n, int m, double lower, double upper)
+{
+	double Oij = 0.0;
+	bool equal;
+	if (n == m) equal = true;
+	else equal = false;
+	
+	//Switch case for possible integrals
+	switch (type_i)
+	{
+		case CONST:
+		{
+			switch (type_j)
+			{
+				case CONST:
+					Oij = upper - lower;
+					break;
+					
+				case SIN:
+					Oij = -(cos(upper*(double)m) - cos(lower*(double)m))/(double)m;
+					break;
+					
+				case COS:
+					Oij = (sin(upper*(double)m) - sin(lower*(double)m))/(double)m;
+					break;
+			}
+		}
+			break;
+			
+		case SIN:
+		{
+			switch (type_j)
+			{
+				case CONST:
+					Oij = -(cos(upper*(double)n) - cos(lower*(double)n))/(double)n;
+					break;
+					
+				case SIN:
+					if (equal == true)
+						Oij = ((2.0*(double)n*(upper-lower)) + sin(2.0*lower*(double)n) - sin(2.0*upper*(double)n))/(4.0*(double)n);
+					else
+						Oij = ( -((double)n*sin(lower*(double)m)*cos(lower*(double)n)) + ((double)m*cos(lower*(double)m)*sin(lower*(double)n)) + ((double)n*sin(upper*(double)m)*cos(upper*(double)n)) - ((double)m*cos(upper*(double)m)*sin(upper*(double)n)) )/((double)(m*m) - (double)(n*n));
+					break;
+					
+				case COS:
+					if (equal == true)
+						Oij = (cos(2.0*lower*(double)n) - cos(2.0*upper*(double)n))/(4.0*(double)n);
+					else
+						Oij = ( -((double)m*sin(lower*(double)m)*sin(lower*(double)n)) - ((double)n*cos(lower*(double)m)*cos(lower*(double)n)) + ((double)m*sin(upper*(double)m)*sin(upper*(double)n)) + ((double)n*cos(upper*(double)m)*cos(upper*(double)n)) )/((double)(m*m) - (double)(n*n));
+					break;
+			}
+		}
+			break;
+			
+		case COS:
+		{
+			switch (type_j)
+			{
+				case CONST:
+					Oij = (sin(upper*(double)n) - sin(lower*(double)n))/(double)n;
+					break;
+					
+				case SIN:
+					if (equal == true)
+						Oij = (cos(2.0*lower*(double)n) - cos(2.0*upper*(double)n))/(4.0*(double)n);
+					else
+						Oij = ( ((double)n*sin(lower*(double)m)*sin(lower*(double)n)) + ((double)m*cos(lower*(double)m)*cos(lower*(double)n)) - ((double)n*sin(upper*(double)m)*sin(upper*(double)n)) - ((double)m*cos(upper*(double)m)*cos(upper*(double)n)) )/((double)(m*m) - (double)(n*n));
+					break;
+					
+				case COS:
+					if (equal == true)
+						Oij = ((2.0*(double)n*(upper-lower)) - sin(2.0*lower*(double)n) + sin(2.0*upper*(double)n))/(4.0*(double)n);
+					else
+						Oij = ( -((double)m*sin(lower*(double)m)*cos(lower*(double)n)) + ((double)n*cos(lower*(double)m)*sin(lower*(double)n)) + ((double)m*sin(upper*(double)m)*cos(upper*(double)n)) - ((double)n*cos(upper*(double)m)*sin(upper*(double)n)) )/((double)(m*m) - (double)(n*n));
+					break;
+			}
+		}
+			break;
+	}
+	
+	return Oij;
+}
+
+//Residuals for Variational Polynomial Approximation method Test 2
+int Eval_VPA_Test02_Residuals(const Matrix<double> &x, Matrix<double> &F, const void *data)
+{
+	int success = 0;
+	VPA_Test02_DATA *dat = (VPA_Test02_DATA *) data;
+	
+	//Note: x(0) = lambda_0 and x(1) = lambda_1
+	
+	//First two residuals are derivative of lambda for constraints
+	double res0 = 0.0, res1 = 0.0;
+	for (int i=0; i<dat->m; i++)
+	{
+		res0 = res0 + (x(i+2,0)*Eval_PolyBasisFunc(i, 0.0));
+		res1 = res1 + (x(i+2,0)*Eval_1stDerivative_PolyBasisFunc(i, dat->L));
+	}
+	F.edit(0, 0, res0 - dat->uo);
+	F.edit(1, 0, res1);
+	
+	double Grad_sum_np1 = 0.0, Over_sum_np1 = 0.0, Over_sum_n = 0.0, Lap_sum_np1 = 0.0;
+	double Grad_sum_n = 0.0, Lap_sum_n = 0.0;
+	for (int i=0; i<dat->m; i++)
+	{
+		Grad_sum_np1 = 0.0;
+		Lap_sum_np1 = 0.0;
+		Over_sum_np1 = 0.0;
+		Over_sum_n = 0.0;
+		Grad_sum_n = 0.0;
+		Lap_sum_n = 0.0;
+		for (int j=0; j<dat->m; j++)
+		{
+			Grad_sum_np1 = Grad_sum_np1 + (x(j+2,0)*Gradient_Integral_PolyBasis(i, j, 0.0, dat->L));
+			Grad_sum_n = Grad_sum_n + (dat->xn(j+2,0)*Gradient_Integral_PolyBasis(i, j, 0.0, dat->L));
+			Over_sum_np1 = Over_sum_np1 + (x(j+2,0)*Overlap_Integral_PolyBasis(i, j, 0.0, dat->L));
+			Over_sum_n = Over_sum_n + (dat->xn(j+2,0)*Overlap_Integral_PolyBasis(i, j, 0.0, dat->L));
+			Lap_sum_np1 = Lap_sum_np1 + (x(j+2,0)*Laplacian_Integral_PolyBasis(i, j, 0.0, dat->L));
+			Lap_sum_n = Lap_sum_n + (dat->xn(j+2,0)*Laplacian_Integral_PolyBasis(i, j, 0.0, dat->L));
+		}
+		F.edit(i+2, 0, Over_sum_np1 - Over_sum_n + (dat->beta*dat->dt*dat->v*Grad_sum_np1) + ((1.0-dat->beta)*dat->dt*dat->v*Grad_sum_n) - (dat->beta*dat->dt*dat->D*Lap_sum_np1) - ((1.0-dat->beta)*dat->dt*dat->D*Lap_sum_n) + (x(0,0)*Eval_PolyBasisFunc(i, 0.0)) + (x(1,0)*Eval_1stDerivative_PolyBasisFunc(i, dat->L)));
+	}
+
+	
+	return success;
+}
+
+//Residuals for Variational Polynomial Approximation method Test 2
+int Eval_VPA_Test03_Residuals(const Matrix<double> &x, Matrix<double> &F, const void *data)
+{
+	int success = 0;
+	VPA_Test02_DATA *dat = (VPA_Test02_DATA *) data;
+	
+	//Note: x(0) = lambda_0 and x(1) = lambda_1
+	
+	//First two residuals are derivative of lambda for constraints
+	double res0 = 0.0, res1 = 0.0;
+	for (int i=0; i<dat->m; i++)
+	{
+		res0 = res0 + (x(i+2,0)*Eval_TrigBasisFunc(i, 0.0));
+		res1 = res1 + (x(i+2,0)*Eval_1stDerivative_TrigBasisFunc(i, dat->L));
+	}
+	F.edit(0, 0, res0 - dat->uo);
+	F.edit(1, 0, res1);
+	
+	double Grad_sum_np1 = 0.0, Over_sum_np1 = 0.0, Over_sum_n = 0.0, Lap_sum_np1 = 0.0;
+	double Grad_sum_n = 0.0, Lap_sum_n = 0.0;
+	for (int i=0; i<dat->m; i++)
+	{
+		Grad_sum_np1 = 0.0;
+		Lap_sum_np1 = 0.0;
+		Over_sum_np1 = 0.0;
+		Over_sum_n = 0.0;
+		Grad_sum_n = 0.0;
+		Lap_sum_n = 0.0;
+		for (int j=0; j<dat->m; j++)
+		{
+			Grad_sum_np1 = Grad_sum_np1 + (x(j+2,0)*Gradient_Integral_TrigBasis(i, j, 0.0, dat->L));
+			Grad_sum_n = Grad_sum_n + (dat->xn(j+2,0)*Gradient_Integral_TrigBasis(i, j, 0.0, dat->L));
+			Over_sum_np1 = Over_sum_np1 + (x(j+2,0)*Overlap_Integral_TrigBasis(i, j, 0.0, dat->L));
+			Over_sum_n = Over_sum_n + (dat->xn(j+2,0)*Overlap_Integral_TrigBasis(i, j, 0.0, dat->L));
+			Lap_sum_np1 = Lap_sum_np1 + (x(j+2,0)*Laplacian_Integral_TrigBasis(i, j, 0.0, dat->L));
+			Lap_sum_n = Lap_sum_n + (dat->xn(j+2,0)*Laplacian_Integral_TrigBasis(i, j, 0.0, dat->L));
+			
+		}
+		F.edit(i+2, 0, Over_sum_np1 - Over_sum_n + (dat->beta*dat->dt*dat->v*Grad_sum_np1) + ((1.0-dat->beta)*dat->dt*dat->v*Grad_sum_n) - (dat->beta*dat->dt*dat->D*Lap_sum_np1) - ((1.0-dat->beta)*dat->dt*dat->D*Lap_sum_n) + (x(0,0)*Eval_TrigBasisFunc(i, 0.0)) + (x(1,0)*Eval_1stDerivative_TrigBasisFunc(i, dat->L)));
+	}
+	
 	
 	return success;
 }
@@ -661,12 +1022,122 @@ int RUN_SANDBOX()
 	b1.Display("b");
 	x1.Display("x");
 	
-	std::cout << "QR solve norm = " << (b1 - A1*x1).norm() << std::endl;
+	std::cout << "QR solve norm = " << (b1 - A1*x1).norm() << std::endl << std::endl;
 	
 	
 	// ------------------------------------- END QR Solve Example -----------------------------------------
 	
-
+	// ----------------------------- Example of Gauss-Seidel ------------------------------
+	Matrix<double> r1, U1, L1, s1;
+	r1.set_size(200, 1);
+	s1.set_size(200, 1);
+	A1.set_size(200, 200);
+	U1.set_size(200, 200);
+	L1.set_size(200, 200);
+	x1.set_size(200, 1);
+	b1.set_size(200, 1);
+	A1.tridiagonalFill(-1, 1.9999, -1, false);
+	U1.tridiagonalFill(0, 0, -1, false);
+	L1.tridiagonalFill(-1, 1.9999, 0, false);
+	//A1.Display("A");
+	x1.zeros();
+	b1(0,0) = 1.0;
+	r1 = (b1 - A1*x1);
+	double norm = (b1 - A1*x1).norm();
+	std::cout << "Gauss-Seidel Method" << std::endl;
+	std::cout << 0 << "\t" << norm << std::endl;
+	for (int i=0; i<10; i++)
+	{
+		s1.lowerTriangularSolve(A1, r1);
+		x1 = s1+x1;
+		r1 = (b1 - A1*x1);
+		
+		norm = (b1 - A1*x1).norm();
+		std::cout << i+1 << "\t" << norm << std::endl;
+	}
+	std::cout << "\n\n";
+	
+	// ------------------------------------- END Gauss-Seidel Example -----------------------------------------
+	
+	// ----------------------------- Example 02 of Varitational Polynomial Approximation ------------------------------
+	
+	std::cout << "Solve {du/dt + v*du/dx = D*d^2u/dx^2} Approximately with a constrained variational method and implicit/CN integration...\n\n";
+	
+	VPA_Test02_DATA vpa_dat02;
+	vpa_dat02.m = 11; //Polynomial order - this may be a bad basis set for advection problems
+	vpa_dat02.N = vpa_dat02.m + 2;
+	vpa_dat02.L = 1.0;
+	vpa_dat02.D = 0.2;
+	vpa_dat02.v = 5.0;
+	vpa_dat02.dt = 0.01;
+	vpa_dat02.uo = 1.0;
+	vpa_dat02.beta = 1.0;
+	vpa_dat02.cnp1.set_size(vpa_dat02.m, 1);
+	vpa_dat02.xnp1.set_size(vpa_dat02.N, 1);
+	
+	//Initial Conditions
+	vpa_dat02.cn.set_size(vpa_dat02.m, 1);
+	vpa_dat02.xn.set_size(vpa_dat02.N, 1);
+	vpa_dat02.cn.zeros();
+	vpa_dat02.cnp1.zeros();
+	vpa_dat02.xn.zeros();
+	vpa_dat02.xnp1.zeros();
+	
+	PJFNK_DATA vpa_newton02;
+	vpa_newton02.linear_solver = QR;
+	vpa_newton02.LineSearch = true;
+	vpa_newton02.nl_tol_abs = 1e-4;
+	vpa_newton02.nl_tol_rel = 1e-6;
+	vpa_newton02.NL_Output = false;
+	
+	double end_time = 1.0;
+	double current_time = 0.0;
+	dx = vpa_dat02.L/10.0;
+	std::cout << "\t-------------------- x values ------------------------------ \n";
+	std::cout << "Time";
+	x = 0.0;
+	for (int i=0; i<11; i++)
+	{
+		x = ((double)i*dx);
+		std::cout << "\t" << x;
+	}
+	std::cout << "\n";
+	do
+	{
+		x = 0.0;
+		std::cout << current_time;
+		for (int i=0; i<11; i++)
+		{
+			x = ((double)i*dx);
+			std::cout  << "\t" << Eval_ApproximatePolySolution(vpa_dat02.cnp1,x);
+			//std::cout  << "\t" << Eval_ApproximateTrigSolution(vpa_dat02.cnp1,x);
+		}
+		std::cout << "\n";
+		
+		success = pjfnk(Eval_VPA_Test02_Residuals, NULL, vpa_dat02.xnp1, &vpa_newton02, &vpa_dat02, &vpa_dat02);
+		//success = pjfnk(Eval_VPA_Test03_Residuals, NULL, vpa_dat02.xnp1, &vpa_newton02, &vpa_dat02, &vpa_dat02);
+	
+		for (int i=0; i<vpa_dat02.m; i++)
+		{
+			vpa_dat02.cnp1.edit(i, 0, vpa_dat02.xnp1(i+2,0));
+		}
+		
+		//Reset n = n+1 level
+		vpa_dat02.cn = vpa_dat02.cnp1;
+		vpa_dat02.xn = vpa_dat02.xnp1;
+		vpa_dat02.xnp1.zeros(); //Note: these are zeroed out because the method seems more efficient this way
+		current_time += vpa_dat02.dt;
+	} while (current_time <= end_time+vpa_dat02.dt);
+	
+	
+	// --------------------------------------------- END VPA Example 02 -----------------------------------------------
+	std::cout << "\n\n";
+	
+	//std::cout << TrigBasis_Integrals(COS, SIN, 2, 1, 0, 1) << std::endl;
+	//std::cout << Overlap_Integral_TrigBasis(4, 1, 0, 1) << std::endl;
+	//std::cout << Gradient_Integral_TrigBasis(4, 1, 0, 1) << std::endl;
+	//std::cout << Laplacian_Integral_TrigBasis(4, 1, 0, 1) << std::endl;
+	
 	std::cout << "\nEnd SANDBOX\n\n";
 	
 	return success;

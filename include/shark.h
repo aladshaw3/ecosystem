@@ -1,6 +1,6 @@
 /*!
  *  \file shark.h shark.cpp
- *	\brief Speciation-object Hierarchy for Aqueous Reaction Kinetics
+ *	\brief Speciation-object Hierarchy for Adsorption Reactions and Kinetics
  *	\details This file contains structures and functions associated with solving speciation and kinetic
  *			problems in aqueous systems. The primary aim for the development of these algorithms was to
  *			solve speciation and adsorption problems for the recovery of uranium resources from seawater.
@@ -816,6 +816,7 @@ public:
 		the primary aqueous index species appears opposite of the adsorbed species in the reactions. Note: This function
 		assumes that the adsorbed indices have already been set. */
 	int setAqueousIndexAuto();
+	void setActivityEnum(int act);						///< Set the surface activity enum value
 	void setMolarFactor(int rxn_i, double m);			///< Set the molar factor for the ith reaction (mol/mol)
 	void setVolumeFactor(int i, double v);				///< Set the ith volume factor for the species list (cm^3/mol)
 	void setAreaFactor(int i, double a);				///< Set the ith area factor for the species list (m^2/mol)
@@ -961,6 +962,7 @@ public:
 	int getNumberRxns();						///< Get the number of reactions involved in the adsorption object
 	int getAdsorbIndex(int i);					///< Get the index of the adsorbed species in the ith reaction
 	int getAqueousIndex(int i);					///< Get the index of the primary aqueous species in the ith reaction
+	int getActivityEnum();						///< Return the enum representing the choosen activity function
 	bool isAreaBasis();							///< Returns true if we are in the Area Basis, False if in Molar Basis
 	bool includeSurfaceCharge();				///< Returns true if we are considering surface charging during adsorption
 	std::string getAdsorbentName();				///< Returns the name of the adsorbent as a string
@@ -1128,6 +1130,337 @@ private:
 	
 };
 
+/// Chemisorption Reaction Object
+/** C++ Object to handle data and functions associated with forumlating adsorption equilibrium reactions
+	in a aqueous mixture based on chemisorption mechanisms. Each unique surface in a system will require 
+	an instance of this structure. This is very similar to AdsorptionReaction, however, this will include
+	a site balance residual that will allow us to consider protonation and deprotonation of the ligands.
+ 
+ */
+class ChemisorptionReaction : AdsorptionReaction
+{
+public:
+	ChemisorptionReaction();								///< Default Constructor
+	~ChemisorptionReaction();								///< Default Destructor
+	
+	void Initialize_Object(MasterSpeciesList &List, int n); ///< Function to call the initialization of objects sequentially
+	void Display_Info();									///< Display the adsorption reaction information
+	
+	/// Modify the Deltas in the MassBalance Object
+	/** This function will take a mass balance object as an argument and modify the deltas in that object to
+		correct for how adsorption affects that particular mass balance. Since adsorption can effect multiple
+		mass balances, this function must be called for each mass balance in the system.
+	 
+		\param mbo reference to the MassBalance Object the adsorption is acting on*/
+	void modifyMBEdeltas(MassBalance &mbo);
+	
+	/// Find and set the adsorbed species indices for each reaction object
+	/** This function searches through the Reaction objects in ChemisorptionReaction to find the adsorbed species
+		and their indices to set that information in the adsorb_index structure. Function will return 0 if successful 
+		and -1 on a failure.*/
+	int setAdsorbIndices();
+	
+	/// Find and set the ligand species index
+	/** This function searches through the Reaction objects in ChemisorptionReaction to find the ligand species
+		and its index to set that information in the ligand_index structure. Function will return 0 if successful
+		and -1 on a failure.*/
+	int setLigandIndex();
+	
+	/// Find and set all the delta values for the site balance
+	/** This function searches through all reaction object instances for the stoicheometry of the ligand in each 
+		adsorption reaction. That stoicheometry serves as the basis for determining the site balance. NOTE: the
+		delta for the ligand is set automatically in the setLigandIndex() function, so we can ignore that species.
+		In addition, this function must be called after setLigandIndex() and setAdsorbIndices() are called and 
+		after the stoicheometry of each reaction has been determined.*/
+	int setDeltas();
+	
+	/// Function to set the surface activity model and data pointer
+	/** This function will setup the surface activity model based on the given pointer arguments. If no arguments
+		are given, or are given as NULL, then the activity model will default to ideal solution assumption.*/
+	void setActivityModelInfo( int (*act) (const Matrix<double>& logq, Matrix<double> &activity, const void *data),
+							  const void *act_data);
+	
+	void setActivityEnum(int act);						///< Set the surface activity enum value
+	void setDelta(int i, double v);						///< Set the ith delta factor for the site balance
+	void setVolumeFactor(int i, double v);				///< Set the ith volume factor for the species list (cm^3/mol)
+	void setAreaFactor(int i, double a);				///< Set the ith area factor for the species list (m^2/mol)
+	void setSpecificArea(double a);						///< Set the specific area for the adsorbent (m^2/kg)
+	void setSpecificMolality(double a);					///< Set the specific molality for the adsorbent (mol/kg)
+	void setTotalMass(double m);						///< Set the total mass of the adsorbent (kg)
+	void setTotalVolume(double v);						///< Set the total volume of the system (L)
+	void setSurfaceChargeBool(bool opt);				///< Set the boolean for inclusion of surface charging
+	void setAdsorbentName(std::string name);			///< Set the name of the adsorbent to the given string
+	
+	void setChargeDensityValue(double a);				///< Set the value of the charge density parameter to a (C/m^2)
+	void setIonicStrengthValue(double a);				///< Set the value of the ionic strength parameter to a (mol/L)
+	void setActivities(Matrix<double> &x);				///< Set the values of activities in the activity matrix
+	
+	void calculateAreaFactors();						///< Calculates the area factors used from the van der Waals volumes
+	void calculateEquilibria(double T);					///< Calculates all equilibrium parameters as a function of temperature
+	void setChargeDensity(const Matrix<double> &x);		///< Calculates and sets the current value of charge density
+	void setIonicStrength(const Matrix<double> &x);		///< Calculates and sets the current value of ionic strength
+	int callSurfaceActivity(const Matrix<double> &x);	///< Calls the activity model and returns an int flag for success or failure
+	
+	/// Function to calculate the surface charge density based on concentrations
+	/** This function is used to calculate the surface charge density of the adsorbed species based on
+		the charges and concentrations of the adsorbed species. The calculation is used to correct the
+		adsorption equilibria constant based on a localized surface charge balance. This requires that
+		you know the molality of the uncomplexed ligand species on the surface, as well as the specific
+		surface area for the adsorbent.
+	 
+		\param x matrix of the log(C) concentration values at the current non-linear step*/
+	double calculateSurfaceChargeDensity( const Matrix<double> &x);
+	
+	/// Function calculates the Psi (electric surface potential) given a set of arguments
+	/** This function will calculate the electric surface potential of the adsorbent under the current
+		conditions of charge density, temperature, ionic strength, and relative permittivity.
+	 
+		\param sigma charge density of the surface (C/m^2)
+		\param T temperature of the system in question (K)
+		\param I ionic strength of the medium the surface is in (mol/L)
+		\param rel_epsilon relative permittivity of the medium (Unitless) */
+	double calculateElecticPotential(double sigma, double T, double I, double rel_epsilon);
+	
+	/// Function to calculate the net exchange of charges of the aqeous species involved in a given reaction
+	/** This function will look at all aqueous species involved in the ith adsorption reaction and sum up
+		their stoicheometries and charges to see what the net change in charge is caused by the adsorption
+		of charged species in solution. It is then used to adjust or correct the equilibrium constant for
+		the given adsorption reaction.
+	 
+		\param i index of the reaction of interest for the adsorption object*/
+	double calculateAqueousChargeExchange(int i);
+	
+	/// Function to calculate the correction term for the equilibrium parameter
+	/** This function calculates the correction term that gets applied to the equilibrium parameter to
+		correct for surface charge and charge accumulation/depletion effects. It will call the psi approximation
+		and charge exchange functions, therefore it needs to have those functions arguments passed to it as well.
+	 
+		\param sigma charge density of the surface (C/m^2)
+		\param T temperature of the system in question (K)
+		\param I ionic strength of the medium the surface is in (mol/L)
+		\param rel_epsilon relative permittivity of the medium (Unitless)
+		\param i index of the reaction of interest for the adsorption object*/
+	double calculateEquilibriumCorrection(double sigma, double T, double I, double rel_epsilon, int i);
+	
+	/// Calculates the residual for the ith reaction in the system
+	/** This function will provide a system residual for the ith reaction object involved in the Adsorption
+		Reaction. The residual is fed into the SHARK solver to find the solution to solid and aqueous phase
+		concentrations simultaneously. This function will also adjust the equilibrium parameter for the reaction
+		
+	 
+		\param x matrix of the log(C) concentration values at the current non-linear step
+		\param gama matrix of activity coefficients for each species at the current non-linear step
+		\param T temperature of the system in question (K)
+		\param rel_perm relative permittivity of the media (unitless)
+		\param i index of the reaction of interest for the adsorption object*/
+	double Eval_RxnResidual(const Matrix<double> &x, const Matrix<double> &gama, double T, double rel_perm, int i);
+	
+	/// Calculates the residual for the overall site balance
+	/** This function will provide a system residual for the site/ligand balance for the Chemisorption
+		Reaction object. The residual is fed into the SHARK solver to find the solution to solid and aqueous phase
+		concentrations simultaneously.
+		
+	 
+		\param x matrix of the log(C) concentration values at the current non-linear step*/
+	double Eval_SiteBalanceResidual(const Matrix<double> &x);
+	
+	Reaction& getReaction(int i);				///< Return reference to the ith reaction object in the adsorption object
+	double getDelta(int i);						///< Get the ith delta factor for the site balance
+	double getVolumeFactor(int i);				///< Get the ith volume factor (species not involved return zeros) (cm^3/mol)
+	double getAreaFactor(int i);				///< Get the ith area factor (species not involved return zeros) (m^2/mol)
+	double getActivity(int i);					///< Get the ith activity factor for the surface species
+	double getSpecificArea();					///< Get the specific area of the adsorbent (m^2/kg) or (mol/kg)
+	double getSpecificMolality();				///< Get the specific molality of the adsorbent (mol/kg)
+	double getBulkDensity();					///< Calculate and return bulk density of adsorbent in system (kg/L)
+	double getTotalMass();						///< Get the total mass of adsorbent in the system (kg)
+	double getTotalVolume();					///< Get the total volume of the system (L)
+	double getChargeDensity();					///< Get the value of the surface charge density (C/m^2)
+	double getIonicStrength();					///< Get the value of the ionic strength of solution (mol/L)
+	int getNumberRxns();						///< Get the number of reactions involved in the adsorption object
+	int getAdsorbIndex(int i);					///< Get the index of the adsorbed species in the ith reaction
+	int getLigandIndex();						///< Get the index of the ligand species
+	int getActivityEnum();						///< Return the enum representing the choosen activity function
+	bool includeSurfaceCharge();				///< Returns true if we are considering surface charging during adsorption
+	std::string getAdsorbentName();				///< Returns the name of the adsorbent as a string
+	
+protected:
+	int ligand_index;						///< Index of the ligand for all reactions
+	std::vector<double> Delta;				///< Vector of weights (i.e., deltas) used in the site balance
+	
+private:
+	std::vector<Reaction> ads_rxn;				///< List of reactions involved with adsorption
+	
+};
+
+/// Multi-ligand Chemisorption Reaction Object
+/** C++ Object to handle data and functions associated with forumlating multi-ligand chemisorption reactions
+	in a aqueous mixture. Each unique surface in a system will require an instance of this structure. This
+	object is made from a vector of ChemisorptionReaction objects, but differentiate between different ligands
+	that exist on the surface. It is based largely off of the original Multiligand Adsorption object, but will
+	include an explict way to handle the site balances associated with each ligand.
+ 
+ */
+class MultiligandChemisorption
+{
+public:
+	MultiligandChemisorption();								///< Default Constructor
+	~MultiligandChemisorption();							///< Default Destructor
+	
+	/// Function to call the initialization of objects sequentially
+	/** Function will initialize each ligand adsorption object.
+	 
+		\param List reference to MasterSpeciesList object
+		\param l number of ligands on the surface
+		\param n number of reactions for each ligand (ligands must be correctly indexed)*/
+	void Initialize_Object(MasterSpeciesList &List, int l, std::vector<int> n);
+	
+	void Display_Info();									///< Display the adsorption reaction information
+	
+	/// Modify the Deltas in the MassBalance Object
+	/** This function will take a mass balance object as an argument and modify the deltas in that object to
+		correct for how adsorption affects that particular mass balance. Since adsorption can effect multiple
+		mass balances, this function must be called for each mass balance in the system.
+	 
+		\param mbo reference to the MassBalance Object the adsorption is acting on*/
+	void modifyMBEdeltas(MassBalance &mbo);
+	
+	/// Find and set the adsorbed species indices for each reaction object in each ligand object
+	/** This function searches through the Reaction objects in ChemisorptionReaction to find the solid species
+		and their indices to set that information in the adsorb_index structure. That information will be used
+		later to approximate maximum capacities and equilibrium parameters for use in a modified extended Langmuir
+		type expression. Function will return 0 if successful and -1 on a failure.*/
+	int setAdsorbIndices();
+	
+	/// Find and set the ligand species index
+	/** This function searches through the Reaction objects in ChemisorptionReaction to find the ligand species
+		and its index to set that information in the ligand_index structure. Function will return 0 if successful
+		and -1 on a failure.*/
+	int setLigandIndices();
+	
+	/// Find and set all the delta values for the site balance
+	/** This function searches through all reaction object instances for the stoicheometry of the ligand in each
+		adsorption reaction. That stoicheometry serves as the basis for determining the site balance. NOTE: the
+		delta for the ligand is set automatically in the setLigandIndex() function, so we can ignore that species.
+		In addition, this function must be called after setLigandIndex() and setAdsorbIndices() are called and
+		after the stoicheometry of each reaction has been determined.*/
+	int setDeltas();
+	
+	/// Function to set the surface activity model and data pointer
+	/** This function will setup the surface activity model based on the given pointer arguments. If no arguments
+		are given, or are given as NULL, then the activity model will default to ideal solution assumption.*/
+	void setActivityModelInfo( int (*act) (const Matrix<double>& logq, Matrix<double> &activity, const void *data),
+							  const void *act_data);
+	
+	void setActivityEnum(int act);					///< Set the activity enum to the value of act
+	void setVolumeFactor(int i, double v);			///< Set all ith volume factors for the species list (cm^3/mol)
+	void setAreaFactor(int i, double a);			///< Set all ith area factors for the species list (m^2/mol)
+	void setSpecificMolality(int ligand, double a);	///< Set the specific molality for the ligand (mol/kg)
+	void setAdsorbentName(std::string name);		///< Set the name of the adsorbent material or particle
+	void setLigandName(int ligand, std::string name);	///< Set the name of the ith ligand
+	void setSpecificArea(double area);				///< Set the specific area of the adsorbent
+	void setTotalMass(double mass);					///< Set the mass of the adsorbent
+	void setTotalVolume(double volume);				///< Set the total volume of the system
+	void setSurfaceChargeBool(bool opt);			///< Set the surface charge boolean
+	void setElectricPotential(double a);			///< Set the surface electric potential
+	
+	void calculateAreaFactors();						///< Calculates the area factors used from the van der Waals volumes
+	void calculateEquilibria(double T);					///< Calculates all equilibrium parameters as a function of temperature
+	void setChargeDensity(const Matrix<double> &x);		///< Calculates and sets the current value of charge density
+	void setIonicStrength(const Matrix<double> &x);		///< Calculates and sets the current value of ionic strength
+	int callSurfaceActivity(const Matrix<double> &x);	///< Calls the activity model and returns an int flag for success or failure
+	
+	/// Function calculates the Psi (electric surface potential) given a set of arguments
+	/** This function will calculate the electric surface potential of the adsorbent under the current
+		conditions of charge density, temperature, ionic strength, and relative permittivity.
+	 
+		\param sigma charge density of the surface (C/m^2)
+		\param T temperature of the system in question (K)
+		\param I ionic strength of the medium the surface is in (mol/L)
+		\param rel_epsilon relative permittivity of the medium (Unitless) */
+	void calculateElecticPotential(double sigma, double T, double I, double rel_epsilon);
+	
+	/// Function to calculate the correction term for the equilibrium parameter
+	/** This function calculates the correction term that gets applied to the equilibrium parameter to
+		correct for surface charge and charge accumulation/depletion effects. It will call the psi approximation
+		and charge exchange functions, therefore it needs to have those functions arguments passed to it as well.
+	 
+		\param sigma charge density of the surface (C/m^2)
+		\param T temperature of the system in question (K)
+		\param I ionic strength of the medium the surface is in (mol/L)
+		\param rel_epsilon relative permittivity of the medium (Unitless)
+		\param rxn index of the reaction of interest for the adsorption object
+		\param ligand index of the ligand of interest for the adsorption object*/
+	double calculateEquilibriumCorrection(double sigma, double T, double I, double rel_epsilon, int rxn, int ligand);
+	
+	/// Calculates the residual for the ith reaction and lth ligand in the system
+	/** This function will provide a system residual for the ith reaction object involved in the lth ligand's Adsorption
+		Reaction object. The residual is fed into the SHARK solver to find the solution to solid and aqueous phase
+		concentrations simultaneously. This function will also adjust the equilibrium parameter for the reaction
+		
+	 
+		\param x matrix of the log(C) concentration values at the current non-linear step
+		\param gama matrix of activity coefficients for each species at the current non-linear step
+		\param T temperature of the system in question (K)
+		\param rel_perm relative permittivity of the media (unitless)
+		\param rxn index of the reaction of interest for the adsorption object
+		\param ligand index of the ligand of interest for the adsorption object*/
+	double Eval_RxnResidual(const Matrix<double> &x, const Matrix<double> &gama, double T, double rel_perm, int rxn, int ligand);
+	
+	/// Calculates the residual for the overall site balance for a given ligand
+	/** This function will provide a system residual for the site/ligand balance for the Chemisorption
+		Reaction object. The residual is fed into the SHARK solver to find the solution to solid and aqueous phase
+		concentrations simultaneously.
+		
+	 
+		\param x matrix of the log(C) concentration values at the current non-linear step
+		\param ligand index of the ligand of interest of the chemisorption object*/
+	double Eval_SiteBalanceResidual(const Matrix<double> &x, int ligand);
+	
+	ChemisorptionReaction& getChemisorptionObject(int ligand);	///< Return reference to the adsortpion object corresponding to the ligand
+	int getNumberLigands();							///< Get the number of ligands involved with the surface
+	int getActivityEnum();							///< Get the value of the activity enum set by user
+	double getActivity(int i);						///< Get the ith activity coefficient from the matrix object
+	double getSpecificArea();						///< Get the specific area of the adsorbent (m^2/kg) or (mol/kg)
+	double getBulkDensity();						///< Calculate and return bulk density of adsorbent in system (kg/L)
+	double getTotalMass();							///< Get the total mass of adsorbent in the system (kg)
+	double getTotalVolume();						///< Get the total volume of the system (L)
+	double getChargeDensity();						///< Get the value of the surface charge density (C/m^2)
+	double getIonicStrength();						///< Get the value of the ionic strength of solution (mol/L)
+	double getElectricPotential();					///< Get the value of the electric surface potential (V)
+	bool includeSurfaceCharge();					///< Returns true if we are considering surface charging during adsorption
+	std::string getLigandName(int ligand);			///< Get the name of the ligand object indexed by ligand
+	std::string getAdsorbentName();					///< Get the name of the adsorbent
+	
+protected:
+	MasterSpeciesList *List;						///< Pointer to the MasterSpeciesList object
+	int num_ligands;								///< Number of different ligands to consider
+	std::string adsorbent_name;						///< Name of the adsorbent
+	
+	/// Pointer to a surface activity model
+	/** This is a function pointer for a surface activity model. The function must accept the log of the
+		surface concentrations as an argument (logq) and provide the activities for each species (activity).
+		The pointer data is used to pass any additional arguments needed.
+	 
+		\param logq matrix of the log (base 10) of surface concentrations of all species
+		\param activity matrix of activity coefficients for all surface species (must be overriden)
+		\param data pointer to a data structure needed to calculate activities*/
+	int (*surface_activity) (const Matrix<double>& logq, Matrix<double> &activity, const void *data);
+	
+	const void *activity_data;					///< Pointer to the data structure needed for surface activities.
+	int act_fun;								///< Enumeration to represent the choosen surface activity function
+	Matrix<double> activities;					///< List of the activities calculated by the activity model
+	double specific_area;						///< Specific surface area of the adsorbent (m^2/kg)
+	double total_mass;							///< Total mass of the adsorbent in the system (kg)
+	double total_volume;						///< Total volume of the system (L)
+	double ionic_strength;						///< Ionic Strength of the system used to adjust equilibria constants (mol/L)
+	double charge_density;						///< Surface charge density of the adsorbent used to adjust equilbria (C/m^2)
+	double electric_potential;					///< Electric surface potential of the adsorbent used to adjust equilibria (V)
+	bool IncludeSurfCharge;						///< True = Includes surface charging corrections, False = Does not consider surface charge
+	
+private:
+	std::vector<ChemisorptionReaction> ligand_obj;		///< List of the ligands and reactions they have on the surface
+	
+};
 
 /// \cond
 
@@ -1193,13 +1526,15 @@ typedef enum {IDEAL_ADS, FLORY_HUGGINS, UNIQUAC_ACT} valid_surf_act;
 	through the "OtherList" vector object. Those residual function must all have the same format. */
 typedef struct SHARK_DATA
 {
-	MasterSpeciesList MasterList;					///< Master List of species object
-	std::vector<Reaction> ReactionList;				///< Equilibrium reaction objects
-	std::vector<MassBalance> MassBalanceList;		///< Mass balance objects
-	std::vector<UnsteadyReaction> UnsteadyList;		///< Unsteady Reaction objects
-	std::vector<AdsorptionReaction> AdsorptionList;	///< Equilibrium Adsorption Reaction Objects
-	std::vector<UnsteadyAdsorption> UnsteadyAdsList;///< Unsteady Adsorption Reaction Objects
-	std::vector<MultiligandAdsorption> MultiAdsList;///< Multiligand Adsorptioin Objects
+	MasterSpeciesList MasterList;							///< Master List of species object
+	std::vector<Reaction> ReactionList;						///< Equilibrium reaction objects
+	std::vector<MassBalance> MassBalanceList;				///< Mass balance objects
+	std::vector<UnsteadyReaction> UnsteadyList;				///< Unsteady Reaction objects
+	std::vector<AdsorptionReaction> AdsorptionList;			///< Equilibrium Adsorption Reaction Objects
+	std::vector<UnsteadyAdsorption> UnsteadyAdsList;		///< Unsteady Adsorption Reaction Objects
+	std::vector<MultiligandAdsorption> MultiAdsList;		///< Multiligand Adsorptioin Objects
+	std::vector<ChemisorptionReaction> ChemisorptionList;	///< Chemisorption Reaction objects
+	std::vector<MultiligandChemisorption> MultiChemList;	///< Multiligand Chemisorption Reaction Objects
 
 	/// Array of Other Residual functions to be defined by user
 	/** This list of function pointers can be declared and set up by the user in order to add to or change
@@ -1222,12 +1557,18 @@ typedef struct SHARK_DATA
 	int num_ssao = 0;								///< Number of steady-state adsorption objects
 	int num_usao = 0;								///< Number of unsteady adsorption objects
 	int num_multi_ssao = 0;							///< Number of multiligand steady-state adsorption objects
+	int num_sschem = 0;								///< Number of steady-state chemisorption objects
+	int num_multi_sschem = 0;						///< Number of multiligand steady-state chemisorption objects
 	std::vector<int> num_ssar;						///< List of the numbers of reactions in each adsorption object
 	std::vector<int> num_usar;						///< List of the numbers of reactions in each unsteady adsorption object
+	std::vector<int> num_sschem_rxns;				///< List of the numbers of reactions in each steady-state chemisorption object
 	std::vector< std::vector<int> > num_multi_ssar; ///< List of all multiligand objects -> List of ligands and rxns of that ligand
+	std::vector< std::vector<int> > num_multichem_rxns;		///< List of all multiligand chemisorption objects -> List of num rxns for that ligand
 	std::vector<std::string> ss_ads_names;			///< List of the steady-state adsorbent object names
 	std::vector<std::string> us_ads_names;			///< List of the unsteady adsorption object names
-	std::vector< std::vector<std::string> > ssmulti_names;	///< List of the names of the ligands in each multiligand object
+	std::vector<std::string> ss_chem_names;			///< List of the steady-state chemisorption object names
+	std::vector< std::vector<std::string> > ssmulti_names;		///< List of the names of the ligands in each multiligand object
+	std::vector< std::vector<std::string> > ssmultichem_names;	///< List of the names of the ligands in each multiligand chemisorption object
 	int num_other = 0;								///< Number of other functions to be used (default is always 0)
 	int act_fun = IDEAL;							///< Flag denoting the activity function to use (default is IDEAL)
 	int reactor_type = BATCH;						///< Flag denoting the type of reactor considered for the system (default is BATCH)
@@ -1240,6 +1581,7 @@ typedef struct SHARK_DATA
 	double simulationtime = 0.0;					///< Time to simulate unsteady reactions for (default = 0.0 hrs)
 	double dt = 0.1;								///< Time step size (hrs)
 	double dt_min = sqrt(DBL_EPSILON);				///< Minimum allowable step size
+	double dt_max = 744.0;							///< Maximum allowable step size (~1 month in time)
 	double t_out = 0.0;								///< Time increment by which file output is made (default = print all time steps)
 	double t_count = 0.0;							///< Running count of time increments
 	double time = 0.0;								///< Current value of time (starts from t = 0.0 hrs)
@@ -1373,6 +1715,28 @@ int FloryHuggins_unsteady(const Matrix<double> &x, Matrix<double> &F, const void
 	\param data pointer to the MultiligandAdsorption object holding parameter information*/
 int FloryHuggins_multiligand(const Matrix<double> &x, Matrix<double> &F, const void *data);
 
+///Surface Activity function for simple non-ideal adsorption (for chemisorption reaction object)
+/** This is a simple surface activity model to be used with the Adsorption objects to evaluate the non-ideal
+	behavoir of the surface phase. The model's only parameters are the shape factors in adsorption and the
+	relative concentrations of each surface species. Therefore, we will pass the Adsorption Object itself
+	as the const void *data structure. NOTE: Only for ChemisorptionReaction!
+ 
+	\param x matrix of the log(C) concentration values at the current non-linear step
+	\param F matrix of activity coefficients that are to be altered by this function
+	\param data pointer to the ChemisorptionReaction object holding parameter information*/
+int FloryHuggins_chemi(const Matrix<double> &x, Matrix<double> &F, const void *data);
+
+///Surface Activity function for simple non-ideal adsorption (for multiligand chemisorption object)
+/** This is a simple surface activity model to be used with the Chemisorption objects to evaluate the non-ideal
+	behavoir of the surface phase. The model's only parameters are the shape factors in adsorption and the
+	relative concentrations of each surface species. Therefore, we will pass the Chemisorption Object itself
+	as the const void *data structure. NOTE: Only for MultiligandChemisorption!
+ 
+	\param x matrix of the log(C) concentration values at the current non-linear step
+	\param F matrix of activity coefficients that are to be altered by this function
+	\param data pointer to the MultiligandChemisorption object holding parameter information*/
+int FloryHuggins_multichemi(const Matrix<double> &x, Matrix<double> &F, const void *data);
+
 ///Surface Activity function for the UNIQUAC model for non-ideal adsorption (for adsorption reaction object)
 /** This is a more complex surface activity model to be used with the Adsorption objects to evaluate the non-ideal
 	behavoir of the surface phase. The model's primary parameters are the shape factors in adsorption and the
@@ -1408,6 +1772,30 @@ int UNIQUAC_unsteady(const Matrix<double> &x, Matrix<double> &F, const void *dat
 	\param F matrix of activity coefficients that are to be altered by this function
 	\param data pointer to the MultiligandAdsorption object holding parameter information*/
 int UNIQUAC_multiligand(const Matrix<double> &x, Matrix<double> &F, const void *data);
+
+///Surface Activity function for the UNIQUAC model for non-ideal adsorption (for chemisorption reaction object)
+/** This is a more complex surface activity model to be used with the Adsorption objects to evaluate the non-ideal
+	behavoir of the surface phase. The model's primary parameters are the shape factors in adsorption and the
+	relative concentrations of each surface species. Therefore, we will pass the Adsorption Object itself
+	as the const void *data structure. However, future development may require some additional parameters, which
+	will be accessed later. NOTE: Only for ChemisorptionReaction!
+ 
+	\param x matrix of the log(C) concentration values at the current non-linear step
+	\param F matrix of activity coefficients that are to be altered by this function
+	\param data pointer to the ChemisorptionReaction object holding parameter information*/
+int UNIQUAC_chemi(const Matrix<double> &x, Matrix<double> &F, const void *data);
+
+///Surface Activity function for the UNIQUAC model for non-ideal adsorption (for multiligand chemisorption object)
+/** This is a more complex surface activity model to be used with the Chemisorption objects to evaluate the non-ideal
+	behavoir of the surface phase. The model's primary parameters are the shape factors in adsorption and the
+	relative concentrations of each surface species. Therefore, we will pass the Chemisorption Object itself
+	as the const void *data structure. However, future development may require some additional parameters, which
+	will be accessed later. NOTE: Only for MultiligandChemisorption!
+ 
+	\param x matrix of the log(C) concentration values at the current non-linear step
+	\param F matrix of activity coefficients that are to be altered by this function
+	\param data pointer to the MultiligandChemisorption object holding parameter information*/
+int UNIQUAC_multichemi(const Matrix<double> &x, Matrix<double> &F, const void *data);
 
 /// Activity function for Ideal Solution
 /** This is one of the default activity models available. It assumes the system behaves ideally and sets the
@@ -1505,6 +1893,12 @@ int read_scenario(SHARK_DATA *shark_dat);
 	*/
 int read_multiligand_scenario(SHARK_DATA *shark_dat);
 
+/// Function to go through the yaml object to setup memory space for multiligand chemisorption objects
+/** This function checks the yaml object for the expected keys and values of the multiligand chemisorption scenario 
+	documents to setup the shark simulation for the input given in the input file.
+	*/
+int read_multichemi_scenario(SHARK_DATA *shark_dat);
+
 /// Function to go through the yaml object for the solver options document
 /** This function checks the yaml object for the expected keys and values of the solver options document
 	to setup the shark simulation for the input given in the input file. */
@@ -1537,12 +1931,33 @@ int read_unsteadyrxn(SHARK_DATA *shark_dat);
 	\note Each adsorption object will have its own document header by the name of that object*/
 int read_adsorbobjects(SHARK_DATA *shark_dat);
 
+/// Function to go through the yaml object for each Unsteady Adsorption Object
+/** This function checks the yaml object for the expected keys and values of the unsteady adsorption object documents
+	to setup the shark simulation for the input given in the input file.
+	
+	\note Each unsteady adsorption object will have its own document header by the name of that object*/
+int read_unsteadyadsorbobjects(SHARK_DATA *shark_dat);
+
 /// Function to go through the yaml object for each MultiligandAdsorption Object
 /** This function checks the yaml object for the expected keys and values of the multiligand object documents
 	to setup the shark simulation for the input given in the input file.
 	
 	\note Each ligand object will have its own document header by the name of that object*/
 int read_multiligandobjects(SHARK_DATA *shark_dat);
+
+/// Function to go through the yaml object for each Chemisorption Object
+/** This function checks the yaml object for the expected keys and values of the chemisorption object documents
+	to setup the shark simulation for the input given in the input file.
+	
+	\note Each adsorption object will have its own document header by the name of that object*/
+int read_chemisorbobjects(SHARK_DATA *shark_dat);
+
+/// Function to go through the yaml object for each MultiligandChemisorption Object
+/** This function checks the yaml object for the expected keys and values of the multiligand chemisorption object 
+	documents to setup the shark simulation for the input given in the input file.
+	
+	\note Each ligand object will have its own document header by the name of that object*/
+int read_multichemiobjects(SHARK_DATA *shark_dat);
 
 /// Function to setup the memory and pointers for the SHARK_DATA structure for the current simulation
 /** This function will be called after reading the scenario file and is used to setup the memory and other pointers
@@ -1896,5 +2311,9 @@ int SHARK_SCENARIO(const char *yaml_input);
 /// Function to perform a series of shark calculation tests
 /** This function sets up and solves a test problem for shark. It is callable from the UI. */
 int SHARK_TESTS();
+
+/// Function to perform a series of shark calculation tests (older version)
+/** This function sets up and solves a test problem for shark. It is NOT callable from the UI. */
+int SHARK_TESTS_OLD();
 
 #endif

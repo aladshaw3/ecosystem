@@ -3,8 +3,8 @@
 Scenario:
 ---
 - vars_fun:
-  numvar: 82
-  num_ssr: 48
+  numvar: 83
+  num_ssr: 47
   num_mbe: 10
   num_multi_ssao: 1
 
@@ -26,17 +26,16 @@ Scenario:
 
 - run_time:
   steady: true
-
   zero_initial_solids: true
   dt: 1e-10
   sim_time: 2.0
   t_out: 0.001
   time_adapt: true  
          
-  specs_curve: false
+  specs_curve: true
   pH_step: 0.25  
 
-  temp_curve: true
+  temp_curve: false
   start_temp: 273.15
   end_temp: 333.15
   temp_step: 2.5
@@ -48,7 +47,7 @@ SolverOptions:
 line_search: true     
 search_type: standard
 linear_solve: qr 
-nl_maxit: 100     
+nl_maxit: 1000     
 
 ...
 
@@ -61,206 +60,205 @@ MasterSpecies:
   3: Ca 2+ (aq)
   4: CaOH + (aq)
   5: Ca(OH)2 (aq)
-  6: Cl2 (aq)
-  7: H2O (l)
-  8: H + (aq)
-  9: H2CO3 (aq)
-  10: HCO3 - (aq)
-  11: HCl (aq)
-  12: H2SO4 (aq)
-  13: HSO4 - (aq)
-  14: Mg 2+ (aq)
-  15: MgOH + (aq)
-  16: Mg(OH)2 (aq)
-  17: NaHCO3 (aq)
-  18: NaCO3 - (aq)
-  19: Na2CO3 (aq)
-  20: Na + (aq)
-  21: NaCl (aq)
-  22: NaOH (aq)
-  23: OH - (aq)
-  24: SO4 2- (aq)
-  25: CaUO2(CO3)3 2- (aq)
-  26: Ca2UO2(CO3)3 (aq)
-  27: MgUO2(CO3)3 2- (aq)
-  28: UO2 2+ (aq)
-  29: UO2OH + (aq)
-  30: UO2(OH)2 (aq)
-  31: UO2(OH)3 - (aq)
-  32: UO2(OH)4 2- (aq)
-  33: (UO2)2OH 3+ (aq)
-  34: (UO2)2(OH)2 2+ (aq)
-  35: (UO2)3(OH)4 2+ (aq)
-  36: (UO2)3(OH)5 + (aq)
-  37: (UO2)3(OH)7 - (aq)
-  38: (UO2)4(OH)7 + (aq)
-  39: UO2CO3 (aq)
-  40: UO2(CO3)2 2- (aq)
-  41: UO2(CO3)3 4- (aq)
-  42: UO2Cl + (aq)
-  43: UO2Cl2 (aq)
-  44: UO2Cl3 - (aq)
-  45: UO2SO4 (aq)
-  46: UO2(SO4)2 2- (aq)
-  47: VO2 + (aq)
-  48: H4VO4 + (aq)
-  49: H3VO4 (aq)
-  50: H2VO4 - (aq)
-  51: HVO4 2- (aq)
-  52: VO4 3- (aq)
-  53: HV2O7 3- (aq)
-  54: V2O7 4- (aq)
-  55: VO2SO4 - (aq)
-  56: VO2OHCO3 2- (aq)
-  57: VO2(CO3)2 3- (aq)
-  58: K + (aq)
+  6: H2O (l)
+  7: H + (aq)
+  8: H2CO3 (aq)
+  9: HCO3 - (aq)
+  10: HCl (aq)
+  11: H2SO4 (aq)
+  12: HSO4 - (aq)
+  13: Mg 2+ (aq)
+  14: MgOH + (aq)
+  15: Mg(OH)2 (aq)
+  16: NaHCO3 (aq)
+  17: NaCO3 - (aq)
+  18: Na2CO3 (aq)
+  19: Na + (aq)
+  20: NaCl (aq)
+  21: NaOH (aq)
+  22: OH - (aq)
+  23: SO4 2- (aq)
+  24: CaUO2(CO3)3 2- (aq)
+  25: Ca2UO2(CO3)3 (aq)
+  26: MgUO2(CO3)3 2- (aq)
+  27: UO2 2+ (aq)
+  28: UO2OH + (aq)
+  29: UO2(OH)2 (aq)
+  30: UO2(OH)3 - (aq)
+  31: UO2(OH)4 2- (aq)
+  32: (UO2)2OH 3+ (aq)
+  33: (UO2)2(OH)2 2+ (aq)
+  34: (UO2)3(OH)4 2+ (aq)
+  35: (UO2)3(OH)5 + (aq)
+  36: (UO2)3(OH)7 - (aq)
+  37: (UO2)4(OH)7 + (aq)
+  38: UO2CO3 (aq)
+  39: UO2(CO3)2 2- (aq)
+  40: UO2(CO3)3 4- (aq)
+  41: UO2Cl + (aq)
+  42: UO2Cl2 (aq)
+  43: UO2Cl3 - (aq)
+  44: UO2SO4 (aq)
+  45: UO2(SO4)2 2- (aq)
+  46: VO2 + (aq)
+  47: H4VO4 + (aq)
+  48: H3VO4 (aq)
+  49: H2VO4 - (aq)
+  50: HVO4 2- (aq)
+  51: VO4 3- (aq)
+  52: HV2O7 3- (aq)
+  53: V2O7 4- (aq)
+  54: VO2SO4 - (aq)
+  55: VO2OHCO3 2- (aq)
+  56: VO2(CO3)2 3- (aq)
+  57: K + (aq)
 
 - unreg:
-  - 59: 
+  - 58: 
     formula: UO2AO + (ad)
     charge: 1
     enthalpy: -1023568.7
     entropy: -106.414
-    have_HS: true
+    have_HS: false
     energy: 0
     have_G: false
     phase: adsorbed
     name: uranyl-amidioxime
     lin_form: UO2
 
-  - 60: 
+  - 59: 
     formula: UO2(AO)2 (ad)
     charge: 0
     enthalpy: -972996.9
     entropy: 7.8759
-    have_HS: true
+    have_HS: false
     energy: 0
     have_G: false
     phase: adsorbed
     name: uranyl-di-amidioxime
     lin_form: UO2
 
-  - 61: 
+  - 60: 
     formula: UO2(AO)3 - (ad)
     charge: -1
     enthalpy: -729241.076
     entropy: 671.461
-    have_HS: true
+    have_HS: false
     energy: 0
     have_G: false
     phase: adsorbed
     name: uranyl-tri-amidioxime
     lin_form: UO2
 
-  - 62: 
+  - 61: 
     formula: UO2CO3AO - (ad)
     charge: -1
     enthalpy: -1741629.98
     entropy: -261.641
-    have_HS: true
+    have_HS: false
     energy: 0
     have_G: false
     phase: adsorbed
     name: uranyl-carbonate-amidioxime
     lin_form: UO2CO3
 
-  - 63: 
+  - 62: 
     formula: UO2CO3(AO)2 2- (ad)
     charge: -2
     enthalpy: -1667060.92
     entropy: -72.497
-    have_HS: true
+    have_HS: false
     energy: 0
     have_G: false
     phase: adsorbed
     name: uranyl-carbonate-diamidioxime
     lin_form: UO2CO3
 
-  - 64: 
+  - 63: 
     formula: UO2IDO (ad)
     charge: 0
     enthalpy: -955716.98
     entropy: 30.3998
-    have_HS: true
+    have_HS: false
     energy: 0
     have_G: false
     phase: adsorbed
     name: uranyl-imide-dioxime
     lin_form: UO2
 
-  - 65: 
+  - 64: 
     formula: UO2HIDO + (ad)
     charge: 1
     enthalpy: -1012734.89
     entropy: -83.236
-    have_HS: true
+    have_HS: false
     energy: 0
     have_G: false
     phase: adsorbed
     name: uranyl-imide-dioxime
     lin_form: UO2H
 
-  - 66: 
+  - 65: 
     formula: UO2(IDO)2 2- (ad)
     charge: -2
     enthalpy: -660147.92
     entropy: 773.1554
-    have_HS: true
+    have_HS: false
     energy: 0
     have_G: false
     phase: adsorbed
     name: uranyl-diimide-dioxime
     lin_form: UO2
 
-  - 67: 
+  - 66: 
     formula: UO2(HIDO)IDO - (ad)
     charge: -1
     enthalpy: -748364.334
     entropy: 662.5315
-    have_HS: true
+    have_HS: false
     energy: 0
     have_G: false
     phase: adsorbed
     name: uranyl-diimide-dioxime
     lin_form: UO2H
 
-  - 68: 
+  - 67: 
     formula: UO2(HIDO)2 (ad)
     charge: 0
     enthalpy: -973627.99
     entropy: -9.3683
-    have_HS: true
+    have_HS: false
     energy: 0
     have_G: false
     phase: adsorbed
     name: uranyl-diimide-dioxime
     lin_form: UO2H2
 
-  - 69: 
+  - 68: 
     formula: UO2CO3IDO 2- (ad)
     charge: -2
     enthalpy: -1724192.065
     entropy: -225.236
-    have_HS: true
+    have_HS: false
     energy: 0
     have_G: false
     phase: adsorbed
     name: uranyl-carbonate-imide-dioxime
     lin_form: UO2CO3
 
-  - 70: 
+  - 69: 
     formula: UO2CO3HIDO - (ad)
     charge: -1
     enthalpy: -1929112.74
     entropy: -850.804
-    have_HS: true
+    have_HS: false
     energy: 0
     have_G: false
     phase: adsorbed
     name: uranyl-carbonate-imide-dioxime
     lin_form: UO2CO3H
 
-  - 71: 
+  - 70: 
     formula: VO2AO (ad)
     charge: 0
     enthalpy: 0
@@ -272,7 +270,7 @@ MasterSpecies:
     name: Vanadyl-amidoximate
     lin_form: VO2
 
-  - 72: 
+  - 71: 
     formula: VO2(AO)2 - (ad)
     charge: -1
     enthalpy: 0
@@ -284,7 +282,7 @@ MasterSpecies:
     name: Vanadium-diamidoximate
     lin_form: VO2
 
-  - 73: 
+  - 72: 
     formula: VOOH(AO)2 (ad)
     charge: 0
     enthalpy: 0
@@ -296,7 +294,7 @@ MasterSpecies:
     name: Vanadium-diamidoximate
     lin_form: VO2H
 
-  - 74: 
+  - 73: 
     formula: V(AO)(AO_H)2 (ad)
     charge: 0
     enthalpy: 0
@@ -308,7 +306,7 @@ MasterSpecies:
     name: Vanadium-diamidoximate
     lin_form: V
 
-  - 75: 
+  - 74: 
     formula: V(AO)3 2+ (ad)
     charge: 2
     enthalpy: 0
@@ -320,7 +318,7 @@ MasterSpecies:
     name: Vanadium-diamidoximate
     lin_form: V
 
-  - 76: 
+  - 75: 
     formula: VO2IDO - (ad)
     charge: -1
     enthalpy: 0
@@ -332,7 +330,7 @@ MasterSpecies:
     name: Vanadyl-amidoximate
     lin_form: VO2
 
-  - 77: 
+  - 76: 
     formula: VO2HIDO (ad)
     charge: 0
     enthalpy: 0
@@ -344,7 +342,7 @@ MasterSpecies:
     name: Vanadium-diamidoximate
     lin_form: VO2H
 
-  - 78: 
+  - 77: 
     formula: NaV(IDO_H)2 (ad)
     charge: 0
     enthalpy: 0
@@ -356,7 +354,7 @@ MasterSpecies:
     name: Vanadium-diamidoximate
     lin_form: VNa
 
-  - 79: 
+  - 78: 
     formula: V(IDO)(IDO_H) (ad)
     charge: 0
     enthalpy: 0
@@ -368,7 +366,7 @@ MasterSpecies:
     name: Vanadium-diamidoximate
     lin_form: V
 
-  - 80: 
+  - 79: 
     formula: V(IDO)2 + (ad)
     charge: 1
     enthalpy: 0
@@ -380,7 +378,7 @@ MasterSpecies:
     name: Vanadium-diamidoximate
     lin_form: V
 
-  - 81: 
+  - 80: 
     formula: V(IDO_H)2 - (ad)
     charge: -1
     enthalpy: 0
@@ -391,6 +389,30 @@ MasterSpecies:
     phase: adsorbed
     name: Vanadium-diamidoximate
     lin_form: V
+
+  - 81: 
+    formula: VO2IDO_H 2- (ad)
+    charge: -2
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Vanadium-diamidoximate
+    lin_form: VO2
+
+  - 82: 
+    formula: VO(IDO_H)2 3- (ad)
+    charge: -3
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Vanadium-amidoximate
+    lin_form: VO
 
 ...
 
@@ -487,7 +509,6 @@ MassBalance:
   - delta:
     "Cl - (aq)": 1
     "CaCl2 (aq)": 2
-    "Cl2 (aq)": 2
     "HCl (aq)": 1
     "NaCl (aq)": 1
     "UO2Cl + (aq)": 1
@@ -529,9 +550,9 @@ MassBalance:
     "Ca2UO2(CO3)3 (aq)": 2
 
 - vanadium(v):
-  total_conc: 3.73e-8
-  initial_conc: 3.73e-8
-  inlet_conc: 3.73e-8
+  total_conc: 3.334E-08
+  initial_conc: 3.334E-08
+  inlet_conc: 3.334E-08
   - delta: 
     "VO2 + (aq)": 1
     "H4VO4 + (aq)": 1 
@@ -555,6 +576,8 @@ MassBalance:
     "V(IDO)(IDO_H) (ad)": 1
     "V(IDO)2 + (ad)": 1
     "V(IDO_H)2 - (ad)": 1
+    "VO(IDO_H)2 3- (ad)": 1
+    "VO2IDO_H 2- (ad)": 1
 
 - potassium:
   total_conc: 0.0096
@@ -729,138 +752,133 @@ EquilRxn:
 - rxn24:
   - stoichiometry:
     "Cl - (aq)": -2
-    "Cl2 (aq)": 1
-
-- rxn25:
-  - stoichiometry:
-    "Cl - (aq)": -2
     "Ca 2+ (aq)": -1
     "CaCl2 (aq)": 1
 
-- rxn26:
+- rxn25:
   - stoichiometry:
     "OH - (aq)": -1
     "Ca 2+ (aq)": -1
     "CaOH + (aq)": 1
 
-- rxn27:
+- rxn26:
   - stoichiometry:
     "OH - (aq)": -2
     "Ca 2+ (aq)": -1
     "Ca(OH)2 (aq)": 1
 
-- rxn28:
+- rxn27:
   - stoichiometry:
     "OH - (aq)": -1
     "Mg 2+ (aq)": -1
     "MgOH + (aq)": 1
 
-- rxn29:
+- rxn28:
   - stoichiometry:
     "OH - (aq)": -2
     "Mg 2+ (aq)": -1
     "Mg(OH)2 (aq)": 1
 
-- rxn30:
+- rxn29:
   - stoichiometry:
     "Na2CO3 (aq)": -1
     "Na + (aq)": 2
     "CO3 2- (aq)": 1
 
-- rxn31:
+- rxn30:
   - stoichiometry:
     "HCl (aq)": -1 
     "H + (aq)": 1
     "Cl - (aq)": 1
 
-- rxn32:
+- rxn31:
   - stoichiometry:
     "NaOH (aq)": -1 
     "Na + (aq)": 1
     "OH - (aq)": 1
 
-- rxn33:
+- rxn32:
   - stoichiometry:
     "Cl - (aq)": -1
     "UO2 2+ (aq)": -1
     "UO2Cl + (aq)": 1
 
-- rxn34:
+- rxn33:
   - stoichiometry:
     "Cl - (aq)": -2
     "UO2 2+ (aq)": -1
     "UO2Cl2 (aq)": 1
 
-- rxn35:
+- rxn34:
   - stoichiometry:
     "Cl - (aq)": -3
     "UO2 2+ (aq)": -1
     "UO2Cl3 - (aq)": 1
 
-- rxn36:
+- rxn35:
   - stoichiometry:
     "SO4 2- (aq)": -1
     "UO2 2+ (aq)": -1
     "UO2SO4 (aq)": 1
 
-- rxn37:
+- rxn36:
   - stoichiometry:
     "SO4 2- (aq)": -2
     "UO2 2+ (aq)": -1
     "UO2(SO4)2 2- (aq)": 1
 
-- rxn38:
+- rxn37:
   - stoichiometry:
     "VO2 + (aq)": -1
     "H2O (l)": -2
     "VO4 3- (aq)": 1
     "H + (aq)": 4
 
-- rxn39:
+- rxn38:
   - stoichiometry:
     "VO2 + (aq)": -2
     "H2O (l)": -3
     "V2O7 4- (aq)": 1
     "H + (aq)": 6
 
-- rxn40:
+- rxn39:
   - stoichiometry:
     "H4VO4 + (aq)": -1
     "H + (aq)": 1
     "H3VO4 (aq)": 1
 
-- rxn41:
+- rxn40:
   - stoichiometry:
     "H3VO4 (aq)": -1
     "H + (aq)": 1
     "H2VO4 - (aq)": 1
 
-- rxn42:
+- rxn41:
   - stoichiometry:
     "H2VO4 - (aq)": -1
     "H + (aq)": 1
     "HVO4 2- (aq)": 1
 
-- rxn43:
+- rxn42:
   - stoichiometry:
     "HVO4 2- (aq)": -1
     "H + (aq)": 1
     "VO4 3- (aq)": 1
 
-- rxn44:
+- rxn43:
   - stoichiometry:
     "HV2O7 3- (aq)": -1
     "H + (aq)": 1
     "V2O7 4- (aq)": 1
 
-- rxn45:
+- rxn44:
   - stoichiometry:
     "VO2SO4 - (aq)": -1
     "H + (aq)": -1
     "VO2 + (aq)": 1
     "HSO4 - (aq)": 1
 
-- rxn46:
+- rxn45:
   - stoichiometry:
     "H2VO4 - (aq)": -1
     "H + (aq)": -1
@@ -868,7 +886,7 @@ EquilRxn:
     "H2O (l)": 1
     "VO2OHCO3 2- (aq)": 1
 
-- rxn47:
+- rxn46:
   - stoichiometry:
     "H2VO4 - (aq)": -1
     "H + (aq)": -2
@@ -891,21 +909,17 @@ include_surfcharge: true
 
 - ligand02:
   name: H2IDO (ad)
-  num_rxns: 13
+  num_rxns: 15
 
 ...
 
 "AF1-HAO (ad)":
 ---
-spec_mole: 1.25      #Units: mol/kg
-#spec_mole: 1e-6     #Units: mol/kg
+spec_mole: 1.45      #Units: mol/kg
 ligand_charge: 0
 
 - rxn01:
-  #logK: 0.39
-  #energy: -2188.79
-  enthalpy: -2897.173517
-  entropy: -2.223286551
+  logK: 0.39
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -913,10 +927,7 @@ ligand_charge: 0
     "H + (aq)": 1
 
 - rxn02:
-  #logK: -2.72
-  #energy: 15265.42
-  enthalpy: 29752.46295
-  entropy: 47.56120439
+  logK: -2.72
   mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -924,10 +935,7 @@ ligand_charge: 0
     "H + (aq)": 2
 
 - rxn03:
-  #logK: -11.73
-  #energy: 65832.11
-  enthalpy: 221447.3223
-  entropy: 523.6862505
+  logK: -11.73
   mole_factor: 3.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -935,10 +943,7 @@ ligand_charge: 0
     "H + (aq)": 3
 
 - rxn04:
-  #logK: 2.59
-  #energy: -14535.82
-  enthalpy: -23751.91731
-  entropy: -30.01603132
+  logK: 2.59
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -947,10 +952,7 @@ ligand_charge: 0
     "H + (aq)": 1
 
 - rxn05:
-  #logK: -0.92
-  #energy: 5163.30
-  enthalpy: 8484.906226
-  entropy: 10.80214617
+  logK: -0.92
   mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -960,10 +962,6 @@ ligand_charge: 0
 
 - rxn06:
   logK: 27.34
-  #logK: 28.30
-  #energy: -153440
-  #enthalpy: 84358.51
-  #entropy: 811.1836
   mole_factor: 1.0
   - stoichiometry:
     "VO4 3- (aq)": -1
@@ -973,10 +971,6 @@ ligand_charge: 0
 
 - rxn07:
   logK: 21.93
-  #logK: 22.89
-  #energy: -123077
-  #enthalpy: 84358.51
-  #entropy: 707.6104
   mole_factor: 2.0
   - stoichiometry:
     "VO4 3- (aq)": -1
@@ -986,10 +980,6 @@ ligand_charge: 0
 
 - rxn08:
   logK: 24.93
-  #logK: 25.89
-  #energy: -139914
-  #enthalpy: 84358.51
-  #entropy: 765.0467
   mole_factor: 2.0
   - stoichiometry:
     "VO4 3- (aq)": -1
@@ -999,10 +989,6 @@ ligand_charge: 0
 
 - rxn09:
   logK: 26.62
-  #logK: 27.58
-  #energy: -149399
-  #enthalpy: 84358.51
-  #entropy: 797.3983
   mole_factor: 3.0
   - stoichiometry:
     "VO4 3- (aq)": -1
@@ -1012,10 +998,6 @@ ligand_charge: 0
 
 - rxn10:
   logK: 22.72
-  #logK: 23.68
-  #energy: -127511
-  #enthalpy: 84358.51
-  #entropy: 722.7344
   mole_factor: 3.0
   - stoichiometry:
     "VO4 3- (aq)": -1
@@ -1027,15 +1009,11 @@ ligand_charge: 0
 
 "AF1-H2IDO (ad)":
 ---
-spec_mole: 2.05     #Units: mol/kg
-#spec_mole: 3.8       #Units: mol/kg
+spec_mole: 3.3     #Units: mol/kg
 ligand_charge: 0
 
 - rxn01:
-  #logK: -4.64
-  #energy: 26041.00
-  enthalpy: 50854.56192
-  entropy: 82.15767162
+  logK: -4.64
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -1043,10 +1021,7 @@ ligand_charge: 0
     "H + (aq)": 2
 
 - rxn02:
-  #logK: -0.34
-  #energy: 1908.18
-  enthalpy: 7122.166265
-  entropy: 17.40549015
+  logK: -0.34
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -1054,10 +1029,7 @@ ligand_charge: 0
     "H + (aq)": 1
 
 - rxn03:
-  #logK: -18.68
-  #energy: 104837.49
-  enthalpy: 281702.2125
-  entropy: 585.2880832
+  logK: -18.68
   mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -1065,10 +1037,7 @@ ligand_charge: 0
     "H + (aq)": 4
 
 - rxn04:
-  #logK: -8.78
-  #energy: 49275.87
-  enthalpy: 237086.8212
-  entropy: 632.28141
+  logK: -8.78
   mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -1076,10 +1045,7 @@ ligand_charge: 0
     "H + (aq)": 3
 
 - rxn05:
-  #logK: -3.48
-  #energy: 19530.75
-  enthalpy: 44084.92875
-  entropy: 81.48004315
+  logK: -3.48
   mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -1087,10 +1053,7 @@ ligand_charge: 0
     "H + (aq)": 2
 
 - rxn06:
-  #logK: 1.36
-  #energy: -7632.71
-  enthalpy: -23729.46827
-  entropy: -53.79372346
+  logK: 1.36
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -1099,10 +1062,7 @@ ligand_charge: 0
     "H + (aq)": 2
 
 - rxn07:
-  #logK: 5.36
-  #energy: -30081.85
-  enthalpy: -237278.0538
-  entropy: -695.8038828
+  logK: 5.36
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -1112,10 +1072,6 @@ ligand_charge: 0
 
 - rxn08:
   logK: 24.61
-  #logK: 25.57
-  #energy: -138118
-  #enthalpy: 84358.51
-  #entropy: 758.9189
   mole_factor: 1.0
   - stoichiometry:
     "VO4 3- (aq)": -1
@@ -1125,10 +1081,6 @@ ligand_charge: 0
 
 - rxn09:
   logK: 28.06
-  #logK: 29.02
-  #energy: -157481
-  #enthalpy: 84358.51
-  #entropy: 824.969
   mole_factor: 1.0
   - stoichiometry:
     "VO4 3- (aq)": -1
@@ -1137,11 +1089,7 @@ ligand_charge: 0
     "H2O (l)": 2
 
 - rxn10:
-  logK: 29.24
-  #logK: 30.20
-  #energy: -164103
-  #enthalpy: 84358.51
-  #entropy: 847.576
+  logK: 29.0
   mole_factor: 2.0
   - stoichiometry:
     "VO4 3- (aq)": -1
@@ -1152,10 +1100,6 @@ ligand_charge: 0
 
 - rxn11:
   logK: 30.07
-  #logK: 31.03
-  #energy: -168761
-  #enthalpy: 84358.51
-  #entropy: 863.4567
   mole_factor: 2.0
   - stoichiometry:
     "VO4 3- (aq)": -1
@@ -1165,10 +1109,6 @@ ligand_charge: 0
 
 - rxn12:
   logK: 26.87
-  #logK: 27.83
-  #energy: -150802
-  #enthalpy: 84358.51
-  #entropy: 802.1874
   mole_factor: 2.0
   - stoichiometry:
     "VO4 3- (aq)": -1
@@ -1178,16 +1118,29 @@ ligand_charge: 0
 
 - rxn13:
   logK: 28.67
-  #logK: 29.63
-  #energy: -160904
-  #enthalpy: 84358.51
-  #entropy: 836.6841
   mole_factor: 2.0
   - stoichiometry:
     "VO4 3- (aq)": -1
     "H + (aq)": -2
     "H2O (l)": 4
     "V(IDO_H)2 - (ad)": 1
+
+- rxn14:
+  logK: 21.3 #Slava
+  mole_factor: 1.0
+  - stoichiometry:
+    "VO4 3- (aq)": -1
+    "H + (aq)": -1
+    "H2O (l)": 2
+    "VO2IDO_H 2- (ad)": 1
+
+- rxn15:
+  logK: 11.7 #Slava
+  mole_factor: 2.0
+  - stoichiometry:
+    "VO4 3- (aq)": -1
+    "H2O (l)": 3
+    "VO(IDO_H)2 3- (ad)": 1
 
 ...
 

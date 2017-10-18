@@ -51,9 +51,9 @@
 #define UI_HPP_
 
 /// Macro expansion for executable current version number
-#define ECO_VERSION "0.0 alpha"
+#define ECO_VERSION "1.0.0"
 /// Macro expansion for executable current name
-#define ECO_EXECUTABLE "eco0"
+#define ECO_EXECUTABLE "eco"
 
 /// Valid options available upon execution of the code.
 /** Enumeration of valid options for executing the ecosystem code.
@@ -66,7 +66,7 @@ typedef enum {TEST, EXECUTE, EXIT, CONTINUE, HELP,
 				macaw, mola, monkfish, sandbox,
 	
 				scopsowl, shark, skua, gsta_opt, magpie,
-				scops_opt, skua_opt, trajectory} valid_options;
+				scops_opt, skua_opt, trajectory, dove} valid_options;
 
 /// Data structure holding the UI arguments.
 /** C-Style object for interfacing with users request upon execution of

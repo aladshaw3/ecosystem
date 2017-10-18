@@ -15,16 +15,16 @@ Scenario:
   act_fun: davies    
   const_pH: false
   pH: 8	
-  temp: 298.15        
+  temp: 293.15        
   dielec: 78.325     
-  volume: 1.0    #0.75  
+  volume: 0.75  
   reactor: batch
 
 - run_time:
   steady: true        
-  specs_curve: false  
+  specs_curve: true  
   pH_step: 0.25
-  temp_curve: true
+  temp_curve: false
   start_temp: 273.15
   end_temp: 323.15
   temp_step: 2.5
@@ -36,12 +36,8 @@ SolverOptions:
 line_search: true      
 search_type: standard
 linear_solve: qr  
-nl_abstol: 1e-8
-nl_maxit: 1000  
-
-- kms_options:
-  max_level: 2
-  inner_tol: 0.01  		
+nl_abstol: 1e-6
+nl_maxit: 100 		
 
 ...
 
@@ -241,7 +237,7 @@ MassBalance:
     "H2O (l)": 1
 
 - carbonate:
-  total_conc: 0.002290951
+  total_conc: 0.002296217
   - delta: 
     "NaHCO3 (aq)": 1
     "NaCO3 - (aq)": 1 
@@ -258,7 +254,7 @@ MassBalance:
     "UO2CO3HIDO - (ad)": 1
 
 - nitrate:
-  total_conc: 6.454E-5
+  total_conc: 6.49166E-05
   - delta:
     "HNO3 (aq)": 1
     "NO3 - (aq)": 1
@@ -266,7 +262,7 @@ MassBalance:
     "UO2(NO3)2 (aq)": 2
 
 - sodium: 
-  total_conc: 0.432290951
+  total_conc: 0.432296217
   - delta:
     "NaHCO3 (aq)": 1
     "NaCO3 - (aq)": 1
@@ -276,7 +272,7 @@ MassBalance:
     "NaOH (aq)": 1
 
 - uranyl:
-  total_conc: 3.227E-5
+  total_conc: 3.24583E-05
   - delta:
     "UO2NO3 + (aq)": 1
     "UO2(NO3)2 (aq)": 1
@@ -514,7 +510,7 @@ EquilRxn:
 "AF1":
 ---
 spec_area: 15000.0     #Units: m^2/kg
-total_mass: 1.51e-5     #Units: kg
+total_mass: 1.51095e-5     #Units: kg
 surf_activity: uniquac
 include_surfcharge: true
 
@@ -530,14 +526,14 @@ include_surfcharge: true
 
 "AF1-HAO (ad)":
 ---
-spec_mole: 1.25      #Units: mol/kg
+spec_mole: 1.45     #Units: mol/kg
 ligand_charge: 0
 
 - rxn01:
-  #logK: 0.39
+  logK: 0.39
   #energy: -2188.79
-  enthalpy: -4568.712516
-  entropy: -8.213854836
+  #enthalpy: -4568.712516
+  #entropy: -8.213854836
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -545,10 +541,11 @@ ligand_charge: 0
     "H + (aq)": 1
 
 - rxn02:
-  #logK: -2.72
+  logK: -2.72   #real
+  #logK: -4.72   #adjust
   #energy: 15265.42
-  enthalpy: 46003.07463
-  entropy: 106.0758781
+  #enthalpy: 46003.07463
+  #entropy: 106.0758781
   mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -556,10 +553,11 @@ ligand_charge: 0
     "H + (aq)": 2
 
 - rxn03:
-  #logK: -11.73
+  logK: -11.73   #real
+  #logK: -14.73   #adjusted
   #energy: 65832.11
-  enthalpy: 289758.924
-  entropy: 769.6612292
+  #enthalpy: 289758.924
+  #entropy: 769.6612292
   mole_factor: 3.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -567,10 +565,10 @@ ligand_charge: 0
     "H + (aq)": 3
 
 - rxn04:
-  #logK: 2.59
+  logK: 2.59
   #energy: -14535.82
-  enthalpy: -45529.98186
-  entropy: -106.5414879
+  #enthalpy: -45529.98186
+  #entropy: -106.5414879
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -579,10 +577,10 @@ ligand_charge: 0
     "H + (aq)": 1
 
 - rxn05:
-  #logK: -0.92
+  logK: -0.92
   #energy: 5163.30
-  enthalpy: 29039.0823
-  entropy: 82.60332667
+  #enthalpy: 29039.0823
+  #entropy: 82.60332667
   mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -594,16 +592,14 @@ ligand_charge: 0
 
 "AF1-H2IDO (ad)":
 ---
-spec_mole: 2.05     #Units: mol/kg
+spec_mole: 3.3     #Units: mol/kg
 ligand_charge: 0
 
 - rxn01:
-  #logK: -4.64
+  logK: -4.64
   #energy: 26041.00
   #enthalpy: 63283.01643
   #entropy: 128.5997497
-  enthalpy: 9912.593391
-  entropy: -55.58463584
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -611,12 +607,10 @@ ligand_charge: 0
     "H + (aq)": 2
 
 - rxn02:
-  #logK: -0.34
+  logK: -0.34
   #energy: 1908.18
   #enthalpy: 6265.111748
   #entropy: 14.96436475
-  enthalpy: -13226.41731
-  entropy: -50.87083581
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -624,12 +618,10 @@ ligand_charge: 0
     "H + (aq)": 1
 
 - rxn03:
-  #logK: -18.68
+  logK: -18.68
   #energy: 104837.49
   #enthalpy: 358852.085
   #entropy: 871.355387
-  enthalpy: 39828.85213
-  entropy: -224.0372932
   mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -637,12 +629,11 @@ ligand_charge: 0
     "H + (aq)": 4
 
 - rxn04:
-  #logK: -8.78
+  logK: -8.78   #real
+  #logK: -12.78   #adjusted
   #energy: 49275.87
   #enthalpy: 270635.6665
   #entropy: 760.7314994
-  enthalpy: 21568.72863
-  entropy: -95.74902898
   mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -650,12 +641,10 @@ ligand_charge: 0
     "H + (aq)": 3
 
 - rxn05:
-  #logK: -3.48
+  logK: -3.48
   #energy: 19530.75
   #enthalpy: 45372.00713
   #entropy: 88.8316885
-  enthalpy: -20251.48619
-  entropy: -134.5475453
   mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -663,10 +652,10 @@ ligand_charge: 0
     "H + (aq)": 2
 
 - rxn06:
-  #logK: 1.36
+  logK: 1.36
   #energy: -7632.71
-  enthalpy: -28092.06533
-  entropy: -70.1357942
+  #enthalpy: -28092.06533
+  #entropy: -70.1357942
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -675,10 +664,10 @@ ligand_charge: 0
     "H + (aq)": 2
 
 - rxn07:
-  #logK: 5.36
+  logK: 5.36
   #energy: -30081.85
-  enthalpy: -233012.7359
-  entropy: -695.7041093
+  #enthalpy: -233012.7359
+  #entropy: -695.7041093
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1

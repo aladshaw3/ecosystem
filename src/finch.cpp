@@ -3858,7 +3858,7 @@ int burgers_ic(const void *user_data)
 	return success;
 }
 
-//Function for the custom parameters for the inviscous Burger's Problem
+//Function for the custom parameters for the Inviscous Burgers' Problem
 int burgers_params(const void *user_data)
 {
 	int success = 0;
@@ -3949,20 +3949,24 @@ int FINCH_TESTS()
   	//dat.uo = 0.0;
 	//dat.vIC = 992.2941164;
 	//dat.vo = 992.2941164;
-  	dat.vIC = 2.0;
-	dat.vo = 2.0;
+  	//dat.vIC = 2.0;
+	//dat.vo = 2.0;
+	dat.vIC = 0.0;
+	dat.vo = 0.0;
   	//dat.vIC = 1.0;
 	//dat.vo = 1.0;
 	//dat.DIC = 0.546244074;
 	//dat.Do = 0.546244074;
-  	dat.DIC = 0.01;
-	dat.Do = 0.01;
+  	//dat.DIC = 0.01;
+	//dat.Do = 0.01;
+	dat.DIC = 2.0;
+	dat.Do = 2.0;
   	//dat.DIC = 0.0;
 	//dat.Do = 0.0;
-  	//dat.kIC = 0.0;
-  	//dat.ko = 0.0;
-  	dat.kIC = 5.0;
-  	dat.ko = 5.0;
+  	dat.kIC = 0.0;
+  	dat.ko = 0.0;
+  	//dat.kIC = 5.0;
+  	//dat.ko = 5.0;
   	dat.RIC = 1.0;
   	dat.Ro = 1.0;
   	//dat.RIC = 285991.8319;
@@ -3973,9 +3977,11 @@ int FINCH_TESTS()
   	dat.L = 1.0;
 	//dat.L = 2.0*M_PI;
   	dat.s = 1.0;
-	dat.T = 0.2;
+	//dat.T = 0.2;
+	dat.T = 1.0;
 	//dat.T = 60.0;
-	dat.LN = 40;
+	//dat.LN = 100;
+	dat.LN = 10;
 	dat.t_old = 0.0;
 	dat.dt_old = 0.0;
   	dat.d = 0;
@@ -3986,9 +3992,12 @@ int FINCH_TESTS()
   	dat.Iterative = true;
   	dat.SteadyState = false;
   	dat.NormTrack = true;
+	dat.CN = true;
 	
   	//Iterative Methods
-	dat.nl_method = LARK_PJFNK; //0 = FINCH_Picard, 1 = LARK_Picard, 2 = LARK_PJFNK
+	dat.nl_method = FINCH_Picard; //0 = FINCH_Picard, 1 = LARK_Picard, 2 = LARK_PJFNK
+	dat.tol_abs = 1e-10;
+	dat.tol_rel = 1e-10;
 	dat.pjfnk_dat.nl_tol_rel = 1e-6;
 	dat.pjfnk_dat.nl_tol_abs = 1e-6;
 	dat.pjfnk_dat.linear_solver = QR;
@@ -4016,13 +4025,13 @@ int FINCH_TESTS()
 	//Set up the FINCH_DATA
 	
 	//Buckley-Leverett Non-Linear Tests with Default Dirichlet BCs
-	success = setup_FINCH_DATA(default_execution,buckley_leverett_ic,default_timestep,default_preprocess,default_solve,buckley_leverett_params,vanAlbada_discretization,default_bcs,default_res,default_precon,default_postprocess,default_reset,&dat,(void *)&dat);
+	//success = setup_FINCH_DATA(default_execution,buckley_leverett_ic,default_timestep,default_preprocess,default_solve,buckley_leverett_params,minmod_discretization,default_bcs,default_res,default_precon,default_postprocess,default_reset,&dat,(void *)&dat);
 	
 	//Inviscous Burger's Non-Linear Tests with Periodic BCs
 	//success = setup_FINCH_DATA(default_execution,burgers_ic,default_timestep,default_preprocess,default_solve,burgers_params,minmod_discretization,burgers_bcs,default_res,default_precon,default_postprocess,default_reset,&dat,(void *)&dat);
 	
 	//Below uses minmod discretization (least dispersive, least oscillatory, worst convergence)
-	//success = setup_FINCH_DATA(default_execution,default_ic,default_timestep,default_preprocess,default_solve,default_params,minmod_discretization,default_bcs,default_res,default_precon,default_postprocess,default_reset,&dat,(void *)&dat);
+	success = setup_FINCH_DATA(default_execution,default_ic,default_timestep,default_preprocess,default_solve,default_params,minmod_discretization,default_bcs,default_res,default_precon,default_postprocess,default_reset,&dat,(void *)&dat);
 	
 	//Below uses Ospre discretization (less dispersive, less oscillatory, better convergence)
 	//success = setup_FINCH_DATA(default_execution,default_ic,default_timestep,default_preprocess,default_solve,default_params,ospre_discretization,default_bcs,default_res,default_precon,default_postprocess,default_reset,&dat,(void *)&dat);

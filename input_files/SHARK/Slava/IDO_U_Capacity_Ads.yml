@@ -32,8 +32,8 @@ SolverOptions:
 ---
 line_search: true      
 search_type: standard
-linear_solve: fom  
-nl_abstol: 1e-4 
+linear_solve: QR  
+nl_abstol: 1e-6 
 nl_maxit: 100   		
 
 ...

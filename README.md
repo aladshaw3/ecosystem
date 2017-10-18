@@ -1,12 +1,12 @@
 # README #
 
-This README file outlines how to get setup using the ecosystem codes and executables. The project is very early in development and is likely to go through very large changes at any time. 
+This README file outlines how to get setup using the ecosystem codes and executables. Please see below for guidelines on how to cite this repository if you are using any of these modules for a publication. Thanks. 
 
 ### What is this repository for? ###
 
 * This repository is for the ecosystem tool set designed and developed by Austin Ladshaw at the Georgia Institute of Technology. Tools and algorithms developed here are designed for simulation and data anaylsis associated with adsorption phenomena in air and water chemistry. However, several sets of tools here are also generalized and could be used in nearly any realm of science and engineering. 
 
-* Version: 0.0 alpha
+* Version: 1.0.0
 
 * [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
 
@@ -31,7 +31,7 @@ This README file outlines how to get setup using the ecosystem codes and executa
 
 * How to run tests
 
-	+ The executable will have built-in tests you can run to check for runtime errors. To run these tests, first build the project from source, then type "eco0 -t" to open a test menu. You can then choose a test to run.
+	+ The executable will have built-in tests you can run to check for runtime errors. To run these tests, first build the project from source, then type "eco -t" to open a test menu. You can then choose a test to run.
 
 * Deployment instructions: No special instructions
 
@@ -50,3 +50,8 @@ This README file outlines how to get setup using the ecosystem codes and executa
 
 * Lead Developer: Austin Ladshaw (aladshaw3@gatech.edu)
 * Trajectory Contributor: Alex Wiechert (awiechert3@gatech.edu)
+
+### How to cite this repository ###
+
+* Please refer to the citation guidelines for your particular journal or publisher for citing software. If no guidelines are available, you may cite this work as the following:
+* Ladshaw, A., Wiechert, A., Tsouris, C., Yiacoumi, S., "Ecosystem Software - A C/C++ library for environmental chemistry and adsorption," Version <(version #)>, Available at https://bitbucket.org/gitecosystem/ecosystem, Accessed on (Month) (Day), (Year). 
