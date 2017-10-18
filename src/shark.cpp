@@ -13887,7 +13887,7 @@ int SHARK_TESTS_OLD()
 	shark_dat.MassBalanceList[5].Set_Delta(21, 1);
 	shark_dat.MassBalanceList[5].Set_Delta(22, 0);
 	shark_dat.MassBalanceList[5].Set_Delta(23, 0);
-<<<<<<< HEAD
+
 /*
 	shark_dat.AdsorptionList[0].setSpecificArea(ads_area);
 	shark_dat.AdsorptionList[0].setSpecificMolality(ads_mol);
@@ -13980,9 +13980,6 @@ int SHARK_TESTS_OLD()
 	//shark_dat.AdsorptionList[0].setVolumeFactor(22, 5.0); //MADE UP NUMBER - given to the adsorbed species
 	//shark_dat.AdsorptionList[0].setVolumeFactor(23, 8.0); //MADE UP NUMBER - given to the adsorbed species
 
-=======
-	
->>>>>>> master
 	shark_dat.UnsteadyAdsList[0].setSpecificArea(ads_area);
 	shark_dat.UnsteadyAdsList[0].setSpecificMolality(ads_mol);
 	shark_dat.UnsteadyAdsList[0].setTotalMass(ads_mass);
