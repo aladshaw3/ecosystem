@@ -75,6 +75,7 @@ void Dove::set_numfunc(int i)
 		this->user_func.set_size(1, 1);
 		this->user_coeff.set_size(1, 1);
 		this->user_jacobi.resize(1);
+		this->var_names.set_size(1, 1);
 		this->num_func = 1;
 	}
 	else
@@ -85,8 +86,10 @@ void Dove::set_numfunc(int i)
 		this->user_func.set_size(i, 1);
 		this->user_coeff.set_size(i, 1);
 		this->user_jacobi.resize(i);
+		this->var_names.set_size(i, 1);
 		this->num_func = i;
 	}
+	this->set_defaultNames();
 	this->set_defaultCoeffs();
 	this->set_defaultJacobis();
 }
@@ -202,6 +205,12 @@ void Dove::set_initialcondition(int i, double ic)
 	this->unm1.edit(i, 0, ic);
 }
 
+//Set the name of the ith variable
+void Dove::set_variableName(int i, std::string name)
+{
+	this->var_names.edit(i, 0, name);
+}
+
 //Set output conditions for Dove
 void Dove::set_output(bool choice)
 {
@@ -245,6 +254,18 @@ void Dove::set_LinearAbsTol(double tol)
 void Dove::set_LinearRelTol(double tol)
 {
 	this->newton_dat.lin_tol_rel = tol;
+}
+
+//Set default names
+void Dove::set_defaultNames()
+{
+	for (int i=0; i<this->num_func; i++)
+	{
+		std::string temp = "u[";
+		temp += std::to_string(i);
+		temp += "]";
+		this->var_names.edit(i, 0, temp);
+	}
 }
 
 //Set the default coeffs
@@ -440,7 +461,7 @@ void Dove::print_header()
 	}
 	fprintf(this->Output,"Time");
 	for (int i=0; i<this->num_func; i++)
-		fprintf(this->Output,"\tu[%i]",i);
+		fprintf(this->Output,"\t%s",this->var_names(i,0).c_str());
 	fprintf(this->Output,"\n");
 }
 
@@ -2212,6 +2233,7 @@ int DOVE_TESTS()
 	test01.set_output(true);
 	
 	test01.set_initialcondition(0, 1);
+	test01.set_variableName(0, "conc");
 	test01.set_timestep(0.05);
 	test01.set_integrationtype(BE);
 	test01.solve_all();
@@ -2429,6 +2451,8 @@ int DOVE_TESTS()
 	test06.set_numfunc(2);
 	test06.registerFunction(1, mb_cstr);
 	test06.registerFunction(0, ldf_kinetics);
+	test06.set_variableName(1, "C_bulk");
+	test06.set_variableName(0, "q_ads");
 	test06.registerCoeff(1, mb_timecoef);
 	test06.set_endtime(10.0);
 	test06.set_timestepper(ADAPTIVE);

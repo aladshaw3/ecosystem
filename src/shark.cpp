@@ -13897,7 +13897,7 @@ int SHARK_TESTS_OLD()
 	shark_dat.AdsorptionList[0].setActivityModelInfo(FloryHuggins, &shark_dat.AdsorptionList[0]);
 	shark_dat.AdsorptionList[0].setBasis("area");
 	//shark_dat.AdsorptionList[0].setBasis("molar");
-/*
+
 	shark_dat.AdsorptionList[0].setMolarFactor(0, 1.0);
 	shark_dat.AdsorptionList[0].getReaction(0).Set_Equilibrium(logK_UO2);
 	shark_dat.AdsorptionList[0].getReaction(0).Set_Stoichiometric(0, 0);
@@ -13952,7 +13952,7 @@ int SHARK_TESTS_OLD()
 	shark_dat.AdsorptionList[0].getReaction(1).Set_Stoichiometric(22, 0);
 	shark_dat.AdsorptionList[0].getReaction(1).Set_Stoichiometric(23, 1);
 
-	/*
+	
 	shark_dat.AdsorptionList[0].setVolumeFactor(0, 0);
 	shark_dat.AdsorptionList[0].setVolumeFactor(1, 0);
 	shark_dat.AdsorptionList[0].setVolumeFactor(2, 0);

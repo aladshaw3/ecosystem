@@ -130,11 +130,13 @@ public:
 	void set_outputfile(FILE *file);					///< Set the output file for simulation results
 	void set_userdata(const void *data);				///< Set the user defined data structure
 	void set_initialcondition(int i, double ic);		///< Set the initial condition of variable i to value ic
+	void set_variableName(int i, std::string name);		///< Set the name of variable i to the given string
 	void set_output(bool choice);						///< Set the value of DoveOutput (True if you want console messages)
 	void set_fileoutput(bool choice);					///< Set the value of DoveFileOuput (True if you want results printed to file)
 	void set_tolerance(double tol);						///< Set the value of residual/error tolerance desired
 	
 	//Set some default conditions
+	void set_defaultNames();							///< Set all the variable names to default values
 	void set_defaultCoeffs();							///< Set all coeff functions to the default
 	void set_defaultJacobis();							///< Set all Jacobians to the default (only does the diagonals!)
 	
@@ -263,6 +265,7 @@ public:
 	int solve_RKF();
 	
 protected:
+	Matrix<std::string> var_names;					///< Matrix of variable names
 	Matrix<double> un;								///< Matrix for nth level solution vector
 	Matrix<double> unp1;							///< Matrix for n+1 level solution vector
 	Matrix<double> unm1;							///< Matrix for n-1 level solution vector
