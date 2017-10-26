@@ -38,7 +38,7 @@
 #include "macaw.h"
 #include "lark.h"
 #include "yaml_wrapper.h"
-//#include <unordered_map>        //Line to allow use of unordered_map structure
+#include <unordered_map>        //Line to allow use of unordered_map structure
 
 #ifndef DOVE_HPP_
 #define DOVE_HPP_
@@ -130,13 +130,13 @@ public:
 	void set_outputfile(FILE *file);					///< Set the output file for simulation results
 	void set_userdata(const void *data);				///< Set the user defined data structure
 	void set_initialcondition(int i, double ic);		///< Set the initial condition of variable i to value ic
-	void set_variableName(int i, std::string name);		///< Set the name of variable i to the given string
+	void set_variableName(int i, std::string name);		///< Set the name of variable i to the given string (both i and name should be unique)
 	void set_output(bool choice);						///< Set the value of DoveOutput (True if you want console messages)
 	void set_fileoutput(bool choice);					///< Set the value of DoveFileOuput (True if you want results printed to file)
 	void set_tolerance(double tol);						///< Set the value of residual/error tolerance desired
 	
 	//Set some default conditions
-	void set_defaultNames();							///< Set all the variable names to default values
+	void set_defaultNames();							///< Set all the variable names to default values (does not set var_names_hash values)
 	void set_defaultCoeffs();							///< Set all coeff functions to the default
 	void set_defaultJacobis();							///< Set all Jacobians to the default (only does the diagonals!)
 	
@@ -204,10 +204,15 @@ public:
 	Matrix<double>& getCurrentU();					///< Return reference to the n level solution
 	Matrix<double>& getOldU();						///< Return reference to the n-1 level solution
 	Matrix<double>& getNewU();						///< Return reference to the n+1 level solution
-	double getCurrentU(int i) const;				///< Return the value of the n level solution for variable i
-	double getOldU(int i) const;					///< Return the value of the n-1 level solution for variable i
-	double getNewU(int i) const;					///< Return the value of the n+1 level solution for variable i
+	int getVariableIndex(std::string name) const;	///< Return the index of the variable whose name matches the given string (checks hash table)
+	double getCurrentU(int i) const;				///< Return the value of the n level solution for variable i (may want to disable)
+	double getOldU(int i) const;					///< Return the value of the n-1 level solution for variable i (may want to disable)
+	double getNewU(int i) const;					///< Return the value of the n+1 level solution for variable i (may want to disable)
+	double getCurrentU(std::string name) const;		///< Return the value of the n level solution for variable of given name (may want to disable)
+	double getOldU(std::string name) const;			///< Return the value of the n-1 level solution for variable of given name (may want to disable)
+	double getNewU(std::string name) const;			///< Return the value of the n+1 level solution for variable of given name (may want to disable)
 	double coupledTimeDerivative(int i) const;		///< Return the value of the ith variable's time derivative
+	double coupledTimeDerivative(std::string name) const;		///< Return the value of the named variable's time derivative
 	double coupledDerivativeTimeDerivative(int i, int j) const; ///< Return the value of the ith variable's time derivative's jth derivative
 	const void *getUserData();						///< Return pointer to user data
 	int getNumFunc() const;							///< Return the number of functions
@@ -265,7 +270,8 @@ public:
 	int solve_RKF();
 	
 protected:
-	Matrix<std::string> var_names;					///< Matrix of variable names
+	Matrix<std::string> var_names;					///< Matrix of variable names (access names by index in numerical order)
+	std::unordered_map<std::string, int> var_names_hash;	///< Hash table of variable names and corresponding indices (access index by name)
 	Matrix<double> un;								///< Matrix for nth level solution vector
 	Matrix<double> unp1;							///< Matrix for n+1 level solution vector
 	Matrix<double> unm1;							///< Matrix for n-1 level solution vector

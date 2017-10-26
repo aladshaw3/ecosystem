@@ -59,6 +59,7 @@ Dove::Dove()
 Dove::~Dove()
 {
 	this->user_jacobi.clear();
+	this->var_names_hash.clear();
 	if (this->Output != nullptr)
 		fclose(Output);
 }
@@ -76,6 +77,7 @@ void Dove::set_numfunc(int i)
 		this->user_coeff.set_size(1, 1);
 		this->user_jacobi.resize(1);
 		this->var_names.set_size(1, 1);
+		this->var_names_hash.reserve(1);
 		this->num_func = 1;
 	}
 	else
@@ -87,6 +89,7 @@ void Dove::set_numfunc(int i)
 		this->user_coeff.set_size(i, 1);
 		this->user_jacobi.resize(i);
 		this->var_names.set_size(i, 1);
+		this->var_names_hash.reserve(i);
 		this->num_func = i;
 	}
 	this->set_defaultNames();
@@ -209,6 +212,7 @@ void Dove::set_initialcondition(int i, double ic)
 void Dove::set_variableName(int i, std::string name)
 {
 	this->var_names.edit(i, 0, name);
+	this->var_names_hash[name] = i;
 }
 
 //Set output conditions for Dove
@@ -501,6 +505,22 @@ Matrix<double>& Dove::getNewU()
 	return this->unp1;
 }
 
+//Return variable index from given name
+int Dove::getVariableIndex(std::string name) const
+{
+	std::unordered_map<std::string, int>::const_iterator it = this->var_names_hash.find(name);
+	
+	if (it == this->var_names_hash.end())
+	{
+		mError(key_not_found);
+		return 0;
+	}
+	else
+	{
+		return it->second;
+	}
+}
+
 //Return u_n for i
 double Dove::getCurrentU(int i) const
 {
@@ -519,9 +539,34 @@ double Dove::getNewU(int i) const
 	return this->unp1(i,0);
 }
 
+//Return u_n for name
+double Dove::getCurrentU(std::string name) const
+{
+	return this->un(this->getVariableIndex(name),0);
+}
+
+//Return u_n-1 for name
+double Dove::getOldU(std::string name) const
+{
+	return this->unm1(this->getVariableIndex(name),0);
+}
+
+//Return u_n+1 for name
+double Dove::getNewU(std::string name) const
+{
+	return this->unp1(this->getVariableIndex(name),0);
+}
+
 //Return du_i/dt
 double Dove::coupledTimeDerivative(int i) const
 {
+	return this->user_func(i,0)(i,this->unp1,this->getCurrentTime(),this->user_data, *this);
+}
+
+//Return du_name/dt
+double Dove::coupledTimeDerivative(std::string name) const
+{
+	int i = this->getVariableIndex(name);
 	return this->user_func(i,0)(i,this->unp1,this->getCurrentTime(),this->user_data, *this);
 }
 
@@ -2188,7 +2233,8 @@ typedef struct
 double ldf_kinetics(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove)
 {
 	Test06_data *dat = (Test06_data *) data;
-	return dat->kldf*(dat->K*u(1,0) - u(0,0));
+	return dat->kldf*(dat->K*u(dove.getVariableIndex("c"),0) - u(dove.getVariableIndex("q"),0));
+	//return dat->kldf*(dat->K*u(1,0) - u(0,0));
 }
 
 double mb_timecoef(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove)
@@ -2200,7 +2246,9 @@ double mb_timecoef(int i, const Matrix<double> &u, double t, const void *data, c
 double mb_cstr(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove)
 {
 	Test06_data *dat = (Test06_data *) data;
-	return dat->Q*dat->co - dat->Q*u(1,0) - dat->rho*dove.coupledTimeDerivative(0);
+	return dat->Q*dat->co - dat->Q*u(dove.getVariableIndex("c"),0) - dat->rho*dove.coupledTimeDerivative("q");
+	//return dat->Q*dat->co - dat->Q*u(dove.getVariableIndex("c"),0) - dat->rho*dove.coupledTimeDerivative(dove.getVariableIndex("q"));
+	//return dat->Q*dat->co - dat->Q*u(1,0) - dat->rho*dove.coupledTimeDerivative(0);
 }
 // -------------------- End temporary testing --------------------------
 
@@ -2451,8 +2499,8 @@ int DOVE_TESTS()
 	test06.set_numfunc(2);
 	test06.registerFunction(1, mb_cstr);
 	test06.registerFunction(0, ldf_kinetics);
-	test06.set_variableName(1, "C_bulk");
-	test06.set_variableName(0, "q_ads");
+	test06.set_variableName(1, "c");
+	test06.set_variableName(0, "q");
 	test06.registerCoeff(1, mb_timecoef);
 	test06.set_endtime(10.0);
 	test06.set_timestepper(ADAPTIVE);
