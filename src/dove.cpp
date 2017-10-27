@@ -463,6 +463,25 @@ void Dove::print_header()
 		default:
 			break;
 	}
+	fprintf(this->Output,"Timestepper scheme =\t");
+	switch (this->timestepper)
+	{
+		case CONSTANT:
+			fprintf(this->Output,"CONSTANT\n");
+			break;
+			
+		case ADAPTIVE:
+			fprintf(this->Output,"ADAPTIVE\n");
+			break;
+			
+		case FEHLBERG:
+			fprintf(this->Output,"FEHLBERG\n");
+			break;
+			
+		default:
+			break;
+	}
+	fprintf(this->Output,"Tolerance =\t%.6g\n", this->tolerance);
 	fprintf(this->Output,"Time");
 	for (int i=0; i<this->num_func; i++)
 		fprintf(this->Output,"\t%s",this->var_names(i,0).c_str());
@@ -519,6 +538,24 @@ int Dove::getVariableIndex(std::string name) const
 	{
 		return it->second;
 	}
+}
+
+//Return variable index of maximum rate of change
+int Dove::getMaxRateIndex()
+{
+	int index=0;
+	double rate = 0.0;
+	for (int i=0; i<this->num_func; i++)
+	{
+		double temp = fabs(this->Eval_Func(i, this->unp1, this->time));
+		double coeff = fabs(this->Eval_Coeff(i, this->unp1, this->time));
+		if (temp > rate && coeff > sqrt(DBL_EPSILON))
+		{
+			rate = temp;
+			index = i;
+		}
+	}
+	return index;
 }
 
 //Return u_n for i
@@ -2531,8 +2568,8 @@ int DOVE_TESTS()
 	fprintf(file,"Test05: Single Variable Non-Linear 2D PDE with Preconditioning\n---------------------------------\ndu/dt = u*Lap(u)\n");
 	 
 	Test05_data data05;
-	data05.N = 20000;
-	data05.m = 800;	//NOTE: for this test, m should be between 2 and N-2
+	data05.N = 2000;
+	data05.m = 80;	//NOTE: for this test, m should be between 2 and N-2
 	test05.set_userdata((void*)&data05);
 	test05.set_output(true);
 	test05.set_numfunc(data05.N);

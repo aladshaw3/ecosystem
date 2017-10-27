@@ -205,6 +205,7 @@ public:
 	Matrix<double>& getOldU();						///< Return reference to the n-1 level solution
 	Matrix<double>& getNewU();						///< Return reference to the n+1 level solution
 	int getVariableIndex(std::string name) const;	///< Return the index of the variable whose name matches the given string (checks hash table)
+	int getMaxRateIndex();							///< Returns index for variable that underwent maximum rate of change
 	double getCurrentU(int i) const;				///< Return the value of the n level solution for variable i (may want to disable)
 	double getOldU(int i) const;					///< Return the value of the n-1 level solution for variable i (may want to disable)
 	double getNewU(int i) const;					///< Return the value of the n+1 level solution for variable i (may want to disable)
@@ -283,7 +284,7 @@ protected:
 	double time_older;								///< Value of older previous time
 	double dtmin;									///< Minimum allowable time step
 	double dtmax;									///< Maximum allowable time step
-	double tolerance;								///< Residual tolerance desired
+	double tolerance;								///< Residual tolerance desired (or level of accuracy desired)
 	integrate_type int_type;						///< Type of time integration to use
 	integrate_subtype int_sub;						///< Subtype of time integration scheme to use
 	timestep_type timestepper;						///< Type of time stepper to be used
