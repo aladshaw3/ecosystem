@@ -65,8 +65,9 @@ typedef enum {BE, FE, CN, BDF2, RK4, RKF} integrate_subtype;
  
 	\param CONSTANT time stepper will use a constant dt value for all time steps.
 	\param ADAPTIVE time stepper will adjust the time step according to simulation success.
-	\param FEHLBERG time stepper will adjust time step according to desired error tolerance. */
-typedef enum {CONSTANT, ADAPTIVE, FEHLBERG} timestep_type;
+	\param FEHLBERG time stepper will adjust time step according to desired error tolerance. 
+	\param RATEBASED time stepper will adjust time step based on maximum rates of change. */
+typedef enum {CONSTANT, ADAPTIVE, FEHLBERG, RATEBASED} timestep_type;
 
 /// Enumeration for the list of valid line search methods
 /** Type of line search method to be used by Dove.
@@ -205,7 +206,7 @@ public:
 	Matrix<double>& getOldU();						///< Return reference to the n-1 level solution
 	Matrix<double>& getNewU();						///< Return reference to the n+1 level solution
 	int getVariableIndex(std::string name) const;	///< Return the index of the variable whose name matches the given string (checks hash table)
-	int getMaxRateIndex();							///< Returns index for variable that underwent maximum rate of change
+	double getMaxRate();							///< Returns the value of the maximum rate of change for all variables
 	double getCurrentU(int i) const;				///< Return the value of the n level solution for variable i (may want to disable)
 	double getOldU(int i) const;					///< Return the value of the n-1 level solution for variable i (may want to disable)
 	double getNewU(int i) const;					///< Return the value of the n+1 level solution for variable i (may want to disable)

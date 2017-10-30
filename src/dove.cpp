@@ -478,6 +478,10 @@ void Dove::print_header()
 			fprintf(this->Output,"FEHLBERG\n");
 			break;
 			
+		case RATEBASED:
+			fprintf(this->Output,"RATEBASED\n");
+			break;
+			
 		default:
 			break;
 	}
@@ -541,9 +545,8 @@ int Dove::getVariableIndex(std::string name) const
 }
 
 //Return variable index of maximum rate of change
-int Dove::getMaxRateIndex()
+double Dove::getMaxRate()
 {
-	int index=0;
 	double rate = 0.0;
 	for (int i=0; i<this->num_func; i++)
 	{
@@ -551,11 +554,10 @@ int Dove::getMaxRateIndex()
 		double coeff = fabs(this->Eval_Coeff(i, this->unp1, this->time));
 		if (temp > rate && coeff > sqrt(DBL_EPSILON))
 		{
-			rate = temp;
-			index = i;
+			rate = temp/coeff;
 		}
 	}
-	return index;
+	return rate;
 }
 
 //Return u_n for i
@@ -734,6 +736,7 @@ double Dove::getNonlinearRelativeRes()
 double Dove::ComputeTimeStep()
 {
 	double step = 0.0;
+	double rate = 0.0;
 	if (this->time == 0.0)
 		return this->dt;
 	if (this->Converged == true)
@@ -754,6 +757,20 @@ double Dove::ComputeTimeStep()
 				step = 0.84*pow((this->tolerance/this->getNonlinearResidual()),0.25)*this->dt;
 				if (step >= this->dtmax)
 					step = this->dtmax;
+				if (step <= this->dtmin)
+					step = this->dtmin;
+				break;
+				
+			case RATEBASED:
+				rate = this->getMaxRate();
+				if (rate <= 1.0)
+					step = this->dt + 0.1*this->dt;
+				else
+					step = this->dt - 0.1*this->dt;
+				if (step >= this->dtmax)
+					step = this->dtmax;
+				if (step <= this->tolerance)
+					step = this->tolerance;
 				if (step <= this->dtmin)
 					step = this->dtmin;
 				break;
@@ -785,6 +802,12 @@ double Dove::ComputeTimeStep()
 				step = 0.84*pow((this->tolerance/this->getNonlinearResidual()),0.25)*this->dt;
 				if (step >= this->dtmax)
 					step = this->dtmax;
+				if (step <= this->dtmin)
+					step = this->dtmin;
+				break;
+				
+			case RATEBASED:
+				step = 0.5 * this->dt;
 				if (step <= this->dtmin)
 					step = this->dtmin;
 				break;
@@ -2530,7 +2553,7 @@ int DOVE_TESTS()
 	data06.eps = 0.5;
 	data06.co = 1.0;
 	data06.rho = 2.0;
-	data06.Q = 1.0;
+	data06.Q = 100.0;
 	test06.set_userdata((void*)&data06);
 	test06.set_output(true);
 	test06.set_numfunc(2);
@@ -2540,7 +2563,7 @@ int DOVE_TESTS()
 	test06.set_variableName(0, "q");
 	test06.registerCoeff(1, mb_timecoef);
 	test06.set_endtime(10.0);
-	test06.set_timestepper(ADAPTIVE);
+	test06.set_timestepper(RATEBASED);
 	test06.set_timestepmax(0.5);
 	test06.set_NonlinearOutput(true);
 	test06.set_LinearOutput(false);
