@@ -284,6 +284,7 @@ protected:
 	double time_old;								///< Value of previous time
 	double time_older;								///< Value of older previous time
 	double dtmin;									///< Minimum allowable time step
+	double dtmin_con;								///< Minimum allowable time step if solution has converged
 	double dtmax;									///< Maximum allowable time step
 	double tolerance;								///< Residual tolerance desired (or level of accuracy desired)
 	integrate_type int_type;						///< Type of time integration to use

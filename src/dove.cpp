@@ -104,6 +104,9 @@ void Dove::set_timestep(double d)
 		this->dt = sqrt(DBL_EPSILON);
 	else
 		this->dt = d;
+	this->dtmin_con	= this->dt/10.0;
+	if (this->dtmin_con <= sqrt(DBL_EPSILON))
+		this->dtmin_con = sqrt(DBL_EPSILON);
 }
 
 //Set min dt
