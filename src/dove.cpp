@@ -19,9 +19,9 @@
 //Default constructor
 Dove::Dove()
 {
-	dt = 0.0;
+	dt = 0.1;
 	dt_old = 0.0;
-	time_end = 0.0;
+	time_end = 1.0;
 	time = 0.0;
 	time_old = 0.0;
 	time_older = 0.0;
@@ -53,6 +53,7 @@ Dove::Dove()
 	newton_dat.nl_maxit = 10;
 	Linear = false;
 	newton_dat.l_restart = 100;
+	AllSteadyState = false;
 }
 
 //Default destructor
@@ -78,6 +79,7 @@ void Dove::set_numfunc(int i)
 		this->user_jacobi.resize(1);
 		this->var_names.set_size(1, 1);
 		this->var_names_hash.reserve(1);
+		this->var_steady.set_size(1, 1);
 		this->num_func = 1;
 	}
 	else
@@ -90,11 +92,13 @@ void Dove::set_numfunc(int i)
 		this->user_jacobi.resize(i);
 		this->var_names.set_size(i, 1);
 		this->var_names_hash.reserve(i);
+		this->var_steady.set_size(i, 1);
 		this->num_func = i;
 	}
 	this->set_defaultNames();
 	this->set_defaultCoeffs();
 	this->set_defaultJacobis();
+	this->set_defaultStates();
 }
 
 //Set time step to value
@@ -107,6 +111,15 @@ void Dove::set_timestep(double d)
 	this->dtmin_con	= this->dt/10.0;
 	if (this->dtmin_con <= sqrt(DBL_EPSILON))
 		this->dtmin_con = sqrt(DBL_EPSILON);
+}
+
+//Set the min dt after convergence
+void Dove::set_timestepmin_converged(double d)
+{
+	if (d <= sqrt(DBL_EPSILON))
+		this->dtmin_con = sqrt(DBL_EPSILON);
+	else
+		this->dtmin_con = d;
 }
 
 //Set min dt
@@ -218,6 +231,22 @@ void Dove::set_variableName(int i, std::string name)
 	this->var_names_hash[name] = i;
 }
 
+//Set the ith variable to steady-state
+void Dove::set_variableSteadyState(int i)
+{
+	this->var_steady.edit(i, 0, true);
+	this->registerCoeff(i, default_func);
+}
+
+//Set all variables to steady-state
+void Dove::set_variableSteadyStateAll()
+{
+	for (int i=0; i<this->num_func; i++)
+		this->set_variableSteadyState(i);
+	this->dt = this->time_end;
+	this->AllSteadyState = true;
+}
+
 //Set output conditions for Dove
 void Dove::set_output(bool choice)
 {
@@ -287,6 +316,13 @@ void Dove::set_defaultJacobis()
 {
 	for (int i=0; i<this->num_func; i++)
 		this->registerJacobi(i, i, default_jacobi);
+}
+
+//Set the defaults for variable states
+void Dove::set_defaultStates()
+{
+	for (int i=0; i<this->num_func; i++)
+		this->var_steady.edit(i, 0, false);
 }
 
 //Set NL output
@@ -395,7 +431,12 @@ void Dove::registerCoeff(int i, double (*coeff) (int i, const Matrix<double> &u,
 	if ((*coeff) == NULL)
 		this->user_coeff.edit(i, 0, default_coeff);
 	else
-		this->user_coeff.edit(i, 0, coeff);
+	{
+		if (this->isSteadyState(i) == true)
+			this->user_coeff.edit(i, 0, default_func);
+		else
+			this->user_coeff.edit(i, 0, coeff);
+	}
 }
 
 //Register jacobians
@@ -735,6 +776,18 @@ double Dove::getNonlinearRelativeRes()
 	return this->newton_dat.nl_relres;
 }
 
+//Return true if all steady
+bool Dove::allSteadyState()
+{
+	return this->AllSteadyState;
+}
+
+//Return state of ith variable
+bool Dove::isSteadyState(int i)
+{
+	return this->var_steady(i,0);
+}
+
 //Compute next time step
 double Dove::ComputeTimeStep()
 {
@@ -772,10 +825,8 @@ double Dove::ComputeTimeStep()
 					step = this->dt - 0.1*this->dt;
 				if (step >= this->dtmax)
 					step = this->dtmax;
-				if (step <= this->tolerance)
-					step = this->tolerance;
-				if (step <= this->dtmin)
-					step = this->dtmin;
+				if (step <= this->dtmin_con)
+					step = this->dtmin_con;
 				break;
 				
 			default:
@@ -857,6 +908,7 @@ double Dove::Eval_Jacobi(int i, int j, const Matrix<double>& u, double t)
 int Dove::solve_timestep()
 {
 	int success = 0;
+	this->validate_method();
 	if (this->int_type == IMPLICIT)
 	{
 		this->validate_linearsteps();
@@ -866,6 +918,11 @@ int Dove::solve_timestep()
 	}
 	else
 	{
+		if (this->allSteadyState() == true)
+		{
+			mError(explicit_invalid);
+			return -1;
+		}
 		switch (this->int_sub)
 		{
 			case FE:
@@ -889,7 +946,7 @@ int Dove::solve_timestep()
 	//What to do on failure
 	if (this->Converged == false)
 	{
-		if (this->dt > this->dtmin)
+		if (this->dt > this->dtmin || this->allSteadyState() == false)
 		{
 			if (this->DoveOutput == true)
 			{
@@ -1163,6 +1220,26 @@ void Dove::validate_linearsteps()
 			break;
 	}
 	
+}
+
+//Validate time integration method
+void Dove::validate_method()
+{
+	if (this->allSteadyState() == true)
+	{
+		this->set_integrationtype(BE);
+		this->dt = this->time_end;
+		this->time = this->time_end;
+		return;
+	}
+	for (int i=0; i<this->num_func; i++)
+	{
+		if (this->isSteadyState(i) == true)
+		{
+			this->set_integrationtype(BE);
+			return;
+		}
+	}
 }
 
 //Update solution states
@@ -2297,7 +2374,6 @@ double ldf_kinetics(int i, const Matrix<double> &u, double t, const void *data, 
 {
 	Test06_data *dat = (Test06_data *) data;
 	return dat->kldf*(dat->K*u(dove.getVariableIndex("c"),0) - u(dove.getVariableIndex("q"),0));
-	//return dat->kldf*(dat->K*u(1,0) - u(0,0));
 }
 
 double mb_timecoef(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove)
@@ -2310,8 +2386,6 @@ double mb_cstr(int i, const Matrix<double> &u, double t, const void *data, const
 {
 	Test06_data *dat = (Test06_data *) data;
 	return dat->Q*dat->co - dat->Q*u(dove.getVariableIndex("c"),0) - dat->rho*dove.coupledTimeDerivative("q");
-	//return dat->Q*dat->co - dat->Q*u(dove.getVariableIndex("c"),0) - dat->rho*dove.coupledTimeDerivative(dove.getVariableIndex("q"));
-	//return dat->Q*dat->co - dat->Q*u(1,0) - dat->rho*dove.coupledTimeDerivative(0);
 }
 // -------------------- End temporary testing --------------------------
 
@@ -2562,9 +2636,14 @@ int DOVE_TESTS()
 	test06.set_numfunc(2);
 	test06.registerFunction(1, mb_cstr);
 	test06.registerFunction(0, ldf_kinetics);
+	test06.registerCoeff(1, mb_timecoef);
+	
+	test06.set_variableSteadyState(0);
+	//test06.set_variableSteadyState(1);
+	//test06.set_variableSteadyStateAll();
+	
 	test06.set_variableName(1, "c");
 	test06.set_variableName(0, "q");
-	test06.registerCoeff(1, mb_timecoef);
 	test06.set_endtime(10.0);
 	test06.set_timestepper(RATEBASED);
 	test06.set_timestepmax(0.5);
@@ -2572,14 +2651,15 @@ int DOVE_TESTS()
 	test06.set_LinearOutput(false);
 	test06.set_LineSearchMethod(BT);
 	test06.set_LinearStatus(false);
-	test06.set_MaxNonLinearIterations(100);
+	test06.set_MaxNonLinearIterations(200);
+	test06.set_tolerance(1e-6);
 	
 	test06.set_LinearMethod(QR);
 	
 	test06.set_initialcondition(0, 0);
 	test06.set_initialcondition(1, 0);
 	test06.set_timestep(0.05);
-	test06.set_integrationtype(BDF2);
+	test06.set_integrationtype(BE); //NOTE: if any rate equation is steady, then method will revert to BE
 	test06.solve_all();
 	
 	fprintf(file,"\n --------------- End of Test06 ---------------- \n\n");

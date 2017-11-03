@@ -78,7 +78,8 @@ anchor_alias_dne,
 initial_error,
 not_a_token,
 read_error,
-invalid_console_input
+invalid_console_input,
+explicit_invalid
 } error_type;
 
 /// Error function customizes output message based on flag

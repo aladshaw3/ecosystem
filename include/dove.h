@@ -122,6 +122,7 @@ public:
 	//Set some Dove conditions
 	void set_numfunc(int i);							///< Set the number of functions to solve and reserve necessary space
 	void set_timestep(double d);						///< Set the value of the time step
+	void set_timestepmin_converged(double d);			///< Set the value of the minimum time step after simulation converged
 	void set_timestepmin(double dmin);					///< Set the value of the minimum time step
 	void set_timestepmax(double dmax);					///< Set the value of the maximum time step
 	void set_endtime(double e);							///< Set the value of the end time
@@ -132,6 +133,8 @@ public:
 	void set_userdata(const void *data);				///< Set the user defined data structure
 	void set_initialcondition(int i, double ic);		///< Set the initial condition of variable i to value ic
 	void set_variableName(int i, std::string name);		///< Set the name of variable i to the given string (both i and name should be unique)
+	void set_variableSteadyState(int i);				///< Set the ith variable to be steady-state (i.e., var_steady[i] = true)
+	void set_variableSteadyStateAll();					///< Set all variables to be steady-state
 	void set_output(bool choice);						///< Set the value of DoveOutput (True if you want console messages)
 	void set_fileoutput(bool choice);					///< Set the value of DoveFileOuput (True if you want results printed to file)
 	void set_tolerance(double tol);						///< Set the value of residual/error tolerance desired
@@ -140,6 +143,7 @@ public:
 	void set_defaultNames();							///< Set all the variable names to default values (does not set var_names_hash values)
 	void set_defaultCoeffs();							///< Set all coeff functions to the default
 	void set_defaultJacobis();							///< Set all Jacobians to the default (only does the diagonals!)
+	void set_defaultStates();							///< Set all var_steady values to false for each variable (unsteady variables are default)
 	
 	// Set conditions for PJFNK
 	void set_NonlinearAbsTol(double tol);				///< Set the value of nonlinear absolute tolerance
@@ -229,6 +233,8 @@ public:
 	bool hasConverged();							///< Returns state of convergence
 	double getNonlinearResidual();					///< Returns the current value of the non-linear residual
 	double getNonlinearRelativeRes();				///< Returns the current value of the non-linear relative residual
+	bool allSteadyState();							///< Returns a boolean to determine whether or not all variables are steady (true = all steady)
+	bool isSteadyState(int i);						///< Returns true if the ith variable is steady-state
 	
 	/// Function to return a reference to the Jacobian Matrix map at the ith row of the matrix
 	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data, const Dove &dove)> & getJacobiMap(int i);
@@ -241,6 +247,7 @@ public:
 	int solve_timestep();							///< Function to solve a single time step
 	void validate_precond();						///< Function to validate and set preconditioning pointer
 	void validate_linearsteps();					///< Function to check and validate the number of linear iterations
+	void validate_method();							///< Function to check and validate the time integration method
 	void update_states();							///< Function to update the stateful information
 	void update_timestep();							///< Function to update the timestep for the simulation
 	void reset_all();								///< Reset all the states
@@ -274,6 +281,7 @@ public:
 protected:
 	Matrix<std::string> var_names;					///< Matrix of variable names (access names by index in numerical order)
 	std::unordered_map<std::string, int> var_names_hash;	///< Hash table of variable names and corresponding indices (access index by name)
+	Matrix<int> var_steady;							///< Matrix of boolean args used to dictate which variables are considered steady-state (if any)
 	Matrix<double> un;								///< Matrix for nth level solution vector
 	Matrix<double> unp1;							///< Matrix for n+1 level solution vector
 	Matrix<double> unm1;							///< Matrix for n-1 level solution vector
@@ -298,6 +306,7 @@ protected:
 	bool DoveFileOutput;							///< Boolean to determine whether or not to print Dove ouput to the file
 	bool Preconditioner;							///< Boolean to determine whether or not to use a preconditioner
 	bool Linear;									///< Boolean to determine whether or not to treat problem as linear
+	bool AllSteadyState;							///< Boolean to determine whether or not all variables are steady (true = all steady-state)
 	int linmax;										///< Users requested maximum number of linear steps
 	
 	/// Matrix object for user defined rate functions
