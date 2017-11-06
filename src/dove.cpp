@@ -680,7 +680,10 @@ double Dove::coupledDerivativeTimeDerivative(int i, int j, const Matrix<double> 
 	}
 	else
 	{
-		return it->second(i,j,u,this->getCurrentTime(),this->user_data, *this);
+		if (this->allSteadyState() == true || this->isSteadyState(i) == false)
+			return it->second(i,j,u,this->getCurrentTime(),this->user_data, *this);
+		else
+			return default_jacobi(i,j,u,this->getCurrentTime(),this->user_data, *this);
 	}
 }
 
