@@ -594,7 +594,7 @@ double Dove::getMaxRate()
 	double rate = 0.0;
 	for (int i=0; i<this->num_func; i++)
 	{
-		double temp = fabs(this->Eval_Func(i, this->unp1, this->time));
+		double temp = (this->unp1(i,0) - this->un(i,0))/this->dt;
 		double coeff = fabs(this->Eval_Coeff(i, this->unp1, this->time));
 		if (coeff > sqrt(DBL_EPSILON))
 		{
@@ -836,6 +836,7 @@ double Dove::ComputeTimeStep()
 				
 			case RATEBASED:
 				rate = this->getMaxRate();
+				std::cout << rate << std::endl;
 				if (rate <= 1.0)
 					step = this->dt + 0.1*this->dt;
 				else
@@ -2741,7 +2742,7 @@ int DOVE_TESTS()
 	fprintf(file,"Test06: Multi-variable test for coupled Time Derivatives\n---------------------------------\n(eps)*dc/dt = Q*co - Q*c - (rho)*dq/dt\ndq/dt=k*(K*c-q)\n");
 	
 	Test06_data data06;
-	data06.kldf = 100.0;
+	data06.kldf = 10.0;
 	data06.K = 5.0;
 	data06.co = 1.0;
 	data06.rho = 2.0;
@@ -2757,7 +2758,7 @@ int DOVE_TESTS()
 	test06.registerFunction(0, ldf_kinetics);
 	test06.registerCoeff(1, mb_timecoef);
 	
-	test06.set_variableSteadyState(0);
+	//test06.set_variableSteadyState(0);
 	//test06.set_variableSteadyState(1);
 	//test06.set_variableSteadyStateAll();
 	
