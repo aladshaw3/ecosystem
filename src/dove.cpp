@@ -596,74 +596,91 @@ double Dove::getMaxRate()
 	{
 		double temp = fabs(this->Eval_Func(i, this->unp1, this->time));
 		double coeff = fabs(this->Eval_Coeff(i, this->unp1, this->time));
-		if (temp > rate && coeff > sqrt(DBL_EPSILON))
+		if (coeff > sqrt(DBL_EPSILON))
 		{
-			rate = temp/coeff;
+			temp = temp/coeff;
+			if (temp > rate)
+				rate = temp;
 		}
 	}
 	return rate;
 }
 
 //Return u_n for i
-double Dove::getCurrentU(int i) const
+double Dove::getCurrentU(int i, const Matrix<double> &u) const
 {
 	return this->un(i,0);
 }
 
 //Return u_n-1 for i
-double Dove::getOldU(int i) const
+double Dove::getOldU(int i, const Matrix<double> &u) const
 {
 	return this->unm1(i,0);
 }
 
 //Return u_n+1 for i
-double Dove::getNewU(int i) const
+double Dove::getNewU(int i, const Matrix<double> &u) const
 {
-	return this->unp1(i,0);
+	return u(i,0);
 }
 
 //Return u_n for name
-double Dove::getCurrentU(std::string name) const
+double Dove::getCurrentU(std::string name, const Matrix<double> &u) const
 {
 	return this->un(this->getVariableIndex(name),0);
 }
 
 //Return u_n-1 for name
-double Dove::getOldU(std::string name) const
+double Dove::getOldU(std::string name, const Matrix<double> &u) const
 {
 	return this->unm1(this->getVariableIndex(name),0);
 }
 
 //Return u_n+1 for name
-double Dove::getNewU(std::string name) const
+double Dove::getNewU(std::string name, const Matrix<double> &u) const
 {
-	return this->unp1(this->getVariableIndex(name),0);
+	return u(this->getVariableIndex(name),0);
 }
 
 //Return du_i/dt
-double Dove::coupledTimeDerivative(int i) const
+double Dove::coupledTimeDerivative(int i, const Matrix<double> &u) const
 {
-	return this->user_func(i,0)(i,this->unp1,this->getCurrentTime(),this->user_data, *this);
+	
+	double rn = 0.0;
+	if (this->getOldTime() > 0.0)
+		rn = this->getTimeStep()/this->getTimeStepOld();
+	
+	double an, bn, cn;
+	an = (1.0 + (2.0*rn)) / (1.0 + rn);
+	bn = (1.0 + rn);
+	cn = (rn*rn)/(1.0+rn);
+	
+	//If all variables are steady-state OR if this variable is NOT steady-state, then use user function
+	if (this->allSteadyState() == true || this->isSteadyState(i) == false)
+		return this->user_func(i,0)(i,u,this->getCurrentTime(),this->user_data, *this);
+	//Otherwise, perform a second-order approximation to the time derivative
+	else
+		return (an*u(i,0)-bn*this->un(i,0)+cn*this->unm1(i,0))/(this->dt);
 }
 
 //Return du_name/dt
-double Dove::coupledTimeDerivative(std::string name) const
+double Dove::coupledTimeDerivative(std::string name, const Matrix<double> &u) const
 {
 	int i = this->getVariableIndex(name);
-	return this->user_func(i,0)(i,this->unp1,this->getCurrentTime(),this->user_data, *this);
+	return this->coupledTimeDerivative(i,u);
 }
 
 //Return d(du_i/dt)/du_j
-double Dove::coupledDerivativeTimeDerivative(int i, int j) const
+double Dove::coupledDerivativeTimeDerivative(int i, int j, const Matrix<double> &u) const
 {
 	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data, const Dove &dove)>::const_iterator it = this->user_jacobi[i].find(j);
 	if (it == this->user_jacobi[i].end())
 	{
-		return default_jacobi(i,j,this->unp1,this->getCurrentTime(),this->user_data, *this);
+		return default_jacobi(i,j,u,this->getCurrentTime(),this->user_data, *this);
 	}
 	else
 	{
-		return it->second(i,j,this->unp1,this->getCurrentTime(),this->user_data, *this);
+		return it->second(i,j,u,this->getCurrentTime(),this->user_data, *this);
 	}
 }
 
@@ -777,13 +794,13 @@ double Dove::getNonlinearRelativeRes()
 }
 
 //Return true if all steady
-bool Dove::allSteadyState()
+bool Dove::allSteadyState() const
 {
 	return this->AllSteadyState;
 }
 
 //Return state of ith variable
-bool Dove::isSteadyState(int i)
+bool Dove::isSteadyState(int i) const
 {
 	return this->var_steady(i,0);
 }
@@ -946,7 +963,13 @@ int Dove::solve_timestep()
 	//What to do on failure
 	if (this->Converged == false)
 	{
-		if (this->dt > this->dtmin || this->allSteadyState() == false)
+		if (this->dt == this->dtmin)
+		{
+			if (this->DoveOutput == true)
+				std::cout << "Unable to further reduce time step. CRITICAL ERROR!!!\n";
+			success = -1;
+		}
+		else if (this->dt > this->dtmin || this->allSteadyState() == false)
 		{
 			if (this->DoveOutput == true)
 			{
@@ -1236,7 +1259,38 @@ void Dove::validate_method()
 	{
 		if (this->isSteadyState(i) == true)
 		{
-			this->set_integrationtype(BE);
+			//Check the method that was set and use BE or BDF2 for level of accuracy
+			switch (this->int_sub)
+			{
+				case BE:
+					this->set_integrationtype(BE);
+					break;
+					
+				case FE:
+					this->set_integrationtype(BE);
+					break;
+					
+				case CN:
+					this->set_integrationtype(BDF2);
+					break;
+					
+				case BDF2:
+					this->set_integrationtype(BDF2);
+					break;
+					
+				case RK4:
+					this->set_integrationtype(BDF2);
+					break;
+					
+				case RKF:
+					this->set_integrationtype(BDF2);
+					break;
+					
+				default:
+					this->set_integrationtype(BE);
+					break;
+			}
+
 			return;
 		}
 	}
@@ -2385,7 +2439,9 @@ double mb_timecoef(int i, const Matrix<double> &u, double t, const void *data, c
 double mb_cstr(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove)
 {
 	Test06_data *dat = (Test06_data *) data;
-	return dat->Q*dat->co - dat->Q*u(dove.getVariableIndex("c"),0) - dat->rho*dove.coupledTimeDerivative("q");
+	return dat->Q*dat->co - dat->Q*u(dove.getVariableIndex("c"),0) - dat->rho*dove.coupledTimeDerivative("q",u);
+	//return dat->Q*dat->co - dat->Q*u(dove.getVariableIndex("c"),0);
+	//return dat->Q*dat->co - dat->Q*u(dove.getVariableIndex("c"),0) - dat->rho*(dove.getNewU("q",u)-dove.getCurrentU("q",u))/dove.getTimeStep();
 }
 // -------------------- End temporary testing --------------------------
 
@@ -2619,54 +2675,6 @@ int DOVE_TESTS()
 	
 	/**  ------------------------------    END Test04   ---------------------------------- */
 	
-	/**  ---------    Test 06: Coupled Time Derivatives -------------- */
-	Dove test06;
-	test06.set_outputfile(file);
-	fprintf(file,"Test06: Multi-variable test for coupled Time Derivatives\n---------------------------------\n(eps)*dc/dt = Q*co - Q*c - (rho)*dq/dt\ndq/dt=k*(K*c-q)\n");
-	
-	Test06_data data06;
-	data06.kldf = 100.0;
-	data06.K = 5.0;
-	data06.eps = 0.5;
-	data06.co = 1.0;
-	data06.rho = 2.0;
-	data06.Q = 100.0;
-	test06.set_userdata((void*)&data06);
-	test06.set_output(true);
-	test06.set_numfunc(2);
-	test06.registerFunction(1, mb_cstr);
-	test06.registerFunction(0, ldf_kinetics);
-	test06.registerCoeff(1, mb_timecoef);
-	
-	test06.set_variableSteadyState(0);
-	//test06.set_variableSteadyState(1);
-	//test06.set_variableSteadyStateAll();
-	
-	test06.set_variableName(1, "c");
-	test06.set_variableName(0, "q");
-	test06.set_endtime(10.0);
-	test06.set_timestepper(RATEBASED);
-	test06.set_timestepmax(0.5);
-	test06.set_NonlinearOutput(true);
-	test06.set_LinearOutput(false);
-	test06.set_LineSearchMethod(BT);
-	test06.set_LinearStatus(false);
-	test06.set_MaxNonLinearIterations(200);
-	test06.set_tolerance(1e-6);
-	
-	test06.set_LinearMethod(QR);
-	
-	test06.set_initialcondition(0, 0);
-	test06.set_initialcondition(1, 0);
-	test06.set_timestep(0.05);
-	test06.set_integrationtype(BE); //NOTE: if any rate equation is steady, then method will revert to BE
-	test06.solve_all();
-	
-	fprintf(file,"\n --------------- End of Test06 ---------------- \n\n");
-	
-	/**  ------------------------------    END Test06   ---------------------------------- */
-
-	
 	/**  ---------    Test 05: Preconditioning for NonLinear Coupled ODEs -------------- */
 	
 	Dove test05;
@@ -2726,6 +2734,54 @@ int DOVE_TESTS()
 	fprintf(file,"\n --------------- End of Test05 ---------------- \n\n");
 	
 	/**  ------------------------------    END Test05   ---------------------------------- */
+	
+	/**  ---------    Test 06: Coupled Time Derivatives -------------- */
+	Dove test06;
+	test06.set_outputfile(file);
+	fprintf(file,"Test06: Multi-variable test for coupled Time Derivatives\n---------------------------------\n(eps)*dc/dt = Q*co - Q*c - (rho)*dq/dt\ndq/dt=k*(K*c-q)\n");
+	
+	Test06_data data06;
+	data06.kldf = 100.0;
+	data06.K = 5.0;
+	data06.co = 1.0;
+	data06.rho = 2.0;
+	data06.Q = 1.0;
+	data06.eps = 0.5;
+	test06.set_userdata((void*)&data06);
+	test06.set_output(true);
+	test06.set_numfunc(2);
+	test06.set_variableName(1, "c");
+	test06.set_variableName(0, "q");
+	
+	test06.registerFunction(1, mb_cstr);
+	test06.registerFunction(0, ldf_kinetics);
+	test06.registerCoeff(1, mb_timecoef);
+	
+	test06.set_variableSteadyState(0);
+	//test06.set_variableSteadyState(1);
+	//test06.set_variableSteadyStateAll();
+	
+	test06.set_endtime(10.0);
+	test06.set_timestepper(RATEBASED);
+	test06.set_timestepmax(0.5);
+	test06.set_NonlinearOutput(true);
+	test06.set_LinearOutput(false);
+	test06.set_LineSearchMethod(BT);
+	test06.set_LinearStatus(false);
+	test06.set_MaxNonLinearIterations(10);
+	test06.set_tolerance(1e-6);
+	
+	test06.set_LinearMethod(QR);
+	
+	test06.set_initialcondition(0, 0);
+	test06.set_initialcondition(1, 0);
+	test06.set_timestep(0.05);
+	test06.set_integrationtype(BDF2);
+	test06.solve_all();
+	
+	fprintf(file,"\n --------------- End of Test06 ---------------- \n\n");
+	
+	/**  ------------------------------    END Test06   ---------------------------------- */
 	
 	return success;
 }

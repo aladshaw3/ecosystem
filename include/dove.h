@@ -211,15 +211,18 @@ public:
 	Matrix<double>& getNewU();						///< Return reference to the n+1 level solution
 	int getVariableIndex(std::string name) const;	///< Return the index of the variable whose name matches the given string (checks hash table)
 	double getMaxRate();							///< Returns the value of the maximum rate of change for all variables
-	double getCurrentU(int i) const;				///< Return the value of the n level solution for variable i (may want to disable)
-	double getOldU(int i) const;					///< Return the value of the n-1 level solution for variable i (may want to disable)
-	double getNewU(int i) const;					///< Return the value of the n+1 level solution for variable i (may want to disable)
-	double getCurrentU(std::string name) const;		///< Return the value of the n level solution for variable of given name (may want to disable)
-	double getOldU(std::string name) const;			///< Return the value of the n-1 level solution for variable of given name (may want to disable)
-	double getNewU(std::string name) const;			///< Return the value of the n+1 level solution for variable of given name (may want to disable)
-	double coupledTimeDerivative(int i) const;		///< Return the value of the ith variable's time derivative
-	double coupledTimeDerivative(std::string name) const;		///< Return the value of the named variable's time derivative
-	double coupledDerivativeTimeDerivative(int i, int j) const; ///< Return the value of the ith variable's time derivative's jth derivative
+	double getCurrentU(int i, const Matrix<double> &u) const;	///< Return the value of the n level solution for variable i
+	double getOldU(int i, const Matrix<double> &u) const;		///< Return the value of the n-1 level solution for variable i
+	double getNewU(int i, const Matrix<double> &u) const;		///< Return the value of the n+1 level solution for variable i
+	double getCurrentU(std::string name, const Matrix<double> &u) const;///< Return the value of the n level solution for variable of given name
+	double getOldU(std::string name, const Matrix<double> &u) const;	///< Return the value of the n-1 level solution for variable of given name
+	double getNewU(std::string name, const Matrix<double> &u) const;	///< Return the value of the n+1 level solution for variable of given name
+	double coupledTimeDerivative(int i, const Matrix<double> &u) const;	///< Return the value of the ith variable's time derivative
+	double coupledTimeDerivative(std::string name, const Matrix<double> &u) const;		///< Return the value of the named variable's time derivative
+	
+	/// Return the value of the ith variable's time derivative's jth derivative
+	double coupledDerivativeTimeDerivative(int i, int j, const Matrix<double> &u) const;
+	
 	const void *getUserData();						///< Return pointer to user data
 	int getNumFunc() const;							///< Return the number of functions
 	double getTimeStep() const;						///< Return the current time step
@@ -233,8 +236,8 @@ public:
 	bool hasConverged();							///< Returns state of convergence
 	double getNonlinearResidual();					///< Returns the current value of the non-linear residual
 	double getNonlinearRelativeRes();				///< Returns the current value of the non-linear relative residual
-	bool allSteadyState();							///< Returns a boolean to determine whether or not all variables are steady (true = all steady)
-	bool isSteadyState(int i);						///< Returns true if the ith variable is steady-state
+	bool allSteadyState() const;					///< Returns a boolean to determine whether or not all variables are steady (true = all steady)
+	bool isSteadyState(int i) const;				///< Returns true if the ith variable is steady-state
 	
 	/// Function to return a reference to the Jacobian Matrix map at the ith row of the matrix
 	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data, const Dove &dove)> & getJacobiMap(int i);
