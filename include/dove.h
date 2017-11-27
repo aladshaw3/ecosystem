@@ -132,8 +132,10 @@ public:
 	void set_outputfile(FILE *file);					///< Set the output file for simulation results
 	void set_userdata(const void *data);				///< Set the user defined data structure
 	void set_initialcondition(int i, double ic);		///< Set the initial condition of variable i to value ic
+	void set_initialcondition(std::string name, double ic); ///< Set the initial condition of variable name to value ic
 	void set_variableName(int i, std::string name);		///< Set the name of variable i to the given string (both i and name should be unique)
 	void set_variableSteadyState(int i);				///< Set the ith variable to be steady-state (i.e., var_steady[i] = true)
+	void set_variableSteadyState(std::string name);		///< Set the named varibale to steady-state (i.e., var_steady[i] = true)
 	void set_variableSteadyStateAll();					///< Set all variables to be steady-state
 	void set_output(bool choice);						///< Set the value of DoveOutput (True if you want console messages)
 	void set_fileoutput(bool choice);					///< Set the value of DoveFileOuput (True if you want results printed to file)
@@ -179,6 +181,24 @@ public:
 		non-singular (i.e., use argument i passed to the function to denote interally which function you are at). */
 	void registerFunction(int i, double (*func) (int i, const Matrix<double> &u, double t, const void *data, const Dove &dove) );
 	
+	/// Register the named user function
+	/** This function will register the named user function into the object. That function must accept as arguments the function
+		identifier i, a constant Matrix for variables u, a double for time t, and a void data pointer. All of this information
+		is required to be in the function parameters, but is not required to be used by the function. The indentifier i can be
+		used to conveniently define coupling between nieghboring elements/variables in the system. In other words, the int i
+		denotes not only the function being registered, but also the primary coupled variable for the function.
+	 
+		i.e., du_i/dt = Func(u_i all other u)
+	 
+		This will allow for this framework to also handle PDEs, whose coupling between ith and jth variables is usually done
+		via nieghboring variables (i.e., u_i in a 1-D PDE couples with u_i-1 and u_i+1). A similar relational scheme is workable
+		with multiple dimensions. Additional information about the coupling between the ith variable and other variables can be
+		passed to the function via the void data pointer.
+	 
+		\note You are allowed to point to the same user function for all i, but you must make sure that the resulting system is
+		non-singular (i.e., use argument i passed to the function to denote interally which function you are at). */
+	void registerFunction(std::string name, double (*func) (int i, const Matrix<double> &u, double t, const void *data, const Dove &dove) );
+	
 	/// Register the ith time coeff function
 	/** This function will register the ith coeff function into the object. That function must accept as arguments the coefficient
 		identifier i, a constant Matrix for variables u, a double for time t, and a void data pointer. All of this information
@@ -188,6 +208,16 @@ public:
 	 
 		For example, in 1-D space, the distance x can be computed as x = dx*i for a regular grid. */
 	void registerCoeff(int i, double (*coeff) (int i, const Matrix<double> &u, double t, const void *data, const Dove &dove) );
+	
+	/// Register the named time coeff function
+	/** This function will register the named coeff function into the object. That function must accept as arguments the coefficient
+		identifier i, a constant Matrix for variables u, a double for time t, and a void data pointer. All of this information
+		is required to be in the function parameters, but is not required to be used by the function. The indentifier i can be
+		used to conveniently define identify where the coefficient may be applied spatially. In other words, if solving a PDE,
+		the time coefficient may be a function of location in space, which can be potentially identified by int i.
+	 
+		For example, in 1-D space, the distance x can be computed as x = dx*i for a regular grid. */
+	void registerCoeff(std::string name, double (*coeff) (int i, const Matrix<double> &u, double t, const void *data, const Dove &dove) );
 	
 	/// Register the i-jth element of jacobian
 	/** This function will register the (i,j) jacobian function into the object. That function must accept as arguments the jacobi
@@ -201,6 +231,19 @@ public:
 		\note The jacobian information is used only in preconditioning actions taken by DOVE. The type of preconditioning can
 		be choosen by the user. There are standard types of preconditioning available. */
 	void registerJacobi(int i, int j, double (*jac) (int i, int j, const Matrix<double> &u, double t, const void *data, const Dove &dove) );
+	
+	/// Register the named element of jacobian
+	/** This function will register the named jacobian function into the object. That function must accept as arguments the jacobi
+		identifiers (i and j), a constant Matrix for variables u, a double for time t, and a void data pointer. All of this information
+		is required to be in the function parameters, but is not required to be used by the function. The indentifiers i and j can be
+		used to determine which Jacobian function this should be, thus allowing a user to potentially reference the same function for
+		all Jacobi elements, but return different results based on matrix location.
+	 
+		Jacobian elements are as follows:  J_ij = d(func_i)/d(u_j)   derivative of ith function with respect to jth variable.
+	 
+		\note The jacobian information is used only in preconditioning actions taken by DOVE. The type of preconditioning can
+		be choosen by the user. There are standard types of preconditioning available. */
+	void registerJacobi(std::string func_name, std::string var_name, double (*jac) (int i, int j, const Matrix<double> &u, double t, const void *data, const Dove &dove) );
 	
 	void print_header();								///< Function to print out a header to output file
 	void print_newresult();								///< Function to print out the new result of n+1 time level

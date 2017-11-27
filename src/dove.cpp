@@ -224,6 +224,12 @@ void Dove::set_initialcondition(int i, double ic)
 	this->unm1.edit(i, 0, ic);
 }
 
+//Set initial condition
+void Dove::set_initialcondition(std::string name, double ic)
+{
+	this->set_initialcondition(this->getVariableIndex(name), ic);
+}
+
 //Set the name of the ith variable
 void Dove::set_variableName(int i, std::string name)
 {
@@ -236,6 +242,12 @@ void Dove::set_variableSteadyState(int i)
 {
 	this->var_steady.edit(i, 0, true);
 	this->registerCoeff(i, default_func);
+}
+
+//Set variable to steady-state
+void Dove::set_variableSteadyState(std::string name)
+{
+	this->set_variableSteadyState(this->getVariableIndex(name));
 }
 
 //Set all variables to steady-state
@@ -425,6 +437,12 @@ void Dove::registerFunction(int i, double (*func) (int i, const Matrix<double> &
 		this->user_func.edit(i, 0, func);
 }
 
+//Register name function
+void Dove::registerFunction(std::string name, double (*func) (int i, const Matrix<double> &u, double t, const void *data, const Dove &dove) )
+{
+	this->registerFunction(this->getVariableIndex(name), func);
+}
+
 //Register time coeff functions
 void Dove::registerCoeff(int i, double (*coeff) (int i, const Matrix<double> &u, double t, const void *data, const Dove &dove) )
 {
@@ -439,6 +457,12 @@ void Dove::registerCoeff(int i, double (*coeff) (int i, const Matrix<double> &u,
 	}
 }
 
+//Register name coeff func
+void Dove::registerCoeff(std::string name, double (*func) (int i, const Matrix<double> &u, double t, const void *data, const Dove &dove) )
+{
+	this->registerCoeff(this->getVariableIndex(name), func);
+}
+
 //Register jacobians
 void Dove::registerJacobi(int i, int j, double (*jac) (int i, int j, const Matrix<double> &u, double t, const void *data, const Dove &dove) )
 {
@@ -450,6 +474,14 @@ void Dove::registerJacobi(int i, int j, double (*jac) (int i, int j, const Matri
 	{
 		this->user_jacobi[i][j] = jac;
 	}
+}
+
+//Register jacobians by names
+void Dove::registerJacobi(std::string func_name, std::string var_name, double (*jac) (int i, int j, const Matrix<double> &u, double t, const void *data, const Dove &dove) )
+{
+	int i = this->getVariableIndex(func_name);
+	int j = this->getVariableIndex(var_name);
+	this->registerJacobi(i, j, jac);
 }
 
 //Print out header info to output file
@@ -2444,8 +2476,6 @@ double mb_cstr(int i, const Matrix<double> &u, double t, const void *data, const
 {
 	Test06_data *dat = (Test06_data *) data;
 	return dat->Q*dat->co - dat->Q*u(dove.getVariableIndex("c"),0) - dat->rho*dove.coupledTimeDerivative("q",u);
-	//return dat->Q*dat->co - dat->Q*u(dove.getVariableIndex("c"),0);
-	//return dat->Q*dat->co - dat->Q*u(dove.getVariableIndex("c"),0) - dat->rho*(dove.getNewU("q",u)-dove.getCurrentU("q",u))/dove.getTimeStep();
 }
 // -------------------- End temporary testing --------------------------
 
@@ -2757,12 +2787,12 @@ int DOVE_TESTS()
 	test06.set_variableName(1, "c");
 	test06.set_variableName(0, "q");
 	
-	test06.registerFunction(1, mb_cstr);
-	test06.registerFunction(0, ldf_kinetics);
-	test06.registerCoeff(1, mb_timecoef);
+	test06.registerFunction("c", mb_cstr);
+	test06.registerFunction("q", ldf_kinetics);
+	test06.registerCoeff("c", mb_timecoef);
 	
-	//test06.set_variableSteadyState(0);
-	//test06.set_variableSteadyState(1);
+	test06.set_variableSteadyState("q");
+	//test06.set_variableSteadyState("c");
 	//test06.set_variableSteadyStateAll();
 	
 	test06.set_endtime(10.0);
@@ -2777,8 +2807,8 @@ int DOVE_TESTS()
 	
 	test06.set_LinearMethod(QR);
 	
-	test06.set_initialcondition(0, 0);
-	test06.set_initialcondition(1, 0);
+	test06.set_initialcondition("c", 0);
+	test06.set_initialcondition("q", 0);
 	test06.set_timestep(0.05);
 	test06.set_integrationtype(BDF2);
 	test06.solve_all();
