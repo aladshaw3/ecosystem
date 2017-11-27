@@ -34,5 +34,6 @@
 #include "scopsowl_opt.h"
 #include "yaml_wrapper.h"
 #include "dove.h"
+#include "crow.h"
 
 #endif

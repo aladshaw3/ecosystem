@@ -72,6 +72,7 @@ void aui_help()
 	puts("(11) SHARK (Speciation-object Hierarchy for Aqueous Reaction Kinetics)");
 	puts("(12) SKUA (Surface Kinetics for Uptake by Adsorption)\n");
 	puts("(13) DOVE (Dynamic Ode solver with Various Established methods)\n");
+	puts("(14) CROW (Coupled Reaction Object Workspace)\n");
 	
 	puts("        CURRENTLY AVAILABLE EXECUTABLES        ");
 	puts("-----------------------------------------------\n");
@@ -83,6 +84,7 @@ void aui_help()
 	puts("(5) SKUA (Surface Kinetics for Uptake by Adsorption)");
 	puts("(6) SKUA_OPT (Optimization scheme for analysis of kinetic uptake data with the SKUA model)");
 	puts("(7) SHARK (Speciation and Kinetic simulation for aqueous and/or mixed multi-species systems)\n");
+	puts("(8) CROW (Coupled Reaction Object Workspace)\n");
 	
 }
 
@@ -137,6 +139,9 @@ void bui_help()
 	puts("(13) DOVE (Dynamic Ode solver with Various Established methods)\n");
 	puts("\tThis test runs an example problem for solving Ordinary Differential Equations. There is an output file associated with this test. However, this kernel is generally not used by itself. Instead, the user will interface with this kernel by writing his/her own code to represent the system of ODEs being solved.\n");
 	
+	puts("(14) CROW (Coupled Reaction Object Workspace)\n");
+	puts("\tThis test runs an example problem for solving Ordinary Differential Equations with DOVE in the CROW system. There is an output file associated with this test that works a simple Reduced Silver Aging mechanism for iodine adsorption.\n");
+	
 	puts("        CURRENTLY AVAILABLE EXECUTABLES        ");
 	puts("-----------------------------------------------\n");
 	
@@ -160,6 +165,9 @@ void bui_help()
 	
 	puts("(7) SHARK (Speciation and Kinetic simulation for aqueous and/or mixed multi-species systems)\n");
 	puts("\tThis algorithm requires one input files: (i) a yaml file detailing all system parameters, the species of interest, the reactions and mass balances, as well as some solver options. NOTE: These routines are still under development and will have new features and functions available to the user as they come available.\n");
+	
+	puts("(8) CROW (Coupled Reaction Object Workspace)\n");
+	puts("\tThis algorithm requires one input files: (i) a yaml file detailing all system parameters, the species of interest, the reactions and/or mass balances, as well as some solver options. This is in effect very similar to SHARK, however, it is not coupled to know species thermodynamic information and is not limited to aqueous systems. The primary focus is to solve coupled systems of reaction mechanisms. NOTE: These routines are still under development and will have new features and functions available to the user as they come available.\n");
 }
 
 //Check user string input for keyword "exit"
@@ -307,6 +315,11 @@ bool valid_test_string(const std::string &input, UI_DATA *ui_dat)
 		ui_dat->option = dove;
 		valid_input = true;
 	}
+	else if (allLower(input) == "crow")
+	{
+		ui_dat->option = crow;
+		valid_input = true;
+	}
 	else
 	{
 		valid_input = false;
@@ -355,6 +368,11 @@ bool valid_exec_string(const std::string &input, UI_DATA *ui_dat)
 	else if (allLower(input) == "shark")
 	{
 		ui_dat->option = shark;
+		valid_input = true;
+	}
+	else if (allLower(input) == "crow")
+	{
+		ui_dat->option = crow;
 		valid_input = true;
 	}
 	else
@@ -411,6 +429,12 @@ int number_files(UI_DATA *ui_dat)
 		}
 			
 		case shark:
+		{
+			num = 1;
+			break;
+		}
+			
+		case crow:
 		{
 			num = 1;
 			break;
@@ -763,6 +787,13 @@ bool valid_input_tests(UI_DATA *ui_dat)
 				break;
 			}
 				
+			case 14:
+			{
+				ui_dat->option = crow;
+				valid_input = true;
+				break;
+			}
+				
 			default:
 			{
 				valid_input = false;
@@ -869,6 +900,13 @@ bool valid_input_execute(UI_DATA *ui_dat)
 			case 7:
 			{
 				ui_dat->option = shark;
+				valid_input = true;
+				break;
+			}
+				
+			case 8:
+			{
+				ui_dat->option = crow;
 				valid_input = true;
 				break;
 			}
@@ -1001,6 +1039,10 @@ int run_test(UI_DATA *ui_dat)
 			
 		case dove:
 			success = DOVE_TESTS();
+			break;
+			
+		case crow:
+			success = CROW_TESTS();
 			break;
 			
 		default:
@@ -1184,6 +1226,22 @@ int run_exec(UI_DATA *ui_dat)
 			}
 			
 			success = SHARK_SCENARIO(ui_dat->input_files[0].c_str());
+			break;
+		}
+			
+		case crow:
+		{
+			if (ui_dat->argc == 1 || ui_dat->MissingArg == true)
+			{
+				ui_dat->input_files.resize(1);
+				std::cout << "CROW needs 1 yaml structured input file containing all information about the simulation.\n";
+				std::cout << "Please provide the file and full path...\n\n";
+				std::cout << "CROW input: ";
+				std::cin >> ui_dat->input_files[0];
+				std::cout << std::endl;
+			}
+			
+			success = CROW_SCENARIO(ui_dat->input_files[0].c_str());
 			break;
 		}
 			

@@ -59,6 +59,10 @@ The following message provides information on running this software with the bas
 
 	This test runs an example problem for solving Ordinary Differential Equations. There is an output file associated with this test. However, this kernel is generally not used by itself. Instead, the user will interface with this kernel by writing his/her own code to represent the system of ODEs being solved.
 
+(14) CROW (Coupled Reaction Object Workspace)
+
+	This test runs an example problem for solving Ordinary Differential Equations with DOVE in the CROW system. There is an output file associated with this test that works a simple Reduced Silver Aging mechanism for iodine adsorption.
+
         CURRENTLY AVAILABLE EXECUTABLES        
 -----------------------------------------------
 
@@ -89,3 +93,7 @@ The following message provides information on running this software with the bas
 (7) SHARK (Speciation and Kinetic simulation for aqueous and/or mixed multi-species systems)
 
 	This algorithm requires one input files: (i) a yaml file detailing all system parameters, the species of interest, the reactions and mass balances, as well as some solver options. NOTE: These routines are still under development and will have new features and functions available to the user as they come available.
+
+(8) CROW (Coupled Reaction Object Workspace)
+
+	This algorithm requires one input files: (i) a yaml file detailing all system parameters, the species of interest, the reactions and/or mass balances, as well as some solver options. This is in effect very similar to SHARK, however, it is not coupled to know species thermodynamic information and is not limited to aqueous systems. The primary focus is to solve coupled systems of reaction mechanisms. NOTE: These routines are still under development and will have new features and functions available to the user as they come available.

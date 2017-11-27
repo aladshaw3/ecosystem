@@ -65,6 +65,7 @@ Usage Notes
 (11) SHARK (Speciation-object Hierarchy for Aqueous Reaction Kinetics)
 (12) SKUA (Surface Kinetics for Uptake by Adsorption)
 (13) DOVE (Dynamic Ode solver with Various Established methods)
+(14) CROW (Coupled Reaction Object Workspace)
 
         CURRENTLY AVAILABLE EXECUTABLES        
 -----------------------------------------------
@@ -76,3 +77,4 @@ Usage Notes
 (5) SKUA (Surface Kinetics for Uptake by Adsorption)
 (6) SKUA_OPT (Optimization scheme for analysis of kinetic uptake data with the SKUA model)
 (7) SHARK (Speciation and Kinetic simulation for aqueous and/or mixed multi-species systems)
+(8) CROW (Coupled Reaction Object Workspace)
