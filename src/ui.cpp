@@ -664,7 +664,7 @@ bool valid_input_tests(UI_DATA *ui_dat)
 	std::cout << "(4)  FINCH       (5)  LARK         (6)  MACAW\n";
 	std::cout << "(7)  MOLA        (8)  MONKFISH     (9)  SANDBOX\n";
 	std::cout << "(10) SCOPSOWL    (11) SHARK        (12) SKUA\n";
-	std::cout << "(13) DOVE\n";
+	std::cout << "(13) DOVE		   (14) CROW\n";
 	std::cout << "\nChoice: ";
 	std::cin >> ui_dat->user_input[0];
 	std::cout << std::endl;
@@ -824,7 +824,7 @@ bool valid_input_execute(UI_DATA *ui_dat)
 	std::cout << "Choose a simulation to run from the list below\n-----------------------------------------------\n\n";
 	std::cout << "(1)  GSTA_OPT      (2)  MAGPIE   (3)  SCOPSOWL\n";
 	std::cout << "(4)  SCOPSOWL_OPT  (5)  SKUA     (6)  SKUA_OPT\n";
-	std::cout << "(7)  SHARK\n";
+	std::cout << "(7)  SHARK         (8)  CROW\n";
 	std::cout << "\nChoice: ";
 	std::cin >> ui_dat->user_input[0];
 	std::cout << std::endl;
