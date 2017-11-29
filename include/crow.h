@@ -120,12 +120,17 @@ typedef struct CROW_DATA
 {
 	std::vector<ConstReaction> const_reacts;	///< List of constant reaction objects used in CROW
 	Dove SolverInfo;							///< Dove object that holds all information associated with the solver
+	FILE *OutputFile;							///< Pointer to the output file for CROW
+	bool FileOutput = true;						///< Boolean to determine whether or not to print results to a file
 } CROW_DATA;
 
-//Run CROW scenario
+///Function to print header information about CROW to output file
+void print2file_crow_header(CROW_DATA *dat);
+
+///Run CROW scenario
 int CROW_SCENARIO(const char *yaml_input);
 
-//Run the CROW test
+///Run the CROW test
 int CROW_TESTS();
 
 #endif /* crow_h */

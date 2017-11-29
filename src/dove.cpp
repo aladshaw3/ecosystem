@@ -39,9 +39,11 @@ Dove::Dove()
 	residual = residual_BE;
 	precon = NULL;
 	newton_dat.LineSearch = true;
+	line_type = BT;
 	newton_dat.NL_Output = false;
 	DoveOutput = false;
 	DoveFileOutput = true;
+	DoveHeader = false;
 	Preconditioner = false;
 	newton_dat.lin_tol_abs = 1e-4;
 	newton_dat.lin_tol_rel = 0.01;
@@ -271,6 +273,12 @@ void Dove::set_fileoutput(bool choice)
 	this->DoveFileOutput = choice;
 }
 
+//Set header output
+void Dove::set_headeroutput(bool choice)
+{
+	this->DoveHeader = choice;
+}
+
 //Set the tolerance
 void Dove::set_tolerance(double tol)
 {
@@ -369,21 +377,25 @@ void Dove::set_LineSearchMethod(linesearch_type choice)
 		case BT:
 			this->newton_dat.LineSearch = true;
 			this->newton_dat.Bounce = false;
+			this->line_type = BT;
 			break;
 			
 		case ABT:
 			this->newton_dat.LineSearch = true;
 			this->newton_dat.Bounce = true;
+			this->line_type = ABT;
 			break;
 			
 		case NO_LS:
 			this->newton_dat.LineSearch = false;
 			this->newton_dat.Bounce = false;
+			this->line_type = NO_LS;
 			break;
 			
 		default:
 			this->newton_dat.LineSearch = false;
 			this->newton_dat.Bounce = false;
+			this->line_type = NO_LS;
 			break;
 	}
 }
@@ -494,74 +506,77 @@ void Dove::print_header()
 		system("mkdir output");
 		this->Output = fopen("output/DOVE_Result.txt", "w+");
 	}
-	fprintf(this->Output,"\nIntegration type =\t");
-	switch (this->int_type)
+	if (this->DoveHeader == true)
 	{
-		case IMPLICIT:
-			fprintf(this->Output,"IMPLICIT\n");
-			break;
+		fprintf(this->Output,"\nIntegration type =\t");
+		switch (this->int_type)
+		{
+			case IMPLICIT:
+				fprintf(this->Output,"IMPLICIT\n");
+				break;
 			
-		case EXPLICIT:
-			fprintf(this->Output,"EXPLICIT\n");
-			break;
+			case EXPLICIT:
+				fprintf(this->Output,"EXPLICIT\n");
+				break;
 			
-		default:
-			fprintf(this->Output,"IMPLICIT\n");
-			break;
+			default:
+				fprintf(this->Output,"IMPLICIT\n");
+				break;
+		}
+		fprintf(this->Output,"Integration scheme =\t");
+		switch (this->int_sub)
+		{
+			case BE:
+				fprintf(this->Output,"Backward-Euler\n");
+				break;
+			
+			case FE:
+				fprintf(this->Output,"Forward-Euler\n");
+				break;
+			
+			case CN:
+				fprintf(this->Output,"Crank-Nicholson\n");
+				break;
+			
+			case BDF2:
+				fprintf(this->Output,"Backward-Differentiation-Formula-2\n");
+				break;
+			
+			case RK4:
+				fprintf(this->Output,"Runge-Kutta-4\n");
+				break;
+			
+			case RKF:
+				fprintf(this->Output,"Runge-Kutta-Fehlberg\n");
+				break;
+			
+			default:
+				break;
+		}
+		fprintf(this->Output,"Timestepper scheme =\t");
+		switch (this->timestepper)
+		{
+			case CONSTANT:
+				fprintf(this->Output,"CONSTANT\n");
+				break;
+			
+			case ADAPTIVE:
+				fprintf(this->Output,"ADAPTIVE\n");
+				break;
+			
+			case FEHLBERG:
+				fprintf(this->Output,"FEHLBERG\n");
+				break;
+			
+			case RATEBASED:
+				fprintf(this->Output,"RATEBASED\n");
+				break;
+			
+			default:
+				break;
+		}
+		fprintf(this->Output,"Tolerance =\t%.6g\n", this->tolerance);
 	}
-	fprintf(this->Output,"Integration scheme =\t");
-	switch (this->int_sub)
-	{
-		case BE:
-			fprintf(this->Output,"Backward-Euler\n");
-			break;
-			
-		case FE:
-			fprintf(this->Output,"Forward-Euler\n");
-			break;
-			
-		case CN:
-			fprintf(this->Output,"Crank-Nicholson\n");
-			break;
-			
-		case BDF2:
-			fprintf(this->Output,"Backward-Differentiation-Formula-2\n");
-			break;
-			
-		case RK4:
-			fprintf(this->Output,"Runge-Kutta-4\n");
-			break;
-			
-		case RKF:
-			fprintf(this->Output,"Runge-Kutta-Fehlberg\n");
-			break;
-			
-		default:
-			break;
-	}
-	fprintf(this->Output,"Timestepper scheme =\t");
-	switch (this->timestepper)
-	{
-		case CONSTANT:
-			fprintf(this->Output,"CONSTANT\n");
-			break;
-			
-		case ADAPTIVE:
-			fprintf(this->Output,"ADAPTIVE\n");
-			break;
-			
-		case FEHLBERG:
-			fprintf(this->Output,"FEHLBERG\n");
-			break;
-			
-		case RATEBASED:
-			fprintf(this->Output,"RATEBASED\n");
-			break;
-			
-		default:
-			break;
-	}
-	fprintf(this->Output,"Tolerance =\t%.6g\n", this->tolerance);
 	fprintf(this->Output,"Time");
 	for (int i=0; i<this->num_func; i++)
 		fprintf(this->Output,"\t%s",this->var_names(i,0).c_str());
@@ -618,6 +633,12 @@ int Dove::getVariableIndex(std::string name) const
 	{
 		return it->second;
 	}
+}
+
+//Return the variable name
+std::string Dove::getVariableName(int i)
+{
+	return this->var_names(i,0);
 }
 
 //Return variable index of maximum rate of change
@@ -838,6 +859,69 @@ bool Dove::allSteadyState() const
 bool Dove::isSteadyState(int i) const
 {
 	return this->var_steady(i,0);
+}
+
+//Return integrate type
+integrate_type Dove::getIntegrationType()
+{
+	return this->int_type;
+}
+
+//Return integrate subtype
+integrate_subtype Dove::getIntegrationMethod()
+{
+	return this->int_sub;
+}
+
+//Return time step type
+timestep_type Dove::getTimeStepper()
+{
+	return this->timestepper;
+}
+
+//Return preconditioner type
+precond_type Dove::getPreconditioner()
+{
+	return this->preconditioner;
+}
+
+//Return line search method
+linesearch_type Dove::getLinesearchMethod()
+{
+	return this->line_type;
+}
+
+//Return linear method
+krylov_method Dove::getLinearMethod()
+{
+	if (this->newton_dat.linear_solver == GMRESR)
+		return GMRESR;
+	else if (this->newton_dat.linear_solver == GMRESLP)
+		return GMRESLP;
+	else if (this->newton_dat.linear_solver == GMRESRP)
+		return GMRESRP;
+	else if (this->newton_dat.linear_solver == PCG)
+		return PCG;
+	else if (this->newton_dat.linear_solver == BiCGSTAB)
+		return BiCGSTAB;
+	else if (this->newton_dat.linear_solver == CGS)
+		return CGS;
+	else if (this->newton_dat.linear_solver == FOM)
+		return FOM;
+	else if (this->newton_dat.linear_solver == GCR)
+		return GCR;
+	else if (this->newton_dat.linear_solver == KMS)
+		return KMS;
+	else if (this->newton_dat.linear_solver == QR)
+		return QR;
+	else
+		return QR;
+}
+
+//Return true if preconditioned
+bool Dove::isPreconditioned()
+{
+	return this->Preconditioner;
 }
 
 //Compute next time step
@@ -2505,6 +2589,7 @@ int DOVE_TESTS()
 	test01.set_endtime(1.0);
 	test01.set_timestepper(CONSTANT);
 	test01.set_NonlinearOutput(false);
+	test01.set_headeroutput(true);
 	test01.set_output(true);
 	
 	test01.set_initialcondition(0, 1);
@@ -2555,6 +2640,7 @@ int DOVE_TESTS()
 	test02.set_timestepper(ADAPTIVE);
 	test02.set_timestepmax(0.2);
 	test02.set_NonlinearOutput(true);
+	test02.set_headeroutput(true);
 	test02.set_output(true);
 	
 	test02.set_initialcondition(0, 1);
@@ -2621,6 +2707,7 @@ int DOVE_TESTS()
 	test03.set_timestepper(CONSTANT);
 	test03.set_timestepmax(0.2);
 	test03.set_NonlinearOutput(true);
+	test03.set_headeroutput(true);
 	test03.set_LinearOutput(false);
 	test03.set_LinearMethod(QR);
 	test03.set_output(true);
@@ -2676,6 +2763,7 @@ int DOVE_TESTS()
 	test04.set_timestepper(ADAPTIVE);
 	test04.set_timestepmax(0.2);
 	test04.set_NonlinearOutput(true);
+	test04.set_headeroutput(true);
 	test04.set_LinearOutput(false);
 	test04.set_LineSearchMethod(BT);
 	test04.set_LinearStatus(true);
@@ -2727,6 +2815,7 @@ int DOVE_TESTS()
 	test05.set_timestepper(CONSTANT);
 	test05.set_timestepmax(0.2);
 	test05.set_NonlinearOutput(true);
+	test05.set_headeroutput(true);
 	test05.set_LinearOutput(true);
 	test05.set_LineSearchMethod(BT);
 	test05.set_LinearStatus(false);
@@ -2799,6 +2888,7 @@ int DOVE_TESTS()
 	test06.set_timestepper(RATEBASED);
 	test06.set_timestepmax(0.5);
 	test06.set_NonlinearOutput(true);
+	test06.set_headeroutput(true);
 	test06.set_LinearOutput(false);
 	test06.set_LineSearchMethod(BT);
 	test06.set_LinearStatus(false);

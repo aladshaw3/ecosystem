@@ -139,6 +139,7 @@ public:
 	void set_variableSteadyStateAll();					///< Set all variables to be steady-state
 	void set_output(bool choice);						///< Set the value of DoveOutput (True if you want console messages)
 	void set_fileoutput(bool choice);					///< Set the value of DoveFileOuput (True if you want results printed to file)
+	void set_headeroutput(bool choice);					///< Set the value of DoveHeader (True if you want header printed to file)
 	void set_tolerance(double tol);						///< Set the value of residual/error tolerance desired
 	
 	//Set some default conditions
@@ -253,6 +254,7 @@ public:
 	Matrix<double>& getOldU();						///< Return reference to the n-1 level solution
 	Matrix<double>& getNewU();						///< Return reference to the n+1 level solution
 	int getVariableIndex(std::string name) const;	///< Return the index of the variable whose name matches the given string (checks hash table)
+	std::string getVariableName(int i);				///< Return the name of the variable based on the given index
 	double getMaxRate();							///< Returns the value of the maximum rate of change for all variables
 	double getCurrentU(int i, const Matrix<double> &u) const;	///< Return the value of the n level solution for variable i
 	double getOldU(int i, const Matrix<double> &u) const;		///< Return the value of the n-1 level solution for variable i
@@ -281,6 +283,13 @@ public:
 	double getNonlinearRelativeRes();				///< Returns the current value of the non-linear relative residual
 	bool allSteadyState() const;					///< Returns a boolean to determine whether or not all variables are steady (true = all steady)
 	bool isSteadyState(int i) const;				///< Returns true if the ith variable is steady-state
+	integrate_type getIntegrationType();			///< Returns the type of integration method in use
+	integrate_subtype getIntegrationMethod();		///< Returns the method of time integration
+	timestep_type getTimeStepper();					///< Returns the time stepper method
+	precond_type getPreconditioner();				///< Returns the preconditioner type
+	linesearch_type getLinesearchMethod();			///< Returns the method of line search
+	krylov_method getLinearMethod();				///< Returns the linear method used 
+	bool isPreconditioned();						///< Returns true if using preconditioning
 	
 	/// Function to return a reference to the Jacobian Matrix map at the ith row of the matrix
 	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data, const Dove &dove)> & getJacobiMap(int i);
@@ -345,11 +354,13 @@ protected:
 	integrate_subtype int_sub;						///< Subtype of time integration scheme to use
 	timestep_type timestepper;						///< Type of time stepper to be used
 	precond_type preconditioner;					///< Type of preconditioner to use
+	linesearch_type line_type;						///< Type of linesearch method to use
 	FILE *Output;									///< File to where simulation results will be place
 	int num_func;									///< Number of functions in the system of ODEs
 	bool Converged;									///< Boolean to hold information on whether or not last step converged
 	bool DoveOutput;								///< Boolean to determine whether or not to print Dove messages to console
 	bool DoveFileOutput;							///< Boolean to determine whether or not to print Dove ouput to the file
+	bool DoveHeader;								///< Boolean to determine whether or not to print the Dove header to file
 	bool Preconditioner;							///< Boolean to determine whether or not to use a preconditioner
 	bool Linear;									///< Boolean to determine whether or not to treat problem as linear
 	bool AllSteadyState;							///< Boolean to determine whether or not all variables are steady (true = all steady-state)
