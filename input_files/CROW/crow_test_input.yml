@@ -1,0 +1,53 @@
+System:
+---
+num_var: 3
+- var_names:
+  0: I2
+  1: Ag0
+  2: AgI
+  
+- solve_opts:
+  solver_type: nonlinear
+  line_search: bt
+  linear_solver: GMRES
+  preconditioning: SGS
+  recursion: 0
+  restart: 10
+  max_lin_it: 100
+  max_nl_it: 10
+  lin_rel_tol: 0.001
+  lin_abs_tol: 1e-6
+  nl_rel_tol: 1e-6
+  nl_abs_tol: 1e-6
+  file_output: true
+  console_output: true
+  nl_output: true
+  lin_output: false
+
+- run_time:
+  dt: 0.05
+  dtmax: 0.5
+  dtmin: 1e-6
+  end_time: 10
+  timestepper: constant
+  integration: BDF2
+
+...
+
+AgI:
+---
+func_type: ConstReaction
+initial_cond: 0
+...
+
+I2:
+---
+func_type: ConstReaction
+initial_cond: 1
+...
+
+Ag0:
+---
+func_type: ConstReaction
+initial_cond: 1
+...

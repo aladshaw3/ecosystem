@@ -33,6 +33,14 @@
 #ifndef crow_h
 #define crow_h
 
+/// Enumeration for the list of valid CROW function types
+/** This enumeration will define all the function types that have so far been created in CROW. So far,
+	the list of valid options is as follows...
+ 
+	\param CONSTREACTION ConstReaction objects for basic chemical reaction mechanisms
+	\param INVALID Default used to denote when a type was not correctly defined*/
+typedef enum {CONSTREACTION, INVALID} func_type;
+
 /// ConstReaction class is an object for information and functions associated with the Generic Reaction
 /** This is a C++ style object designed to store and operate on the generic representation of a 
 	reaction mechanism. In this object, the reaction parameters are treated as constants and do
@@ -122,10 +130,51 @@ typedef struct CROW_DATA
 	Dove SolverInfo;							///< Dove object that holds all information associated with the solver
 	FILE *OutputFile;							///< Pointer to the output file for CROW
 	bool FileOutput = true;						///< Boolean to determine whether or not to print results to a file
+	yaml_cpp_class yaml_object;					///< yaml object to read and access digitized yaml documents (see yaml_wrapper.h)
 } CROW_DATA;
 
 ///Function to print header information about CROW to output file
 void print2file_crow_header(CROW_DATA *dat);
+
+///Function to validate solver choice
+//** Returns true for Linear and false for Nonlinear */
+bool solver_choice(std::string &choice);
+
+///Function to validate linesearch choice
+linesearch_type linesearch_choice(std::string &choice);
+
+///Function to validate linear solver choice
+krylov_method linearsolver_choice(std::string &choice);
+
+///Function to determine whether or not to precondition
+bool use_preconditioning(std::string &choice);
+
+///Function to validate preconditioning choice
+precond_type preconditioner_choice(std::string &choice);
+
+///Function to validate timestepper choice
+timestep_type timestepper_choice(std::string &choice);
+
+///Function to validate integration method choice
+integrate_subtype integration_choice(std::string &choice);
+
+///Function to validate Function type
+func_type function_choice(std::string &choice);
+
+///Function to add to growing list of registered objects
+int add_function(func_type type, CROW_DATA *dat);
+
+///Function to read a yaml input file to setup a CROW simulation
+int read_crow_input(CROW_DATA *dat);
+
+///Function to intialize system information
+int read_crow_system(CROW_DATA *dat);
+
+///Function to read the header files for each variable
+int read_crow_functions(CROW_DATA *dat);
+
+///Function to initialize ConstReaction information
+int read_crow_ConstReaction(CROW_DATA *dat);
 
 ///Run CROW scenario
 int CROW_SCENARIO(const char *yaml_input);

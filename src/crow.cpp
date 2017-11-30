@@ -276,6 +276,18 @@ void print2file_crow_header(CROW_DATA *dat)
 		fprintf(dat->OutputFile, "\n\t%s",dat->SolverInfo.getVariableName(i).c_str());
 	fprintf(dat->OutputFile, "\n");
 	fprintf(dat->OutputFile,"\nDOVE Solver Options:\n");
+	fprintf(dat->OutputFile, "\tSOLVER TYPE = \t");
+	if (dat->SolverInfo.isLinear() == true)
+		fprintf(dat->OutputFile, "Linear\n");
+	else
+	{
+		if (dat->SolverInfo.isPreconditioned() == false || dat->SolverInfo.getLinearMethod() == FOM)
+			fprintf(dat->OutputFile, "Jacobian-Free Newton-Krylov (JFNK)\n");
+		else if (dat->SolverInfo.getLinearMethod() == QR)
+			fprintf(dat->OutputFile, "Direct Newton Method\n");
+		else
+			fprintf(dat->OutputFile, "Preconditioned Jacobian-Free Newton-Krylov (PJFNK)\n");
+	}
 	fprintf(dat->OutputFile, "\tINTEGRATION TYPE = \t");
 	switch (dat->SolverInfo.getIntegrationType())
 	{
@@ -348,8 +360,8 @@ void print2file_crow_header(CROW_DATA *dat)
 			fprintf(dat->OutputFile, "None\n");
 			break;
 	}
-	fprintf(dat->OutputFile, "\tPRECONDITIONING METHOD = \t");
-	if (dat->SolverInfo.isPreconditioned() == false)
+	fprintf(dat->OutputFile, "\tPRECONDITION METHOD = \t");
+	if (dat->SolverInfo.isPreconditioned() == false || dat->SolverInfo.getLinearMethod() == FOM || dat->SolverInfo.getLinearMethod() == QR)
 		fprintf(dat->OutputFile, "None\n");
 	else
 	{
@@ -376,7 +388,7 @@ void print2file_crow_header(CROW_DATA *dat)
 				break;
 		}
 	}
-	fprintf(dat->OutputFile, "\tLINEAR SOLVER = \t");
+	fprintf(dat->OutputFile, "\tLINEAR SOLVER METHOD = \t");
 	switch (dat->SolverInfo.getLinearMethod())
 	{
 		case GMRESLP:
@@ -419,14 +431,689 @@ void print2file_crow_header(CROW_DATA *dat)
 			fprintf(dat->OutputFile, "QR Factorization (QR)\n");
 			break;
 	}
+	fprintf(dat->OutputFile, "\tRESTART ITERATION LEVEL =\t%i\n", dat->SolverInfo.getRestartLevel());
+	fprintf(dat->OutputFile, "\tRECURSION ITERATION LEVEL =\t%i\n", dat->SolverInfo.getRecursionLevel());
+	fprintf(dat->OutputFile, "\tMAXIMUM LINEAR ITERATIONS =\t%i\n", dat->SolverInfo.getMaxLinearIterations());
+	fprintf(dat->OutputFile, "\tLINEAR TOLERANCE (Absolute) =\t%.6g\n", dat->SolverInfo.getLinearToleranceABS());
+	fprintf(dat->OutputFile, "\tLINEAR TOLERANCE (Relative) =\t%.6g\n", dat->SolverInfo.getLinearToleranceREL());
+	fprintf(dat->OutputFile, "\tMAXIMUM NONLINEAR ITERATIONS =\t%i\n", dat->SolverInfo.getMaxNonlinearIterations());
+	fprintf(dat->OutputFile, "\tNONLINEAR TOLERANCE (Absolute) =\t%.6g\n", dat->SolverInfo.getNonlinearToleranceABS());
+	fprintf(dat->OutputFile, "\tNONLINEAR TOLERANCE (Relative) =\t%.6g\n", dat->SolverInfo.getNonlinearToleranceREL());
+	fprintf(dat->OutputFile,"\n-----------------------------------------------------------\n\n");
+	
+	//Loop over all ConstReaction Objects
+	for (int i=0; i<dat->const_reacts.size(); i++)
+	{
+		if (i == 0)
+			fprintf(dat->OutputFile, "---------------- Constant Reaction Objects ----------------\n\n");
+		
+		fprintf(dat->OutputFile, "Variable:\t%s\nEquation:\td(%s)/dt = ", dat->SolverInfo.getVariableName(i).c_str(), dat->SolverInfo.getVariableName(i).c_str());
+		
+		//Reaction Equation Information
+		std::map<int, int>::iterator it;
+		//Forward rate / positive reactants
+		if (dat->const_reacts[i].getStoichiometryMap()[dat->const_reacts[i].getIndex()] > 0)
+		{
+			//Forward part
+			if (dat->const_reacts[i].getForwardRate() != 0)
+			{
+				if (abs(dat->const_reacts[i].getStoichiometryMap()[dat->const_reacts[i].getIndex()]) > 1)
+					fprintf(dat->OutputFile, "%i*", abs(dat->const_reacts[i].getStoichiometryMap()[dat->const_reacts[i].getIndex()]));
+				fprintf(dat->OutputFile, "kf");
+				for (it = dat->const_reacts[i].getStoichiometryMap().begin(); it != dat->const_reacts[i].getStoichiometryMap().end(); it++)
+				{
+					if (it->second < 0)
+					{
+						if (abs(it->second) == 1)
+							fprintf(dat->OutputFile, "*(%s)", dat->SolverInfo.getVariableName(it->first).c_str());
+						else
+							fprintf(dat->OutputFile, "*(%s)^%i", dat->SolverInfo.getVariableName(it->first).c_str(), abs(it->second));
+					}
+					else
+					{
+						//Do Nothing
+					}
+				}
+			}
+			
+			//Reverse part
+			if (dat->const_reacts[i].getReverseRate() != 0)
+			{
+				if (abs(dat->const_reacts[i].getStoichiometryMap()[dat->const_reacts[i].getIndex()]) > 1)
+					fprintf(dat->OutputFile, " - %i*kr", abs(dat->const_reacts[i].getStoichiometryMap()[dat->const_reacts[i].getIndex()]));
+				else
+					fprintf(dat->OutputFile, " - kr");
+				for (it = dat->const_reacts[i].getStoichiometryMap().begin(); it != dat->const_reacts[i].getStoichiometryMap().end(); it++)
+				{
+					if (it->second > 0)
+					{
+						if (abs(it->second) == 1)
+							fprintf(dat->OutputFile, "*(%s)", dat->SolverInfo.getVariableName(it->first).c_str());
+						else
+							fprintf(dat->OutputFile, "*(%s)^%i", dat->SolverInfo.getVariableName(it->first).c_str(), abs(it->second));
+					}
+					else
+					{
+						//Do Nothing
+					}
+				}
+			}
+		}
+		//Reverse rate / negative reactants
+		else if (dat->const_reacts[i].getStoichiometryMap()[dat->const_reacts[i].getIndex()] < 0)
+		{
+			//Reverse part
+			if (dat->const_reacts[i].getReverseRate() != 0)
+			{
+				if (abs(dat->const_reacts[i].getStoichiometryMap()[dat->const_reacts[i].getIndex()]) > 1)
+					fprintf(dat->OutputFile, "%i*", abs(dat->const_reacts[i].getStoichiometryMap()[dat->const_reacts[i].getIndex()]));
+				fprintf(dat->OutputFile, "kr");
+				for (it = dat->const_reacts[i].getStoichiometryMap().begin(); it != dat->const_reacts[i].getStoichiometryMap().end(); it++)
+				{
+					if (it->second > 0)
+					{
+						if (abs(it->second) == 1)
+							fprintf(dat->OutputFile, "*(%s)", dat->SolverInfo.getVariableName(it->first).c_str());
+						else
+							fprintf(dat->OutputFile, "*(%s)^%i", dat->SolverInfo.getVariableName(it->first).c_str(), abs(it->second));
+					}
+					else
+					{
+						//Do Nothing
+					}
+				}
+			}
+			
+			//Forward part
+			if (dat->const_reacts[i].getForwardRate() != 0)
+			{
+				if (abs(dat->const_reacts[i].getStoichiometryMap()[dat->const_reacts[i].getIndex()]) > 1)
+					fprintf(dat->OutputFile, " - %i*kf", abs(dat->const_reacts[i].getStoichiometryMap()[dat->const_reacts[i].getIndex()]));
+				else
+					fprintf(dat->OutputFile, " - kf");
+				for (it = dat->const_reacts[i].getStoichiometryMap().begin(); it != dat->const_reacts[i].getStoichiometryMap().end(); it++)
+				{
+					if (it->second < 0)
+					{
+						if (abs(it->second) == 1)
+							fprintf(dat->OutputFile, "*(%s)", dat->SolverInfo.getVariableName(it->first).c_str());
+						else
+							fprintf(dat->OutputFile, "*(%s)^%i", dat->SolverInfo.getVariableName(it->first).c_str(), abs(it->second));
+					}
+					else
+					{
+						//Do Nothing
+					}
+				}
+			}
+		}
+		else
+		{
+			//Do Nothing
+		}
+		fprintf(dat->OutputFile, "\n");
+		
+		//Parameter Information
+		if (dat->const_reacts[i].getForwardRate() != 0)
+			fprintf(dat->OutputFile, "Parameter:\tkf =\t%.6g\n", dat->const_reacts[i].getForwardRate());
+		if (dat->const_reacts[i].getReverseRate() != 0)
+			fprintf(dat->OutputFile, "Parameter:\tkr =\t%.6g\n", dat->const_reacts[i].getReverseRate());
+		
+		fprintf(dat->OutputFile, "\n");
+		
+		if (i == dat->const_reacts.size() - 1)
+			fprintf(dat->OutputFile,"\n-----------------------------------------------------------\n\n");
+	}
+}
+
+//solver opt
+bool solver_choice(std::string &choice)
+{
+	bool Linear = false;
+	
+	std::string copy = choice;
+	for (int i=0; i<copy.size(); i++)
+		copy[i] = tolower(copy[i]);
+	
+	if (copy == "linear")
+		Linear = true;
+	else
+		Linear = false;
+	
+	return Linear;
+}
+
+///Function to validate linesearch choice
+linesearch_type linesearch_choice(std::string &choice)
+{
+	linesearch_type type = NO_LS;
+	
+	std::string copy = choice;
+	for (int i=0; i<copy.size(); i++)
+		copy[i] = tolower(copy[i]);
+	
+	if (copy == "none")
+		type = NO_LS;
+	else if (copy == "bt" || copy == "backtracking")
+		type = BT;
+	else if (copy == "abt" || copy == "adaptive-backtracking" || copy == "adaptive")
+		type = ABT;
+	else
+		type = NO_LS;
+	
+	return type;
+}
+
+///Function to validate linear solver choice
+krylov_method linearsolver_choice(std::string &choice)
+{
+	krylov_method type = QR;
+	
+	std::string copy = choice;
+	for (int i=0; i<copy.size(); i++)
+		copy[i] = tolower(copy[i]);
+	
+	if (copy == "gmreslp")
+		type = GMRESLP;
+	else if (copy == "pcg")
+		type = PCG;
+	else if (copy == "bicgstab")
+		type = BiCGSTAB;
+	else if (copy == "cgs")
+		type = CGS;
+	else if (copy == "fom")
+		type = FOM;
+	else if (copy == "gmresrp")
+		type = GMRESRP;
+	else if (copy == "gcr")
+		type = GCR;
+	else if (copy == "gmresr")
+		type = GMRESR;
+	else if (copy == "kms")
+		type = KMS;
+	else if (copy == "gmres")
+		type = GMRESRP;
+	else if (copy == "qr")
+		type = QR;
+	else
+		type = GMRESRP;
+	
+	return type;
+}
+
+///Function to determine whether or not to precondition
+bool use_preconditioning(std::string &choice)
+{
+	bool Precon = false;
+	
+	std::string copy = choice;
+	for (int i=0; i<copy.size(); i++)
+		copy[i] = tolower(copy[i]);
+	
+	if (copy == "none")
+		Precon = false;
+	else
+		Precon = true;
+	
+	return Precon;
+}
+
+///Function to validate preconditioning choice
+precond_type preconditioner_choice(std::string &choice)
+{
+	precond_type type = JACOBI;
+	
+	std::string copy = choice;
+	for (int i=0; i<copy.size(); i++)
+		copy[i] = tolower(copy[i]);
+	
+	if (copy == "jacobi")
+		type = JACOBI;
+	else if (copy == "tridiagonal" || copy == "tridiag")
+		type = TRIDIAG;
+	else if (copy == "ugs" || copy == "upper-gs")
+		type = UGS;
+	else if (copy == "lgs" || copy == "lower-gs")
+		type = LGS;
+	else if (copy == "sgs" || copy == "symmetric-gs")
+		type = SGS;
+	else
+		type = JACOBI;
+	
+	return type;
+}
+
+///Function to validate timestepper choice
+timestep_type timestepper_choice(std::string &choice)
+{
+	timestep_type type = CONSTANT;
+	
+	std::string copy = choice;
+	for (int i=0; i<copy.size(); i++)
+		copy[i] = tolower(copy[i]);
+	
+	if (copy == "constant")
+		type = CONSTANT;
+	else if (copy == "adaptive")
+		type = ADAPTIVE;
+	else if (copy == "fehlberg")
+		type = FEHLBERG;
+	else if (copy == "ratebased")
+		type = RATEBASED;
+	else
+		type = CONSTANT;
+	
+	return type;
+}
+
+///Function to validate integration method choice
+integrate_subtype integration_choice(std::string &choice)
+{
+	integrate_subtype type = BE;
+	
+	std::string copy = choice;
+	for (int i=0; i<copy.size(); i++)
+		copy[i] = tolower(copy[i]);
+	
+	if (copy == "be" || copy == "backwards-euler")
+		type = BE;
+	else if (copy == "fe" || copy == "forwards-euler")
+		type = FE;
+	else if (copy == "bdf2" || copy == "backwards-differentiation-formula-2")
+		type = BDF2;
+	else if (copy == "cn" || copy == "crank-nicholson")
+		type = CN;
+	else if (copy == "rk4" || copy == "runge-kutta")
+		type = RK4;
+	else if (copy == "rkf" || copy == "runge-kutta-fehlberg")
+		type = RKF;
+	else
+		type = BE;
+	
+	return type;
+}
+
+///Function to validate Function type
+func_type function_choice(std::string &choice)
+{
+	func_type type = INVALID;
+	
+	std::string copy = choice;
+	for (int i=0; i<copy.size(); i++)
+		copy[i] = tolower(copy[i]);
+	
+	if (copy == "constreaction")
+		type = CONSTREACTION;
+	else
+		type = INVALID;
+	
+	return type;
+}
+
+///Function to add to growing list of registered objects
+int add_function(func_type type, CROW_DATA *dat)
+{
+	int success = 0;
+	
+	switch (type)
+	{
+		case INVALID:
+			success = -1;
+			mError(invalid_type);
+			break;
+			
+		case CONSTREACTION:
+			dat->const_reacts.emplace_back();
+			break;
+			
+		default:
+			success = -1;
+			mError(invalid_type);
+			break;
+	}
+	
+	return success;
+}
+
+//Read input file
+int read_crow_input(CROW_DATA *dat)
+{
+	int success = 0;
+	
+	success = read_crow_system(dat);
+	if (success != 0) {mError(read_error); return -1;}
+	
+	success = read_crow_functions(dat);
+	if (success != 0) {mError(read_error); return -1;}
+	
+	return success;
+}
+
+//Function to intialize system information
+int read_crow_system(CROW_DATA *dat)
+{
+	int success = 0;
+	
+	//Find all required info from System Document
+	try
+	{
+		dat->SolverInfo.set_numfunc(dat->yaml_object.getYamlWrapper()("System")["num_var"].getInt());
+	}
+	catch (std::out_of_range)
+	{
+		mError(missing_information);
+		return -1;
+	}
+	int size = 0;
+	try
+	{
+		size = dat->yaml_object.getYamlWrapper()("System")("var_names").getDataMap().size();
+		if (size != dat->SolverInfo.getNumFunc())
+		{
+			mError(missing_information);
+			return -1;
+		}
+	}
+	catch (std::out_of_range)
+	{
+		mError(missing_information);
+		return -1;
+	}
+	try
+	{
+		for (auto &x: dat->yaml_object.getYamlWrapper()("System")("var_names").getDataMap().getMap())
+		{
+			int index = atoi(x.first.c_str());
+			dat->SolverInfo.set_variableName(index, x.second.getString());
+		}
+	}
+	catch (std::out_of_range)
+	{
+		mError(missing_information);
+		return -1;
+	}
+	
+	//Solver Options
+	try
+	{
+		std::string choice = dat->yaml_object.getYamlWrapper()("System")("solve_opts")["solver_type"].getString();
+		dat->SolverInfo.set_LinearStatus(solver_choice(choice));
+	}
+	catch (std::out_of_range)
+	{
+		dat->SolverInfo.set_LinearStatus(false);
+	}
+	try
+	{
+		std::string choice = dat->yaml_object.getYamlWrapper()("System")("solve_opts")["line_search"].getString();
+		dat->SolverInfo.set_LineSearchMethod(linesearch_choice(choice));
+	}
+	catch (std::out_of_range)
+	{
+		dat->SolverInfo.set_LineSearchMethod(NO_LS);
+	}
+	try
+	{
+		std::string choice = dat->yaml_object.getYamlWrapper()("System")("solve_opts")["linear_solver"].getString();
+		dat->SolverInfo.set_LinearMethod(linearsolver_choice(choice));
+	}
+	catch (std::out_of_range)
+	{
+		dat->SolverInfo.set_LinearMethod(QR);
+	}
+	try
+	{
+		std::string choice = dat->yaml_object.getYamlWrapper()("System")("solve_opts")["preconditioning"].getString();
+		dat->SolverInfo.set_Preconditioning(use_preconditioning(choice));
+	}
+	catch (std::out_of_range)
+	{
+		dat->SolverInfo.set_Preconditioning(false);
+	}
+	try
+	{
+		std::string choice = dat->yaml_object.getYamlWrapper()("System")("solve_opts")["preconditioning"].getString();
+		dat->SolverInfo.set_preconditioner(preconditioner_choice(choice));
+	}
+	catch (std::out_of_range)
+	{
+		dat->SolverInfo.set_preconditioner(JACOBI);
+	}
+	try
+	{
+		dat->SolverInfo.set_RecursionLevel(dat->yaml_object.getYamlWrapper()("System")("solve_opts")["recursion"].getInt());
+	}
+	catch (std::out_of_range)
+	{
+		dat->SolverInfo.set_RecursionLevel(1);
+	}
+	try
+	{
+		dat->SolverInfo.set_RestartLimit(dat->yaml_object.getYamlWrapper()("System")("solve_opts")["restart"].getInt());
+	}
+	catch (std::out_of_range)
+	{
+		dat->SolverInfo.set_RestartLimit(20);
+	}
+	try
+	{
+		dat->SolverInfo.set_MaxLinearIterations(dat->yaml_object.getYamlWrapper()("System")("solve_opts")["max_lin_it"].getInt());
+	}
+	catch (std::out_of_range)
+	{
+		dat->SolverInfo.set_MaxLinearIterations(100);
+	}
+	try
+	{
+		dat->SolverInfo.set_MaxNonLinearIterations(dat->yaml_object.getYamlWrapper()("System")("solve_opts")["max_nl_it"].getInt());
+	}
+	catch (std::out_of_range)
+	{
+		dat->SolverInfo.set_MaxNonLinearIterations(10);
+	}
+	try
+	{
+		dat->SolverInfo.set_LinearRelTol(dat->yaml_object.getYamlWrapper()("System")("solve_opts")["lin_rel_tol"].getDouble());
+	}
+	catch (std::out_of_range)
+	{
+		dat->SolverInfo.set_LinearRelTol(0.01);
+	}
+	try
+	{
+		dat->SolverInfo.set_LinearAbsTol(dat->yaml_object.getYamlWrapper()("System")("solve_opts")["lin_abs_tol"].getDouble());
+	}
+	catch (std::out_of_range)
+	{
+		dat->SolverInfo.set_LinearAbsTol(0.0001);
+	}
+	try
+	{
+		dat->SolverInfo.set_NonlinearRelTol(dat->yaml_object.getYamlWrapper()("System")("solve_opts")["nl_rel_tol"].getDouble());
+	}
+	catch (std::out_of_range)
+	{
+		dat->SolverInfo.set_NonlinearRelTol(1e-6);
+	}
+	try
+	{
+		dat->SolverInfo.set_NonlinearAbsTol(dat->yaml_object.getYamlWrapper()("System")("solve_opts")["nl_abs_tol"].getDouble());
+	}
+	catch (std::out_of_range)
+	{
+		dat->SolverInfo.set_NonlinearAbsTol(0.0001);
+	}
+	try
+	{
+		dat->SolverInfo.set_fileoutput(dat->yaml_object.getYamlWrapper()("System")("solve_opts")["file_output"].getBool());
+	}
+	catch (std::out_of_range)
+	{
+		dat->SolverInfo.set_fileoutput(true);
+	}
+	try
+	{
+		dat->SolverInfo.set_output(dat->yaml_object.getYamlWrapper()("System")("solve_opts")["console_output"].getBool());
+	}
+	catch (std::out_of_range)
+	{
+		dat->SolverInfo.set_output(true);
+	}
+	try
+	{
+		dat->SolverInfo.set_NonlinearOutput(dat->yaml_object.getYamlWrapper()("System")("solve_opts")["nl_output"].getBool());
+	}
+	catch (std::out_of_range)
+	{
+		dat->SolverInfo.set_NonlinearOutput(true);
+	}
+	try
+	{
+		dat->SolverInfo.set_LinearOutput(dat->yaml_object.getYamlWrapper()("System")("solve_opts")["lin_output"].getBool());
+	}
+	catch (std::out_of_range)
+	{
+		dat->SolverInfo.set_LinearOutput(false);
+	}
+	
+	//Runtime Options
+	try
+	{
+		std::string choice = dat->yaml_object.getYamlWrapper()("System")("run_time")["timestepper"].getString();
+		dat->SolverInfo.set_timestepper(timestepper_choice(choice));
+	}
+	catch (std::out_of_range)
+	{
+		dat->SolverInfo.set_timestepper(CONSTANT);
+	}
+	try
+	{
+		std::string choice = dat->yaml_object.getYamlWrapper()("System")("run_time")["integration"].getString();
+		dat->SolverInfo.set_integrationtype(integration_choice(choice));
+	}
+	catch (std::out_of_range)
+	{
+		dat->SolverInfo.set_integrationtype(BE);
+	}
+	try
+	{
+		dat->SolverInfo.set_timestep(dat->yaml_object.getYamlWrapper()("System")("run_time")["dt"].getDouble());
+	}
+	catch (std::out_of_range)
+	{
+		mError(missing_information);
+		return -1;
+	}
+	try
+	{
+		dat->SolverInfo.set_endtime(dat->yaml_object.getYamlWrapper()("System")("run_time")["end_time"].getDouble());
+	}
+	catch (std::out_of_range)
+	{
+		mError(missing_information);
+		return -1;
+	}
+	try
+	{
+		dat->SolverInfo.set_timestepmax(dat->yaml_object.getYamlWrapper()("System")("run_time")["dtmax"].getDouble());
+	}
+	catch (std::out_of_range)
+	{
+		dat->SolverInfo.set_timestepmax(100.0);
+	}
+	try
+	{
+		dat->SolverInfo.set_timestepmin(dat->yaml_object.getYamlWrapper()("System")("run_time")["dtmin"].getDouble());
+	}
+	catch (std::out_of_range)
+	{
+		dat->SolverInfo.set_timestepmin(0.0);
+	}
+	
+	return success;
+}
+
+///Function to read the header files for each variable
+int read_crow_functions(CROW_DATA *dat)
+{
+	int success = 0;
+	
+	//Check the number of headers
+	int headers = (int)dat->yaml_object.getYamlWrapper().getDocMap().size();
+	if (headers != dat->SolverInfo.getNumFunc()+1)
+	{
+		mError(missing_information);
+		return -1;
+	}
+	
+	//Create space for all functions first
+	int valid_names = 0;
+	try
+	{
+		for (auto &x: dat->yaml_object.getYamlWrapper().getDocMap())
+		{
+			if (dat->SolverInfo.isValidName(x.first))
+			{
+				std::cout << x.first << std::endl;
+				std::cout << dat->yaml_object.getYamlWrapper()(x.first)["func_type"].getString() << std::endl;
+				std::string choice = dat->yaml_object.getYamlWrapper()(x.first)["func_type"].getString();
+				success = add_function(function_choice(choice), dat);
+				if (success == -1) {mError(read_error);return -1;}
+				valid_names++;
+			}
+		}
+
+	}
+	catch (std::out_of_range)
+	{
+		mError(missing_information);
+		return -1;
+	}
+	
+	return success;
+}
+
+//Function to initialize ConstReaction information
+int read_crow_ConstReaction(CROW_DATA *dat)
+{
+	int success = 0;
+	
+	return success;
 }
 
 //Execute CROW
 int CROW_SCENARIO(const char *yaml_input)
 {
 	int success = 0;
+	double time;
 	
-	std::cout << "This is an executable\n";
+	// ---------------------------- Initializations ---------------------------------
+	time = clock();
+	CROW_DATA crow;
+	FILE *file;
+	file = fopen("output/CROW_Results.txt", "w+");
+	if (file == nullptr)
+	{
+		system("mkdir output");
+		file = fopen("output/CROW_Results.txt", "w+");
+	}
+	crow.SolverInfo.set_outputfile(file);
+	crow.OutputFile = file;
+	crow.SolverInfo.set_userdata((void*)&crow);
+	
+	//Read input file
+	success = crow.yaml_object.executeYamlRead(yaml_input);
+	if (success != 0) {mError(file_dne); return -1;}
+	success = read_crow_input(&crow);
+	if (success != 0) {mError(read_error); return -1;}
+	
+	//Execute solver functions
+	print2file_crow_header(&crow);
+	//crow.SolverInfo.solve_all();
+	
+	//Exit Messages
+	time = clock() - time;
+	std::cout << "\nCROW Runtime: " << (time / CLOCKS_PER_SEC) << " seconds\n";
 	
 	return success;
 }
@@ -476,7 +1163,7 @@ int CROW_TESTS()
 	test01.SolverInfo.set_timestepper(RATEBASED);
 	test01.SolverInfo.set_timestep(0.05);
 	test01.SolverInfo.set_integrationtype(BE);
-	test01.SolverInfo.set_LinearMethod(GMRESRP);
+	test01.SolverInfo.set_LinearMethod(QR);
 	test01.SolverInfo.set_preconditioner(SGS);
 	test01.SolverInfo.set_Preconditioning(true);
 	

@@ -288,8 +288,18 @@ public:
 	timestep_type getTimeStepper();					///< Returns the time stepper method
 	precond_type getPreconditioner();				///< Returns the preconditioner type
 	linesearch_type getLinesearchMethod();			///< Returns the method of line search
-	krylov_method getLinearMethod();				///< Returns the linear method used 
+	krylov_method getLinearMethod();				///< Returns the linear method used
 	bool isPreconditioned();						///< Returns true if using preconditioning
+	double getLinearToleranceABS();					///< Returns the value of linear tolerance (absolute)
+	double getLinearToleranceREL();					///< Returns the value of linear tolerance (relative)
+	double getNonlinearToleranceABS();				///< Returns the value of nonlinear tolerance (absolute)
+	double getNonlinearToleranceREL();				///< Returns the value of nonlinear tolerance (relative)
+	int getMaxNonlinearIterations();				///< Returns the maximum allowable nonlinear iterations
+	int getMaxLinearIterations();					///< Returns the maximum allowable linear iterations
+	bool isLinear();								///< Returns true if the system is being treated as linear
+	int getRestartLevel();							///< Returns the number of iterations allowed before restart for Krylov methods
+	int getRecursionLevel();						///< Returns the number of recursion levels allow for Krylov preconditioning
+	bool isValidName(std::string name);				///< Returns true if the given name is a variable in the DOVE system
 	
 	/// Function to return a reference to the Jacobian Matrix map at the ith row of the matrix
 	std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data, const Dove &dove)> & getJacobiMap(int i);

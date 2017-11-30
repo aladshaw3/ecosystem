@@ -924,6 +924,120 @@ bool Dove::isPreconditioned()
 	return this->Preconditioner;
 }
 
+//Return abs lin tol
+double Dove::getLinearToleranceABS()
+{
+	return this->newton_dat.lin_tol_abs;
+}
+
+//Return rel lin tol
+double Dove::getLinearToleranceREL()
+{
+	return this->newton_dat.lin_tol_rel;
+}
+
+//Return abs nl tol
+double Dove::getNonlinearToleranceABS()
+{
+	return this->newton_dat.nl_tol_abs;
+}
+
+//Return rel nl tol
+double Dove::getNonlinearToleranceREL()
+{
+	return this->newton_dat.nl_tol_rel;
+}
+
+//Max nl it
+int Dove::getMaxNonlinearIterations()
+{
+	return this->newton_dat.nl_maxit;
+}
+
+//Max l it
+int Dove::getMaxLinearIterations()
+{
+	return this->linmax;
+}
+
+//Return whether the system is linear
+bool Dove::isLinear()
+{
+	return this->Linear;
+}
+
+//Return restarts
+int Dove::getRestartLevel()
+{
+	int level = 0;
+	switch (this->newton_dat.linear_solver)
+	{
+		case KMS:
+			level = this->newton_dat.l_restart;
+			break;
+			
+		case GMRESR:
+			level = this->newton_dat.l_restart;
+			break;
+			
+		case GMRESLP:
+			level = this->newton_dat.l_restart;
+			break;
+			
+		case GMRESRP:
+			level = this->newton_dat.l_restart;
+			break;
+			
+		case GCR:
+			level = this->newton_dat.l_restart;
+			break;
+			
+		default:
+			level = this->linmax;
+			break;
+	}
+	return level;
+}
+
+//Return recursion level
+int Dove::getRecursionLevel()
+{
+	int level = 0;
+	switch (this->newton_dat.linear_solver)
+	{
+		case KMS:
+			level = this->newton_dat.kms_dat.max_level;
+			break;
+			
+		case GMRESR:
+			level = 1;
+			break;
+			
+		default:
+			level = 0;
+			break;
+	}
+	return level;
+}
+
+//Is the name valid?
+bool Dove::isValidName(std::string name)
+{
+	bool valid = false;
+	std::unordered_map<std::string, int>::const_iterator it = this->var_names_hash.find(name);
+	
+	if (it == this->var_names_hash.end())
+	{
+		valid = false;
+	}
+	else
+	{
+		valid = true;
+	}
+	
+	return valid;
+}
+
 //Compute next time step
 double Dove::ComputeTimeStep()
 {
