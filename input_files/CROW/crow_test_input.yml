@@ -9,7 +9,7 @@ num_var: 3
 - solve_opts:
   solver_type: nonlinear
   line_search: bt
-  linear_solver: GMRES
+  linear_solver: QR
   preconditioning: SGS
   recursion: 0
   restart: 10
@@ -28,9 +28,9 @@ num_var: 3
   dt: 0.05
   dtmax: 0.5
   dtmin: 1e-6
-  end_time: 10
-  timestepper: constant
-  integration: BDF2
+  end_time: 20
+  timestepper: ratebased
+  integration: be
 
 ...
 
@@ -38,16 +38,43 @@ AgI:
 ---
 func_type: ConstReaction
 initial_cond: 0
+
+forward_rate: 1
+reverse_rate: 0
+
+- stoichiometry:
+  I2: -1
+  Ag0: -2
+  AgI: 2
+
 ...
 
 I2:
 ---
 func_type: ConstReaction
 initial_cond: 1
+
+forward_rate: 1
+reverse_rate: 0
+
+- stoichiometry:
+  I2: -1
+  Ag0: -2
+  AgI: 2
+
 ...
 
 Ag0:
 ---
 func_type: ConstReaction
 initial_cond: 1
+
+forward_rate: 1
+reverse_rate: 0
+
+- stoichiometry:
+  I2: -1
+  Ag0: -2
+  AgI: 2
+
 ...

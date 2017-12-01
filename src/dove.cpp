@@ -1069,7 +1069,6 @@ double Dove::ComputeTimeStep()
 				
 			case RATEBASED:
 				rate = this->getMaxRate();
-				std::cout << rate << std::endl;
 				if (rate <= 1.0)
 					step = this->dt + 0.1*this->dt;
 				else
