@@ -1146,6 +1146,8 @@ func_type function_choice(std::string &choice)
 	
 	if (copy == "constreaction")
 		type = CONSTREACTION;
+	else if (copy == "multiconstreaction")
+		type = MULTICONSTREACTION;
 	else
 		type = INVALID;
 	
@@ -1468,7 +1470,14 @@ int read_crow_functions(CROW_DATA *dat)
 						if (success == -1) {mError(read_error);return -1;}
 						break;
 						
+					case MULTICONSTREACTION:
+						success = read_crow_MultiConstReaction(index, dat->multi_const_reacts, dat->yaml_object.getYamlWrapper().getDocument(x.first), dat->SolverInfo);
+						if (success == -1) {mError(read_error);return -1;}
+						break;
+						
 					default:
+						mError(invalid_type);
+						return -1;
 						break;
 				}
 			}
@@ -1491,6 +1500,10 @@ int read_crow_ConstReaction(int index, std::unordered_map<int, ConstReaction> &m
 	
 	map[index].InitializeSolver(solver);
 	map[index].SetIndex(index);
+	
+	//Register appropriate functions
+	solver.registerCoeff(index, default_coeff);
+	solver.registerFunction(index, rate_func_ConstReaction);
 	
 	int num_rate = 0;
 	//Read forward and reverse rate info (at least one is required)
@@ -1533,10 +1546,6 @@ int read_crow_ConstReaction(int index, std::unordered_map<int, ConstReaction> &m
 		return -1;
 	}
 	
-	//Register appropriate functions
-	solver.registerCoeff(index, default_coeff);
-	solver.registerFunction(index, rate_func_ConstReaction);
-	
 	//Loop through all stoichiometry
 	for (auto &x: info("stoichiometry").getDataMap())
 	{
@@ -1560,6 +1569,112 @@ int read_crow_ConstReaction(int index, std::unordered_map<int, ConstReaction> &m
 		
 		//Register appropriate jacobian functions
 		solver.registerJacobi(index, species, jacobi_func_ConstReaction);
+	}
+	
+	return success;
+}
+
+///Function to initialize MultiConstReaction information
+int read_crow_MultiConstReaction(int index, std::unordered_map<int, MultiConstReaction> &map, Document &info, Dove &solver)
+{
+	int success = 0;
+	
+	//Must determine number of reactions for object FIRST!
+	try
+	{
+		map[index].SetNumberReactions(info["num_reactions"].getInt());
+	}
+	catch (std::out_of_range)
+	{
+		mError(missing_information);
+		return -1;
+	}
+	
+	map[index].InitializeSolver(solver);
+	map[index].SetIndex(index);
+	
+	//Register appropriate functions
+	solver.registerCoeff(index, default_coeff);
+	solver.registerFunction(index, rate_func_MultiConstReaction);
+	
+	//Check number of headers to ensure it is correct
+	int headers = (int)info.getHeadMap().size();
+	if (headers != map[index].getNumReactions())
+	{
+		mError(missing_information);
+		return -1;
+	}
+	
+	//Loop through all headers to setup reactions (NOTE: header names don't matter)
+	int react = 0;
+	for (auto &y: info.getHeadMap())
+	{
+		int num_rate = 0;
+		//Read forward and reverse rate info (at least one is required)
+		try
+		{
+			map[index].SetForwardRate(react, info(y.first)["forward_rate"].getDouble());
+			num_rate++;
+		}
+		catch (std::out_of_range)
+		{
+			map[index].SetForwardRate(react,0);
+		}
+		try
+		{
+			map[index].SetReverseRate(react, info(y.first)["reverse_rate"].getDouble());
+			num_rate++;
+		}
+		catch (std::out_of_range)
+		{
+			map[index].SetReverseRate(react,0);
+		}
+		if (num_rate == 0)
+		{
+			mError(missing_information);
+			return -1;
+		}
+		
+		//Check the size of the map
+		try
+		{
+			if (info(y.first)("stoichiometry").getMap().size() < 1)
+			{
+				mError(missing_information);
+				return -1;
+			}
+		}
+		catch (std::out_of_range)
+		{
+			mError(read_error);
+			return -1;
+		}
+		
+		//Loop through all stoichiometry
+		for (auto &x: info(y.first)("stoichiometry").getMap())
+		{
+			if (solver.isValidName(x.first) == false)
+			{
+				mError(read_error);
+				return -1;
+			}
+			
+			//Grad stoichiometry
+			int species = solver.getVariableIndex(x.first);
+			try
+			{
+				map[index].InsertStoichiometry(react, species, x.second.getInt());
+			}
+			catch (std::out_of_range)
+			{
+				mError(read_error);
+				return -1;
+			}
+			
+			//Register appropriate jacobian functions
+			solver.registerJacobi(index, species, jacobi_func_ConstReaction);
+		}
+		react++;
 	}
 	
 	return success;
@@ -1654,6 +1769,7 @@ int CROW_TESTS()
 	//---Function Info (Specific to ConstReaction)---
 	
 	//Use emplace_back for each instance of a variable (C++11)
+	/*
 	//test01.const_reacts.emplace();
 	test01.const_reacts[0].InitializeSolver(test01.SolverInfo);
 	test01.const_reacts[0].SetIndex(0); //Index are the same!!!
@@ -1666,6 +1782,22 @@ int CROW_TESTS()
 	test01.SolverInfo.registerFunction(0, rate_func_ConstReaction);
 	test01.SolverInfo.registerJacobi(0, 0, jacobi_func_ConstReaction); //automate
 	test01.SolverInfo.registerJacobi(0, 1, jacobi_func_ConstReaction); //automate
+	 */
+	
+	test01.multi_const_reacts[0].SetNumberReactions(1);//MUST BE CALLED FIRST!!!
+	test01.multi_const_reacts[0].InitializeSolver(test01.SolverInfo);
+	test01.multi_const_reacts[0].SetIndex(0);
+	
+	test01.multi_const_reacts[0].SetForwardRate(0, 1);
+	test01.multi_const_reacts[0].SetReverseRate(0, 1);
+	test01.multi_const_reacts[0].InsertStoichiometry(0, 0, -1); //Species 0, stoic 1 (+) for products
+	test01.multi_const_reacts[0].InsertStoichiometry(0, 1, -2); //Species 0, stoic 1 (+) for products
+	test01.multi_const_reacts[0].InsertStoichiometry(0, 2, 2); //Species 0, stoic 1 (+) for products
+	
+	test01.SolverInfo.registerCoeff(0, default_coeff);
+	test01.SolverInfo.registerFunction(0, rate_func_MultiConstReaction);
+	test01.SolverInfo.registerJacobi(0, 0, jacobi_func_MultiConstReaction);
+	test01.SolverInfo.registerJacobi(0, 1, jacobi_func_MultiConstReaction);
 	
 	//test01.const_reacts.emplace();
 	test01.const_reacts[1].InitializeSolver(test01.SolverInfo);

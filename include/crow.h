@@ -44,8 +44,10 @@
 	the list of valid options is as follows...
  
 	\param CONSTREACTION ConstReaction objects for basic chemical reaction mechanisms
+	\param MULTICONSTREACTION MultiConstReaction objects for advanced mechanisms with const coeffs
 	\param INVALID Default used to denote when a type was not correctly defined*/
-typedef enum {CONSTREACTION, INVALID} func_type;
+typedef enum {CONSTREACTION,
+				MULTICONSTREACTION, INVALID} func_type;
 
 /// ConstReaction class is an object for information and functions associated with the Generic Reaction
 /** This is a C++ style object designed to store and operate on the generic representation of a 
@@ -221,6 +223,9 @@ int read_crow_functions(CROW_DATA *dat);
 
 ///Function to initialize ConstReaction information
 int read_crow_ConstReaction(int index, std::unordered_map<int, ConstReaction> &map, Document &info, Dove &solver);
+
+///Function to initialize MultiConstReaction information
+int read_crow_MultiConstReaction(int index, std::unordered_map<int, MultiConstReaction> &map, Document &info, Dove &solver);
 
 ///Run CROW scenario
 int CROW_SCENARIO(const char *yaml_input);
