@@ -23,6 +23,17 @@
  *
  *			NOTE: See above for description of single reaction rate functions
  *
+ *			Mathematical description of Infinite Bath:
+ *			------------------------------------------
+ *			du_i/dt = 0 = Value - SUM (d_i*u_i, other species)
+ *
+ *			where Value is the constant that the system is held to, u_i is the primary
+ *			species or variable of interest, and d_i is a constant coefficient representing
+ *			how much of u_i goes into Value.
+ *
+ *			NOTE: may also be a function of the other species (i.e., if doing some form of
+ *			speciation for the system in question)
+ *
  *			\warning This kernel is still under active development. Use with caution!
  *
  *
@@ -45,9 +56,14 @@
  
 	\param CONSTREACTION ConstReaction objects for basic chemical reaction mechanisms
 	\param MULTICONSTREACTION MultiConstReaction objects for advanced mechanisms with const coeffs
+	\param INFINITEBATH InfiniteBath objects for a material balance to hold a variable(s) constant
 	\param INVALID Default used to denote when a type was not correctly defined*/
-typedef enum {CONSTREACTION,
-				MULTICONSTREACTION, INVALID} func_type;
+typedef enum
+{	CONSTREACTION,
+	MULTICONSTREACTION,
+	INFINITEBATH,
+	INVALID
+} func_type;
 
 /// ConstReaction class is an object for information and functions associated with the Generic Reaction
 /** This is a C++ style object designed to store and operate on the generic representation of a 
@@ -71,7 +87,7 @@ public:
 	double getForwardRate();						///< Function to return the forward reaction rate constant
 	double getReverseRate();						///< Function to return the reverse reaction rate constant
 	int getIndex();									///< Function to return the primary variable index
-	std::map<int, int> & getStoichiometryMap();	///< Function to return reference to the Stoichiometry map object
+	std::map<int, int> & getStoichiometryMap();		///< Function to return reference to the Stoichiometry map object
 	
 protected:
 	double forward_rate;						///< Reaction rate constant associated with reactants
@@ -169,6 +185,65 @@ double rate_func_MultiConstReaction(int i, const Matrix<double> &u, double t, co
  \param dove reference to the Dove object itself for access to specific functions*/
 double jacobi_func_MultiConstReaction(int i, int j, const Matrix<double> &u, double t, const void *data, const Dove &dove);
 
+/// InfiniteBath is a class object associated with residuals stemming from an infinite concentration of a species
+/** This is a C++ style object designed to store and operate on information associated with material balances
+	associated with the infinite bath representation of materials. In an infinite bath, the concentration level
+	of a certain species, or set of species, is held to a specific constant value and cannot change in time. Thus,
+	the system behaves as if there is an infinite amount of the material in question available to react with other
+	species in the system. As such, this object's rate function will be a simple linear equation and will be a steady-
+	state function when incorporated into the DOVE solver. */
+class InfiniteBath
+{
+public:
+	InfiniteBath();								///< Default constructor
+	~InfiniteBath();							///< Default destructor
+	
+	void InitializeSolver(Dove &Solver);			///< Function to initialize the InfiniteBath object from the Dove object
+	void SetIndex(int index);						///< Function to set the index of the primary variable species
+	void SetValue(double val);						///< Set the value of the infinite bath parameter
+	void InsertWeight(int i, double w);				///< Insert the weight for the indicated species
+	
+	double getValue();								///< Return the value of the infinite bath
+	int getIndex();									///< Function to return the primary variable index
+	std::map<int, double> & getWeightMap();			///< Function to return reference to the weight map object
+	
+protected:
+	double Value;								///< Value that the variable or set of variables is being held to
+	int main_index;								///< Variable index for the variable of interest
+	std::map<int, double> weights;				///< Map of weight coefficients for the infinite bath
+	Dove *SolverInfo;							///< Pointer to the Dove Object
+	
+private:
+	
+};
+
+/// Rate function for the InfiniteBath Object
+/** This function defines the infinite bath function that will be used in the Dove Object to solve
+ the system of equations. Arguments passed to this function are standard and are required in order
+ to have this function registered in the Dove object itself. Parameters of this function are as
+ follows...
+ 
+ \param i index of the non-linear variable for which this function applies
+ \param u matrix of all non-linear variables in the Dove system
+ \param t value of time in the current simulation (user must define units)
+ \param data pointer to a data structure used to delineate parameters of the function
+ \param dove reference to the Dove object itself for access to specific functions*/
+double rate_func_InfiniteBath(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
+
+/// Jacobi function for the InfiniteBath Object
+/** This function defines the Jacobian functions that will be used in the Dove Object to precondition
+ the system of equations. Arguments passed to this function are standard and are required in order
+ to have this function registered in the Dove object itself. Parameters of this function are as
+ follows...
+ 
+ \param i index of the non-linear variable for which this function applies
+ \param j index of the non-linear variable for which we are taking the derivative with respect to
+ \param u matrix of all non-linear variables in the Dove system
+ \param t value of time in the current simulation (user must define units)
+ \param data pointer to a data structure used to delineate parameters of the function
+ \param dove reference to the Dove object itself for access to specific functions*/
+double jacobi_func_InfiniteBath(int i, int j, const Matrix<double> &u, double t, const void *data, const Dove &dove);
+
 /// Primary data structure for the CROW routines
 /** This is a c-style data structure used to house all CROW data necessary to perform simulations on
 	systems of non-linear reaction equations. It is the primary structure that will interface with DOVE
@@ -177,7 +252,8 @@ double jacobi_func_MultiConstReaction(int i, int j, const Matrix<double> &u, dou
 typedef struct CROW_DATA
 {
 	std::unordered_map<int, ConstReaction> const_reacts;	///< Map of constant reaction objects used in CROW (access by variable index)
-	std::unordered_map<int, MultiConstReaction> multi_const_reacts;	///< Map of constant reaction objects used in CROW (access by variable index)
+	std::unordered_map<int, MultiConstReaction> multi_const_reacts;	///< Map of multiple constant reaction objects used in CROW (access by variable index)
+	std::unordered_map<int, InfiniteBath> inf_bath;			///< Map of Infinite Bath objects used in CROW (access by variable index)
 	Dove SolverInfo;										///< Dove object that holds all information associated with the solver
 	FILE *OutputFile;										///< Pointer to the output file for CROW
 	bool FileOutput = true;									///< Boolean to determine whether or not to print results to a file
@@ -226,6 +302,9 @@ int read_crow_ConstReaction(int index, std::unordered_map<int, ConstReaction> &m
 
 ///Function to initialize MultiConstReaction information
 int read_crow_MultiConstReaction(int index, std::unordered_map<int, MultiConstReaction> &map, Document &info, Dove &solver);
+
+///Function to initialize InfiniteBath information
+int read_crow_InfiniteBath(int index, std::unordered_map<int, InfiniteBath> &map, Document &info, Dove &solver);
 
 ///Run CROW scenario
 int CROW_SCENARIO(const char *yaml_input);

@@ -488,6 +488,117 @@ double jacobi_func_MultiConstReaction(int i, int j, const Matrix<double> &u, dou
  *								End: MultiConstReaction
  */
 
+/*
+ *								Start: InfiniteBath
+ *	-------------------------------------------------------------------------------------
+ */
+
+//Default constructor
+InfiniteBath::InfiniteBath()
+{
+	Value = 0;
+	main_index = 0;
+}
+
+//Default destructor
+InfiniteBath::~InfiniteBath()
+{
+	weights.clear();
+}
+
+//Initialize solver
+void InfiniteBath::InitializeSolver(Dove &Solver)
+{
+	this->SolverInfo = &Solver;
+}
+
+//Set index
+void InfiniteBath::SetIndex(int index)
+{
+	this->main_index = index;
+}
+
+//Set value
+void InfiniteBath::SetValue(double val)
+{
+	this->Value = val;
+}
+
+//Insert weight
+void InfiniteBath::InsertWeight(int i, double w)
+{
+	if (w < 0)
+		w = 0;
+	this->weights[i] = w;
+}
+
+//Return value
+double InfiniteBath::getValue()
+{
+	return this->Value;
+}
+
+//Return index
+int InfiniteBath::getIndex()
+{
+	return this->main_index;
+}
+
+//Return reference to map
+std::map<int, double> & InfiniteBath::getWeightMap()
+{
+	return this->weights;
+}
+
+/// Rate function for the InfiniteBath Object
+double rate_func_InfiniteBath(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove)
+{
+	double res = 0;
+	CROW_DATA *dat = (CROW_DATA *) data;
+	std::map<int, double>::iterator it;
+	
+	//Loop over all mapped values
+	for (it = dat->inf_bath[i].getWeightMap().begin(); it != dat->inf_bath[i].getWeightMap().end(); it++)
+	{
+		res += u(it->first,0)*it->second;
+	}
+	res = dat->inf_bath[i].getValue() - res;
+	
+	return res;
+}
+
+/// Jacobi function for the InfiniteBath Object
+double jacobi_func_InfiniteBath(int i, int j, const Matrix<double> &u, double t, const void *data, const Dove &dove)
+{
+	double jac = 0;
+	CROW_DATA *dat = (CROW_DATA *) data;
+	std::map<int, double>::iterator it;
+	
+	//Assume jacobian is only registered for species involved
+	try
+	{
+		//Loop over all mapped values
+		for (it = dat->inf_bath[i].getWeightMap().begin(); it != dat->inf_bath[i].getWeightMap().end(); it++)
+		{
+			if (it->first == j)
+				jac += it->second;
+			else
+				jac += 0;
+		}
+	}
+	catch (std::out_of_range)
+	{
+		jac = 0.0;
+	}
+	
+	return jac;
+}
+
+/*
+ *	-------------------------------------------------------------------------------------
+ *								End: InfiniteBath
+ */
+
 //Print header to file
 void print2file_crow_header(CROW_DATA *dat)
 {
@@ -966,6 +1077,41 @@ void print2file_crow_header(CROW_DATA *dat)
 		i++;
 	}//END MultiConstReaction Loop
 
+	//Loop over all InfiniteBath Objects
+	i = 0;
+	for (auto &x: dat->inf_bath)
+	{
+		if (i == 0)
+			fprintf(dat->OutputFile, "------------------ Infinite Bath Objects ------------------\n\n");
+		
+		fprintf(dat->OutputFile, "Variable:\t%s\nEquation:\t%.6g = ", dat->SolverInfo.getVariableName(x.first).c_str(),x.second.getValue());
+		
+		//Infinite Bath Equation Information
+		std::map<int, double>::iterator it;
+		for (it = dat->inf_bath[x.first].getWeightMap().begin(); it != dat->inf_bath[x.first].getWeightMap().end(); it++)
+		{
+			if (it == dat->inf_bath[x.first].getWeightMap().begin())
+			{
+				if (it->second > 1)
+					fprintf(dat->OutputFile, "%.6g*(%s)", it->second, dat->SolverInfo.getVariableName(it->first).c_str());
+				else
+					fprintf(dat->OutputFile, "(%s)", dat->SolverInfo.getVariableName(it->first).c_str());
+			}
+			else
+			{
+				if (it->second > 1)
+					fprintf(dat->OutputFile, " + %.6g*(%s)", it->second, dat->SolverInfo.getVariableName(it->first).c_str());
+				else
+					fprintf(dat->OutputFile, " + (%s)", dat->SolverInfo.getVariableName(it->first).c_str());
+			}
+		}
+		
+		fprintf(dat->OutputFile, "\n\n");
+		if (i == dat->const_reacts.size()-1)
+			fprintf(dat->OutputFile,"-----------------------------------------------------------\n\n");
+		i++;
+	}//END InfiniteBath Loop
+	
 }
 
 //solver opt
@@ -1148,6 +1294,8 @@ func_type function_choice(std::string &choice)
 		type = CONSTREACTION;
 	else if (copy == "multiconstreaction")
 		type = MULTICONSTREACTION;
+	else if (copy == "infinitebath")
+		type = INFINITEBATH;
 	else
 		type = INVALID;
 	
@@ -1459,7 +1607,6 @@ int read_crow_functions(CROW_DATA *dat)
 			if (dat->SolverInfo.isValidName(x.first))
 			{
 				index = dat->SolverInfo.getVariableIndex(x.first);
-				dat->SolverInfo.set_initialcondition(index,dat->yaml_object.getYamlWrapper()(x.first)["initial_cond"].getDouble());
 				std::string choice = dat->yaml_object.getYamlWrapper()(x.first)["func_type"].getString();
 				func_type type = function_choice(choice);
 				
@@ -1472,6 +1619,11 @@ int read_crow_functions(CROW_DATA *dat)
 						
 					case MULTICONSTREACTION:
 						success = read_crow_MultiConstReaction(index, dat->multi_const_reacts, dat->yaml_object.getYamlWrapper().getDocument(x.first), dat->SolverInfo);
+						if (success == -1) {mError(read_error);return -1;}
+						break;
+						
+					case INFINITEBATH:
+						success = read_crow_InfiniteBath(index, dat->inf_bath, dat->yaml_object.getYamlWrapper().getDocument(x.first), dat->SolverInfo);
 						if (success == -1) {mError(read_error);return -1;}
 						break;
 						
@@ -1497,6 +1649,17 @@ int read_crow_functions(CROW_DATA *dat)
 int read_crow_ConstReaction(int index, std::unordered_map<int, ConstReaction> &map, Document &info, Dove &solver)
 {
 	int success = 0;
+	
+	//try to set initial condition
+	try
+	{
+		solver.set_initialcondition(index, info["initial_cond"].getDouble());
+	}
+	catch (std::out_of_range)
+	{
+		mError(missing_information);
+		return -1;
+	}
 	
 	map[index].InitializeSolver(solver);
 	map[index].SetIndex(index);
@@ -1555,7 +1718,7 @@ int read_crow_ConstReaction(int index, std::unordered_map<int, ConstReaction> &m
 			return -1;
 		}
 		
-		//Grad stoichiometry
+		//Grab stoichiometry
 		int species = solver.getVariableIndex(x.first);
 		try
 		{
@@ -1583,6 +1746,17 @@ int read_crow_MultiConstReaction(int index, std::unordered_map<int, MultiConstRe
 	try
 	{
 		map[index].SetNumberReactions(info["num_reactions"].getInt());
+	}
+	catch (std::out_of_range)
+	{
+		mError(missing_information);
+		return -1;
+	}
+	
+	//try to set initial condition
+	try
+	{
+		solver.set_initialcondition(index, info["initial_cond"].getDouble());
 	}
 	catch (std::out_of_range)
 	{
@@ -1659,7 +1833,7 @@ int read_crow_MultiConstReaction(int index, std::unordered_map<int, MultiConstRe
 				return -1;
 			}
 			
-			//Grad stoichiometry
+			//Grab stoichiometry
 			int species = solver.getVariableIndex(x.first);
 			try
 			{
@@ -1676,6 +1850,76 @@ int read_crow_MultiConstReaction(int index, std::unordered_map<int, MultiConstRe
 		}
 		react++;
 	}
+	
+	return success;
+}
+
+///Function to initialize InfiniteBath information
+int read_crow_InfiniteBath(int index, std::unordered_map<int, InfiniteBath> &map, Document &info, Dove &solver)
+{
+	int success = 0;
+	
+	map[index].InitializeSolver(solver);
+	map[index].SetIndex(index);
+	
+	//Register appropriate functions
+	solver.registerCoeff(index, default_coeff);
+	solver.registerFunction(index, rate_func_InfiniteBath);
+	
+	//Try to set constant value
+	try
+	{
+		map[index].SetValue(info["const_value"].getDouble());
+		solver.set_initialcondition(index, info["const_value"].getDouble());
+	}
+	catch (std::out_of_range)
+	{
+		mError(missing_information);
+		return -1;
+	}
+	
+	//Check the size of the map
+	try
+	{
+		if (info("weights").getDataMap().size() < 1)
+		{
+			mError(missing_information);
+			return -1;
+		}
+	}
+	catch (std::out_of_range)
+	{
+		mError(read_error);
+		return -1;
+	}
+	
+	//Loop through all weights
+	bool found_index = false;
+	for (auto &x: info("weights").getDataMap())
+	{
+		if (solver.isValidName(x.first) == false)
+		{
+			mError(read_error);
+			return -1;
+		}
+		
+		int species = solver.getVariableIndex(x.first);
+		if (index == species)
+			found_index = true;
+		
+		map[index].InsertWeight(species, x.second.getDouble());
+		solver.registerJacobi(index, species, jacobi_func_InfiniteBath);
+	}
+	
+	//Check to ensure non-singularity
+	if (found_index == false)
+	{
+		mError(missing_information);
+		mError(singular_matrix);
+		return -1;
+	}
+	
+	solver.set_variableSteadyState(index);
 	
 	return success;
 }

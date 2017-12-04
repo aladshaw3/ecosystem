@@ -1,0 +1,231 @@
+System:
+---
+num_var: 9
+- var_names:
+  0: I2
+  1: Ag0
+  2: AgI
+  3: O2
+  4: H+
+  5: Ag+
+  6: H2O
+  7: NO
+  8: N2
+  
+- solve_opts:
+  solver_type: nonlinear
+  line_search: bt
+  linear_solver: QR
+  preconditioning: SGS
+  recursion: 0
+  restart: 10
+  max_lin_it: 100
+  max_nl_it: 100
+  lin_rel_tol: 0.001
+  lin_abs_tol: 1e-6
+  nl_rel_tol: 1e-6
+  nl_abs_tol: 1e-6
+  file_output: true
+  console_output: true
+  nl_output: true
+  lin_output: false
+
+- run_time:
+  dt: 0.05
+  dtmax: 0.5
+  dtmin: 1e-6
+  end_time: 50
+  timestepper: ratebased
+  integration: be
+
+...
+
+I2:
+---
+func_type: ConstReaction
+#initial_cond: 0.005 #%
+initial_cond: 50 #%
+
+forward_rate: 1e-5
+- stoichiometry:
+  I2: -1
+  Ag0: -2
+  AgI: 2
+
+...
+
+Ag0:
+---
+func_type: MultiConstReaction
+initial_cond: 15 #%
+num_reactions: 3
+
+- reaction1:
+  forward_rate: 1e-5
+  - stoichiometry:
+    I2: -1
+    Ag0: -2
+    AgI: 2
+
+- reaction2:
+  forward_rate: 1e-6
+  - stoichiometry:
+    O2: -1
+    Ag0: -4
+    H+: -4
+    Ag+: 4
+    H2O: 2
+
+- reaction3:
+  forward_rate: 1e-6
+  - stoichiometry:
+    NO: -2
+    Ag0: -4
+    H+: -4
+    Ag+: 4
+    H2O: 2
+    N2: 1
+
+...
+
+AgI:
+---
+func_type: ConstReaction
+initial_cond: 0 #%
+
+forward_rate: 1e-5
+- stoichiometry:
+  I2: -1
+  Ag0: -2
+  AgI: 2
+
+...
+
+O2:
+---
+func_type: ConstReaction
+initial_cond: 19.5 #%
+
+forward_rate: 1e-6
+- stoichiometry:
+  O2: -1
+  Ag0: -4
+  H+: -4
+  Ag+: 4
+  H2O: 2
+
+...
+
+H+:
+---
+func_type: MultiConstReaction
+#initial_cond: 1 #%
+initial_cond: 0 #%
+num_reactions: 2
+
+- reaction1:
+  forward_rate: 1e-6
+  - stoichiometry:
+    O2: -1
+    Ag0: -4
+    H+: -4
+    Ag+: 4
+    H2O: 2
+
+- reaction2:
+  forward_rate: 1e-6
+  - stoichiometry:
+    NO: -2
+    Ag0: -4
+    H+: -4
+    Ag+: 4
+    H2O: 2
+    N2: 1
+
+...
+
+Ag+:
+---
+func_type: MultiConstReaction
+initial_cond: 0 #%
+num_reactions: 2
+
+- reaction1:
+  forward_rate: 1e-6
+  - stoichiometry:
+    O2: -1
+    Ag0: -4
+    H+: -4
+    Ag+: 4
+    H2O: 2
+
+- reaction2:
+  forward_rate: 1e-6
+  - stoichiometry:
+    NO: -2
+    Ag0: -4
+    H+: -4
+    Ag+: 4
+    H2O: 2
+    N2: 1
+
+...
+
+H2O:
+---
+func_type: MultiConstReaction
+initial_cond: 1 #%
+num_reactions: 2
+
+- reaction1:
+  forward_rate: 1e-6
+  - stoichiometry:
+    O2: -1
+    Ag0: -4
+    H+: -4
+    Ag+: 4
+    H2O: 2
+
+- reaction2:
+  forward_rate: 1e-6
+  - stoichiometry:
+    NO: -2
+    Ag0: -4
+    H+: -4
+    Ag+: 4
+    H2O: 2
+    N2: 1
+
+...
+
+NO:
+---
+func_type: ConstReaction
+initial_cond: 1 #%
+
+forward_rate: 1e-6
+- stoichiometry:
+  NO: -2
+  Ag0: -4
+  H+: -4
+  Ag+: 4
+  H2O: 2
+  N2: 1
+
+...
+
+N2:
+---
+func_type: ConstReaction
+initial_cond: 77.5 #%
+
+forward_rate: 1e-6
+- stoichiometry:
+  NO: -2
+  Ag0: -4
+  H+: -4
+  Ag+: 4
+  H2O: 2
+  N2: 1
+
+...
