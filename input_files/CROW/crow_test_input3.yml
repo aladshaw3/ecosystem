@@ -45,6 +45,7 @@ A:
 #  B: 1
 
 func_type: InfiniteBath
+initial_cond: 1
 const_value: 1
 
 - weights:

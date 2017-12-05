@@ -1107,7 +1107,7 @@ void print2file_crow_header(CROW_DATA *dat)
 		}
 		
 		fprintf(dat->OutputFile, "\n\n");
-		if (i == dat->const_reacts.size()-1)
+		if (i == dat->inf_bath.size()-1)
 			fprintf(dat->OutputFile,"-----------------------------------------------------------\n\n");
 		i++;
 	}//END InfiniteBath Loop
@@ -1871,6 +1871,17 @@ int read_crow_InfiniteBath(int index, std::unordered_map<int, InfiniteBath> &map
 	{
 		map[index].SetValue(info["const_value"].getDouble());
 		solver.set_initialcondition(index, info["const_value"].getDouble());
+	}
+	catch (std::out_of_range)
+	{
+		mError(missing_information);
+		return -1;
+	}
+	
+	//Try to set initial condition
+	try
+	{
+		solver.set_initialcondition(index, info["initial_cond"].getDouble());
 	}
 	catch (std::out_of_range)
 	{

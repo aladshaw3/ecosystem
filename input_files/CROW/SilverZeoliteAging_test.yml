@@ -42,15 +42,12 @@ num_var: 9
 
 I2:
 ---
-func_type: ConstReaction
-#initial_cond: 0.005 #%
-initial_cond: 50 #%
+func_type: InfiniteBath
+initial_cond: 0.005
+const_value: 0.005
 
-forward_rate: 1e-5
-- stoichiometry:
-  I2: -1
-  Ag0: -2
-  AgI: 2
+- weights:
+  I2: 1
 
 ...
 
@@ -60,14 +57,14 @@ func_type: MultiConstReaction
 initial_cond: 15 #%
 num_reactions: 3
 
-- reaction1:
-  forward_rate: 1e-5
+- reaction1: 
+  forward_rate: 1
   - stoichiometry:
     I2: -1
     Ag0: -2
     AgI: 2
 
-- reaction2:
+- reaction2: 
   forward_rate: 1e-6
   - stoichiometry:
     O2: -1
@@ -76,7 +73,7 @@ num_reactions: 3
     Ag+: 4
     H2O: 2
 
-- reaction3:
+- reaction3: 
   forward_rate: 1e-6
   - stoichiometry:
     NO: -2
@@ -93,7 +90,7 @@ AgI:
 func_type: ConstReaction
 initial_cond: 0 #%
 
-forward_rate: 1e-5
+forward_rate: 1
 - stoichiometry:
   I2: -1
   Ag0: -2
@@ -103,44 +100,23 @@ forward_rate: 1e-5
 
 O2:
 ---
-func_type: ConstReaction
-initial_cond: 19.5 #%
+func_type: InfiniteBath
+initial_cond: 20
+const_value: 20
 
-forward_rate: 1e-6
-- stoichiometry:
-  O2: -1
-  Ag0: -4
-  H+: -4
-  Ag+: 4
-  H2O: 2
+- weights:
+  O2: 1
 
 ...
 
 H+:
 ---
-func_type: MultiConstReaction
-#initial_cond: 1 #%
-initial_cond: 0 #%
-num_reactions: 2
+func_type: InfiniteBath
+initial_cond: 1
+const_value: 1
 
-- reaction1:
-  forward_rate: 1e-6
-  - stoichiometry:
-    O2: -1
-    Ag0: -4
-    H+: -4
-    Ag+: 4
-    H2O: 2
-
-- reaction2:
-  forward_rate: 1e-6
-  - stoichiometry:
-    NO: -2
-    Ag0: -4
-    H+: -4
-    Ag+: 4
-    H2O: 2
-    N2: 1
+- weights:
+  H+: 1
 
 ...
 
@@ -200,24 +176,19 @@ num_reactions: 2
 
 NO:
 ---
-func_type: ConstReaction
-initial_cond: 1 #%
+func_type: InfiniteBath
+initial_cond: 1
+const_value: 1
 
-forward_rate: 1e-6
-- stoichiometry:
-  NO: -2
-  Ag0: -4
-  H+: -4
-  Ag+: 4
-  H2O: 2
-  N2: 1
+- weights:
+  NO: 1
 
 ...
 
 N2:
 ---
 func_type: ConstReaction
-initial_cond: 77.5 #%
+initial_cond: 78 #%
 
 forward_rate: 1e-6
 - stoichiometry:
