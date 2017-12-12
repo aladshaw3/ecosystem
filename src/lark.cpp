@@ -3585,6 +3585,7 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 			if (pjfnk_dat->NL_Output == true)
 				std::cout << "\nSolution converged after " << k+1 << " PJFNK iterations within residual tolerance!" << std::endl;
 			pjfnk_dat->Converged = true;
+			success = 0;
 			return success;
 		}
 		else if (pjfnk_dat->nl_relres <= pjfnk_dat->nl_tol_rel)
@@ -3592,6 +3593,7 @@ int pjfnk( int (*res) (const Matrix<double>& x, Matrix<double> &F, const void *d
 			if (pjfnk_dat->NL_Output == true)
 				std::cout << "\nSolution converged after " << k+1 << " PJFNK iterations within relative residual tolerance!" << std::endl;
 			pjfnk_dat->Converged = true;
+			success = 0;
 			return success;
 		}
 		else

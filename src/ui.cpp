@@ -664,7 +664,7 @@ bool valid_input_tests(UI_DATA *ui_dat)
 	std::cout << "(4)  FINCH       (5)  LARK         (6)  MACAW\n";
 	std::cout << "(7)  MOLA        (8)  MONKFISH     (9)  SANDBOX\n";
 	std::cout << "(10) SCOPSOWL    (11) SHARK        (12) SKUA\n";
-	std::cout << "(13) DOVE		   (14) CROW\n";
+	std::cout << "(13) DOVE        (14) CROW\n";
 	std::cout << "\nChoice: ";
 	std::cin >> ui_dat->user_input[0];
 	std::cout << std::endl;
