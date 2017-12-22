@@ -531,9 +531,6 @@ ligand_charge: 0
 
 - rxn01:
   logK: 0.39
-  #energy: -2188.79
-  #enthalpy: -4568.712516
-  #entropy: -8.213854836
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -542,10 +539,6 @@ ligand_charge: 0
 
 - rxn02:
   logK: -2.72   #real
-  #logK: -4.72   #adjust
-  #energy: 15265.42
-  #enthalpy: 46003.07463
-  #entropy: 106.0758781
   mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -554,10 +547,6 @@ ligand_charge: 0
 
 - rxn03:
   logK: -11.73   #real
-  #logK: -14.73   #adjusted
-  #energy: 65832.11
-  #enthalpy: 289758.924
-  #entropy: 769.6612292
   mole_factor: 3.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -566,9 +555,6 @@ ligand_charge: 0
 
 - rxn04:
   logK: 2.59
-  #energy: -14535.82
-  #enthalpy: -45529.98186
-  #entropy: -106.5414879
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -578,9 +564,6 @@ ligand_charge: 0
 
 - rxn05:
   logK: -0.92
-  #energy: 5163.30
-  #enthalpy: 29039.0823
-  #entropy: 82.60332667
   mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -597,9 +580,6 @@ ligand_charge: 0
 
 - rxn01:
   logK: -4.64
-  #energy: 26041.00
-  #enthalpy: 63283.01643
-  #entropy: 128.5997497
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -608,9 +588,6 @@ ligand_charge: 0
 
 - rxn02:
   logK: -0.34
-  #energy: 1908.18
-  #enthalpy: 6265.111748
-  #entropy: 14.96436475
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -619,9 +596,6 @@ ligand_charge: 0
 
 - rxn03:
   logK: -18.68
-  #energy: 104837.49
-  #enthalpy: 358852.085
-  #entropy: 871.355387
   mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -630,10 +604,6 @@ ligand_charge: 0
 
 - rxn04:
   logK: -8.78   #real
-  #logK: -12.78   #adjusted
-  #energy: 49275.87
-  #enthalpy: 270635.6665
-  #entropy: 760.7314994
   mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -642,9 +612,6 @@ ligand_charge: 0
 
 - rxn05:
   logK: -3.48
-  #energy: 19530.75
-  #enthalpy: 45372.00713
-  #entropy: 88.8316885
   mole_factor: 2.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -653,9 +620,6 @@ ligand_charge: 0
 
 - rxn06:
   logK: 1.36
-  #energy: -7632.71
-  #enthalpy: -28092.06533
-  #entropy: -70.1357942
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1
@@ -665,9 +629,6 @@ ligand_charge: 0
 
 - rxn07:
   logK: 5.36
-  #energy: -30081.85
-  #enthalpy: -233012.7359
-  #entropy: -695.7041093
   mole_factor: 1.0
   - stoichiometry:
     "UO2 2+ (aq)": -1

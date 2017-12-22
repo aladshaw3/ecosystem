@@ -387,14 +387,11 @@ include_surfcharge: true
 
 "AF1-HAO (ad)":
 ---
-spec_mole: 1e-6     #Units: mol/kg
+spec_mole: 1.45     #Units: mol/kg
 ligand_charge: 0
 
 - rxn01:
   logK: 27.34
-  #energy: -153440
-  #enthalpy: 84358.51
-  #entropy: 811.1836
   mole_factor: 1.0
   - stoichiometry:
     "VO4 3- (aq)": -1
@@ -404,9 +401,6 @@ ligand_charge: 0
 
 - rxn02:
   logK: 21.93
-  #energy: -123077
-  #enthalpy: 84358.51
-  #entropy: 707.6104
   mole_factor: 2.0
   - stoichiometry:
     "VO4 3- (aq)": -1
@@ -416,9 +410,6 @@ ligand_charge: 0
 
 - rxn03:
   logK: 24.93
-  #energy: -139914
-  #enthalpy: 84358.51
-  #entropy: 765.0467
   mole_factor: 2.0
   - stoichiometry:
     "VO4 3- (aq)": -1
@@ -428,9 +419,6 @@ ligand_charge: 0
 
 - rxn04:
   logK: 26.62
-  #energy: -149399
-  #enthalpy: 84358.51
-  #entropy: 797.3983
   mole_factor: 3.0
   - stoichiometry:
     "VO4 3- (aq)": -1
@@ -440,9 +428,6 @@ ligand_charge: 0
 
 - rxn05:
   logK: 22.72
-  #energy: -127511
-  #enthalpy: 84358.51
-  #entropy: 722.7344
   mole_factor: 3.0
   - stoichiometry:
     "VO4 3- (aq)": -1
@@ -461,9 +446,6 @@ ligand_charge: 0
 
 - rxn01:
   logK: 24.61
-  #energy: -138118
-  #enthalpy: 84358.51
-  #entropy: 758.9189
   mole_factor: 1.0
   - stoichiometry:
     "VO4 3- (aq)": -1
@@ -473,9 +455,6 @@ ligand_charge: 0
 
 - rxn02:
   logK: 28.06
-  #energy: -157481
-  #enthalpy: 84358.51
-  #entropy: 824.969
   mole_factor: 1.0
   - stoichiometry:
     "VO4 3- (aq)": -1
@@ -484,10 +463,7 @@ ligand_charge: 0
     "H2O (l)": 2
 
 - rxn03:
-  logK: 29.24
-  #energy: -164103
-  #enthalpy: 84358.51
-  #entropy: 847.576
+  logK: -29.0
   mole_factor: 2.0
   - stoichiometry:
     "VO4 3- (aq)": -1
@@ -498,9 +474,6 @@ ligand_charge: 0
 
 - rxn04:
   logK: 30.07
-  #energy: -168761
-  #enthalpy: 84358.51
-  #entropy: 863.4567
   mole_factor: 2.0
   - stoichiometry:
     "VO4 3- (aq)": -1
@@ -510,9 +483,6 @@ ligand_charge: 0
 
 - rxn05:
   logK: 26.87
-  #energy: -150802
-  #enthalpy: 84358.51
-  #entropy: 802.1874
   mole_factor: 2.0
   - stoichiometry:
     "VO4 3- (aq)": -1
@@ -522,9 +492,6 @@ ligand_charge: 0
 
 - rxn06:
   logK: 28.67
-  #energy: -160904
-  #enthalpy: 84358.51
-  #entropy: 836.6841
   mole_factor: 2.0
   - stoichiometry:
     "VO4 3- (aq)": -1

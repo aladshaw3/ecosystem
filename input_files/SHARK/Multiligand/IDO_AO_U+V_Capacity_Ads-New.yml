@@ -1,7 +1,7 @@
 Scenario:
 ---
 - vars_fun:
-  numvar: 68
+  numvar: 67
   num_ssr: 35
   num_mbe: 7
   num_multi_ssao: 1
@@ -375,17 +375,17 @@ MasterSpecies:
     name: Vanadium-diamidoximate
     lin_form: VO2
 
-  - 67: 
-    formula: VO(IDO_H)2 3- (ad)
-    charge: -3
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: adsorbed
-    name: Vanadium-amidoximate
-    lin_form: VO
+  #- 67: 
+  #  formula: VO(IDO_H)2 3- (ad)
+  #  charge: -3
+  #  enthalpy: 0
+  #  entropy: 0
+  #  have_HS: false
+  #  energy: 0
+  #  have_G: false
+  #  phase: adsorbed
+  #  name: Vanadium-amidoximate
+  #  lin_form: VO
 
 ...
 
@@ -499,7 +499,7 @@ MassBalance:
     "V(IDO)(IDO_H) (ad)": 1
     "V(IDO)2 + (ad)": 1
     "V(IDO_H)2 - (ad)": 1
-    "VO(IDO_H)2 3- (ad)": 1
+    #"VO(IDO_H)2 3- (ad)": 1
     "VO2IDO_H 2- (ad)": 1
 
 - chlorine:
@@ -759,7 +759,7 @@ include_surfcharge: true
 
 - ligand02:
   name: H2IDO (ad)
-  num_rxns: 15
+  num_rxns: 14
 
 ...
 
@@ -859,7 +859,7 @@ ligand_charge: 0
 
 "AF1-H2IDO (ad)":
 ---
-spec_mole: 3.33     #Units: mol/kg
+spec_mole: 3.30     #Units: mol/kg
 ligand_charge: 0
 
 - rxn01:
@@ -984,12 +984,12 @@ ligand_charge: 0
     "H2O (l)": 2
     "VO2IDO_H 2- (ad)": 1
 
-- rxn15:
-  logK: 11.7 #Slava
-  mole_factor: 2.0
-  - stoichiometry:
-    "VO4 3- (aq)": -1
-    "H2O (l)": 3
-    "VO(IDO_H)2 3- (ad)": 1
+#- rxn15:
+#  logK: 11.7 #Slava
+#  mole_factor: 2.0
+#  - stoichiometry:
+#    "VO4 3- (aq)": -1
+#    "H2O (l)": 3
+#    "VO(IDO_H)2 3- (ad)": 1
 
 ...
