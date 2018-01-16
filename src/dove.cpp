@@ -315,11 +315,11 @@ void Dove::set_LinearRelTol(double tol)
 //Set default names
 void Dove::set_defaultNames()
 {
+	char buff[10];
 	for (int i=0; i<this->num_func; i++)
 	{
-		std::string temp = "u[";
-		temp += std::to_string(i);
-		temp += "]";
+		sprintf(buff, "u[%i]",i);
+		std::string temp = buff;
 		this->var_names.edit(i, 0, temp);
 	}
 }

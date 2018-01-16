@@ -33,6 +33,8 @@ int twoFifths(int m)
 int orderMag(double x)
 {
 	int m=0; double y=fabs(x);
+	if (x == 0.0)
+		return 1;
 	if (x>=10)
 	{
 		while(y>=10)
