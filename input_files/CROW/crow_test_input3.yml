@@ -36,22 +36,29 @@ num_var: 3
 
 A:
 ---
-#func_type: ConstReaction
-#initial_cond: 1
-
-#forward_rate: 1
-#- stoichiometry:
-#  A: -1
-#  B: 1
-
-func_type: InfiniteBath
+func_type: MultiConstReaction
 initial_cond: 1
-const_value: 1
+num_reactions: 1
 
-- weights:
-  A: 1
-  B: 2
-  C: 2
+- reaction1: &AB          #Anchor for reaction A -> B
+  forward_rate: 1
+  - stoichiometry:
+    A: -1
+    B: 1
+
+...
+
+C:
+---
+func_type: MultiConstReaction
+initial_cond: 0
+num_reactions: 1
+
+- reaction2: &BC          #Anchor for reaction 2B -> C
+  forward_rate: 2
+  - stoichiometry:
+    B: -2
+    C: 1
 
 ...
 
@@ -61,28 +68,8 @@ func_type: MultiConstReaction
 initial_cond: 0
 num_reactions: 2
 
-- reaction1:
-  forward_rate: 1
-  - stoichiometry:
-    A: -1
-    B: 1
+- reaction1: *AB          #Alias for reaction A -> B
 
-- reaction2:
-  forward_rate: 2
-  - stoichiometry:
-    B: -2
-    C: 1
-
-...
-
-C:
----
-func_type: ConstReaction
-initial_cond: 0
-
-forward_rate: 2
-- stoichiometry:
-  B: -2
-  C: 1
+- reaction2: *BC          #Alias for reaction 2B -> C
 
 ...
