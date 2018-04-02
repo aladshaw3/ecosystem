@@ -157,7 +157,7 @@ MassBalance:
     "UO2(SO4)2 2- (aq)": 1
 
 - chlorine:
-  total_conc: 1e-25
+  total_conc: 0.546
   - delta:
     "Cl - (aq)": 1
     "CaCl2 (aq)": 2
