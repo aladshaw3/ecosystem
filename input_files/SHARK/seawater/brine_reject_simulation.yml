@@ -1,0 +1,648 @@
+# This will serve as a test input file for shark to demo how to structure the document
+
+Scenario:
+---
+- vars_fun:
+  numvar: 75
+  num_ssr: 59
+  num_mbe: 15
+
+- sys_data:
+  act_fun: davies    
+  const_pH: false
+  res_alk: 0.005   #unknown amount of alkalinity may be present
+  temp: 296.15       
+  dielec: 78.325 
+  volume: 18.927
+
+- run_time:
+  steady: true         
+  specs_curve: true
+  pH_step: 0.25    
+...
+
+SolverOptions:
+---
+line_search: true     
+search_type: standard
+linear_solve: qr
+l_print: true 
+nl_maxit: 100     
+
+...
+
+MasterSpecies:
+---
+- reg:
+  0: CO3 2- (aq)
+  1: Cl - (aq)
+  2: CaCl2 (aq)
+  3: Ca 2+ (aq)
+  4: CaOH + (aq)
+  5: Ca(OH)2 (aq)
+  6: H2O (l)
+  7: H + (aq)
+  8: H2CO3 (aq)
+  9: HCO3 - (aq)
+  10: HCl (aq)
+  11: H2SO4 (aq)
+  12: HSO4 - (aq)
+  13: Mg 2+ (aq)
+  14: MgOH + (aq)
+  15: Mg(OH)2 (aq)
+  16: NaHCO3 (aq)
+  17: NaCO3 - (aq)
+  18: Na2CO3 (aq)
+  19: Na + (aq)
+  20: NaCl (aq)
+  21: NaOH (aq)
+  22: OH - (aq)
+  23: SO4 2- (aq)
+  24: CaUO2(CO3)3 2- (aq)
+  25: Ca2UO2(CO3)3 (aq)
+  26: MgUO2(CO3)3 2- (aq)
+  27: UO2 2+ (aq)
+  28: UO2OH + (aq)
+  29: UO2(OH)2 (aq)
+  30: UO2(OH)3 - (aq)
+  31: UO2(OH)4 2- (aq)
+  32: (UO2)2OH 3+ (aq)
+  33: (UO2)2(OH)2 2+ (aq)
+  34: (UO2)3(OH)4 2+ (aq)
+  35: (UO2)3(OH)5 + (aq)
+  36: (UO2)3(OH)7 - (aq)
+  37: (UO2)4(OH)7 + (aq)
+  38: UO2CO3 (aq)
+  39: UO2(CO3)2 2- (aq)
+  40: UO2(CO3)3 4- (aq)
+  41: UO2Cl + (aq)
+  42: UO2Cl2 (aq)
+  43: UO2Cl3 - (aq)
+  44: UO2SO4 (aq)
+  45: UO2(SO4)2 2- (aq)
+  46: VO2 + (aq)
+  47: H4VO4 + (aq)
+  48: H3VO4 (aq)
+  49: H2VO4 - (aq)
+  50: HVO4 2- (aq)
+  51: VO4 3- (aq)
+  52: HV2O7 3- (aq)
+  53: V2O7 4- (aq)
+  54: VO2SO4 - (aq)
+  55: VO2OHCO3 2- (aq)
+  56: VO2(CO3)2 3- (aq)
+  57: K + (aq)
+  58: F - (aq)
+  59: HF (aq)
+  60: HF2 - (aq)
+  61: Fe 3+ (aq)
+  62: FeOH 2+ (aq)
+  63: Fe(OH)2 + (aq)
+  64: Fe(OH)3 (aq)
+  65: Fe(OH)4 - (aq)
+  66: Fe2(OH)2 4+ (aq)
+  67: Cu 2+ (aq)
+  68: CuOH + (aq)
+  69: Cu(OH)2 (aq)
+  70: Cu(OH)3 - (aq)
+  71: Cu(OH)4 2- (aq)
+  72: Br - (aq)
+  73: B(OH)3 (aq)
+  74: B(OH)4 - (aq)
+...
+
+MassBalance:
+---
+- water:
+  total_conc: 1
+  - delta: 
+    "H2O (l)": 1
+
+- carbonate:
+  total_conc: 0.004053
+  - delta: 
+    "NaHCO3 (aq)": 1
+    "NaCO3 - (aq)": 1 
+    "Na2CO3 (aq)": 1
+    "H2CO3 (aq)": 1 
+    "HCO3 - (aq)": 1
+    "CO3 2- (aq)": 1
+    "UO2CO3 (aq)": 1
+    "UO2(CO3)2 2- (aq)": 2
+    "UO2(CO3)3 4- (aq)": 3
+    "CaUO2(CO3)3 2- (aq)": 3
+    "Ca2UO2(CO3)3 (aq)": 3
+    "MgUO2(CO3)3 2- (aq)": 3
+    "VO2OHCO3 2- (aq)": 1
+    "VO2(CO3)2 3- (aq)": 2
+
+- sodium: 
+  total_conc: 0.9308
+  - delta:
+    "NaHCO3 (aq)": 1
+    "NaCO3 - (aq)": 1
+    "Na + (aq)": 1
+    "Na2CO3 (aq)": 2
+    "NaCl (aq)": 1
+    "NaOH (aq)": 1
+
+- uranium:
+  total_conc: 2.8E-8
+  - delta:
+    "UO2 2+ (aq)": 1
+    "UO2OH + (aq)": 1
+    "UO2(OH)2 (aq)": 1
+    "UO2(OH)3 - (aq)": 1
+    "UO2(OH)4 2- (aq)": 1
+    "(UO2)2OH 3+ (aq)": 2
+    "(UO2)2(OH)2 2+ (aq)": 2
+    "(UO2)3(OH)4 2+ (aq)": 3
+    "(UO2)3(OH)5 + (aq)": 3
+    "(UO2)3(OH)7 - (aq)": 3
+    "(UO2)4(OH)7 + (aq)": 4
+    "UO2CO3 (aq)": 1
+    "UO2(CO3)2 2- (aq)": 1
+    "UO2(CO3)3 4- (aq)": 1
+    "CaUO2(CO3)3 2- (aq)": 1
+    "Ca2UO2(CO3)3 (aq)": 1
+    "MgUO2(CO3)3 2- (aq)": 1
+    "UO2Cl + (aq)": 1
+    "UO2Cl2 (aq)": 1
+    "UO2Cl3 - (aq)": 1
+    "UO2SO4 (aq)": 1
+    "UO2(SO4)2 2- (aq)": 1
+
+- chlorine:
+  total_conc: 1.085
+  - delta:
+    "Cl - (aq)": 1
+    "CaCl2 (aq)": 2
+    "HCl (aq)": 1
+    "NaCl (aq)": 1
+    "UO2Cl + (aq)": 1
+    "UO2Cl2 (aq)": 2
+    "UO2Cl3 - (aq)": 3
+
+- sulfate:
+  total_conc: 0.0554
+  - delta:
+    "H2SO4 (aq)": 1
+    "HSO4 - (aq)": 1
+    "SO4 2- (aq)": 1
+    "UO2SO4 (aq)": 1
+    "UO2(SO4)2 2- (aq)": 2
+    "VO2SO4 - (aq)": 1
+
+- magnesium:
+  total_conc: 0.1014
+  - delta:
+    "Mg 2+ (aq)": 1
+    "MgOH + (aq)": 1
+    "Mg(OH)2 (aq)": 1
+    "MgUO2(CO3)3 2- (aq)": 1
+
+- calcium:
+  total_conc: 0.0193
+  - delta:
+    "CaCl2 (aq)": 1
+    "Ca 2+ (aq)": 1
+    "CaOH + (aq)": 1
+    "Ca(OH)2 (aq)": 1
+    "CaUO2(CO3)3 2- (aq)": 1
+    "Ca2UO2(CO3)3 (aq)": 2
+
+- vanadium(v):
+  total_conc: 2.69e-8
+  - delta: 
+    "VO2 + (aq)": 1
+    "H4VO4 + (aq)": 1 
+    "H3VO4 (aq)": 1 
+    "H2VO4 - (aq)": 1 
+    "HVO4 2- (aq)": 1
+    "VO4 3- (aq)": 1
+    "HV2O7 3- (aq)": 2
+    "V2O7 4- (aq)": 2
+    "VO2SO4 - (aq)": 1
+    "VO2OHCO3 2- (aq)": 1
+    "VO2(CO3)2 3- (aq)": 1
+
+- potassium:
+  total_conc: 0.0214
+  - delta:
+    "K + (aq)": 1
+
+- fluorine:
+  total_conc: 0.000134
+  - delta:
+    "F - (aq)": 1
+    "HF (aq)": 1
+    "HF2 - (aq)": 2
+
+- iron:
+  total_conc: 9.714e-7
+  - delta:
+    "Fe 3+ (aq)": 1
+    "FeOH 2+ (aq)": 1
+    "Fe(OH)2 + (aq)": 1
+    "Fe(OH)3 (aq)": 1
+    "Fe(OH)4 - (aq)": 1
+    "Fe2(OH)2 4+ (aq)": 2
+
+- copper:
+  total_conc: 7.406e-8
+  - delta:
+    "Cu 2+ (aq)": 1
+    "CuOH + (aq)": 1
+    "Cu(OH)2 (aq)": 1
+    "Cu(OH)3 - (aq)": 1
+    "Cu(OH)4 2- (aq)": 1
+
+- bromide:
+  total_conc: 1.651e-6
+  - delta:
+    "Br - (aq)": 1
+
+- boron:
+  total_conc: 0.000814
+  - delta:
+    "B(OH)3 (aq)": 1
+    "B(OH)4 - (aq)": 1
+...
+
+EquilRxn:
+---
+
+- rxn00:
+  - stoichiometry:
+    "H2O (l)": -1
+    "OH - (aq)": 1
+    "H + (aq)": 1
+
+- rxn01:
+  - stoichiometry:
+    "H2CO3 (aq)": -1
+    "HCO3 - (aq)": 1
+    "H + (aq)": 1
+
+- rxn02:
+  - stoichiometry:
+    "HCO3 - (aq)": -1
+    "CO3 2- (aq)": 1
+    "H + (aq)": 1
+
+- rxn03:
+  - stoichiometry:
+    "NaHCO3 (aq)": -1
+    "Na + (aq)": 1
+    "CO3 2- (aq)": 1
+    "H + (aq)": 1
+
+- rxn04:
+  - stoichiometry:
+    "NaCO3 - (aq)": -1
+    "Na + (aq)": 1
+    "CO3 2- (aq)": 1
+
+- rxn05:
+  - stoichiometry:
+    "H2SO4 (aq)": -1
+    "HSO4 - (aq)": 1
+    "H + (aq)": 1
+
+- rxn06:
+  - stoichiometry:
+    "HSO4 - (aq)": -1
+    "SO4 2- (aq)": 1
+    "H + (aq)": 1
+
+- rxn07:
+  - stoichiometry:
+    "NaCl (aq)": -1 
+    "Na + (aq)": 1
+    "Cl - (aq)": 1
+
+- rxn08:
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "H2O (l)": -1
+    "UO2OH + (aq)": 1
+    "H + (aq)": 1
+
+- rxn09:
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "H2O (l)": -3
+    "UO2(OH)3 - (aq)": 1
+    "H + (aq)": 3
+
+- rxn10:
+  - stoichiometry:
+    "UO2 2+ (aq)": -2
+    "H2O (l)": -2
+    "(UO2)2(OH)2 2+ (aq)": 1
+    "H + (aq)": 2
+
+- rxn11:
+  - stoichiometry:
+    "UO2 2+ (aq)": -3
+    "H2O (l)": -5
+    "(UO2)3(OH)5 + (aq)": 1
+    "H + (aq)": 5
+
+- rxn12:
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "CO3 2- (aq)": -1
+    "UO2CO3 (aq)": 1
+
+- rxn13:
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "CO3 2- (aq)": -2
+    "UO2(CO3)2 2- (aq)": 1
+
+- rxn14:
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "CO3 2- (aq)": -3
+    "UO2(CO3)3 4- (aq)": 1
+
+- rxn15:
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "H2O (l)": -2
+    "UO2(OH)2 (aq)": 1
+    "H + (aq)": 2
+
+- rxn16:
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "H2O (l)": -4
+    "UO2(OH)4 2- (aq)": 1
+    "H + (aq)": 4
+
+- rxn17:
+  - stoichiometry:
+    "UO2 2+ (aq)": -2
+    "H2O (l)": -1
+    "(UO2)2OH 3+ (aq)": 1
+    "H + (aq)": 1
+
+- rxn18:
+  - stoichiometry:
+    "UO2 2+ (aq)": -3
+    "H2O (l)": -4
+    "(UO2)3(OH)4 2+ (aq)": 1
+    "H + (aq)": 4
+
+- rxn19:
+  - stoichiometry:
+    "UO2 2+ (aq)": -3
+    "H2O (l)": -7
+    "(UO2)3(OH)7 - (aq)": 1
+    "H + (aq)": 7
+
+- rxn20:
+  - stoichiometry:
+    "UO2 2+ (aq)": -4
+    "H2O (l)": -7
+    "(UO2)4(OH)7 + (aq)": 1
+    "H + (aq)": 7
+
+- rxn21:
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "Ca 2+ (aq)": -1
+    "CO3 2- (aq)": -3
+    "CaUO2(CO3)3 2- (aq)": 1
+
+- rxn22:
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "Ca 2+ (aq)": -2
+    "CO3 2- (aq)": -3
+    "Ca2UO2(CO3)3 (aq)": 1
+
+- rxn23:
+  - stoichiometry:
+    "UO2 2+ (aq)": -1
+    "Mg 2+ (aq)": -1
+    "CO3 2- (aq)": -3
+    "MgUO2(CO3)3 2- (aq)": 1
+
+- rxn24:
+  - stoichiometry:
+    "Cl - (aq)": -2
+    "Ca 2+ (aq)": -1
+    "CaCl2 (aq)": 1
+
+- rxn25:
+  - stoichiometry:
+    "OH - (aq)": -1
+    "Ca 2+ (aq)": -1
+    "CaOH + (aq)": 1
+
+- rxn26:
+  - stoichiometry:
+    "OH - (aq)": -2
+    "Ca 2+ (aq)": -1
+    "Ca(OH)2 (aq)": 1
+
+- rxn27:
+  - stoichiometry:
+    "OH - (aq)": -1
+    "Mg 2+ (aq)": -1
+    "MgOH + (aq)": 1
+
+- rxn28:
+  - stoichiometry:
+    "OH - (aq)": -2
+    "Mg 2+ (aq)": -1
+    "Mg(OH)2 (aq)": 1
+
+- rxn29:
+  - stoichiometry:
+    "Na2CO3 (aq)": -1
+    "Na + (aq)": 2
+    "CO3 2- (aq)": 1
+
+- rxn30:
+  - stoichiometry:
+    "HCl (aq)": -1 
+    "H + (aq)": 1
+    "Cl - (aq)": 1
+
+- rxn31:
+  - stoichiometry:
+    "NaOH (aq)": -1 
+    "Na + (aq)": 1
+    "OH - (aq)": 1
+
+- rxn32:
+  - stoichiometry:
+    "Cl - (aq)": -1
+    "UO2 2+ (aq)": -1
+    "UO2Cl + (aq)": 1
+
+- rxn33:
+  - stoichiometry:
+    "Cl - (aq)": -2
+    "UO2 2+ (aq)": -1
+    "UO2Cl2 (aq)": 1
+
+- rxn34:
+  - stoichiometry:
+    "Cl - (aq)": -3
+    "UO2 2+ (aq)": -1
+    "UO2Cl3 - (aq)": 1
+
+- rxn35:
+  - stoichiometry:
+    "SO4 2- (aq)": -1
+    "UO2 2+ (aq)": -1
+    "UO2SO4 (aq)": 1
+
+- rxn36:
+  - stoichiometry:
+    "SO4 2- (aq)": -2
+    "UO2 2+ (aq)": -1
+    "UO2(SO4)2 2- (aq)": 1
+
+- rxn37:
+  - stoichiometry:
+    "VO2 + (aq)": -1
+    "H2O (l)": -2
+    "VO4 3- (aq)": 1
+    "H + (aq)": 4
+
+- rxn38:
+  - stoichiometry:
+    "VO2 + (aq)": -2
+    "H2O (l)": -3
+    "V2O7 4- (aq)": 1
+    "H + (aq)": 6
+
+- rxn39:
+  - stoichiometry:
+    "H4VO4 + (aq)": -1
+    "H + (aq)": 1
+    "H3VO4 (aq)": 1
+
+- rxn40:
+  - stoichiometry:
+    "H3VO4 (aq)": -1
+    "H + (aq)": 1
+    "H2VO4 - (aq)": 1
+
+- rxn41:
+  - stoichiometry:
+    "H2VO4 - (aq)": -1
+    "H + (aq)": 1
+    "HVO4 2- (aq)": 1
+
+- rxn42:
+  - stoichiometry:
+    "HVO4 2- (aq)": -1
+    "H + (aq)": 1
+    "VO4 3- (aq)": 1
+
+- rxn43:
+  - stoichiometry:
+    "HV2O7 3- (aq)": -1
+    "H + (aq)": 1
+    "V2O7 4- (aq)": 1
+
+- rxn44:
+  - stoichiometry:
+    "VO2SO4 - (aq)": -1
+    "H + (aq)": -1
+    "VO2 + (aq)": 1
+    "HSO4 - (aq)": 1
+
+- rxn45:
+  - stoichiometry:
+    "H2VO4 - (aq)": -1
+    "H + (aq)": -1
+    "CO3 2- (aq)": -1
+    "H2O (l)": 1
+    "VO2OHCO3 2- (aq)": 1
+
+- rxn46:
+  - stoichiometry:
+    "H2VO4 - (aq)": -1
+    "H + (aq)": -2
+    "CO3 2- (aq)": -2
+    "H2O (l)": 2
+    "VO2(CO3)2 3- (aq)": 1
+
+- rxn47:
+  - stoichiometry:
+    "H + (aq)": -1
+    "F - (aq)": -1
+    "HF (aq)": 1
+
+- rxn48:
+  - stoichiometry:
+    "F - (aq)": -1
+    "HF (aq)": -1
+    "HF2 - (aq)": 1
+
+- rxn49:
+  - stoichiometry:
+    "Fe 3+ (aq)": -1
+    "OH - (aq)": -1
+    "FeOH 2+ (aq)": 1
+
+- rxn50:
+  - stoichiometry:
+    "FeOH 2+ (aq)": -1
+    "OH - (aq)": -1
+    "Fe(OH)2 + (aq)": 1
+
+- rxn51:
+  - stoichiometry:
+    "Fe(OH)2 + (aq)": -1
+    "OH - (aq)": -1
+    "Fe(OH)3 (aq)": 1
+
+- rxn52:
+  - stoichiometry:
+    "Fe(OH)3 (aq)": -1
+    "OH - (aq)": -1
+    "Fe(OH)4 - (aq)": 1
+
+- rxn54:
+  - stoichiometry:
+    "Cu 2+ (aq)": -1
+    "OH - (aq)": -1
+    "CuOH + (aq)": 1
+
+- rxn55:
+  - stoichiometry:
+    "CuOH + (aq)": -1
+    "OH - (aq)": -1
+    "Cu(OH)2 (aq)": 1
+
+- rxn56:
+  - stoichiometry:
+    "Cu(OH)2 (aq)": -1
+    "OH - (aq)": -1
+    "Cu(OH)3 - (aq)": 1
+
+- rxn57:
+  - stoichiometry:
+    "Cu(OH)3 - (aq)": -1
+    "OH - (aq)": -1
+    "Cu(OH)4 2- (aq)": 1
+
+- rxn58:
+  - stoichiometry:
+    "FeOH 2+ (aq)": -2
+    "Fe2(OH)2 4+ (aq)": 1
+
+- rxn59:
+  - stoichiometry:
+    "B(OH)3 (aq)": -1
+    "OH - (aq)": -1
+    "B(OH)4 - (aq)": 1
+...
