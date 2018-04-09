@@ -17,3 +17,18 @@
  */
 
 #include "mesh.h"
+
+// Test function for MESH kernel
+int MESH_TESTS()
+{
+	// --- Initializations ----
+	int success = 0;
+	double time = clock();
+	std::cout << "\nStart Running Tests on Mesh Objects...\n";
+	
+	//---Exit Messages and cleanup---
+	time = clock() - time;
+	std::cout << "\nMESH Runtime: " << (time / CLOCKS_PER_SEC) << " seconds\n";
+	
+	return success;
+}

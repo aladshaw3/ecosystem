@@ -31,7 +31,31 @@
 #include <exception>            //Line to allow use of try-catch statements
 #include "error.h"
 
+/// Enumeration for the list of valid node types
+/** The only types that have been defined are for Boudary and Interior nodes.*/
+typedef enum {BOUNDARY, INTERIOR} node_type;
 
+/// Node object
+/** This class structure creates a C++ object for a node in a mesh. The node will have
+	an identifying ID number and a sub_type (either BOUNDARY or INTERIOR) to add in identification
+	of different aspects the node has in the overall mesh. All nodes are considered to be points
+	in 3D space, whether or not the final mesh is 3D. As such, every node will have a coordinate
+	vector (x, y, z) associated with it. */
+class Node
+{
+public:
+	Node();												///< Default constructor
+	~Node();											///< Default destructor
+	
+protected:
+	
+private:
+	
+	
+};
 
+/// Test function for MESH kernel
+/** This function runs tests on the mesh objects. */
+int MESH_TESTS();
 
 #endif /* MESH_HPP_ */

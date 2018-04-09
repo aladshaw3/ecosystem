@@ -67,7 +67,7 @@ typedef enum {TEST, EXECUTE, EXIT, CONTINUE, HELP,
 	
 				scopsowl, shark, skua, gsta_opt, magpie,
 				scops_opt, skua_opt, trajectory, dove,
-				crow } valid_options;
+				crow, mesh } valid_options;
 
 /// Data structure holding the UI arguments.
 /** C-Style object for interfacing with users request upon execution of

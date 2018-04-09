@@ -63,6 +63,10 @@ The following message provides information on running this software with the bas
 
 	This test runs an example problem for solving Ordinary Differential Equations with DOVE in the CROW system. There is an output file associated with this test that works a simple Reduced Silver Aging mechanism for iodine adsorption.
 
+(15) MESH (NO ACRONYM) - Runs tests associated with mesh objects
+
+	This runs tests associated with the mesh objects and sub-objects developed in ecosystem. These tests are primarily intended for developer purposes and do not produce any specific outcomes.
+
         CURRENTLY AVAILABLE EXECUTABLES        
 -----------------------------------------------
 

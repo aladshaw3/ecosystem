@@ -73,6 +73,7 @@ void aui_help()
 	puts("(12) SKUA (Surface Kinetics for Uptake by Adsorption)\n");
 	puts("(13) DOVE (Dynamic Ode solver with Various Established methods)\n");
 	puts("(14) CROW (Coupled Reaction Object Workspace)\n");
+	puts("(15) MESH (NO ACRONYM) - Runs tests associated with mesh objects\n");
 	
 	puts("        CURRENTLY AVAILABLE EXECUTABLES        ");
 	puts("-----------------------------------------------\n");
@@ -141,6 +142,9 @@ void bui_help()
 	
 	puts("(14) CROW (Coupled Reaction Object Workspace)\n");
 	puts("\tThis test runs an example problem for solving Ordinary Differential Equations with DOVE in the CROW system. There is an output file associated with this test that works a simple Reduced Silver Aging mechanism for iodine adsorption.\n");
+	
+	puts("(15) MESH (NO ACRONYM) - Runs tests associated with mesh objects\n");
+	puts("\tThis runs tests associated with the mesh objects and sub-objects developed in ecosystem. These tests are primarily intended for developer purposes and do not produce any specific outcomes.\n");
 	
 	puts("        CURRENTLY AVAILABLE EXECUTABLES        ");
 	puts("-----------------------------------------------\n");
@@ -318,6 +322,11 @@ bool valid_test_string(const std::string &input, UI_DATA *ui_dat)
 	else if (allLower(input) == "crow")
 	{
 		ui_dat->option = crow;
+		valid_input = true;
+	}
+	else if (allLower(input) == "mesh")
+	{
+		ui_dat->option = mesh;
 		valid_input = true;
 	}
 	else
@@ -664,7 +673,7 @@ bool valid_input_tests(UI_DATA *ui_dat)
 	std::cout << "(4)  FINCH       (5)  LARK         (6)  MACAW\n";
 	std::cout << "(7)  MOLA        (8)  MONKFISH     (9)  SANDBOX\n";
 	std::cout << "(10) SCOPSOWL    (11) SHARK        (12) SKUA\n";
-	std::cout << "(13) DOVE        (14) CROW\n";
+	std::cout << "(13) DOVE        (14) CROW         (15) MESH\n";
 	std::cout << "\nChoice: ";
 	std::cin >> ui_dat->user_input[0];
 	std::cout << std::endl;
@@ -790,6 +799,13 @@ bool valid_input_tests(UI_DATA *ui_dat)
 			case 14:
 			{
 				ui_dat->option = crow;
+				valid_input = true;
+				break;
+			}
+				
+			case 15:
+			{
+				ui_dat->option = mesh;
 				valid_input = true;
 				break;
 			}
@@ -1043,6 +1059,10 @@ int run_test(UI_DATA *ui_dat)
 			
 		case crow:
 			success = CROW_TESTS();
+			break;
+			
+		case mesh:
+			success = MESH_TESTS();
 			break;
 			
 		default:
