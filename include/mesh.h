@@ -47,10 +47,24 @@ public:
 	Node();												///< Default constructor
 	~Node();											///< Default destructor
 	
+	void DisplayInfo();										///< Display the information associated with this node
+	void AssignCoordinates(double x, double y, double z);	///< Assign the coordinates for the node
+	void AssignIDnumber(unsigned int i);					///< Assign the ID number for the node
+	void AssignSubType(node_type type);						///< Assign the node_type for the node
+	
+	bool isSameLocation(Node& node);						///< Returns true if nodes are at same location (witin tolerance)
+	bool isSameType(Node& node);							///< Returns true if nodes are of same type
+	bool isSameNode(Node& node);							///< Returns true if nodes have same ID number (could indicate error)
+	
+	double distance(Node& node);							///< Returns the distance between two given nodes
+	double angle(Node& n1, Node& n2);						///< Returns angle between n1 and n2 with respect to this node
+	
 protected:
 	
 private:
-	
+	std::vector<double> coordinates;					///< x, y, z location of the node in space
+	unsigned int IDnum;									///< Identification number for the node
+	node_type SubType;									///< Sub-type for the node
 	
 };
 
