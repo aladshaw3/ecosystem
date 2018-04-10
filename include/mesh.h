@@ -19,21 +19,47 @@
 #ifndef MESH_HPP_
 #define MESH_HPP_
 
-#include <stdio.h>				//Line to allow cout functionality
-#include <math.h>               //Line added to allow usage of the pow (e, x) function
-#include <iostream>				//Line to allow for read/write to the console using cpp functions
-#include <fstream>				//Line to allow for read/write to and from .txt files
-#include <stdlib.h>				//Line need to convert strings to doubles
-#include <vector>				//Line needed to use dynamic arrays called vectors
-#include <time.h>				//Line needed to display program runtime
-#include <float.h>				//Line to allow use of machine precision constants
-#include <string>				//Line to allow use of strings as a data type
-#include <exception>            //Line to allow use of try-catch statements
-#include "error.h"
+#include "macaw.h"
 
 /// Enumeration for the list of valid node types
 /** The only types that have been defined are for Boudary and Interior nodes.*/
 typedef enum {BOUNDARY, INTERIOR} node_type;
+
+/// 3D Vector Object
+/** This class structure creates a C++ object for a vector in 3D space. Built using the MACAW matrix
+	object, this object contains functions and data associated with working with vectors in 3D space.*/
+class Vector3D
+{
+public:
+	Vector3D();									///< Default Constructor
+	~Vector3D();								///< Default Destructor
+	Vector3D(double x, double y, double z);		///< Construction of RVector with each component
+	Vector3D(const Vector3D &v);				///< Copy constructor for the vector
+	
+	double& operator()(int i);					///< Access to reference of a component of the vector
+	double operator()(int i) const;				///< Access to a component of the vector
+	double norm();								///< Calculation of the 2-Norm of the vector
+	double dot_product(const Vector3D &v);		///< Perform the dot product between two vectors
+	double angleRAD(Vector3D &v);				///< Returns the angle between the two vectors in radians
+	double angleDEG(Vector3D &v);				///< Returns the angle between the two vectors in degrees
+	
+	void edit(int i, double value);					///< Editing a single value in the vector
+	void set_vector(double x, double y, double z);	///< Editing all values in a vector
+	
+	Vector3D& operator=(const Vector3D& v);			///< Vector assignment
+	Vector3D operator+(const Vector3D& v);			///< Vector Addition
+	Vector3D operator-(const Vector3D& v);			///< Vector Subtraction
+	double operator*(const Vector3D& v);			///< Vector dot product (short hand = this'*v)
+	Vector3D operator*(const double a);				///< Vector-scalar multiplication
+	Vector3D operator/(const double a);				///< Vector-scalar division
+	Vector3D cross_product(const Vector3D &v);		///< Vector cross product
+	
+protected:
+	Matrix<double> vector;							///< Matrix object to store vector data
+	
+private:
+	
+};
 
 /// Node object
 /** This class structure creates a C++ object for a node in a mesh. The node will have
@@ -57,14 +83,15 @@ public:
 	bool isSameNode(Node& node);							///< Returns true if nodes have same ID number (could indicate error)
 	
 	double distance(Node& node);							///< Returns the distance between two given nodes
-	double angle(Node& n1, Node& n2);						///< Returns angle between n1 and n2 with respect to this node
+	double angle(Node& n1, Node& n2);						///< Returns angle between n1 and n2 with respect to this node (radians)
 	
 protected:
 	
 private:
-	std::vector<double> coordinates;					///< x, y, z location of the node in space
+	Vector3D coordinates;								///< x, y, z location of the node in space
 	unsigned int IDnum;									///< Identification number for the node
 	node_type SubType;									///< Sub-type for the node
+	double distance_tolerance;							///< Tolerance used to determine if two nodes are in same location
 	
 };
 
