@@ -83,7 +83,7 @@ double Vector3D::dot_product(const Vector3D &v)
 double Vector3D::angleRAD(Vector3D &v)
 {
 	double value = this->dot_product(v)/(this->norm() * v.norm());
-	/*
+	
 	if (value >= 1.0)
 		value = 1.0;
 	else if (value <= -1.0)
@@ -93,7 +93,7 @@ double Vector3D::angleRAD(Vector3D &v)
 		mError(zero_vector);
 		value = 1.0;
 	}
-	*/
+	
 	return acos( value );
 }
 
@@ -236,6 +236,24 @@ void Node::AssignCoordinates(double x, double y, double z)
 	this->coordinates(2) = z;
 }
 
+//Assign x
+void Node::AssignX(double x)
+{
+	this->coordinates(0) = x;
+}
+
+//Assign y
+void Node::AssignY(double y)
+{
+	this->coordinates(1) = y;
+}
+
+//Assign z
+void Node::AssignZ(double z)
+{
+	this->coordinates(2) = z;
+}
+
 //Assign id
 void Node::AssignIDnumber(unsigned int i)
 {
@@ -243,7 +261,7 @@ void Node::AssignIDnumber(unsigned int i)
 }
 
 //Assign type
-void Node::AssignSubType(node_type type)
+void Node::AssignSubType(element_type type)
 {
 	this->SubType = type;
 }
@@ -281,15 +299,155 @@ bool Node::isSameNode(Node& node)
 //calc and return distance
 double Node::distance(Node& node)
 {
-	double xdiff = this->coordinates(0) - node.coordinates(0);
-	double ydiff = this->coordinates(1) - node.coordinates(1);
-	double zdiff = this->coordinates(2) - node.coordinates(2);
-	return sqrt( xdiff*xdiff + ydiff*ydiff + zdiff*zdiff );
+	double sum = 0;
+	for (int i=0; i<3; i++)
+		sum = sum + (this->coordinates(i) - node.coordinates(i))*(this->coordinates(i) - node.coordinates(i));
+	return sqrt( sum );
+}
+
+//calc and return angle (radians)
+double Node::angle(Node& n1, Node& n2)
+{
+	//Form vectors between (n1 and this) and (this and n2)
+	Vector3D ThisN1 = *this-n1, ThisN2 = *this-n2;
+	
+	return ThisN1.angleRAD(ThisN2);
+}
+
+//calc and return angle (degrees)
+double Node::angle_degrees(Node& n1, Node& n2)
+{
+	return this->angle(n1, n2) * 180.0 / M_PI;
+}
+
+//return x
+double Node::getX()
+{
+	return this->coordinates(0);
+}
+
+//return y
+double Node::getY()
+{
+	return this->coordinates(1);
+}
+
+//return z
+double Node::getZ()
+{
+	return this->coordinates(2);
+}
+
+//return type
+element_type Node::getType()
+{
+	return this->SubType;
+}
+
+//returns vector formed from subtracting nodes
+Vector3D Node::operator-(const Node& node)
+{
+	Vector3D temp;
+	for (int i=0; i<3; i++)
+		temp.edit(i, this->coordinates(i) - node.coordinates(i));
+	return temp;
 }
 
 /*
  *	-------------------------------------------------------------------------------------
  *								End: Node Class Definitions
+ */
+
+/*
+ *								Start: LineElement Class Definitions
+ *	-------------------------------------------------------------------------------------
+ */
+
+//Default constructor
+LineElement::LineElement()
+{
+	length = 0;
+	IDnum = 0;
+	SubType = INTERIOR;
+}
+
+//Default destructor
+LineElement::~LineElement()
+{
+	
+}
+
+//Display info
+void LineElement::DisplayInfo()
+{
+	std::cout << "LineElement ID: " << this->IDnum << std::endl;
+	std::cout << "LineElement Type: ";
+	switch (this->SubType)
+	{
+		case INTERIOR:
+			std::cout << "INTERIOR\n";
+			break;
+			
+		case BOUNDARY:
+			std::cout << "BOUNDARY\n";
+			break;
+			
+		default:
+			std::cout << "INTERIOR\n";
+			break;
+	}
+	std::cout << "Node 1: ( " << this->node1->getX() << " , " << this->node1->getY() << " , " << this->node1->getZ() << " )\n";
+	std::cout << "Node 2: ( " << this->node2->getX() << " , " << this->node2->getY() << " , " << this->node2->getZ() << " )\n";
+	std::cout << "Midpoint: ( " << this->midpoint.getX() << " , " << this->midpoint.getY() << " , " << this->midpoint.getZ() << " )\n";
+	std::cout << "Length: " << this->length << std::endl << std::endl;
+}
+
+//Assign nodes
+void LineElement::AssignNodes(Node& n1, Node& n2)
+{
+	this->node1 = &n1;
+	this->node2 = &n2;
+}
+
+//Assign id
+void LineElement::AssignIDnumber(unsigned int i)
+{
+	this->IDnum = i;
+}
+
+//Calculate length
+void LineElement::calculateLength()
+{
+	this->length = this->node1->distance(*this->node2);
+}
+
+//Find midpoint
+void LineElement::findMidpoint()
+{
+	this->midpoint.AssignCoordinates(0.5*(this->node1->getX()+this->node2->getX()), 0.5*(this->node1->getY()+this->node2->getY()), 0.5*(this->node1->getZ()+this->node2->getZ()));
+}
+
+//Determine type
+void LineElement::determineType()
+{
+	if (this->node1->getType() == BOUNDARY && this->node2->getType() == BOUNDARY)
+		this->midpoint.AssignSubType(BOUNDARY);
+	else
+		this->midpoint.AssignSubType(INTERIOR);
+	this->SubType = this->midpoint.getType();
+}
+
+//eval properties
+void LineElement::evaluateProperties()
+{
+	this->calculateLength();
+	this->findMidpoint();
+	this->determineType();
+}
+
+/*
+ *	-------------------------------------------------------------------------------------
+ *								End: LineElement Class Definitions
  */
 
 // Test function for MESH kernel
@@ -309,16 +467,29 @@ int MESH_TESTS()
 	Node n2;
 	n2.AssignSubType(INTERIOR);
 	n2.AssignIDnumber(2);
-	n2.AssignCoordinates(0, 0, 0);
+	n2.AssignCoordinates(0, 1, 0);
 	n2.DisplayInfo();
 	
 	Node n3;
 	n3.AssignSubType(BOUNDARY);
 	n3.AssignIDnumber(3);
-	n3.AssignCoordinates(0, 1, 0);
+	n3.AssignCoordinates(0, 0, 1);
 	n3.DisplayInfo();
 	
 	std::cout << "Distance between n1 and n2 = " << n2.distance(n1) << std::endl;
+	std::cout << "Angle (deg) between n1-n2 and n2-n3 = " << n2.angle_degrees(n1, n3) << std::endl << std::endl;;
+	
+	LineElement n1n2;
+	n1n2.AssignNodes(n1, n2);
+	n1n2.AssignIDnumber(0);
+	n1n2.evaluateProperties();
+	n1n2.DisplayInfo();
+	
+	LineElement n1n3;
+	n1n3.AssignNodes(n1, n3);
+	n1n3.AssignIDnumber(1);
+	n1n3.evaluateProperties();
+	n1n3.DisplayInfo();
 	
 	//---Exit Messages and cleanup---
 	time = clock() - time;
