@@ -450,6 +450,175 @@ void LineElement::evaluateProperties()
  *								End: LineElement Class Definitions
  */
 
+/*
+ *								Start: SurfaceElement Class Definitions
+ *	-------------------------------------------------------------------------------------
+ */
+
+//Default constructor
+SurfaceElement::SurfaceElement()
+{
+	area = 0;
+	IDnum = 0;
+	SubType = INTERIOR;
+}
+
+//Default destructor
+SurfaceElement::~SurfaceElement()
+{
+	
+}
+
+
+//Display info
+void SurfaceElement::DisplayInfo()
+{
+	std::cout << "SurfaceElement ID: " << this->IDnum << std::endl;
+	std::cout << "SurfaceElement Type: ";
+	switch (this->SubType)
+	{
+		case INTERIOR:
+			std::cout << "INTERIOR\n";
+			break;
+			
+		case BOUNDARY:
+			std::cout << "BOUNDARY\n";
+			break;
+			
+		default:
+			std::cout << "INTERIOR\n";
+			break;
+	}
+	std::cout << "Node 1: ( " << this->node1->getX() << " , " << this->node1->getY() << " , " << this->node1->getZ() << " )\n";
+	std::cout << "Node 2: ( " << this->node2->getX() << " , " << this->node2->getY() << " , " << this->node2->getZ() << " )\n";
+	std::cout << "Node 3: ( " << this->node3->getX() << " , " << this->node3->getY() << " , " << this->node3->getZ() << " )\n";
+	std::cout << "Centroid: ( " << this->centroid.getX() << " , " << this->centroid.getY() << " , " << this->centroid.getZ() << " )\n";
+	std::cout << "Area: " << this->area << std::endl << std::endl;
+}
+
+//Assign nodes
+void SurfaceElement::AssignNodes(Node& n1, Node& n2, Node& n3)
+{
+	this->node1 = &n1;
+	this->node2 = &n2;
+	this->node3 = &n3;
+}
+
+//Assign id
+void SurfaceElement::AssignIDnumber(unsigned int i)
+{
+	this->IDnum = i;
+}
+
+//Calculate length
+void SurfaceElement::calculateArea()
+{
+	Vector3D n1n2 = *this->node1 - *this->node2, n2n3 = *this->node2 - *this->node3;
+	Vector3D cross = n1n2.cross_product(n2n3);
+	this->area = cross.norm() / 2.0;
+}
+
+//Find midpoint
+void SurfaceElement::findCentroid()
+{
+	this->centroid.AssignCoordinates((this->node1->getX()+this->node2->getX()+this->node3->getX())/3.0, (this->node1->getY()+this->node2->getY()+this->node3->getY())/3.0, (this->node1->getZ()+this->node2->getZ()+this->node3->getZ())/3.0);
+}
+
+//Determine type
+void SurfaceElement::determineType()
+{
+	if (this->node1->getType() == BOUNDARY && this->node2->getType() == BOUNDARY && this->node3->getType() == BOUNDARY)
+		this->centroid.AssignSubType(BOUNDARY);
+	else
+		this->centroid.AssignSubType(INTERIOR);
+	this->SubType = this->centroid.getType();
+}
+
+//eval properties
+void SurfaceElement::evaluateProperties()
+{
+	this->calculateArea();
+	this->findCentroid();
+	this->determineType();
+}
+
+/*
+ *	-------------------------------------------------------------------------------------
+ *								End: SurfaceElement Class Definitions
+ */
+
+/*
+ *								Start: VolumeElement Class Definitions
+ *	-------------------------------------------------------------------------------------
+ */
+
+//Default constructor
+VolumeElement::VolumeElement()
+{
+	volume = 0;
+	IDnum = 0;
+}
+
+//Default destructor
+VolumeElement::~VolumeElement()
+{
+	
+}
+
+
+//Display info
+void VolumeElement::DisplayInfo()
+{
+	std::cout << "VolumeElement ID: " << this->IDnum << std::endl;
+	std::cout << "Node 1: ( " << this->node1->getX() << " , " << this->node1->getY() << " , " << this->node1->getZ() << " )\n";
+	std::cout << "Node 2: ( " << this->node2->getX() << " , " << this->node2->getY() << " , " << this->node2->getZ() << " )\n";
+	std::cout << "Node 3: ( " << this->node3->getX() << " , " << this->node3->getY() << " , " << this->node3->getZ() << " )\n";
+	std::cout << "Node 4: ( " << this->node4->getX() << " , " << this->node4->getY() << " , " << this->node4->getZ() << " )\n";
+	std::cout << "Centroid: ( " << this->centroid.getX() << " , " << this->centroid.getY() << " , " << this->centroid.getZ() << " )\n";
+	std::cout << "Volume: " << this->volume << std::endl << std::endl;
+}
+
+//Assign nodes
+void VolumeElement::AssignNodes(Node& n1, Node& n2, Node& n3, Node& n4)
+{
+	this->node1 = &n1;
+	this->node2 = &n2;
+	this->node3 = &n3;
+	this->node4 = &n4;
+}
+
+//Assign id
+void VolumeElement::AssignIDnumber(unsigned int i)
+{
+	this->IDnum = i;
+}
+
+//Calculate length
+void VolumeElement::calculateVolume()
+{
+	Vector3D n1n4 = *this->node1 - *this->node4, n2n4 = *this->node2 - *this->node4, n3n4 = *this->node3 - *this->node4;
+	Vector3D cross = n2n4.cross_product(n3n4);
+	this->volume = fabs(n1n4.dot_product(cross)) / 6.0;
+}
+
+//Find midpoint
+void VolumeElement::findCentroid()
+{
+	this->centroid.AssignCoordinates((this->node1->getX()+this->node2->getX()+this->node3->getX()+this->node4->getX())/4.0, (this->node1->getY()+this->node2->getY()+this->node3->getY()+this->node4->getY())/4.0, (this->node1->getZ()+this->node2->getZ()+this->node3->getZ()+this->node4->getZ())/4.0);
+}
+
+//eval properties
+void VolumeElement::evaluateProperties()
+{
+	this->calculateVolume();
+	this->findCentroid();
+}
+
+/*
+ *	-------------------------------------------------------------------------------------
+ *								End: VolumeElement Class Definitions
+ */
+
 // Test function for MESH kernel
 int MESH_TESTS()
 {
@@ -460,24 +629,30 @@ int MESH_TESTS()
 	
 	Node n1;
 	n1.AssignSubType(BOUNDARY);
-	n1.AssignIDnumber(1);
+	n1.AssignIDnumber(0);
 	n1.AssignCoordinates(1, 0, 0);
 	n1.DisplayInfo();
 	
 	Node n2;
 	n2.AssignSubType(INTERIOR);
-	n2.AssignIDnumber(2);
+	n2.AssignIDnumber(1);
 	n2.AssignCoordinates(0, 1, 0);
 	n2.DisplayInfo();
 	
 	Node n3;
 	n3.AssignSubType(BOUNDARY);
-	n3.AssignIDnumber(3);
-	n3.AssignCoordinates(0, 0, 1);
+	n3.AssignIDnumber(2);
+	n3.AssignCoordinates(0, 0, 0);
 	n3.DisplayInfo();
 	
-	std::cout << "Distance between n1 and n2 = " << n2.distance(n1) << std::endl;
-	std::cout << "Angle (deg) between n1-n2 and n2-n3 = " << n2.angle_degrees(n1, n3) << std::endl << std::endl;;
+	Node n4;
+	n4.AssignSubType(BOUNDARY);
+	n4.AssignIDnumber(3);
+	n4.AssignCoordinates(0, 0, 1);
+	n4.DisplayInfo();
+	
+	std::cout << "Distance between n0 and n1 = " << n2.distance(n1) << std::endl;
+	std::cout << "Angle (deg) between n0-n1 and n1-n2 = " << n2.angle_degrees(n1, n3) << std::endl << std::endl;;
 	
 	LineElement n1n2;
 	n1n2.AssignNodes(n1, n2);
@@ -490,6 +665,18 @@ int MESH_TESTS()
 	n1n3.AssignIDnumber(1);
 	n1n3.evaluateProperties();
 	n1n3.DisplayInfo();
+	
+	SurfaceElement n1n2n3;
+	n1n2n3.AssignNodes(n1, n2, n3);
+	n1n2n3.AssignIDnumber(0);
+	n1n2n3.evaluateProperties();
+	n1n2n3.DisplayInfo();
+	
+	VolumeElement n1n2n3n4;
+	n1n2n3n4.AssignNodes(n1, n2, n3, n4);
+	n1n2n3n4.AssignIDnumber(0);
+	n1n2n3n4.evaluateProperties();
+	n1n2n3n4.DisplayInfo();
 	
 	//---Exit Messages and cleanup---
 	time = clock() - time;

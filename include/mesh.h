@@ -138,6 +138,69 @@ private:
 
 };
 
+/// SurfaceElement Object
+/** This class structure creates a C++ object for a surface element. The surface is made up of a
+	reference to three distinct nodes. Based on those nodes, we can formulate a set of line segments
+	that encapsulates the surface element. The surface element will also have an identification number,
+	an area, and a centroid (similar to the midpoint of a line segment).*/
+class SurfaceElement
+{
+public:
+	SurfaceElement();										///< Default Constructor
+	~SurfaceElement();										///< Default Destructor
+	
+	void DisplayInfo();										///< Print out information to the console
+	void AssignNodes(Node &n1, Node &n2, Node& n3);			///< Assign nodes for the surface element
+	void AssignIDnumber(unsigned int i);					///< Assign the id number for the surface element
+	
+	void calculateArea();									///< Calculate and store area value
+	void findCentroid();									///< Find and set the centroid node
+	void determineType();									///< Determine the type of surface element
+	void evaluateProperties();								///< Calls functions for area and centroid
+	
+protected:
+	
+private:
+	Node *node1;										///< Pointer to first node
+	Node *node2;										///< Pointer to second node
+	Node *node3;										///< Pointer to third node
+	double area;										///< Area of the surface element
+	Node centroid;										///< Centroid node for the surface element
+	unsigned int IDnum;									///< Identification number for the surface element
+	element_type SubType;								///< Type of surface element (BOUDNARY or INTERIOR)
+};
+
+/// VolumeElement Object
+/** This class structure creates a C++ object for a volume element. The volume is made up of a
+	reference to four distinct nodes. Based on those nodes, we can formulate a set of surfaces
+	that encapsulates the volume element. The volume element will also have an identification number,
+	a volume, and a centroid.*/
+class VolumeElement
+{
+public:
+	VolumeElement();										///< Default Constructor
+	~VolumeElement();										///< Default Destructor
+	
+	void DisplayInfo();											///< Print out information to the console
+	void AssignNodes(Node &n1, Node &n2, Node& n3, Node& n4);	///< Assign nodes for the volume element
+	void AssignIDnumber(unsigned int i);						///< Assign the id number for the volume element
+	
+	void calculateVolume();									///< Calculate and store volume value
+	void findCentroid();									///< Find and set the centroid node
+	void evaluateProperties();								///< Calls functions for volume and centroid
+	
+protected:
+	
+private:
+	Node *node1;										///< Pointer to first node
+	Node *node2;										///< Pointer to second node
+	Node *node3;										///< Pointer to third node
+	Node *node4;										///< Pointer to fourth node
+	double volume;										///< Area of the volume element
+	Node centroid;										///< Centroid node for the volume element
+	unsigned int IDnum;									///< Identification number for the volume element
+};
+
 /// NodeSet Object
 /** This class structure creates a C++ object for a set of nodes. The set of nodes will be a
 	listing of all nodes in a domain. Each node must have a unique ID number and unique locations
