@@ -29,5 +29,6 @@
 #include "dogfish.h"
 #include "monkfish.h"
 #include "yaml_wrapper.h"
+#include "mesh.h"
 
 #endif

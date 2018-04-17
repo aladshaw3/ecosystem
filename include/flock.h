@@ -35,5 +35,6 @@
 #include "yaml_wrapper.h"
 #include "dove.h"
 #include "crow.h"
+#include "mesh.h"
 
 #endif
