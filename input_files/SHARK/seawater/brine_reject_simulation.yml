@@ -8,6 +8,7 @@ Scenario:
   num_mbe: 15
   num_multi_ssao: 1
 
+#wrong object!!! This is an older version that has convergence issues!!!
 - ss_multiads_objs:
   - obj01:
     name: AF1
