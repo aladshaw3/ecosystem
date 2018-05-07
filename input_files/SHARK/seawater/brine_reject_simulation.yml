@@ -6,9 +6,16 @@ Scenario:
   numvar: 119
   num_ssr: 62
   num_mbe: 15
+<<<<<<< HEAD
   num_multi_sschem: 1
 
 - ss_multichemi_objs:
+=======
+  num_multi_ssao: 1
+
+#wrong object!!! This is an older version that has convergence issues!!!
+- ss_multiads_objs:
+>>>>>>> d503d5ead1e1f51df9fc0c10c90d98132521b9e7
   - obj01:
     name: AF1
     num_ligands: 2 
