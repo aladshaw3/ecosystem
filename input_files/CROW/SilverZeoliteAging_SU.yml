@@ -32,10 +32,10 @@ num_var: 10
   lin_output: false
 
 - run_time:
-  dt: 0.01
-  dtmax: 20
+  dt: 1e-4
+  dtmax: 0.01
   dtmin: 1e-6
-  end_time: 700
+  end_time: 6
   timestepper: ratebased
   integration: be
 
@@ -44,8 +44,8 @@ num_var: 10
 O2:
 ---
 func_type: InfiniteBath
-initial_cond: 6.428 #6.428(100C) 6.05(150C) 5.411(200C) mol/m3
-const_value: 6.428 #6.428 6.05 5.411
+initial_cond: 0.0 #0.006428(100C) 0.00605(150C) 0.005411(200C) mol/m3
+const_value: 0.0 #0.006428(100C) 0.00605(150C) 0.005411(200C)
 
 - weights:
   O2: 1
@@ -55,8 +55,8 @@ const_value: 6.428 #6.428 6.05 5.411
 N2:
 ---
 func_type: InfiniteBath
-initial_cond: 0.0 #22.76 (150C)
-const_value: 0.0 #22.76
+initial_cond: 0.02318 #0.02318(100C) 0.02276(150C) mol/L
+const_value: 0.02318 
 
 - weights:
   N2: 1
@@ -66,8 +66,8 @@ const_value: 0.0 #22.76
 NO:
 ---
 func_type: InfiniteBath
-initial_cond: 0.0 #0.288 (150C)
-const_value: 0.0 #0.288 (150C)
+initial_cond: 0.0 #2.88e-4 (150C) mol/L
+const_value: 0.0 #2.88e-4 (150C)
 
 - weights:
   NO: 1
@@ -77,8 +77,8 @@ const_value: 0.0 #0.288 (150C)
 NO2:
 ---
 func_type: InfiniteBath
-initial_cond: 0.0 #0.576 (150C)
-const_value: 0.0 #0.576 (150C)
+initial_cond: 6.53e-4 #6.53e-4(100C) 5.76e-4(150C) mol/L
+const_value: 6.53e-4 
 
 - weights:
   NO2: 1
@@ -92,14 +92,14 @@ initial_cond: 0.9764 #mol/kg
 num_reactions: 10
 
 - reaction1:
-  forward_rate: 1.5e-5 #8e-5(150C) 3e-4(200C)
+  forward_rate: 1e-16 #4e-2(100C) 8e-2(150C) 3e-1(200C)
   - stoichiometry:
     O2: -1
     Ag0: -4
     Ag2O: 2
 
 - reaction2:
-  forward_rate: 4.5e-4 #2.4e-3(150C) 9e-3(200C)
+  forward_rate: 1e-16 #2e-2(100C) 2.4e-3(150C) 1.75e-3(200C)
   - stoichiometry:
     Ag2O: -2
     Ag0: 4
@@ -122,7 +122,7 @@ num_reactions: 10
     Ag0: 4
 
 - reaction5:
-  forward_rate: 1e-16 #2e4(150C)
+  forward_rate: 2e8 #2e10(150C)
   - stoichiometry:
     NO2: -2
     Ag0: -8
@@ -130,7 +130,7 @@ num_reactions: 10
     N2: 1
 
 - reaction6:
-  forward_rate: 1e-16 #1e-4(150C)
+  forward_rate: 1e-16 #1e-1(150C)
   - stoichiometry:
     Ag2O: -4
     N2: -1
@@ -138,7 +138,7 @@ num_reactions: 10
     Ag0: 8
 
 - reaction7:
-  forward_rate: 1e-16 #1e0(100C) 1.5e0(150C) 1.5e0(200C)
+  forward_rate: 1e-16 #1e9(100C) 1.5e9(150C) 1.5e9(200C)
   - stoichiometry:
     H2O: -2
     O2: -1
@@ -146,7 +146,7 @@ num_reactions: 10
     AgOH: 4
 
 - reaction8:
-  forward_rate: 1e-16 #5e-1(100C) 1.2e-1(150C) 2e-2(200C)
+  forward_rate: 1e-16 #1.35e-1(100C) 1.2e-1(150C) 2e-2(200C)
   - stoichiometry:
     AgOH: -4
     H2O: 2
@@ -154,14 +154,14 @@ num_reactions: 10
     Ag0: 4
 
 - reaction9:
-  forward_rate: 2e1
+  forward_rate: 1e-16 #2e1
   - stoichiometry:
     Ag0: -2
     I2: -1
     AgI: 2
 
 - reaction10:
-  forward_rate: 6.1538e-4
+  forward_rate: 1e-16 #6.1538e-4
   - stoichiometry:
     AgI: -2
     I2: 1
@@ -175,14 +175,14 @@ initial_cond: 0.0 #mol/kg
 num_reactions: 6
 
 - reaction1:
-  forward_rate: 1.5e-5 #8e-5(150C) 3e-4(200C)
+  forward_rate: 1e-16 #4e-2(100C) 8e-2(150C) 3e-1(200C)
   - stoichiometry:
     O2: -1
     Ag0: -4
     Ag2O: 2
 
 - reaction2:
-  forward_rate: 4.5e-4 #2.4e-3(150C) 9e-3(200C)
+  forward_rate: 1e-16 #2e-2(100C) 2.4e-3(150C) 1.75e-3(200C)
   - stoichiometry:
     Ag2O: -2
     Ag0: 4
@@ -205,7 +205,7 @@ num_reactions: 6
     Ag0: 4
 
 - reaction5:
-  forward_rate: 1e-16 #2e4(150C)
+  forward_rate: 2e7 #2e10(150C)
   - stoichiometry:
     NO2: -2
     Ag0: -8
@@ -213,7 +213,7 @@ num_reactions: 6
     N2: 1
 
 - reaction6:
-  forward_rate: 1e-16 #1e-4(150C)
+  forward_rate: 1e-16 #1e-1(150C)
   - stoichiometry:
     Ag2O: -4
     N2: -1
@@ -225,8 +225,8 @@ num_reactions: 6
 H2O:
 ---
 func_type: InfiniteBath
-initial_cond: 0.0 #0.07667 #mol/m3
-const_value: 0.0 #0.07667
+initial_cond: 0.0 #7.667e-5 #mol/L
+const_value: 0.0 #7.667e-5
 
 - weights:
   H2O: 1
@@ -240,7 +240,7 @@ initial_cond: 0.0 #mol/kg
 num_reactions: 2
 
 - reaction1:
-  forward_rate: 1e-16 #1e0(100C) 1.5e0(150C) 1.5e0(200C)
+  forward_rate: 1e-16 #1e9(100C) 1.5e9(150C) 1.5e9(200C)
   - stoichiometry:
     H2O: -2
     O2: -1
@@ -248,7 +248,7 @@ num_reactions: 2
     AgOH: 4
 
 - reaction2:
-  forward_rate: 1e-16 #5e-1(100C) 1.2e-1(150C) 2e-2(200C)
+  forward_rate: 1e-16 #1.35e-1(100C) 1.2e-1(150C) 2e-2(200C)
   - stoichiometry:
     AgOH: -4
     H2O: 2
@@ -260,8 +260,8 @@ num_reactions: 2
 I2:
 ---
 func_type: InfiniteBath
-initial_cond: 1.304e-3 # mol/m3
-const_value: 1.304e-3 #
+initial_cond: 0.0 #1.304e-6  mol/L
+const_value: 0.0 #1.304e-6 
 
 - weights:
   I2: 1   
@@ -275,14 +275,14 @@ initial_cond: 0.0 #mol/kg
 num_reactions: 2
 
 - reaction1:
-  forward_rate: 2e1
+  forward_rate: 1e-16 #2e1
   - stoichiometry:
     Ag0: -2
     I2: -1
     AgI: 2
 
 - reaction2:
-  forward_rate: 6.1538e-4
+  forward_rate: 1e-16 #6.1538e-4
   - stoichiometry:
     AgI: -2
     I2: 1
