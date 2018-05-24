@@ -44,7 +44,7 @@ num_var: 10
 O2:
 ---
 func_type: InfiniteBath
-initial_cond: 0.0 #0.006428(100C) 0.00605(150C) 0.005411(200C) mol/m3
+initial_cond: 0.0 #0.006428(100C) 0.00605(150C) 0.005411(200C) mol/L
 const_value: 0.0 #0.006428(100C) 0.00605(150C) 0.005411(200C)
 
 - weights:
