@@ -12282,10 +12282,10 @@ int SHARK(SHARK_DATA *shark_dat)
 		if (shark_dat->SpeciationCurve == true)
 		{
 			shark_dat->pH = shark_dat->pH + shark_dat->pH_step;
-			if (shark_dat->pH >= 14.0 && overage == false)
+			if (shark_dat->pH >= shark_dat->pH_end && overage == false)
 			{
 				overage = true;
-				shark_dat->pH = 14.0;
+				shark_dat->pH = shark_dat->pH_end;
 			}
 		}
 		if (shark_dat->TemperatureCurve == true)
