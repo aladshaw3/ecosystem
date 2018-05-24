@@ -17,8 +17,10 @@ Scenario:
 
 - run_time:
   steady: true         
-  specs_curve: false
-  pH_step: 0.25    
+  specs_curve: true
+  pH_step: 0.25 
+  pH_start: 7
+  pH_end: 8.5   
 ...
 
 SolverOptions:

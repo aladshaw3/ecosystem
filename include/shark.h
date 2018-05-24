@@ -1588,6 +1588,7 @@ typedef struct SHARK_DATA
 	double time_old = 0.0;							///< Previous value of time (start from t = 0.0 hrs)
 	double pH = 7.0;								///< Value of pH if needed (default = 7)
 	double pH_step = 0.5;							///< Value by which to increment pH when doing a speciation curve (default = 0.5)
+	double pH_end = 14.0;							///< Value at which we stop doing the speciation curve as a function of pH (default = 14.0)
 	double start_temp = 277.15;						///< Value of the starting temperature used for Temperature Curves (default = 277.15 K)
 	double end_temp = 323.15;						///< Value of the ending temperature used for Temperature Curves (default = 323.15 K)
 	double temp_step = 10.0;						///< Size of the step changes to use for Temperature Curves (default = 10.0 K);

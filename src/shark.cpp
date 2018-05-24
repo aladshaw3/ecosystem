@@ -7716,6 +7716,7 @@ int read_scenario(SHARK_DATA *shark_dat)
 		if (shark_dat->SpeciationCurve == true)
 		{
 			shark_dat->TemperatureCurve = false;
+			shark_dat->pH = 1.0;
 			try
 			{
 				shark_dat->pH_step = shark_dat->yaml_object.getYamlWrapper()("Scenario")("run_time")["pH_step"].getDouble();
@@ -7727,6 +7728,22 @@ int read_scenario(SHARK_DATA *shark_dat)
 			catch (std::out_of_range)
 			{
 				shark_dat->pH_step = 0.5;
+			}
+			try
+			{
+				shark_dat->pH = shark_dat->yaml_object.getYamlWrapper()("Scenario")("run_time")["pH_start"].getDouble();
+			}
+			catch (std::out_of_range)
+			{
+				shark_dat->pH = 1.0;
+			}
+			try
+			{
+				shark_dat->pH_end = shark_dat->yaml_object.getYamlWrapper()("Scenario")("run_time")["pH_end"].getDouble();
+			}
+			catch (std::out_of_range)
+			{
+				shark_dat->pH_end = 14.0;
 			}
 		}
 		
@@ -10766,7 +10783,7 @@ int setup_SHARK_DATA( FILE *file, int (*residual) (const Matrix<double> &x, Matr
 	{
 		dat->dt = sqrt(DBL_EPSILON);
 	}
-	if (dat->pH < 1.0 || dat->SpeciationCurve == true)
+	if (dat->pH < 1.0)
 		dat->pH = 1.0;
 	else if (dat->pH > 14.0)
 		dat->pH = 14.0;
@@ -12295,7 +12312,7 @@ int SHARK(SHARK_DATA *shark_dat)
 		}
 
 	} while (	(shark_dat->steadystate == false && shark_dat->simulationtime > (shark_dat->time+DBL_EPSILON))
-			    || (shark_dat->SpeciationCurve == true && shark_dat->pH <= 14.0)
+			    || (shark_dat->SpeciationCurve == true && shark_dat->pH <= shark_dat->pH_end)
 				|| (shark_dat->TemperatureCurve == true && shark_dat->temperature <= shark_dat->end_temp) );
 
 	//Call solver one last time to establish the steady-state solution
