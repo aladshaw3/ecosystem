@@ -3945,22 +3945,27 @@ int FINCH_TESTS()
   	//Change Parameters for Testing
 	dat.uIC = 0.0;
 	//dat.uIC = 1.0;
-  	dat.uo = 1.0;
+  	//dat.uo = 1.0;
+	dat.uo = 25000; //ppm
   	//dat.uo = 0.0;
 	//dat.vIC = 992.2941164;
 	//dat.vo = 992.2941164;
   	//dat.vIC = 2.0;
 	//dat.vo = 2.0;
-	dat.vIC = 0.0;
-	dat.vo = 0.0;
+	//dat.vIC = 0.0;
+	//dat.vo = 0.0;
+	dat.vIC = 0.001341; //m/s
+	dat.vo = 0.001341;
   	//dat.vIC = 1.0;
 	//dat.vo = 1.0;
 	//dat.DIC = 0.546244074;
 	//dat.Do = 0.546244074;
   	//dat.DIC = 0.01;
 	//dat.Do = 0.01;
-	dat.DIC = 2.0;
-	dat.Do = 2.0;
+	//dat.DIC = 2.0;
+	//dat.Do = 2.0;
+	dat.DIC = 0.0005; //m^2/s
+	dat.Do = 0.0005;
   	//dat.DIC = 0.0;
 	//dat.Do = 0.0;
   	dat.kIC = 0.0;
@@ -3974,20 +3979,22 @@ int FINCH_TESTS()
   	dat.kfn = 0.0;
   	dat.kfnp1 = 0.0;
 	//dat.L = 0.127;
-  	dat.L = 1.0;
+  	//dat.L = 1.0;
+	dat.L = 0.762; //m
 	//dat.L = 2.0*M_PI;
   	dat.s = 1.0;
 	//dat.T = 0.2;
-	dat.T = 1.0;
+	//dat.T = 1.0;
+	dat.T = 1000; //s
 	//dat.T = 60.0;
-	//dat.LN = 100;
-	dat.LN = 10;
+	dat.LN = 40;
+	//dat.LN = 10;
 	dat.t_old = 0.0;
 	dat.dt_old = 0.0;
   	dat.d = 0;
 	
   	//Boolean Statments
-	dat.Dirichlet = true;
+	dat.Dirichlet = false;
   	dat.CheckMass = false;
   	dat.Iterative = true;
   	dat.SteadyState = false;
@@ -4068,11 +4075,15 @@ int FINCH_TESTS()
 		//Step size based of off CFL condition
 		success = (*dat.settime) ((void *)&dat);
 		if (success != 0) {mError(simulation_fail); return -1;}
-		//dat.dt = 0.1;
+		dat.dt = 0.1;
 		if (dat.SteadyState == false)
 			dat.t = dat.t_old + dat.dt;
 		else
 			dat.t = INFINITY;
+		
+		// Pulse input test
+		if (dat.t >= 3.2)
+			dat.uo = 0.0;
 		
 		//Call the routine
 		std::cout << "Evaluating Time: " << dat.t << std::endl;

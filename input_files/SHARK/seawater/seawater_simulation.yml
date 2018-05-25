@@ -18,7 +18,7 @@ Scenario:
 - run_time:
   steady: true         
   specs_curve: true
-  pH_step: 0.25 
+  pH_step: 0.35 
   pH_start: 7
   pH_end: 8.5   
 ...
