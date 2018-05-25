@@ -1,20 +1,20 @@
 Scenario:
 ---
 - vars_fun:
-  numvar: 133
-  num_ssr: 76
+  numvar: 91
+  num_ssr: 67
   num_mbe: 15
   num_multi_sschem: 1
 
 - ss_multichemi_objs:
   - obj01:
     name: AF1
-    num_ligands: 2 
+    num_ligands: 1 
 
 - sys_data:
   act_fun: davies    
-  const_pH: true
-  pH: 8.3
+  const_pH: false
+  #pH: 8.3
   res_alk: 0.000   #unknown amount of alkalinity may be present
   temp: 296.15       
   dielec: 78.325 
@@ -23,7 +23,7 @@ Scenario:
 
 - run_time:
   steady: true         
-  specs_curve: false
+  specs_curve: true
   pH_step: 0.25    
 ...
 
@@ -166,402 +166,6 @@ MasterSpecies:
     lin_form: H3
 
   - 79: 
-    formula: AO - (ad)
-    charge: -1
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: adsorbed
-    name: acyclic-amidioxime
-    lin_form: none
-
-  - 80: 
-    formula: HAO (ad)
-    charge: 0
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: adsorbed
-    name: acyclic-amidioxime
-    lin_form: H
-
-  - 81: 
-    formula: H2AO + (ad)
-    charge: 1
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: adsorbed
-    name: acyclic-amidioxime
-    lin_form: H2
-
-  - 82: 
-    formula: UO2AO + (ad)
-    charge: 1
-    enthalpy: -1023568.7
-    entropy: -106.414
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: adsorbed
-    name: uranyl-amidioxime
-    lin_form: UO2
-
-  - 83: 
-    formula: UO2(AO)2 (ad)
-    charge: 0
-    enthalpy: -972996.9
-    entropy: 7.8759
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: adsorbed
-    name: uranyl-di-amidioxime
-    lin_form: UO2
-
-  - 84: 
-    formula: UO2(AO)3 - (ad)
-    charge: -1
-    enthalpy: -729241.076
-    entropy: 671.461
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: adsorbed
-    name: uranyl-tri-amidioxime
-    lin_form: UO2
-
-  - 85: 
-    formula: UO2CO3AO - (ad)
-    charge: -1
-    enthalpy: -1741629.98
-    entropy: -261.641
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: adsorbed
-    name: uranyl-carbonate-amidioxime
-    lin_form: UO2CO3
-
-  - 86: 
-    formula: UO2CO3(AO)2 2- (ad)
-    charge: -2
-    enthalpy: -1667060.92
-    entropy: -72.497
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: adsorbed
-    name: uranyl-carbonate-diamidioxime
-    lin_form: UO2CO3
-
-  - 87: 
-    formula: UO2IDO (ad)
-    charge: 0
-    enthalpy: -955716.98
-    entropy: 30.3998
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: adsorbed
-    name: uranyl-imide-dioxime
-    lin_form: UO2
-
-  - 88: 
-    formula: UO2HIDO + (ad)
-    charge: 1
-    enthalpy: -1012734.89
-    entropy: -83.236
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: adsorbed
-    name: uranyl-imide-dioxime
-    lin_form: UO2H
-
-  - 89: 
-    formula: UO2(IDO)2 2- (ad)
-    charge: -2
-    enthalpy: -660147.92
-    entropy: 773.1554
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: adsorbed
-    name: uranyl-diimide-dioxime
-    lin_form: UO2
-
-  - 90: 
-    formula: UO2(HIDO)IDO - (ad)
-    charge: -1
-    enthalpy: -748364.334
-    entropy: 662.5315
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: adsorbed
-    name: uranyl-diimide-dioxime
-    lin_form: UO2H
-
-  - 91: 
-    formula: UO2(HIDO)2 (ad)
-    charge: 0
-    enthalpy: -973627.99
-    entropy: -9.3683
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: adsorbed
-    name: uranyl-diimide-dioxime
-    lin_form: UO2H2
-
-  - 92: 
-    formula: UO2CO3IDO 2- (ad)
-    charge: -2
-    enthalpy: -1724192.065
-    entropy: -225.236
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: adsorbed
-    name: uranyl-carbonate-imide-dioxime
-    lin_form: UO2CO3
-
-  - 93: 
-    formula: UO2CO3HIDO - (ad)
-    charge: -1
-    enthalpy: -1929112.74
-    entropy: -850.804
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: adsorbed
-    name: uranyl-carbonate-imide-dioxime
-    lin_form: UO2CO3H
-
-  - 94: 
-    formula: VO2AO (ad)
-    charge: 0
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: adsorbed
-    name: Vanadyl-amidoximate
-    lin_form: VO2
-
-  - 95: 
-    formula: VO2(AO)2 - (ad)
-    charge: -1
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: adsorbed
-    name: Vanadium-diamidoximate
-    lin_form: VO2
-
-  - 96: 
-    formula: VOOH(AO)2 (ad)
-    charge: 0
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: adsorbed
-    name: Vanadium-diamidoximate
-    lin_form: VO2H
-
-  - 97: 
-    formula: V(AO)(AO_H)2 (ad)
-    charge: 0
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: adsorbed
-    name: Vanadium-diamidoximate
-    lin_form: V
-
-  - 98: 
-    formula: V(AO)3 2+ (ad)
-    charge: 2
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: adsorbed
-    name: Vanadium-diamidoximate
-    lin_form: V
-
-  - 99: 
-    formula: VO2IDO - (ad)
-    charge: -1
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: adsorbed
-    name: Vanadyl-amidoximate
-    lin_form: VO2
-
-  - 100: 
-    formula: VO2HIDO (ad)
-    charge: 0
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: adsorbed
-    name: Vanadium-diamidoximate
-    lin_form: VO2H
-
-  - 101: 
-    formula: NaV(IDO_H)2 (ad)
-    charge: 0
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: adsorbed
-    name: Vanadium-diamidoximate
-    lin_form: VNa
-
-  - 102: 
-    formula: V(IDO)(IDO_H) (ad)
-    charge: 0
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: adsorbed
-    name: Vanadium-diamidoximate
-    lin_form: V
-
-  - 103: 
-    formula: V(IDO)2 + (ad)
-    charge: 1
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: adsorbed
-    name: Vanadium-diamidoximate
-    lin_form: V
-
-  - 104: 
-    formula: V(IDO_H)2 - (ad)
-    charge: -1
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: adsorbed
-    name: Vanadium-diamidoximate
-    lin_form: V
-
-  - 105: 
-    formula: VO(IDO_H)2 3- (ad)
-    charge: -3
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: adsorbed
-    name: Vanadium-amidoximate
-    lin_form: VO
-
-  - 106: 
-    formula: VO2IDO_H 2- (ad)
-    charge: -2
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: adsorbed
-    name: Vanadium-diamidoximate
-    lin_form: VO2
-
-  - 107: 
-    formula: FeHIDO 2+ (ad)
-    charge: 2
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: adsorbed
-    name: Iron-amidoximate
-    lin_form: FeH
-
-  - 108: 
-    formula: Fe(IDO)2 - (ad)
-    charge: -1
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: adsorbed
-    name: Iron-diamidoximate
-    lin_form: Fe
-
-  - 109: 
-    formula: FeH(IDO)2 (ad)
-    charge: 0
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: adsorbed
-    name: Iron-diamidoximate
-    lin_form: FeH
-
-  - 110: 
-    formula: FeH2(IDO)2 + (ad)
-    charge: 1
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: adsorbed
-    name: Iron-diamidoximate
-    lin_form: FeH2
-
-  - 111: 
-    formula: FeOH(IDO)2 2- (ad)
-    charge: -2
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: adsorbed
-    name: Iron-diamidoximate
-    lin_form: FeOH
-
-  - 112: 
     formula: CuIDO (ad)
     charge: 0
     enthalpy: 0
@@ -573,7 +177,7 @@ MasterSpecies:
     name: Copper-amidoximate
     lin_form: Cu
 
-  - 113: 
+  - 80: 
     formula: CuHIDO + (ad)
     charge: 1
     enthalpy: 0
@@ -585,7 +189,7 @@ MasterSpecies:
     name: Copper-amidoximate
     lin_form: CuH
 
-  - 114: 
+  - 81: 
     formula: Cu(IDO)2 2- (ad)
     charge: -2
     enthalpy: 0
@@ -597,7 +201,7 @@ MasterSpecies:
     name: Copper-diamidoximate
     lin_form: Cu
 
-  - 115: 
+  - 82: 
     formula: CuH(IDO)2 - (ad)
     charge: -1
     enthalpy: 0
@@ -609,7 +213,7 @@ MasterSpecies:
     name: Copper-diamidoximate
     lin_form: CuH
 
-  - 116: 
+  - 83: 
     formula: CuCO3 (aq)
     charge: 0
     enthalpy: 0
@@ -621,7 +225,7 @@ MasterSpecies:
     name: Copper-carbonate
     lin_form: CuCO3
 
-  - 117: 
+  - 84: 
     formula: Cu(CO3)2 2- (aq)
     charge: -2
     enthalpy: 0
@@ -633,7 +237,7 @@ MasterSpecies:
     name: Copper-dicarbonate
     lin_form: CuC2O6
 
-  - 118: 
+  - 85: 
     formula: CuHCO3 + (aq)
     charge: 1
     enthalpy: 0
@@ -645,7 +249,7 @@ MasterSpecies:
     name: Copper-bicarbonate
     lin_form: CuHCO3
 
-  - 119: 
+  - 86: 
     formula: CuSO4 (aq)
     charge: 0
     enthalpy: 0
@@ -657,7 +261,7 @@ MasterSpecies:
     name: Copper-sulfate
     lin_form: CuSO4
 
-  - 120: 
+  - 87: 
     formula: CuCl + (aq)
     charge: 1
     enthalpy: 0
@@ -669,7 +273,7 @@ MasterSpecies:
     name: Copper-cloride
     lin_form: CuCl
 
-  - 121: 
+  - 88: 
     formula: CuCl2 (aq)
     charge: 0
     enthalpy: 0
@@ -681,7 +285,7 @@ MasterSpecies:
     name: Copper-cloride
     lin_form: CuCl2
 
-  - 122: 
+  - 89: 
     formula: CuCl3 - (aq)
     charge: -1
     enthalpy: 0
@@ -693,7 +297,7 @@ MasterSpecies:
     name: Copper-cloride
     lin_form: CuCl3
 
-  - 123: 
+  - 90: 
     formula: CuCl4 2- (aq)
     charge: -2
     enthalpy: 0
@@ -704,114 +308,6 @@ MasterSpecies:
     phase: aqueous
     name: Copper-cloride
     lin_form: CuCl4
-
-  - 124: 
-    formula: FeB(OH)4 2+ (aq)
-    charge: 2
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: aqueous
-    name: Iron-boric
-    lin_form: BFeH4O4
-
-  - 125: 
-    formula: Fe(B(OH)4)2 + (aq)
-    charge: 1
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: aqueous
-    name: Iron-diboric
-    lin_form: B2FeH8O8
-
-  - 126: 
-    formula: FeF 2+ (aq)
-    charge: -2
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: aqueous
-    name: Iron-fluoride
-    lin_form: FeF
-
-  - 127: 
-    formula: FeF2 + (aq)
-    charge: -1
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: aqueous
-    name: Iron-difluoride
-    lin_form: FeF2
-
-  - 128: 
-    formula: FeF3 (aq)
-    charge: 0
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: aqueous
-    name: Iron-difluoride
-    lin_form: FeF3
-
-  - 129: 
-    formula: FeSO4 + (aq)
-    charge: 1
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: aqueous
-    name: Iron-sulfate
-    lin_form: FeSO4
-
-  - 130: 
-    formula: Fe(SO4)2 - (aq)
-    charge: -1
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: aqueous
-    name: Iron-disulfate
-    lin_form: FeS2O8
-
-  - 131: 
-    formula: FeCl 2+ (aq)
-    charge: 2
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: aqueous
-    name: Iron-chloride
-    lin_form: FeCl
-
-  - 132: 
-    formula: FeCl2 + (aq)
-    charge: 1
-    enthalpy: 0
-    entropy: 0
-    have_HS: false
-    energy: 0
-    have_G: false
-    phase: aqueous
-    name: Iron-dichloride
-    lin_form: FeCl2
 ...
 
 MassBalance:
@@ -838,10 +334,6 @@ MassBalance:
     "MgUO2(CO3)3 2- (aq)": 3
     "VO2OHCO3 2- (aq)": 1
     "VO2(CO3)2 3- (aq)": 2
-    "UO2CO3AO - (ad)": 1
-    "UO2CO3(AO)2 2- (ad)": 1
-    "UO2CO3IDO 2- (ad)": 1
-    "UO2CO3HIDO - (ad)": 1
     "CuCO3 (aq)": 1
     "Cu(CO3)2 2- (aq)": 2
     "CuHCO3 + (aq)": 1
@@ -855,7 +347,6 @@ MassBalance:
     "Na2CO3 (aq)": 2
     "NaCl (aq)": 1
     "NaOH (aq)": 1
-    "NaV(IDO_H)2 (ad)": 1
 
 - uranium:
   total_conc: 1.22E-8
@@ -882,18 +373,6 @@ MassBalance:
     "UO2Cl3 - (aq)": 1
     "UO2SO4 (aq)": 1
     "UO2(SO4)2 2- (aq)": 1
-    "UO2AO + (ad)": 1
-    "UO2(AO)2 (ad)": 1
-    "UO2(AO)3 - (ad)": 1
-    "UO2CO3AO - (ad)": 1
-    "UO2CO3(AO)2 2- (ad)": 1
-    "UO2IDO (ad)": 1
-    "UO2HIDO + (ad)": 1
-    "UO2(IDO)2 2- (ad)": 1
-    "UO2(HIDO)IDO - (ad)": 1
-    "UO2(HIDO)2 (ad)": 1
-    "UO2CO3IDO 2- (ad)": 1
-    "UO2CO3HIDO - (ad)": 1
 
 - chlorine:
   total_conc: 0.5668
@@ -909,8 +388,6 @@ MassBalance:
     "CuCl2 (aq)": 2
     "CuCl3 - (aq)": 3
     "CuCl4 2- (aq)": 4
-    "FeCl 2+ (aq)": 1
-    "FeCl2 + (aq)": 2
 
 - sulfate:
   total_conc: 0.02896
@@ -922,8 +399,6 @@ MassBalance:
     "UO2(SO4)2 2- (aq)": 2
     "VO2SO4 - (aq)": 1
     "CuSO4 (aq)": 1
-    "FeSO4 + (aq)": 1
-    "Fe(SO4)2 - (aq)": 2
 
 - magnesium:
   total_conc: 0.05484
@@ -957,19 +432,6 @@ MassBalance:
     "VO2SO4 - (aq)": 1
     "VO2OHCO3 2- (aq)": 1
     "VO2(CO3)2 3- (aq)": 1
-    "VO2AO (ad)": 1
-    "VO2(AO)2 - (ad)": 1
-    "VOOH(AO)2 (ad)": 1
-    "V(AO)(AO_H)2 (ad)": 1
-    "V(AO)3 2+ (ad)": 1
-    "VO2IDO - (ad)": 1
-    "VO2HIDO (ad)": 1
-    "NaV(IDO_H)2 (ad)": 1
-    "V(IDO)(IDO_H) (ad)": 1
-    "V(IDO)2 + (ad)": 1
-    "V(IDO_H)2 - (ad)": 1
-    "VO(IDO_H)2 3- (ad)": 1
-    "VO2IDO_H 2- (ad)": 1
 
 - potassium:
   total_conc: 0.01049
@@ -982,9 +444,6 @@ MassBalance:
     "F - (aq)": 1
     "HF (aq)": 1
     "HF2 - (aq)": 2
-    "FeF 2+ (aq)": 1
-    "FeF2 + (aq)": 2
-    "FeF3 (aq)": 3
 
 - iron:
   total_conc: 3.54e-8
@@ -995,20 +454,6 @@ MassBalance:
     "Fe(OH)3 (aq)": 1
     "Fe(OH)4 - (aq)": 1
     "Fe2(OH)2 4+ (aq)": 2
-    "FeHIDO 2+ (ad)": 1
-    "Fe(IDO)2 - (ad)": 1
-    "FeH(IDO)2 (ad)": 1
-    "FeH2(IDO)2 + (ad)": 1
-    "FeOH(IDO)2 2- (ad)": 1
-    "FeB(OH)4 2+ (aq)": 1
-    "Fe(B(OH)4)2 + (aq)": 1
-    "FeF 2+ (aq)": 1
-    "FeF2 + (aq)": 1
-    "FeF3 (aq)": 1
-    "FeSO4 + (aq)": 1
-    "Fe(SO4)2 - (aq)": 1
-    "FeCl 2+ (aq)": 1
-    "FeCl2 + (aq)": 1
 
 - copper:
   total_conc: 8.25e-8
@@ -1041,8 +486,6 @@ MassBalance:
   - delta:
     "B(OH)3 (aq)": 1
     "B(OH)4 - (aq)": 1
-    "FeB(OH)4 2+ (aq)": 1
-    "Fe(B(OH)4)2 + (aq)": 2
 ...
 
 EquilRxn:
@@ -1481,69 +924,6 @@ EquilRxn:
     "Cu 2+ (aq)": -1
     "Cl - (aq)": -4
     "CuCl4 2- (aq)": 1
-
-- rxn68:
-  logK: 8.58
-  - stoichiometry:
-    "Fe 3+ (aq)": -1
-    "B(OH)4 - (aq)": -1
-    "FeB(OH)4 2+ (aq)": 1
-
-- rxn69:
-  logK: 15.54
-  - stoichiometry:
-    "Fe 3+ (aq)": -1
-    "B(OH)4 - (aq)": -2
-    "Fe(B(OH)4)2 + (aq)": 1
-
-- rxn70:
-  logK: 5.18
-  - stoichiometry:
-    "Fe 3+ (aq)": -1
-    "F - (aq)": -1
-    "FeF 2+ (aq)": 1
-
-- rxn71:
-  logK: 9.11
-  - stoichiometry:
-    "Fe 3+ (aq)": -1
-    "F - (aq)": -2
-    "FeF2 + (aq)": 1
-
-- rxn72:
-  logK: 11.93
-  - stoichiometry:
-    "Fe 3+ (aq)": -1
-    "F - (aq)": -2
-    "FeF3 (aq)": 1
-
-- rxn73:
-  logK: 2.21
-  - stoichiometry:
-    "Fe 3+ (aq)": -1
-    "SO4 2- (aq)": -1
-    "FeSO4 + (aq)": 1
-
-- rxn74:
-  logK: 3.17
-  - stoichiometry:
-    "Fe 3+ (aq)": -1
-    "SO4 2- (aq)": -2
-    "Fe(SO4)2 - (aq)": 1
-
-- rxn75:
-  logK: 0.45
-  - stoichiometry:
-    "Fe 3+ (aq)": -1
-    "Cl - (aq)": -1
-    "FeCl 2+ (aq)": 1
-
-- rxn76:
-  logK: -0.36
-  - stoichiometry:
-    "Fe 3+ (aq)": -1
-    "Cl - (aq)": -2
-    "FeCl2 + (aq)": 1
 ...
 
 "AF1":
@@ -1551,118 +931,12 @@ EquilRxn:
 spec_area: 15000.0     #Units: m^2/kg
 total_mass: 8.2e-6     #Units: kg
 surf_activity: uniquac #ideal floryhuggins uniquac
-include_surfcharge: false
+include_surfcharge: true
 
 - ligand01:
-  name: AO - (ad)
-  num_rxns: 12
-
-- ligand02:
   name: IDO 2- (ad)
-  num_rxns: 27
+  num_rxns: 7
 
-...
-
-"AF1-AO - (ad)":
----
-spec_mole: 1.45       #Units: mol/kg
-ligand_charge: 0
-
-- rxn01:
-  logK: 13.6
-  - stoichiometry:
-    "UO2 2+ (aq)": -1
-    "AO - (ad)": -1
-    "UO2AO + (ad)": 1
-
-- rxn02:
-  logK: 23.7
-  - stoichiometry:
-    "UO2 2+ (aq)": -1
-    "AO - (ad)": -2
-    "UO2(AO)2 (ad)": 1
-
-- rxn03:
-  logK: 27.9
-  - stoichiometry:
-    "UO2 2+ (aq)": -1
-    "AO - (ad)": -3
-    "UO2(AO)3 - (ad)": 1
-
-- rxn04:
-  logK: 15.8
-  - stoichiometry:
-    "UO2 2+ (aq)": -1
-    "CO3 2- (aq)": -1
-    "AO - (ad)": -1
-    "UO2CO3AO - (ad)": 1
-
-- rxn05:
-  logK: 25.5
-  - stoichiometry:
-    "UO2 2+ (aq)": -1
-    "CO3 2- (aq)": -1
-    "AO - (ad)": -2
-    "UO2CO3(AO)2 2- (ad)": 1
-
-- rxn06:
-  logK: 40.55
-  - stoichiometry:
-    "VO4 3- (aq)": -1
-    "H + (aq)": -4
-    "AO - (ad)": -1
-    "VO2AO (ad)": 1
-    "H2O (l)": 2
-
-- rxn07:
-  logK: 48.35
-  - stoichiometry:
-    "VO4 3- (aq)": -1
-    "H + (aq)": -4
-    "AO - (ad)": -2
-    "VO2(AO)2 - (ad)": 1
-    "H2O (l)": 2
-
-- rxn08:
-  logK: 51.35
-  - stoichiometry:
-    "VO4 3- (aq)": -1
-    "H + (aq)": -5
-    "AO - (ad)": -2
-    "VOOH(AO)2 (ad)": 1
-    "H2O (l)": 2
-
-- rxn09:
-  logK: 66.25
-  - stoichiometry:
-    "VO4 3- (aq)": -1
-    "H + (aq)": -6
-    "AO - (ad)": -3
-    "V(AO)(AO_H)2 (ad)": 1
-    "H2O (l)": 4
-
-- rxn10:
-  logK: 62.35
-  - stoichiometry:
-    "VO4 3- (aq)": -1
-    "H + (aq)": -8
-    "AO - (ad)": -3
-    "V(AO)3 2+ (ad)": 1
-    "H2O (l)": 4
-
-- rxn11:
-  logK: 13.21
-  - stoichiometry:
-    "H + (aq)": -1
-    "AO - (ad)": -1
-    "HAO (ad)": 1
-
-- rxn12:
-  logK: 18.99
-  - stoichiometry:
-    "H + (aq)": -2
-    "AO - (ad)": -1
-    "H2AO + (ad)": 1
 ...
 
 "AF1-IDO 2- (ad)":
@@ -1670,222 +944,55 @@ ligand_charge: 0
 spec_mole: 3.3       #Units: mol/kg
 ligand_charge: 0
 
-- rxn01:
-  logK: 19.2
-  - stoichiometry:
-    "UO2 2+ (aq)": -1
-    "IDO 2- (ad)": -1
-    "UO2IDO (ad)": 1
-
-- rxn02:
-  logK: 23.5
-  - stoichiometry:
-    "UO2 2+ (aq)": -1
-    "H + (aq)": -1
-    "IDO 2- (ad)": -1
-    "UO2HIDO + (ad)": 1
-
-- rxn03:
-  logK: 29.0
-  - stoichiometry:
-    "UO2 2+ (aq)": -1
-    "IDO 2- (ad)": -2
-    "UO2(IDO)2 2- (ad)": 1
-
-- rxn04:
-  logK: 38.9
-  - stoichiometry:
-    "UO2 2+ (aq)": -1
-    "H + (aq)": -1
-    "IDO 2- (ad)": -2
-    "UO2(HIDO)IDO - (ad)": 1
-
-- rxn05:
-  logK: 44.2
-  - stoichiometry:
-    "UO2 2+ (aq)": -1
-    "H + (aq)": -2
-    "IDO 2- (ad)": -2
-    "UO2(HIDO)2 (ad)": 1
-
-- rxn06:
-  logK: 25.2
-  - stoichiometry:
-    "UO2 2+ (aq)": -1
-    "CO3 2- (aq)": -1
-    "IDO 2- (ad)": -1
-    "UO2CO3IDO 2- (ad)": 1
-
-- rxn07:
-  logK: 29.2
-  - stoichiometry:
-    "UO2 2+ (aq)": -1
-    "CO3 2- (aq)": -1
-    "H + (aq)": -1
-    "IDO 2- (ad)": -1
-    "UO2CO3HIDO - (ad)": 1
-
-- rxn08:
-  logK: 45.1 
-  - stoichiometry:
-    "VO4 3- (aq)": -1
-    "H + (aq)": -3
-    "IDO 2- (ad)": -1
-    "VO2IDO_H 2- (ad)": 1
-    "H2O (l)": 2
-
-- rxn09:
-  logK: 48.5
-  - stoichiometry:
-    "VO4 3- (aq)": -1
-    "H + (aq)": -4
-    "IDO 2- (ad)": -1
-    "VO2IDO - (ad)": 1
-    "H2O (l)": 2
-
-- rxn10:
-  logK: 51.9
-  - stoichiometry:
-    "VO4 3- (aq)": -1
-    "H + (aq)": -5
-    "IDO 2- (ad)": -1
-    "H2O (l)": 2
-    "VO2HIDO (ad)": 1
-
-- rxn11:
-  logK: 59.4
-  - stoichiometry:
-    "VO4 3- (aq)": -1
-    "H + (aq)": -4
-    "IDO 2- (ad)": -2
-    "H2O (l)": 3
-    "VO(IDO_H)2 3- (ad)": 1
-
-- rxn12:
-  logK: 76.2
-  - stoichiometry:
-    "VO4 3- (aq)": -1
-    "H + (aq)": -6
-    "IDO 2- (ad)": -2
-    "H2O (l)": 4
-    "V(IDO_H)2 - (ad)": 1
-
-- rxn13:
-  logK: 77.8 
-  - stoichiometry:
-    "VO4 3- (aq)": -1
-    "H + (aq)": -7
-    "IDO 2- (ad)": -2
-    "H2O (l)": 4
-    "V(IDO)(IDO_H) (ad)": 1
-
-- rxn14:
-  logK: 74.6 
-  - stoichiometry:
-    "VO4 3- (aq)": -1
-    "H + (aq)": -8
-    "IDO 2- (ad)": -2
-    "H2O (l)": 4
-    "V(IDO)2 + (ad)": 1
-
-- rxn15:
-  logK: 76.7 #Na
-  - stoichiometry:
-    "VO4 3- (aq)": -1
-    "H + (aq)": -6
-    "IDO 2- (ad)": -2
-    "Na + (aq)": -1
-    "H2O (l)": 4
-    "NaV(IDO_H)2 (ad)": 1
-
-- rxn16:
+- rxn1:
   logK: 12.85
   - stoichiometry:
     "H + (aq)": -1
     "IDO 2- (ad)": -1
     "HIDO - (ad)": 1
 
-- rxn17:
+- rxn2:
   logK: 23.84
   - stoichiometry:
     "H + (aq)": -2
     "IDO 2- (ad)": -1
     "H2IDO (ad)": 1
 
-- rxn18:
+- rxn3:
   logK: 25.97
   - stoichiometry:
     "H + (aq)": -3
     "IDO 2- (ad)": -1
     "H3IDO + (ad)": 1
 
-- rxn19:
-  logK: 22.7 #27.3
-  - stoichiometry:
-    "Fe 3+ (aq)": -1
-    "H + (aq)": -1
-    "IDO 2- (ad)": -1
-    "FeHIDO 2+ (ad)": 1
-
-- rxn20:
-  logK: 32.0 #38.6
-  - stoichiometry:
-    "Fe 3+ (aq)": -1
-    "IDO 2- (ad)": -2
-    "Fe(IDO)2 - (ad)": 1
-
-- rxn21:
-  logK: 38.8 #46.8
-  - stoichiometry:
-    "Fe 3+ (aq)": -1
-    "H + (aq)": -1
-    "IDO 2- (ad)": -2
-    "FeH(IDO)2 (ad)": 1
-
-- rxn22:
-  logK: 43.7 #52.6
-  - stoichiometry:
-    "Fe 3+ (aq)": -1
-    "H + (aq)": -2
-    "IDO 2- (ad)": -2
-    "FeH2(IDO)2 + (ad)": 1
-
-- rxn23:
-  logK: 23.0 #27.7
-  - stoichiometry:
-    "Fe 3+ (aq)": -1
-    "H2O (l)": -1
-    "IDO 2- (ad)": -2
-    "FeOH(IDO)2 2- (ad)": 1
-    "H + (aq)": 1
-
-- rxn24:
-  logK: 15.86 #20.2
+- rxn4:
+  logK: 20.2
   - stoichiometry:
     "Cu 2+ (aq)": -1
     "IDO 2- (ad)": -1
     "CuIDO (ad)": 1
 
-- rxn25:
-  logK: 18.84 #24.0
+- rxn5:
+  logK: 24.0
   - stoichiometry:
     "Cu 2+ (aq)": -1
     "H + (aq)": -1
     "IDO 2- (ad)": -1
     "CuHIDO + (ad)": 1
 
-- rxn26:
-  logK: 20.17 #25.7
+- rxn6:
+  logK: 25.7
   - stoichiometry:
     "Cu 2+ (aq)": -1
     "IDO 2- (ad)": -2
     "Cu(IDO)2 2- (ad)": 1
 
-- rxn27:
-  logK: 29.59 #37.7
+- rxn7:
+  logK: 37.7
   - stoichiometry:
     "Cu 2+ (aq)": -1
     "H + (aq)": -1
     "IDO 2- (ad)": -2
     "CuH(IDO)2 - (ad)": 1
+
 ...
