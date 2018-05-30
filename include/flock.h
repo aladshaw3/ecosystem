@@ -36,5 +36,6 @@
 #include "dove.h"
 #include "crow.h"
 #include "mesh.h"
+#include "crane.h"
 
 #endif

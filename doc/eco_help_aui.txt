@@ -67,6 +67,7 @@ Usage Notes
 (13) DOVE (Dynamic Ode solver with Various Established methods)
 (14) CROW (Coupled Reaction Object Workspace)
 (15) MESH (NO ACRONYM) - Runs tests associated with mesh objects
+(16) CRANE (Cloud Rise After Nuclear Explosion) - Runs tests associated with simulating nuclear debris clouds
 
         CURRENTLY AVAILABLE EXECUTABLES        
 -----------------------------------------------

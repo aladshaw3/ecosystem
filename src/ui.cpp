@@ -74,6 +74,7 @@ void aui_help()
 	puts("(13) DOVE (Dynamic Ode solver with Various Established methods)\n");
 	puts("(14) CROW (Coupled Reaction Object Workspace)\n");
 	puts("(15) MESH (NO ACRONYM) - Runs tests associated with mesh objects\n");
+	puts("(16) CRANE (Cloud Rise After Nuclear Explosion) - Runs tests associated with simulating nuclear debris clouds\n");
 	
 	puts("        CURRENTLY AVAILABLE EXECUTABLES        ");
 	puts("-----------------------------------------------\n");
@@ -145,6 +146,9 @@ void bui_help()
 	
 	puts("(15) MESH (NO ACRONYM) - Runs tests associated with mesh objects\n");
 	puts("\tThis runs tests associated with the mesh objects and sub-objects developed in ecosystem. These tests are primarily intended for developer purposes and do not produce any specific outcomes.\n");
+	
+	puts("(16) CRANE (Cloud Rise After Nuclear Explosion) - Runs tests associated with simulating nuclear debris clouds\n");
+	puts("\tThis runs tests associated with the cloud rise estimations following a nuclear explosion. There are a series of 9 coupled ODEs that must be solved. Output for each timestep in the test case is provided in an output file.\n");
 	
 	puts("        CURRENTLY AVAILABLE EXECUTABLES        ");
 	puts("-----------------------------------------------\n");
@@ -327,6 +331,11 @@ bool valid_test_string(const std::string &input, UI_DATA *ui_dat)
 	else if (allLower(input) == "mesh")
 	{
 		ui_dat->option = mesh;
+		valid_input = true;
+	}
+	else if (allLower(input) == "crane")
+	{
+		ui_dat->option = crane;
 		valid_input = true;
 	}
 	else
@@ -674,6 +683,7 @@ bool valid_input_tests(UI_DATA *ui_dat)
 	std::cout << "(7)  MOLA        (8)  MONKFISH     (9)  SANDBOX\n";
 	std::cout << "(10) SCOPSOWL    (11) SHARK        (12) SKUA\n";
 	std::cout << "(13) DOVE        (14) CROW         (15) MESH\n";
+	std::cout << "(16) CRANE        \n";
 	std::cout << "\nChoice: ";
 	std::cin >> ui_dat->user_input[0];
 	std::cout << std::endl;
@@ -806,6 +816,13 @@ bool valid_input_tests(UI_DATA *ui_dat)
 			case 15:
 			{
 				ui_dat->option = mesh;
+				valid_input = true;
+				break;
+			}
+				
+			case 16:
+			{
+				ui_dat->option = crane;
 				valid_input = true;
 				break;
 			}
@@ -1063,6 +1080,10 @@ int run_test(UI_DATA *ui_dat)
 			
 		case mesh:
 			success = MESH_TESTS();
+			break;
+			
+		case crane:
+			success = CRANE_TESTS();
 			break;
 			
 		default:

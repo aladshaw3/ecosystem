@@ -67,6 +67,10 @@ The following message provides information on running this software with the bas
 
 	This runs tests associated with the mesh objects and sub-objects developed in ecosystem. These tests are primarily intended for developer purposes and do not produce any specific outcomes.
 
+(16) CRANE (Cloud Rise After Nuclear Explosion) - Runs tests associated with simulating nuclear debris clouds
+
+	This runs tests associated with the cloud rise estimations following a nuclear explosion. There are a series of 9 coupled ODEs that must be solved. Output for each timestep in the test case is provided in an output file.
+
         CURRENTLY AVAILABLE EXECUTABLES        
 -----------------------------------------------
 
