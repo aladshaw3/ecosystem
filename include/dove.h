@@ -386,9 +386,7 @@ protected:
 		Each "vector" index denotes a row in the full matrix. In each row, there is a map of the non-zero
 		elements. Doing the mapping in this way allows for the sparcity of the matrix to easily change 
 		while also allowing for relatively fast access to the non-zero elements. 
-	 
-		\note An unordered map would allow for faster access of specific elements, but may be slower when
-		iterating through that map. May consider changing to unordered map in the future. */
+	 */
 	std::vector< std::map<int, double (*) (int i, int j, const Matrix<double> &u, double t, const void *data, const Dove &dove)> > user_jacobi;
 	const void *user_data;														///< Pointer for user defined data structure
 	
