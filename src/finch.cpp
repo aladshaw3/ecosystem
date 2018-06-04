@@ -3942,6 +3942,19 @@ int FINCH_TESTS()
 		Output = fopen("output/FINCH_TEST_Output.txt","w+");
 	}
 	
+	//Temp input
+	double tempD, tempV, tempR, tempL, tempT;
+	std::cout << "Input D (m^2/s): ";
+	std::cin >> tempD;
+	std::cout << "Input v (m/s): ";
+	std::cin >> tempV;
+	std::cout << "Input R (-): ";
+	std::cin >> tempR;
+	std::cout << "Input t (s): ";
+	std::cin >> tempT;
+	std::cout << "Input L (m): ";
+	std::cin >> tempL;
+	
   	//Change Parameters for Testing
 	dat.uIC = 0.0;
 	//dat.uIC = 1.0;
@@ -3980,18 +3993,27 @@ int FINCH_TESTS()
   	dat.kfnp1 = 0.0;
 	//dat.L = 0.127;
   	//dat.L = 1.0;
-	dat.L = 0.762; //m
+	dat.L = 0.762 + 0.0254; //m
 	//dat.L = 2.0*M_PI;
   	dat.s = 1.0;
 	//dat.T = 0.2;
 	//dat.T = 1.0;
-	dat.T = 1000; //s
+	dat.T = 1400; //s
 	//dat.T = 60.0;
 	dat.LN = 40;
 	//dat.LN = 10;
 	dat.t_old = 0.0;
 	dat.dt_old = 0.0;
   	dat.d = 0;
+	
+	dat.DIC = tempD; //m^2/s
+	dat.Do = tempD;
+	dat.vIC = tempV; //m/s
+	dat.vo = tempV;
+	dat.RIC = tempR;
+	dat.Ro = tempR;
+	dat.L = tempL; //m
+	dat.T = tempT; //s
 	
   	//Boolean Statments
 	dat.Dirichlet = false;
@@ -4082,7 +4104,7 @@ int FINCH_TESTS()
 			dat.t = INFINITY;
 		
 		// Pulse input test
-		if (dat.t >= 3.2)
+		if (dat.t >= 2.5)
 			dat.uo = 0.0;
 		
 		//Call the routine
