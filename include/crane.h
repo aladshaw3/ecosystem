@@ -114,6 +114,9 @@ public:
 	void set_temperature(double val);					///< Set the temperature parameter
 	void set_energy(double val);						///< Set the energy parameter
 	void set_current_time(double val);					///< Set the current_time parameter
+	void set_vapor_pressure(double val);				///< Set the vapor_pressure parameter
+	void set_sat_vapor_pressure(double val);			///< Set the sat_vapor_pressure parameter
+	void set_includeShearVel(bool val);					///< Set the includeShearVel parameter
 	
 	// Below are listed all the manual get functions for manually retrieving individual values
 	double get_eps();							///< Get the eps parameter
@@ -176,6 +179,48 @@ public:
 	double get_temperature();					///< Get the temperature parameter
 	double get_energy();						///< Get the energy parameter
 	double get_current_time();					///< Get the current_time parameter
+	double get_vapor_pressure();				///< Get the vapor_pressure parameter
+	double get_sat_vapor_pressure();			///< Get the sat_vapor_pressure parameter
+	bool get_includeShearVel();					///< Get the includeShearVel parameter
+	
+	// Below are listed all the compute functions for various parameter values
+	void compute_beta_prime(double x, double s, double w);		///< Function to compute ratio of cloud gas density to local density
+	void compute_q_x(double x);									///< Function to compute virtual temperature ratio for x
+	void compute_q_xe(double xe);								///< Function to compute virtual temperature ratio for xe
+	void compute_apparent_temp(double T, double x);				///< Function to compute apparent temp (T*) given T and x
+	void compute_apparent_amb_temp(double Te, double xe);		///< Function to compute apparent amb temp (Te*) given Te and xe
+	void compute_char_vel(double u, double E);					///< Function to compute characteristic velocity
+	void compute_air_viscosity(double T);						///< Function to compute air viscosity
+	void compute_vapor_pressure(double P, double x);			///< Function to compute vapor pressure in cloud given P and x
+	void compute_sat_vapor_pressure(double T);					///< Function to compute saturation vapor pressure given T
+	void compute_xe(double Te, double P, double HR);			///< Function to compute ambient air water ratio given Te, P, and HR
+	void compute_air_density(double P, double Pws, double HR, double T);///< Function to compute air density given P, Pws, HR, T
+	void compute_spec_heat_entrain(double T);					///< Function to compute specific heat of entrained air given T
+	void compute_spec_heat_water(double T);						///< Function to compute specific heat of water vapor given T
+	void compute_spec_heat_conds(double T);						///< Function to compute specific heat of condensed matter given T
+	void compute_actual_spec_heat(double T, double x);			///< Function to compute the actual specific heat of the cloud given T
+	void compute_k_temp(double T);								///< Function to compute temperature factor based on given T
+	void compute_mean_spec_heat(double T, double x, double s, double w);///< Function to compute mean specific heat given T, x, s, and w
+	void compute_cloud_volume(double m, double x, double s, double w, double T, double P);///< Function to compute cloud volume
+	void compute_vert_rad(double z);							///< Function to compute vertical cloud radius given z
+	void compute_horz_rad(double m, double x, double s, double w, double T, double P, double z);///< Function to compute horizontal radius
+	void compute_sigma_turbulence(double E, double z);			///< Function to compute sigma turbulence given E and z
+	void compute_surf_area(double m, double x, double s, double w, double T, double P, double z);///< Function to compute cloud surface area
+	void compute_shear_vel(double z, Matrix<double> v);			///< Function to compute the shear_vel based on z and v
+	/// Function to compute the shear_ratio based on the fundamental variables and atmospheric parameters
+	void compute_shear_ratio(double m, double x, double s, double w, double T, double P, double z, double u, double E, Matrix<double> v);
+	
+	// Below are listed compute functions specific for initial conditions or system constants
+	void compute_k(double W);									///< Function to compute cloud rise yield from W
+	void compute_k2(double W);									///< Function to compute power function yield from W
+	void compute_mu(double W);									///< Function to compute energy yield from W
+	void compute_force_factor(double W);						///< Function to compute the force factor from W
+	
+	// Below are listed return functions specific for temperature integral related values
+	
+	// Below are listed return functions specific for air profile related values
+	
+	// Below are listed return functions specific for particle histograms
 	
 protected:
 	double eps;						///< Ratio of molecular wieghts for water-vapor and dry air					(eps)
@@ -223,6 +268,9 @@ protected:
 	double air_viscosity;			///< Viscosity of air in cloud (kg/m/s)										(eta)
 	double slip_factor;				///< Slip factor for particle settling (-)									(s)
 	double davies_num;				///< Unitless number for particle settling analysis (-)						(ND)
+	double vapor_pressure;			///< Vapor pressure inside the cloud at cloud altitude (Pa)					(Pv)
+	double sat_vapor_pressure;		///< Saturation vapor pressure inside the cloud (Pa)						(Pws)
+	bool includeShearVel;			///< Boolean statement used to include (true) or ignore (false) wind shear
 	
 	std::map<double, double> amb_temp;	///< Ambient Temperature (K) at various altitudes (m)					(Te)
 	std::map<double, double> atm_press;	///< Atmospheric Pressure (Pa) at various altitudes (m)					(P)

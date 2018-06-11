@@ -64,6 +64,9 @@ Crane::Crane()
 	air_viscosity = 1.81e-5;
 	slip_factor = 1.0;
 	davies_num = 1.0;
+	vapor_pressure = 0.0;
+	sat_vapor_pressure = 1.0;
+	includeShearVel = false;
 	min_dia = 0.0001;
 	max_dia = 10000.0;
 	mean_dia = 0.407;
@@ -395,6 +398,21 @@ void Crane::set_current_time(double val)
 	this->current_time = val;
 }
 
+void Crane::set_vapor_pressure(double val)
+{
+	this->vapor_pressure = val;
+}
+
+void Crane::set_sat_vapor_pressure(double val)
+{
+	this->sat_vapor_pressure = val;
+}
+
+void Crane::set_includeShearVel(bool val)
+{
+	this->includeShearVel = val;
+}
+
 ///< Below are the get functions for various parameters
 
 double Crane::get_eps()
@@ -696,6 +714,225 @@ double Crane::get_current_time()
 {
 	return this->current_time;
 }
+
+double Crane::get_vapor_pressure()
+{
+	return this->vapor_pressure;
+}
+
+double Crane::get_sat_vapor_pressure()
+{
+	return this->sat_vapor_pressure;
+}
+
+bool Crane::get_includeShearVel()
+{
+	return this->includeShearVel;
+}
+
+// Below are listed all the compute function for various parameters
+void Crane::compute_beta_prime(double x, double s, double w)
+{
+	double val = (1.0 + x) / (1.0 + x + s + w);
+	this->set_beta_prime(val);
+}
+
+void Crane::compute_q_x(double x)
+{
+	double val = (1.0 + (this->get_eps()/x)) / (1.0 + x);
+	this->set_q_x(val);
+}
+
+void Crane::compute_q_xe(double xe)
+{
+	double val = (1.0 + (this->get_eps()/xe)) / (1.0 + xe);
+	this->set_q_xe(val);
+}
+
+void Crane::compute_apparent_temp(double T, double x)
+{
+	this->compute_q_x(x);
+	this->set_apparent_temp(T*this->get_q_x());
+}
+
+void Crane::compute_apparent_amb_temp(double Te, double xe)
+{
+	this->compute_q_xe(xe);
+	this->set_apparent_amb_temp(Te*this->get_q_xe());
+}
+
+void Crane::compute_char_vel(double u, double E)
+{
+	this->set_char_vel(fmax(fabs(u), 2.0*E));
+}
+
+void Crane::compute_air_viscosity(double T)
+{
+	this->set_air_viscosity( (145.8*pow(10.0, -8.0)*pow(T, (3.0/2.0))) / (110.4 + T) );
+}
+
+void Crane::compute_vapor_pressure(double P, double x)
+{
+	this->set_vapor_pressure( (P*x) / (this->get_eps() + x) );
+}
+
+void Crane::compute_sat_vapor_pressure(double T)
+{
+	this->set_sat_vapor_pressure( 611.0*pow(T/273.0, -5.13)*exp(25.0*(T-273.0)/T) );
+}
+
+void Crane::compute_xe(double Te, double P, double HR)
+{
+	double val = (109.98*HR/29.0/P)*pow(Te/273.0, -5.13)*exp(25.0*(Te-273.0)/Te);
+	this->set_xe(val);
+}
+
+void Crane::compute_air_density(double P, double Pws, double HR, double T)
+{
+	//Assume P and Pws come in as Pa --> convert to mBar
+	P = P*0.01;
+	Pws = Pws*0.01;
+	double val = ( P - (Pws*HR*(1.0-this->eps)/100.0) ) / (2.8679*T);
+	this->set_air_density(val);
+}
+
+void Crane::compute_spec_heat_entrain(double T)
+{
+	if (T <= 2300.0)
+	{
+		this->set_spec_heat_entrain(946.6+(0.1971*T));
+	}
+	else
+	{
+		this->set_spec_heat_entrain(-3587.5+(2.125*T));
+	}
+}
+
+void Crane::compute_spec_heat_water(double T)
+{
+	this->set_spec_heat_water(1697.66+(1.144174*T));
+}
+
+void Crane::compute_spec_heat_conds(double T)
+{
+	if (T <= 848.0)
+	{
+		this->set_spec_heat_conds(781.6+(0.5612*T)-(1.881e7/T/T));
+	}
+	else
+	{
+		this->set_spec_heat_conds(1003.8+(0.1351*T));
+	}
+}
+
+void Crane::compute_actual_spec_heat(double T, double x)
+{
+	this->compute_spec_heat_entrain(T);
+	this->compute_spec_heat_water(T);
+	this->set_actual_spec_heat( (this->get_spec_heat_entrain() + (x*this->get_spec_heat_water())) / (1.0+x) );
+}
+
+void Crane::compute_k_temp(double T)
+{
+	if (T > this->equil_temp)
+	{
+		this->set_k_temp(0.0);
+	}
+	else
+	{
+		this->set_k_temp(1.0);
+	}
+}
+
+void Crane::compute_mean_spec_heat(double T, double x, double s, double w)
+{
+	this->compute_k_temp(T);
+	this->compute_beta_prime(x, s, w);
+	this->compute_actual_spec_heat(T, x);
+	this->compute_spec_heat_conds(T);
+	this->set_mean_spec_heat( this->get_beta_prime()*this->get_actual_spec_heat() + (1.0-this->get_beta_prime())*this->get_k_temp()*this->get_spec_heat_conds() );
+}
+
+void Crane::compute_cloud_volume(double m, double x, double s, double w, double T, double P)
+{
+	this->compute_beta_prime(x, s, w);
+	this->compute_apparent_temp(T, x);
+	this->set_cloud_volume( m*this->get_beta_prime()*this->get_gas_const()*this->get_apparent_temp()/P );
+}
+
+void Crane::compute_vert_rad(double z)
+{
+	this->set_vert_rad( this->get_mu()*(z - this->get_adjusted_height()) );
+}
+
+void Crane::compute_horz_rad(double m, double x, double s, double w, double T, double P, double z)
+{
+	this->compute_cloud_volume(m, x, s, w, T, P);
+	this->compute_vert_rad(z);
+	this->set_horz_rad( sqrt(3.0*this->get_cloud_volume()/4.0/M_PI/this->get_vert_rad()) );
+}
+
+void Crane::compute_sigma_turbulence(double E, double z)
+{
+	this->compute_vert_rad(z);
+	this->set_sigma_turbulence( this->get_k3()*pow(2.0*E, 3.0/2.0)/this->get_vert_rad() );
+}
+
+void Crane::compute_surf_area(double m, double x, double s, double w, double T, double P, double z)
+{
+	this->compute_horz_rad(m, x, s, w, T, P, z);
+	this->set_surf_area( 4.0*M_PI*pow(this->get_horz_rad(), 2.0) );
+}
+
+void Crane::compute_shear_vel(double z, Matrix<double> v)
+{
+	this->compute_vert_rad(z);
+	this->set_shear_vel( 2.0*this->get_vert_rad()*v.norm() );
+}
+
+void Crane::compute_shear_ratio(double m, double x, double s, double w, double T, double P, double z, double u, double E, Matrix<double> v)
+{
+	this->compute_surf_area(m, x, s, w, T, P, z);
+	this->compute_cloud_volume(m, x, s, w, T, P);
+	this->compute_char_vel(u, E);
+	this->compute_shear_vel(z, v);
+	
+	if (this->get_includeShearVel() == true)
+	{
+		this->set_shear_ratio( this->get_mu()*((this->get_surf_area()*this->get_char_vel()/this->get_cloud_volume())+(this->get_k6()*1.5*this->get_shear_vel()/this->get_horz_rad())) );
+	}
+	else
+	{
+		this->set_shear_ratio( this->get_mu()*(this->get_surf_area()*this->get_char_vel()/this->get_cloud_volume()) );
+	}
+}
+
+// Below are listed compute functions specific for initial conditions
+void Crane::compute_k(double W)
+{
+	this->set_k(595.0*pow(W, -0.0527));
+}
+
+void Crane::compute_k2(double W)
+{
+	this->set_k2( fmax(0.004, fmin(0.1, 0.1*pow(W, -(1.0/3.0)))) );
+}
+
+void Crane::compute_mu(double W)
+{
+	this->set_mu( fmax(fmax(0.12, 0.1*pow(W, 0.1)), 0.01*pow(W, (1.0/3.0)))	);
+}
+
+void Crane::compute_force_factor(double W)
+{
+	this->set_force_factor(0.44*pow(W, 0.014));
+}
+
+// Below are listed return functions specific for temperature integral related values
+
+// Below are listed return functions specific for air profile related values
+
+// Below are listed return functions specific for particle histograms
 
 /*
  *	-------------------------------------------------------------------------------------
