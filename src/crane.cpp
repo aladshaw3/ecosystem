@@ -96,8 +96,20 @@ Crane::~Crane()
 	part_conc.clear();
 }
 
-///< Below are the set functions for various parameters
+// Below are some display functions used for testing different functions
+void Crane::display_part_hist()
+{
+	std::cout << "Normalized Particle Distribution by Size\n";
+	std::cout << "----------------------------------------\n";
+	std::cout << "Size (um)\tNormalDist\n";
+	//Iterate through map
+	for (std::map<double,double>::iterator it=this->part_hist.begin(); it!=this->part_hist.end(); ++it)
+	{
+		std::cout << it->first << "\t" << it->second << std::endl;
+	}
+}
 
+///< Below are the set functions for various parameters
 void Crane::set_eps(double val)
 {
 	this->eps = val;
@@ -907,6 +919,24 @@ void Crane::compute_shear_ratio(double m, double x, double s, double w, double T
 	}
 }
 
+void Crane::compute_slip_factor(double Dj, double T, double P)
+{
+	this->compute_air_viscosity(T);
+	this->set_slip_factor( 1.0 + (54.088*this->get_air_viscosity()*pow(T, 0.5)/Dj/P) );
+}
+
+void Crane::compute_davies_num(double Dj, double P, double Pws, double HR, double T)
+{
+	this->compute_air_density(P, Pws, HR, T);
+	this->compute_air_viscosity(T);
+	this->set_davies_num( (4.0*this->get_air_density()*(this->get_part_density()-this->get_air_density())*this->get_grav()*pow(Dj,3.0)) / (3.0*pow(this->get_air_viscosity(),2.0)) );
+}
+
+void Crane::compute_settling_rate(double P, double Pws, double HR, double T)
+{
+	//Need to compute slip and davies first
+}
+
 // Below are listed compute functions specific for initial conditions
 void Crane::compute_k(double W)
 {
@@ -928,6 +958,44 @@ void Crane::compute_force_factor(double W)
 	this->set_force_factor(0.44*pow(W, 0.014));
 }
 
+void Crane::compute_part_hist(double min, double max, int size, double avg, double std)
+{
+	if (max <= min || max <= 0.0 || min <= 0.0 || size < 1 || avg <= 0.0 || std <= 0.0)
+	{
+		mError(distribution_impossible);
+		return;
+	}
+	
+	this->set_min_dia(min);
+	this->set_max_dia(max);
+	this->set_num_bins(size);
+	this->set_mean_dia(avg);
+	this->set_std_dia(std);
+	
+	double distance = log10(this->get_max_dia()) - log10(this->get_min_dia());
+	double logstep = distance / ((double)this->get_num_bins());
+	double current_log = log10(this->get_min_dia());
+	double sum = 0.0;
+	
+	//Loop to create initial map
+	for (int i=0; i<this->get_num_bins(); i++)
+	{
+		double next_log = current_log + logstep;
+		double Dj = sqrt(pow(10.0,current_log)*pow(10.0,next_log));
+		double Nj = ( 1.0 / sqrt(2.0*M_PI) / Dj / log(this->get_std_dia()) ) * exp( -0.5*pow( log(Dj/this->get_mean_dia())/log(this->get_std_dia()) ,2.0) );
+		this->part_hist[Dj] = Nj*(pow(10.0,next_log)-pow(10.0,current_log));
+		this->settling_rate[Dj] = 0.0;
+		sum += Nj*(pow(10.0,next_log)-pow(10.0,current_log));
+		current_log += logstep;
+	}
+	
+	//Iterate through map to normalize
+	for (std::map<double,double>::iterator it=this->part_hist.begin(); it!=this->part_hist.end(); ++it)
+	{
+		it->second = it->second/sum;
+	}
+}
+
 // Below are listed return functions specific for temperature integral related values
 
 // Below are listed return functions specific for air profile related values
@@ -944,7 +1012,13 @@ int CRANE_TESTS()
 {
 	int success = 0;
 	
-	std::cout << "here is the test\n";
+	Crane test;
+	
+	std::cout << "Test of particle histogram\n\n";
+	
+	test.compute_part_hist(0.0001, 100, 10, 0.15, 2);
+	test.display_part_hist();
+	
 	
 	return success;
 }

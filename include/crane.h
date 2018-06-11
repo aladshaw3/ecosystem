@@ -53,6 +53,9 @@ public:
 	Crane();						///< Default Constructor
 	~Crane();						///< Default Destructor
 	
+	// Below are some display functions used for testing different functions
+	void display_part_hist();
+	
 	// Below are listed all the manual set functions for manually changing individual values
 	void set_eps(double val);							///< Set the eps parameter
 	void set_grav(double val);							///< Set the grav parameter
@@ -209,12 +212,17 @@ public:
 	void compute_shear_vel(double z, Matrix<double> v);			///< Function to compute the shear_vel based on z and v
 	/// Function to compute the shear_ratio based on the fundamental variables and atmospheric parameters
 	void compute_shear_ratio(double m, double x, double s, double w, double T, double P, double z, double u, double E, Matrix<double> v);
+	void compute_slip_factor(double Dj, double T, double P);	///< Function to compute the slip_factor given Dj, T, and P
+	void compute_davies_num(double Dj, double P, double Pws, double HR, double T);///< Function to compute davies_num given the conditions
+	/// Function to compute the settling rates of all particles based on given conditions
+	void compute_settling_rate(double P, double Pws, double HR, double T);
 	
 	// Below are listed compute functions specific for initial conditions or system constants
 	void compute_k(double W);									///< Function to compute cloud rise yield from W
 	void compute_k2(double W);									///< Function to compute power function yield from W
 	void compute_mu(double W);									///< Function to compute energy yield from W
 	void compute_force_factor(double W);						///< Function to compute the force factor from W
+	void compute_part_hist(double min, double max, int size, double avg, double std);///< Function to compute normalized particle histogram
 	
 	// Below are listed return functions specific for temperature integral related values
 	
@@ -299,7 +307,7 @@ protected:
 	double s_soil;								///< Mixing ratio for suspended soils to dry air (kg/kg)		(s)
 	double temperature;							///< Temperature of the air in the cloud (K)					(T)
 	double energy;								///< Mass-less Kinetic Energy in the cloud (m^2/s^2)			(E)
-	std::map<double, double> part_conc;	///< Number of particles per volume (#/m^3) for given size (um)			(n_j(t))
+	std::map<double, double> part_conc;		///< Number of particles per volume (#/m^3) for given size (um)		(n_j(t))
 	double current_time;						///< Current time since explosion (s)							(t)
 	
 private:

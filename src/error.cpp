@@ -232,6 +232,10 @@ void error(int flag)
 			std::cout << "\nError!\n\nExplict methods are invalid for Steady-State Problems!" << std::endl;
 			break;
 			
+		case distribution_impossible:
+			std::cout << "\nError!\n\nImpossible Particle Distribution!" << std::endl;
+			break;
+			
 		default:
 			std::cout << "\nUndefined or Generic Error!!!" << std::endl;
 			break;
