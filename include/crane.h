@@ -196,6 +196,8 @@ public:
 	void compute_air_viscosity(double T);						///< Function to compute air viscosity
 	void compute_vapor_pressure(double P, double x);			///< Function to compute vapor pressure in cloud given P and x
 	void compute_sat_vapor_pressure(double T);					///< Function to compute saturation vapor pressure given T
+	
+	//Check functions below (for xe, check inside air_density)
 	void compute_xe(double Te, double P, double HR);			///< Function to compute ambient air water ratio given Te, P, and HR
 	void compute_air_density(double P, double HR, double T);///< Function to compute air density given P, Pws, HR, T
 	void compute_spec_heat_entrain(double T);					///< Function to compute specific heat of entrained air given T
