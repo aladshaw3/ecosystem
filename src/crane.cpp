@@ -799,13 +799,24 @@ void Crane::compute_xe(double Te, double P, double HR)
 	this->set_xe(val);
 }
 
-void Crane::compute_air_density(double P, double Pws, double HR, double T)
+void Crane::compute_air_density(double P, double HR, double T)
 {
 	//Assume P and Pws come in as Pa --> convert to mBar
-	P = P*0.01;
-	Pws = Pws*0.01;
-	double val = ( P - (Pws*HR*(1.0-this->eps)/100.0) ) / (2.8679*T);
-	this->set_air_density(val);
+	//this->compute_sat_vapor_pressure(T);
+	//P = P*0.01;
+	//double Pws = this->get_sat_vapor_pressure()*0.01;
+	//double val = ( P - (Pws*HR*(1.0-this->eps)/100.0) ) / (2.8679*T);
+	//this->set_air_density(val);
+	
+	//NOTE: Changed DEFLIC's model because it failed to produce good results at high humidity
+	
+	this->compute_sat_vapor_pressure(T);
+	double Pv = this->get_sat_vapor_pressure()*HR/100.0;
+	double x = 0.62198 * Pv / (P - Pv);
+	if (Pv < P)
+		this->set_air_density( (P/this->get_gas_const()/T)*(1.0+x)/(1.0+x*1.609) );
+	else
+		this->set_air_density( (P/this->get_gas_const()/T)*(1.0)/(1.609) );
 }
 
 void Crane::compute_spec_heat_entrain(double T)
@@ -921,20 +932,77 @@ void Crane::compute_shear_ratio(double m, double x, double s, double w, double T
 
 void Crane::compute_slip_factor(double Dj, double T, double P)
 {
+	//NOTE: Dj comes in as um --> convert to m
+	double dj = Dj/1.0E+6;
 	this->compute_air_viscosity(T);
-	this->set_slip_factor( 1.0 + (54.088*this->get_air_viscosity()*pow(T, 0.5)/Dj/P) );
+	this->set_slip_factor( 1.0 + (54.088*this->get_air_viscosity()*pow(T, 0.5)/dj/P) );
 }
 
-void Crane::compute_davies_num(double Dj, double P, double Pws, double HR, double T)
+void Crane::compute_davies_num(double Dj, double P, double HR, double T)
 {
-	this->compute_air_density(P, Pws, HR, T);
+	//NOTE: Dj comes in as um --> convert to m
+	double dj = Dj/1.0E+6;
+	this->compute_air_density(P, HR, T);
 	this->compute_air_viscosity(T);
-	this->set_davies_num( (4.0*this->get_air_density()*(this->get_part_density()-this->get_air_density())*this->get_grav()*pow(Dj,3.0)) / (3.0*pow(this->get_air_viscosity(),2.0)) );
+	this->set_davies_num( (4.0*this->get_air_density()*(this->get_part_density()-this->get_air_density())*this->get_grav()*pow(dj,3.0)) / (3.0*pow(this->get_air_viscosity(),2.0)) );
 }
 
-void Crane::compute_settling_rate(double P, double Pws, double HR, double T)
+void Crane::compute_settling_rate(double Dj, double P, double HR, double T)
 {
-	//Need to compute slip and davies first
+	//NOTE: Dj comes in as um --> convert to m
+	double dj = Dj/1.0E+6;
+	this->compute_slip_factor(Dj, T, P);
+	this->compute_davies_num(Dj, P, HR, T);
+	
+	//If statements for flow conditions
+	if (this->get_davies_num() <= 0.3261)
+	{
+		this->settling_rate[Dj] = this->get_air_viscosity()*this->get_davies_num()*this->get_slip_factor()/24.0/this->get_air_density()/dj;
+	}
+	else if (this->get_davies_num() <= 84.175)
+	{
+		double Y = log(this->get_davies_num());
+		double exp = -3.18657 + (0.992696*Y) - (0.153193E-2*pow(Y,2.0)) - (0.987059E-3*pow(Y,3.0)) - (0.578878E-3*pow(Y,4.0)) + (0.855176E-4*pow(Y,5.0)) - (0.327815E-5*pow(Y,6.0));
+		this->settling_rate[Dj] = this->get_air_viscosity()*exp*this->get_slip_factor()/this->get_air_density()/dj;
+	}
+	else if (this->get_davies_num() < 140.0)
+	{
+		double poly = 4.1667E-2 - (2.3363E-4*this->get_davies_num()) + (2.0154E-6*this->get_davies_num()*this->get_davies_num()) - (6.9105E-9*this->get_davies_num()*this->get_davies_num()*this->get_davies_num());
+		this->settling_rate[Dj] = this->get_air_viscosity()*poly*this->get_slip_factor()*this->get_davies_num()/this->get_air_density()/dj;
+	}
+	else if (this->get_davies_num() < 4.5E+7)
+	{
+		double X = log10(this->get_davies_num());
+		double poly = -1.29536 + (0.986*X) - (0.046677*X*X) + (1.1235E-3*X*X*X);
+		this->settling_rate[Dj] = this->get_air_viscosity()*pow(10.0,poly)/this->get_air_density()/dj;
+	}
+	else
+	{
+		double X = log10(this->get_davies_num());
+		double poly = -1.29536 + (0.986*X) - (0.046677*X*X) + (1.1235E-3*X*X*X);
+		this->settling_rate[Dj] = this->get_air_viscosity()*pow(10.0,poly)/this->get_air_density()/dj;
+	}
+}
+
+void Crane::compute_total_mass_fallout_rate(double m, double x, double s, double w, double T, double P, double z,
+											double HR, const Matrix<double> &n)
+{
+	this->compute_horz_rad(m, x, s, w, T, P, z);
+	this->settling_rate.clear();
+	double sum = 0.0;
+	int i = 0;
+	
+	//Iterate through part_hist map for summation term (NOTE: first N variables in matrix will correspond to particle concentrations)
+	for (std::map<double,double>::iterator it=this->part_hist.begin(); it!=this->part_hist.end(); ++it)
+	{
+		//NOTE: Dj comes in as um --> convert to m
+		double dj = it->first/1.0E+6;
+		this->compute_settling_rate(it->first, P, HR, T);
+		sum += this->settling_rate[it->first]*M_PI*dj*dj*dj*n(i,0)/6.0;
+		i++;
+	}
+	sum = sum*M_PI*this->get_horz_rad()*this->get_horz_rad()*this->get_part_density();
+	this->set_total_mass_fallout_rate(sum);
 }
 
 // Below are listed compute functions specific for initial conditions
@@ -1019,6 +1087,20 @@ int CRANE_TESTS()
 	test.compute_part_hist(0.0001, 100, 10, 0.15, 2);
 	test.display_part_hist();
 	
+	std::cout << "Test of air viscosity and air density\n\n";
+	std::cout << "Temp(oC)\tVis.(cP)\tDens.(kg/m^3)\tPws(Pa)\n";
+	for (int i=0; i<=20 ; i++)
+	{
+		double temp = 273 + ((double)i*10);
+		test.compute_air_viscosity(temp);
+		
+		//NOTE: Pressure must be given in Pa (Pressure (Pa), Rel_Humid (%), temp (K))
+		test.compute_air_density(101325, 10.0, temp);
+		
+		test.compute_sat_vapor_pressure(temp);
+		
+		std::cout << temp-273.0 << "\t" << test.get_air_viscosity()*1000.0 << "\t" << test.get_air_density() << "\t" << test.get_sat_vapor_pressure() <<std::endl;
+	}
 	
 	return success;
 }

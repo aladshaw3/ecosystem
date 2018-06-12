@@ -197,7 +197,7 @@ public:
 	void compute_vapor_pressure(double P, double x);			///< Function to compute vapor pressure in cloud given P and x
 	void compute_sat_vapor_pressure(double T);					///< Function to compute saturation vapor pressure given T
 	void compute_xe(double Te, double P, double HR);			///< Function to compute ambient air water ratio given Te, P, and HR
-	void compute_air_density(double P, double Pws, double HR, double T);///< Function to compute air density given P, Pws, HR, T
+	void compute_air_density(double P, double HR, double T);///< Function to compute air density given P, Pws, HR, T
 	void compute_spec_heat_entrain(double T);					///< Function to compute specific heat of entrained air given T
 	void compute_spec_heat_water(double T);						///< Function to compute specific heat of water vapor given T
 	void compute_spec_heat_conds(double T);						///< Function to compute specific heat of condensed matter given T
@@ -213,9 +213,10 @@ public:
 	/// Function to compute the shear_ratio based on the fundamental variables and atmospheric parameters
 	void compute_shear_ratio(double m, double x, double s, double w, double T, double P, double z, double u, double E, Matrix<double> v);
 	void compute_slip_factor(double Dj, double T, double P);	///< Function to compute the slip_factor given Dj, T, and P
-	void compute_davies_num(double Dj, double P, double Pws, double HR, double T);///< Function to compute davies_num given the conditions
-	/// Function to compute the settling rates of all particles based on given conditions
-	void compute_settling_rate(double P, double Pws, double HR, double T);
+	void compute_davies_num(double Dj, double P, double HR, double T);///< Function to compute davies_num given the conditions
+	void compute_settling_rate(double Dj, double P, double HR, double T);///< Function to compute the settling rates of specific particle size
+	/// Function to compute total_mass_fallout_rate based on all given variables and parameters
+	void compute_total_mass_fallout_rate(double m, double x, double s, double w, double T, double P, double z, double HR, const Matrix<double> &n);
 	
 	// Below are listed compute functions specific for initial conditions or system constants
 	void compute_k(double W);									///< Function to compute cloud rise yield from W
@@ -307,7 +308,7 @@ protected:
 	double s_soil;								///< Mixing ratio for suspended soils to dry air (kg/kg)		(s)
 	double temperature;							///< Temperature of the air in the cloud (K)					(T)
 	double energy;								///< Mass-less Kinetic Energy in the cloud (m^2/s^2)			(E)
-	std::map<double, double> part_conc;		///< Number of particles per volume (#/m^3) for given size (um)		(n_j(t))
+	std::map<double, double> part_conc;			///< Number of particles per volume (#/m^3) given size (um)		(n_j(t))
 	double current_time;						///< Current time since explosion (s)							(t)
 	
 private:
