@@ -790,7 +790,13 @@ void Crane::compute_vapor_pressure(double P, double x)
 
 void Crane::compute_sat_vapor_pressure(double T)
 {
-	this->set_sat_vapor_pressure( 611.0*pow(T/273.0, -5.13)*exp(25.0*(T-273.0)/T) );
+	//this->set_sat_vapor_pressure( 611.0*pow(T/273.0, -5.13)*exp(25.0*(T-273.0)/T) );
+	
+	//NOTE: Changed DEFLIC's model because it failed to produce good results at high temperatures
+	
+	T = T - 273.15;
+	double Pws = 618.8*exp(17.27*T/(T+237.3));
+	this->set_sat_vapor_pressure(Pws);
 }
 
 void Crane::compute_xe(double Te, double P, double HR)
@@ -799,7 +805,7 @@ void Crane::compute_xe(double Te, double P, double HR)
 	this->set_xe(val);
 }
 
-void Crane::compute_air_density(double P, double HR, double T)
+void Crane::compute_air_density(double P, double x, double T)
 {
 	//Assume P and Pws come in as Pa --> convert to mBar
 	//this->compute_sat_vapor_pressure(T);
@@ -810,13 +816,7 @@ void Crane::compute_air_density(double P, double HR, double T)
 	
 	//NOTE: Changed DEFLIC's model because it failed to produce good results at high humidity
 	
-	this->compute_sat_vapor_pressure(T);
-	double Pv = this->get_sat_vapor_pressure()*HR/100.0;
-	double x = 0.62198 * Pv / (P - Pv);
-	if (Pv < P)
-		this->set_air_density( (P/this->get_gas_const()/T)*(1.0+x)/(1.0+x*1.609) );
-	else
-		this->set_air_density( (P/this->get_gas_const()/T)*(1.0)/(1.609) );
+	this->set_air_density( (P/this->get_gas_const()/T)*(1.0+x)/(1.0+x*1.609) );
 }
 
 void Crane::compute_spec_heat_entrain(double T)
@@ -938,21 +938,21 @@ void Crane::compute_slip_factor(double Dj, double T, double P)
 	this->set_slip_factor( 1.0 + (54.088*this->get_air_viscosity()*pow(T, 0.5)/dj/P) );
 }
 
-void Crane::compute_davies_num(double Dj, double P, double HR, double T)
+void Crane::compute_davies_num(double Dj, double P, double x, double T)
 {
 	//NOTE: Dj comes in as um --> convert to m
 	double dj = Dj/1.0E+6;
-	this->compute_air_density(P, HR, T);
+	this->compute_air_density(P, x, T);
 	this->compute_air_viscosity(T);
 	this->set_davies_num( (4.0*this->get_air_density()*(this->get_part_density()-this->get_air_density())*this->get_grav()*pow(dj,3.0)) / (3.0*pow(this->get_air_viscosity(),2.0)) );
 }
 
-void Crane::compute_settling_rate(double Dj, double P, double HR, double T)
+void Crane::compute_settling_rate(double Dj, double P, double x, double T)
 {
 	//NOTE: Dj comes in as um --> convert to m
 	double dj = Dj/1.0E+6;
 	this->compute_slip_factor(Dj, T, P);
-	this->compute_davies_num(Dj, P, HR, T);
+	this->compute_davies_num(Dj, P, x, T);
 	
 	//If statements for flow conditions
 	if (this->get_davies_num() <= 0.3261)
@@ -984,8 +984,7 @@ void Crane::compute_settling_rate(double Dj, double P, double HR, double T)
 	}
 }
 
-void Crane::compute_total_mass_fallout_rate(double m, double x, double s, double w, double T, double P, double z,
-											double HR, const Matrix<double> &n)
+void Crane::compute_total_mass_fallout_rate(double m, double x, double s, double w, double T, double P, double z, const Matrix<double> &n)
 {
 	this->compute_horz_rad(m, x, s, w, T, P, z);
 	this->settling_rate.clear();
@@ -997,7 +996,7 @@ void Crane::compute_total_mass_fallout_rate(double m, double x, double s, double
 	{
 		//NOTE: Dj comes in as um --> convert to m
 		double dj = it->first/1.0E+6;
-		this->compute_settling_rate(it->first, P, HR, T);
+		this->compute_settling_rate(it->first, P, x, T);
 		sum += this->settling_rate[it->first]*M_PI*dj*dj*dj*n(i,0)/6.0;
 		i++;
 	}
@@ -1066,7 +1065,181 @@ void Crane::compute_part_hist(double min, double max, int size, double avg, doub
 
 // Below are listed return functions specific for temperature integral related values
 
-// Below are listed return functions specific for air profile related values
+// Below are listed functions specific for air profile related operations
+
+void Crane::add_amb_temp(double z, double Te)
+{
+	this->amb_temp[z] = Te;
+}
+
+void Crane::add_atm_press(double z, double P)
+{
+	this->atm_press[z] = P;
+}
+
+void Crane::add_rel_humid(double z, double HR)
+{
+	this->rel_humid[z] = HR;
+}
+
+void Crane::add_wind_vel(double z, double vx, double vy)
+{
+	Matrix<double> v(2,1);
+	v(0,0) = vx;
+	v(1,0) = vy;
+	this->wind_vel[z] = v;
+}
+
+void Crane::create_default_atmosphere()
+{
+	this->amb_temp.clear();
+	this->atm_press.clear();
+	this->rel_humid.clear();
+	this->wind_vel.clear();
+	
+	this->add_amb_temp(-1000, 21.5+273.15);
+	this->add_atm_press(-1000, 11.39*10000.0);
+	this->add_rel_humid(-1000, 0.86);
+	this->add_wind_vel(-1000, 8.19, 0.0);
+	
+	this->add_amb_temp(0, 15.0+273.15);
+	this->add_atm_press(0, 10.13*10000.0);
+	this->add_rel_humid(0, 0.91);
+	this->add_wind_vel(0, 9.04, 0.0);
+	
+	this->add_amb_temp(1000, 8.5+273.15);
+	this->add_atm_press(1000, 8.988*10000.0);
+	this->add_rel_humid(1000, 1.29);
+	this->add_wind_vel(1000, 9.58, 0.0);
+	
+	this->add_amb_temp(2000, 2.0+273.15);
+	this->add_atm_press(2000, 7.95*10000.0);
+	this->add_rel_humid(2000, 3.21);
+	this->add_wind_vel(2000, 9.98, 0.0);
+	
+	this->add_amb_temp(3000, -4.49+273.15);
+	this->add_atm_press(3000, 7.012*10000.0);
+	this->add_rel_humid(3000, 4.80);
+	this->add_wind_vel(3000, 14.06, 0.0);
+	
+	this->add_amb_temp(4000, -10.98+273.15);
+	this->add_atm_press(4000, 6.166*10000.0);
+	this->add_rel_humid(4000, 5.39);
+	this->add_wind_vel(4000, 18.14, 0.0);
+	
+	this->add_amb_temp(5000, -17.47+273.15);
+	this->add_atm_press(5000, 5.405*10000.0);
+	this->add_rel_humid(5000, 13.83);
+	this->add_wind_vel(5000, 20.68, 0.0);
+	
+	this->add_amb_temp(6000, -23.96+273.15);
+	this->add_atm_press(6000, 4.722*10000.0);
+	this->add_rel_humid(6000, 27.61);
+	this->add_wind_vel(6000, 23.21, 0.0);
+	
+	this->add_amb_temp(7000, -30.45+273.15);
+	this->add_atm_press(7000, 4.111*10000.0);
+	this->add_rel_humid(7000, 41.67);
+	this->add_wind_vel(7000, 26.37, 0.0);
+	
+	this->add_amb_temp(8000, -36.94+273.15);
+	this->add_atm_press(8000, 3.565*10000.0);
+	this->add_rel_humid(8000, 49.80);
+	this->add_wind_vel(8000, 29.52, 0.0);
+	
+	this->add_amb_temp(9000, -43.42+273.15);
+	this->add_atm_press(9000, 3.080*10000.0);
+	this->add_rel_humid(9000, 54.80);
+	this->add_wind_vel(9000, 32.37, 0.0);
+	
+	this->add_amb_temp(10000, -49.90+273.15);
+	this->add_atm_press(10000, 2.650*10000.0);
+	this->add_rel_humid(10000, 79.90);
+	this->add_wind_vel(10000, 35.21, 0.0);
+	
+	this->add_amb_temp(15000, -56.5+273.15);
+	this->add_atm_press(15000, 1.211*10000.0);
+	this->add_rel_humid(15000, 83.27);
+	this->add_wind_vel(15000, 28.64, 0.0);
+	
+	this->add_amb_temp(20000, -56.5+273.15);
+	this->add_atm_press(20000, 0.5529*10000.0);
+	this->add_rel_humid(20000, 46.74);
+	this->add_wind_vel(20000, 12.26, 0.0);
+	
+	this->add_amb_temp(25000, -51.6+273.15);
+	this->add_atm_press(25000, 0.2549*10000.0);
+	this->add_rel_humid(25000, 16.33);
+	this->add_wind_vel(25000, 7.51, 0.0);
+	
+	this->add_amb_temp(30000, -46.64+273.15);
+	this->add_atm_press(30000, 0.1197*10000.0);
+	this->add_rel_humid(30000, 3.02);
+	this->add_wind_vel(30000, 20.49, 0.0);
+	
+	this->add_amb_temp(40000, -22.80+273.15);
+	this->add_atm_press(40000, 0.0287*10000.0);
+	this->add_rel_humid(40000, 0.15);
+	this->add_wind_vel(40000, 61.79, 0.0);
+	
+	this->add_amb_temp(50000, -2.5+273.15);
+	this->add_atm_press(50000, 0.007978*10000.0);
+	this->add_rel_humid(50000, 0.003);
+	this->add_wind_vel(50000, 88.44, 0.0);
+	
+	this->add_amb_temp(60000, -26.13+273.15);
+	this->add_atm_press(60000, 0.002196*10000.0);
+	this->add_rel_humid(60000, 0.009);
+	this->add_wind_vel(60000, 74.65, 0.0);
+	
+	this->add_amb_temp(70000, -53.57+273.15);
+	this->add_atm_press(70000, 0.00052*10000.0);
+	this->add_rel_humid(70000, 0.65);
+	this->add_wind_vel(70000, 32.79, 0.0);
+	
+	this->add_amb_temp(80000, -74.51+273.15);
+	this->add_atm_press(80000, 0.00011*10000.0);
+	this->add_rel_humid(80000, 1.28);
+	this->add_wind_vel(80000, 56.37, 0.0);
+}
+
+double Crane::return_amb_temp(double z)
+{
+	double Te = 0.0;
+	
+	//Setup the iterators
+	std::map<double,double>::iterator it=this->amb_temp.begin();
+	std::map<double,double>::reverse_iterator rit=this->amb_temp.rbegin();
+	
+	//Special Case 1: z less than lowest value in map
+	if (z <= it->first)
+		return it->second;
+	
+	//Special Case 2: z greater than highest value in map
+	if (z >= rit->first)
+		return rit->second;
+	
+	//Iterate through map
+	double old_z = it->first;
+	double old_Te = it->second;
+	for (it=this->amb_temp.begin(); it!=this->amb_temp.end(); ++it)
+	{
+		if (it->first > z)
+		{
+			double slope = (it->second - old_Te) / (it->first - old_z);
+			double inter = it->second - (slope*it->first);
+			Te = slope*z + inter;
+			break;
+		}
+		else
+		{
+			old_z = it->first;
+			old_Te = it->second;
+		}
+	}
+	
+	return Te;
+}
 
 // Below are listed return functions specific for particle histograms
 
@@ -1087,20 +1260,44 @@ int CRANE_TESTS()
 	test.compute_part_hist(0.0001, 100, 10, 0.15, 2);
 	test.display_part_hist();
 	
-	std::cout << "Test of air viscosity and air density\n\n";
-	std::cout << "Temp(oC)\tVis.(cP)\tDens.(kg/m^3)\tPws(Pa)\n";
-	for (int i=0; i<=20 ; i++)
+	std::cout << "\nTest of air viscosity and air density\n\n";
+	std::cout << "Temp(oC)\tVis.(cP)\tDens.(kg/m^3)\tPws(Pa)\tPv(Pa)\tCpw(J/kg/K)\tCpa(J/kg/K)\tCs(J/kg/K)\n";
+	for (int i=0; i<=100 ; i++)
 	{
 		double temp = 273 + ((double)i*10);
 		test.compute_air_viscosity(temp);
 		
-		//NOTE: Pressure must be given in Pa (Pressure (Pa), Rel_Humid (%), temp (K))
-		test.compute_air_density(101325, 10.0, temp);
+		test.compute_xe(temp, 101325, 50.0);
+		double x = test.get_xe();
+		
+		//NOTE: Pressure must be given in Pa (Pressure (Pa), x (kg/kg), temp (K))
+		test.compute_air_density(101325, x, temp);
 		
 		test.compute_sat_vapor_pressure(temp);
 		
-		std::cout << temp-273.0 << "\t" << test.get_air_viscosity()*1000.0 << "\t" << test.get_air_density() << "\t" << test.get_sat_vapor_pressure() <<std::endl;
+		test.compute_vapor_pressure(101325, x);
+		
+		test.compute_spec_heat_water(temp);
+		
+		test.compute_spec_heat_entrain(temp);
+		
+		test.compute_spec_heat_conds(temp);
+		
+		std::cout << temp-273.0 << "\t" << test.get_air_viscosity()*1000.0 << "\t" << test.get_air_density() << "\t" << test.get_sat_vapor_pressure() << "\t" << test.get_vapor_pressure() << "\t" << test.get_spec_heat_water() << "\t" << test.get_spec_heat_entrain() << "\t" << test.get_spec_heat_conds() << std::endl;
 	}
+	std::cout << std::endl;
+	
+	test.create_default_atmosphere();
+	
+	
+	std::cout << "\nTest of air profiler\n\n";
+	std::cout << "Alt(m)\tT(K)\tP(Pa)\tHR(%)\tv(m/s)\t\n";
+	for (int i=0; i<=80; i++)
+	{
+		double alt = (double)i*1000.0;
+		std::cout << alt << "\t" << test.return_amb_temp(alt) << std::endl;
+	}
+	
 	
 	return success;
 }

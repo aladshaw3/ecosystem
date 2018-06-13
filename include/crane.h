@@ -24,6 +24,14 @@
  *			H.G. Normet and S. Woolf, "Department of Defense Land Fallout Prediction System - Volume III - Cloud
  *				Rise," U.S. DOD, DASA01-69-C-0077, DASA-1800-III, September 1970.
  *
+ *			References for Default Atmospheric Profile
+ *			------------------------------------------
+ *			Engineering ToolBox, (2001). [online] Available at: https://www.engineeringtoolbox.com 
+ *				Accessed on June 13, 2018.
+ *
+ *			C.J. Brasefield, "Winds at Altitudes up to 80 Kilometers," J. of Geophysical Research, 59,
+ *				233-237, 1954.
+ *
  *
  *  \author Austin Ladshaw
  *	\date 05/30/2018
@@ -196,14 +204,12 @@ public:
 	void compute_air_viscosity(double T);						///< Function to compute air viscosity
 	void compute_vapor_pressure(double P, double x);			///< Function to compute vapor pressure in cloud given P and x
 	void compute_sat_vapor_pressure(double T);					///< Function to compute saturation vapor pressure given T
-	
-	//Check functions below (for xe, check inside air_density)
 	void compute_xe(double Te, double P, double HR);			///< Function to compute ambient air water ratio given Te, P, and HR
-	void compute_air_density(double P, double HR, double T);///< Function to compute air density given P, Pws, HR, T
+	void compute_air_density(double P, double x, double T);		///< Function to compute air density given P, x, and T
 	void compute_spec_heat_entrain(double T);					///< Function to compute specific heat of entrained air given T
 	void compute_spec_heat_water(double T);						///< Function to compute specific heat of water vapor given T
 	void compute_spec_heat_conds(double T);						///< Function to compute specific heat of condensed matter given T
-	void compute_actual_spec_heat(double T, double x);			///< Function to compute the actual specific heat of the cloud given T
+	void compute_actual_spec_heat(double T, double x);			///< Function to compute the actual specific heat of the cloud given T and x
 	void compute_k_temp(double T);								///< Function to compute temperature factor based on given T
 	void compute_mean_spec_heat(double T, double x, double s, double w);///< Function to compute mean specific heat given T, x, s, and w
 	void compute_cloud_volume(double m, double x, double s, double w, double T, double P);///< Function to compute cloud volume
@@ -215,10 +221,10 @@ public:
 	/// Function to compute the shear_ratio based on the fundamental variables and atmospheric parameters
 	void compute_shear_ratio(double m, double x, double s, double w, double T, double P, double z, double u, double E, Matrix<double> v);
 	void compute_slip_factor(double Dj, double T, double P);	///< Function to compute the slip_factor given Dj, T, and P
-	void compute_davies_num(double Dj, double P, double HR, double T);///< Function to compute davies_num given the conditions
-	void compute_settling_rate(double Dj, double P, double HR, double T);///< Function to compute the settling rates of specific particle size
+	void compute_davies_num(double Dj, double P, double x, double T);///< Function to compute davies_num given the conditions
+	void compute_settling_rate(double Dj, double P, double x, double T);///< Function to compute the settling rates of specific particle size
 	/// Function to compute total_mass_fallout_rate based on all given variables and parameters
-	void compute_total_mass_fallout_rate(double m, double x, double s, double w, double T, double P, double z, double HR, const Matrix<double> &n);
+	void compute_total_mass_fallout_rate(double m, double x, double s, double w, double T, double P, double z, const Matrix<double> &n);
 	
 	// Below are listed compute functions specific for initial conditions or system constants
 	void compute_k(double W);									///< Function to compute cloud rise yield from W
@@ -229,7 +235,13 @@ public:
 	
 	// Below are listed return functions specific for temperature integral related values
 	
-	// Below are listed return functions specific for air profile related values
+	// Below are listed functions specific for air profile related operations
+	void add_amb_temp(double z, double Te);						///< Function to add a temperature Te at altitude z
+	void add_atm_press(double z, double P);						///< Function to add a pressure P at altitude z
+	void add_rel_humid(double z, double HR);					///< Function to add a relative humidity HR at altitude z
+	void add_wind_vel(double z, double vx, double vy);			///< Function to add a wind velocity by components at altitude z
+	void create_default_atmosphere();							///< Function to create a default atmosphere from -1,000 m to 80,000 m
+	double return_amb_temp(double z);							///< Function to return the ambient temperature (K) given an altitude z (m)
 	
 	// Below are listed return functions specific for particle histograms
 	
