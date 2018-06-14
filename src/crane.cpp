@@ -45,6 +45,7 @@ Crane::Crane()
 	spec_heat_water = 2108.0;
 	spec_heat_conds = 1480.0;
 	spec_heat_entrain = 1005.0;
+	spec_heat_entrain_integral = 0.0;
 	cloud_volume = 0.0;
 	equil_temp = 1000.0;
 	total_mass_fallout_rate = 0.0;
@@ -233,6 +234,11 @@ void Crane::set_spec_heat_water(double val)
 void Crane::set_spec_heat_entrain(double val)
 {
 	this->spec_heat_entrain = val;
+}
+
+void Crane::set_spec_heat_entrain_integral(double val)
+{
+	this->spec_heat_entrain_integral = val;
 }
 
 void Crane::set_spec_heat_conds(double val)
@@ -550,6 +556,11 @@ double Crane::get_spec_heat_water()
 double Crane::get_spec_heat_entrain()
 {
 	return this->spec_heat_entrain;
+}
+
+double Crane::get_spec_heat_entrain_integral()
+{
+	return this->spec_heat_entrain_integral;
 }
 
 double Crane::get_spec_heat_conds()
@@ -1025,7 +1036,7 @@ void Crane::compute_force_factor(double W)
 	this->set_force_factor(0.44*pow(W, 0.014));
 }
 
-void Crane::compute_part_hist(double min, double max, int size, double avg, double std)
+void Crane::create_part_hist(double min, double max, int size, double avg, double std)
 {
 	if (max <= min || max <= 0.0 || min <= 0.0 || size < 1 || avg <= 0.0 || std <= 0.0)
 	{
@@ -1064,6 +1075,45 @@ void Crane::compute_part_hist(double min, double max, int size, double avg, doub
 }
 
 // Below are listed return functions specific for temperature integral related values
+
+void Crane::compute_spec_heat_entrain_integral(double T, double Te)
+{
+	//Integration by parts for a piecewise polynomial
+	double upper = 0.0, lower = 0.0;
+	if (T > 2300.0)
+		upper = (-3587.5*T + (2.125/2.0)*T*T) - (-3587.5*2300.0 + (2.125/2.0)*2300.0*2300.0);
+	else
+		upper = (946.6*T + (0.1971/2.0)*T*T) - (946.6*2300.0 + (0.1971/2.0)*2300.0*2300.0);
+	
+	if (Te > 2300.0)
+		lower = (-3587.5*2300.0 + (2.125/2.0)*2300.0*2300.0) - (-3587.5*Te + (2.125/2.0)*Te*Te);
+	else
+		lower = (946.6*2300.0 + (0.1971/2.0)*2300.0*2300.0) - (946.6*Te + (0.1971/2.0)*Te*Te);
+	
+	this->set_spec_heat_entrain_integral(upper + lower);
+}
+
+double Crane::return_spec_heat_water_integral(double T, double Te)
+{
+	return (1697.66*T + (1.144174/2.0)*T*T) - (1697.66*Te + (1.144174/2.0)*Te*Te);
+}
+
+double Crane::return_spec_heat_conds_integral(double T, double Te)
+{
+	//Integration by parts for a piecewise polynomial
+	double upper = 0.0, lower = 0.0;
+	if (T > 848.0)
+		upper = (1003.8*T + (0.1351/2.0)*T*T) - (1003.8*848.0 + (0.1351/2.0)*848.0*848.0);
+	else
+		upper = (781.6*T + (0.5612/2.0)*T*T + 1.881e+7/T) - (781.6*848.0 + (0.5612/2.0)*848.0*848.0 + 1.881e+7/848.0);
+	
+	if (Te > 848.0)
+		lower = (1003.8*848.0 + (0.1351/2.0)*848.0*848.0) - (1003.8*Te + (0.1351/2.0)*Te*Te);
+	else
+		lower = (781.6*848.0 + (0.5612/2.0)*848.0*848.0 + 1.881e+7/848.0) - (781.6*Te + (0.5612/2.0)*Te*Te + 1.881e+7/Te);
+	
+	return upper+lower;
+}
 
 // Below are listed functions specific for air profile related operations
 
@@ -1241,7 +1291,125 @@ double Crane::return_amb_temp(double z)
 	return Te;
 }
 
-// Below are listed return functions specific for particle histograms
+double Crane::return_atm_press(double z)
+{
+	double P = 0.0;
+	
+	//Setup the iterators
+	std::map<double,double>::iterator it=this->atm_press.begin();
+	std::map<double,double>::reverse_iterator rit=this->atm_press.rbegin();
+	
+	//Special Case 1: z less than lowest value in map
+	if (z <= it->first)
+		return it->second;
+	
+	//Special Case 2: z greater than highest value in map
+	if (z >= rit->first)
+		return rit->second;
+	
+	//Iterate through map
+	double old_z = it->first;
+	double old_Te = it->second;
+	for (it=this->atm_press.begin(); it!=this->atm_press.end(); ++it)
+	{
+		if (it->first > z)
+		{
+			double slope = (it->second - old_Te) / (it->first - old_z);
+			double inter = it->second - (slope*it->first);
+			P = slope*z + inter;
+			break;
+		}
+		else
+		{
+			old_z = it->first;
+			old_Te = it->second;
+		}
+	}
+	
+	return P;
+}
+
+double Crane::return_rel_humid(double z)
+{
+	double HR = 0.0;
+	
+	//Setup the iterators
+	std::map<double,double>::iterator it=this->rel_humid.begin();
+	std::map<double,double>::reverse_iterator rit=this->rel_humid.rbegin();
+	
+	//Special Case 1: z less than lowest value in map
+	if (z <= it->first)
+		return it->second;
+	
+	//Special Case 2: z greater than highest value in map
+	if (z >= rit->first)
+		return rit->second;
+	
+	//Iterate through map
+	double old_z = it->first;
+	double old_Te = it->second;
+	for (it=this->rel_humid.begin(); it!=this->rel_humid.end(); ++it)
+	{
+		if (it->first > z)
+		{
+			double slope = (it->second - old_Te) / (it->first - old_z);
+			double inter = it->second - (slope*it->first);
+			HR = slope*z + inter;
+			break;
+		}
+		else
+		{
+			old_z = it->first;
+			old_Te = it->second;
+		}
+	}
+	
+	return HR;
+}
+
+Matrix<double> Crane::return_wind_vel(double z)
+{
+	Matrix<double> HR;
+	
+	//Setup the iterators
+	std::map<double,Matrix<double>>::iterator it=this->wind_vel.begin();
+	std::map<double,Matrix<double>>::reverse_iterator rit=this->wind_vel.rbegin();
+	
+	//Special Case 1: z less than lowest value in map
+	if (z <= it->first)
+		return it->second;
+	
+	//Special Case 2: z greater than highest value in map
+	if (z >= rit->first)
+		return rit->second;
+	
+	//Iterate through map
+	double old_z = it->first;
+	Matrix<double> old_Te = it->second;
+	for (it=this->wind_vel.begin(); it!=this->wind_vel.end(); ++it)
+	{
+		if (it->first > z)
+		{
+			Matrix<double> slope = (it->second - old_Te) / (it->first - old_z);
+			Matrix<double> inter = it->second - (slope*it->first);
+			HR = slope*z + inter;
+			break;
+		}
+		else
+		{
+			old_z = it->first;
+			old_Te = it->second;
+		}
+	}
+	
+	return HR;
+}
+
+double Crane::return_wind_speed(double z)
+{
+	Matrix<double> v = this->return_wind_vel(z);
+	return v.norm();
+}
 
 /*
  *	-------------------------------------------------------------------------------------
@@ -1257,7 +1425,7 @@ int CRANE_TESTS()
 	
 	std::cout << "Test of particle histogram\n\n";
 	
-	test.compute_part_hist(0.0001, 100, 10, 0.15, 2);
+	test.create_part_hist(0.0001, 100, 10, 0.15, 2);
 	test.display_part_hist();
 	
 	std::cout << "\nTest of air viscosity and air density\n\n";
@@ -1295,9 +1463,16 @@ int CRANE_TESTS()
 	for (int i=0; i<=80; i++)
 	{
 		double alt = (double)i*1000.0;
-		std::cout << alt << "\t" << test.return_amb_temp(alt) << std::endl;
+		std::cout << alt << "\t" << test.return_amb_temp(alt) << "\t" << test.return_atm_press(alt) << "\t" << test.return_rel_humid(alt) << "\t" << test.return_wind_speed(alt) << std::endl;
 	}
 	
+	std::cout << "\nTest of integrals\n\n";
+	
+	double T = 900.0;
+	double Te = 200.0;
+	test.compute_spec_heat_entrain_integral(T, Te);
+	std::cout << "Integral of c_pa(T) from T = " << T << " to Te = " << Te << " ==>\t" << test.get_spec_heat_entrain_integral() << std::endl;
+	std::cout << "Integral of c_s(T) from T = " << T << " to Te = " << Te << " ==>\t" << test.return_spec_heat_conds_integral(T,Te) << std::endl;
 	
 	return success;
 }

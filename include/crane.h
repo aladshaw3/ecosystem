@@ -90,6 +90,7 @@ public:
 	void set_actual_spec_heat(double val);				///< Set the actual_spec_heat parameter
 	void set_spec_heat_water(double val);				///< Set the spec_heat_water parameter
 	void set_spec_heat_entrain(double val);				///< Set the spec_heat_entrain parameter
+	void set_spec_heat_entrain_integral(double val);	///< Set the spec_heat_entrain_integral parameter
 	void set_spec_heat_conds(double val);				///< Set the spec_heat_conds parameter
 	void set_cloud_volume(double val);					///< Set the cloud_volume parameter
 	void set_equil_temp(double val);					///< Set the equil_temp parameter
@@ -155,6 +156,7 @@ public:
 	double get_actual_spec_heat();				///< Get the actual_spec_heat parameter
 	double get_spec_heat_water();				///< Get the spec_heat_water parameter
 	double get_spec_heat_entrain();				///< Get the spec_heat_entrain parameter
+	double get_spec_heat_entrain_integral();	///< Get the spec_heat_entrain_integral parameter
 	double get_spec_heat_conds();				///< Get the spec_heat_conds parameter
 	double get_cloud_volume();					///< Get the cloud_volume parameter
 	double get_equil_temp();					///< Get the equil_temp parameter
@@ -231,9 +233,12 @@ public:
 	void compute_k2(double W);									///< Function to compute power function yield from W
 	void compute_mu(double W);									///< Function to compute energy yield from W
 	void compute_force_factor(double W);						///< Function to compute the force factor from W
-	void compute_part_hist(double min, double max, int size, double avg, double std);///< Function to compute normalized particle histogram
+	void create_part_hist(double min, double max, int size, double avg, double std);///< Function to compute normalized particle histogram
 	
 	// Below are listed return functions specific for temperature integral related values
+	void compute_spec_heat_entrain_integral(double T, double Te);///< Function to compute integral of spec_heat_entrain from Te to T
+	double return_spec_heat_water_integral(double T, double Te);///< Function to return integral of spec_heat_water from Te to T
+	double return_spec_heat_conds_integral(double T, double Te);///< Function to return integral of spec_heat_conds from Te to T
 	
 	// Below are listed functions specific for air profile related operations
 	void add_amb_temp(double z, double Te);						///< Function to add a temperature Te at altitude z
@@ -242,8 +247,10 @@ public:
 	void add_wind_vel(double z, double vx, double vy);			///< Function to add a wind velocity by components at altitude z
 	void create_default_atmosphere();							///< Function to create a default atmosphere from -1,000 m to 80,000 m
 	double return_amb_temp(double z);							///< Function to return the ambient temperature (K) given an altitude z (m)
-	
-	// Below are listed return functions specific for particle histograms
+	double return_atm_press(double z);							///< Function to return the atmospheric pressure (Pa) given an altitude z (m)
+	double return_rel_humid(double z);							///< Function to return the relative humidity (%) given an altitude z (m)
+	Matrix<double> return_wind_vel(double z);					///< Function to return wind velocity vector (m/s) given an altitude z (m)
+	double return_wind_speed(double z);							///< Function to return wind speed (m/s) given an altitude (m)
 	
 protected:
 	double eps;						///< Ratio of molecular wieghts for water-vapor and dry air					(eps)
@@ -271,6 +278,7 @@ protected:
 	double actual_spec_heat;		///< Actual specific heat of the cloud mass (J/kg/K)						(c_p(T))
 	double spec_heat_water;			///< Specific heat of water vapor (J/kg/K)									(c_pw(T))
 	double spec_heat_entrain;		///< Specific heat of entrained air (J/kg/K)								(c_pa(T))
+	double spec_heat_entrain_integral;///< Integrated Specific heat of entrained air (J/kg)						(integral(c_pa(T)*dT))
 	double spec_heat_conds;			///< Specific heat of condensed matter (J/kg/K)								(c_s(T))
 	double cloud_volume;			///< Volume of the debris cloud (m^3)										(V)
 	double equil_temp;				///< Initial thermal equilibrium temperature (K)							(T_ri)
