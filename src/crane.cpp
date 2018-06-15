@@ -59,7 +59,7 @@ Crane::Crane()
 	det_alt = 0.0;
 	burst_height = 0.0;
 	ground_alt = 0.0;
-	energy_frac = 0.0;
+	energy_frac = 0.5;
 	eccentricity = 0.75;
 	air_density = 1.225;
 	air_viscosity = 1.81e-5;
@@ -67,6 +67,9 @@ Crane::Crane()
 	davies_num = 1.0;
 	vapor_pressure = 0.0;
 	sat_vapor_pressure = 1.0;
+	initial_soil_mass = 0.0;
+	initial_water_mass = 0.0;
+	initial_air_mass = 0.0;
 	includeShearVel = false;
 	min_dia = 0.0001;
 	max_dia = 10000.0;
@@ -426,6 +429,21 @@ void Crane::set_sat_vapor_pressure(double val)
 	this->sat_vapor_pressure = val;
 }
 
+void Crane::set_initial_soil_mass(double val)
+{
+	this->initial_soil_mass = val;
+}
+
+void Crane::set_initial_water_mass(double val)
+{
+	this->initial_water_mass = val;
+}
+
+void Crane::set_initial_air_mass(double val)
+{
+	this->initial_air_mass = val;
+}
+
 void Crane::set_includeShearVel(bool val)
 {
 	this->includeShearVel = val;
@@ -748,6 +766,21 @@ double Crane::get_sat_vapor_pressure()
 	return this->sat_vapor_pressure;
 }
 
+double Crane::get_initial_soil_mass()
+{
+	return this->initial_soil_mass;
+}
+
+double Crane::get_initial_water_mass()
+{
+	return this->initial_water_mass;
+}
+
+double Crane::get_initial_air_mass()
+{
+	return this->initial_air_mass;
+}
+
 bool Crane::get_includeShearVel()
 {
 	return this->includeShearVel;
@@ -1036,6 +1069,11 @@ void Crane::compute_force_factor(double W)
 	this->set_force_factor(0.44*pow(W, 0.014));
 }
 
+void Crane::compute_equil_temp(double W)
+{
+	this->set_equil_temp(200.0*log10(W)+1000.0);
+}
+
 void Crane::create_part_hist(double min, double max, int size, double avg, double std)
 {
 	if (max <= min || max <= 0.0 || min <= 0.0 || size < 1 || avg <= 0.0 || std <= 0.0)
@@ -1044,6 +1082,8 @@ void Crane::create_part_hist(double min, double max, int size, double avg, doubl
 		return;
 	}
 	
+	this->part_hist.clear();
+	this->settling_rate.clear();
 	this->set_min_dia(min);
 	this->set_max_dia(max);
 	this->set_num_bins(size);
@@ -1072,6 +1112,129 @@ void Crane::create_part_hist(double min, double max, int size, double avg, doubl
 	{
 		it->second = it->second/sum;
 	}
+}
+
+void Crane::compute_det_alt(double gz, double hb)
+{
+	this->set_det_alt(gz+hb);
+}
+
+void Crane::compute_initial_cloud_alt(double W, double gz, double hb)
+{
+	this->compute_det_alt(gz, hb);
+	this->set_cloud_alt(this->get_det_alt() + 108.0*pow(W,0.349));
+}
+
+void Crane::compute_initial_current_time(double W, double gz, double hb)
+{
+	this->compute_det_alt(gz, hb);
+	double scaled = this->get_det_alt() / pow(W,1.0/3.0);
+	double t2m;
+	
+	if (scaled <= 180.0)
+	{
+		t2m = 0.037*pow(1.216,scaled/180.0)*pow(W, 0.49 - (0.07*scaled/180.0));
+	}
+	else
+	{
+		t2m = 0.045*pow(W, 0.42);
+	}
+	
+	this->set_current_time(56.0*t2m*pow(W, -0.3));
+}
+
+void Crane::compute_initial_temperature(double W, double gz, double hb)
+{
+	this->compute_initial_current_time(W, gz, hb);
+	double scaled = this->get_det_alt() / pow(W,1.0/3.0);
+	double t2m;
+	double K, n;
+	
+	if (scaled <= 180.0)
+	{
+		t2m = 0.037*pow(1.216,scaled/180.0)*pow(W, 0.49 - (0.07*scaled/180.0));
+		K = 5980.0*pow(1.145, scaled/180.0)*pow(W, -0.0395 + (0.0264*scaled/180.0));
+		n = -0.4473*pow(W, 0.0436);
+	}
+	else
+	{
+		t2m = 0.045*pow(W, 0.42);
+		K = 6847.0*pow(W, -0.0131);
+		n = -0.4473*pow(W, 0.0436);
+	}
+	
+	this->set_temperature( K*pow(this->get_current_time()/t2m, n) + 1500.0 );
+}
+
+void Crane::compute_initial_soil_mass(double W, double gz, double hb)
+{
+	this->compute_det_alt(gz, hb);
+	double scaled;
+	//Check for underground detonation
+	if (hb < 0.0)
+	{
+		scaled = fabs(hb)/pow(W, 1.0/3.4);
+		double Rad = 112.5 + 0.755*scaled - 9.6e-6*scaled*scaled*scaled - 9.11e-12*scaled*scaled*scaled*scaled*scaled;
+		double D = 32.7 + 0.851*scaled - 2.52e-5*scaled*scaled*scaled - 1.78e-10*scaled*scaled*scaled*scaled*scaled;
+		
+		this->set_initial_soil_mass( 2.182*pow(W, 3.0/3.4)*Rad*Rad*D );
+	}
+	else
+	{
+		scaled = this->get_det_alt() / pow(W, 1.0/3.4);
+		
+		if (scaled <= 180.0)
+		{
+			this->set_initial_soil_mass( 0.07741*pow(W, 3.0/3.4)*pow(180.0-scaled,2.0)*(360.0+scaled) );
+		}
+		else
+		{
+			this->set_initial_soil_mass( 90.7 );
+		}
+	}
+}
+
+void Crane::compute_initial_part_hist(double W, double gz, double hb, int size)
+{
+	this->compute_det_alt(gz, hb);
+	double scaled = this->get_det_alt() / pow(W, 1.0/3.4);
+	
+	if (scaled < 180.0)
+	{
+		this->create_part_hist(0.0001, 100, size, 0.407, 4.0);
+	}
+	else
+	{
+		this->create_part_hist(0.0001, 100, size, 0.15, 2.0);
+	}
+}
+
+void Crane::compute_initial_air_mass(double W, double gz, double hb)
+{
+	this->compute_initial_cloud_alt(W, gz, hb);
+	this->compute_force_factor(W);
+	this->compute_initial_soil_mass(W, gz, hb);
+	this->compute_initial_temperature(W, gz, hb);
+	this->compute_equil_temp(W);
+	double Tei = this->return_amb_temp(this->get_cloud_alt());
+	double P = this->return_atm_press(this->get_cloud_alt());
+	double HR = this->return_rel_humid(this->get_cloud_alt());
+	this->compute_xe(Tei, P, HR);
+	double cs_int = this->return_spec_heat_conds_integral(this->get_equil_temp(), Tei);
+	this->compute_spec_heat_entrain_integral(this->get_temperature(), Tei);
+	double cpw_int = this->return_spec_heat_water_integral(this->get_temperature(), Tei);
+	
+	this->set_initial_air_mass( this->get_energy_frac()*(4.18e12*this->get_force_factor()*W - this->get_initial_soil_mass()*cs_int)/(this->get_spec_heat_entrain_integral() + (this->get_xe()*cpw_int)) );
+}
+
+void Crane::compute_initial_water_mass(double W, double gz, double hb)
+{
+	this->compute_initial_air_mass(W, gz, hb);
+	double Tei = this->return_amb_temp(this->get_cloud_alt());
+	double cs_int = this->return_spec_heat_conds_integral(this->get_equil_temp(), Tei);
+	double cpw_int = this->return_spec_heat_water_integral(this->get_temperature(), Tei);
+	
+	this->set_initial_water_mass( ( (1.0-this->get_energy_frac())*(4.18e12*this->get_force_factor()*W - this->get_initial_soil_mass()*cs_int)/(cpw_int + this->get_latent_heat()) ) + (this->get_xe()*this->get_initial_air_mass()) );
 }
 
 // Below are listed return functions specific for temperature integral related values

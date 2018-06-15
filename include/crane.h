@@ -128,6 +128,9 @@ public:
 	void set_current_time(double val);					///< Set the current_time parameter
 	void set_vapor_pressure(double val);				///< Set the vapor_pressure parameter
 	void set_sat_vapor_pressure(double val);			///< Set the sat_vapor_pressure parameter
+	void set_initial_soil_mass(double val);				///< Set the initial_soil_mass parameter
+	void set_initial_water_mass(double val);			///< Set the initial_water_mass parameter
+	void set_initial_air_mass(double val);				///< Set the initial_air_mass parameter
 	void set_includeShearVel(bool val);					///< Set the includeShearVel parameter
 	
 	// Below are listed all the manual get functions for manually retrieving individual values
@@ -194,6 +197,9 @@ public:
 	double get_current_time();					///< Get the current_time parameter
 	double get_vapor_pressure();				///< Get the vapor_pressure parameter
 	double get_sat_vapor_pressure();			///< Get the sat_vapor_pressure parameter
+	double get_initial_soil_mass();				///< Get the initial_soil_mass parameter
+	double get_initial_water_mass();			///< Get the initial_water_mass parameter
+	double get_initial_air_mass();				///< Get the initial_air_mass parameter
 	bool get_includeShearVel();					///< Get the includeShearVel parameter
 	
 	// Below are listed all the compute functions for various parameter values
@@ -233,7 +239,18 @@ public:
 	void compute_k2(double W);									///< Function to compute power function yield from W
 	void compute_mu(double W);									///< Function to compute energy yield from W
 	void compute_force_factor(double W);						///< Function to compute the force factor from W
+	void compute_equil_temp(double W);							///< Function to compute T_ri from W
 	void create_part_hist(double min, double max, int size, double avg, double std);///< Function to compute normalized particle histogram
+	void compute_det_alt(double gz, double hb);					///< Function to compute the det_alt given ground alt and burst height
+	void compute_initial_cloud_alt(double W, double gz, double hb);///< Function to compute initial cloud_alt
+	void compute_initial_current_time(double W, double gz, double hb);///< Function to compute initial time after detonation
+	void compute_initial_temperature(double W, double gz, double hb);///< Function to compute initial temperature of fallout cloud
+	void compute_initial_soil_mass(double W, double gz, double hb);///< Function to compute initial soil mass in cloud
+	void compute_initial_part_hist(double W, double gz, double hb, int size);///< Function to compute part_hist from W, gz, hb, and size
+	void compute_initial_air_mass(double W, double gz, double hb);///< Function to compute initial air mass in cloud
+	void compute_initial_water_mass(double W, double gz, double hb);///< Function to compute initial water mass in cloud
+	
+	//continue with initial conditions
 	
 	// Below are listed return functions specific for temperature integral related values
 	void compute_spec_heat_entrain_integral(double T, double Te);///< Function to compute integral of spec_heat_entrain from Te to T
@@ -301,6 +318,9 @@ protected:
 	double davies_num;				///< Unitless number for particle settling analysis (-)						(ND)
 	double vapor_pressure;			///< Vapor pressure inside the cloud at cloud altitude (Pa)					(Pv)
 	double sat_vapor_pressure;		///< Saturation vapor pressure inside the cloud (Pa)						(Pws)
+	double initial_soil_mass;		///< Initial value for soil mass in debris cloud (kg)						(m_ri)
+	double initial_water_mass;		///< Initial value for water mass in debris cloud (kg)						(m_wi)
+	double initial_air_mass;		///< Initial value for air mass in debris cloud (kg)						(m_ai)
 	bool includeShearVel;			///< Boolean statement used to include (true) or ignore (false) wind shear
 	
 	std::map<double, double> amb_temp;	///< Ambient Temperature (K) at various altitudes (m)					(Te)
