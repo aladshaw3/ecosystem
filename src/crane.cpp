@@ -86,18 +86,15 @@ Crane::Crane()
 	temperature = 298;
 	energy = 0.0;
 	current_time = 0.0;
+	
+	create_default_atmosphere();
 }
 
 //Default destructor
 Crane::~Crane()
 {
-	amb_temp.clear();
-	atm_press.clear();
-	rel_humid.clear();
-	wind_vel.clear();
-	part_hist.clear();
-	settling_rate.clear();
-	part_conc.clear();
+	delete_atmosphere();
+	delete_particles();
 }
 
 // Below are some display functions used for testing different functions
@@ -108,6 +105,18 @@ void Crane::display_part_hist()
 	std::cout << "Size (um)\tNormalDist\n";
 	//Iterate through map
 	for (std::map<double,double>::iterator it=this->part_hist.begin(); it!=this->part_hist.end(); ++it)
+	{
+		std::cout << it->first << "\t" << it->second << std::endl;
+	}
+}
+
+void Crane::display_part_conc()
+{
+	std::cout << "Particle Concentration Distribution by Size\n";
+	std::cout << "----------------------------------------\n";
+	std::cout << "Size (um)\tConcDist\n";
+	//Iterate through map
+	for (std::map<double,double>::iterator it=this->part_conc.begin(); it!=this->part_conc.end(); ++it)
 	{
 		std::cout << it->first << "\t" << it->second << std::endl;
 	}
@@ -1123,6 +1132,7 @@ void Crane::compute_initial_cloud_alt(double W, double gz, double hb)
 {
 	this->compute_det_alt(gz, hb);
 	this->set_cloud_alt(this->get_det_alt() + 108.0*pow(W,0.349));
+	//this->set_cloud_alt(this->get_det_alt() + 208.0*pow(W,0.349));  //May need to adjust may of the initial condition calculations
 }
 
 void Crane::compute_initial_current_time(double W, double gz, double hb)
@@ -1237,6 +1247,96 @@ void Crane::compute_initial_water_mass(double W, double gz, double hb)
 	this->set_initial_water_mass( ( (1.0-this->get_energy_frac())*(4.18e12*this->get_force_factor()*W - this->get_initial_soil_mass()*cs_int)/(cpw_int + this->get_latent_heat()) ) + (this->get_xe()*this->get_initial_air_mass()) );
 }
 
+void Crane::compute_initial_entrained_mass(double W, double gz, double hb)
+{
+	this->compute_initial_water_mass(W, gz, hb);
+	this->set_entrained_mass(this->get_initial_air_mass()+this->get_initial_water_mass());
+}
+
+void Crane::compute_initial_cloud_mass(double W, double gz, double hb)
+{
+	this->compute_initial_entrained_mass(W, gz, hb);
+	this->set_cloud_mass(this->get_entrained_mass()+this->get_initial_soil_mass());
+}
+
+void Crane::compute_initial_s_soil(double W, double gz, double hb)
+{
+	this->compute_initial_air_mass(W, gz, hb);
+	this->set_s_soil(this->get_initial_soil_mass()/this->get_initial_air_mass());
+}
+
+void Crane::compute_initial_x_water_vapor(double W, double gz, double hb)
+{
+	this->compute_initial_water_mass(W, gz, hb);
+	this->set_x_water_vapor(this->get_initial_water_mass()/this->get_initial_air_mass());
+}
+
+void Crane::compute_initial_cloud_volume(double W, double gz, double hb)
+{
+	this->compute_initial_entrained_mass(W, gz, hb);
+	this->compute_initial_x_water_vapor(W, gz, hb);
+	this->compute_apparent_temp(this->get_temperature(), this->get_x_water_vapor());
+	this->set_cloud_volume( (this->get_initial_air_mass()+this->get_initial_water_mass()) * this->get_gas_const() * this->get_apparent_temp() / this->return_atm_press(this->get_cloud_alt()) );
+}
+
+void Crane::compute_initial_horz_rad(double W, double gz, double hb)
+{
+	this->compute_initial_cloud_volume(W, gz, hb);
+	double top = 3.0*this->get_cloud_volume();
+	double bot = 4.0*M_PI*sqrt(1.0 - (this->get_eccentricity()*this->get_eccentricity()));
+	this->set_horz_rad( pow(top/bot, 1.0/3.0) );
+}
+
+void Crane::compute_initial_vert_rad(double W, double gz, double hb)
+{
+	this->compute_initial_horz_rad(W, gz, hb);
+	this->set_vert_rad( sqrt(this->get_horz_rad()*this->get_horz_rad()*(1.0 - (this->get_eccentricity()*this->get_eccentricity()))) );
+}
+
+void Crane::compute_initial_cloud_rise(double W, double gz, double hb)
+{
+	//NOTE: There are TWO recorded methods to calculate...
+	
+	// Original
+	//this->compute_initial_current_time(W, gz, hb);
+	//double n = 0.409*pow(W,0.071);
+	//this->compute_k(W);
+	//this->set_cloud_rise( n*this->get_k()*pow(this->get_current_time(),n-1.0) );
+	
+	// Revised
+	this->compute_initial_horz_rad(W, gz, hb);
+	this->set_cloud_rise( 1.2*sqrt(this->get_grav()*this->get_horz_rad()) );
+}
+
+void Crane::compute_initial_energy(double W, double gz, double hb)
+{
+	this->compute_initial_cloud_rise(W, gz, hb);
+	this->set_energy(this->get_cloud_rise()*this->get_cloud_rise()/2.0);
+}
+
+void Crane::compute_initial_part_conc(double W, double gz, double hb, int size)
+{
+	this->compute_initial_cloud_volume(W, gz, hb);
+	this->compute_initial_part_hist(W, gz, hb, size);
+	double conc = this->get_initial_soil_mass() / this->get_cloud_volume();
+	
+	//Iterate through map
+	for (std::map<double,double>::iterator it=this->part_hist.begin(); it!=this->part_hist.end(); ++it)
+	{
+		//NOTE: Dj comes in as um --> convert to m
+		double dj = it->first/1.0E+6;
+		double mass = this->get_part_density() * M_PI * dj*dj*dj / 6.0;
+		this->part_conc[it->first] = it->second * conc / mass;
+	}
+}
+
+void Crane::delete_particles()
+{
+	part_hist.clear();
+	settling_rate.clear();
+	part_conc.clear();
+}
+
 // Below are listed return functions specific for temperature integral related values
 
 void Crane::compute_spec_heat_entrain_integral(double T, double Te)
@@ -1305,10 +1405,7 @@ void Crane::add_wind_vel(double z, double vx, double vy)
 
 void Crane::create_default_atmosphere()
 {
-	this->amb_temp.clear();
-	this->atm_press.clear();
-	this->rel_humid.clear();
-	this->wind_vel.clear();
+	this->delete_atmosphere();
 	
 	this->add_amb_temp(-1000, 21.5+273.15);
 	this->add_atm_press(-1000, 11.39*10000.0);
@@ -1414,6 +1511,14 @@ void Crane::create_default_atmosphere()
 	this->add_atm_press(80000, 0.00011*10000.0);
 	this->add_rel_humid(80000, 1.28);
 	this->add_wind_vel(80000, 56.37, 0.0);
+}
+
+void Crane::delete_atmosphere()
+{
+	this->amb_temp.clear();
+	this->atm_press.clear();
+	this->rel_humid.clear();
+	this->wind_vel.clear();
 }
 
 double Crane::return_amb_temp(double z)
@@ -1637,5 +1742,36 @@ int CRANE_TESTS()
 	std::cout << "Integral of c_pa(T) from T = " << T << " to Te = " << Te << " ==>\t" << test.get_spec_heat_entrain_integral() << std::endl;
 	std::cout << "Integral of c_s(T) from T = " << T << " to Te = " << Te << " ==>\t" << test.return_spec_heat_conds_integral(T,Te) << std::endl;
 	
+	
+	
+	double W = 12.0; //kT
+	double hb = 500.0*0.3048;// 500 ft
+	double gz = 1155; //m (Nevada Test Site)
+	test.set_energy_frac(0.4);                        //Unknown initial condition variable
+	std::cout << "\nTest of Initial Conditions\n\n";
+	test.compute_initial_current_time(W, gz, hb);
+	test.compute_initial_temperature(W, gz, hb);
+	test.compute_initial_cloud_alt(W, gz, hb);
+	test.compute_initial_cloud_rise(W, gz, hb);
+	test.compute_initial_cloud_mass(W, gz, hb);
+	test.compute_initial_x_water_vapor(W, gz, hb);
+	test.compute_initial_s_soil(W, gz, hb);
+	test.compute_initial_energy(W, gz, hb);
+	test.compute_initial_part_conc(W, gz, hb, 10);
+	std::cout << "ti (s) =\t" << test.get_current_time() << std::endl;
+	std::cout << "Ti (K) =\t" << test.get_temperature() << std::endl;
+	std::cout << "zi (m) =\t" << test.get_cloud_alt() << std::endl;
+	std::cout << "hi (m) =\t" << test.get_cloud_alt() - gz << std::endl;
+	std::cout << "ui (m/s) =\t" << test.get_cloud_rise() << std::endl;
+	std::cout << "mi (kg) =\t" << test.get_cloud_mass() << std::endl;
+	std::cout << "xi (kg/kg) =\t" << test.get_x_water_vapor() << std::endl;
+	std::cout << "si (kg/kg) =\t" << test.get_s_soil() << std::endl;
+	std::cout << "wi (kg/kg) =\t" << test.get_w_water_conds() << std::endl;
+	std::cout << "Ei (m*m/s/s) =\t" << test.get_energy() << std::endl;
+	
+	test.display_part_hist();
+	test.display_part_conc();
+	
+	std::cout << std::endl;
 	return success;
 }

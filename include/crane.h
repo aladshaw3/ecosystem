@@ -63,6 +63,7 @@ public:
 	
 	// Below are some display functions used for testing different functions
 	void display_part_hist();
+	void display_part_conc();
 	
 	// Below are listed all the manual set functions for manually changing individual values
 	void set_eps(double val);							///< Set the eps parameter
@@ -241,16 +242,25 @@ public:
 	void compute_force_factor(double W);						///< Function to compute the force factor from W
 	void compute_equil_temp(double W);							///< Function to compute T_ri from W
 	void create_part_hist(double min, double max, int size, double avg, double std);///< Function to compute normalized particle histogram
-	void compute_det_alt(double gz, double hb);					///< Function to compute the det_alt given ground alt and burst height
-	void compute_initial_cloud_alt(double W, double gz, double hb);///< Function to compute initial cloud_alt
-	void compute_initial_current_time(double W, double gz, double hb);///< Function to compute initial time after detonation
-	void compute_initial_temperature(double W, double gz, double hb);///< Function to compute initial temperature of fallout cloud
-	void compute_initial_soil_mass(double W, double gz, double hb);///< Function to compute initial soil mass in cloud
+	void compute_det_alt(double gz, double hb);							///< Function to compute the det_alt given ground alt and burst height
+	void compute_initial_cloud_alt(double W, double gz, double hb);		///< Function to compute initial cloud_alt
+	void compute_initial_current_time(double W, double gz, double hb);	///< Function to compute initial time after detonation
+	void compute_initial_temperature(double W, double gz, double hb);	///< Function to compute initial temperature of fallout cloud
+	void compute_initial_soil_mass(double W, double gz, double hb);		///< Function to compute initial soil mass in cloud
 	void compute_initial_part_hist(double W, double gz, double hb, int size);///< Function to compute part_hist from W, gz, hb, and size
-	void compute_initial_air_mass(double W, double gz, double hb);///< Function to compute initial air mass in cloud
-	void compute_initial_water_mass(double W, double gz, double hb);///< Function to compute initial water mass in cloud
-	
-	//continue with initial conditions
+	void compute_initial_air_mass(double W, double gz, double hb);		///< Function to compute initial air mass in cloud
+	void compute_initial_water_mass(double W, double gz, double hb);	///< Function to compute initial water mass in cloud
+	void compute_initial_entrained_mass(double W, double gz, double hb);///< Function to compute initial entrained mass in cloud
+	void compute_initial_cloud_mass(double W, double gz, double hb);	///< Function to compute initial cloud mass
+	void compute_initial_s_soil(double W, double gz, double hb);		///< Function to compute initial soil fraction
+	void compute_initial_x_water_vapor(double W, double gz, double hb);	///< Function to compute initial water fraction
+	void compute_initial_cloud_volume(double W, double gz, double hb);	///< Function to compute initial cloud volume
+	void compute_initial_horz_rad(double W, double gz, double hb);		///< Function to compute initial horizontal radius of cloud
+	void compute_initial_vert_rad(double W, double gz, double hb);		///< Function to compute initial vertical cloud radius
+	void compute_initial_cloud_rise(double W, double gz, double hb);	///< Function to compute initial cloud rise velocity
+	void compute_initial_energy(double W, double gz, double hb);		///< Function to compute initial energy for cloud
+	void compute_initial_part_conc(double W, double gz, double hb, int size);///< Function to compute initial particle concentrations
+	void delete_particles();											///< Function to remove all existing particle information
 	
 	// Below are listed return functions specific for temperature integral related values
 	void compute_spec_heat_entrain_integral(double T, double Te);///< Function to compute integral of spec_heat_entrain from Te to T
@@ -263,6 +273,7 @@ public:
 	void add_rel_humid(double z, double HR);					///< Function to add a relative humidity HR at altitude z
 	void add_wind_vel(double z, double vx, double vy);			///< Function to add a wind velocity by components at altitude z
 	void create_default_atmosphere();							///< Function to create a default atmosphere from -1,000 m to 80,000 m
+	void delete_atmosphere();									///< Function to remove existing atmosphere profile from memory
 	double return_amb_temp(double z);							///< Function to return the ambient temperature (K) given an altitude z (m)
 	double return_atm_press(double z);							///< Function to return the atmospheric pressure (Pa) given an altitude z (m)
 	double return_rel_humid(double z);							///< Function to return the relative humidity (%) given an altitude z (m)
