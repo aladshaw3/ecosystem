@@ -132,7 +132,10 @@ public:
 	void set_initial_soil_mass(double val);				///< Set the initial_soil_mass parameter
 	void set_initial_water_mass(double val);			///< Set the initial_water_mass parameter
 	void set_initial_air_mass(double val);				///< Set the initial_air_mass parameter
+	void set_current_amb_temp(double val);				///< Set the current_amb_temp parameter
+	void set_current_atm_press(double val);				///< Set the current_atm_press parameter
 	void set_includeShearVel(bool val);					///< Set the includeShearVel parameter
+	void set_isSaturated(bool val);						///< Set the isSaturated parameter
 	
 	// Below are listed all the manual get functions for manually retrieving individual values
 	double get_eps();							///< Get the eps parameter
@@ -201,7 +204,10 @@ public:
 	double get_initial_soil_mass();				///< Get the initial_soil_mass parameter
 	double get_initial_water_mass();			///< Get the initial_water_mass parameter
 	double get_initial_air_mass();				///< Get the initial_air_mass parameter
+	double get_current_amb_temp();				///< Get the current_amb_temp parameter
+	double get_current_atm_press();				///< Get the current_atm_press parameter
 	bool get_includeShearVel();					///< Get the includeShearVel parameter
+	bool get_isSaturated();						///< Get the isSaturated parameter
 	
 	// Below are listed all the compute functions for various parameter values
 	void compute_beta_prime(double x, double s, double w);		///< Function to compute ratio of cloud gas density to local density
@@ -260,6 +266,7 @@ public:
 	void compute_initial_cloud_rise(double W, double gz, double hb);	///< Function to compute initial cloud rise velocity
 	void compute_initial_energy(double W, double gz, double hb);		///< Function to compute initial energy for cloud
 	void compute_initial_part_conc(double W, double gz, double hb, int size);///< Function to compute initial particle concentrations
+	void compute_initial_virtual_mass(double W, double gz, double hb);	///< Function to compute initial virtual mass of cloud
 	void delete_particles();											///< Function to remove all existing particle information
 	
 	// Below are listed return functions specific for temperature integral related values
@@ -279,6 +286,37 @@ public:
 	double return_rel_humid(double z);							///< Function to return the relative humidity (%) given an altitude z (m)
 	Matrix<double> return_wind_vel(double z);					///< Function to return wind velocity vector (m/s) given an altitude z (m)
 	double return_wind_speed(double z);							///< Function to return wind speed (m/s) given an altitude (m)
+	void compute_current_amb_temp(double z);					///< Function to set the current_amb_temp parameter given an altitude (m)
+	void compute_current_atm_press(double z);					///< Function to set the current_amb_press parameter given an altitude (m)
+	
+	// Below are listed functions to feed to DOVE as residuals
+	
+	/// Function to provide a coupled cloud rise residual
+	double res_could_rise(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
+	
+	/// Function to provide a coupled cloud altitude residual
+	double res_cloud_alt(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
+	
+	/// Function to provide a coupled water ratio residual
+	double res_x_water_vapor(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
+	
+	/// Function to provide a coupled temperature residual
+	double res_temperature(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
+	
+	/// Function to provide a coupled water fraction residual
+	double res_w_water_conds(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
+	
+	/// Function to provide a coupled energy residual
+	double res_energy(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
+	
+	/// Function to provide a coupled cloud mass residual
+	double res_cloud_mass(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
+	
+	/// Function to provide a coupled soil ratio residual
+	double res_s_soil(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
+	
+	/// Function to provide a coupled entrained mass residual
+	double res_entrained_mass(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
 	
 protected:
 	double eps;						///< Ratio of molecular wieghts for water-vapor and dry air					(eps)
@@ -332,7 +370,10 @@ protected:
 	double initial_soil_mass;		///< Initial value for soil mass in debris cloud (kg)						(m_ri)
 	double initial_water_mass;		///< Initial value for water mass in debris cloud (kg)						(m_wi)
 	double initial_air_mass;		///< Initial value for air mass in debris cloud (kg)						(m_ai)
+	double current_amb_temp;		///< Current value of ambient temperature (set based on atm profile)		(Te)
+	double current_atm_press;		///< Current value of atmospheric pressure (set based on atm profile)		(P)
 	bool includeShearVel;			///< Boolean statement used to include (true) or ignore (false) wind shear
+	bool isSaturated;				///< Boolean state used to determine whether or not to use Saturated Functions
 	
 	std::map<double, double> amb_temp;	///< Ambient Temperature (K) at various altitudes (m)					(Te)
 	std::map<double, double> atm_press;	///< Atmospheric Pressure (Pa) at various altitudes (m)					(P)
