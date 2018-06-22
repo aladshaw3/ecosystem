@@ -22,6 +22,7 @@ Dove::Dove()
 	dt = 0.1;
 	dt_old = 0.0;
 	time_end = 1.0;
+	time_start = 0.0;
 	time = 0.0;
 	time_old = 0.0;
 	time_older = 0.0;
@@ -149,6 +150,15 @@ void Dove::set_endtime(double e)
 		this->time_end = sqrt(DBL_EPSILON);
 	else
 		this->time_end = e;
+}
+
+//Set the start time
+void Dove::set_starttime(double s)
+{
+	if (s <= 0.0)
+		this->time_start = 0.0;
+	else
+		this->time_start = s;
 }
 
 //Set the type of integration scheme to use
@@ -788,6 +798,12 @@ double Dove::getOlderTime() const
 	return this->time_older;
 }
 
+//Return start time
+double Dove::getStartTime() const
+{
+	return this->time_start;
+}
+
 //Return dtmin
 double Dove::getMinTimeStep()
 {
@@ -1043,7 +1059,7 @@ double Dove::ComputeTimeStep()
 {
 	double step = 0.0;
 	double rate = 0.0;
-	if (this->time == 0.0)
+	if (this->time == this->time_start)
 		return this->dt;
 	if (this->Converged == true)
 	{
@@ -1553,9 +1569,9 @@ void Dove::update_timestep()
 //Reset all states
 void Dove::reset_all()
 {
-	this->time = 0.0;
-	this->time_old = 0.0;
-	this->time_older = 0.0;
+	this->time = this->time_start;
+	this->time_old = this->time_start;
+	this->time_older = this->time_start;
 	this->dt_old = 0.0;
 	this->Converged = true;
 }
@@ -2085,7 +2101,7 @@ int residual_BDF2(const Matrix<double> &u, Matrix<double> &Res, const void *data
 	Dove *dat = (Dove *) data;
 	
 	double rn = 0.0;
-	if (dat->getOldTime() > 0.0)
+	if (dat->getOldTime() > dat->getStartTime())
 		rn = dat->getTimeStep()/dat->getTimeStepOld();
 	
 	double an, bn, cn;
@@ -2997,6 +3013,7 @@ int DOVE_TESTS()
 	//test06.set_variableSteadyState("c");
 	//test06.set_variableSteadyStateAll();
 	
+	test06.set_starttime(1.0);
 	test06.set_endtime(10.0);
 	test06.set_timestepper(RATEBASED);
 	test06.set_timestepmax(0.5);

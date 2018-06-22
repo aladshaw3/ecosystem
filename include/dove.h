@@ -127,6 +127,7 @@ public:
 	void set_timestepmin(double dmin);					///< Set the value of the minimum time step
 	void set_timestepmax(double dmax);					///< Set the value of the maximum time step
 	void set_endtime(double e);							///< Set the value of the end time
+	void set_starttime(double s);						///< Set the value of the starting time
 	void set_integrationtype(integrate_subtype type);	///< Set the type of integration scheme to use
 	void set_timestepper(timestep_type type);			///< Set the time stepper scheme type
 	void set_preconditioner(precond_type type);			///< Set the type of preconditioner to use
@@ -277,6 +278,7 @@ public:
 	double getCurrentTime() const;					///< Return the value of current time
 	double getOldTime() const;						///< Return the value of the previous time
 	double getOlderTime() const;					///< Return the value of the older previous time
+	double getStartTime() const;					///< Return the value of the start time
 	double getMinTimeStep();						///< Return the value of the minimum time step
 	double getMaxTimeStep();						///< Return the value of the maximum time step
 	bool hasConverged();							///< Returns state of convergence
@@ -354,6 +356,7 @@ protected:
 	double dt;										///< Time step between n and n+1 time levels
 	double dt_old;									///< Time step between n and n-1 time levels
 	double time_end;								///< Time on which to end the ODE simulations
+	double time_start;								///< Time on which to start the ODE simulations
 	double time;									///< Value of current time
 	double time_old;								///< Value of previous time
 	double time_older;								///< Value of older previous time

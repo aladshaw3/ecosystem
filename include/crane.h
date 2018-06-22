@@ -136,6 +136,8 @@ public:
 	void set_current_atm_press(double val);				///< Set the current_atm_press parameter
 	void set_includeShearVel(bool val);					///< Set the includeShearVel parameter
 	void set_isSaturated(bool val);						///< Set the isSaturated parameter
+	void set_ConsoleOut(bool val);						///< Set the ConsoleOut parameter
+	void set_FileOut(bool val);							///< Set the FileOut parameter
 	
 	// Below are listed all the manual get functions for manually retrieving individual values
 	double get_eps();							///< Get the eps parameter
@@ -208,6 +210,10 @@ public:
 	double get_current_atm_press();				///< Get the current_atm_press parameter
 	bool get_includeShearVel();					///< Get the includeShearVel parameter
 	bool get_isSaturated();						///< Get the isSaturated parameter
+	double get_part_size(int i);				///< Get the i-th particle size parameter
+	double get_settling_rate(double Dj);		///< Get the settling_rate associated with size Dj
+	bool get_ConsoleOut();						///< Get the ConsoleOut parameter
+	bool get_FileOut();							///< Get the FileOut parameter
 	
 	// Below are listed all the compute functions for various parameter values
 	void compute_beta_prime(double x, double s, double w);		///< Function to compute ratio of cloud gas density to local density
@@ -267,6 +273,7 @@ public:
 	void compute_initial_energy(double W, double gz, double hb);		///< Function to compute initial energy for cloud
 	void compute_initial_part_conc(double W, double gz, double hb, int size);///< Function to compute initial particle concentrations
 	void compute_initial_virtual_mass(double W, double gz, double hb);	///< Function to compute initial virtual mass of cloud
+	void compute_adjusted_height(double W, double gz, double hb);		///< Function to compute the adjusted height of the cloud
 	void delete_particles();											///< Function to remove all existing particle information
 	
 	// Below are listed return functions specific for temperature integral related values
@@ -289,34 +296,28 @@ public:
 	void compute_current_amb_temp(double z);					///< Function to set the current_amb_temp parameter given an altitude (m)
 	void compute_current_atm_press(double z);					///< Function to set the current_amb_press parameter given an altitude (m)
 	
-	// Below are listed functions to feed to DOVE as residuals
+	// Below are list functions associated with actions completed outside of the solver in DOVE
 	
-	/// Function to provide a coupled cloud rise residual
-	double res_could_rise(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
+	/// Function will establish initial conditions, setup variables names, and register functions
+	void establish_initial_conditions(double W, double gz, double hb, int bins, bool includeShear, Dove &dove);
 	
-	/// Function to provide a coupled cloud altitude residual
-	double res_cloud_alt(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
+	/// Function to establish DOVE conditions and options
+	void establish_dove_options(Dove &dove, FILE *file, bool fileout, bool consoleout, integrate_subtype inttype, timestep_type timetype,
+								precond_type type, double tol, double dtmin, double dtmax, double dtmin_conv, double endtime);
 	
-	/// Function to provide a coupled water ratio residual
-	double res_x_water_vapor(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
+	/// Function to establish PJFNK conditions and options
+	void establish_pjfnk_options(Dove &dove, krylov_method lin_method, linesearch_type linesearch, bool linear, bool precon, bool nl_out,
+		bool l_out, int max_nlit, int max_lit, int restart, int recursive, double nl_abstol, double nl_reltol, double l_abstol, double l_reltol);
 	
-	/// Function to provide a coupled temperature residual
-	double res_temperature(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
+	/// Function to estimate all parameters prior to simulating a single timestep
+	void estimate_parameters(const Matrix<double> &n);
 	
-	/// Function to provide a coupled water fraction residual
-	double res_w_water_conds(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
+	/// Function to store all variable values to be updated from Dove simulations
+	void store_variables(Dove &dove);
 	
-	/// Function to provide a coupled energy residual
-	double res_energy(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
+	/// Function to run the simulation to completion
+	int run_crane_simulation(Dove &dove);
 	
-	/// Function to provide a coupled cloud mass residual
-	double res_cloud_mass(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
-	
-	/// Function to provide a coupled soil ratio residual
-	double res_s_soil(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
-	
-	/// Function to provide a coupled entrained mass residual
-	double res_entrained_mass(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
 	
 protected:
 	double eps;						///< Ratio of molecular wieghts for water-vapor and dry air					(eps)
@@ -374,6 +375,8 @@ protected:
 	double current_atm_press;		///< Current value of atmospheric pressure (set based on atm profile)		(P)
 	bool includeShearVel;			///< Boolean statement used to include (true) or ignore (false) wind shear
 	bool isSaturated;				///< Boolean state used to determine whether or not to use Saturated Functions
+	bool ConsoleOut;				///< Boolean state used to determine whether or not to include console output
+	bool FileOut;					///< Boolean state used to determine whether or not to include file output
 	
 	std::map<double, double> amb_temp;	///< Ambient Temperature (K) at various altitudes (m)					(Te)
 	std::map<double, double> atm_press;	///< Atmospheric Pressure (Pa) at various altitudes (m)					(P)
@@ -383,6 +386,7 @@ protected:
 	std::map<double, Matrix<double> > wind_vel;
 	std::map<double, double> part_hist;			///< Normalized Histogram of Particle Distribution by size (um)
 	std::map<double, double> settling_rate;		///< Particle settling rate (m/s) by particle size (um)			(f_j)
+	std::vector<double> part_size;				///< Particle sizes listed in order from smallest to largest (um)
 	double min_dia;								///< Minimum particle diameter for distribution (um)			(dmin)
 	double max_dia;								///< Maximum particle diameter for distribution (um)			(dmax)
 	double mean_dia;							///< Mean particle diameter for distribution (um)				(d50)
@@ -408,6 +412,38 @@ protected:
 private:
 	
 };
+
+// Below are listed functions to feed to DOVE as residuals
+
+/// Function to provide a coupled cloud rise residual
+double res_cloud_rise(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
+
+/// Function to provide a coupled cloud altitude residual
+double res_cloud_alt(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
+
+/// Function to provide a coupled water ratio residual
+double res_x_water_vapor(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
+
+/// Function to provide a coupled temperature residual
+double res_temperature(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
+
+/// Function to provide a coupled water fraction residual
+double res_w_water_conds(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
+
+/// Function to provide a coupled energy residual
+double res_energy(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
+
+/// Function to provide a coupled cloud mass residual
+double res_cloud_mass(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
+
+/// Function to provide a coupled soil ratio residual
+double res_s_soil(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
+
+/// Function to provide a coupled entrained mass residual
+double res_entrained_mass(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
+
+/// Function to provide a coupled particle concentration residual
+double res_part_conc(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
 
 /// Test function for CRANE
 /**  Test function is callable from the cli */
