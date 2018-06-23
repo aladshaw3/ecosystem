@@ -2615,7 +2615,7 @@ int QRsolve( int (*matvec) (const Matrix<double>& x, Matrix<double> &Ax, const v
 		qr_dat->Ro.columnReplace(k, qr_dat->x);
 		qr_dat->ek.edit(k, 0, 0.0);
 	}
-	
+    
 	//Call the QR solve function from macaw
 	qr_dat->x.qrSolve(qr_dat->Ro, b);
 	

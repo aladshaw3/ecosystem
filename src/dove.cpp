@@ -611,6 +611,24 @@ void Dove::print_result()
 	fprintf(this->Output,"\n");
 }
 
+//Set numerical jacobian
+void Dove::createJacobian()
+{
+    int success = NumericalJacobian(this->residual, this->unp1, this->Jacobian, this->num_func, this->num_func, &this->jac_dat, this);
+    
+    if (success != 0)
+    {
+        //error!
+        std::cout << "error\n";
+    }
+}
+
+//Return reference to Jacobian
+Matrix<double>& Dove::getNumJacobian()
+{
+    return this->Jacobian;
+}
+
 //Return reference to un
 Matrix<double>& Dove::getCurrentU()
 {

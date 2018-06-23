@@ -416,34 +416,34 @@ private:
 // Below are listed functions to feed to DOVE as residuals
 
 /// Function to provide a coupled cloud rise residual
-double res_cloud_rise(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
+double rate_cloud_rise(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
 
 /// Function to provide a coupled cloud altitude residual
-double res_cloud_alt(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
+double rate_cloud_alt(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
 
 /// Function to provide a coupled water ratio residual
-double res_x_water_vapor(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
+double rate_x_water_vapor(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
 
 /// Function to provide a coupled temperature residual
-double res_temperature(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
+double rate_temperature(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
 
 /// Function to provide a coupled water fraction residual
-double res_w_water_conds(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
+double rate_w_water_conds(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
 
 /// Function to provide a coupled energy residual
-double res_energy(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
+double rate_energy(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
 
 /// Function to provide a coupled cloud mass residual
-double res_cloud_mass(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
+double rate_cloud_mass(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
 
 /// Function to provide a coupled soil ratio residual
-double res_s_soil(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
+double rate_s_soil(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
 
 /// Function to provide a coupled entrained mass residual
-double res_entrained_mass(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
+double rate_entrained_mass(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
 
 /// Function to provide a coupled particle concentration residual
-double res_part_conc(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
+double rate_part_conc(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
 
 /// Test function for CRANE
 /**  Test function is callable from the cli */

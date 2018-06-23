@@ -252,6 +252,8 @@ public:
 	void print_newresult();								///< Function to print out the new result of n+1 time level
 	void print_result();								///< Function to print out the old result of n time level
 	
+    void createJacobian();                          ///< Function to create and store a numerical jacobian
+    Matrix<double>& getNumJacobian();               ///< Return reference to the numerical jacobian
 	Matrix<double>& getCurrentU();					///< Return reference to the n level solution
 	Matrix<double>& getOldU();						///< Return reference to the n-1 level solution
 	Matrix<double>& getNewU();						///< Return reference to the n+1 level solution
@@ -398,6 +400,9 @@ protected:
 	int (*residual) (const Matrix<double> &x, Matrix<double> &F, const void *res_data);
 	/// Function pointer for the preconditioning operation of DOVE
 	int (*precon) (const Matrix<double> &r, Matrix<double> &p, const void *precon_data);
+    
+    NUM_JAC_DATA jac_dat;                           ///< Data structure for making Numerical Jacobian Matrices
+    Matrix<double> Jacobian;                        ///< Matrix to hold numerical jacobian
 	
 private:
 	
