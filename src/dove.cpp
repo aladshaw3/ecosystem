@@ -3072,7 +3072,7 @@ int DOVE_TESTS()
 	test06.set_initialcondition("c", 0);
 	test06.set_initialcondition("q", 0);
 	test06.set_timestep(0.05);
-	test06.set_integrationtype(BDF2);
+	test06.set_integrationtype(CN);
 	test06.solve_all();
 	
 	fprintf(file,"\n --------------- End of Test06 ---------------- \n\n");
