@@ -76,6 +76,8 @@ Crane::Crane()
 	isSaturated = false;
 	ConsoleOut = false;
 	FileOut = false;
+	isTight = true;
+	saturation_time = 0.0;
 	min_dia = 0.0001;
 	max_dia = 10000.0;
 	mean_dia = 0.407;
@@ -488,6 +490,16 @@ void Crane::set_FileOut(bool val)
 	this->FileOut = val;
 }
 
+void Crane::set_saturation_time(double val)
+{
+	this->saturation_time = val;
+}
+
+void Crane::set_isTight(bool val)
+{
+	this->isTight = val;
+}
+
 ///< Below are the get functions for various parameters
 
 double Crane::get_eps()
@@ -863,6 +875,21 @@ bool Crane::get_FileOut()
 	return this->FileOut;
 }
 
+Matrix<double> & Crane::get_part_conc_var()
+{
+	return this->part_conc_var;
+}
+
+double Crane::get_saturation_time()
+{
+	return this->saturation_time;
+}
+
+bool Crane::get_isTight()
+{
+	return this->isTight;
+}
+
 // Below are listed all the compute function for various parameters
 void Crane::compute_beta_prime(double x, double s, double w)
 {
@@ -999,6 +1026,7 @@ void Crane::compute_mean_spec_heat(double T, double x, double s, double w)
 
 void Crane::compute_cloud_volume(double m, double x, double s, double w, double T, double P)
 {
+	m = m * 1000.0; //Convert from Mg to kg
 	this->compute_beta_prime(x, s, w);
 	this->compute_apparent_temp(T, x);
 	this->set_cloud_volume( m*this->get_beta_prime()*this->get_gas_const()*this->get_apparent_temp()/P );
@@ -1118,7 +1146,7 @@ void Crane::compute_total_mass_fallout_rate(double m, double x, double s, double
 		//NOTE: Dj comes in as um --> convert to m
 		double dj = it->first/1.0E+6;
 		this->compute_settling_rate(it->first, P, x, T);
-		sum += this->settling_rate[it->first]*M_PI*dj*dj*dj*n(i,0)/6.0;
+		sum += this->settling_rate[it->first]*M_PI*dj*dj*dj*n(i,0)*1.0e9/6.0;
 		i++;
 	}
 	sum = sum*M_PI*this->get_horz_rad()*this->get_horz_rad()*this->get_part_density();
@@ -1168,6 +1196,7 @@ void Crane::create_part_hist(double min, double max, int size, double avg, doubl
 	this->set_mean_dia(avg);
 	this->set_std_dia(std);
 	this->part_size.resize(size);
+	this->part_conc_var.set_size(size, 1);
 	
 	double distance = log10(this->get_max_dia()) - log10(this->get_min_dia());
 	double logstep = distance / ((double)this->get_num_bins());
@@ -1203,7 +1232,6 @@ void Crane::compute_initial_cloud_alt(double W, double gz, double hb)
 {
 	this->compute_det_alt(gz, hb);
 	this->set_cloud_alt(this->get_det_alt() + 108.0*pow(W,0.349));
-	//this->set_cloud_alt(this->get_det_alt() + 208.0*pow(W,0.349));  //May need to adjust may of the initial condition calculations
 }
 
 void Crane::compute_initial_current_time(double W, double gz, double hb)
@@ -1327,7 +1355,7 @@ void Crane::compute_initial_entrained_mass(double W, double gz, double hb)
 void Crane::compute_initial_cloud_mass(double W, double gz, double hb)
 {
 	this->compute_initial_entrained_mass(W, gz, hb);
-	this->set_cloud_mass(this->get_entrained_mass()+this->get_initial_soil_mass());
+	this->set_cloud_mass( (this->get_entrained_mass()+this->get_initial_soil_mass())/1000.0 );
 }
 
 void Crane::compute_initial_s_soil(double W, double gz, double hb)
@@ -1366,15 +1394,6 @@ void Crane::compute_initial_vert_rad(double W, double gz, double hb)
 
 void Crane::compute_initial_cloud_rise(double W, double gz, double hb)
 {
-	//NOTE: There are TWO recorded methods to calculate...
-	
-	// Original
-	//this->compute_initial_current_time(W, gz, hb);
-	//double n = 0.409*pow(W,0.071);
-	//this->compute_k(W);
-	//this->set_cloud_rise( n*this->get_k()*pow(this->get_current_time(),n-1.0) );
-	
-	// Revised
 	this->compute_initial_horz_rad(W, gz, hb);
 	this->set_cloud_rise( 1.2*sqrt(this->get_grav()*this->get_horz_rad()) );
 }
@@ -1392,12 +1411,15 @@ void Crane::compute_initial_part_conc(double W, double gz, double hb, int size)
 	double conc = this->get_initial_soil_mass() / this->get_cloud_volume();
 	
 	//Iterate through map
+	int i=0;
 	for (std::map<double,double>::iterator it=this->part_hist.begin(); it!=this->part_hist.end(); ++it)
 	{
 		//NOTE: Dj comes in as um --> convert to m
 		double dj = it->first/1.0E+6;
 		double mass = this->get_part_density() * M_PI * dj*dj*dj / 6.0;
-		this->part_conc[it->first] = it->second * conc / mass;
+		this->part_conc[it->first] = it->second * conc / mass / 1.0e9;
+		this->part_conc_var(i,0) = this->part_conc[it->first];
+		i++;
 	}
 }
 
@@ -1789,19 +1811,22 @@ double rate_cloud_rise(int i, const Matrix<double> &u, double t, const void *dat
 	double res = 0.0;
 	
 	Crane *dat = (Crane *) data;
-	double m = u(dove.getVariableIndex("m"),0);
-	double U = u(dove.getVariableIndex("u"),0);
-	double dm_dt = dove.coupledTimeDerivative("m",u);
+	double m = u(dove.getVariableIndex("m (Mg)"),0);
+	double U = u(dove.getVariableIndex("u (m/s)"),0);
+	double dm_dt = dove.coupledTimeDerivative("m (Mg)",u);
 	double mass_rat = m / (m + dat->get_virtual_mass());
-	//double T = u(dove.getVariableIndex("T"),0);
-	//double x = u(dove.getVariableIndex("x"),0);
-	//double s = u(dove.getVariableIndex("s"),0);
-	//double w = u(dove.getVariableIndex("w"),0);
-	//double z = u(dove.getVariableIndex("z"),0);
+	double T = u(dove.getVariableIndex("T (K)"),0);
+	double x = u(dove.getVariableIndex("x (kg/kg)"),0);
+	double s = u(dove.getVariableIndex("s (kg/kg)"),0);
+	double w = u(dove.getVariableIndex("w (kg/kg)"),0);
+	double z = u(dove.getVariableIndex("z (m)"),0);
 	
-	//dat->compute_apparent_temp(T, x); //NOTE: be aware of potential nan or inf residuals
-	//dat->compute_beta_prime(x, s, w); //NOTE: be aware of potential nan or inf residuals
-	//dat->compute_vert_rad(z);
+	if (dat->get_isTight() == true)
+	{
+		dat->compute_apparent_temp(T, x); //NOTE: be aware of potential nan or inf residuals
+		dat->compute_beta_prime(x, s, w); //NOTE: be aware of potential nan or inf residuals
+		dat->compute_vert_rad(z);
+	}
 	
 	double p1 = (((dat->get_apparent_temp()/dat->get_apparent_amb_temp())*dat->get_beta_prime()) - 1.0) * (dat->get_grav()/(1.0-dat->get_mu()));
 	double p2 = (2.0*dat->get_k2()*dat->get_char_vel()*dat->get_apparent_temp()*dat->get_beta_prime()*(1.0-dat->get_mu()))/(dat->get_vert_rad()*dat->get_apparent_amb_temp());
@@ -1814,7 +1839,7 @@ double rate_cloud_rise(int i, const Matrix<double> &u, double t, const void *dat
 
 double rate_cloud_alt(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove)
 {
-	return u(dove.getVariableIndex("u"),0);
+	return u(dove.getVariableIndex("u (m/s)"),0);
 }
 
 double rate_x_water_vapor(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove)
@@ -1826,10 +1851,10 @@ double rate_x_water_vapor(int i, const Matrix<double> &u, double t, const void *
 	// Check for saturation
 	if (dat->get_isSaturated() == true)
 	{
-		double x = u(dove.getVariableIndex("x"),0);
-		double T = u(dove.getVariableIndex("T"),0);
-		double U = u(dove.getVariableIndex("u"),0);
-		double dT_dt = dove.coupledTimeDerivative("T",u);
+		double x = u(dove.getVariableIndex("x (kg/kg)"),0);
+		double T = u(dove.getVariableIndex("T (K)"),0);
+		double U = u(dove.getVariableIndex("u (m/s)"),0);
+		double dT_dt = dove.coupledTimeDerivative("T (K)",u);
 		
 		double p1 = (1.0 + (x/dat->get_eps()))*(dat->get_latent_heat()*dat->get_eps()/dat->get_gas_const()/T/T)*dT_dt;
 		double p2 = (1.0 + (x/dat->get_eps()))*dat->get_grav()*U/dat->get_gas_const()/dat->get_apparent_amb_temp();
@@ -1838,11 +1863,10 @@ double rate_x_water_vapor(int i, const Matrix<double> &u, double t, const void *
 	}
 	else
 	{
-		double m = u(dove.getVariableIndex("m"),0);
-		//double dment_dt = dove.coupledTimeDerivative("m_ent",u);
+		double m = u(dove.getVariableIndex("m (Mg)"),0);
 		double dment_dt = rate_entrained_mass(0, u, 0, data, dove);
-		double x = u(dove.getVariableIndex("x"),0);
-		double s = u(dove.getVariableIndex("s"),0);
+		double x = u(dove.getVariableIndex("x (kg/kg)"),0);
+		double s = u(dove.getVariableIndex("s (kg/kg)"),0);
 		
 		res = -((1.0+x+s)/(1.0+dat->get_xe()))*(x - dat->get_xe())*dment_dt/m;
 	}
@@ -1859,21 +1883,23 @@ double rate_temperature(int i, const Matrix<double> &u, double t, const void *da
 	// Check for saturation
 	if (dat->get_isSaturated() == true)
 	{
-		double x = u(dove.getVariableIndex("x"),0);
-		double T = u(dove.getVariableIndex("T"),0);
-		double m = u(dove.getVariableIndex("m"),0);
-		//double dment_dt = dove.coupledTimeDerivative("m_ent",u);
+		double x = u(dove.getVariableIndex("x (kg/kg)"),0);
+		double T = u(dove.getVariableIndex("T (K)"),0);
+		double m = u(dove.getVariableIndex("m (Mg)"),0);
 		double dment_dt = rate_entrained_mass(0, u, 0, data, dove);
-		//double E = u(dove.getVariableIndex("E"),0);
-		//double s = u(dove.getVariableIndex("s"),0);
-		//double w = u(dove.getVariableIndex("w"),0);
-		double U = u(dove.getVariableIndex("u"),0);
-		//double z = u(dove.getVariableIndex("z"),0);
+		double E = u(dove.getVariableIndex("E (J/kg)"),0);
+		double s = u(dove.getVariableIndex("s (kg/kg)"),0);
+		double w = u(dove.getVariableIndex("w (kg/kg)"),0);
+		double U = u(dove.getVariableIndex("u (m/s)"),0);
+		double z = u(dove.getVariableIndex("z (m)"),0);
 		
-		//dat->compute_apparent_temp(T, x); //NOTE: be aware of potential nan or inf residuals
-		//dat->compute_beta_prime(x, s, w); //NOTE: be aware of potential nan or inf residuals
-		//dat->compute_sigma_turbulence(E, z);
-		//dat->compute_actual_spec_heat(T, x);
+		if (dat->get_isTight() == true)
+		{
+			dat->compute_apparent_temp(T, x); //NOTE: be aware of potential nan or inf residuals
+			dat->compute_beta_prime(x, s, w); //NOTE: be aware of potential nan or inf residuals
+			dat->compute_sigma_turbulence(E, z);
+			dat->compute_actual_spec_heat(T, x);
+		}
 		
 		double p1 = dat->get_beta_prime() / (1.0 + (dat->get_latent_heat()*dat->get_latent_heat()*x*dat->get_eps()/dat->get_actual_spec_heat()/dat->get_gas_const()/T/T));
 		double p2 = ( T - dat->get_current_amb_temp() + (dat->get_latent_heat()*(x-dat->get_xe())/dat->get_actual_spec_heat()) ) * dment_dt/m/dat->get_beta_prime();
@@ -1885,21 +1911,23 @@ double rate_temperature(int i, const Matrix<double> &u, double t, const void *da
 	}
 	else
 	{
-		//double x = u(dove.getVariableIndex("x"),0);
-		//double T = u(dove.getVariableIndex("T"),0);
-		double m = u(dove.getVariableIndex("m"),0);
-		//double dment_dt = dove.coupledTimeDerivative("m_ent",u);
+		double x = u(dove.getVariableIndex("x (kg/kg)"),0);
+		double T = u(dove.getVariableIndex("T (K)"),0);
+		double m = u(dove.getVariableIndex("m (Mg)"),0);
 		double dment_dt = rate_entrained_mass(0, u, 0, data, dove);
-		//double E = u(dove.getVariableIndex("E"),0);
-		//double s = u(dove.getVariableIndex("s"),0);
-		//double w = u(dove.getVariableIndex("w"),0);
-		double U = u(dove.getVariableIndex("u"),0);
-		//double z = u(dove.getVariableIndex("z"),0);
+		double E = u(dove.getVariableIndex("E (J/kg)"),0);
+		double s = u(dove.getVariableIndex("s (kg/kg)"),0);
+		double w = u(dove.getVariableIndex("w (kg/kg)"),0);
+		double U = u(dove.getVariableIndex("u (m/s)"),0);
+		double z = u(dove.getVariableIndex("z (m)"),0);
 		
-		//dat->compute_apparent_temp(T, x); //NOTE: be aware of potential nan or inf residuals
-		//dat->compute_beta_prime(x, s, w); //NOTE: be aware of potential nan or inf residuals
-		//dat->compute_sigma_turbulence(E, z);
-		//dat->compute_mean_spec_heat(T, x, s, w);
+		if (dat->get_isTight() == true)
+		{
+			dat->compute_apparent_temp(T, x); //NOTE: be aware of potential nan or inf residuals
+			dat->compute_beta_prime(x, s, w); //NOTE: be aware of potential nan or inf residuals
+			dat->compute_sigma_turbulence(E, z);
+			dat->compute_mean_spec_heat(T, x, s, w);
+		}
 		
 		double p1 = dat->get_beta_prime()/dat->get_mean_spec_heat();
 		double p2 = dat->get_apparent_temp()*dat->get_grav()*U/dat->get_apparent_amb_temp();
@@ -1920,21 +1948,23 @@ double rate_w_water_conds(int i, const Matrix<double> &u, double t, const void *
 	// Check for saturation
 	if (dat->get_isSaturated() == true)
 	{
-		double x = u(dove.getVariableIndex("x"),0);
-		//double T = u(dove.getVariableIndex("T"),0);
-		double m = u(dove.getVariableIndex("m"),0);
-		//double dment_dt = dove.coupledTimeDerivative("m_ent",u);
+		double x = u(dove.getVariableIndex("x (kg/kg)"),0);
+		double T = u(dove.getVariableIndex("T (K)"),0);
+		double m = u(dove.getVariableIndex("m (Mg)"),0);
 		double dment_dt = rate_entrained_mass(0, u, 0, data, dove);
-		double dx_dt = dove.coupledTimeDerivative("x",u);
-		double s = u(dove.getVariableIndex("s"),0);
-		double w = u(dove.getVariableIndex("w"),0);
-		//double z = u(dove.getVariableIndex("z"),0);
+		double dx_dt = dove.coupledTimeDerivative("x (kg/kg)",u);
+		double s = u(dove.getVariableIndex("s (kg/kg)"),0);
+		double w = u(dove.getVariableIndex("w (kg/kg)"),0);
+		double z = u(dove.getVariableIndex("z (m)"),0);
 		
-		//dat->compute_beta_prime(x, s, w); //NOTE: be aware of potential nan or inf residuals
-		//dat->compute_total_mass_fallout_rate(m, x, s, w, T, dat->get_current_atm_press(), z, u);
+		if (dat->get_isTight() == true)
+		{
+			dat->compute_beta_prime(x, s, w); //NOTE: be aware of potential nan or inf residuals
+			dat->compute_total_mass_fallout_rate(m, x, s, w, T, dat->get_current_atm_press(), z, dat->get_part_conc_var());
+		}
 		
 		double p1 = (1.0/dat->get_beta_prime())*((1.0+x)/(1.0+dat->get_xe()))*(w+x-dat->get_xe())*dment_dt/m;
-		double p2 = ((1.0+x+s+w)/m)*(w/(s+w))*dat->get_total_mass_fallout_rate();
+		double p2 = ((1.0+x+s+w)/m)*(w/(s+w))*dat->get_total_mass_fallout_rate()/1000.0;
 		
 		res = -p1 - dx_dt - p2;
 	}
@@ -1952,21 +1982,23 @@ double rate_energy(int i, const Matrix<double> &u, double t, const void *data, c
 	
 	Crane *dat = (Crane *) data;
 	
-	//double x = u(dove.getVariableIndex("x"),0);
-	//double T = u(dove.getVariableIndex("T"),0);
-	double m = u(dove.getVariableIndex("m"),0);
-	//double dment_dt = dove.coupledTimeDerivative("m_ent",u);
+	double x = u(dove.getVariableIndex("x (kg/kg)"),0);
+	double T = u(dove.getVariableIndex("T (K)"),0);
+	double m = u(dove.getVariableIndex("m (Mg)"),0);
 	double dment_dt = rate_entrained_mass(0, u, 0, data, dove);
-	double E = u(dove.getVariableIndex("E"),0);
-	//double s = u(dove.getVariableIndex("s"),0);
-	//double w = u(dove.getVariableIndex("w"),0);
-	double U = u(dove.getVariableIndex("u"),0);
-	//double z = u(dove.getVariableIndex("z"),0);
+	double E = u(dove.getVariableIndex("E (J/kg)"),0);
+	double s = u(dove.getVariableIndex("s (kg/kg)"),0);
+	double w = u(dove.getVariableIndex("w (kg/kg)"),0);
+	double U = u(dove.getVariableIndex("u (m/s)"),0);
+	double z = u(dove.getVariableIndex("z (m)"),0);
 	
-	//dat->compute_apparent_temp(T, x);
-	//dat->compute_beta_prime(x, s, w);
-	//dat->compute_vert_rad(z);
-	//dat->compute_sigma_turbulence(E, z);
+	if (dat->get_isTight() == true)
+	{
+		dat->compute_apparent_temp(T, x);
+		dat->compute_beta_prime(x, s, w);
+		dat->compute_vert_rad(z);
+		dat->compute_sigma_turbulence(E, z);
+	}
 	
 	double p1 = 2.0*dat->get_k2()*dat->get_apparent_temp()*dat->get_beta_prime()*U*U*dat->get_char_vel()/dat->get_apparent_amb_temp()/dat->get_vert_rad();
 	double p2 = U*U*dment_dt/2.0/m;
@@ -1983,18 +2015,18 @@ double rate_cloud_mass(int i, const Matrix<double> &u, double t, const void *dat
 	
 	Crane *dat = (Crane *) data;
 	
-	//double x = u(dove.getVariableIndex("x"),0);
-	//double T = u(dove.getVariableIndex("T"),0);
-	//double m = u(dove.getVariableIndex("m"),0);
-	//double dment_dt = dove.coupledTimeDerivative("m_ent",u);
+	double x = u(dove.getVariableIndex("x (kg/kg)"),0);
+	double T = u(dove.getVariableIndex("T (K)"),0);
+	double m = u(dove.getVariableIndex("m (Mg)"),0);
 	double dment_dt = rate_entrained_mass(0, u, 0, data, dove);
-	//double s = u(dove.getVariableIndex("s"),0);
-	//double w = u(dove.getVariableIndex("w"),0);
-	//double z = u(dove.getVariableIndex("z"),0);
+	double s = u(dove.getVariableIndex("s (kg/kg)"),0);
+	double w = u(dove.getVariableIndex("w (kg/kg)"),0);
+	double z = u(dove.getVariableIndex("z (m)"),0);
 	
-	//dat->compute_total_mass_fallout_rate(m, x, s, w, T, dat->get_current_atm_press(), z, u);
+	if (dat->get_isTight() == true)
+		dat->compute_total_mass_fallout_rate(m, x, s, w, T, dat->get_current_atm_press(), z, dat->get_part_conc_var());
 	
-	res = dment_dt - dat->get_total_mass_fallout_rate();
+	res = dment_dt - dat->get_total_mass_fallout_rate()/1000.0;
 	
 	return res;
 }
@@ -2005,20 +2037,22 @@ double rate_s_soil(int i, const Matrix<double> &u, double t, const void *data, c
 	
 	Crane *dat = (Crane *) data;
 	
-	double x = u(dove.getVariableIndex("x"),0);
-	//double T = u(dove.getVariableIndex("T"),0);
-	double m = u(dove.getVariableIndex("m"),0);
-	//double dment_dt = dove.coupledTimeDerivative("m_ent",u);
+	double x = u(dove.getVariableIndex("x (kg/kg)"),0);
+	double T = u(dove.getVariableIndex("T (K)"),0);
+	double m = u(dove.getVariableIndex("m (Mg)"),0);
 	double dment_dt = rate_entrained_mass(0, u, 0, data, dove);
-	double s = u(dove.getVariableIndex("s"),0);
-	double w = u(dove.getVariableIndex("w"),0);
-	//double z = u(dove.getVariableIndex("z"),0);
+	double s = u(dove.getVariableIndex("s (kg/kg)"),0);
+	double w = u(dove.getVariableIndex("w (kg/kg)"),0);
+	double z = u(dove.getVariableIndex("z (m)"),0);
 	
-	//dat->compute_total_mass_fallout_rate(m, x, s, w, T, dat->get_current_atm_press(), z, u);
-	//dat->compute_beta_prime(x, s, w);
+	if (dat->get_isTight() == true)
+	{
+		dat->compute_total_mass_fallout_rate(m, x, s, w, T, dat->get_current_atm_press(), z, dat->get_part_conc_var());
+		dat->compute_beta_prime(x, s, w);
+	}
 	
 	double p1 = ((1.0+x)/(1.0+dat->get_xe()))*s*dment_dt/m/dat->get_beta_prime();
-	double p2 = ((1.0+x+s+w)/m)*(s/(s+w))*dat->get_total_mass_fallout_rate();
+	double p2 = ((1.0+x+s+w)/m)*(s/(s+w))*dat->get_total_mass_fallout_rate()/1000.0;
 	
 	res = -p1-p2;
 	
@@ -2034,19 +2068,22 @@ double rate_entrained_mass(int i, const Matrix<double> &u, double t, const void 
 	// Check for saturation
 	if (dat->get_isSaturated() == true)
 	{
-		double x = u(dove.getVariableIndex("x"),0);
-		double T = u(dove.getVariableIndex("T"),0);
-		double m = u(dove.getVariableIndex("m"),0);
-		//double E = u(dove.getVariableIndex("E"),0);
-		//double s = u(dove.getVariableIndex("s"),0);
-		//double w = u(dove.getVariableIndex("w"),0);
-		double U = u(dove.getVariableIndex("u"),0);
-		//double z = u(dove.getVariableIndex("z"),0);
+		double x = u(dove.getVariableIndex("x (kg/kg)"),0);
+		double T = u(dove.getVariableIndex("T (K)"),0);
+		double m = u(dove.getVariableIndex("m (Mg)"),0);
+		double E = u(dove.getVariableIndex("E (J/kg)"),0);
+		double s = u(dove.getVariableIndex("s (kg/kg)"),0);
+		double w = u(dove.getVariableIndex("w (kg/kg)"),0);
+		double U = u(dove.getVariableIndex("u (m/s)"),0);
+		double z = u(dove.getVariableIndex("z (m)"),0);
 		
-		//dat->compute_apparent_temp(T, x);
-		//dat->compute_beta_prime(x, s, w);
-		//dat->compute_sigma_turbulence(E, z);
-		//dat->compute_actual_spec_heat(T, x);
+		if (dat->get_isTight() == true)
+		{
+			dat->compute_apparent_temp(T, x);
+			dat->compute_beta_prime(x, s, w);
+			dat->compute_sigma_turbulence(E, z);
+			dat->compute_actual_spec_heat(T, x);
+		}
 		
 		double p1 = T - dat->get_current_amb_temp() + (dat->get_latent_heat()*(x-dat->get_xe())/dat->get_actual_spec_heat());
 		p1 = p1 / (1.0+(dat->get_latent_heat()*dat->get_latent_heat()*x*dat->get_eps()/dat->get_actual_spec_heat()/dat->get_gas_const()/T/T));
@@ -2062,19 +2099,22 @@ double rate_entrained_mass(int i, const Matrix<double> &u, double t, const void 
 	}
 	else
 	{
-		//double x = u(dove.getVariableIndex("x"),0);
-		//double T = u(dove.getVariableIndex("T"),0);
-		double m = u(dove.getVariableIndex("m"),0);
-		//double E = u(dove.getVariableIndex("E"),0);
-		//double s = u(dove.getVariableIndex("s"),0);
-		//double w = u(dove.getVariableIndex("w"),0);
-		double U = u(dove.getVariableIndex("u"),0);
-		//double z = u(dove.getVariableIndex("z"),0);
+		double x = u(dove.getVariableIndex("x (kg/kg)"),0);
+		double T = u(dove.getVariableIndex("T (K)"),0);
+		double m = u(dove.getVariableIndex("m (Mg)"),0);
+		double E = u(dove.getVariableIndex("E (J/kg)"),0);
+		double s = u(dove.getVariableIndex("s (kg/kg)"),0);
+		double w = u(dove.getVariableIndex("w (kg/kg)"),0);
+		double U = u(dove.getVariableIndex("u (m/s)"),0);
+		double z = u(dove.getVariableIndex("z (m)"),0);
 		
-		//dat->compute_apparent_temp(T, x);
-		//dat->compute_beta_prime(x, s, w);
-		//dat->compute_sigma_turbulence(E, z);
-		//dat->compute_mean_spec_heat(T, x, s, w);
+		if (dat->get_isTight() == true)
+		{
+			dat->compute_apparent_temp(T, x);
+			dat->compute_beta_prime(x, s, w);
+			dat->compute_sigma_turbulence(E, z);
+			dat->compute_mean_spec_heat(T, x, s, w);
+		}
 		
 		double p1 = dat->get_beta_prime()*dat->get_spec_heat_entrain_integral()/dat->get_apparent_temp()/dat->get_mean_spec_heat();
 		p1 = dat->get_beta_prime()*m/(1.0 - p1);
@@ -2090,31 +2130,9 @@ double rate_entrained_mass(int i, const Matrix<double> &u, double t, const void 
 	return res;
 }
 
-double rate_part_conc(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove)
-{
-	double res = 0.0;
-	
-	Crane *dat = (Crane *) data;
-	
-	//double x = u(dove.getVariableIndex("x"),0);
-	//double T = u(dove.getVariableIndex("T"),0);
-	//double m = u(dove.getVariableIndex("m"),0);
-	//double s = u(dove.getVariableIndex("s"),0);
-	//double w = u(dove.getVariableIndex("w"),0);
-	//double z = u(dove.getVariableIndex("z"),0);
-	
-	//dat->compute_cloud_volume(m, x, s, w, T, dat->get_current_atm_press());
-	//dat->compute_horz_rad(m, x, s, w, T, dat->get_current_atm_press(), z);
-	//dat->compute_settling_rate(dat->get_part_size(i), dat->get_current_atm_press(), x, T);
-	
-	res = -u(i,0)*M_PI*dat->get_horz_rad()*dat->get_horz_rad()*dat->get_settling_rate(dat->get_part_size(i))/dat->get_cloud_volume();
-    
-	return res;
-}
-
 // Below are list functions associated with actions completed outside of the solver in DOVE
 
-void Crane::establish_initial_conditions(double W, double gz, double hb, int bins, bool includeShear, Dove &dove)
+void Crane::establish_initial_conditions(double W, double gz, double hb, int bins, bool includeShear, bool isTight, Dove &dove)
 {
 	this->compute_initial_current_time(W, gz, hb);
 	this->compute_initial_temperature(W, gz, hb);
@@ -2136,87 +2154,69 @@ void Crane::establish_initial_conditions(double W, double gz, double hb, int bin
 	this->compute_k2(W);
 	this->compute_mu(W);
 	this->set_includeShearVel(includeShear);
+	this->set_isTight(isTight);
 	this->set_isSaturated(false);
 	
-	// Setup data
+	///*** Override ICs **///
+	this->set_energy( 1993.76 );
+	this->set_cloud_alt( 1645.96 );
+	this->set_cloud_mass( 3974.0 );
+	this->set_s_soil(1.35e-5);
+	this->set_temperature(2803.7);
+	this->set_cloud_rise(65.01);
+	this->set_w_water_conds(0);
+	this->set_x_water_vapor(0.002626);
 	
+	// Setup data
 	dove.set_userdata(this);
-	//dove.set_numfunc(bins+9);
-	dove.set_numfunc(bins+8);
+	dove.set_numfunc(8);
 	
 	// Name variables
-	
-	for (int i=0; i<bins; i++)
-	{
-		char buff[10];
-		sprintf(buff, "n[%i]",i);
-		std::string temp = buff;
-		dove.set_variableName(i, temp);
-	}
-	
-	dove.set_variableName(bins, "z");
-	dove.set_variableName(bins+1, "w");
-	dove.set_variableName(bins+2, "x");
-	dove.set_variableName(bins+3, "s");
-	dove.set_variableName(bins+4, "u");
-	dove.set_variableName(bins+5, "m");
-	dove.set_variableName(bins+6, "E");
-	dove.set_variableName(bins+7, "T");
-	//dove.set_variableName(bins+8, "m_ent");
+
+	dove.set_variableName(0, "z (m)");
+	dove.set_variableName(1, "w (kg/kg)");
+	dove.set_variableName(2, "x (kg/kg)");
+	dove.set_variableName(3, "s (kg/kg)");
+	dove.set_variableName(4, "u (m/s)");
+	dove.set_variableName(5, "m (Mg)");
+	dove.set_variableName(6, "E (J/kg)");
+	dove.set_variableName(7, "T (K)");
 	
 	// Register rate functions
 	
-	for (int i=0; i<bins; i++)
-	{
-		dove.registerFunction(i, rate_part_conc);
-        dove.registerCoeff(i, default_coeff);
-	}
-	
-	dove.registerFunction("z", rate_cloud_alt);
-    dove.registerCoeff("z", default_coeff);
-	dove.registerFunction("w", rate_w_water_conds);
-    dove.registerCoeff("w", default_coeff);
-	dove.registerFunction("x", rate_x_water_vapor);
-    dove.registerCoeff("x", default_coeff);
-	dove.registerFunction("s", rate_s_soil);
-    dove.registerCoeff("s", default_coeff);
-	dove.registerFunction("u", rate_cloud_rise);
-    dove.registerCoeff("u", default_coeff);
-	dove.registerFunction("m", rate_cloud_mass);
-    dove.registerCoeff("m", default_coeff);
-	dove.registerFunction("E", rate_energy);
-    dove.registerCoeff("E", default_coeff);
-	dove.registerFunction("T", rate_temperature);
-    dove.registerCoeff("T", default_coeff);
-	//dove.registerFunction("m_ent", res_entrained_mass);
+	dove.registerFunction("z (m)", rate_cloud_alt);
+    dove.registerCoeff("z (m)", default_coeff);
+	dove.registerFunction("w (kg/kg)", rate_w_water_conds);
+    dove.registerCoeff("w (kg/kg)", default_coeff);
+	dove.registerFunction("x (kg/kg)", rate_x_water_vapor);
+    dove.registerCoeff("x (kg/kg)", default_coeff);
+	dove.registerFunction("s (kg/kg)", rate_s_soil);
+    dove.registerCoeff("s (kg/kg)", default_coeff);
+	dove.registerFunction("u (m/s)", rate_cloud_rise);
+    dove.registerCoeff("u (m/s)", default_coeff);
+	dove.registerFunction("m (Mg)", rate_cloud_mass);
+    dove.registerCoeff("m (Mg)", default_coeff);
+	dove.registerFunction("E (J/kg)", rate_energy);
+    dove.registerCoeff("E (J/kg)", default_coeff);
+	dove.registerFunction("T (K)", rate_temperature);
+    dove.registerCoeff("T (K)", default_coeff);
 	
 	// Set initial conditions
 	
 	dove.set_starttime(this->get_current_time());
-	
-	//Iterate through map
-	int i = 0;
-	for (std::map<double,double>::iterator it=this->part_conc.begin(); it!=this->part_conc.end(); ++it)
-	{
-		dove.set_initialcondition(i, it->second);
-		i++;
-	}
-	
-	dove.set_initialcondition("z", this->get_cloud_alt());
-	dove.set_initialcondition("w", this->get_w_water_conds());
-	dove.set_initialcondition("x", this->get_x_water_vapor());
-	dove.set_initialcondition("s", this->get_s_soil());
-	dove.set_initialcondition("u", this->get_cloud_rise());
-	dove.set_initialcondition("m", this->get_cloud_mass());
-	dove.set_initialcondition("E", this->get_energy());
-	dove.set_initialcondition("T", this->get_temperature());
-	//dove.set_initialcondition("m_ent", this->get_entrained_mass());
-	
+	dove.set_initialcondition("z (m)", this->get_cloud_alt());
+	dove.set_initialcondition("w (kg/kg)", this->get_w_water_conds());
+	dove.set_initialcondition("x (kg/kg)", this->get_x_water_vapor());
+	dove.set_initialcondition("s (kg/kg)", this->get_s_soil());
+	dove.set_initialcondition("u (m/s)", this->get_cloud_rise());
+	dove.set_initialcondition("m (Mg)", this->get_cloud_mass());
+	dove.set_initialcondition("E (J/kg)", this->get_energy());
+	dove.set_initialcondition("T (K)", this->get_temperature());
 	dove.set_timestep(1.0/this->get_cloud_rise());
 }
 
 void Crane::establish_dove_options(Dove &dove, FILE *file, bool fileout, bool consoleout, integrate_subtype inttype, timestep_type timetype,
-								   precond_type type, double tol, double dtmin, double dtmax, double dtmin_conv, double endtime)
+								   precond_type type, double tol, double dtmin, double dtmax, double dtmin_conv, double t_out, double endtime)
 {
 	dove.set_outputfile(file);
 	dove.set_fileoutput(fileout);
@@ -2231,6 +2231,7 @@ void Crane::establish_dove_options(Dove &dove, FILE *file, bool fileout, bool co
 	dove.set_timestepmin(dtmin);
 	dove.set_timestepmax(dtmax);
 	dove.set_timestepmin_converged(dtmin_conv);
+	dove.set_t_out(t_out);
 	dove.set_endtime(endtime);
 }
 
@@ -2253,7 +2254,7 @@ void Crane::establish_pjfnk_options(Dove &dove, krylov_method lin_method, linese
 	dove.set_LinearRelTol(l_reltol);
 }
 
-void Crane::estimate_parameters(const Matrix<double> &n)
+void Crane::estimate_parameters(Dove &dove)
 {
 	this->compute_beta_prime(this->get_x_water_vapor(), this->get_s_soil(), this->get_w_water_conds());
 	this->compute_q_x(this->get_x_water_vapor());
@@ -2278,7 +2279,11 @@ void Crane::estimate_parameters(const Matrix<double> &n)
 	this->compute_sat_vapor_pressure(this->get_temperature());
 	
 	if (this->get_vapor_pressure() > this->get_sat_vapor_pressure())
+	{
 		this->set_isSaturated(true);
+		if (this->get_saturation_time() <= 0.0)
+			this->set_saturation_time(this->get_current_time());
+	}
 	else
 		this->set_isSaturated(false);
 	
@@ -2297,30 +2302,30 @@ void Crane::estimate_parameters(const Matrix<double> &n)
 	this->compute_shear_vel(this->get_cloud_alt(), v);
 	this->compute_shear_ratio(this->get_cloud_mass(), this->get_x_water_vapor(), this->get_s_soil(), this->get_w_water_conds(), this->get_temperature(), P, this->get_cloud_alt(), this->get_cloud_rise(), this->get_energy(), v);
 	
-	this->compute_total_mass_fallout_rate(this->get_cloud_mass(), this->get_x_water_vapor(), this->get_s_soil(), this->get_w_water_conds(), this->get_temperature(), P, this->get_cloud_alt(), n);
+	this->compute_total_mass_fallout_rate(this->get_cloud_mass(), this->get_x_water_vapor(), this->get_s_soil(), this->get_w_water_conds(), this->get_temperature(), P, this->get_cloud_alt(), this->get_part_conc_var());
+	
+	for (int i=0; i<this->part_conc_var.rows(); i++)
+	{
+		//res = -u(i,0)*M_PI*dat->get_horz_rad()*dat->get_horz_rad()*dat->get_settling_rate(dat->get_part_size(i))/dat->get_cloud_volume();
+		double rate = M_PI*this->get_horz_rad()*this->get_horz_rad()*this->get_settling_rate(this->get_part_size(i))/this->get_cloud_volume();
+		
+		rate = exp(-rate*dove.getTimeStep());
+		
+		this->part_conc_var(i,0) = this->part_conc_var(i,0)*rate;
+	}
 }
 
 void Crane::store_variables(Dove &dove)
 {
 	this->set_current_time(dove.getCurrentTime());
-	
-	//Iterate through map
-	int i = 0;
-	for (std::map<double,double>::iterator it=this->part_conc.begin(); it!=this->part_conc.end(); ++it)
-	{
-		it->second = dove.getNewU(i, dove.getNewU());
-		i++;
-	}
-	
-	this->set_cloud_mass( dove.getNewU("m", dove.getNewU()) );
-	//this->set_entrained_mass( dove.getNewU("m_ent", dove.getNewU()) );
-	this->set_cloud_rise( dove.getNewU("u", dove.getNewU()) );
-	this->set_cloud_alt( dove.getNewU("z", dove.getNewU()) );
-	this->set_x_water_vapor( dove.getNewU("x", dove.getNewU()) );
-	this->set_w_water_conds( dove.getNewU("w", dove.getNewU()) );
-	this->set_s_soil(dove.getNewU("s", dove.getNewU()));
-	this->set_temperature(dove.getNewU("T", dove.getNewU()));
-	this->set_energy( dove.getNewU("E", dove.getNewU()) );
+	this->set_cloud_mass( dove.getNewU("m (Mg)", dove.getNewU()) );
+	this->set_cloud_rise( dove.getNewU("u (m/s)", dove.getNewU()) );
+	this->set_cloud_alt( dove.getNewU("z (m)", dove.getNewU()) );
+	this->set_x_water_vapor( dove.getNewU("x (kg/kg)", dove.getNewU()) );
+	this->set_w_water_conds( dove.getNewU("w (kg/kg)", dove.getNewU()) );
+	this->set_s_soil(dove.getNewU("s (kg/kg)", dove.getNewU()));
+	this->set_temperature(dove.getNewU("T (K)", dove.getNewU()));
+	this->set_energy( dove.getNewU("E (J/kg)", dove.getNewU()) );
 }
 
 int Crane::run_crane_simulation(Dove &dove)
@@ -2372,10 +2377,10 @@ int Crane::run_crane_simulation(Dove &dove)
 	}
 	
 	//Do-while loop
+	this->estimate_parameters(dove);
 	do
 	{
 		dove.update_timestep();
-		this->estimate_parameters(dove.getNewU());
 		if (this->get_ConsoleOut() == true)
 		{
 			std::cout << "\nSolving (" << dove.getNumFunc() << ") equation(s) at time (" << dove.getCurrentTime() << ") with time step (" << dove.getTimeStep() << "). Please wait...\n";
@@ -2390,6 +2395,7 @@ int Crane::run_crane_simulation(Dove &dove)
 			dove.print_newresult();
 		this->store_variables(dove);
 		dove.update_states();
+		this->estimate_parameters(dove);
 	} while (dove.getEndTime() > (dove.getCurrentTime()+dove.getMinTimeStep()));
 	if (this->get_ConsoleOut() == true)
 		std::cout << "------------------------------------------------------\n\n";
@@ -2424,7 +2430,8 @@ int CRANE_TESTS()
 	double hb = 500.0*0.3048;// 500 ft
 	double gz = 1155; //m (Nevada Test Site)
 	int bins = 10;
-	bool includeShear = false;
+	bool includeShear = true;
+	bool isTight = true;
 	
 	std::cout << "\nTesting of the CRANE for Plumbbob Boltzman Bomb at Nevada Test Site\n";
 	std::cout <<   "-------------------------------------------------------------------\n\n";
@@ -2433,17 +2440,18 @@ int CRANE_TESTS()
 	std::cout << "Ground Altitude (m) =\t" << gz << std::endl;
 	std::cout << "\n";
 	
-	test.establish_initial_conditions(W, gz, hb, bins, includeShear, dove);
+	test.establish_initial_conditions(W, gz, hb, bins, includeShear, isTight, dove);
 	
 	bool fileout = true;
 	bool consoleout = true;
-	double tol = 1e-6;
+	double tol = 1e-8;
 	double dtmin = 1e-8;
 	double dtmax = 1.0;
 	double dtmin_conv = 0.001;
-	double endtime = 50.0;
+	double t_out = 0.1;
+	double endtime = 5.0;
 	
-	test.establish_dove_options(dove, file, fileout, consoleout, FE, RATEBASED, SGS, tol, dtmin, dtmax, dtmin_conv, endtime);
+	test.establish_dove_options(dove, file, fileout, consoleout, BE, CONSTANT, SGS, tol, dtmin, dtmax, dtmin_conv, t_out, endtime);
 	
 	bool isLinear = false;
 	bool isPrecon = false;
@@ -2453,121 +2461,28 @@ int CRANE_TESTS()
 	int max_lit = 200;
 	int restart = 20;
 	int recursive = 2;
-	double nl_abstol = 1e-6;
-	double nl_reltol = 1e-6;
+	double nl_abstol = 1e-8;
+	double nl_reltol = 1e-8;
 	double l_abstol = 1e-6;
 	double l_reltol = 1e-6;
 	
 	test.establish_pjfnk_options(dove, QR, BT, isLinear, isPrecon, nl_out, l_out, max_nlit, max_lit, restart, recursive, nl_abstol, nl_reltol, l_abstol, l_reltol);
 	
+	//test.run_crane_simulation(dove);
+	for (int i=0; i<8; i++)
+	{
+		std::cout << dove.getVariableName(i) << " =\t " << dove.getNewU(i, dove.getNewU()) << "\t: rate =\t " << dove.Eval_Func(i, dove.getNewU(), dove.getCurrentTime()) << std::endl;
+	}
+	
 	test.run_crane_simulation(dove);
 	
-	/*
-	dove.reset_all();
-	
-	if (test.get_FileOut() == true)
-	{
-		dove.print_header();
-		dove.print_result();
-	}
-	*/
-	
-	// -------- First Time Step ------------
-    /*
-	dove.update_timestep();
-	test.estimate_parameters(dove.getNewU());
-     */
-	
-    /*
-	std::cout << "z (m) =\t" << dove.getNewU("z", dove.getNewU()) << std::endl;
-	std::cout << "dz/dt =\t" << rate_cloud_alt(dove.getVariableIndex("z"), dove.getNewU(), dove.getCurrentTime(), (void*)&test, dove) << std::endl;
-	
-	std::cout << "u (m/s) =\t" << dove.getNewU("u", dove.getNewU()) << std::endl;
-	std::cout << "du/dt =\t" << rate_cloud_rise(dove.getVariableIndex("u"), dove.getNewU(), dove.getCurrentTime(), (void*)&test, dove) << std::endl;
-	
-	std::cout << "x (m/s) =\t" << dove.getNewU("x", dove.getNewU()) << std::endl;
-	std::cout << "dx/dt =\t" << rate_x_water_vapor(dove.getVariableIndex("x"), dove.getNewU(), dove.getCurrentTime(), (void*)&test, dove) << std::endl;
-	
-	std::cout << "p(t) = \t" << test.get_total_mass_fallout_rate() << std::endl;
-	
-	std::cout << "m (m/s) =\t" << dove.getNewU("m", dove.getNewU()) << std::endl;
-	std::cout << "dm/dt =\t" << rate_cloud_mass(dove.getVariableIndex("m"), dove.getNewU(), dove.getCurrentTime(), (void*)&test, dove) << std::endl;
-	
-	std::cout << std::endl;
-	dove.solve_timestep();
-	
-	if (test.get_FileOut() == true)
-		dove.print_newresult();
-	test.store_variables(dove);
-	dove.update_states();
-	
-	// -------- Second Time Step ------------
-	dove.update_timestep();
-	test.estimate_parameters(dove.getNewU());
-	std::cout << "z (m) =\t" << dove.getNewU("z", dove.getNewU()) << std::endl;
-	std::cout << "dz/dt =\t" << rate_cloud_alt(dove.getVariableIndex("z"), dove.getNewU(), dove.getCurrentTime(), (void*)&test, dove) << std::endl;
-	
-	std::cout << "u (m/s) =\t" << dove.getNewU("u", dove.getNewU()) << std::endl;
-	std::cout << "du/dt =\t" << rate_cloud_rise(dove.getVariableIndex("u"), dove.getNewU(), dove.getCurrentTime(), (void*)&test, dove) << std::endl;
-	
-	std::cout << "x (m/s) =\t" << dove.getNewU("x", dove.getNewU()) << std::endl;
-	std::cout << "dx/dt =\t" << rate_x_water_vapor(dove.getVariableIndex("x"), dove.getNewU(), dove.getCurrentTime(), (void*)&test, dove) << std::endl;
-	
-	std::cout << "p(t) = \t" << test.get_total_mass_fallout_rate() << std::endl;
-	
-	std::cout << "m (m/s) =\t" << dove.getNewU("m", dove.getNewU()) << std::endl;
-	std::cout << "dm/dt =\t" << rate_cloud_mass(dove.getVariableIndex("m"), dove.getNewU(), dove.getCurrentTime(), (void*)&test, dove) << std::endl;
-	
-	std::cout << std::endl;
-	
-	dove.solve_timestep();
-	
-	if (test.get_FileOut() == true)
-		dove.print_newresult();
-	test.store_variables(dove);
-	dove.update_states();
-	*/
-    
-    /*
     dove.createJacobian();
     Matrix<double> J = dove.getNumJacobian();
-    J.Display("J"); //Jacobian is coming out as singular (CAUSED BY EPS TOL!!!) - n_j are too large for eps to have impact
-    
-    Matrix<double> Res(dove.getNumFunc(),1);
-    
-    success = residual_BE(dove.getNewU(), Res, (void*)&dove);
-    Res.Display("Res");
-    dove.getNewU().Display("var");
-    std::cout << "ResNorm = " << Res.norm() << std::endl;
-    
-    //Manual calc of Res 1
-    double eps = sqrt(DBL_EPSILON);
-    //eps = 1000.0;
-    double Res1 = dove.getNewU(3, dove.getNewU()) - dove.getCurrentU(3, dove.getCurrentU()) - dove.getTimeStep()*rate_part_conc(3, dove.getNewU(), dove.getCurrentTime(), (void*)&test, dove);
-    
-    Matrix<double> dist = dove.getNewU();
-    dist.edit(3,0,dist(3,0)+eps);
-    double distRes1 = dist(3, 0) - dove.getCurrentU(3, dove.getCurrentU()) - dove.getTimeStep()*rate_part_conc(3, dist, dove.getCurrentTime(), (void*)&test, dove);
-    
-    std::cout << (distRes1 - Res1)/eps << std::endl;
-    std::cout << 1.0 - 0.0 - (dove.getTimeStep()*rate_part_conc(3, dist, dove.getCurrentTime(), (void*)&test, dove)/dove.getNewU(3, dove.getNewU())) << std::endl;
-    std::cout << dove.getTimeStep()*rate_part_conc(3, dist, dove.getCurrentTime(), (void*)&test, dove)/dove.getNewU(3, dove.getNewU()) << std::endl;
-    
-    std::cout << (1995.44+eps - 1995.44)/eps << std::endl;
-     
-     */
-    
-    /** Solutions to the tolerance issue
-        --------------------------------
-        (1) Change units... kg for mass is too small... convert to metric tonnes? (kg/1000)
-                                                        convert to kilotonnes? (kg/10^6)
-                            num/m^3 is way, way too small for particle concentrations...
-                                            convert to num/mm^3? (n_j/1000^3)
-                                            convert to num/um^3 (n_j/1000000^3)
-                                            conavert to mass/volume???*/
-    
-    //dove.solve_timestep();
-	//dove.solve_all();
+    J.Display("J");
+	
+	std::cout << "Saturation Time (s) =\t" << test.get_saturation_time() << std::endl;
+	
+	test.get_part_conc_var().Display("n");
 	
 	time = clock() - time;
 	std::cout << "\nTest Runtime: " << (time / CLOCKS_PER_SEC) << " seconds\n";

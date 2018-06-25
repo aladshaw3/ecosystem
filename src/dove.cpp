@@ -29,6 +29,8 @@ Dove::Dove()
 	dtmin = sqrt(DBL_EPSILON);
 	dtmax = 100.0;
 	tolerance = 1e-4;
+	t_count = 0.0;
+	t_out = 0.0;
 	int_type = IMPLICIT;
 	int_sub = BE;
 	timestepper = CONSTANT;
@@ -57,6 +59,7 @@ Dove::Dove()
 	Linear = false;
 	newton_dat.l_restart = 100;
 	AllSteadyState = false;
+	timesteps = 0;
 }
 
 //Default destructor
@@ -296,6 +299,14 @@ void Dove::set_tolerance(double tol)
 		tol = MIN_TOL;
 	this->tolerance = tol;
 	this->newton_dat.nl_tol_abs = tol;
+}
+
+//Set the t_out variable
+void Dove::set_t_out(double v)
+{
+	if (v <= 0.0)
+		v = 0.0;
+	this->t_out = v;
 }
 
 //Set nl_abs_tol
@@ -596,10 +607,17 @@ void Dove::print_header()
 //Print new result
 void Dove::print_newresult()
 {
-	fprintf(this->Output,"%.6g",this->time);
-	for (int i=0; i<this->num_func; i++)
-		fprintf(this->Output,"\t%.6g",this->unp1(i,0));
-	fprintf(this->Output,"\n");
+	this->t_count = this->t_count + this->dt;
+	if (this->t_count >= (this->t_out+sqrt(DBL_EPSILON))
+		|| this->t_count >= (this->t_out-sqrt(DBL_EPSILON))
+		|| this->time == this->time_end)
+	{
+		fprintf(this->Output,"%.6g",this->time);
+		for (int i=0; i<this->num_func; i++)
+			fprintf(this->Output,"\t%.6g",this->unp1(i,0));
+		fprintf(this->Output,"\n");
+		this->t_count = 0.0;
+	}
 }
 
 //Print result
@@ -728,7 +746,7 @@ double Dove::coupledTimeDerivative(int i, const Matrix<double> &u) const
 {
 	
 	double rn = 0.0;
-	if (this->getOldTime() > 0.0)
+	if (this->getOldTime() > this->getStartTime())
 		rn = this->getTimeStep()/this->getTimeStepOld();
 	
 	double an, bn, cn;
@@ -1261,6 +1279,8 @@ int Dove::solve_timestep()
 		}
 		
 	}
+	else
+		this->timesteps++;
 	return success;
 }
 
@@ -2694,7 +2714,9 @@ typedef struct
 double ldf_kinetics(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove)
 {
 	Test06_data *dat = (Test06_data *) data;
-	return dat->kldf*(dat->K*u(dove.getVariableIndex("c"),0) - u(dove.getVariableIndex("q"),0));
+	double rate = dat->kldf*(dat->K*u(dove.getVariableIndex("c"),0) - u(dove.getVariableIndex("q"),0));
+	//std::cout << i << " = " << rate << std::endl;
+	return rate;
 }
 
 double mb_timecoef(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove)
@@ -2706,7 +2728,9 @@ double mb_timecoef(int i, const Matrix<double> &u, double t, const void *data, c
 double mb_cstr(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove)
 {
 	Test06_data *dat = (Test06_data *) data;
-	return dat->Q*dat->co - dat->Q*u(dove.getVariableIndex("c"),0) - dat->rho*dove.coupledTimeDerivative("q",u);
+	double rate = dat->Q*dat->co - dat->Q*u(dove.getVariableIndex("c"),0) - dat->rho*dove.coupledTimeDerivative("q",u);
+	//std::cout << i << " = " << dove.coupledTimeDerivative("q",u) << std::endl;
+	return rate;
 }
 // -------------------- End temporary testing --------------------------
 

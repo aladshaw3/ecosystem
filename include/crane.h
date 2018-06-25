@@ -138,6 +138,8 @@ public:
 	void set_isSaturated(bool val);						///< Set the isSaturated parameter
 	void set_ConsoleOut(bool val);						///< Set the ConsoleOut parameter
 	void set_FileOut(bool val);							///< Set the FileOut parameter
+	void set_saturation_time(double val);				///< Set the saturation_time parameter
+	void set_isTight(bool val);							///< Set the isTight parameter
 	
 	// Below are listed all the manual get functions for manually retrieving individual values
 	double get_eps();							///< Get the eps parameter
@@ -214,6 +216,9 @@ public:
 	double get_settling_rate(double Dj);		///< Get the settling_rate associated with size Dj
 	bool get_ConsoleOut();						///< Get the ConsoleOut parameter
 	bool get_FileOut();							///< Get the FileOut parameter
+	Matrix<double> & get_part_conc_var();		///< Get the part_conc_var parameter
+	double get_saturation_time();				///< Get the saturation_time parameter
+	bool get_isTight();							///< Get the isTight parameter
 	
 	// Below are listed all the compute functions for various parameter values
 	void compute_beta_prime(double x, double s, double w);		///< Function to compute ratio of cloud gas density to local density
@@ -299,18 +304,18 @@ public:
 	// Below are list functions associated with actions completed outside of the solver in DOVE
 	
 	/// Function will establish initial conditions, setup variables names, and register functions
-	void establish_initial_conditions(double W, double gz, double hb, int bins, bool includeShear, Dove &dove);
+	void establish_initial_conditions(double W, double gz, double hb, int bins, bool includeShear, bool isTight, Dove &dove);
 	
 	/// Function to establish DOVE conditions and options
 	void establish_dove_options(Dove &dove, FILE *file, bool fileout, bool consoleout, integrate_subtype inttype, timestep_type timetype,
-								precond_type type, double tol, double dtmin, double dtmax, double dtmin_conv, double endtime);
+								precond_type type, double tol, double dtmin, double dtmax, double dtmin_conv, double t_out, double endtime);
 	
 	/// Function to establish PJFNK conditions and options
 	void establish_pjfnk_options(Dove &dove, krylov_method lin_method, linesearch_type linesearch, bool linear, bool precon, bool nl_out,
 		bool l_out, int max_nlit, int max_lit, int restart, int recursive, double nl_abstol, double nl_reltol, double l_abstol, double l_reltol);
 	
 	/// Function to estimate all parameters prior to simulating a single timestep
-	void estimate_parameters(const Matrix<double> &n);
+	void estimate_parameters(Dove &dove);
 	
 	/// Function to store all variable values to be updated from Dove simulations
 	void store_variables(Dove &dove);
@@ -375,6 +380,7 @@ protected:
 	double current_atm_press;		///< Current value of atmospheric pressure (set based on atm profile)		(P)
 	bool includeShearVel;			///< Boolean statement used to include (true) or ignore (false) wind shear
 	bool isSaturated;				///< Boolean state used to determine whether or not to use Saturated Functions
+	bool isTight;					///< Boolean state used to determine whether or not to use Tight Coulpling
 	bool ConsoleOut;				///< Boolean state used to determine whether or not to include console output
 	bool FileOut;					///< Boolean state used to determine whether or not to include file output
 	
@@ -397,17 +403,20 @@ protected:
 	/** These variables are stored internally by Dove,
 		but will be placed into these parameters below
 		after completing a solve for convenience. */
-	double cloud_mass;							///< Total mass of the debris cloud (kg)						(m)
-	double entrained_mass;						///< Mass of entrained materials in debris cloud (kg)			(m_ent)
+	double cloud_mass;							///< Total mass of the debris cloud (Mg)						(m)
+	double entrained_mass;						///< Mass of entrained materials in debris cloud (Mg)			(m_ent)
 	double cloud_rise;							///< Rate of cloud rise through atmosphere (m/s)				(u)
 	double cloud_alt;							///< Altitude of the cloud above mean sea level (m)				(z)
 	double x_water_vapor;						///< Mixing ratio for water vapor to dry air (kg/kg)			(x)
 	double w_water_conds;						///< Mixing ratio for condensed water to dry air (kg/kg)		(w)
 	double s_soil;								///< Mixing ratio for suspended soils to dry air (kg/kg)		(s)
 	double temperature;							///< Temperature of the air in the cloud (K)					(T)
-	double energy;								///< Mass-less Kinetic Energy in the cloud (m^2/s^2)			(E)
-	std::map<double, double> part_conc;			///< Number of particles per volume (#/m^3) given size (um)		(n_j(t))
+	double energy;								///< Mass-less Kinetic Energy in the cloud (J/kg)				(E)
+	std::map<double, double> part_conc;			///< Number of particles per volume (Gp/m^3) given size (um)	(n_j(t))
 	double current_time;						///< Current time since explosion (s)							(t)
+	
+	Matrix<double> part_conc_var;				///< Storage matrix for particle concentrations in order of size
+	double saturation_time;						///< Time at which saturation has occurred (s)
 	
 private:
 	
@@ -441,9 +450,6 @@ double rate_s_soil(int i, const Matrix<double> &u, double t, const void *data, c
 
 /// Function to provide a coupled entrained mass residual
 double rate_entrained_mass(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
-
-/// Function to provide a coupled particle concentration residual
-double rate_part_conc(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
 
 /// Test function for CRANE
 /**  Test function is callable from the cli */

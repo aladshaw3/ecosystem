@@ -143,6 +143,7 @@ public:
 	void set_fileoutput(bool choice);					///< Set the value of DoveFileOuput (True if you want results printed to file)
 	void set_headeroutput(bool choice);					///< Set the value of DoveHeader (True if you want header printed to file)
 	void set_tolerance(double tol);						///< Set the value of residual/error tolerance desired
+	void set_t_out(double v);							///< Set the value of the t_out parameter
 	
 	//Set some default conditions
 	void set_defaultNames();							///< Set all the variable names to default values (does not set var_names_hash values)
@@ -366,6 +367,8 @@ protected:
 	double dtmin_con;								///< Minimum allowable time step if solution has converged
 	double dtmax;									///< Maximum allowable time step
 	double tolerance;								///< Residual tolerance desired (or level of accuracy desired)
+	double t_count;									///< Counter designed to keep track of how often we print results
+	double t_out;									///< Direct Dove to only print results after specific time increments
 	integrate_type int_type;						///< Type of time integration to use
 	integrate_subtype int_sub;						///< Subtype of time integration scheme to use
 	timestep_type timestepper;						///< Type of time stepper to be used
@@ -381,6 +384,7 @@ protected:
 	bool Linear;									///< Boolean to determine whether or not to treat problem as linear
 	bool AllSteadyState;							///< Boolean to determine whether or not all variables are steady (true = all steady-state)
 	int linmax;										///< Users requested maximum number of linear steps
+	int timesteps;									///< Running count of number of time steps taken
 	
 	/// Matrix object for user defined rate functions
 	Matrix<double (*) (int i, const Matrix<double> &u, double t, const void *data, const Dove &dove)> user_func;
