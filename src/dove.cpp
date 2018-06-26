@@ -1697,6 +1697,10 @@ int Dove::solve_FE()
 		
 		if (isinf(value) || isnan(value))
 		{
+			std::cout << "Equation for variable " << this->getVariableName(i) << " failed and produced " << value << std::endl;
+			std::cout << "Rate expression produced " << this->Eval_Func(i, this->un, this->time_old) << std::endl;
+			std::cout << "Variable List \n";
+			this->un.Display("un");
 			this->Converged = false;
 			return -1;
 		}
@@ -1729,6 +1733,10 @@ int Dove::solve_RK4()
 		
 		if (isinf(value) || isnan(value))
 		{
+			std::cout << "Equation for variable " << this->getVariableName(i) << " failed and produced " << value << std::endl;
+			std::cout << "Rate expression produced " << this->Eval_Func(i, this->un, this->time_old) << std::endl;
+			std::cout << "Variable List \n";
+			this->un.Display("un");
 			this->Converged = false;
 			return -1;
 		}
@@ -1769,6 +1777,10 @@ int Dove::solve_RKF()
 		
 		if (isinf(value) || isnan(value))
 		{
+			std::cout << "Equation for variable " << this->getVariableName(i) << " failed and produced " << value << std::endl;
+			std::cout << "Rate expression produced " << this->Eval_Func(i, this->un, this->time_old) << std::endl;
+			std::cout << "Variable List \n";
+			this->un.Display("un");
 			this->Converged = false;
 			return -1;
 		}
