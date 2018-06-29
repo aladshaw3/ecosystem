@@ -1793,6 +1793,198 @@ void Crane::create_default_atmosphere()
 	this->add_amb_temp(21000, 216.51);
 	this->add_atm_press(21000, 4812.4);
 	this->add_rel_humid(21000, 1.922e-8);
+	
+	this->add_amb_temp(21600, 216.3);
+	this->add_atm_press(21600, 4437.7);
+	this->add_rel_humid(21600, 1.5246e-8);
+	
+	this->add_amb_temp(22200, 216.08);
+	this->add_atm_press(22200, 4053.8);
+	this->add_rel_humid(22200, 1.1272e-8);
+	
+	this->add_amb_temp(22800, 215.86);
+	this->add_atm_press(22800, 3688.3);
+	this->add_rel_humid(22800, 7.2583e-9);
+	
+	this->add_amb_temp(23400, 215.64);
+	this->add_atm_press(23400, 3313.5);
+	this->add_rel_humid(23400, 3.3246e-9);
+	
+	this->add_amb_temp(24000, 215.79);
+	this->add_atm_press(24000, 2884.7);
+	this->add_rel_humid(24000, 6.25355e-10);
+	
+	this->add_amb_temp(24800, 216.67);
+	this->add_atm_press(24800, 2747.7);
+	this->add_rel_humid(24800, 4.7485e-10);
+	
+	this->add_amb_temp(25200, 217.56);
+	this->add_atm_press(25200, 2510.7);
+	this->add_rel_humid(25200, 3.2434e-10);
+	
+	this->add_amb_temp(25800, 218.44);
+	this->add_atm_press(25800, 2273.7);
+	this->add_rel_humid(25800, 1.7583e-10);
+	
+	this->add_amb_temp(26400, 219.32);
+	this->add_atm_press(26400, 2086.7);
+	this->add_rel_humid(26400, 2.3328e-11);
+	
+	this->add_amb_temp(27000, 220.41);
+	this->add_atm_press(27000, 1902.2);
+	this->add_rel_humid(27000, 2.0301e-11);
+	
+	this->add_amb_temp(27600, 221.49);
+	this->add_atm_press(27600, 1767.65);
+	this->add_rel_humid(27600, 1.7275e-11);
+	
+	this->add_amb_temp(28200, 222.57);
+	this->add_atm_press(28200, 1633.1);
+	this->add_rel_humid(28200, 1.4245e-11);
+	
+	this->add_amb_temp(28800, 223.65);
+	this->add_atm_press(28800, 1488.55);
+	this->add_rel_humid(28800, 1.1218e-11);
+	
+	this->add_amb_temp(29400, 224.78);
+	this->add_atm_press(29400, 1229.4);
+	this->add_rel_humid(29400, 5.1899e-12);
+	
+	this->add_amb_temp(30000, 225.82);
+	this->add_atm_press(30000, 1364);
+	this->add_rel_humid(30000, 5.1622e-12);
+	
+	this->add_amb_temp(30600, 226.9);
+	this->add_atm_press(30600, 1094.9);
+	this->add_rel_humid(30600, 0.021345);
+	
+	this->add_amb_temp(31200, 228.07);
+	this->add_atm_press(31200, 995.42);
+	this->add_rel_humid(31200, 0.042105);
+	
+	this->add_amb_temp(31800, 229.43);
+	this->add_atm_press(31800, 966.19);
+	this->add_rel_humid(31800, 0.168425);
+	
+	this->add_amb_temp(32400, 230.79);
+	this->add_atm_press(32400, 935.57);
+	this->add_rel_humid(32400, 0.29474);
+	
+	this->add_amb_temp(33000, 232.15);
+	this->add_atm_press(33000, 907.75);
+	this->add_rel_humid(33000, 0.4210);
+	
+	this->add_amb_temp(33600, 233.51);
+	this->add_atm_press(33600, 878.53);
+	this->add_rel_humid(33600, 0.54757);
+	
+	this->add_amb_temp(34200, 234.87);
+	this->add_atm_press(34200, 849.33);
+	this->add_rel_humid(34200, 0.67366);
+	
+	this->add_amb_temp(34800, 236.22);
+	this->add_atm_press(34800, 825.08);
+	this->add_rel_humid(34800, 0.86004);
+	
+	this->add_amb_temp(35400, 237.58);
+	this->add_atm_press(35400, 798.86);
+	this->add_rel_humid(35400, 0.92632);
+	
+	this->add_amb_temp(36000, 238.94);
+	this->add_atm_press(36000, 761.54);
+	this->add_rel_humid(36000, 1.0525);
+	
+	this->add_amb_temp(36600, 240.3);
+	this->add_atm_press(36600, 732.41);
+	this->add_rel_humid(36600, 1.1789);
+	
+	this->add_amb_temp(37200, 241.66);
+	this->add_atm_press(37200, 703.19);
+	this->add_rel_humid(37200, 1.3053);
+	
+	this->add_amb_temp(37800, 243.02);
+	this->add_atm_press(37800, 673.97);
+	this->add_rel_humid(37800, 1.4315);
+	
+	this->add_amb_temp(38400, 244.38);
+	this->add_atm_press(38400, 544.75);
+	this->add_rel_humid(38400, 1.5579);
+	
+	this->add_amb_temp(39000, 245.74);
+	this->add_atm_press(39000, 515.52);
+	this->add_rel_humid(39000, 1.6842);
+	
+	this->add_amb_temp(39600, 247.1);
+	this->add_atm_press(39600, 508.37);
+	this->add_rel_humid(39600, 1.8105);
+	
+	this->add_amb_temp(40200, 248.45);
+	this->add_atm_press(40200, 557.08);
+	this->add_rel_humid(40200, 1.9365);
+	
+	this->add_amb_temp(40800, 249.81);
+	this->add_atm_press(40800, 527.36);
+	this->add_rel_humid(40800, 2.0632);
+	
+	this->add_amb_temp(41400, 251.17);
+	this->add_atm_press(41400, 498.53);
+	this->add_rel_humid(41400, 2.1895);
+	
+	this->add_amb_temp(42000, 252.53);
+	this->add_atm_press(42000, 469.41);
+	this->add_rel_humid(42000, 2.3158);
+	
+	this->add_amb_temp(42600, 253.89);
+	this->add_atm_press(42600, 440.19);
+	this->add_rel_humid(42600, 2.4421);
+	
+	this->add_amb_temp(43200, 255.25);
+	this->add_atm_press(43200, 410.97);
+	this->add_rel_humid(43200, 2.5684);
+	
+	this->add_amb_temp(43800, 256.61);
+	this->add_atm_press(43800, 381.74);
+	this->add_rel_humid(43800, 2.5947);
+	
+	this->add_amb_temp(44400, 257.97);
+	this->add_atm_press(44400, 352.52);
+	this->add_rel_humid(44400, 2.8211);
+	
+	this->add_amb_temp(45000, 259.33);
+	this->add_atm_press(45000, 323.3);
+	this->add_rel_humid(45000, 2.9474);
+	
+	this->add_amb_temp(45600, 260.68);
+	this->add_atm_press(45600, 294.08);
+	this->add_rel_humid(45600, 3.0737);
+	
+	this->add_amb_temp(46200, 262.04);
+	this->add_atm_press(46200, 254.85);
+	this->add_rel_humid(46200, 3.2);
+	
+	this->add_amb_temp(46800, 263.4);
+	this->add_atm_press(46800, 235.63);
+	this->add_rel_humid(46800, 3.3263);
+	
+	this->add_amb_temp(47400, 264.76);
+	this->add_atm_press(47400, 206.41);
+	this->add_rel_humid(47400, 3.4526);
+	
+	this->add_amb_temp(48000, 266.12);
+	this->add_atm_press(48000, 177.19);
+	this->add_rel_humid(48000, 3.5789);
+	
+	this->add_amb_temp(48600, 267.48);
+	this->add_atm_press(48600, 147.96);
+	this->add_rel_humid(48600, 3.7053);
+	
+	this->add_amb_temp(49200, 268.84);
+	this->add_atm_press(49200, 118.74);
+	this->add_rel_humid(49200, 3.8316);
+	
+	this->add_amb_temp(49800, 270.2);
+	this->add_atm_press(49800, 89.52);
+	this->add_rel_humid(49800, 3.9579);
 }
 
 void Crane::delete_atmosphere()
