@@ -140,6 +140,7 @@ public:
 	void set_FileOut(bool val);							///< Set the FileOut parameter
 	void set_saturation_time(double val);				///< Set the saturation_time parameter
 	void set_isTight(bool val);							///< Set the isTight parameter
+	void set_cloud_density(double val);					///< Set the cloud_density parameter
 	
 	// Below are listed all the manual get functions for manually retrieving individual values
 	double get_eps();							///< Get the eps parameter
@@ -219,6 +220,7 @@ public:
 	Matrix<double> & get_part_conc_var();		///< Get the part_conc_var parameter
 	double get_saturation_time();				///< Get the saturation_time parameter
 	bool get_isTight();							///< Get the isTight parameter
+	double get_cloud_density();					///< Get the cloud_density parameter
 	
 	// Below are listed all the compute functions for various parameter values
 	void compute_beta_prime(double x, double s, double w);		///< Function to compute ratio of cloud gas density to local density
@@ -239,6 +241,7 @@ public:
 	void compute_k_temp(double T);								///< Function to compute temperature factor based on given T
 	void compute_mean_spec_heat(double T, double x, double s, double w);///< Function to compute mean specific heat given T, x, s, and w
 	void compute_cloud_volume(double m, double x, double s, double w, double T, double P);///< Function to compute cloud volume
+	void compute_cloud_density(double m, double x, double s, double w, double T, double P);///< Function to compute cloud density
 	void compute_vert_rad(double z);							///< Function to compute vertical cloud radius given z
 	void compute_horz_rad(double m, double x, double s, double w, double T, double P, double z);///< Function to compute horizontal radius
 	void compute_sigma_turbulence(double E, double z);			///< Function to compute sigma turbulence given E and z
@@ -247,8 +250,8 @@ public:
 	/// Function to compute the shear_ratio based on the fundamental variables and atmospheric parameters
 	void compute_shear_ratio(double m, double x, double s, double w, double T, double P, double z, double u, double E, Matrix<double> v);
 	void compute_slip_factor(double Dj, double T, double P);	///< Function to compute the slip_factor given Dj, T, and P
-	void compute_davies_num(double Dj, double P, double x, double T);///< Function to compute davies_num given the conditions
-	void compute_settling_rate(double Dj, double P, double x, double T);///< Function to compute the settling rates of specific particle size
+	void compute_davies_num(double Dj, double m, double x, double s, double w, double T, double P);///< Function to compute davies_num given the conditions
+	void compute_settling_rate(double Dj, double m, double x, double s, double w, double T, double P);///< Function to compute the settling rates of specific particle size
 	/// Function to compute total_mass_fallout_rate based on all given variables and parameters
 	void compute_total_mass_fallout_rate(double m, double x, double s, double w, double T, double P, double z, const Matrix<double> &n);
 	
@@ -417,6 +420,7 @@ protected:
 	
 	Matrix<double> part_conc_var;				///< Storage matrix for particle concentrations in order of size
 	double saturation_time;						///< Time at which saturation has occurred (s)
+	double cloud_density;						///< Density of the cloud materials	(kg/m^3)
 	
 private:
 	

@@ -93,6 +93,7 @@ Crane::Crane()
 	temperature = 298;
 	energy = 0.0;
 	current_time = 0.0;
+	cloud_density = 0.0;
 	
 	create_default_atmosphere();
 }
@@ -500,6 +501,11 @@ void Crane::set_isTight(bool val)
 	this->isTight = val;
 }
 
+void Crane::set_cloud_density(double val)
+{
+	this->cloud_density = val;
+}
+
 ///< Below are the get functions for various parameters
 
 double Crane::get_eps()
@@ -890,49 +896,65 @@ bool Crane::get_isTight()
 	return this->isTight;
 }
 
+double Crane::get_cloud_density()
+{
+	return this->cloud_density;
+}
+
 // Below are listed all the compute function for various parameters
 void Crane::compute_beta_prime(double x, double s, double w)
 {
+	if (x < 0.0)	x = 0.0;
+	if (s < 0.0)	s = 0.0;
+	if (w < 0.0)	w = 0.0;
 	double val = (1.0 + x) / (1.0 + x + s + w);
 	this->set_beta_prime(val);
 }
 
 void Crane::compute_q_x(double x)
 {
+	if (x < 0.0)	x = 0.0;
 	double val = (1.0 + (x/this->get_eps())) / (1.0 + x);
 	this->set_q_x(val);
 }
 
 void Crane::compute_q_xe(double xe)
 {
+	if (xe < 0.0)	xe = 0.0;
 	double val = (1.0 + (xe/this->get_eps())) / (1.0 + xe);
 	this->set_q_xe(val);
 }
 
 void Crane::compute_apparent_temp(double T, double x)
 {
+	if (T < 0.0)	T = 0.0;
 	this->compute_q_x(x);
 	this->set_apparent_temp(T*this->get_q_x());
 }
 
 void Crane::compute_apparent_amb_temp(double Te, double xe)
 {
+	if (Te < 0.0)	Te = 0.0;
 	this->compute_q_xe(xe);
 	this->set_apparent_amb_temp(Te*this->get_q_xe());
 }
 
 void Crane::compute_char_vel(double u, double E)
 {
+	if (E < 0.0)	E = 0.0;
 	this->set_char_vel(fmax(fabs(u), 2.0*E));
 }
 
 void Crane::compute_air_viscosity(double T)
 {
+	if (T < 0.0)	T = 0.0;
 	this->set_air_viscosity( (145.8*pow(10.0, -8.0)*pow(T, (3.0/2.0))) / (110.4 + T) );
 }
 
 void Crane::compute_vapor_pressure(double P, double x)
 {
+	if (x < 0.0)	x = 0.0;
+	if (P < 0.0)	P = 0.0;
 	this->set_vapor_pressure( (P*x) / (this->get_eps() + x) );
 }
 
@@ -941,7 +963,7 @@ void Crane::compute_sat_vapor_pressure(double T)
 	//this->set_sat_vapor_pressure( 611.0*pow(T/273.0, -5.13)*exp(25.0*(T-273.0)/T) );
 	
 	//NOTE: Changed DEFLIC's model because it failed to produce good results at high temperatures
-	
+	if (T < 0.0)	T = 0.0;
 	T = T - 273.15;
 	double Pws = 618.8*exp(17.27*T/(T+237.3));
 	this->set_sat_vapor_pressure(Pws);
@@ -949,6 +971,9 @@ void Crane::compute_sat_vapor_pressure(double T)
 
 void Crane::compute_xe(double Te, double P, double HR)
 {
+	if (Te < 0.0)	Te = 0.0;
+	if (P < 0.0)	P = 0.0;
+	if (HR < 0.0)	HR = 0.0;
 	double val = (109.98*HR/29.0/P)*pow(Te/273.0, -5.13)*exp(25.0*(Te-273.0)/Te);
 	this->set_xe(val);
 }
@@ -963,12 +988,15 @@ void Crane::compute_air_density(double P, double x, double T)
 	//this->set_air_density(val);
 	
 	//NOTE: Changed DEFLIC's model because it failed to produce good results at high humidity
-	
+	if (x < 0.0)	x = 0.0;
+	if (P < 0.0)	P = 0.0;
+	if (T < 0.0)	T = 0.0;
 	this->set_air_density( (P/this->get_gas_const()/T)*(1.0+x)/(1.0+x*1.609) );
 }
 
 void Crane::compute_spec_heat_entrain(double T)
 {
+	if (T < 0.0)	T = 0.0;
 	if (T <= 2300.0)
 	{
 		this->set_spec_heat_entrain(946.6+(0.1971*T));
@@ -981,11 +1009,13 @@ void Crane::compute_spec_heat_entrain(double T)
 
 void Crane::compute_spec_heat_water(double T)
 {
+	if (T < 0.0)	T = 0.0;
 	this->set_spec_heat_water(1697.66+(1.144174*T));
 }
 
 void Crane::compute_spec_heat_conds(double T)
 {
+	if (T < 0.0)	T = 0.0;
 	if (T <= 848.0)
 	{
 		this->set_spec_heat_conds(781.6+(0.5612*T)-(1.881e7/T/T));
@@ -998,6 +1028,7 @@ void Crane::compute_spec_heat_conds(double T)
 
 void Crane::compute_actual_spec_heat(double T, double x)
 {
+	if (x < 0.0)	x = 0.0;
 	this->compute_spec_heat_entrain(T);
 	this->compute_spec_heat_water(T);
 	this->set_actual_spec_heat( (this->get_spec_heat_entrain() + (x*this->get_spec_heat_water())) / (1.0+x) );
@@ -1005,6 +1036,7 @@ void Crane::compute_actual_spec_heat(double T, double x)
 
 void Crane::compute_k_temp(double T)
 {
+	if (T < 0.0)	T = 0.0;
 	if (T > this->equil_temp)
 	{
 		this->set_k_temp(0.0);
@@ -1026,10 +1058,20 @@ void Crane::compute_mean_spec_heat(double T, double x, double s, double w)
 
 void Crane::compute_cloud_volume(double m, double x, double s, double w, double T, double P)
 {
+	if (P < 0.0)	P = 0.0;
+	if (m < 0.0)	m = 0.0;
 	m = m * 1000.0; //Convert from Mg to kg
 	this->compute_beta_prime(x, s, w);
 	this->compute_apparent_temp(T, x);
 	this->set_cloud_volume( m*this->get_beta_prime()*this->get_gas_const()*this->get_apparent_temp()/P );
+}
+
+void Crane::compute_cloud_density(double m, double x, double s, double w, double T, double P)
+{
+	this->compute_cloud_volume(m, x, s, w, T, P);
+	if (m < 0.0)	m = 0.0;
+	m = m * 1000.0; //Convert from Mg to kg
+	this->set_cloud_density( m/this->get_cloud_volume()*this->get_beta_prime() );
 }
 
 void Crane::compute_vert_rad(double z)
@@ -1046,8 +1088,9 @@ void Crane::compute_horz_rad(double m, double x, double s, double w, double T, d
 
 void Crane::compute_sigma_turbulence(double E, double z)
 {
+	if (E < 0.0)	E = 0.0;
 	this->compute_vert_rad(z);
-	this->set_sigma_turbulence( this->get_k3()*pow(2.0*fabs(E), 3.0/2.0)/this->get_vert_rad() );
+	this->set_sigma_turbulence( this->get_k3()*pow(2.0*E, 3.0/2.0)/this->get_vert_rad() );
 }
 
 void Crane::compute_surf_area(double m, double x, double s, double w, double T, double P, double z)
@@ -1082,54 +1125,57 @@ void Crane::compute_shear_ratio(double m, double x, double s, double w, double T
 void Crane::compute_slip_factor(double Dj, double T, double P)
 {
 	//NOTE: Dj comes in as um --> convert to m
+	if (T < 0.0)	T = 0.0;
+	if (P < 0.0)	P = 0.0;
 	double dj = Dj/1.0E+6;
 	this->compute_air_viscosity(T);
 	this->set_slip_factor( 1.0 + (54.088*this->get_air_viscosity()*pow(T, 0.5)/dj/P) );
 }
 
-void Crane::compute_davies_num(double Dj, double P, double x, double T)
+void Crane::compute_davies_num(double Dj, double m, double x, double s, double w, double T, double P)
 {
 	//NOTE: Dj comes in as um --> convert to m
 	double dj = Dj/1.0E+6;
-	this->compute_air_density(P, x, T);
+	//this->compute_air_density(P, x, T);
+	this->compute_cloud_density(m, x, s, w, T, P);
 	this->compute_air_viscosity(T);
-	this->set_davies_num( (4.0*this->get_air_density()*(this->get_part_density()-this->get_air_density())*this->get_grav()*pow(dj,3.0)) / (3.0*pow(this->get_air_viscosity(),2.0)) );
+	this->set_davies_num( (4.0*this->get_cloud_density()*(this->get_part_density()-this->get_cloud_density())*this->get_grav()*pow(dj,3.0)) / (3.0*pow(this->get_air_viscosity(),2.0)) );
 }
 
-void Crane::compute_settling_rate(double Dj, double P, double x, double T)
+void Crane::compute_settling_rate(double Dj, double m, double x, double s, double w, double T, double P)
 {
 	//NOTE: Dj comes in as um --> convert to m
 	double dj = Dj/1.0E+6;
 	this->compute_slip_factor(Dj, T, P);
-	this->compute_davies_num(Dj, P, x, T);
+	this->compute_davies_num(Dj, m, x, s, w, T, P);
 	
 	//If statements for flow conditions
 	if (this->get_davies_num() <= 0.3261)
 	{
-		this->settling_rate[Dj] = this->get_air_viscosity()*this->get_davies_num()*this->get_slip_factor()/24.0/this->get_air_density()/dj;
+		this->settling_rate[Dj] = this->get_air_viscosity()*this->get_davies_num()*this->get_slip_factor()/24.0/this->get_cloud_density()/dj;
 	}
 	else if (this->get_davies_num() <= 84.175)
 	{
 		double Y = log(this->get_davies_num());
 		double exp = -3.18657 + (0.992696*Y) - (0.153193E-2*pow(Y,2.0)) - (0.987059E-3*pow(Y,3.0)) - (0.578878E-3*pow(Y,4.0)) + (0.855176E-4*pow(Y,5.0)) - (0.327815E-5*pow(Y,6.0));
-		this->settling_rate[Dj] = this->get_air_viscosity()*exp*this->get_slip_factor()/this->get_air_density()/dj;
+		this->settling_rate[Dj] = this->get_air_viscosity()*exp*this->get_slip_factor()/this->get_cloud_density()/dj;
 	}
 	else if (this->get_davies_num() < 140.0)
 	{
 		double poly = 4.1667E-2 - (2.3363E-4*this->get_davies_num()) + (2.0154E-6*this->get_davies_num()*this->get_davies_num()) - (6.9105E-9*this->get_davies_num()*this->get_davies_num()*this->get_davies_num());
-		this->settling_rate[Dj] = this->get_air_viscosity()*poly*this->get_slip_factor()*this->get_davies_num()/this->get_air_density()/dj;
+		this->settling_rate[Dj] = this->get_air_viscosity()*poly*this->get_slip_factor()*this->get_davies_num()/this->get_cloud_density()/dj;
 	}
 	else if (this->get_davies_num() < 4.5E+7)
 	{
 		double X = log10(this->get_davies_num());
 		double poly = -1.29536 + (0.986*X) - (0.046677*X*X) + (1.1235E-3*X*X*X);
-		this->settling_rate[Dj] = this->get_air_viscosity()*pow(10.0,poly)/this->get_air_density()/dj;
+		this->settling_rate[Dj] = this->get_air_viscosity()*pow(10.0,poly)/this->get_cloud_density()/dj;
 	}
 	else
 	{
 		double X = log10(this->get_davies_num());
 		double poly = -1.29536 + (0.986*X) - (0.046677*X*X) + (1.1235E-3*X*X*X);
-		this->settling_rate[Dj] = this->get_air_viscosity()*pow(10.0,poly)/this->get_air_density()/dj;
+		this->settling_rate[Dj] = this->get_air_viscosity()*pow(10.0,poly)/this->get_cloud_density()/dj;
 	}
 }
 
@@ -1144,9 +1190,11 @@ void Crane::compute_total_mass_fallout_rate(double m, double x, double s, double
 	for (std::map<double,double>::iterator it=this->part_hist.begin(); it!=this->part_hist.end(); ++it)
 	{
 		//NOTE: Dj comes in as um --> convert to m
+		double ni = n(i,0);
+		if (ni < 0.0)	ni = 0.0;
 		double dj = it->first/1.0E+6;
-		this->compute_settling_rate(it->first, P, x, T);
-		sum += this->settling_rate[it->first]*M_PI*dj*dj*dj*n(i,0)*1.0e9/6.0;
+		this->compute_settling_rate(it->first, m, x, s, w, T, P);
+		sum += this->settling_rate[it->first]*M_PI*dj*dj*dj*ni*1.0e9/6.0;
 		i++;
 	}
 	sum = sum*M_PI*this->get_horz_rad()*this->get_horz_rad()*this->get_part_density();
@@ -2170,14 +2218,14 @@ double rate_cloud_rise(int i, const Matrix<double> &u, double t, const void *dat
 	double res = 0.0;
 	
 	Crane *dat = (Crane *) data;
-	double m = fabs( u(dove.getVariableIndex("m (Mg)"),0) );
+	double m = ( u(dove.getVariableIndex("m (Mg)"),0) );
 	double U = u(dove.getVariableIndex("u (m/s)"),0);
 	double dm_dt = dove.coupledTimeDerivative("m (Mg)",u);
 	double mass_rat = m / (m + dat->get_virtual_mass());
-	double T = fabs( u(dove.getVariableIndex("T (K)"),0) );
-	double x = fabs( u(dove.getVariableIndex("x (kg/kg)"),0) );
-	double s = fabs( u(dove.getVariableIndex("s (kg/kg)"),0) );
-	double w = fabs( u(dove.getVariableIndex("w (kg/kg)"),0) );
+	double T = ( u(dove.getVariableIndex("T (K)"),0) );
+	double x = ( u(dove.getVariableIndex("x (kg/kg)"),0) );
+	double s = ( u(dove.getVariableIndex("s (kg/kg)"),0) );
+	double w = ( u(dove.getVariableIndex("w (kg/kg)"),0) );
 	double z = u(dove.getVariableIndex("z (m)"),0);
 	
 	if (dat->get_isTight() == true)
@@ -2211,8 +2259,8 @@ double rate_x_water_vapor(int i, const Matrix<double> &u, double t, const void *
 	// Check for saturation
 	if (dat->get_isSaturated() == true)
 	{
-		double x = fabs( u(dove.getVariableIndex("x (kg/kg)"),0) );
-		double T = fabs( u(dove.getVariableIndex("T (K)"),0) );
+		double x = ( u(dove.getVariableIndex("x (kg/kg)"),0) );
+		double T = ( u(dove.getVariableIndex("T (K)"),0) );
 		double U = u(dove.getVariableIndex("u (m/s)"),0);
 		double dT_dt = dove.coupledTimeDerivative("T (K)",u);
 		
@@ -2223,10 +2271,10 @@ double rate_x_water_vapor(int i, const Matrix<double> &u, double t, const void *
 	}
 	else
 	{
-		double m = fabs( u(dove.getVariableIndex("m (Mg)"),0) );
+		double m = ( u(dove.getVariableIndex("m (Mg)"),0) );
 		double dment_dt = rate_entrained_mass(0, u, dove.getCurrentTime(), data, dove);
-		double x = fabs( u(dove.getVariableIndex("x (kg/kg)"),0) );
-		double s = fabs( u(dove.getVariableIndex("s (kg/kg)"),0) );
+		double x = ( u(dove.getVariableIndex("x (kg/kg)"),0) );
+		double s = ( u(dove.getVariableIndex("s (kg/kg)"),0) );
 		
 		res = -((1.0+x+s)/(1.0+dat->get_xe()))*(x - dat->get_xe())*dment_dt/m;
 	}
@@ -2243,13 +2291,13 @@ double rate_temperature(int i, const Matrix<double> &u, double t, const void *da
 	// Check for saturation
 	if (dat->get_isSaturated() == true)
 	{
-		double x = fabs( u(dove.getVariableIndex("x (kg/kg)"),0) );
-		double T = fabs( u(dove.getVariableIndex("T (K)"),0) );
-		double m = fabs( u(dove.getVariableIndex("m (Mg)"),0) );
+		double x = ( u(dove.getVariableIndex("x (kg/kg)"),0) );
+		double T = ( u(dove.getVariableIndex("T (K)"),0) );
+		double m = ( u(dove.getVariableIndex("m (Mg)"),0) );
 		double dment_dt = rate_entrained_mass(0, u, dove.getCurrentTime(), data, dove);
-		double E = fabs( u(dove.getVariableIndex("E (J/kg)"),0) );
-		double s = fabs( u(dove.getVariableIndex("s (kg/kg)"),0) );
-		double w = fabs( u(dove.getVariableIndex("w (kg/kg)"),0) );
+		double E = ( u(dove.getVariableIndex("E (J/kg)"),0) );
+		double s = ( u(dove.getVariableIndex("s (kg/kg)"),0) );
+		double w = ( u(dove.getVariableIndex("w (kg/kg)"),0) );
 		double U = u(dove.getVariableIndex("u (m/s)"),0);
 		double z = u(dove.getVariableIndex("z (m)"),0);
 		
@@ -2271,15 +2319,15 @@ double rate_temperature(int i, const Matrix<double> &u, double t, const void *da
 	}
 	else
 	{
-		double x = fabs( u(dove.getVariableIndex("x (kg/kg)"),0) );
-		double T = fabs( u(dove.getVariableIndex("T (K)"),0) );
-		double m = fabs( u(dove.getVariableIndex("m (Mg)"),0) );
+		double x = ( u(dove.getVariableIndex("x (kg/kg)"),0) );
+		double T = ( u(dove.getVariableIndex("T (K)"),0) );
+		double m = ( u(dove.getVariableIndex("m (Mg)"),0) );
 		double dment_dt = rate_entrained_mass(0, u, dove.getCurrentTime(), data, dove);
-		double E = fabs( u(dove.getVariableIndex("E (J/kg)"),0) );
-		double s = fabs( u(dove.getVariableIndex("s (kg/kg)"),0) );
-		double w = fabs( u(dove.getVariableIndex("w (kg/kg)"),0) );
+		double E = ( u(dove.getVariableIndex("E (J/kg)"),0) );
+		double s = ( u(dove.getVariableIndex("s (kg/kg)"),0) );
+		double w = ( u(dove.getVariableIndex("w (kg/kg)"),0) );
 		double U = u(dove.getVariableIndex("u (m/s)"),0);
-		double z = fabs( u(dove.getVariableIndex("z (m)"),0) );
+		double z = ( u(dove.getVariableIndex("z (m)"),0) );
 		
 		if (dat->get_isTight() == true)
 		{
@@ -2308,13 +2356,13 @@ double rate_w_water_conds(int i, const Matrix<double> &u, double t, const void *
 	// Check for saturation
 	if (dat->get_isSaturated() == true)
 	{
-		double x = fabs( u(dove.getVariableIndex("x (kg/kg)"),0) );
-		double T = fabs( u(dove.getVariableIndex("T (K)"),0) );
-		double m = fabs( u(dove.getVariableIndex("m (Mg)"),0) );
+		double x = ( u(dove.getVariableIndex("x (kg/kg)"),0) );
+		double T = ( u(dove.getVariableIndex("T (K)"),0) );
+		double m = ( u(dove.getVariableIndex("m (Mg)"),0) );
 		double dment_dt = rate_entrained_mass(0, u, dove.getCurrentTime(), data, dove);
 		double dx_dt = dove.coupledTimeDerivative("x (kg/kg)",u);
-		double s = fabs( u(dove.getVariableIndex("s (kg/kg)"),0) );
-		double w = fabs( u(dove.getVariableIndex("w (kg/kg)"),0) );
+		double s = ( u(dove.getVariableIndex("s (kg/kg)"),0) );
+		double w = ( u(dove.getVariableIndex("w (kg/kg)"),0) );
 		double z = u(dove.getVariableIndex("z (m)"),0);
 		
 		if (dat->get_isTight() == true)
@@ -2342,13 +2390,13 @@ double rate_energy(int i, const Matrix<double> &u, double t, const void *data, c
 	
 	Crane *dat = (Crane *) data;
 	
-	double x = fabs( u(dove.getVariableIndex("x (kg/kg)"),0) );
-	double T = fabs( u(dove.getVariableIndex("T (K)"),0) );
-	double m = fabs( u(dove.getVariableIndex("m (Mg)"),0) );
+	double x = ( u(dove.getVariableIndex("x (kg/kg)"),0) );
+	double T = ( u(dove.getVariableIndex("T (K)"),0) );
+	double m = ( u(dove.getVariableIndex("m (Mg)"),0) );
 	double dment_dt = rate_entrained_mass(0, u, dove.getCurrentTime(), data, dove);
-	double E = fabs( u(dove.getVariableIndex("E (J/kg)"),0) );
-	double s = fabs( u(dove.getVariableIndex("s (kg/kg)"),0) );
-	double w = fabs( u(dove.getVariableIndex("w (kg/kg)"),0) );
+	double E = ( u(dove.getVariableIndex("E (J/kg)"),0) );
+	double s = ( u(dove.getVariableIndex("s (kg/kg)"),0) );
+	double w = ( u(dove.getVariableIndex("w (kg/kg)"),0) );
 	double U = u(dove.getVariableIndex("u (m/s)"),0);
 	double z = u(dove.getVariableIndex("z (m)"),0);
 	
@@ -2375,12 +2423,12 @@ double rate_cloud_mass(int i, const Matrix<double> &u, double t, const void *dat
 	
 	Crane *dat = (Crane *) data;
 	
-	double x = fabs( u(dove.getVariableIndex("x (kg/kg)"),0) );
-	double T = fabs( u(dove.getVariableIndex("T (K)"),0) );
-	double m = fabs( u(dove.getVariableIndex("m (Mg)"),0) );
+	double x = ( u(dove.getVariableIndex("x (kg/kg)"),0) );
+	double T = ( u(dove.getVariableIndex("T (K)"),0) );
+	double m = ( u(dove.getVariableIndex("m (Mg)"),0) );
 	double dment_dt = rate_entrained_mass(0, u, dove.getCurrentTime(), data, dove);
-	double s = fabs( u(dove.getVariableIndex("s (kg/kg)"),0) );
-	double w = fabs( u(dove.getVariableIndex("w (kg/kg)"),0) );
+	double s = ( u(dove.getVariableIndex("s (kg/kg)"),0) );
+	double w = ( u(dove.getVariableIndex("w (kg/kg)"),0) );
 	double z = u(dove.getVariableIndex("z (m)"),0);
 	
 	if (dat->get_isTight() == true)
@@ -2397,12 +2445,12 @@ double rate_s_soil(int i, const Matrix<double> &u, double t, const void *data, c
 	
 	Crane *dat = (Crane *) data;
 	
-	double x = fabs( u(dove.getVariableIndex("x (kg/kg)"),0) );
-	double T = fabs( u(dove.getVariableIndex("T (K)"),0) );
-	double m = fabs( u(dove.getVariableIndex("m (Mg)"),0) );
+	double x = ( u(dove.getVariableIndex("x (kg/kg)"),0) );
+	double T = ( u(dove.getVariableIndex("T (K)"),0) );
+	double m = ( u(dove.getVariableIndex("m (Mg)"),0) );
 	double dment_dt = rate_entrained_mass(0, u, dove.getCurrentTime(), data, dove);
-	double s = fabs( u(dove.getVariableIndex("s (kg/kg)"),0) );
-	double w = fabs( u(dove.getVariableIndex("w (kg/kg)"),0) );
+	double s = ( u(dove.getVariableIndex("s (kg/kg)"),0) );
+	double w = ( u(dove.getVariableIndex("w (kg/kg)"),0) );
 	double z = u(dove.getVariableIndex("z (m)"),0);
 	
 	if (dat->get_isTight() == true)
@@ -2428,12 +2476,12 @@ double rate_entrained_mass(int i, const Matrix<double> &u, double t, const void 
 	// Check for saturation
 	if (dat->get_isSaturated() == true)
 	{
-		double x = fabs( u(dove.getVariableIndex("x (kg/kg)"),0) );
-		double T = fabs( u(dove.getVariableIndex("T (K)"),0) );
-		double m = fabs( u(dove.getVariableIndex("m (Mg)"),0) );
-		double E = fabs( u(dove.getVariableIndex("E (J/kg)"),0) );
-		double s = fabs( u(dove.getVariableIndex("s (kg/kg)"),0) );
-		double w = fabs( u(dove.getVariableIndex("w (kg/kg)"),0) );
+		double x = ( u(dove.getVariableIndex("x (kg/kg)"),0) );
+		double T = ( u(dove.getVariableIndex("T (K)"),0) );
+		double m = ( u(dove.getVariableIndex("m (Mg)"),0) );
+		double E = ( u(dove.getVariableIndex("E (J/kg)"),0) );
+		double s = ( u(dove.getVariableIndex("s (kg/kg)"),0) );
+		double w = ( u(dove.getVariableIndex("w (kg/kg)"),0) );
 		double U = u(dove.getVariableIndex("u (m/s)"),0);
 		double z = u(dove.getVariableIndex("z (m)"),0);
 		
@@ -2459,12 +2507,12 @@ double rate_entrained_mass(int i, const Matrix<double> &u, double t, const void 
 	}
 	else
 	{
-		double x = fabs( u(dove.getVariableIndex("x (kg/kg)"),0) );
-		double T = fabs( u(dove.getVariableIndex("T (K)"),0) );
-		double m = fabs( u(dove.getVariableIndex("m (Mg)"),0) );
-		double E = fabs( u(dove.getVariableIndex("E (J/kg)"),0) );
-		double s = fabs( u(dove.getVariableIndex("s (kg/kg)"),0) );
-		double w = fabs( u(dove.getVariableIndex("w (kg/kg)"),0) );
+		double x = ( u(dove.getVariableIndex("x (kg/kg)"),0) );
+		double T = ( u(dove.getVariableIndex("T (K)"),0) );
+		double m = ( u(dove.getVariableIndex("m (Mg)"),0) );
+		double E = ( u(dove.getVariableIndex("E (J/kg)"),0) );
+		double s = ( u(dove.getVariableIndex("s (kg/kg)"),0) );
+		double w = ( u(dove.getVariableIndex("w (kg/kg)"),0) );
 		double U = u(dove.getVariableIndex("u (m/s)"),0);
 		double z = u(dove.getVariableIndex("z (m)"),0);
 		
@@ -2477,7 +2525,12 @@ double rate_entrained_mass(int i, const Matrix<double> &u, double t, const void 
 		}
 		
 		double p1 = dat->get_beta_prime()*dat->get_spec_heat_entrain_integral()/dat->get_apparent_temp()/dat->get_mean_spec_heat();
+		//if (t > 3.42)
+			//std::cout << "\t1 - stuff = " << 1.0 - p1 << std::endl;
 		p1 = dat->get_beta_prime()*m/(1.0 - p1);
+		
+		//if (t > 3.42)
+			//std::cout << "\tp1 = " << p1 << std::endl;
 		
 		double p2 = (dat->get_apparent_temp()*dat->get_grav()*U/dat->get_apparent_amb_temp()) - dat->get_sigma_turbulence();
 		p2 = dat->get_beta_prime()*p2/dat->get_apparent_temp()/dat->get_mean_spec_heat();
@@ -2650,6 +2703,7 @@ void Crane::estimate_parameters(Dove &dove)
 		this->set_isSaturated(false);
 	
 	this->compute_air_density(P, this->get_x_water_vapor(), this->get_temperature());
+	this->compute_cloud_density(this->get_cloud_mass(), this->get_x_water_vapor(), this->get_s_soil(), this->get_w_water_conds(), this->get_temperature(), P);
 	this->compute_spec_heat_entrain(this->get_temperature());
 	this->compute_spec_heat_water(this->get_temperature());
 	this->compute_spec_heat_conds(this->get_temperature());
@@ -2786,8 +2840,22 @@ int Crane::run_crane_simulation(Dove &dove)
 	
 	//Do-while loop
 	this->estimate_parameters(dove);
+	double percent_comp = 0.0;
+	double print_comp = 0.0;
+	if (this->get_ConsoleOut() == false)
+		std::cout << "Percent Completion...\n";
 	do
 	{
+		percent_comp = (dove.getCurrentTime() - dove.getStartTime()) / (dove.getEndTime() - dove.getStartTime());
+		//std::cout << percent_comp << std::endl;
+		if ( (percent_comp - print_comp) >= 0.0)
+		{
+			print_comp = print_comp + 0.1;
+			
+			if (this->get_ConsoleOut() == false)
+				std::cout << "\t[" << percent_comp*100.0 << " %]\n";
+		}
+		
 		dove.update_timestep();
 		if (this->get_ConsoleOut() == true)
 		{
@@ -2799,18 +2867,29 @@ int Crane::run_crane_simulation(Dove &dove)
 			mError(simulation_fail);
 			return -1;
 		}
-        
-        for (int i=0; i<8; i++)
-        {
-            std::cout << dove.getVariableName(i) << " =\t " << dove.getNewU(i, dove.getNewU()) << "\t: rate =\t " << dove.Eval_Func(i, dove.getNewU(), dove.getCurrentTime()) << std::endl;
-        }
-        
+		
+		if (this->get_ConsoleOut() == true)
+		{
+			for (int i=0; i<8; i++)
+			{
+				std::cout << dove.getVariableName(i) << " =\t " << dove.getNewU(i, dove.getNewU()) << "\t: rate =\t " << dove.Eval_Func(i, dove.getNewU(), dove.getCurrentTime()) << std::endl;
+			}
+			std::cout << "dm/dt | ent =\t" << rate_entrained_mass(0, dove.getNewU(), dove.getCurrentTime(), this, dove) << std::endl;
+			double P = this->return_atm_press(this->get_cloud_alt());
+			this->compute_total_mass_fallout_rate(this->get_cloud_mass(), this->get_x_water_vapor(), this->get_s_soil(), this->get_w_water_conds(), this->get_temperature(), P, this->get_cloud_alt(), this->get_part_conc_var());
+			std::cout << "p(t) =\t" << this->get_total_mass_fallout_rate() << std::endl;
+		}
+		
 		this->store_variables(dove);
 		if (this->get_FileOut() == true)
 			dove.print_newresult();
 		dove.update_states();
 		this->estimate_parameters(dove);
+		
 	} while (dove.getEndTime() > (dove.getCurrentTime()+dove.getMinTimeStep()));
+	
+	if (this->get_ConsoleOut() == false)
+		std::cout << "\t[100 %]\n\n";
 	if (this->get_ConsoleOut() == true)
 		std::cout << "------------------------------------------------------\n\n";
 	
@@ -2845,7 +2924,7 @@ int CRANE_TESTS()
 	double gz = 1155; //m (Nevada Test Site)
 	int bins = 10;
 	bool includeShear = false;
-	bool isTight = true;
+	bool isTight = false;
 	
 	std::cout << "\nTesting of the CRANE for Plumbbob Boltzman Bomb at Nevada Test Site\n";
 	std::cout <<   "-------------------------------------------------------------------\n\n";
@@ -2857,15 +2936,15 @@ int CRANE_TESTS()
 	test.establish_initial_conditions(W, gz, hb, bins, includeShear, isTight, dove);
 	
 	bool fileout = true;
-	bool consoleout = true;
+	bool consoleout = false;
 	double tol = 0.1;
 	double dtmin = 1e-8;
 	double dtmax = 1.0;
-	double dtmin_conv = 1e-4;
+	double dtmin_conv = 1e-8;
 	double t_out = 1.0;
 	double endtime = 500.0;
 	
-	test.establish_dove_options(dove, file, fileout, consoleout, FE, RATEBASED, SGS, tol, dtmin, dtmax, dtmin_conv, t_out, endtime);
+	test.establish_dove_options(dove, file, fileout, consoleout, RK4, RATEBASED, SGS, tol, dtmin, dtmax, dtmin_conv, t_out, endtime);
 	
 	bool isLinear = false;
 	bool isPrecon = false;
@@ -2887,6 +2966,10 @@ int CRANE_TESTS()
 	{
 		std::cout << dove.getVariableName(i) << " =\t " << dove.getNewU(i, dove.getNewU()) << "\t: rate =\t " << dove.Eval_Func(i, dove.getNewU(), dove.getCurrentTime()) << std::endl;
 	}
+	std::cout << "dm/dt | ent =\t" << rate_entrained_mass(0, dove.getNewU(), dove.getCurrentTime(), (void*)&test, dove) << std::endl;
+	double P = test.return_atm_press(test.get_cloud_alt());
+	test.compute_total_mass_fallout_rate(test.get_cloud_mass(), test.get_x_water_vapor(), test.get_s_soil(), test.get_w_water_conds(), test.get_temperature(), P, test.get_cloud_alt(), test.get_part_conc_var());
+	std::cout << "p(t) =\t" << test.get_total_mass_fallout_rate() << std::endl;
 	
 	//test.get_part_conc_var().Display("n");
 	
@@ -2896,6 +2979,10 @@ int CRANE_TESTS()
     {
         std::cout << dove.getVariableName(i) << " =\t " << dove.getNewU(i, dove.getNewU()) << "\t: rate =\t " << dove.Eval_Func(i, dove.getNewU(), dove.getCurrentTime()) << std::endl;
     }
+	std::cout << "dm/dt | ent =\t" << rate_entrained_mass(0, dove.getNewU(), dove.getCurrentTime(), (void*)&test, dove) << std::endl;
+	P = test.return_atm_press(test.get_cloud_alt());
+	test.compute_total_mass_fallout_rate(test.get_cloud_mass(), test.get_x_water_vapor(), test.get_s_soil(), test.get_w_water_conds(), test.get_temperature(), P, test.get_cloud_alt(), test.get_part_conc_var());
+	std::cout << "p(t) =\t" << test.get_total_mass_fallout_rate() << std::endl;
 	
     //dove.createJacobian();
     //Matrix<double> J = dove.getNumJacobian();
