@@ -2629,7 +2629,7 @@ void Crane::establish_initial_conditions(double W, double gz, double hb, int bin
 	dove.set_initialcondition("m (Mg)", this->get_cloud_mass());
 	dove.set_initialcondition("E (J/kg)", this->get_energy());
 	dove.set_initialcondition("T (K)", this->get_temperature());
-	dove.set_timestep(1.0/this->get_cloud_rise()/100.0);
+	dove.set_timestep(1.0/this->get_cloud_rise()/10.0);
 }
 
 void Crane::establish_dove_options(Dove &dove, FILE *file, bool fileout, bool consoleout, integrate_subtype inttype, timestep_type timetype,
@@ -2927,12 +2927,12 @@ int CRANE_TESTS()
 		file = fopen("output/CRANE_Tests.txt", "w+");
 	}
 	
-	double W = 12.0; //kT
-	double hb = 500.0*0.3048;// 500 ft
-	double gz = 1155; //m (Nevada Test Site)
-	int bins = 10;
+	double W = 50.0; //12 kT
+	double hb = 0.0*0.3048;// 500 ft
+	double gz = 1000; //1155 m (Nevada Test Site)
+	int bins = 100;
 	bool includeShear = false;
-	bool isTight = false;
+	bool isTight = true;
 	
 	std::cout << "\nTesting of the CRANE for Plumbbob Boltzman Bomb at Nevada Test Site\n";
 	std::cout <<   "-------------------------------------------------------------------\n\n";
@@ -2952,7 +2952,7 @@ int CRANE_TESTS()
 	double t_out = 0.1;
 	double endtime = 20.0;
 	
-	test.establish_dove_options(dove, file, fileout, consoleout, RK4, RATEBASED, SGS, tol, dtmin, dtmax, dtmin_conv, t_out, endtime);
+	test.establish_dove_options(dove, file, fileout, consoleout, RK4, CONSTANT, SGS, tol, dtmin, dtmax, dtmin_conv, t_out, endtime);
 	
 	bool isLinear = false;
 	bool isPrecon = false;
