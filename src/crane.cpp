@@ -2495,7 +2495,8 @@ double rate_entrained_mass(int i, const Matrix<double> &u, double t, const void 
 		
 		double p1 = T - dat->get_current_amb_temp() + (dat->get_latent_heat()*(x-dat->get_xe())/dat->get_actual_spec_heat());
 		p1 = p1 / (1.0+(dat->get_latent_heat()*dat->get_latent_heat()*x*dat->get_eps()/dat->get_actual_spec_heat()/dat->get_gas_const()/T/T));
-		p1 = dat->get_beta_prime()*m/(1.0 - (dat->get_beta_prime()*p1/dat->get_apparent_temp()));
+		
+		p1 = dat->get_beta_prime()*m/fabs(1.0 - (dat->get_beta_prime()*p1/dat->get_apparent_temp()));
 		
 		double p2 = ((dat->get_grav()*U*dat->get_apparent_temp()/dat->get_actual_spec_heat()/dat->get_apparent_amb_temp())*(1.0+(dat->get_latent_heat()*x/dat->get_gas_const()/T))) - (dat->get_sigma_turbulence()/dat->get_actual_spec_heat());
 		p2 = p2 / (1.0+(dat->get_latent_heat()*dat->get_latent_heat()*x*dat->get_eps()/dat->get_actual_spec_heat()/dat->get_gas_const()/T/T));
@@ -2527,7 +2528,8 @@ double rate_entrained_mass(int i, const Matrix<double> &u, double t, const void 
 		double p1 = dat->get_beta_prime()*dat->get_spec_heat_entrain_integral()/dat->get_apparent_temp()/dat->get_mean_spec_heat();
 		//if (t > 3.42)
 			//std::cout << "\t1 - stuff = " << 1.0 - p1 << std::endl;
-		p1 = dat->get_beta_prime()*m/(1.0 - p1);
+		
+		p1 = dat->get_beta_prime()*m/fabs(1.0 - p1);
 		
 		//if (t > 3.42)
 			//std::cout << "\tp1 = " << p1 << std::endl;
@@ -2667,6 +2669,12 @@ void Crane::establish_pjfnk_options(Dove &dove, krylov_method lin_method, linese
 	dove.set_NonlinearRelTol(nl_reltol);
 	dove.set_LinearAbsTol(l_abstol);
 	dove.set_LinearRelTol(l_reltol);
+	
+	if (this->get_ConsoleOut() == false)
+	{
+		dove.set_NonlinearOutput(false);
+		dove.set_LinearOutput(false);
+	}
 }
 
 void Crane::estimate_parameters(Dove &dove)
@@ -2735,32 +2743,32 @@ void Crane::store_variables(Dove &dove)
 {
     if ( dove.getNewU()(dove.getVariableIndex("m (Mg)"), 0) < 0.0)
     {
-        std::cout << "ERROR!!! Negative m (Mg)\n\n";
+        //std::cout << "ERROR!!! Negative m (Mg)\n\n";
         dove.getNewU()(dove.getVariableIndex("m (Mg)"), 0) = dove.getCurrentU()(dove.getVariableIndex("m (Mg)"), 0);
     }
     if ( dove.getNewU()(dove.getVariableIndex("x (kg/kg)"), 0) < 0.0)
     {
-        std::cout << "ERROR!!! Negative x (kg/kg)\n\n";
+        //std::cout << "ERROR!!! Negative x (kg/kg)\n\n";
         dove.getNewU()(dove.getVariableIndex("x (kg/kg)"), 0) = dove.getCurrentU()(dove.getVariableIndex("x (kg/kg)"), 0);
     }
     if ( dove.getNewU()(dove.getVariableIndex("w (kg/kg)"), 0) < 0.0)
     {
-        std::cout << "ERROR!!! Negative w (kg/kg)\n\n";
+        //std::cout << "ERROR!!! Negative w (kg/kg)\n\n";
         dove.getNewU()(dove.getVariableIndex("w (kg/kg)"), 0) = dove.getCurrentU()(dove.getVariableIndex("w (kg/kg)"), 0);
     }
     if ( dove.getNewU()(dove.getVariableIndex("s (kg/kg)"), 0) < 0.0)
     {
-        std::cout << "ERROR!!! Negative s (kg/kg)\n\n";
+        //std::cout << "ERROR!!! Negative s (kg/kg)\n\n";
         dove.getNewU()(dove.getVariableIndex("s (kg/kg)"), 0) = dove.getCurrentU()(dove.getVariableIndex("s (kg/kg)"), 0);
     }
     if ( dove.getNewU()(dove.getVariableIndex("T (K)"), 0) < 0.0)
     {
-        std::cout << "ERROR!!! Negative T (K)\n\n";
+        //std::cout << "ERROR!!! Negative T (K)\n\n";
         dove.getNewU()(dove.getVariableIndex("T (K)"), 0) = dove.getCurrentU()(dove.getVariableIndex("T (K)"), 0);
     }
     if ( dove.getNewU()(dove.getVariableIndex("E (J/kg)"), 0) < 0.0)
     {
-        std::cout << "ERROR!!! Negative E (J/kg)\n\n";
+        //std::cout << "ERROR!!! Negative E (J/kg)\n\n";
         dove.getNewU()(dove.getVariableIndex("E (J/kg)"), 0) = dove.getCurrentU()(dove.getVariableIndex("E (J/kg)"), 0);
     }
     
@@ -2853,7 +2861,7 @@ int Crane::run_crane_simulation(Dove &dove)
 			print_comp = print_comp + 0.1;
 			
 			if (this->get_ConsoleOut() == false)
-				std::cout << "\t[" << percent_comp*100.0 << " %]\n";
+				std::cout << "\t[" << (int)(percent_comp*100.0) << " %]\n";
 		}
 		
 		dove.update_timestep();
@@ -2940,9 +2948,9 @@ int CRANE_TESTS()
 	double tol = 0.1;
 	double dtmin = 1e-8;
 	double dtmax = 1.0;
-	double dtmin_conv = 1e-8;
-	double t_out = 1.0;
-	double endtime = 500.0;
+	double dtmin_conv = 0.0001;
+	double t_out = 0.1;
+	double endtime = 20.0;
 	
 	test.establish_dove_options(dove, file, fileout, consoleout, RK4, RATEBASED, SGS, tol, dtmin, dtmax, dtmin_conv, t_out, endtime);
 	
