@@ -3944,15 +3944,16 @@ int FINCH_TESTS()
 	
 	//Temp input
 	double tempD, tempV, tempR, tempL, tempT;
-	std::cout << "Input D (m^2/s): ";
+	double pulse_time, total_mass, flow_rate;
+	std::cout << "Input Diffusion D (m^2/s): ";
 	std::cin >> tempD;
-	std::cout << "Input v (m/s): ";
+	std::cout << "Input velocity v (m/s): ";
 	std::cin >> tempV;
-	std::cout << "Input R (-): ";
+	std::cout << "Input void fraction R (-): ";
 	std::cin >> tempR;
-	std::cout << "Input t (s): ";
+	std::cout << "Input end time t (s): ";
 	std::cin >> tempT;
-	std::cout << "Input L (m): ";
+	std::cout << "Input total length L (m): ";
 	std::cin >> tempL;
 	
   	//Change Parameters for Testing
@@ -4014,6 +4015,11 @@ int FINCH_TESTS()
 	dat.Ro = tempR;
 	dat.L = tempL; //m
 	dat.T = tempT; //s
+	
+	flow_rate = (tempV*M_PI*0.0381*0.0381) * 1000.0;
+	total_mass = 0.5; //g
+	pulse_time = total_mass	/ (dat.uo / 1000.0) / flow_rate;
+	dat.t_out = 2.0;
 	
   	//Boolean Statments
 	dat.Dirichlet = false;
@@ -4104,7 +4110,7 @@ int FINCH_TESTS()
 			dat.t = INFINITY;
 		
 		// Pulse input test
-		if (dat.t >= 2.5)
+		if (dat.t >= pulse_time)
 			dat.uo = 0.0;
 		
 		//Call the routine
@@ -4118,8 +4124,15 @@ int FINCH_TESTS()
 		else {mError(simulation_fail); dat.Update = false; return -1;}
 		
 		//Print out simulation results
-		print2file_result_new(Output, &dat);
-		print2file_newline(Output, &dat);
+		dat.t_count = dat.t_count + dat.dt;
+		if (dat.t_count >= (dat.t_out+sqrt(DBL_EPSILON))
+			|| dat.t_count >= (dat.t_out-sqrt(DBL_EPSILON))
+			|| dat.t >= dat.T)
+		{
+			print2file_result_new(Output, &dat);
+			print2file_newline(Output, &dat);
+			dat.t_count = 0.0;
+		}
 		
 		time_steps++;
 		
@@ -4141,5 +4154,7 @@ int FINCH_TESTS()
   	std::cout << "Total Time Steps:\t" << time_steps+1 << std::endl;
   	std::cout << "Average Iterations:\t" << (double)dat.total_iter/(time_steps+1) << std::endl;
   	std::cout << "Complexity (ms):\t" << (time / CLOCKS_PER_SEC)/(double)(dat.total_iter+time_steps)*1000.0 << std::endl;
+	
+	std::cout << "\n\nPulse Time = " << pulse_time << " seconds...\n";
 	return success;
 }

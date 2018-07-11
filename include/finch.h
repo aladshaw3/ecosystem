@@ -91,6 +91,9 @@ typedef struct
 	double t = 0.0;			///< Current Time
 	double t_old = 0.0;		///< Previous Time
 	
+	double t_out = 0.0;		///< How often to print output
+	double t_count = 0.0;	///< Counter to determine when output is to be printed
+	
   	double uT = 0.0;		///< Total amount of conserved quantity in domain
   	double uT_old = 0.0;	///< Old Total amount of conserved quantity
   	double uAvg = 0.0;		///< Average amount of conserved quantity in domain
