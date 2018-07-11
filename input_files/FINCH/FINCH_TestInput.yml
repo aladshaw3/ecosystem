@@ -1,0 +1,28 @@
+Options:
+---
+coord: 0           #0 = z-cartesian, 1 = r-cylindrical, 2 = r-spherical
+nodes: 40
+Dirichlet: false
+Iterative: true
+Steady: false
+CrankNicholson: true
+NormTrack: false
+
+...
+
+Parameters:
+---
+IC: 0.0
+reaction: 0.0
+mass_transfer: 0.0
+
+conc_input: 25000
+velocity: 0.00125396
+diffusion: 0.0005
+time_coeff: 0.9879
+length: 0.7456
+time_out: 2.0
+end_time: 1800
+dt: 0.1
+
+...

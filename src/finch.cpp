@@ -671,6 +671,9 @@ int default_timestep(const void *user_data)
 		dat->dt = dat->dz / fabs(maxV) / 8.0;
 	}
 	
+	if (dat->dt_const > 0)
+		dat->dt = dat->dt_const;
+	
 	return success;
 }
 
@@ -3932,6 +3935,7 @@ int FINCH_TESTS()
   	double exponent = 0.0;
   	double truncErr;
   	int time_steps = 0;
+	yaml_cpp_class yaml;
 	
 	//Initializations
 	time = clock();
@@ -3941,10 +3945,18 @@ int FINCH_TESTS()
 		system("mkdir output");
 		Output = fopen("output/FINCH_TEST_Output.txt","w+");
 	}
+	success = yaml.executeYamlRead("input_files/FINCH/FINCH_TestInput.yml");
+	if (success != 0)
+	{
+		std::cout << "\nFINCH input file not found!\n\n";
+		std::cout << "File must be located under 'input_files/FINCH/FINCH_TestInput.yml'\n";
+		return -1;
+	}
 	
 	//Temp input
-	double tempD, tempV, tempR, tempL, tempT;
+	//double tempD, tempV, tempR, tempL, tempT;
 	double pulse_time, total_mass, flow_rate;
+	/*
 	std::cout << "Input Diffusion D (m^2/s): ";
 	std::cin >> tempD;
 	std::cout << "Input velocity v (m/s): ";
@@ -3955,7 +3967,9 @@ int FINCH_TESTS()
 	std::cin >> tempT;
 	std::cout << "Input total length L (m): ";
 	std::cin >> tempL;
+	 */
 	
+	/*
   	//Change Parameters for Testing
 	dat.uIC = 0.0;
 	//dat.uIC = 1.0;
@@ -4006,7 +4020,9 @@ int FINCH_TESTS()
 	dat.t_old = 0.0;
 	dat.dt_old = 0.0;
   	dat.d = 0;
+	 */
 	
+	/*
 	dat.DIC = tempD; //m^2/s
 	dat.Do = tempD;
 	dat.vIC = tempV; //m/s
@@ -4015,19 +4031,183 @@ int FINCH_TESTS()
 	dat.Ro = tempR;
 	dat.L = tempL; //m
 	dat.T = tempT; //s
+	 */
 	
-	flow_rate = (tempV*M_PI*0.0381*0.0381) * 1000.0;
+	//Boolean Statments
+	/*
+	 dat.Dirichlet = false;
+	 dat.CheckMass = false;
+	 dat.Iterative = true;
+	 dat.SteadyState = false;
+	 dat.NormTrack = true;
+	 dat.CN = true;
+	 */
+	
+	//Read the test input file
+	dat.dt_old = 0.0;
+	try
+	{
+		dat.d = yaml.getYamlWrapper()("Options")["coord"].getInt();
+		
+		if (dat.d > 2 || dat.d < 0)
+			dat.d = 0;
+	}
+	catch (std::out_of_range)
+	{
+		dat.d = 0;
+	}
+	try
+	{
+		dat.LN = yaml.getYamlWrapper()("Options")["nodes"].getInt();
+		
+		if (dat.LN > 100)
+			dat.LN = 100;
+		if (dat.LN < 10)
+			dat.LN = 10;
+	}
+	catch (std::out_of_range)
+	{
+		dat.LN = 10;
+	}
+	try
+	{
+		dat.Dirichlet = yaml.getYamlWrapper()("Options")["Dirichlet"].getBool();
+	}
+	catch (std::out_of_range)
+	{
+		dat.Dirichlet = false;
+	}
+	try
+	{
+		dat.Iterative = yaml.getYamlWrapper()("Options")["Iterative"].getBool();
+	}
+	catch (std::out_of_range)
+	{
+		dat.Iterative = true;
+	}
+	try
+	{
+		dat.SteadyState = yaml.getYamlWrapper()("Options")["Steady"].getBool();
+	}
+	catch (std::out_of_range)
+	{
+		dat.SteadyState = false;
+	}
+	try
+	{
+		dat.CN = yaml.getYamlWrapper()("Options")["CrankNicholson"].getBool();
+	}
+	catch (std::out_of_range)
+	{
+		dat.CN = true;
+	}
+	try
+	{
+		dat.NormTrack = yaml.getYamlWrapper()("Options")["NormTrack"].getBool();
+	}
+	catch (std::out_of_range)
+	{
+		dat.NormTrack = true;
+	}
+	
+	try
+	{
+		dat.uIC = yaml.getYamlWrapper()("Parameters")["IC"].getDouble();
+	}
+	catch (std::out_of_range)
+	{
+		dat.uIC = 0.0;
+	}
+	try
+	{
+		dat.uo = yaml.getYamlWrapper()("Parameters")["conc_input"].getDouble();
+	}
+	catch (std::out_of_range)
+	{
+		dat.uo = 1.0;
+	}
+	try
+	{
+		dat.ko = yaml.getYamlWrapper()("Parameters")["reaction"].getDouble();
+	}
+	catch (std::out_of_range)
+	{
+		dat.ko = 0.0;
+	}
+	dat.kIC = dat.ko;
+	try
+	{
+		dat.kfn = yaml.getYamlWrapper()("Parameters")["mass_transfer"].getDouble();
+	}
+	catch (std::out_of_range)
+	{
+		dat.kfn = 0.0;
+	}
+	dat.kfnp1 = dat.kfn;
+	try
+	{
+		dat.vo = yaml.getYamlWrapper()("Parameters")["velocity"].getDouble();
+	}
+	catch (std::out_of_range)
+	{
+		dat.vo = 0.0;
+	}
+	dat.vIC = dat.vo;
+	try
+	{
+		dat.Do = yaml.getYamlWrapper()("Parameters")["diffusion"].getDouble();
+	}
+	catch (std::out_of_range)
+	{
+		dat.Do = 0.1;
+	}
+	dat.DIC = dat.Do;
+	try
+	{
+		dat.Ro = yaml.getYamlWrapper()("Parameters")["time_coeff"].getDouble();
+	}
+	catch (std::out_of_range)
+	{
+		dat.Ro = 1.0;
+	}
+	dat.RIC = dat.Ro;
+	try
+	{
+		dat.L = yaml.getYamlWrapper()("Parameters")["length"].getDouble();
+	}
+	catch (std::out_of_range)
+	{
+		dat.L = 1.0;
+	}
+	try
+	{
+		dat.t_out = yaml.getYamlWrapper()("Parameters")["time_out"].getDouble();
+	}
+	catch (std::out_of_range)
+	{
+		dat.t_out = 0.0;
+	}
+	try
+	{
+		dat.T = yaml.getYamlWrapper()("Parameters")["end_time"].getDouble();
+	}
+	catch (std::out_of_range)
+	{
+		dat.T = 10.0;
+	}
+	try
+	{
+		dat.dt_const = yaml.getYamlWrapper()("Parameters")["dt"].getDouble();
+	}
+	catch (std::out_of_range)
+	{
+		dat.dt_const = 0.0;
+	}
+	
+	//Particular for Abishek's Data analysis
+	flow_rate = (dat.vo*M_PI*0.0381*0.0381) * 1000.0;
 	total_mass = 0.5; //g
 	pulse_time = total_mass	/ (dat.uo / 1000.0) / flow_rate;
-	dat.t_out = 2.0;
-	
-  	//Boolean Statments
-	dat.Dirichlet = false;
-  	dat.CheckMass = false;
-  	dat.Iterative = true;
-  	dat.SteadyState = false;
-  	dat.NormTrack = true;
-	dat.CN = true;
 	
   	//Iterative Methods
 	dat.nl_method = FINCH_Picard; //0 = FINCH_Picard, 1 = LARK_Picard, 2 = LARK_PJFNK
@@ -4036,8 +4216,6 @@ int FINCH_TESTS()
 	dat.pjfnk_dat.nl_tol_rel = 1e-6;
 	dat.pjfnk_dat.nl_tol_abs = 1e-6;
 	dat.pjfnk_dat.linear_solver = QR;
-	//dat.pjfnk_dat.L_Output = true;
-	//dat.pjfnk_dat.lin_tol = 1e-10;
 	dat.pjfnk_dat.LineSearch = true;
 	dat.pjfnk_dat.Bounce = true;
 
@@ -4103,7 +4281,7 @@ int FINCH_TESTS()
 		//Step size based of off CFL condition
 		success = (*dat.settime) ((void *)&dat);
 		if (success != 0) {mError(simulation_fail); return -1;}
-		dat.dt = 0.1;
+		
 		if (dat.SteadyState == false)
 			dat.t = dat.t_old + dat.dt;
 		else

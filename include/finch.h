@@ -57,6 +57,7 @@
 
 #include "macaw.h"
 #include "lark.h"
+#include "yaml_wrapper.h"
 
 /// List of enum options to define the solver type in FINCH
 typedef enum { FINCH_Picard, LARK_Picard, LARK_PJFNK } finch_solve_type;
@@ -84,6 +85,7 @@ typedef struct
   	int d = 0;				///< Dimension of the problem: 0 = cartesian, 1 = cylindrical, 2 = spherical
 	double dt = 0.0125;		///< Time step
 	double dt_old = 0.0125;	///< Previous time step
+	double dt_const = 0.0;	///< Forced selection of time step
 	double T = 1.0;			///< Total time
 	double dz = 0.1;		///< Space step
 	double L = 1.0;			///< Total space
