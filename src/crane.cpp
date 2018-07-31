@@ -2352,6 +2352,7 @@ double rate_temperature(int i, const Matrix<double> &u, double t, const void *da
 		}
 		
 		double p1 = dat->get_beta_prime()/dat->get_mean_spec_heat();
+        //double p1 = dat->get_beta_prime()/dat->get_mean_spec_heat()/100.0;
 		double p2 = dat->get_apparent_temp()*dat->get_grav()*U/dat->get_apparent_amb_temp();
 		double p3 = dat->get_spec_heat_entrain_integral()*dment_dt/dat->get_beta_prime()/m;
 		
