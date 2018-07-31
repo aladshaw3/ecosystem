@@ -1060,7 +1060,7 @@ void Crane::compute_cloud_volume(double m, double x, double s, double w, double 
 {
 	if (P < 0.0)	P = 0.0;
 	if (m < 0.0)	m = 0.0;
-	m = m * 1000.0; //Convert from Mg to kg
+	//m = m * 1000.0; //Convert from Mg to kg
 	this->compute_beta_prime(x, s, w);
 	this->compute_apparent_temp(T, x);
 	this->set_cloud_volume( m*this->get_beta_prime()*this->get_gas_const()*this->get_apparent_temp()/P );
@@ -1070,7 +1070,7 @@ void Crane::compute_cloud_density(double m, double x, double s, double w, double
 {
 	this->compute_cloud_volume(m, x, s, w, T, P);
 	if (m < 0.0)	m = 0.0;
-	m = m * 1000.0; //Convert from Mg to kg
+	//m = m * 1000.0; //Convert from Mg to kg
 	this->set_cloud_density( m/this->get_cloud_volume()*this->get_beta_prime() );
 }
 
@@ -1403,7 +1403,7 @@ void Crane::compute_initial_entrained_mass(double W, double gz, double hb)
 void Crane::compute_initial_cloud_mass(double W, double gz, double hb)
 {
 	this->compute_initial_entrained_mass(W, gz, hb);
-	this->set_cloud_mass( (this->get_entrained_mass()+this->get_initial_soil_mass())/1000.0 );
+	this->set_cloud_mass( (this->get_entrained_mass()+this->get_initial_soil_mass())/*/1000*/ );
 }
 
 void Crane::compute_initial_s_soil(double W, double gz, double hb)
@@ -2372,7 +2372,7 @@ double rate_w_water_conds(int i, const Matrix<double> &u, double t, const void *
 		}
 		
 		double p1 = (1.0/dat->get_beta_prime())*((1.0+x)/(1.0+dat->get_xe()))*(w+x-dat->get_xe())*dment_dt/m;
-		double p2 = ((1.0+x+s+w)/m)*(w/(s+w))*dat->get_total_mass_fallout_rate()/1000.0;
+		double p2 = ((1.0+x+s+w)/m)*(w/(s+w))*dat->get_total_mass_fallout_rate()/*/1000.0*/;
 		
 		res = -p1 - dx_dt - p2;
 	}
@@ -2434,7 +2434,7 @@ double rate_cloud_mass(int i, const Matrix<double> &u, double t, const void *dat
 	if (dat->get_isTight() == true)
 		dat->compute_total_mass_fallout_rate(m, x, s, w, T, dat->get_current_atm_press(), z, dat->get_part_conc_var());
 	
-	res = dment_dt - dat->get_total_mass_fallout_rate()/1000.0;
+	res = dment_dt - dat->get_total_mass_fallout_rate()/*/1000.0*/;
 	
 	return res;
 }
@@ -2460,7 +2460,7 @@ double rate_s_soil(int i, const Matrix<double> &u, double t, const void *data, c
 	}
 	
 	double p1 = ((1.0+x)/(1.0+dat->get_xe()))*s*dment_dt/m/dat->get_beta_prime();
-	double p2 = ((1.0+x+s+w)/m)*(s/(s+w))*dat->get_total_mass_fallout_rate()/1000.0;
+	double p2 = ((1.0+x+s+w)/m)*(s/(s+w))*dat->get_total_mass_fallout_rate()/*/1000.0*/;
 	
 	res = -p1-p2;
 	
@@ -2496,7 +2496,7 @@ double rate_entrained_mass(int i, const Matrix<double> &u, double t, const void 
 		double p1 = T - dat->get_current_amb_temp() + (dat->get_latent_heat()*(x-dat->get_xe())/dat->get_actual_spec_heat());
 		p1 = p1 / (1.0+(dat->get_latent_heat()*dat->get_latent_heat()*x*dat->get_eps()/dat->get_actual_spec_heat()/dat->get_gas_const()/T/T));
 		
-		p1 = dat->get_beta_prime()*m/fabs(1.0 - (dat->get_beta_prime()*p1/dat->get_apparent_temp()));
+		p1 = dat->get_beta_prime()*m/(1.0 - (dat->get_beta_prime()*p1/dat->get_apparent_temp()));
 		
 		double p2 = ((dat->get_grav()*U*dat->get_apparent_temp()/dat->get_actual_spec_heat()/dat->get_apparent_amb_temp())*(1.0+(dat->get_latent_heat()*x/dat->get_gas_const()/T))) - (dat->get_sigma_turbulence()/dat->get_actual_spec_heat());
 		p2 = p2 / (1.0+(dat->get_latent_heat()*dat->get_latent_heat()*x*dat->get_eps()/dat->get_actual_spec_heat()/dat->get_gas_const()/T/T));
@@ -2526,20 +2526,14 @@ double rate_entrained_mass(int i, const Matrix<double> &u, double t, const void 
 		}
 		
 		double p1 = dat->get_beta_prime()*dat->get_spec_heat_entrain_integral()/dat->get_apparent_temp()/dat->get_mean_spec_heat();
-		//if (t > 3.42)
-			//std::cout << "\t1 - stuff = " << 1.0 - p1 << std::endl;
-		
-		p1 = dat->get_beta_prime()*m/fabs(1.0 - p1);
-		
-		//if (t > 3.42)
-			//std::cout << "\tp1 = " << p1 << std::endl;
+		p1 = dat->get_beta_prime()*m/(1.0 - p1);
 		
 		double p2 = (dat->get_apparent_temp()*dat->get_grav()*U/dat->get_apparent_amb_temp()) - dat->get_sigma_turbulence();
 		p2 = dat->get_beta_prime()*p2/dat->get_apparent_temp()/dat->get_mean_spec_heat();
         
 		double p3 = dat->get_grav()*U/dat->get_gas_const()/dat->get_apparent_amb_temp();
         
-		res = p1*(dat->get_shear_ratio()+p2-p3);
+		res = p1*(dat->get_shear_ratio()+p2-p3);   /// Are the units wrong here? Since we changed m to Mg, what else changes?
 	}
 	
 	return res;
@@ -2700,6 +2694,8 @@ void Crane::estimate_parameters(Dove &dove)
 	this->compute_air_viscosity(this->get_temperature());
 	this->compute_vapor_pressure(P, this->get_x_water_vapor());
 	this->compute_sat_vapor_pressure(this->get_temperature());
+    
+    this->compute_spec_heat_entrain_integral(this->get_temperature(), Te);
 	
 	if (this->get_vapor_pressure() > this->get_sat_vapor_pressure())
 	{
@@ -2927,12 +2923,12 @@ int CRANE_TESTS()
 		file = fopen("output/CRANE_Tests.txt", "w+");
 	}
 	
-	double W = 50.0; //12 kT
-	double hb = 0.0*0.3048;// 500 ft
-	double gz = 1000; //1155 m (Nevada Test Site)
+	double W = 12.0; //12 kT
+	double hb = 500.0*0.3048;// 500 ft
+	double gz = 1155; //1155 m (Nevada Test Site)
 	int bins = 100;
 	bool includeShear = false;
-	bool isTight = true;
+	bool isTight = false;
 	
 	std::cout << "\nTesting of the CRANE for Plumbbob Boltzman Bomb at Nevada Test Site\n";
 	std::cout <<   "-------------------------------------------------------------------\n\n";
@@ -2949,8 +2945,8 @@ int CRANE_TESTS()
 	double dtmin = 1e-8;
 	double dtmax = 1.0;
 	double dtmin_conv = 0.0001;
-	double t_out = 0.1;
-	double endtime = 20.0;
+	double t_out = 1.0;
+	double endtime = 500.0;
 	
 	test.establish_dove_options(dove, file, fileout, consoleout, RK4, CONSTANT, SGS, tol, dtmin, dtmax, dtmin_conv, t_out, endtime);
 	
