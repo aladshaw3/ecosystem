@@ -2251,9 +2251,9 @@ double rate_cloud_rise(int i, const Matrix<double> &u, double t, const void *dat
 	
 	double p1 = (((dat->get_apparent_temp()/dat->get_apparent_amb_temp())*dat->get_beta_prime()) - 1.0) * (dat->get_grav()/*/(1.0-dat->get_mu())*/);
 	double p2 = (2.0*dat->get_k2()*dat->get_char_vel()*dat->get_apparent_temp()*dat->get_beta_prime()/**(1.0-dat->get_mu())*/)/(dat->get_vert_rad()*dat->get_apparent_amb_temp());
-	double p3 = (1.0/m)*dm_dt;
+	double p3 = (dm_dt/m);
 	
-    mass_rat = 1.0;
+    //mass_rat = 1.0;
 	res = p1 - ((p2+p3)*U);
 	
 	return res;
@@ -2349,6 +2349,7 @@ double rate_temperature(int i, const Matrix<double> &u, double t, const void *da
 			dat->compute_beta_prime(x, s, w); //NOTE: be aware of potential nan or inf residuals
 			dat->compute_sigma_turbulence(E, z);
 			dat->compute_mean_spec_heat(T, x, s, w);
+            dat->compute_spec_heat_entrain_integral(T, dat->get_current_amb_temp());
 		}
 		
 		double p1 = dat->get_beta_prime()/dat->get_mean_spec_heat();
@@ -2538,6 +2539,7 @@ double rate_entrained_mass(int i, const Matrix<double> &u, double t, const void 
 			dat->compute_beta_prime(x, s, w);
 			dat->compute_sigma_turbulence(E, z);
 			dat->compute_mean_spec_heat(T, x, s, w);
+            dat->compute_spec_heat_entrain_integral(T, dat->get_current_amb_temp());
 		}
 		
 		double p1 = dat->get_beta_prime()*dat->get_spec_heat_entrain_integral()/dat->get_apparent_temp()/dat->get_mean_spec_heat();
@@ -2638,7 +2640,7 @@ void Crane::establish_initial_conditions(double W, double gz, double hb, int bin
 	dove.set_initialcondition("m (kg)", this->get_cloud_mass());
 	dove.set_initialcondition("E (J/kg)", this->get_energy());
 	dove.set_initialcondition("T (K)", this->get_temperature());
-	dove.set_timestep(1.0/this->get_cloud_rise()/10.0);
+	dove.set_timestep(1.0/this->get_cloud_rise()/1.0);
 }
 
 void Crane::establish_dove_options(Dove &dove, FILE *file, bool fileout, bool consoleout, integrate_subtype inttype, timestep_type timetype,
@@ -2701,6 +2703,11 @@ void Crane::estimate_parameters(Dove &dove)
 	this->set_current_amb_temp(Te);
 	this->set_current_atm_press(P);
 	this->compute_xe(Te, P, HR);
+    //this->compute_xe(Te, P, 0.0);
+    
+    //this->set_xe(0.03);
+    //std::cout << "xe = " << this->get_xe() << std::endl;
+    //ISSUE MAY BE WITH ATMOSPHERE!!!
 	
 	this->compute_q_xe(this->get_xe());
 	this->compute_apparent_temp(this->get_temperature(), this->get_x_water_vapor());
@@ -2867,7 +2874,7 @@ int Crane::run_crane_simulation(Dove &dove)
 	do
 	{
 		percent_comp = (dove.getCurrentTime() - dove.getStartTime()) / (dove.getEndTime() - dove.getStartTime());
-		//std::cout << percent_comp << std::endl;
+		
 		if ( (percent_comp - print_comp) >= 0.0)
 		{
 			print_comp = print_comp + 0.1;
@@ -2981,7 +2988,7 @@ int CRANE_TESTS()
 	
 	test.establish_pjfnk_options(dove, QR, BT, isLinear, isPrecon, nl_out, l_out, max_nlit, max_lit, restart, recursive, nl_abstol, nl_reltol, l_abstol, l_reltol);
 	
-	//test.run_crane_simulation(dove);
+    test.estimate_parameters(dove);
 	for (int i=0; i<8; i++)
 	{
 		std::cout << dove.getVariableName(i) << " =\t " << dove.getNewU(i, dove.getNewU()) << "\t: rate =\t " << dove.Eval_Func(i, dove.getNewU(), dove.getCurrentTime()) << std::endl;
@@ -2990,9 +2997,7 @@ int CRANE_TESTS()
 	double P = test.return_atm_press(test.get_cloud_alt());
 	test.compute_total_mass_fallout_rate(test.get_cloud_mass(), test.get_x_water_vapor(), test.get_s_soil(), test.get_w_water_conds(), test.get_temperature(), P, test.get_cloud_alt(), test.get_part_conc_var());
 	std::cout << "p(t) =\t" << test.get_total_mass_fallout_rate() << std::endl;
-	
-	//test.get_part_conc_var().Display("n");
-	
+		
 	test.run_crane_simulation(dove);
     
     for (int i=0; i<8; i++)
@@ -3004,14 +3009,8 @@ int CRANE_TESTS()
 	test.compute_total_mass_fallout_rate(test.get_cloud_mass(), test.get_x_water_vapor(), test.get_s_soil(), test.get_w_water_conds(), test.get_temperature(), P, test.get_cloud_alt(), test.get_part_conc_var());
 	std::cout << "p(t) =\t" << test.get_total_mass_fallout_rate() << std::endl;
 	
-    //dove.createJacobian();
-    //Matrix<double> J = dove.getNumJacobian();
-    //J.Display("J");
-	
 	std::cout << "\nSaturation Time (s) =\t" << test.get_saturation_time() << std::endl;
-	
-	//test.get_part_conc_var().Display("n");
-	
+    
 	time = clock() - time;
 	std::cout << "\nTest Runtime: " << (time / CLOCKS_PER_SEC) << " seconds\n";
 	
