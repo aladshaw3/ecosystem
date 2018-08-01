@@ -2234,8 +2234,6 @@ double rate_cloud_rise(int i, const Matrix<double> &u, double t, const void *dat
 	double m = ( u(dove.getVariableIndex("m (kg)"),0) );
 	double U = u(dove.getVariableIndex("u (m/s)"),0);
 	double dm_dt = dove.coupledTimeDerivative("m (kg)",u);
-    //double dm_dt = rate_cloud_mass(0, u, dove.getCurrentTime(), data, dove);
-	double mass_rat = m / (m + dat->get_virtual_mass());
 	double T = ( u(dove.getVariableIndex("T (K)"),0) );
 	double x = ( u(dove.getVariableIndex("x (kg/kg)"),0) );
 	double s = ( u(dove.getVariableIndex("s (kg/kg)"),0) );
@@ -2249,11 +2247,10 @@ double rate_cloud_rise(int i, const Matrix<double> &u, double t, const void *dat
 		dat->compute_vert_rad(z);
 	}
 	
-	double p1 = (((dat->get_apparent_temp()/dat->get_apparent_amb_temp())*dat->get_beta_prime()) - 1.0) * (dat->get_grav()/*/(1.0-dat->get_mu())*/);
-	double p2 = (2.0*dat->get_k2()*dat->get_char_vel()*dat->get_apparent_temp()*dat->get_beta_prime()/**(1.0-dat->get_mu())*/)/(dat->get_vert_rad()*dat->get_apparent_amb_temp());
+	double p1 = (((dat->get_apparent_temp()/dat->get_apparent_amb_temp())*dat->get_beta_prime()) - 1.0) * dat->get_grav();
+	double p2 = (2.0*dat->get_k2()*dat->get_char_vel()*dat->get_apparent_temp()*dat->get_beta_prime())/(dat->get_vert_rad()*dat->get_apparent_amb_temp());
 	double p3 = (dm_dt/m);
 	
-    //mass_rat = 1.0;
 	res = p1 - ((p2+p3)*U);
 	
 	return res;
@@ -2348,12 +2345,11 @@ double rate_temperature(int i, const Matrix<double> &u, double t, const void *da
 			dat->compute_apparent_temp(T, x); //NOTE: be aware of potential nan or inf residuals
 			dat->compute_beta_prime(x, s, w); //NOTE: be aware of potential nan or inf residuals
 			dat->compute_sigma_turbulence(E, z);
-			dat->compute_mean_spec_heat(T, x, s, w);
+			dat->compute_actual_spec_heat(T, x);
             dat->compute_spec_heat_entrain_integral(T, dat->get_current_amb_temp());
 		}
 		
-		double p1 = dat->get_beta_prime()/dat->get_mean_spec_heat();
-        //double p1 = dat->get_beta_prime()/dat->get_mean_spec_heat()/100.0;
+		double p1 = dat->get_beta_prime()/dat->get_actual_spec_heat();
 		double p2 = dat->get_apparent_temp()*dat->get_grav()*U/dat->get_apparent_amb_temp();
 		double p3 = dat->get_spec_heat_entrain_integral()*dment_dt/dat->get_beta_prime()/m;
 		
@@ -2539,6 +2535,7 @@ double rate_entrained_mass(int i, const Matrix<double> &u, double t, const void 
 			dat->compute_beta_prime(x, s, w);
 			dat->compute_sigma_turbulence(E, z);
 			dat->compute_mean_spec_heat(T, x, s, w);
+            dat->compute_actual_spec_heat(T, x);
             dat->compute_spec_heat_entrain_integral(T, dat->get_current_amb_temp());
 		}
 		
@@ -2546,7 +2543,7 @@ double rate_entrained_mass(int i, const Matrix<double> &u, double t, const void 
 		p1 = dat->get_beta_prime()*m/(1.0 - p1);
 		
 		double p2 = (dat->get_apparent_temp()*dat->get_grav()*U/dat->get_apparent_amb_temp()) - dat->get_sigma_turbulence();
-		p2 = dat->get_beta_prime()*p2/dat->get_apparent_temp()/dat->get_mean_spec_heat();
+		p2 = dat->get_beta_prime()*p2/dat->get_apparent_temp()/dat->get_actual_spec_heat();
         
 		double p3 = dat->get_grav()*U/dat->get_gas_const()/dat->get_apparent_amb_temp();
         
@@ -2804,17 +2801,7 @@ void Crane::store_variables(Dove &dove)
 	this->set_s_soil( fabs( dove.getNewU("s (kg/kg)", dove.getNewU()) ) );
 	this->set_temperature( fabs( dove.getNewU("T (K)", dove.getNewU()) ) );
 	this->set_energy( fabs( dove.getNewU("E (J/kg)", dove.getNewU()) ) );
-    
-    /*
-    dove.getNewU()(dove.getVariableIndex("m (kg)"), 0) = this->get_cloud_mass();
-    dove.getNewU()(dove.getVariableIndex("u (m/s)"), 0) = this->get_cloud_mass();
-    dove.getNewU()(dove.getVariableIndex("z (m)"), 0) = this->get_cloud_mass();
-    dove.getNewU()(dove.getVariableIndex("x (kg/kg)"), 0) = this->get_cloud_mass();
-    dove.getNewU()(dove.getVariableIndex("w (kg/kg)"), 0) = this->get_cloud_mass();
-    dove.getNewU()(dove.getVariableIndex("s (kg/kg)"), 0) = this->get_cloud_mass();
-    dove.getNewU()(dove.getVariableIndex("T (K)"), 0) = this->get_cloud_mass();
-    dove.getNewU()(dove.getVariableIndex("E (J/kg)"), 0) = this->get_cloud_mass();
-     */
+
 }
 
 int Crane::run_crane_simulation(Dove &dove)
@@ -2946,9 +2933,16 @@ int CRANE_TESTS()
 		file = fopen("output/CRANE_Tests.txt", "w+");
 	}
 	
+    // Nevada Plumbbob Boltzman Test Case
 	double W = 12.0; //12 kT
 	double hb = 500.0*0.3048;// 500 ft
 	double gz = 1155; //1155 m (Nevada Test Site)
+    
+    //V. Jodoin Test Case from 1994 Thesis
+    //double W = 50.0; //12 kT
+    //double hb = 0.0*0.3048;// 500 ft
+    //double gz = 500.0; //500 m
+    
 	int bins = 100;
 	bool includeShear = false;
 	bool isTight = false;
@@ -2958,9 +2952,11 @@ int CRANE_TESTS()
 	std::cout << "Bomb Yield (kT) =\t" << W << std::endl;
 	std::cout << "Burst Height (m) =\t" << hb << std::endl;
 	std::cout << "Ground Altitude (m) =\t" << gz << std::endl;
-	std::cout << "\n";
 	
 	test.establish_initial_conditions(W, gz, hb, bins, includeShear, isTight, dove);
+    
+    std::cout << "Initial Time (s) =\t" << test.get_current_time() << std::endl;
+    std::cout << "\n";
 	
 	bool fileout = true;
 	bool consoleout = false;
