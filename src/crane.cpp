@@ -2249,7 +2249,7 @@ double rate_cloud_rise(int i, const Matrix<double> &u, double t, const void *dat
 	double p1 = (((dat->get_apparent_temp()/dat->get_apparent_amb_temp())*dat->get_beta_prime()) - 1.0) * dat->get_grav();
 	double p2 = (2.0*dat->get_k2()*dat->get_char_vel()*dat->get_apparent_temp()*dat->get_beta_prime())/(dat->get_vert_rad()*dat->get_apparent_amb_temp());
 	double p3 = (dm_dt/m);
-	
+    
 	res = p1 - ((p2+p3)*U);
 	
 	return res;
@@ -2902,9 +2902,19 @@ int Crane::run_crane_simulation(Dove &dove)
 		if (this->get_FileOut() == true)
 			dove.print_newresult();
 		dove.update_states();
+        
+        //Check for early termination
+        if (this->get_cloud_rise() < 0.0)
+        {
+            if (this->get_ConsoleOut() == false)
+                std::cout << "Cloud stopped rising at " << this->get_current_time() << " (s)... Ending Early...\n";
+            
+            break;
+        }
+        
 		this->estimate_parameters(dove);
 		
-	} while (dove.getEndTime() > (dove.getCurrentTime()+dove.getMinTimeStep()));
+	} while (dove.getEndTime() > (dove.getCurrentTime()+dove.getMinTimeStep()) );
 	
 	if (this->get_ConsoleOut() == false)
 		std::cout << "\t[100 %]\n\n";
@@ -2938,14 +2948,14 @@ int CRANE_TESTS()
 	}
 	
     // Nevada Plumbbob Boltzman Test Case
-	double W = 12.0; //12 kT
-	double hb = 500.0*0.3048;// 500 ft
-	double gz = 1155; //1155 m (Nevada Test Site)
+	//double W = 12.0; //12 kT
+	//double hb = 500.0*0.3048;// 500 ft
+	//double gz = 1155; //1155 m (Nevada Test Site)
     
     //V. Jodoin Test Case from 1994 Thesis
-    //double W = 50.0; //12 kT
-    //double hb = 0.0*0.3048;// 500 ft
-    //double gz = 500.0; //500 m
+    double W = 50.0; //12 kT
+    double hb = 0.0*0.3048;// 500 ft
+    double gz = 500.0; //500 m
     
 	int bins = 10;
 	bool includeShear = false;
