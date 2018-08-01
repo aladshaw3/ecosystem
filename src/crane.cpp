@@ -1134,10 +1134,11 @@ void Crane::compute_davies_num(double Dj, double m, double x, double s, double w
 {
 	//NOTE: Dj comes in as um --> convert to m
 	double dj = Dj/1.0E+6;
-	//this->compute_air_density(P, x, T);
+	this->compute_air_density(P, x, T);
 	this->compute_cloud_density(m, x, s, w, T, P);
 	this->compute_air_viscosity(T);
-	this->set_davies_num( (4.0*this->get_cloud_density()*(this->get_part_density()-this->get_cloud_density())*this->get_grav()*pow(dj,3.0)) / (3.0*pow(this->get_air_viscosity(),2.0)) );
+	//this->set_davies_num( (4.0*this->get_cloud_density()*(this->get_part_density()-this->get_cloud_density())*this->get_grav()*pow(dj,3.0)) / (3.0*pow(this->get_air_viscosity(),2.0)) );
+    this->set_davies_num( (4.0*this->get_air_density()*(this->get_part_density()-this->get_air_density())*this->get_grav()*pow(dj,3.0)) / (3.0*pow(this->get_air_viscosity(),2.0)) );
 }
 
 void Crane::compute_settling_rate(double Dj, double m, double x, double s, double w, double T, double P)
@@ -1146,36 +1147,39 @@ void Crane::compute_settling_rate(double Dj, double m, double x, double s, doubl
 	double dj = Dj/1.0E+6;
 	this->compute_slip_factor(Dj, T, P);
 	this->compute_davies_num(Dj, m, x, s, w, T, P);
+    
+    //double rho = this->get_cloud_density();
+    double rho = this->get_air_density();
 	
 	//If statements for flow conditions
 	if (this->get_davies_num() <= 0.3261)
 	{
-		this->settling_rate[Dj] = this->get_air_viscosity()*this->get_davies_num()*this->get_slip_factor()/24.0/this->get_cloud_density()/dj;
+		this->settling_rate[Dj] = this->get_air_viscosity()*this->get_davies_num()*this->get_slip_factor()/24.0/rho/dj;
 	}
 	else if (this->get_davies_num() <= 84.175)
 	{
 		double Y = log(this->get_davies_num());
 		double exp = -3.18657 + (0.992696*Y) - (0.153193E-2*pow(Y,2.0)) - (0.987059E-3*pow(Y,3.0)) - (0.578878E-3*pow(Y,4.0)) + (0.855176E-4*pow(Y,5.0)) - (0.327815E-5*pow(Y,6.0));
-		this->settling_rate[Dj] = this->get_air_viscosity()*exp*this->get_slip_factor()/this->get_cloud_density()/dj;
+		this->settling_rate[Dj] = this->get_air_viscosity()*exp*this->get_slip_factor()/rho/dj;
 	}
 	else if (this->get_davies_num() < 140.0)
 	{
 		double poly = 4.1667E-2 - (2.3363E-4*this->get_davies_num()) + (2.0154E-6*this->get_davies_num()*this->get_davies_num()) - (6.9105E-9*this->get_davies_num()*this->get_davies_num()*this->get_davies_num());
-		this->settling_rate[Dj] = this->get_air_viscosity()*poly*this->get_slip_factor()*this->get_davies_num()/this->get_cloud_density()/dj;
+		this->settling_rate[Dj] = this->get_air_viscosity()*poly*this->get_slip_factor()*this->get_davies_num()/rho/dj;
 	}
 	else if (this->get_davies_num() < 4.5E+7)
 	{
 		double X = log10(this->get_davies_num());
 		double poly = -1.29536 + (0.986*X) - (0.046677*X*X) + (1.1235E-3*X*X*X);
-		this->settling_rate[Dj] = this->get_air_viscosity()*pow(10.0,poly)/this->get_cloud_density()/dj;
+		this->settling_rate[Dj] = this->get_air_viscosity()*pow(10.0,poly)/rho/dj;
 	}
 	else
 	{
 		double X = log10(this->get_davies_num());
 		double poly = -1.29536 + (0.986*X) - (0.046677*X*X) + (1.1235E-3*X*X*X);
-		this->settling_rate[Dj] = this->get_air_viscosity()*pow(10.0,poly)/this->get_cloud_density()/dj;
+		this->settling_rate[Dj] = this->get_air_viscosity()*pow(10.0,poly)/rho/dj;
 	}
-    this->settling_rate[Dj] = this->settling_rate[Dj];
+    
 }
 
 void Crane::compute_total_mass_fallout_rate(double m, double x, double s, double w, double T, double P, double z, const Matrix<double> &n)
@@ -2594,18 +2598,25 @@ void Crane::establish_initial_conditions(double W, double gz, double hb, int bin
 	
 	dove.registerFunction("z (m)", rate_cloud_alt);
     dove.registerCoeff("z (m)", default_coeff);
+    
 	dove.registerFunction("w (kg/kg)", rate_w_water_conds);
     dove.registerCoeff("w (kg/kg)", default_coeff);
+    
 	dove.registerFunction("x (kg/kg)", rate_x_water_vapor);
     dove.registerCoeff("x (kg/kg)", default_coeff);
+    
 	dove.registerFunction("s (kg/kg)", rate_s_soil);
     dove.registerCoeff("s (kg/kg)", default_coeff);
+    
 	dove.registerFunction("u (m/s)", rate_cloud_rise);
     dove.registerCoeff("u (m/s)", default_coeff);
+    
 	dove.registerFunction("m (kg)", rate_cloud_mass);
     dove.registerCoeff("m (kg)", default_coeff);
+    
 	dove.registerFunction("E (J/kg)", rate_energy);
     dove.registerCoeff("E (J/kg)", default_coeff);
+    
 	dove.registerFunction("T (K)", rate_temperature);
     dove.registerCoeff("T (K)", default_coeff);
 	
@@ -2674,15 +2685,25 @@ void Crane::estimate_parameters(Dove &dove)
 	this->compute_q_x(this->get_x_water_vapor());
 	
 	double Te, P, HR;
-	Matrix<double> v;
+	Matrix<double> v(2,1);
 	Te = this->return_amb_temp(this->get_cloud_alt());
 	P = this->return_atm_press(this->get_cloud_alt());
 	HR = this->return_rel_humid(this->get_cloud_alt());
 	v = this->return_wind_vel(this->get_cloud_alt());
+    
+    //Te = 264.0;
+    //P = 101350.0;
+    //HR = 0.0;
+    //v(0,0) = 0.0;
+    //v(1,0) = 0.0;
 	
 	this->set_current_amb_temp(Te);
 	this->set_current_atm_press(P);
 	this->compute_xe(Te, P, HR);
+    
+    //std::cout << "Te = " << this->get_current_amb_temp() << std::endl;
+   // std::cout << "P = " << this->get_current_atm_press() << std::endl;
+   // std::cout << "xe = " << this->get_xe() << std::endl;
     //this->compute_xe(Te, P, 70.0);
     
     //this->set_xe(0.03);
