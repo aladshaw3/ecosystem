@@ -1060,7 +1060,6 @@ void Crane::compute_cloud_volume(double m, double x, double s, double w, double 
 {
 	if (P < 0.0)	P = 0.0;
 	if (m < 0.0)	m = 0.0;
-	//m = m * 1000.0; //Convert from Mg to kg
 	this->compute_beta_prime(x, s, w);
 	this->compute_apparent_temp(T, x);
 	this->set_cloud_volume( m*this->get_beta_prime()*this->get_gas_const()*this->get_apparent_temp()/P );
@@ -1070,7 +1069,6 @@ void Crane::compute_cloud_density(double m, double x, double s, double w, double
 {
 	this->compute_cloud_volume(m, x, s, w, T, P);
 	if (m < 0.0)	m = 0.0;
-	//m = m * 1000.0; //Convert from Mg to kg
 	this->set_cloud_density( m/this->get_cloud_volume()*this->get_beta_prime() );
 }
 
@@ -1177,6 +1175,7 @@ void Crane::compute_settling_rate(double Dj, double m, double x, double s, doubl
 		double poly = -1.29536 + (0.986*X) - (0.046677*X*X) + (1.1235E-3*X*X*X);
 		this->settling_rate[Dj] = this->get_air_viscosity()*pow(10.0,poly)/this->get_cloud_density()/dj;
 	}
+    this->settling_rate[Dj] = this->settling_rate[Dj];
 }
 
 void Crane::compute_total_mass_fallout_rate(double m, double x, double s, double w, double T, double P, double z, const Matrix<double> &n)
@@ -1327,7 +1326,6 @@ void Crane::compute_initial_soil_mass(double W, double gz, double hb)
 {
 	this->compute_det_alt(gz, hb);
 	double scaled;
-    /// EDIT??
 	//Check for underground detonation
 	if (hb < 0.0)
 	{
@@ -1351,7 +1349,6 @@ void Crane::compute_initial_soil_mass(double W, double gz, double hb)
 		}
 	}
     
-    //std::cout << "Initial Soil (kg) = " << this->get_initial_soil_mass() << std::endl;
 }
 
 void Crane::compute_initial_part_hist(double W, double gz, double hb, int size)
@@ -1384,11 +1381,8 @@ void Crane::compute_initial_air_mass(double W, double gz, double hb)
 	this->compute_spec_heat_entrain_integral(this->get_temperature(), Tei);
 	double cpw_int = this->return_spec_heat_water_integral(this->get_temperature(), Tei);
 	
-    //EDIT???
 	this->set_initial_air_mass( this->get_energy_frac()*(4.18e12*this->get_force_factor()*W - this->get_initial_soil_mass()*cs_int)/(this->get_spec_heat_entrain_integral() + (this->get_xe()*cpw_int)) );
     
-    //this->set_initial_air_mass( this->get_initial_air_mass()/1000.0 );
-    //std::cout << "Initial air (kg) = " << this->get_initial_air_mass() << std::endl;
 }
 
 void Crane::compute_initial_water_mass(double W, double gz, double hb)
@@ -1398,11 +1392,8 @@ void Crane::compute_initial_water_mass(double W, double gz, double hb)
 	double cs_int = this->return_spec_heat_conds_integral(this->get_equil_temp(), Tei);
 	double cpw_int = this->return_spec_heat_water_integral(this->get_temperature(), Tei);
 	
-    //EDIT???
 	this->set_initial_water_mass( ( (1.0-this->get_energy_frac())*(4.18e12*this->get_force_factor()*W - this->get_initial_soil_mass()*cs_int)/(cpw_int + this->get_latent_heat()) ) + (this->get_xe()*this->get_initial_air_mass()) );
     
-    //this->set_initial_water_mass( this->get_initial_water_mass()/1000.0 );
-    //std::cout << "Initial water (kg) = " << this->get_initial_water_mass() << std::endl;
 }
 
 void Crane::compute_initial_entrained_mass(double W, double gz, double hb)
@@ -1414,7 +1405,7 @@ void Crane::compute_initial_entrained_mass(double W, double gz, double hb)
 void Crane::compute_initial_cloud_mass(double W, double gz, double hb)
 {
 	this->compute_initial_entrained_mass(W, gz, hb);
-	this->set_cloud_mass( (this->get_entrained_mass()+this->get_initial_soil_mass())/*/1000*/ );
+	this->set_cloud_mass( (this->get_entrained_mass()+this->get_initial_soil_mass()) );
 }
 
 void Crane::compute_initial_s_soil(double W, double gz, double hb)
@@ -1468,9 +1459,11 @@ void Crane::compute_initial_part_conc(double W, double gz, double hb, int size)
 	this->compute_initial_cloud_volume(W, gz, hb);
 	this->compute_initial_part_hist(W, gz, hb, size);
 	double conc = this->get_initial_soil_mass() / this->get_cloud_volume();
-	
+    //std::cout << "Total Conc = " << conc << std::endl;
+    
 	//Iterate through map
 	int i=0;
+    //double sum = 0.0;
 	for (std::map<double,double>::iterator it=this->part_hist.begin(); it!=this->part_hist.end(); ++it)
 	{
 		//NOTE: Dj comes in as um --> convert to m
@@ -1479,9 +1472,11 @@ void Crane::compute_initial_part_conc(double W, double gz, double hb, int size)
 		this->part_conc[it->first] = it->second * conc / mass / 1.0e9;
 		this->part_conc_var(i,0) = this->part_conc[it->first];
         
-        //std::cout << "Part size (um) = " << it->first << "\tConc (kg/m^3) = " << this->part_conc[it->first] << std::endl;
+        //std::cout << "Part size (um) = " << it->first << "\tConc (Gp/m^3) = " << this->part_conc[it->first] << std::endl;
 		i++;
+        //sum += this->part_conc[it->first]*mass*1.0e9;
 	}
+    //std::cout << "Total Conc = " << sum << std::endl;
 }
 
 void Crane::compute_initial_virtual_mass(double W, double gz, double hb)
@@ -2384,7 +2379,7 @@ double rate_w_water_conds(int i, const Matrix<double> &u, double t, const void *
 		}
 		
 		double p1 = (1.0/dat->get_beta_prime())*((1.0+x)/(1.0+dat->get_xe()))*(w+x-dat->get_xe())*dment_dt/m;
-		double p2 = ((1.0+x+s+w)/m)*(w/(s+w))*dat->get_total_mass_fallout_rate()/*/1000.0*/;
+		double p2 = ((1.0+x+s+w)/m)*(w/(s+w))*dat->get_total_mass_fallout_rate();
 		
 		res = -p1 - dx_dt - p2;
 	}
@@ -2446,7 +2441,7 @@ double rate_cloud_mass(int i, const Matrix<double> &u, double t, const void *dat
 	if (dat->get_isTight() == true)
 		dat->compute_total_mass_fallout_rate(m, x, s, w, T, dat->get_current_atm_press(), z, dat->get_part_conc_var());
 	
-	res = dment_dt - dat->get_total_mass_fallout_rate()/*/1000.0*/;
+	res = dment_dt - dat->get_total_mass_fallout_rate();
 	
 	return res;
 }
@@ -2472,7 +2467,7 @@ double rate_s_soil(int i, const Matrix<double> &u, double t, const void *data, c
 	}
 	
 	double p1 = ((1.0+x)/(1.0+dat->get_xe()))*s*dment_dt/m/dat->get_beta_prime();
-	double p2 = ((1.0+x+s+w)/m)*(s/(s+w))*dat->get_total_mass_fallout_rate()/*/1000.0*/;
+	double p2 = ((1.0+x+s+w)/m)*(s/(s+w))*dat->get_total_mass_fallout_rate();
 	
 	res = -p1-p2;
 	
@@ -2547,7 +2542,7 @@ double rate_entrained_mass(int i, const Matrix<double> &u, double t, const void 
         
 		double p3 = dat->get_grav()*U/dat->get_gas_const()/dat->get_apparent_amb_temp();
         
-		res = p1*(dat->get_shear_ratio()+p2-p3);   /// Are the units wrong here? Since we changed m to Mg, what else changes?
+		res = p1*(dat->get_shear_ratio()+p2-p3);
 	}
 	
 	return res;
@@ -2579,18 +2574,6 @@ void Crane::establish_initial_conditions(double W, double gz, double hb, int bin
 	this->set_includeShearVel(includeShear);
 	this->set_isTight(isTight);
 	this->set_isSaturated(false);
-	
-	///*** Override ICs **///
-	/*
-	this->set_energy( 1993.76 );
-	this->set_cloud_alt( 1645.96 );
-	this->set_cloud_mass( 3974.0 );
-	this->set_s_soil(1.35e-5);
-	this->set_temperature(2803.7);
-	this->set_cloud_rise(65.01);
-	this->set_w_water_conds(0);
-	this->set_x_water_vapor(0.002626);
-	 */
 	
 	// Setup data
 	dove.set_userdata(this);
@@ -2637,7 +2620,7 @@ void Crane::establish_initial_conditions(double W, double gz, double hb, int bin
 	dove.set_initialcondition("m (kg)", this->get_cloud_mass());
 	dove.set_initialcondition("E (J/kg)", this->get_energy());
 	dove.set_initialcondition("T (K)", this->get_temperature());
-	dove.set_timestep(1.0/this->get_cloud_rise()/1.0);
+	dove.set_timestep(1.0/this->get_cloud_rise()/10.0);
 }
 
 void Crane::establish_dove_options(Dove &dove, FILE *file, bool fileout, bool consoleout, integrate_subtype inttype, timestep_type timetype,
@@ -2700,7 +2683,7 @@ void Crane::estimate_parameters(Dove &dove)
 	this->set_current_amb_temp(Te);
 	this->set_current_atm_press(P);
 	this->compute_xe(Te, P, HR);
-    //this->compute_xe(Te, P, 0.0);
+    //this->compute_xe(Te, P, 70.0);
     
     //this->set_xe(0.03);
     //std::cout << "xe = " << this->get_xe() << std::endl;
@@ -2751,6 +2734,7 @@ void Crane::estimate_parameters(Dove &dove)
 		rate = exp(-rate*dove.getTimeStep());
 		
 		this->part_conc_var(i,0) = this->part_conc_var(i,0)*rate;
+        
 	}
     
 }
@@ -2787,7 +2771,6 @@ void Crane::store_variables(Dove &dove)
         //std::cout << "ERROR!!! Negative E (J/kg)\n\n";
         dove.getNewU()(dove.getVariableIndex("E (J/kg)"), 0) = dove.getCurrentU()(dove.getVariableIndex("E (J/kg)"), 0);
     }
-    
     
     
 	this->set_current_time(dove.getCurrentTime());
@@ -2943,7 +2926,7 @@ int CRANE_TESTS()
     //double hb = 0.0*0.3048;// 500 ft
     //double gz = 500.0; //500 m
     
-	int bins = 100;
+	int bins = 10;
 	bool includeShear = false;
 	bool isTight = false;
 	
