@@ -418,7 +418,7 @@ protected:
 	std::map<double, double> part_conc;			///< Number of particles per volume (Gp/m^3) given size (um)	(n_j(t))
 	double current_time;						///< Current time since explosion (s)							(t)
 	
-	Matrix<double> part_conc_var;				///< Storage matrix for particle concentrations in order of size
+	Matrix<double> part_conc_var;				///< Storage matrix for particle concentrations (Gp/m^3) in order of size
 	double saturation_time;						///< Time at which saturation has occurred (s)
 	double cloud_density;						///< Density of the cloud materials	(kg/m^3)
 	
