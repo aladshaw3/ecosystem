@@ -942,7 +942,7 @@ void Crane::compute_apparent_amb_temp(double Te, double xe)
 void Crane::compute_char_vel(double u, double E)
 {
 	if (E < 0.0)	E = 0.0;
-	this->set_char_vel(fmax(fabs(u), 2.0*E));
+	this->set_char_vel(fmax(fabs(u), sqrt(2.0*E)));
 }
 
 void Crane::compute_air_viscosity(double T)
@@ -1463,11 +1463,11 @@ void Crane::compute_initial_part_conc(double W, double gz, double hb, int size)
 	this->compute_initial_cloud_volume(W, gz, hb);
 	this->compute_initial_part_hist(W, gz, hb, size);
 	double conc = this->get_initial_soil_mass() / this->get_cloud_volume();
-    //std::cout << "Total Conc = " << conc << std::endl;
+    std::cout << "Total Conc = " << conc << std::endl;
     
 	//Iterate through map
 	int i=0;
-    //double sum = 0.0;
+    double sum = 0.0;
 	for (std::map<double,double>::iterator it=this->part_hist.begin(); it!=this->part_hist.end(); ++it)
 	{
 		//NOTE: Dj comes in as um --> convert to m
@@ -1476,11 +1476,11 @@ void Crane::compute_initial_part_conc(double W, double gz, double hb, int size)
 		this->part_conc[it->first] = it->second * conc / mass / 1.0e9;
 		this->part_conc_var(i,0) = this->part_conc[it->first];
         
-        //std::cout << "Part size (um) = " << it->first << "\tConc (Gp/m^3) = " << this->part_conc[it->first] << std::endl;
+        std::cout << "Part size (um) = " << it->first << "\tConc (Gp/m^3) = " << this->part_conc[it->first] << std::endl;
 		i++;
-        //sum += this->part_conc[it->first]*mass*1.0e9;
+        sum += this->part_conc[it->first]*mass*1.0e9;
 	}
-    //std::cout << "Total Conc = " << sum << std::endl;
+    std::cout << "Total Conc = " << sum << std::endl;
 }
 
 void Crane::compute_initial_virtual_mass(double W, double gz, double hb)
@@ -2690,25 +2690,10 @@ void Crane::estimate_parameters(Dove &dove)
 	P = this->return_atm_press(this->get_cloud_alt());
 	HR = this->return_rel_humid(this->get_cloud_alt());
 	v = this->return_wind_vel(this->get_cloud_alt());
-    
-    //Te = 264.0;
-    //P = 101350.0;
-    //HR = 0.0;
-    //v(0,0) = 0.0;
-    //v(1,0) = 0.0;
 	
 	this->set_current_amb_temp(Te);
 	this->set_current_atm_press(P);
 	this->compute_xe(Te, P, HR);
-    
-    //std::cout << "Te = " << this->get_current_amb_temp() << std::endl;
-   // std::cout << "P = " << this->get_current_atm_press() << std::endl;
-   // std::cout << "xe = " << this->get_xe() << std::endl;
-    //this->compute_xe(Te, P, 70.0);
-    
-    //this->set_xe(0.03);
-    //std::cout << "xe = " << this->get_xe() << std::endl;
-    //ISSUE MAY BE WITH ATMOSPHERE!!!
 	
 	this->compute_q_xe(this->get_xe());
 	this->compute_apparent_temp(this->get_temperature(), this->get_x_water_vapor());
@@ -2747,6 +2732,41 @@ void Crane::estimate_parameters(Dove &dove)
 	this->compute_shear_ratio(this->get_cloud_mass(), this->get_x_water_vapor(), this->get_s_soil(), this->get_w_water_conds(), this->get_temperature(), P, this->get_cloud_alt(), this->get_cloud_rise(), this->get_energy(), v);
 	
 	this->compute_total_mass_fallout_rate(this->get_cloud_mass(), this->get_x_water_vapor(), this->get_s_soil(), this->get_w_water_conds(), this->get_temperature(), P, this->get_cloud_alt(), this->get_part_conc_var());
+    
+}
+
+void Crane::store_variables(Dove &dove)
+{
+    if ( dove.getNewU()(dove.getVariableIndex("m (kg)"), 0) < 0.0)
+    {
+        std::cout << "ERROR!!! Negative m (kg)\n\n";
+        dove.getNewU()(dove.getVariableIndex("m (kg)"), 0) = dove.getCurrentU()(dove.getVariableIndex("m (kg)"), 0);
+    }
+    if ( dove.getNewU()(dove.getVariableIndex("x (kg/kg)"), 0) < 0.0)
+    {
+        std::cout << "ERROR!!! Negative x (kg/kg)\n\n";
+        dove.getNewU()(dove.getVariableIndex("x (kg/kg)"), 0) = dove.getCurrentU()(dove.getVariableIndex("x (kg/kg)"), 0);
+    }
+    if ( dove.getNewU()(dove.getVariableIndex("w (kg/kg)"), 0) < 0.0)
+    {
+        std::cout << "ERROR!!! Negative w (kg/kg)\n\n";
+        dove.getNewU()(dove.getVariableIndex("w (kg/kg)"), 0) = dove.getCurrentU()(dove.getVariableIndex("w (kg/kg)"), 0);
+    }
+    if ( dove.getNewU()(dove.getVariableIndex("s (kg/kg)"), 0) < 0.0)
+    {
+        std::cout << "ERROR!!! Negative s (kg/kg)\n\n";
+        dove.getNewU()(dove.getVariableIndex("s (kg/kg)"), 0) = dove.getCurrentU()(dove.getVariableIndex("s (kg/kg)"), 0);
+    }
+    if ( dove.getNewU()(dove.getVariableIndex("T (K)"), 0) < 0.0)
+    {
+        std::cout << "ERROR!!! Negative T (K)\n\n";
+        dove.getNewU()(dove.getVariableIndex("T (K)"), 0) = dove.getCurrentU()(dove.getVariableIndex("T (K)"), 0);
+    }
+    if ( dove.getNewU()(dove.getVariableIndex("E (J/kg)"), 0) < 0.0)
+    {
+        std::cout << "ERROR!!! Negative E (J/kg)\n\n";
+        dove.getNewU()(dove.getVariableIndex("E (J/kg)"), 0) = dove.getCurrentU()(dove.getVariableIndex("E (J/kg)"), 0);
+    }
 	
 	for (int i=0; i<this->part_conc_var.rows(); i++)
 	{
@@ -2755,45 +2775,9 @@ void Crane::estimate_parameters(Dove &dove)
 		rate = exp(-rate*dove.getTimeStep());
 		
 		this->part_conc_var(i,0) = this->part_conc_var(i,0)*rate;
-        
+		
 	}
-    
-}
-
-void Crane::store_variables(Dove &dove)
-{
-    if ( dove.getNewU()(dove.getVariableIndex("m (kg)"), 0) < 0.0)
-    {
-        //std::cout << "ERROR!!! Negative m (kg)\n\n";
-        dove.getNewU()(dove.getVariableIndex("m (kg)"), 0) = dove.getCurrentU()(dove.getVariableIndex("m (kg)"), 0);
-    }
-    if ( dove.getNewU()(dove.getVariableIndex("x (kg/kg)"), 0) < 0.0)
-    {
-        //std::cout << "ERROR!!! Negative x (kg/kg)\n\n";
-        dove.getNewU()(dove.getVariableIndex("x (kg/kg)"), 0) = dove.getCurrentU()(dove.getVariableIndex("x (kg/kg)"), 0);
-    }
-    if ( dove.getNewU()(dove.getVariableIndex("w (kg/kg)"), 0) < 0.0)
-    {
-        //std::cout << "ERROR!!! Negative w (kg/kg)\n\n";
-        dove.getNewU()(dove.getVariableIndex("w (kg/kg)"), 0) = dove.getCurrentU()(dove.getVariableIndex("w (kg/kg)"), 0);
-    }
-    if ( dove.getNewU()(dove.getVariableIndex("s (kg/kg)"), 0) < 0.0)
-    {
-        //std::cout << "ERROR!!! Negative s (kg/kg)\n\n";
-        dove.getNewU()(dove.getVariableIndex("s (kg/kg)"), 0) = dove.getCurrentU()(dove.getVariableIndex("s (kg/kg)"), 0);
-    }
-    if ( dove.getNewU()(dove.getVariableIndex("T (K)"), 0) < 0.0)
-    {
-        //std::cout << "ERROR!!! Negative T (K)\n\n";
-        dove.getNewU()(dove.getVariableIndex("T (K)"), 0) = dove.getCurrentU()(dove.getVariableIndex("T (K)"), 0);
-    }
-    if ( dove.getNewU()(dove.getVariableIndex("E (J/kg)"), 0) < 0.0)
-    {
-        //std::cout << "ERROR!!! Negative E (J/kg)\n\n";
-        dove.getNewU()(dove.getVariableIndex("E (J/kg)"), 0) = dove.getCurrentU()(dove.getVariableIndex("E (J/kg)"), 0);
-    }
-    
-    
+	
 	this->set_current_time(dove.getCurrentTime());
 	this->set_cloud_mass( fabs( dove.getNewU("m (kg)", dove.getNewU()) ) );
 	this->set_cloud_rise( dove.getNewU("u (m/s)", dove.getNewU()) );
@@ -2861,7 +2845,7 @@ int Crane::run_crane_simulation(Dove &dove)
 	double percent_comp = 0.0;
 	double print_comp = 0.0;
 	if (this->get_ConsoleOut() == false)
-		std::cout << "Percent Completion...\n";
+		std::cout << "\nPercent Completion...\n";
 	do
 	{
 		percent_comp = (dove.getCurrentTime() - dove.getStartTime()) / (dove.getEndTime() - dove.getStartTime());
@@ -2886,6 +2870,7 @@ int Crane::run_crane_simulation(Dove &dove)
 			return -1;
 		}
 		
+		/*
 		if (this->get_ConsoleOut() == true)
 		{
 			for (int i=0; i<8; i++)
@@ -2897,6 +2882,7 @@ int Crane::run_crane_simulation(Dove &dove)
 			this->compute_total_mass_fallout_rate(this->get_cloud_mass(), this->get_x_water_vapor(), this->get_s_soil(), this->get_w_water_conds(), this->get_temperature(), P, this->get_cloud_alt(), this->get_part_conc_var());
 			std::cout << "p(t) =\t" << this->get_total_mass_fallout_rate() << std::endl;
 		}
+		 */
 		
 		this->store_variables(dove);
 		if (this->get_FileOut() == true)
@@ -2961,14 +2947,13 @@ int CRANE_TESTS()
 	bool includeShear = false;
 	bool isTight = false;
 	
+	test.establish_initial_conditions(W, gz, hb, bins, includeShear, isTight, dove);
+	
 	std::cout << "\nTesting of the CRANE for Plumbbob Boltzman Bomb at Nevada Test Site\n";
 	std::cout <<   "-------------------------------------------------------------------\n\n";
 	std::cout << "Bomb Yield (kT) =\t" << W << std::endl;
 	std::cout << "Burst Height (m) =\t" << hb << std::endl;
 	std::cout << "Ground Altitude (m) =\t" << gz << std::endl;
-	
-	test.establish_initial_conditions(W, gz, hb, bins, includeShear, isTight, dove);
-    
     std::cout << "Initial Time (s) =\t" << test.get_current_time() << std::endl;
     std::cout << "\n";
 	
@@ -2998,28 +2983,31 @@ int CRANE_TESTS()
 	
 	test.establish_pjfnk_options(dove, QR, BT, isLinear, isPrecon, nl_out, l_out, max_nlit, max_lit, restart, recursive, nl_abstol, nl_reltol, l_abstol, l_reltol);
 	
+	
+	std::cout << "\nInitial Conditions for Non-linear Variables\n";
+	std::cout <<   "-------------------------------------------\n\n";
     test.estimate_parameters(dove);
 	for (int i=0; i<8; i++)
 	{
-		std::cout << dove.getVariableName(i) << " =\t " << dove.getNewU(i, dove.getNewU()) << "\t: rate =\t " << dove.Eval_Func(i, dove.getNewU(), dove.getCurrentTime()) << std::endl;
+		std::cout << dove.getVariableName(i) << " =\t " << dove.getNewU(i, dove.getNewU()) << std::endl;
 	}
-	std::cout << "dm/dt | ent =\t" << rate_entrained_mass(0, dove.getNewU(), dove.getCurrentTime(), (void*)&test, dove) << std::endl;
-	double P = test.return_atm_press(test.get_cloud_alt());
-	test.compute_total_mass_fallout_rate(test.get_cloud_mass(), test.get_x_water_vapor(), test.get_s_soil(), test.get_w_water_conds(), test.get_temperature(), P, test.get_cloud_alt(), test.get_part_conc_var());
-	std::cout << "p(t) =\t" << test.get_total_mass_fallout_rate() << std::endl;
+	//test.get_part_conc_var().Display("Pc");
 		
 	test.run_crane_simulation(dove);
-    
+	
+	std::cout << "\nFinal Results for Non-linear Variables\n";
+	std::cout <<   "---------------------------------------\n\n";
     for (int i=0; i<8; i++)
     {
-        std::cout << dove.getVariableName(i) << " =\t " << dove.getNewU(i, dove.getNewU()) << "\t: rate =\t " << dove.Eval_Func(i, dove.getNewU(), dove.getCurrentTime()) << std::endl;
+        std::cout << dove.getVariableName(i) << " =\t " << dove.getNewU(i, dove.getNewU()) << std::endl;
     }
-	std::cout << "dm/dt | ent =\t" << rate_entrained_mass(0, dove.getNewU(), dove.getCurrentTime(), (void*)&test, dove) << std::endl;
-	P = test.return_atm_press(test.get_cloud_alt());
-	test.compute_total_mass_fallout_rate(test.get_cloud_mass(), test.get_x_water_vapor(), test.get_s_soil(), test.get_w_water_conds(), test.get_temperature(), P, test.get_cloud_alt(), test.get_part_conc_var());
-	std::cout << "p(t) =\t" << test.get_total_mass_fallout_rate() << std::endl;
+	//test.get_part_conc_var().Display("Pc");
 	
-	std::cout << "\nSaturation Time (s) =\t" << test.get_saturation_time() << std::endl;
+	std::cout << "\nSaturation Time (s) =\t";
+	if (test.get_isSaturated() == true)
+		std::cout << test.get_saturation_time() << std::endl;
+	else
+		std::cout << "Unsaturated\n";
     
 	time = clock() - time;
 	std::cout << "\nTest Runtime: " << (time / CLOCKS_PER_SEC) << " seconds\n";
