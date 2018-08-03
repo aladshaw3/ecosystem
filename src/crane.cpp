@@ -94,6 +94,8 @@ Crane::Crane()
 	energy = 0.0;
 	current_time = 0.0;
 	cloud_density = 0.0;
+	horz_rad_change = 0.0;
+	energy_switch = 0.0;
 	
 	create_default_atmosphere();
 }
@@ -506,6 +508,16 @@ void Crane::set_cloud_density(double val)
 	this->cloud_density = val;
 }
 
+void Crane::set_horz_rad_change(double val)
+{
+	this->horz_rad_change = val;
+}
+
+void Crane::set_energy_switch(double val)
+{
+	this->energy_switch = val;
+}
+
 ///< Below are the get functions for various parameters
 
 double Crane::get_eps()
@@ -901,6 +913,16 @@ double Crane::get_cloud_density()
 	return this->cloud_density;
 }
 
+double Crane::get_horz_rad_change()
+{
+	return this->horz_rad_change;
+}
+
+double Crane::get_energy_switch()
+{
+	return this->energy_switch;
+}
+
 // Below are listed all the compute function for various parameters
 void Crane::compute_beta_prime(double x, double s, double w)
 {
@@ -1138,8 +1160,8 @@ void Crane::compute_davies_num(double Dj, double m, double x, double s, double w
 	this->compute_air_density(P, x, T);
 	this->compute_cloud_density(m, x, s, w, T, P);
 	this->compute_air_viscosity(T);
-	//this->set_davies_num( (4.0*this->get_cloud_density()*(this->get_part_density()-this->get_cloud_density())*this->get_grav()*pow(dj,3.0)) / (3.0*pow(this->get_air_viscosity(),2.0)) );
-    this->set_davies_num( (4.0*this->get_air_density()*(this->get_part_density()-this->get_air_density())*this->get_grav()*pow(dj,3.0)) / (3.0*pow(this->get_air_viscosity(),2.0)) );
+	this->set_davies_num( (4.0*this->get_cloud_density()*(this->get_part_density()-this->get_cloud_density())*this->get_grav()*pow(dj,3.0)) / (3.0*pow(this->get_air_viscosity(),2.0)) );
+    //this->set_davies_num( (4.0*this->get_air_density()*(this->get_part_density()-this->get_air_density())*this->get_grav()*pow(dj,3.0)) / (3.0*pow(this->get_air_viscosity(),2.0)) );
 }
 
 void Crane::compute_settling_rate(double Dj, double m, double x, double s, double w, double T, double P)
@@ -1149,8 +1171,8 @@ void Crane::compute_settling_rate(double Dj, double m, double x, double s, doubl
 	this->compute_slip_factor(Dj, T, P);
 	this->compute_davies_num(Dj, m, x, s, w, T, P);
     
-    //double rho = this->get_cloud_density();
-    double rho = this->get_air_density();
+    double rho = this->get_cloud_density();
+    //double rho = this->get_air_density();
 	
 	//If statements for flow conditions
 	if (this->get_davies_num() <= 0.3261)
@@ -1206,6 +1228,11 @@ void Crane::compute_total_mass_fallout_rate(double m, double x, double s, double
 }
 
 // Below are listed compute functions specific for initial conditions
+void Crane::compute_energy_switch(double W)
+{
+	this->set_energy_switch(fmax( 10.0, fmin(23.0+9.0*log10(W), 60.0) ));
+}
+
 void Crane::compute_k(double W)
 {
 	this->set_k(595.0*pow(W, -0.0527));
@@ -1277,6 +1304,8 @@ void Crane::create_part_hist(double min, double max, int size, double avg, doubl
 
 void Crane::compute_det_alt(double gz, double hb)
 {
+	this->set_ground_alt(gz);
+	this->set_burst_height(hb);
 	this->set_det_alt(gz+hb);
 }
 
@@ -1288,8 +1317,9 @@ void Crane::compute_initial_cloud_alt(double W, double gz, double hb)
 
 void Crane::compute_initial_current_time(double W, double gz, double hb)
 {
+	this->set_bomb_yield(W);
 	this->compute_det_alt(gz, hb);
-	double scaled = this->get_det_alt() / pow(W,1.0/3.0);
+	double scaled = fabs(hb)*3.281 / pow(W,1.0/3.0);
 	double t2m;
 	
 	if (scaled <= 180.0)
@@ -1307,7 +1337,7 @@ void Crane::compute_initial_current_time(double W, double gz, double hb)
 void Crane::compute_initial_temperature(double W, double gz, double hb)
 {
 	this->compute_initial_current_time(W, gz, hb);
-	double scaled = this->get_det_alt() / pow(W,1.0/3.0);
+	double scaled = fabs(hb)*3.281 / pow(W,1.0/3.0);
 	double t2m;
 	double K, n;
 	
@@ -1334,23 +1364,26 @@ void Crane::compute_initial_soil_mass(double W, double gz, double hb)
 	//Check for underground detonation
 	if (hb < 0.0)
 	{
-		scaled = fabs(hb)/pow(W, 1.0/3.4);
+		scaled = fabs(hb*3.281)/pow(W, 1.0/3.4);
 		double Rad = 112.5 + 0.755*scaled - 9.6e-6*scaled*scaled*scaled - 9.11e-12*scaled*scaled*scaled*scaled*scaled;
 		double D = 32.7 + 0.851*scaled - 2.52e-5*scaled*scaled*scaled - 1.78e-10*scaled*scaled*scaled*scaled*scaled;
 		
 		this->set_initial_soil_mass( 2.182*pow(W, 3.0/3.4)*Rad*Rad*D );
+		//std::cout << "Below Ground Soil mass (kg)= " << this->get_initial_soil_mass() << std::endl;
 	}
 	else
 	{
-		scaled = this->get_det_alt() / pow(W, 1.0/3.4);
+		scaled = fabs(hb)*3.281 / pow(W, 1.0/3.4);
 		
 		if (scaled <= 180.0)
 		{
 			this->set_initial_soil_mass( 0.07741*pow(W, 3.0/3.4)*pow(180.0-scaled,2.0)*(360.0+scaled) );
+			//std::cout << "Above Ground Soil mass (kg)= " << this->get_initial_soil_mass() << std::endl;
 		}
 		else
 		{
 			this->set_initial_soil_mass( 90.7 );
+			//std::cout << "Pure Air Soil mass (kg)= " << this->get_initial_soil_mass() << std::endl;
 		}
 	}
     
@@ -1359,7 +1392,7 @@ void Crane::compute_initial_soil_mass(double W, double gz, double hb)
 void Crane::compute_initial_part_hist(double W, double gz, double hb, int size)
 {
 	this->compute_det_alt(gz, hb);
-	double scaled = this->get_det_alt() / pow(W, 1.0/3.4);
+	double scaled = fabs(hb)*3.281 / pow(W, 1.0/3.4);
 	
 	if (scaled < 180.0)
 	{
@@ -2448,6 +2481,7 @@ double rate_entrained_mass(int i, const Matrix<double> &u, double t, const void 
 
 void Crane::establish_initial_conditions(double W, double gz, double hb, int bins, bool includeShear, bool isTight, Dove &dove)
 {
+	this->compute_energy_switch(W);
 	this->compute_initial_current_time(W, gz, hb);
 	this->compute_initial_temperature(W, gz, hb);
 	this->compute_initial_cloud_alt(W, gz, hb);
@@ -2688,6 +2722,11 @@ void Crane::store_variables(Dove &dove)
 	this->set_s_soil( fabs( dove.getNewU("s (kg/kg)", dove.getNewU()) ) );
 	this->set_temperature( fabs( dove.getNewU("T (K)", dove.getNewU()) ) );
 	this->set_energy( fabs( dove.getNewU("E (J/kg)", dove.getNewU()) ) );
+	
+	double Rc_old = this->get_horz_rad();
+	double P = this->return_atm_press(this->get_cloud_alt());
+	this->compute_horz_rad(this->get_cloud_mass(), this->get_x_water_vapor(), this->get_s_soil(), this->get_w_water_conds(), this->get_temperature(), P, this->get_cloud_alt());
+	this->set_horz_rad_change(Rc_old - this->get_horz_rad());
 
 }
 
@@ -2775,14 +2814,19 @@ int Crane::run_crane_simulation(Dove &dove)
 		dove.update_states();
         
         //Check for early termination
-        if (this->get_cloud_rise() < 0.0)
+        if (this->get_cloud_rise() <= 0.0 && this->get_energy() < this->get_energy_switch())
         {
-            if (this->get_ConsoleOut() == false)
-                std::cout << "Cloud stopped rising at " << this->get_current_time() << " (s)... Ending Early...\n";
+			std::cout << "Cloud has stabilized at " << this->get_current_time() << " (s)... Ending Early...\n";
             
             break;
         }
-        
+		if (this->get_cloud_rise() <= 0.0 && fabs(this->get_horz_rad_change()) <= (dove.getTimeStep()*this->get_horz_rad()*pow(this->get_bomb_yield(), 0.014778)/1153.0) )
+		{
+			std::cout << "Cloud has stopped expanding at " << this->get_current_time() << " (s)... Ending Early...\n";
+			
+			break;
+		}
+		
 		this->estimate_parameters(dove);
 		
 	} while (dove.getEndTime() > (dove.getCurrentTime()+dove.getMinTimeStep()) );
@@ -2846,6 +2890,11 @@ int CRANE_TESTS()
 	
 	std::cout << "\nTesting of the CRANE for the 1979 DELFIC Test Case with Default Atmosphere\n";
 	std::cout <<   "--------------------------------------------------------------------------\n\n";
+	std::cout << "Shear Velocity = \t";
+	if (includeShear == true)
+		std::cout << "True\n";
+	else
+		std::cout << "False\n";
 	std::cout << "Bomb Yield (kT) =\t" << W << std::endl;
 	std::cout << "Burst Height (m) =\t" << hb << std::endl;
 	std::cout << "Ground Altitude (m) =\t" << gz << std::endl;
@@ -2859,7 +2908,7 @@ int CRANE_TESTS()
 	double dtmax = 0.1; //ABS MAX!!!
 	double dtmin_conv = 0.0001;
 	double t_out = 1.0;
-	double endtime = 500.0;
+	double endtime = 1000.0;
 	
 	test.establish_dove_options(dove, file, fileout, consoleout, RK4, CONSTANT, SGS, tol, dtmin, dtmax, dtmin_conv, t_out, endtime);
 	

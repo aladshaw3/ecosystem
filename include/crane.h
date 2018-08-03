@@ -141,6 +141,8 @@ public:
 	void set_saturation_time(double val);				///< Set the saturation_time parameter
 	void set_isTight(bool val);							///< Set the isTight parameter
 	void set_cloud_density(double val);					///< Set the cloud_density parameter
+	void set_horz_rad_change(double val);				///< Set the horz_rad_change parameter
+	void set_energy_switch(double val);					///< Set the energy_switch parameter
 	
 	// Below are listed all the manual get functions for manually retrieving individual values
 	double get_eps();							///< Get the eps parameter
@@ -221,6 +223,8 @@ public:
 	double get_saturation_time();				///< Get the saturation_time parameter
 	bool get_isTight();							///< Get the isTight parameter
 	double get_cloud_density();					///< Get the cloud_density parameter
+	double get_horz_rad_change();				///< Get the horz_rad_change parameter
+	double get_energy_switch();					///< Get the energy_switch parameter
 	
 	// Below are listed all the compute functions for various parameter values
 	void compute_beta_prime(double x, double s, double w);		///< Function to compute ratio of cloud gas density to local density
@@ -256,6 +260,7 @@ public:
 	void compute_total_mass_fallout_rate(double m, double x, double s, double w, double T, double P, double z, const Matrix<double> &n);
 	
 	// Below are listed compute functions specific for initial conditions or system constants
+	void compute_energy_switch(double W);						///< Function to compute energy switch from W
 	void compute_k(double W);									///< Function to compute cloud rise yield from W
 	void compute_k2(double W);									///< Function to compute power function yield from W
 	void compute_mu(double W);									///< Function to compute energy yield from W
@@ -421,6 +426,8 @@ protected:
 	Matrix<double> part_conc_var;				///< Storage matrix for particle concentrations (Gp/m^3) in order of size
 	double saturation_time;						///< Time at which saturation has occurred (s)
 	double cloud_density;						///< Density of the cloud materials	(kg/m^3)
+	double horz_rad_change;						///< Change in horizontal radius between time steps (m)			(d(Rc))
+	double energy_switch;						///< Energy switch parameter for determining termination (J/kg)
 	
 private:
 	
