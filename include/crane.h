@@ -246,9 +246,9 @@ public:
 	void compute_horz_rad(double m, double x, double s, double w, double T, double P, double z);///< Function to compute horizontal radius
 	void compute_sigma_turbulence(double E, double z);			///< Function to compute sigma turbulence given E and z
 	void compute_surf_area(double m, double x, double s, double w, double T, double P, double z);///< Function to compute cloud surface area
-	void compute_shear_vel(double z, Matrix<double> v);			///< Function to compute the shear_vel based on z and v
+	void compute_shear_vel(Matrix<double> v_top, Matrix<double> v_bot);	///< Function to compute the shear_vel based on v_top and v_bot
 	/// Function to compute the shear_ratio based on the fundamental variables and atmospheric parameters
-	void compute_shear_ratio(double m, double x, double s, double w, double T, double P, double z, double u, double E, Matrix<double> v);
+	void compute_shear_ratio(double m, double x, double s, double w, double T, double P, double z, double u, double E, Matrix<double> v_top, Matrix<double> v_bot);
 	void compute_slip_factor(double Dj, double T, double P);	///< Function to compute the slip_factor given Dj, T, and P
 	void compute_davies_num(double Dj, double m, double x, double s, double w, double T, double P);///< Function to compute davies_num given the conditions
 	void compute_settling_rate(double Dj, double m, double x, double s, double w, double T, double P);///< Function to compute the settling rates of specific particle size
