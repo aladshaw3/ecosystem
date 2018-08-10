@@ -2166,8 +2166,8 @@ double rate_cloud_rise(int i, const Matrix<double> &u, double t, const void *dat
 	
 	if (dat->get_isTight() == true)
 	{
-		dat->compute_apparent_temp(T, x); //NOTE: be aware of potential nan or inf residuals
-		dat->compute_beta_prime(x, s, w); //NOTE: be aware of potential nan or inf residuals
+		dat->compute_apparent_temp(T, x);
+		dat->compute_beta_prime(x, s, w);
 		dat->compute_vert_rad(z);
 	}
 	
@@ -2238,8 +2238,8 @@ double rate_temperature(int i, const Matrix<double> &u, double t, const void *da
 		
 		if (dat->get_isTight() == true)
 		{
-			dat->compute_apparent_temp(T, x); //NOTE: be aware of potential nan or inf residuals
-			dat->compute_beta_prime(x, s, w); //NOTE: be aware of potential nan or inf residuals
+			dat->compute_apparent_temp(T, x);
+			dat->compute_beta_prime(x, s, w);
 			dat->compute_sigma_turbulence(E, z);
 			dat->compute_actual_spec_heat(T, x);
 		}
@@ -2266,8 +2266,8 @@ double rate_temperature(int i, const Matrix<double> &u, double t, const void *da
 		
 		if (dat->get_isTight() == true)
 		{
-			dat->compute_apparent_temp(T, x); //NOTE: be aware of potential nan or inf residuals
-			dat->compute_beta_prime(x, s, w); //NOTE: be aware of potential nan or inf residuals
+			dat->compute_apparent_temp(T, x);
+			dat->compute_beta_prime(x, s, w);
 			dat->compute_sigma_turbulence(E, z);
 			dat->compute_actual_spec_heat(T, x);
             dat->compute_spec_heat_entrain_integral(T, dat->get_current_amb_temp());
@@ -2303,7 +2303,7 @@ double rate_w_water_conds(int i, const Matrix<double> &u, double t, const void *
 		
 		if (dat->get_isTight() == true)
 		{
-			dat->compute_beta_prime(x, s, w); //NOTE: be aware of potential nan or inf residuals
+			dat->compute_beta_prime(x, s, w);
 			dat->compute_total_mass_fallout_rate(m, x, s, w, T, dat->get_current_atm_press(), z, dat->get_part_conc_var());
 		}
 		
@@ -2632,15 +2632,34 @@ void Crane::estimate_parameters(Dove &dove)
 	else
 		this->set_latent_heat(2.83E+6);
 	
-	this->compute_q_xe(this->get_xe());
-	this->compute_apparent_temp(this->get_temperature(), this->get_x_water_vapor());
-	this->compute_apparent_amb_temp(Te, this->get_xe());
-	this->compute_char_vel(this->get_cloud_rise(), this->get_energy());
-	this->compute_air_viscosity(this->get_temperature());
-	this->compute_vapor_pressure(P, this->get_x_water_vapor());
-	this->compute_sat_vapor_pressure(this->get_temperature());
-    
-    this->compute_spec_heat_entrain_integral(this->get_temperature(), Te);
+	//Call the compute functions that are not called by any other compute function
+	this->compute_apparent_amb_temp(Te, this->get_xe());								//NOT CALLED
+	this->compute_vapor_pressure(P, this->get_x_water_vapor());							//NOT CALLED
+	this->compute_sat_vapor_pressure(this->get_temperature());							//NOT CALLED
+	this->compute_spec_heat_entrain_integral(this->get_temperature(), Te);				//NOT CALLED
+	this->compute_mean_spec_heat(this->get_temperature(), this->get_x_water_vapor(), this->get_s_soil(), this->get_w_water_conds());//NOT CALLED
+	this->compute_sigma_turbulence(this->get_energy(), this->get_cloud_alt());			//NOT CALLED
+	this->compute_shear_ratio(this->get_cloud_mass(), this->get_x_water_vapor(), this->get_s_soil(), this->get_w_water_conds(), this->get_temperature(), P, this->get_cloud_alt(), this->get_cloud_rise(), this->get_energy(), v_top, v_bot);	//NOT CALLED
+	this->compute_total_mass_fallout_rate(this->get_cloud_mass(), this->get_x_water_vapor(), this->get_s_soil(), this->get_w_water_conds(), this->get_temperature(), P, this->get_cloud_alt(), this->get_part_conc_var());	//NOT CALLED
+	
+	//Functions below are needed prior to solver, but are all called from the above functions (removes redundancy)
+	/**
+	this->compute_q_xe(this->get_xe());												//called by compute_apparent_temp
+	this->compute_apparent_temp(this->get_temperature(), this->get_x_water_vapor());	//called by compute_cloud_volume
+	this->compute_char_vel(this->get_cloud_rise(), this->get_energy());					//called by compute_shear_ratio
+	this->compute_air_viscosity(this->get_temperature());								//called by compute_slip_factor & compute_davies_num
+	this->compute_air_density(P, this->get_x_water_vapor(), this->get_temperature());	//called by compute_davies_num
+	this->compute_cloud_density(this->get_cloud_mass(), this->get_x_water_vapor(), this->get_s_soil(), this->get_w_water_conds(), this->get_temperature(), P);															//called by compute_davies_num
+	this->compute_spec_heat_entrain(this->get_temperature());							//called by compute_actual_spec_heat
+	this->compute_spec_heat_water(this->get_temperature());								//called by compute_actual_spec_heat
+	this->compute_spec_heat_conds(this->get_temperature());								//called by compute_mean_spec_heat
+	this->compute_actual_spec_heat(this->get_temperature(), this->get_x_water_vapor());	//called by compute_mean_spec_heat
+	this->compute_k_temp(this->get_temperature());										//called by compute_mean_spec_heat
+	this->compute_cloud_volume(this->get_cloud_mass(), this->get_x_water_vapor(), this->get_s_soil(), this->get_w_water_conds(), this->get_temperature(), P);															//called by cloud_dens, shear_rat, & horz_rad
+	this->compute_horz_rad(this->get_cloud_mass(), this->get_x_water_vapor(), this->get_s_soil(), this->get_w_water_conds(), this->get_temperature(), P, this->get_cloud_alt());									//called by surf_area & total_fallout
+	this->compute_surf_area(this->get_cloud_mass(), this->get_x_water_vapor(), this->get_s_soil(), this->get_w_water_conds(), this->get_temperature(), P, this->get_cloud_alt());									//called by shear_ratio
+	this->compute_shear_vel(v_top, v_bot);												//called by shear_ratio
+	*/
 	
 	if (this->get_isSaturated() == false)
 	{
@@ -2653,24 +2672,6 @@ void Crane::estimate_parameters(Dove &dove)
 		else
 			this->set_isSaturated(false);
 	}
-	
-	this->compute_air_density(P, this->get_x_water_vapor(), this->get_temperature());
-	this->compute_cloud_density(this->get_cloud_mass(), this->get_x_water_vapor(), this->get_s_soil(), this->get_w_water_conds(), this->get_temperature(), P);
-	this->compute_spec_heat_entrain(this->get_temperature());
-	this->compute_spec_heat_water(this->get_temperature());
-	this->compute_spec_heat_conds(this->get_temperature());
-	this->compute_actual_spec_heat(this->get_temperature(), this->get_x_water_vapor());
-	this->compute_k_temp(this->get_temperature());
-	this->compute_mean_spec_heat(this->get_temperature(), this->get_x_water_vapor(), this->get_s_soil(), this->get_w_water_conds());
-	this->compute_cloud_volume(this->get_cloud_mass(), this->get_x_water_vapor(), this->get_s_soil(), this->get_w_water_conds(), this->get_temperature(), P);
-	this->compute_horz_rad(this->get_cloud_mass(), this->get_x_water_vapor(), this->get_s_soil(), this->get_w_water_conds(), this->get_temperature(), P, this->get_cloud_alt());
-	this->compute_sigma_turbulence(this->get_energy(), this->get_cloud_alt());
-	this->compute_surf_area(this->get_cloud_mass(), this->get_x_water_vapor(), this->get_s_soil(), this->get_w_water_conds(), this->get_temperature(), P, this->get_cloud_alt());
-	this->compute_shear_vel(v_top, v_bot);
-    
-	this->compute_shear_ratio(this->get_cloud_mass(), this->get_x_water_vapor(), this->get_s_soil(), this->get_w_water_conds(), this->get_temperature(), P, this->get_cloud_alt(), this->get_cloud_rise(), this->get_energy(), v_top, v_bot);
-	
-	this->compute_total_mass_fallout_rate(this->get_cloud_mass(), this->get_x_water_vapor(), this->get_s_soil(), this->get_w_water_conds(), this->get_temperature(), P, this->get_cloud_alt(), this->get_part_conc_var());
     
 }
 
@@ -2905,12 +2906,12 @@ int CRANE_TESTS()
 	bool consoleout = false;
 	double tol = 0.1;
 	double dtmin = 1e-8;
-	double dtmax = 0.1; //ABS MAX!!!
+	double dtmax = 0.1; //ABS MAX!!! Beyond this point the numerical errors become too large...
 	double dtmin_conv = 0.0001;
 	double t_out = 1.0;
 	double endtime = 1000.0;
 	
-	test.establish_dove_options(dove, file, fileout, consoleout, RK4, CONSTANT, SGS, tol, dtmin, dtmax, dtmin_conv, t_out, endtime);
+	test.establish_dove_options(dove, file, fileout, consoleout, BDF2, ADAPTIVE, SGS, tol, dtmin, dtmax, dtmin_conv, t_out, endtime);
 	
 	bool isLinear = false;
 	bool isPrecon = false;
