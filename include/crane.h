@@ -462,6 +462,27 @@ double rate_s_soil(int i, const Matrix<double> &u, double t, const void *data, c
 /// Function to provide a coupled entrained mass residual
 double rate_entrained_mass(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove);
 
+/// CRANE Executable given an input file
+/** Main CRANE executable from the ecosystem cli. User must provide a yaml-style input file directing 
+	all simulation, solver, and runtime options. The second file is optional and will contain meteorlogical
+	data as a function of hieght above mean sea level. 
+ 
+	\note The atmosphere file must be in a specific format. Each line of the file must read off the following,
+		in order, using the noted units: (1) altitude [m], (2) temperature [K], (3) pressure [Pa], and (4) 
+		relative humidity (%). Then, start a new line for each change in altitude. Wind data is optional and
+		is given in the Yaml Input File instead. This is because wind readings do not often correspond to the
+		same altitudes as pressure and temperature readings. Also note that the first line of the atmosphere
+		file is NOT read in by the program. It is treated as just a header. 
+ 
+	Example Yaml Input File
+	-----------------------
+ 
+ 
+	Example Atmosphere Input File
+	-----------------------------
+ */
+int CRANE_SCENARIO(const char *yaml_input, const char *atmosphere_data);
+
 /// Test function for CRANE
 /**  Test function is callable from the cli */
 int CRANE_TESTS();

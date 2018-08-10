@@ -1836,7 +1836,7 @@ void Crane::create_default_atmosphere()
 	this->add_rel_humid(29400, 5.1899e-12);
 	
 	this->add_amb_temp(30000, 225.82);
-	this->add_atm_press(30000, 1364);
+	this->add_atm_press(30000, 1164);
 	this->add_rel_humid(30000, 5.1622e-12);
 	
 	this->add_amb_temp(30600, 226.9);
@@ -2844,6 +2844,14 @@ int Crane::run_crane_simulation(Dove &dove)
  *	-------------------------------------------------------------------------------------
  *								End: Crane Class Definitions
  */
+
+//CRANE executable scenario
+int CRANE_SCENARIO(const char *yaml_input, const char *atmosphere_data)
+{
+	int success = 0;
+	std::cout << "This executable is currently blank...\n";
+	return success;
+}
 
 //Test function
 int CRANE_TESTS()
