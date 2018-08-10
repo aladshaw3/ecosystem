@@ -98,6 +98,7 @@ Crane::Crane()
 	energy_switch = 0.0;
 	
 	create_default_atmosphere();
+	create_default_wind_profile();
 }
 
 //Default destructor
@@ -105,6 +106,7 @@ Crane::~Crane()
 {
 	delete_atmosphere();
 	delete_particles();
+	delete_wind_profile();
 }
 
 // Below are some display functions used for testing different functions
@@ -1615,22 +1617,6 @@ void Crane::create_default_atmosphere()
 {
 	this->delete_atmosphere();
 	
-	this->add_wind_vel(216, -5.14, 6.13);
-	this->add_wind_vel(1548, -5.494, 11.78);
-	this->add_wind_vel(3097, 0.8582, 4.924);
-	this->add_wind_vel(5688, 5.13, 14.095);
-	this->add_wind_vel(7327, 10.898, 15.56);
-	this->add_wind_vel(9309, 10.28, 12.25);
-	this->add_wind_vel(10488, 6.309, 9.0156);
-	this->add_wind_vel(11887, 8.356, 9.9585);
-	this->add_wind_vel(13698, 9.8298, 6.883);
-	this->add_wind_vel(16267, 8.457, 3.078);
-	this->add_wind_vel(18526, 5.9733, -0.61);
-	this->add_wind_vel(20665, 6.973, -0.618);
-	this->add_wind_vel(23902, 10.83, -1.91);
-	this->add_wind_vel(26493, 11.0, 1.974);
-	this->add_wind_vel(31023, 24.804, -2.1788);
-	
 	this->add_amb_temp(-600, 292.05);
 	this->add_atm_press(-600, 108870);
 	this->add_rel_humid(-600, 77);
@@ -1972,11 +1958,36 @@ void Crane::create_default_atmosphere()
 	this->add_rel_humid(49800, 3.9579);
 }
 
+void Crane::create_default_wind_profile()
+{
+	this->delete_wind_profile();
+	
+	this->add_wind_vel(216, -5.14, 6.13);
+	this->add_wind_vel(1548, -5.494, 11.78);
+	this->add_wind_vel(3097, 0.8582, 4.924);
+	this->add_wind_vel(5688, 5.13, 14.095);
+	this->add_wind_vel(7327, 10.898, 15.56);
+	this->add_wind_vel(9309, 10.28, 12.25);
+	this->add_wind_vel(10488, 6.309, 9.0156);
+	this->add_wind_vel(11887, 8.356, 9.9585);
+	this->add_wind_vel(13698, 9.8298, 6.883);
+	this->add_wind_vel(16267, 8.457, 3.078);
+	this->add_wind_vel(18526, 5.9733, -0.61);
+	this->add_wind_vel(20665, 6.973, -0.618);
+	this->add_wind_vel(23902, 10.83, -1.91);
+	this->add_wind_vel(26493, 11.0, 1.974);
+	this->add_wind_vel(31023, 24.804, -2.1788);
+}
+
 void Crane::delete_atmosphere()
 {
 	this->amb_temp.clear();
 	this->atm_press.clear();
 	this->rel_humid.clear();
+}
+
+void Crane::delete_wind_profile()
+{
 	this->wind_vel.clear();
 }
 

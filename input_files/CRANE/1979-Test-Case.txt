@@ -1,0 +1,114 @@
+Simulation_Conditions:
+---
+bomb_yield: 50         #kT
+burst_height: 0        #m above ground
+ground_level: 500      #m above mean sea level
+particle_bins: 10      #number of particle size distributions 
+tight_coupling: true   #use tight or loose coupling for variables
+shear_correction: true #use a correction for shear velocity (requires wind profile)
+
+...
+
+ODE_Options:
+---
+file_output: true           #print results to a file
+console_output: false       #print messages to the console window after each step
+integration_method: bdf2    #choices: 
+time_stepper: adaptive      #choices:
+preconditioner: sgs         #choices: 
+tolerance: 0.001            #explicit solver tolerance
+dtmin: 1e-8                 #minimum allowable time step
+dtmax: 0.1                  #maximum allowable time step
+converged_dtmin: 0.001      #minimum allowbable time step after convergence 
+time_out: 1.0               #number of seconds between each print-to-file action
+end_time: 1000.0            #number of seconds until simulation forced to end
+
+...
+
+Solver_Options:
+---
+linear_method: qr      #choices:
+line_search: bt        #choices: 
+linear: false          #treat system as linear (default = false)
+precondition: false    #use a preconditioner (default = false)
+nl_out: false          #print non-linear residuals to console
+lin_out: false         #print linear residuals to console 
+max_nl_iter: 50        #maximum allowable non-linear iterations
+max_lin_iter: 200      #maximum allowable linear iterations
+restart_limit: 20      #number of allowable vector spans before restart
+recursion_limit: 2     #number of allowable recurives calls for preconditioning 
+nl_abs_tol: 1e-6       #Absolute tolerance for non-linear iterations
+nl_rel_tol: 1e-6       #Relative tolerance for non-linear iterations
+lin_abs_tol: 1e-6      #Absolute tolerance for linear iterations
+lin_rel_tol: 1e-4      #Relative tolerance for linear iterations
+
+...
+
+Wind_Profile:
+---
+#user provides lists of velocity components at various altitude values
+#name of each list is the altitude in m
+#under each list is vx and vy in m/s at corresponding altitude 
+#NOTE: This entire document for wind is optional (a default can be used)
+
+- 216:
+  vx: -5.14
+  vy: 6.13
+
+- 1548:
+  vx: -5.494
+  vy: 11.78
+
+- 3097:
+  vx: 0.8582
+  vy: 4.924
+
+- 5688:
+  vx: 5.13
+  vy: 14.095
+
+- 7327:
+  vx: 10.898
+  vy: 15.56
+
+- 9309:
+  vx: 10.28
+  vy: 12.25
+
+- 10488:
+  vx: 6.309
+  vy: 9.0156
+
+- 11887:
+  vx: 8.356
+  vy: 9.9585
+
+- 13698:
+  vx: 9.8298
+  vy: 6.883
+
+- 16267:
+  vx: 8.457
+  vy: 3.078
+
+- 18526:
+  vx: 5.9733
+  vy: -0.61
+
+- 20665:
+  vx: 6.973
+  vy: -0.618
+
+- 23902:
+  vx: 10.83
+  vy: -1.91
+
+- 26493:
+  vx: 11.0
+  vy: 1.974
+
+- 31023:
+  vx: 24.804
+  vy: -2.1788
+
+...
