@@ -2490,7 +2490,12 @@ double rate_entrained_mass(int i, const Matrix<double> &u, double t, const void 
 
 // Below are list functions associated with actions completed outside of the solver in DOVE
 
-void Crane::establish_initial_conditions(double W, double gz, double hb, int bins, bool includeShear, bool isTight, Dove &dove)
+void Crane::read_conditions(yaml_cpp_class &yaml)
+{
+	
+}
+
+void Crane::establish_initial_conditions(Dove &dove, double W, double gz, double hb, int bins, bool includeShear, bool isTight)
 {
 	this->compute_energy_switch(W);
 	this->compute_initial_current_time(W, gz, hb);
@@ -2571,6 +2576,11 @@ void Crane::establish_initial_conditions(double W, double gz, double hb, int bin
 	dove.set_timestep(1.0/this->get_cloud_rise()/10.0);
 }
 
+void Crane::read_dove_options(yaml_cpp_class &yaml)
+{
+	
+}
+
 void Crane::establish_dove_options(Dove &dove, FILE *file, bool fileout, bool consoleout, integrate_subtype inttype, timestep_type timetype,
 								   precond_type type, double tol, double dtmin, double dtmax, double dtmin_conv, double t_out, double endtime)
 {
@@ -2592,6 +2602,11 @@ void Crane::establish_dove_options(Dove &dove, FILE *file, bool fileout, bool co
 	
 	if (dove.getIntegrationType() == EXPLICIT)
 		this->set_isTight(false);
+}
+
+void Crane::read_pjfnk_options(yaml_cpp_class &yaml)
+{
+	
 }
 
 void Crane::establish_pjfnk_options(Dove &dove, krylov_method lin_method, linesearch_type linesearch, bool linear, bool precon, bool nl_out,
@@ -2617,6 +2632,11 @@ void Crane::establish_pjfnk_options(Dove &dove, krylov_method lin_method, linese
 		dove.set_NonlinearOutput(false);
 		dove.set_LinearOutput(false);
 	}
+}
+
+void Crane::read_wind_profile(yaml_cpp_class &yaml)
+{
+	
 }
 
 void Crane::estimate_parameters(Dove &dove)
@@ -2860,6 +2880,84 @@ int Crane::run_crane_simulation(Dove &dove)
 int CRANE_SCENARIO(const char *yaml_input, const char *atmosphere_data)
 {
 	int success = 0;
+	double time;
+	
+	Crane crane;
+	Dove dove;
+	yaml_cpp_class yaml;
+	time = clock();
+	
+	FILE *file;
+	file = fopen("output/CRANE_Results.txt", "w+");
+	if (crane.get_FileOut() == true)
+	{
+		if (file == nullptr)
+		{
+			system("mkdir output");
+			file = fopen("output/CRANE_Results.txt", "w+");
+		}
+	}
+	
+	//Execule yaml read of input file
+	
+	//Read in the atmosphere data (if file exists)
+	
+	//Read in Simulation_Options
+	crane.read_conditions(yaml);
+	
+	std::cout << "\nCRANE SIMULATION CONDITIONS\n";
+	std::cout <<   "---------------------------\n\n";
+	std::cout << "Shear Velocity = \t";
+	if (crane.get_includeShearVel() == true)
+		std::cout << "True\n";
+	else
+		std::cout << "False\n";
+	std::cout << "Bomb Yield (kT) =\t" << crane.get_bomb_yield() << std::endl;
+	std::cout << "Burst Height (m) =\t" << crane.get_burst_height() << std::endl;
+	std::cout << "Ground Altitude (m) =\t" << crane.get_ground_alt() << std::endl;
+	std::cout << "Initial Time (s) =\t" << crane.get_current_time() << std::endl;
+	std::cout << "\n";
+	
+	//Read in ODE_Options
+	crane.read_dove_options(yaml);
+	
+	//Read in Solver_Options
+	crane.read_pjfnk_options(yaml);
+	
+	//Read in Wind_Profile
+	crane.read_wind_profile(yaml);
+	
+	//Run simulation case
+	std::cout << "\nInitial Conditions for Non-linear Variables\n";
+	std::cout <<   "-------------------------------------------\n\n";
+	crane.estimate_parameters(dove);
+	for (int i=0; i<8; i++)
+	{
+		std::cout << dove.getVariableName(i) << " =\t " << dove.getNewU(i, dove.getNewU()) << std::endl;
+	}
+	
+	crane.run_crane_simulation(dove);
+	
+	std::cout << "\nFinal Results for Non-linear Variables\n";
+	std::cout <<   "---------------------------------------\n\n";
+	for (int i=0; i<8; i++)
+	{
+		std::cout << dove.getVariableName(i) << " =\t " << dove.getNewU(i, dove.getNewU()) << std::endl;
+	}
+
+	
+	std::cout << "\nSaturation Time (s) =\t";
+	if (crane.get_saturation_time() > 0.0)
+		std::cout << crane.get_saturation_time() << std::endl;
+	else
+		std::cout << "Unsaturated\n";
+	
+	time = clock() - time;
+	std::cout << "\nCRANE Runtime: " << (time / CLOCKS_PER_SEC) << " seconds\n";
+	
+	if (file!= nullptr)
+		fclose(file);
+	
 	std::cout << "This executable is currently blank...\n";
 	return success;
 }
@@ -2906,7 +3004,7 @@ int CRANE_TESTS()
 	bool includeShear = true;
 	bool isTight = true;
 	
-	test.establish_initial_conditions(W, gz, hb, bins, includeShear, isTight, dove);
+	test.establish_initial_conditions(dove, W, gz, hb, bins, includeShear, isTight);
 	
 	std::cout << "\nTesting of the CRANE for the 1979 DELFIC Test Case with Default Atmosphere\n";
 	std::cout <<   "--------------------------------------------------------------------------\n\n";

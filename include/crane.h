@@ -313,16 +313,28 @@ public:
 	
 	// Below are list functions associated with actions completed outside of the solver in DOVE
 	
+	/// Function to read yaml input for Simulation Conditions
+	void read_conditions(yaml_cpp_class &yaml);
+	
 	/// Function will establish initial conditions, setup variables names, and register functions
-	void establish_initial_conditions(double W, double gz, double hb, int bins, bool includeShear, bool isTight, Dove &dove);
+	void establish_initial_conditions(Dove &dove, double W, double gz, double hb, int bins, bool includeShear, bool isTight);
+	
+	/// Function to read yaml input for ODE options
+	void read_dove_options(yaml_cpp_class &yaml);
 	
 	/// Function to establish DOVE conditions and options
 	void establish_dove_options(Dove &dove, FILE *file, bool fileout, bool consoleout, integrate_subtype inttype, timestep_type timetype,
 								precond_type type, double tol, double dtmin, double dtmax, double dtmin_conv, double t_out, double endtime);
 	
+	/// Function to read yaml input for solver options
+	void read_pjfnk_options(yaml_cpp_class &yaml);
+	
 	/// Function to establish PJFNK conditions and options
 	void establish_pjfnk_options(Dove &dove, krylov_method lin_method, linesearch_type linesearch, bool linear, bool precon, bool nl_out,
-		bool l_out, int max_nlit, int max_lit, int restart, int recursive, double nl_abstol, double nl_reltol, double l_abstol, double l_reltol);
+								 bool l_out, int max_nlit, int max_lit, int restart, int recursive, double nl_abstol, double nl_reltol, double l_abstol, double l_reltol);
+	
+	/// Function to read yaml input for solver options
+	void read_wind_profile(yaml_cpp_class &yaml);
 	
 	/// Function to estimate all parameters prior to simulating a single timestep
 	void estimate_parameters(Dove &dove);
