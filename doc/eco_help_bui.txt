@@ -105,3 +105,7 @@ The following message provides information on running this software with the bas
 (8) CROW (Coupled Reaction Object Workspace)
 
 	This algorithm requires one input files: (i) a yaml file detailing all system parameters, the species of interest, the reactions and/or mass balances, as well as some solver options. This is in effect very similar to SHARK, however, it is not coupled to know species thermodynamic information and is not limited to aqueous systems. The primary focus is to solve coupled systems of reaction mechanisms. NOTE: These routines are still under development and will have new features and functions available to the user as they come available.
+
+(9) CRANE (Cloud Rise After Nuclear Explosion)
+
+	This algorithm requires one input file and has an optional input file you can provide: (i) a yaml file detailing all system conditions, the integration options, the solver options, as well as a section allowing the user to give a custom wind profile for the atmosphere and (ii) an optional atmospheric profile input file, which in a line-by-line read out of temperature, pressure, and relative humidity at specific altitudes. If the second file is not given, then the routine will use a default atmosphere. NOTE: Simulations are sensitive to atmospheric conditions, so the more accurate information given, the better the results will be.

@@ -2490,6 +2490,112 @@ double rate_entrained_mass(int i, const Matrix<double> &u, double t, const void 
 
 // Below are list functions associated with actions completed outside of the solver in DOVE
 
+int Crane::read_atmosphere_profile(const char *profile)
+{
+	int success = 0;
+	
+	//std::cout << "\nReading atmospheric profile...\n";
+	
+	//Check to see if any argument was given
+	if (profile == nullptr || profile == NULL)
+	{
+		std::cout << "WARNING!!! No atmospheric profile was given!\nUsing default atmosphere instead...\n\n";
+		this->create_default_atmosphere();
+		return 0;
+	}
+	
+	//Check for existence of file, if no file, then use default
+	std::ifstream inputFile( profile );
+	if (inputFile.good()==false)
+	{
+		mError(file_dne);
+		std::cout << "Using default atmosphere...\n\n";
+		this->create_default_atmosphere();
+		return 0;
+	}
+	
+	//Read all as strings, but parse into characters and determine types automatically
+	std::string s_read;
+	char line[256];
+	ValueTypePair data;
+	char *num;
+	int count = 0;
+	this->delete_atmosphere();
+	double alt = 0;
+	
+	//Reading in the first line as a header (not used)
+	inputFile.getline(line, 256);
+	
+	//Read input until reaching end-of-file
+	do
+	{
+		inputFile.getline(line, 256);
+		
+		//Read numbers delimited by spaces, commas, and/or tabs
+		num = strtok(line, " ,\t");
+		
+		count = 0;
+		while (num != NULL)
+		{
+			s_read = num;
+			data.editValue(num);
+			data.findType();
+			
+			if (data.getType() != DOUBLE && data.getType() != INT)
+			{
+				mError(read_error);
+				return -1;
+			}
+			
+			//Store altitude of current line
+			if (count == 0)
+				alt = data.getDouble();
+			
+			//Register temperature of current line
+			if (count == 1)
+				this->add_amb_temp(alt, data.getDouble());
+			
+			//Register pressure of current line
+			if (count == 2)
+				this->add_atm_press(alt, data.getDouble());
+			
+			//Register humidity of current line
+			if (count == 3)
+				this->add_rel_humid(alt, data.getDouble());
+			
+			if (count > 3)
+			{
+				mError(read_error);
+				return -1;
+			}
+			
+			num = strtok(NULL, " ,\t");
+			count++;
+		}
+		
+		if (count < 3)
+		{
+			mError(read_error);
+			return -1;
+		}
+		
+	} while (!inputFile.eof());
+	
+	/*
+	std::map<double,double>::iterator it=this->rel_humid.begin();
+	for (it=this->rel_humid.begin(); it!=this->rel_humid.end(); ++it)
+	{
+		std::cout << it->first << "\t" << it->second << std::endl;
+	}
+	 */
+
+	
+	//END of Input Read
+	inputFile.close();
+	
+	return success;
+}
+
 void Crane::read_conditions(yaml_cpp_class &yaml)
 {
 	
@@ -2899,8 +3005,12 @@ int CRANE_SCENARIO(const char *yaml_input, const char *atmosphere_data)
 	}
 	
 	//Execule yaml read of input file
+	success = yaml.executeYamlRead(yaml_input);
+	if (success != 0) {mError(file_dne); return -1;}
 	
 	//Read in the atmosphere data (if file exists)
+	success = crane.read_atmosphere_profile(atmosphere_data);
+	if (success != 0) {mError(read_error); return -1;}
 	
 	//Read in Simulation_Options
 	crane.read_conditions(yaml);
@@ -2928,6 +3038,7 @@ int CRANE_SCENARIO(const char *yaml_input, const char *atmosphere_data)
 	crane.read_wind_profile(yaml);
 	
 	//Run simulation case
+	/*
 	std::cout << "\nInitial Conditions for Non-linear Variables\n";
 	std::cout <<   "-------------------------------------------\n\n";
 	crane.estimate_parameters(dove);
@@ -2944,7 +3055,7 @@ int CRANE_SCENARIO(const char *yaml_input, const char *atmosphere_data)
 	{
 		std::cout << dove.getVariableName(i) << " =\t " << dove.getNewU(i, dove.getNewU()) << std::endl;
 	}
-
+	 */
 	
 	std::cout << "\nSaturation Time (s) =\t";
 	if (crane.get_saturation_time() > 0.0)
@@ -2958,7 +3069,6 @@ int CRANE_SCENARIO(const char *yaml_input, const char *atmosphere_data)
 	if (file!= nullptr)
 		fclose(file);
 	
-	std::cout << "This executable is currently blank...\n";
 	return success;
 }
 

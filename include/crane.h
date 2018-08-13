@@ -313,6 +313,9 @@ public:
 	
 	// Below are list functions associated with actions completed outside of the solver in DOVE
 	
+	/// Function to read atmospheric data from input file (return 0 on success and -1 on failure)
+	int read_atmosphere_profile(const char *profile);
+	
 	/// Function to read yaml input for Simulation Conditions
 	void read_conditions(yaml_cpp_class &yaml);
 	

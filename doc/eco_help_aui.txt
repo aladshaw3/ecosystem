@@ -80,3 +80,4 @@ Usage Notes
 (6) SKUA_OPT (Optimization scheme for analysis of kinetic uptake data with the SKUA model)
 (7) SHARK (Speciation and Kinetic simulation for aqueous and/or mixed multi-species systems)
 (8) CROW (Coupled Reaction Object Workspace)
+(9) CRANE (Cloud Rise After Nuclear Explosion)

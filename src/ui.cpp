@@ -87,6 +87,7 @@ void aui_help()
 	puts("(6) SKUA_OPT (Optimization scheme for analysis of kinetic uptake data with the SKUA model)");
 	puts("(7) SHARK (Speciation and Kinetic simulation for aqueous and/or mixed multi-species systems)\n");
 	puts("(8) CROW (Coupled Reaction Object Workspace)\n");
+	puts("(9) CRANE (Cloud Rise After Nuclear Explosion)\n");
 	
 }
 
@@ -176,6 +177,9 @@ void bui_help()
 	
 	puts("(8) CROW (Coupled Reaction Object Workspace)\n");
 	puts("\tThis algorithm requires one input files: (i) a yaml file detailing all system parameters, the species of interest, the reactions and/or mass balances, as well as some solver options. This is in effect very similar to SHARK, however, it is not coupled to know species thermodynamic information and is not limited to aqueous systems. The primary focus is to solve coupled systems of reaction mechanisms. NOTE: These routines are still under development and will have new features and functions available to the user as they come available.\n");
+	
+	puts("(9) CRANE (Cloud Rise After Nuclear Explosion)\n");
+	puts("\tThis algorithm requires one input file and has an optional input file you can provide: (i) a yaml file detailing all system conditions, the integration options, the solver options, as well as a section allowing the user to give a custom wind profile for the atmosphere and (ii) an optional atmospheric profile input file, which in a line-by-line read out of temperature, pressure, and relative humidity at specific altitudes. If the second file is not given, then the routine will use a default atmosphere. NOTE: Simulations are sensitive to atmospheric conditions, so the more accurate information given, the better the results will be.\n");
 }
 
 //Check user string input for keyword "exit"
@@ -393,6 +397,11 @@ bool valid_exec_string(const std::string &input, UI_DATA *ui_dat)
 		ui_dat->option = crow;
 		valid_input = true;
 	}
+	else if (allLower(input) == "crane")
+	{
+		ui_dat->option = crane;
+		valid_input = true;
+	}
 	else
 	{
 		valid_input = false;
@@ -458,6 +467,12 @@ int number_files(UI_DATA *ui_dat)
 			break;
 		}
 			
+		case crane:
+		{
+			num = 1;
+			break;
+		}
+			
 		default:
 		{
 			mError(opt_no_support);
@@ -473,13 +488,13 @@ int number_files(UI_DATA *ui_dat)
 bool valid_addon_options(UI_DATA *ui_dat)
 {
 	bool valid_input = false;
-	int remander = (int) ui_dat->user_input.size();
+	int remainder = (int) ui_dat->user_input.size();
 	int files = 0;
 	
 	//Read the next option stored at offset 3
 	ui_dat->Path = path(ui_dat->user_input[3]);
 	ui_dat->Files = input(ui_dat->user_input[3]);
-	remander = remander - 4;
+	remainder = remainder - 4;
 	
 	if (ui_dat->Path == false && ui_dat->Files == false)
 		return false;
@@ -488,15 +503,15 @@ bool valid_addon_options(UI_DATA *ui_dat)
 	if (ui_dat->Files == true)
 	{
 		files = number_files(ui_dat);
-		if (files != remander)
+		if (files > remainder)
 		{
 			ui_dat->MissingArg = true;
 			return true;
 		}
 		valid_input = true;
 		ui_dat->MissingArg = false;
-		ui_dat->input_files.resize(files);
-		for (int i=0; i<files; i++)
+		ui_dat->input_files.resize(remainder);
+		for (int i=0; i<remainder; i++)
 		{
 			ui_dat->input_files[i] = ui_dat->user_input[i+4];
 		}
@@ -505,24 +520,24 @@ bool valid_addon_options(UI_DATA *ui_dat)
 	else
 	{
 		ui_dat->path = ui_dat->user_input[4];
-		remander--;
+		remainder--;
 		
 		ui_dat->Files = input(ui_dat->user_input[5]);
-		remander--;
+		remainder--;
 		
 		if (ui_dat->Files == false)
 			return false;
 		
 		files = number_files(ui_dat);
-		if (files != remander)
+		if (files > remainder)
 		{
 			ui_dat->MissingArg = true;
 			return true;
 		}
 		valid_input = true;
 		ui_dat->MissingArg = false;
-		ui_dat->input_files.resize(files);
-		for (int i=0; i<files; i++)
+		ui_dat->input_files.resize(remainder);
+		for (int i=0; i<remainder; i++)
 		{
 			ui_dat->input_files[i] = ui_dat->path + ui_dat->user_input[i+6];
 		}
@@ -857,7 +872,7 @@ bool valid_input_execute(UI_DATA *ui_dat)
 	std::cout << "Choose a simulation to run from the list below\n-----------------------------------------------\n\n";
 	std::cout << "(1)  GSTA_OPT      (2)  MAGPIE   (3)  SCOPSOWL\n";
 	std::cout << "(4)  SCOPSOWL_OPT  (5)  SKUA     (6)  SKUA_OPT\n";
-	std::cout << "(7)  SHARK         (8)  CROW\n";
+	std::cout << "(7)  SHARK         (8)  CROW     (9)  CRANE\n";
 	std::cout << "\nChoice: ";
 	std::cin >> ui_dat->user_input[0];
 	std::cout << std::endl;
@@ -940,6 +955,13 @@ bool valid_input_execute(UI_DATA *ui_dat)
 			case 8:
 			{
 				ui_dat->option = crow;
+				valid_input = true;
+				break;
+			}
+				
+			case 9:
+			{
+				ui_dat->option = crane;
 				valid_input = true;
 				break;
 			}
@@ -1283,6 +1305,29 @@ int run_exec(UI_DATA *ui_dat)
 			}
 			
 			success = CROW_SCENARIO(ui_dat->input_files[0].c_str());
+			break;
+		}
+			
+		case crane:
+		{
+			if (ui_dat->argc == 1 || ui_dat->MissingArg == true)
+			{
+				ui_dat->input_files.resize(2);
+				std::cout << "CRANE requires 1 input file to run and has 1 optional atmospheric data file you can provide.\n";
+				std::cout << "Please provide each necessary file and full path for the requested file...\n";
+				std::cout << "(NOTE: Type 'default' for Atmospheric Profile to use the default atmosphere)\n\n";
+				std::cout << "CRANE Input: ";
+				std::cin >> ui_dat->input_files[0];
+				std::cout << std::endl;
+				std::cout << "Atmospheric Profile: ";
+				std::cin >> ui_dat->input_files[1];
+				std::cout << std::endl;
+			}
+			
+			if (ui_dat->input_files.size() >= 2)
+				success = CRANE_SCENARIO(ui_dat->input_files[0].c_str(), ui_dat->input_files[1].c_str());
+			else
+				success = CRANE_SCENARIO(ui_dat->input_files[0].c_str(), NULL);
 			break;
 		}
 			
