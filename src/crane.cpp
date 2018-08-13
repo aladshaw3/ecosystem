@@ -2566,6 +2566,7 @@ int Crane::read_atmosphere_profile(const char *profile)
 			if (count > 3)
 			{
 				mError(read_error);
+				std::cout << "Too many arguments in single line of Atmospheric Input File...\n";
 				return -1;
 			}
 			
@@ -2576,6 +2577,7 @@ int Crane::read_atmosphere_profile(const char *profile)
 		if (count < 3)
 		{
 			mError(read_error);
+			std::cout << "Too few arguments in single line of Atmospheric Input File...\n";
 			return -1;
 		}
 		
@@ -2741,9 +2743,113 @@ void Crane::establish_initial_conditions(Dove &dove, double W, double gz, double
 	dove.set_timestep(1.0/this->get_cloud_rise()/10.0);
 }
 
-int Crane::read_dove_options(Dove &dove, yaml_cpp_class &yaml)
+int Crane::read_dove_options(Dove &dove, FILE *file, yaml_cpp_class &yaml)
 {
 	int success = 0;
+	bool fileout = true, consoleout = false;
+	integrate_subtype inttype = BE;
+	timestep_type timetype = CONSTANT;
+	precond_type type = SGS;
+	double tol = 0.1, dtmin = 1e-6, dtmax = 0.1, dtmin_conv = 0.001, t_out = 1.0, endtime = 1000.0;
+	
+	try
+	{
+		fileout = yaml.getYamlWrapper()("ODE_Options")["file_output"].getBool();
+	}
+	catch (std::out_of_range)
+	{
+		fileout = false;
+	}
+	try
+	{
+		consoleout = yaml.getYamlWrapper()("ODE_Options")["console_output"].getBool();
+	}
+	catch (std::out_of_range)
+	{
+		consoleout = false;
+	}
+	try
+	{
+		std::string choice;
+		choice = yaml.getYamlWrapper()("ODE_Options")["integration_method"].getString();
+		inttype = integration_choice(choice);
+	}
+	catch (std::out_of_range)
+	{
+		inttype = BDF2;
+	}
+	try
+	{
+		std::string choice;
+		choice = yaml.getYamlWrapper()("ODE_Options")["time_stepper"].getString();
+		timetype = timestepper_choice(choice);
+	}
+	catch (std::out_of_range)
+	{
+		timetype = ADAPTIVE;
+	}
+	try
+	{
+		std::string choice;
+		choice = yaml.getYamlWrapper()("ODE_Options")["preconditioner"].getString();
+		type = preconditioner_choice(choice);
+	}
+	catch (std::out_of_range)
+	{
+		type = SGS;
+	}
+	try
+	{
+		tol = yaml.getYamlWrapper()("ODE_Options")["tolerance"].getDouble();
+	}
+	catch (std::out_of_range)
+	{
+		tol = 0.001;
+	}
+	try
+	{
+		dtmin = yaml.getYamlWrapper()("ODE_Options")["dtmin"].getDouble();
+	}
+	catch (std::out_of_range)
+	{
+		dtmin = 1e-8;
+	}
+	try
+	{
+		dtmax = yaml.getYamlWrapper()("ODE_Options")["dtmax"].getDouble();
+	}
+	catch (std::out_of_range)
+	{
+		dtmax = 0.1;
+	}
+	if (dtmax > 0.1) dtmax = 0.1;
+	try
+	{
+		dtmin_conv = yaml.getYamlWrapper()("ODE_Options")["converged_dtmin"].getDouble();
+	}
+	catch (std::out_of_range)
+	{
+		dtmin_conv = 0.1;
+	}
+	try
+	{
+		t_out = yaml.getYamlWrapper()("ODE_Options")["time_out"].getDouble();
+	}
+	catch (std::out_of_range)
+	{
+		t_out = 1.0;
+	}
+	try
+	{
+		endtime = yaml.getYamlWrapper()("ODE_Options")["end_time"].getDouble();
+	}
+	catch (std::out_of_range)
+	{
+		endtime = 1000.0;
+	}
+	
+	this->establish_dove_options(dove, file, fileout, consoleout, inttype, timetype, type, tol, dtmin, dtmax, dtmin_conv, t_out, endtime);
+	
 	return success;
 }
 
@@ -2773,6 +2879,132 @@ void Crane::establish_dove_options(Dove &dove, FILE *file, bool fileout, bool co
 int Crane::read_pjfnk_options(Dove &dove, yaml_cpp_class &yaml)
 {
 	int success = 0;
+	
+	krylov_method lin_method = QR;
+	linesearch_type linesearch = BT;
+	bool linear = false, precon = false, nl_out = false, l_out = false;
+	int max_nlit = 10, max_lit = 100, restart = 10, recursive = 2;
+	double nl_abstol = 1e-6, nl_reltol = 1e-6, l_abstol = 1e-6, l_reltol = 1e-6;
+	
+	try
+	{
+		std::string choice;
+		choice = yaml.getYamlWrapper()("Solver_Options")["linear_method"].getString();
+		lin_method = linearsolver_choice(choice);
+	}
+	catch (std::out_of_range)
+	{
+		lin_method = QR;
+	}
+	try
+	{
+		std::string choice;
+		choice = yaml.getYamlWrapper()("Solver_Options")["line_search"].getString();
+		linesearch = linesearch_choice(choice);
+	}
+	catch (std::out_of_range)
+	{
+		linesearch = BT;
+	}
+	try
+	{
+		linear = yaml.getYamlWrapper()("Solver_Options")["linear"].getBool();
+	}
+	catch (std::out_of_range)
+	{
+		linear = false;
+	}
+	try
+	{
+		precon = yaml.getYamlWrapper()("Solver_Options")["precondition"].getBool();
+	}
+	catch (std::out_of_range)
+	{
+		precon = false;
+	}
+	try
+	{
+		nl_out = yaml.getYamlWrapper()("Solver_Options")["nl_out"].getBool();
+	}
+	catch (std::out_of_range)
+	{
+		nl_out = false;
+	}
+	try
+	{
+		l_out = yaml.getYamlWrapper()("Solver_Options")["lin_out"].getBool();
+	}
+	catch (std::out_of_range)
+	{
+		l_out = false;
+	}
+	try
+	{
+		max_nlit = yaml.getYamlWrapper()("Solver_Options")["max_nl_iter"].getInt();
+	}
+	catch (std::out_of_range)
+	{
+		max_nlit = 10;
+	}
+	try
+	{
+		max_lit = yaml.getYamlWrapper()("Solver_Options")["max_lin_iter"].getInt();
+	}
+	catch (std::out_of_range)
+	{
+		max_lit = 100;
+	}
+	try
+	{
+		restart = yaml.getYamlWrapper()("Solver_Options")["restart_limit"].getInt();
+	}
+	catch (std::out_of_range)
+	{
+		restart = 100;
+	}
+	try
+	{
+		recursive = yaml.getYamlWrapper()("Solver_Options")["recursion_limit"].getInt();
+	}
+	catch (std::out_of_range)
+	{
+		recursive = 2;
+	}
+	try
+	{
+		nl_abstol = yaml.getYamlWrapper()("Solver_Options")["nl_abs_tol"].getDouble();
+	}
+	catch (std::out_of_range)
+	{
+		nl_abstol = 1e-6;
+	}
+	try
+	{
+		nl_reltol = yaml.getYamlWrapper()("Solver_Options")["nl_rel_tol"].getDouble();
+	}
+	catch (std::out_of_range)
+	{
+		nl_reltol = 1e-6;
+	}
+	try
+	{
+		l_abstol = yaml.getYamlWrapper()("Solver_Options")["lin_abs_tol"].getDouble();
+	}
+	catch (std::out_of_range)
+	{
+		l_abstol = 1e-6;
+	}
+	try
+	{
+		l_reltol = yaml.getYamlWrapper()("Solver_Options")["lin_rel_tol"].getDouble();
+	}
+	catch (std::out_of_range)
+	{
+		l_reltol = 1e-6;
+	}
+	
+	this->establish_pjfnk_options(dove, lin_method, linesearch, linear, precon, nl_out, l_out, max_nlit, max_lit, restart, recursive, nl_abstol, nl_reltol, l_abstol, l_reltol);
+	
 	return success;
 }
 
@@ -2804,6 +3036,61 @@ void Crane::establish_pjfnk_options(Dove &dove, krylov_method lin_method, linese
 int Crane::read_wind_profile(yaml_cpp_class &yaml)
 {
 	int success = 0;
+	this->delete_wind_profile();
+	
+	int num_data = 0;
+	try
+	{
+		num_data = (int) yaml.getYamlWrapper()("Wind_Profile").getHeadMap().size();
+	}
+	catch (std::out_of_range)
+	{
+		num_data = 0;
+	}
+	if (num_data == 0)
+	{
+		std::cout << "WARNING!!! No wind profile data was given!\nUsing default wind profile instead...\n\n";
+		this->create_default_wind_profile();
+		return 0;
+	}
+	
+	double vx = 0, vy = 0;
+	for (auto &x: yaml.getYamlWrapper()("Wind_Profile").getHeadMap())
+	{
+		ValueTypePair alt;
+		alt.editValue(x.first);
+		alt.findType();
+		if (alt.getType() != DOUBLE && alt.getType() != INT)
+		{
+			mError(read_error);
+			std::cout << "Altitute not a number...\n";
+			return -1;
+		}
+		
+		try
+		{
+			vx = yaml.getYamlWrapper()("Wind_Profile")(x.first)["vx"].getDouble();
+		}
+		catch (std::out_of_range)
+		{
+			mError(missing_information);
+			std::cout << "Velocity in x-direction missing!!!\n";
+			return -1;
+		}
+		try
+		{
+			vy = yaml.getYamlWrapper()("Wind_Profile")(x.first)["vy"].getDouble();
+		}
+		catch (std::out_of_range)
+		{
+			mError(missing_information);
+			std::cout << "Velocity in y-direction missing!!!\n";
+			return -1;
+		}
+		
+		this->add_wind_vel(alt.getDouble(), vx, vy);
+	}
+	
 	return success;
 }
 
@@ -3066,6 +3353,8 @@ int CRANE_SCENARIO(const char *yaml_input, const char *atmosphere_data)
 		}
 	}
 	
+	std::cout << "\n";
+	
 	//Execule yaml read of input file
 	success = yaml.executeYamlRead(yaml_input);
 	if (success != 0) {mError(file_dne); return -1;}
@@ -3092,7 +3381,7 @@ int CRANE_SCENARIO(const char *yaml_input, const char *atmosphere_data)
 	std::cout << "\n";
 	
 	//Read in ODE_Options
-	success = crane.read_dove_options(dove, yaml);
+	success = crane.read_dove_options(dove, file, yaml);
 	if (success != 0) {mError(read_error); return -1;}
 	
 	//Read in Solver_Options
@@ -3104,7 +3393,6 @@ int CRANE_SCENARIO(const char *yaml_input, const char *atmosphere_data)
 	if (success != 0) {mError(read_error); return -1;}
 	
 	//Run simulation case
-	/*
 	std::cout << "\nInitial Conditions for Non-linear Variables\n";
 	std::cout <<   "-------------------------------------------\n\n";
 	crane.estimate_parameters(dove);
@@ -3121,7 +3409,6 @@ int CRANE_SCENARIO(const char *yaml_input, const char *atmosphere_data)
 	{
 		std::cout << dove.getVariableName(i) << " =\t " << dove.getNewU(i, dove.getNewU()) << std::endl;
 	}
-	 */
 	
 	std::cout << "\nSaturation Time (s) =\t";
 	if (crane.get_saturation_time() > 0.0)

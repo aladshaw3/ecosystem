@@ -13,9 +13,9 @@ ODE_Options:
 ---
 file_output: true           #print results to a file
 console_output: false       #print messages to the console window after each step
-integration_method: bdf2    #choices: 
-time_stepper: adaptive      #choices:
-preconditioner: sgs         #choices: 
+integration_method: bdf2    #choices: be, bdf2, fe, cn, rk4, rkf
+time_stepper: adaptive      #choices: constant, adaptive, fehlberg, ratebased
+preconditioner: sgs         #choices: jacobi, ugs, lgs, sgs
 tolerance: 0.001            #explicit solver tolerance
 dtmin: 1e-8                 #minimum allowable time step
 dtmax: 0.1                  #maximum allowable time step
@@ -27,8 +27,8 @@ end_time: 1000.0            #number of seconds until simulation forced to end
 
 Solver_Options:
 ---
-linear_method: qr      #choices:
-line_search: bt        #choices: 
+linear_method: qr      #choices: gmreslp, pcg, bicgstab, cgs, fom, gmresrp, gcr, gmresr, kms, gmres, qr
+line_search: bt        #choices: none, bt, abt
 linear: false          #treat system as linear (default = false)
 precondition: false    #use a preconditioner (default = false)
 nl_out: false          #print non-linear residuals to console

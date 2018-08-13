@@ -323,7 +323,7 @@ public:
 	void establish_initial_conditions(Dove &dove, double W, double gz, double hb, int bins, bool includeShear, bool isTight);
 	
 	/// Function to read yaml input for ODE options
-	int read_dove_options(Dove &dove, yaml_cpp_class &yaml);
+	int read_dove_options(Dove &dove, FILE *file, yaml_cpp_class &yaml);
 	
 	/// Function to establish DOVE conditions and options
 	void establish_dove_options(Dove &dove, FILE *file, bool fileout, bool consoleout, integrate_subtype inttype, timestep_type timetype,
