@@ -88,6 +88,29 @@ typedef enum {BT, ABT, NO_LS} linesearch_type;
 	\param SGS uses a Symmetric-Gauss-Seidel iteration as preconditioning.*/
 typedef enum {JACOBI, TRIDIAG, UGS, LGS, SGS} precond_type;
 
+///Function to validate solver choice
+//** Returns true for Linear and false for Nonlinear */
+bool solver_choice(std::string &choice);
+
+///Function to validate linesearch choice
+linesearch_type linesearch_choice(std::string &choice);
+
+///Function to validate linear solver choice
+krylov_method linearsolver_choice(std::string &choice);
+
+///Function to determine whether or not to precondition
+bool use_preconditioning(std::string &choice);
+
+///Function to validate preconditioning choice
+precond_type preconditioner_choice(std::string &choice);
+
+///Function to validate timestepper choice
+timestep_type timestepper_choice(std::string &choice);
+
+///Function to validate integration method choice
+integrate_subtype integration_choice(std::string &choice);
+
+
 /// Dynamic ODE-solver with Various Established methods (DOVE) object
 /** This class structure creates a C++ object that can be used to solve coupled systems of 
 	Ordinary Differential Equations. A user will interface with this object by creating functions

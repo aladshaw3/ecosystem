@@ -263,28 +263,6 @@ typedef struct CROW_DATA
 ///Function to print header information about CROW to output file
 void print2file_crow_header(CROW_DATA *dat);
 
-///Function to validate solver choice
-//** Returns true for Linear and false for Nonlinear */
-bool solver_choice(std::string &choice);
-
-///Function to validate linesearch choice
-linesearch_type linesearch_choice(std::string &choice);
-
-///Function to validate linear solver choice
-krylov_method linearsolver_choice(std::string &choice);
-
-///Function to determine whether or not to precondition
-bool use_preconditioning(std::string &choice);
-
-///Function to validate preconditioning choice
-precond_type preconditioner_choice(std::string &choice);
-
-///Function to validate timestepper choice
-timestep_type timestepper_choice(std::string &choice);
-
-///Function to validate integration method choice
-integrate_subtype integration_choice(std::string &choice);
-
 ///Function to validate Function type
 func_type function_choice(std::string &choice);
 

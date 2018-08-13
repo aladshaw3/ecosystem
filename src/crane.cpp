@@ -2596,9 +2596,68 @@ int Crane::read_atmosphere_profile(const char *profile)
 	return success;
 }
 
-void Crane::read_conditions(yaml_cpp_class &yaml)
+int Crane::read_conditions(Dove &dove, yaml_cpp_class &yaml)
 {
+	int success = 0;
+	double W = 0, gz = 0, hb = 0;
+	int bins = 0;
+	bool includeShear = false, isTight = false;
 	
+	try
+	{
+		W = yaml.getYamlWrapper()("Simulation_Conditions")["bomb_yield"].getDouble();
+	}
+	catch (std::out_of_range)
+	{
+		mError(missing_information);
+		return -1;
+	}
+	try
+	{
+		hb = yaml.getYamlWrapper()("Simulation_Conditions")["burst_height"].getDouble();
+	}
+	catch (std::out_of_range)
+	{
+		mError(missing_information);
+		return -1;
+	}
+	try
+	{
+		gz = yaml.getYamlWrapper()("Simulation_Conditions")["ground_level"].getDouble();
+	}
+	catch (std::out_of_range)
+	{
+		mError(missing_information);
+		return -1;
+	}
+	try
+	{
+		bins = yaml.getYamlWrapper()("Simulation_Conditions")["particle_bins"].getInt();
+	}
+	catch (std::out_of_range)
+	{
+		bins = 10;
+	}
+	try
+	{
+		isTight = yaml.getYamlWrapper()("Simulation_Conditions")["tight_coupling"].getBool();
+	}
+	catch (std::out_of_range)
+	{
+		isTight = true;
+	}
+	try
+	{
+		includeShear = yaml.getYamlWrapper()("Simulation_Conditions")["shear_correction"].getBool();
+	}
+	catch (std::out_of_range)
+	{
+		includeShear = false;
+	}
+	
+	this->establish_initial_conditions(dove, W, gz, hb, bins, includeShear, isTight);
+	
+	return success;
 }
 
 void Crane::establish_initial_conditions(Dove &dove, double W, double gz, double hb, int bins, bool includeShear, bool isTight)
@@ -2682,9 +2741,10 @@ void Crane::establish_initial_conditions(Dove &dove, double W, double gz, double
 	dove.set_timestep(1.0/this->get_cloud_rise()/10.0);
 }
 
-void Crane::read_dove_options(yaml_cpp_class &yaml)
+int Crane::read_dove_options(Dove &dove, yaml_cpp_class &yaml)
 {
-	
+	int success = 0;
+	return success;
 }
 
 void Crane::establish_dove_options(Dove &dove, FILE *file, bool fileout, bool consoleout, integrate_subtype inttype, timestep_type timetype,
@@ -2710,9 +2770,10 @@ void Crane::establish_dove_options(Dove &dove, FILE *file, bool fileout, bool co
 		this->set_isTight(false);
 }
 
-void Crane::read_pjfnk_options(yaml_cpp_class &yaml)
+int Crane::read_pjfnk_options(Dove &dove, yaml_cpp_class &yaml)
 {
-	
+	int success = 0;
+	return success;
 }
 
 void Crane::establish_pjfnk_options(Dove &dove, krylov_method lin_method, linesearch_type linesearch, bool linear, bool precon, bool nl_out,
@@ -2740,9 +2801,10 @@ void Crane::establish_pjfnk_options(Dove &dove, krylov_method lin_method, linese
 	}
 }
 
-void Crane::read_wind_profile(yaml_cpp_class &yaml)
+int Crane::read_wind_profile(yaml_cpp_class &yaml)
 {
-	
+	int success = 0;
+	return success;
 }
 
 void Crane::estimate_parameters(Dove &dove)
@@ -3013,7 +3075,8 @@ int CRANE_SCENARIO(const char *yaml_input, const char *atmosphere_data)
 	if (success != 0) {mError(read_error); return -1;}
 	
 	//Read in Simulation_Options
-	crane.read_conditions(yaml);
+	success = crane.read_conditions(dove, yaml);
+	if (success != 0) {mError(read_error); return -1;}
 	
 	std::cout << "\nCRANE SIMULATION CONDITIONS\n";
 	std::cout <<   "---------------------------\n\n";
@@ -3029,13 +3092,16 @@ int CRANE_SCENARIO(const char *yaml_input, const char *atmosphere_data)
 	std::cout << "\n";
 	
 	//Read in ODE_Options
-	crane.read_dove_options(yaml);
+	success = crane.read_dove_options(dove, yaml);
+	if (success != 0) {mError(read_error); return -1;}
 	
 	//Read in Solver_Options
-	crane.read_pjfnk_options(yaml);
+	success = crane.read_pjfnk_options(dove, yaml);
+	if (success != 0) {mError(read_error); return -1;}
 	
 	//Read in Wind_Profile
-	crane.read_wind_profile(yaml);
+	success = crane.read_wind_profile(yaml);
+	if (success != 0) {mError(read_error); return -1;}
 	
 	//Run simulation case
 	/*
