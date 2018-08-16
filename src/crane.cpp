@@ -98,6 +98,13 @@ Crane::Crane()
 	energy_switch = 0.0;
 	t_count = 0.0;
 	
+	alt_top = 0.0;
+	alt_bottom = 0.0;
+	alt_top_old = 0.0;
+	alt_bottom_old = 0.0;
+	rise_top = 0.0;
+	rise_bottom = 0.0;
+	
 	create_default_atmosphere();
 	create_default_wind_profile();
 }
@@ -521,6 +528,36 @@ void Crane::set_energy_switch(double val)
 	this->energy_switch = val;
 }
 
+void Crane::set_alt_top(double val)
+{
+	this->alt_top = val;
+}
+
+void Crane::set_alt_bottom(double val)
+{
+	this->alt_bottom = val;
+}
+
+void Crane::set_alt_top_old(double val)
+{
+	this->alt_top_old = val;
+}
+
+void Crane::set_alt_bottom_old(double val)
+{
+	this->alt_bottom_old = val;
+}
+
+void Crane::set_rise_top(double val)
+{
+	this->rise_top = val;
+}
+
+void Crane::set_rise_bottom(double val)
+{
+	this->rise_bottom = val;
+}
+
 ///< Below are the get functions for various parameters
 
 double Crane::get_eps()
@@ -924,6 +961,36 @@ double Crane::get_horz_rad_change()
 double Crane::get_energy_switch()
 {
 	return this->energy_switch;
+}
+
+double Crane::get_alt_top()
+{
+	return this->alt_top;
+}
+
+double Crane::get_alt_bottom()
+{
+	return this->alt_bottom;
+}
+
+double Crane::get_alt_top_old()
+{
+	return this->alt_top_old;
+}
+
+double Crane::get_alt_bottom_old()
+{
+	return this->alt_bottom_old;
+}
+
+double Crane::get_rise_top()
+{
+	return this->rise_top;
+}
+
+double Crane::get_rise_bottom()
+{
+	return this->rise_bottom;
 }
 
 // Below are listed all the compute function for various parameters
@@ -1405,6 +1472,12 @@ void Crane::compute_initial_part_hist(double W, double gz, double hb, int size)
 	{
 		this->create_part_hist(0.0001, 100, size, 0.15, 2.0);
 	}
+	
+	int parcels = 15 + (int)log(W);
+	this->parcel_alt_top.set_size(parcels, size);
+	this->parcel_alt_bot.set_size(parcels, size);
+	this->parcel_rad_top.set_size(parcels, size);
+	this->parcel_rad_bot.set_size(parcels, size);
 }
 
 void Crane::compute_initial_air_mass(double W, double gz, double hb)
@@ -2489,6 +2562,52 @@ double rate_entrained_mass(int i, const Matrix<double> &u, double t, const void 
 	return res;
 }
 
+// Below are listed function to compute some post-processing/post-solver information to form the cloud stem
+
+void Crane::compute_alt_top(double z, double Hc)
+{
+	this->set_alt_top(z+Hc);
+}
+
+void Crane::compute_alt_bottom(double z, double Hc)
+{
+	double bot = z-Hc;
+	if (bot < 0.0)
+		this->set_alt_bottom(0.0);
+	else
+		this->set_alt_bottom(bot);
+}
+
+void Crane::compute_rise_top(double z_new, double z_old, double dt)
+{
+	this->set_rise_top((z_new-z_old)/dt);
+}
+
+void Crane::compute_rise_bottom(double z_new, double z_old, double dt)
+{
+	this->set_rise_bottom((z_new-z_old)/dt);
+}
+
+Matrix<double> & Crane::return_parcel_alt_top()
+{
+	return this->parcel_alt_top;
+}
+
+Matrix<double> & Crane::return_parcel_alt_bot()
+{
+	return this->parcel_alt_bot;
+}
+
+Matrix<double> & Crane::return_parcel_rad_top()
+{
+	return this->parcel_rad_top;
+}
+
+Matrix<double> & Crane::return_parcel_rad_bot()
+{
+	return this->parcel_rad_bot;
+}
+
 // Below are list functions associated with actions completed outside of the solver in DOVE
 
 int Crane::read_atmosphere_profile(const char *profile)
@@ -2658,6 +2777,8 @@ int Crane::read_conditions(Dove &dove, yaml_cpp_class &yaml)
 		includeShear = false;
 	}
 	
+	if (bins > 20) isTight = false;
+	
 	this->establish_initial_conditions(dove, W, gz, hb, bins, includeShear, isTight);
 	
 	return success;
@@ -2688,6 +2809,34 @@ void Crane::establish_initial_conditions(Dove &dove, double W, double gz, double
 	this->set_includeShearVel(includeShear);
 	this->set_isTight(isTight);
 	this->set_isSaturated(false);
+	
+	// Post-processing ICs
+	this->compute_alt_top(this->get_cloud_alt(), this->get_vert_rad());
+	this->compute_alt_bottom(this->get_cloud_alt(), this->get_vert_rad());
+	this->set_alt_top_old(this->get_alt_top());
+	this->set_alt_bottom_old(this->get_alt_bottom());
+	this->set_rise_top(this->get_cloud_rise());
+	this->set_rise_bottom(this->get_cloud_rise());
+	double dz = 2.0*this->get_vert_rad()/(double)(this->return_parcel_alt_top().rows()-0);
+	double z = this->get_alt_bottom();
+	//std::cout << "z parcle = " << z << std::endl;
+	//Loop through i parcels
+	for (int i=0; i<this->return_parcel_alt_top().rows(); i++)
+	{
+		//Loop through j particle sizes
+		for (int j=0; j<this->return_parcel_alt_top().columns(); j++)
+		{
+			this->return_parcel_rad_top().edit(i, j, this->get_horz_rad());
+			this->return_parcel_rad_bot().edit(i, j, this->get_horz_rad());
+			this->return_parcel_alt_bot().edit(i, j, z);
+			this->return_parcel_alt_top().edit(i, j, z+dz);
+		}
+		z = dz + z;
+		
+		//std::cout << "z parcle = " << z << std::endl;
+	}
+	this->return_parcel_alt_top().Display("z_t");
+	this->return_parcel_alt_bot().Display("z_b");
 	
 	// Setup data
 	dove.set_userdata(this);
@@ -3162,6 +3311,17 @@ void Crane::estimate_parameters(Dove &dove)
     
 }
 
+void Crane::perform_postprocessing(Dove &dove)
+{
+	this->compute_alt_top(this->get_cloud_alt(), this->get_vert_rad());
+	this->compute_alt_bottom(this->get_cloud_alt(), this->get_vert_rad());
+	this->compute_rise_top(this->get_alt_top(), this->get_alt_top_old(), dove.getTimeStep());
+	this->compute_rise_bottom(this->get_alt_bottom(), this->get_alt_bottom_old(), dove.getTimeStep());
+	
+	this->set_alt_top_old(this->get_alt_top());
+	this->set_alt_bottom_old(this->get_alt_bottom());
+}
+
 void Crane::store_variables(Dove &dove)
 {
     if ( dove.getNewU()(dove.getVariableIndex("m (Gg)"), 0) < 0.0)
@@ -3214,12 +3374,23 @@ void Crane::store_variables(Dove &dove)
 
 }
 
+void Crane::print_header(Dove &dove)
+{
+	fprintf(dove.getFile(), "\tV (m^3)\tHc (m)\tRc (m)");
+	fprintf(dove.getFile(), "\tz_b (m)\tz_t (m)");
+	fprintf(dove.getFile(), "\tu_b (m/s)\tu_t (m/s)");
+	
+	fprintf(dove.getFile(), "\n");
+}
+
 void Crane::print_information(Dove &dove, bool initialPhase)
 {
 	
 	if (initialPhase == true)
 	{
-		
+		fprintf(dove.getFile(), "\t%.6g\t%.6g\t%.6g", this->get_cloud_volume(), this->get_vert_rad(), this->get_horz_rad());
+		fprintf(dove.getFile(), "\t%.6g\t%.6g", this->get_alt_bottom(), this->get_alt_top());
+		fprintf(dove.getFile(), "\t%.6g\t%.6g", this->get_rise_bottom(), this->get_rise_top());
 		
 		fprintf(dove.getFile(), "\n");
 	}
@@ -3231,7 +3402,9 @@ void Crane::print_information(Dove &dove, bool initialPhase)
 			|| this->t_count >= (dove.getOutputTime()-sqrt(DBL_EPSILON))
 			|| dove.getCurrentTime() == dove.getEndTime())
 		{
-			
+			fprintf(dove.getFile(), "\t%.6g\t%.6g\t%.6g", this->get_cloud_volume(), this->get_vert_rad(), this->get_horz_rad());
+			fprintf(dove.getFile(), "\t%.6g\t%.6g", this->get_alt_bottom(), this->get_alt_top());
+			fprintf(dove.getFile(), "\t%.6g\t%.6g", this->get_rise_bottom(), this->get_rise_top());
 			
 			fprintf(dove.getFile(), "\n");
 			this->t_count = 0.0;
@@ -3248,7 +3421,8 @@ int Crane::run_crane_simulation(Dove &dove)
 	
 	if (this->get_FileOut() == true)
 	{
-		dove.print_header();
+		dove.print_header(false);
+		this->print_header(dove);
 		dove.print_result(false);
 		this->print_information(dove, true);
 	}
@@ -3320,6 +3494,8 @@ int Crane::run_crane_simulation(Dove &dove)
 		}
 		
 		this->store_variables(dove);
+		this->estimate_parameters(dove);
+		this->perform_postprocessing(dove);
 		if (this->get_FileOut() == true)
 		{
 			dove.print_newresult(false);
@@ -3340,8 +3516,6 @@ int Crane::run_crane_simulation(Dove &dove)
 			
 			break;
 		}
-		
-		this->estimate_parameters(dove);
 		
 	} while (dove.getEndTime() > (dove.getCurrentTime()+dove.getMinTimeStep()) );
 	
@@ -3405,6 +3579,8 @@ int CRANE_SCENARIO(const char *yaml_input, const char *atmosphere_data)
 	std::cout << "Burst Height (m) =\t" << crane.get_burst_height() << std::endl;
 	std::cout << "Ground Altitude (m) =\t" << crane.get_ground_alt() << std::endl;
 	std::cout << "Initial Time (s) =\t" << crane.get_current_time() << std::endl;
+	std::cout << "Number of air parcels =\t" << crane.return_parcel_alt_top().rows() << std::endl;
+	std::cout << "Number of particle bins = \t" << crane.return_parcel_alt_top().columns() << std::endl;
 	std::cout << "\n";
 	
 	//Read in ODE_Options
@@ -3507,6 +3683,8 @@ int CRANE_TESTS()
 	std::cout << "Burst Height (m) =\t" << hb << std::endl;
 	std::cout << "Ground Altitude (m) =\t" << gz << std::endl;
     std::cout << "Initial Time (s) =\t" << test.get_current_time() << std::endl;
+	std::cout << "Number of air parcels =\t" << test.return_parcel_alt_top().rows() << std::endl;
+	std::cout << "Number of particle bins = \t" << test.return_parcel_alt_top().columns() << std::endl;
     std::cout << "\n";
 	
 	bool fileout = true;

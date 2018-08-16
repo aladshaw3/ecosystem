@@ -143,6 +143,12 @@ public:
 	void set_cloud_density(double val);					///< Set the cloud_density parameter
 	void set_horz_rad_change(double val);				///< Set the horz_rad_change parameter
 	void set_energy_switch(double val);					///< Set the energy_switch parameter
+	void set_alt_top(double val);						///< Set the alt_top parameter
+	void set_alt_bottom(double val);					///< Set the alt_bottom parameter
+	void set_alt_top_old(double val);					///< Set the alt_top_old parameter
+	void set_alt_bottom_old(double val);				///< Set the alt_bottom_old parameter
+	void set_rise_top(double val);						///< Set the rise_top parameter
+	void set_rise_bottom(double val);					///< Set the rise_bottom parameter
 	
 	// Below are listed all the manual get functions for manually retrieving individual values
 	double get_eps();							///< Get the eps parameter
@@ -225,6 +231,12 @@ public:
 	double get_cloud_density();					///< Get the cloud_density parameter
 	double get_horz_rad_change();				///< Get the horz_rad_change parameter
 	double get_energy_switch();					///< Get the energy_switch parameter
+	double get_alt_top();						///< Get the alt_top parameter
+	double get_alt_bottom();					///< Get the alt_bottom parameter
+	double get_alt_top_old();					///< Get the alt_top parameter
+	double get_alt_bottom_old();				///< Get the alt_bottom parameter
+	double get_rise_top();						///< Get the rise_top parameter
+	double get_rise_bottom();					///< Get the rise_bottom parameter
 	
 	// Below are listed all the compute functions for various parameter values
 	void compute_beta_prime(double x, double s, double w);		///< Function to compute ratio of cloud gas density to local density
@@ -311,6 +323,16 @@ public:
 	void compute_current_amb_temp(double z);					///< Function to set the current_amb_temp parameter given an altitude (m)
 	void compute_current_atm_press(double z);					///< Function to set the current_amb_press parameter given an altitude (m)
 	
+	// Below are listed function to compute some post-processing/post-solver information to form the cloud stem
+	void compute_alt_top(double z, double Hc);					///< Function to compute cloud cap top given center z and height Hc
+	void compute_alt_bottom(double z, double Hc);				///< Function to compute cloud cap bottom given center z and height Hc
+	void compute_rise_top(double z_new, double z_old, double dt);	///< Function to compute cloud cap top rise given changes in top altitudes
+	void compute_rise_bottom(double z_new, double z_old, double dt);///< Function to compute cloud cap bottom rise given changes in bottom altitudes
+	Matrix<double> & return_parcel_alt_top();					///< Function to return matrix of parcels and particle sizes for top of parcel
+	Matrix<double> & return_parcel_alt_bot();					///< Function to return matrix of parcels and particle sizes for bottom of parcel
+	Matrix<double> & return_parcel_rad_top();			///< Function to return matrix of parcels and particle sizes for radius of top of parcel
+	Matrix<double> & return_parcel_rad_bot();			///< Function to return matrix of parcels and particle sizes for radius of bottom of parcel
+	
 	// Below are list functions associated with actions completed outside of the solver in DOVE
 	
 	/// Function to read atmospheric data from input file (return 0 on success and -1 on failure)
@@ -342,8 +364,14 @@ public:
 	/// Function to estimate all parameters prior to simulating a single timestep
 	void estimate_parameters(Dove &dove);
 	
+	/// Function to compute post-processing information to establish cloud stem
+	void perform_postprocessing(Dove &dove);
+	
 	/// Function to store all variable values to be updated from Dove simulations
 	void store_variables(Dove &dove);
+	
+	/// Function to print addition headers to the output file
+	void print_header(Dove &dove);
 	
 	/// Function to print additional information to output file
 	void print_information(Dove &dove, bool initialPhase);
@@ -451,6 +479,19 @@ protected:
 	
 	double t_count;								///< Place holder for a time variable to determine when output is printed
 	
+	// Information below is used to define the cloud stem for particle distribution
+	
+	double alt_top;								///< Top of the cloud cap (m)									(zt)
+	double alt_bottom;							///< Bottom of the cloud cap (m)								(zb)
+	double alt_top_old;							///< Old top of the cloud cap (m)								(zt_old)
+	double alt_bottom_old;						///< Old bottom of the cloud cap (m)							(zb_old)
+	double rise_top;							///< Cloud rise for top of cloud cap (m/s)						(ut)
+	double rise_bottom;							///< Cloud rise for the bottom of cloud cap (m/s)				(ub)
+	Matrix<double> parcel_alt_top;				///< Top of stem of ith parcel for jth particle size (m)		(zt_ij)
+	Matrix<double> parcel_alt_bot;				///< Bottom of the stem of ith parcel for jth particle size (m)	(zb_ij)
+	Matrix<double> parcel_rad_top;				///< Radius of the Top of stem of ith parcel for jth particle size (m)			(Rt_ij)
+	Matrix<double> parcel_rad_bot;				///< Radius of the Bottom of the stem of ith parcel for jth particle size (m)	(Rb_ij)
+	
 private:
 	
 };
@@ -499,7 +540,121 @@ double rate_entrained_mass(int i, const Matrix<double> &u, double t, const void 
 	Example Yaml Input File
 	-----------------------
  
+	Simulation_Conditions:
+	---
+	bomb_yield: 50         #kT
+	burst_height: 0        #m above ground
+	ground_level: 500      #m above mean sea level
+	particle_bins: 10      #number of particle size distributions
+	tight_coupling: true   #use tight or loose coupling for variables
+	shear_correction: true #use a correction for shear velocity (requires wind profile)
  
+	...
+ 
+	ODE_Options:
+	---
+	file_output: true           #print results to a file
+	console_output: false       #print messages to the console window after each step
+	integration_method: bdf2    #choices: be, bdf2, fe, cn, rk4, rkf
+	time_stepper: adaptive      #choices: constant, adaptive, fehlberg, ratebased
+	preconditioner: sgs         #choices: jacobi, ugs, lgs, sgs
+	tolerance: 0.001            #explicit solver tolerance
+	dtmin: 1e-8                 #minimum allowable time step
+	dtmax: 0.1                  #maximum allowable time step
+	converged_dtmin: 0.001      #minimum allowbable time step after convergence
+	time_out: 1.0               #number of seconds between each print-to-file action
+	end_time: 1000.0            #number of seconds until simulation forced to end
+ 
+	...
+ 
+	Solver_Options:
+	---
+	linear_method: qr      #choices: gmreslp, pcg, bicgstab, cgs, fom, gmresrp, gcr, gmresr, kms, gmres, qr
+	line_search: bt        #choices: none, bt, abt
+	linear: false          #treat system as linear (default = false)
+	precondition: false    #use a preconditioner (default = false)
+	nl_out: false          #print non-linear residuals to console
+	lin_out: false         #print linear residuals to console
+	max_nl_iter: 50        #maximum allowable non-linear iterations
+	max_lin_iter: 200      #maximum allowable linear iterations
+	restart_limit: 20      #number of allowable vector spans before restart
+	recursion_limit: 2     #number of allowable recurives calls for preconditioning
+	nl_abs_tol: 1e-6       #Absolute tolerance for non-linear iterations
+	nl_rel_tol: 1e-6       #Relative tolerance for non-linear iterations
+	lin_abs_tol: 1e-6      #Absolute tolerance for linear iterations
+	lin_rel_tol: 1e-4      #Relative tolerance for linear iterations
+ 
+	...
+ 
+	Wind_Profile:
+	---
+	#user provides lists of velocity components at various altitude values
+	#name of each list is the altitude in m
+	#under each list is vx and vy in m/s at corresponding altitude
+	#NOTE: This entire document for wind is optional (a default can be used)
+ 
+	- 216:
+	  vx: -5.14
+	  vy: 6.13
+ 
+	- 1548:
+	  vx: -5.494
+	  vy: 11.78
+ 
+	- 3097:
+	  vx: 0.8582
+	  vy: 4.924
+ 
+	- 5688:
+	  vx: 5.13
+	  vy: 14.095
+ 
+	- 7327:
+	  vx: 10.898
+	  vy: 15.56
+ 
+	- 9309:
+	  vx: 10.28
+	  vy: 12.25
+ 
+	- 10488:
+	  vx: 6.309
+	  vy: 9.0156
+ 
+	- 11887:
+	  vx: 8.356
+	  vy: 9.9585
+ 
+	- 13698:
+	  vx: 9.8298
+	  vy: 6.883
+ 
+	- 16267:
+	  vx: 8.457
+	  vy: 3.078
+ 
+	- 18526:
+	  vx: 5.9733
+	  vy: -0.61
+ 
+	- 20665:
+	  vx: 6.973
+	  vy: -0.618
+ 
+	- 23902:
+	  vx: 10.83
+	  vy: -1.91
+ 
+	- 26493:
+	  vx: 11.0
+	  vy: 1.974
+ 
+	- 31023:
+	  vx: 24.804
+	  vy: -2.1788
+ 
+	...
+	
 	Example Atmosphere Input File
 	-----------------------------
 	Alt(m)	T(K)	P(Pa)	RelH(%)

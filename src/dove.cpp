@@ -685,7 +685,7 @@ void Dove::registerJacobi(std::string func_name, std::string var_name, double (*
 }
 
 //Print out header info to output file
-void Dove::print_header()
+void Dove::print_header(bool addNewLine)
 {
 	if (this->Output == nullptr)
 		this->Output = fopen("output/DOVE_Result.txt", "w+");
@@ -768,7 +768,8 @@ void Dove::print_header()
 	fprintf(this->Output,"Time");
 	for (int i=0; i<this->num_func; i++)
 		fprintf(this->Output,"\t%s",this->var_names(i,0).c_str());
-	fprintf(this->Output,"\n");
+	if (addNewLine == true)
+		fprintf(this->Output,"\n");
 }
 
 //Print new result
@@ -1802,7 +1803,7 @@ int Dove::solve_all()
 	this->reset_all();
 	if (this->DoveFileOutput == true)
 	{
-		this->print_header();
+		this->print_header(true);
 		this->print_result(true);
 	}
 	if (this->DoveOutput == true)

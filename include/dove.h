@@ -272,7 +272,7 @@ public:
 		be choosen by the user. There are standard types of preconditioning available. */
 	void registerJacobi(std::string func_name, std::string var_name, double (*jac) (int i, int j, const Matrix<double> &u, double t, const void *data, const Dove &dove) );
 	
-	void print_header();								///< Function to print out a header to output file
+	void print_header(bool addNewLine);					///< Function to print out a header to output file
 	void print_newresult(bool addNewLine);				///< Function to print out the new result of n+1 time level
 	void print_result(bool addNewLine);					///< Function to print out the old result of n time level
 	
@@ -308,7 +308,7 @@ public:
 	double getMinTimeStep();						///< Return the value of the minimum time step
 	double getMaxTimeStep();						///< Return the value of the maximum time step
 	double getOutputTime();							///< Return the time that output is printed on
-	FILE *getFile();								///< Return the pointer to the output file 
+	FILE *getFile();								///< Return the pointer to the output file
 	bool hasConverged();							///< Returns state of convergence
 	double getNonlinearResidual();					///< Returns the current value of the non-linear residual
 	double getNonlinearRelativeRes();				///< Returns the current value of the non-linear relative residual
