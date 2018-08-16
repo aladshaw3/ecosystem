@@ -345,6 +345,9 @@ public:
 	/// Function to store all variable values to be updated from Dove simulations
 	void store_variables(Dove &dove);
 	
+	/// Function to print additional information to output file
+	void print_information(Dove &dove, bool initialPhase);
+	
 	/// Function to run the simulation to completion
 	int run_crane_simulation(Dove &dove);
 	
@@ -445,6 +448,8 @@ protected:
 	double cloud_density;						///< Density of the cloud materials	(kg/m^3)
 	double horz_rad_change;						///< Change in horizontal radius between time steps (m)			(d(Rc))
 	double energy_switch;						///< Energy switch parameter for determining termination (J/kg)
+	
+	double t_count;								///< Place holder for a time variable to determine when output is printed
 	
 private:
 	

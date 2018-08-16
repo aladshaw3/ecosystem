@@ -273,8 +273,8 @@ public:
 	void registerJacobi(std::string func_name, std::string var_name, double (*jac) (int i, int j, const Matrix<double> &u, double t, const void *data, const Dove &dove) );
 	
 	void print_header();								///< Function to print out a header to output file
-	void print_newresult();								///< Function to print out the new result of n+1 time level
-	void print_result();								///< Function to print out the old result of n time level
+	void print_newresult(bool addNewLine);				///< Function to print out the new result of n+1 time level
+	void print_result(bool addNewLine);					///< Function to print out the old result of n time level
 	
     void createJacobian();                          ///< Function to create and store a numerical jacobian
     Matrix<double>& getNumJacobian();               ///< Return reference to the numerical jacobian
@@ -307,6 +307,8 @@ public:
 	double getStartTime() const;					///< Return the value of the start time
 	double getMinTimeStep();						///< Return the value of the minimum time step
 	double getMaxTimeStep();						///< Return the value of the maximum time step
+	double getOutputTime();							///< Return the time that output is printed on
+	FILE *getFile();								///< Return the pointer to the output file 
 	bool hasConverged();							///< Returns state of convergence
 	double getNonlinearResidual();					///< Returns the current value of the non-linear residual
 	double getNonlinearRelativeRes();				///< Returns the current value of the non-linear relative residual

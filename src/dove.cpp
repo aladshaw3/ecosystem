@@ -772,7 +772,7 @@ void Dove::print_header()
 }
 
 //Print new result
-void Dove::print_newresult()
+void Dove::print_newresult(bool addNewLine)
 {
 	this->t_count = this->t_count + this->dt;
 	if (this->t_count >= (this->t_out+sqrt(DBL_EPSILON))
@@ -782,18 +782,20 @@ void Dove::print_newresult()
 		fprintf(this->Output,"%.6g",this->time);
 		for (int i=0; i<this->num_func; i++)
 			fprintf(this->Output,"\t%.6g",this->unp1(i,0));
-		fprintf(this->Output,"\n");
+		if (addNewLine == true)
+			fprintf(this->Output,"\n");
 		this->t_count = 0.0;
 	}
 }
 
 //Print result
-void Dove::print_result()
+void Dove::print_result(bool addNewLine)
 {
 	fprintf(this->Output,"%.6g",this->time);
 	for (int i=0; i<this->num_func; i++)
 		fprintf(this->Output,"\t%.6g",this->un(i,0));
-	fprintf(this->Output,"\n");
+	if (addNewLine == true)
+		fprintf(this->Output,"\n");
 }
 
 //Set numerical jacobian
@@ -1011,6 +1013,18 @@ double Dove::getStartTime() const
 double Dove::getMinTimeStep()
 {
 	return this->dtmin;
+}
+
+//Return t_out
+double Dove::getOutputTime()
+{
+	return this->t_out;
+}
+
+//Return output file
+FILE *Dove::getFile()
+{
+	return this->Output;
 }
 
 //Return dtmax
@@ -1789,7 +1803,7 @@ int Dove::solve_all()
 	if (this->DoveFileOutput == true)
 	{
 		this->print_header();
-		this->print_result();
+		this->print_result(true);
 	}
 	if (this->DoveOutput == true)
 	{
@@ -1843,7 +1857,7 @@ int Dove::solve_all()
 			return -1;
 		}
 		if (this->DoveFileOutput == true)
-			this->print_newresult();
+			this->print_newresult(true);
 		this->update_states();
 	} while (this->time_end > (this->time+this->dtmin));
 	if (this->DoveOutput == true)

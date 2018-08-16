@@ -96,6 +96,7 @@ Crane::Crane()
 	cloud_density = 0.0;
 	horz_rad_change = 0.0;
 	energy_switch = 0.0;
+	t_count = 0.0;
 	
 	create_default_atmosphere();
 	create_default_wind_profile();
@@ -3191,11 +3192,7 @@ void Crane::store_variables(Dove &dove)
 	for (int i=0; i<this->part_conc_var.rows(); i++)
 	{
 		double rate = M_PI*this->get_horz_rad()*this->get_horz_rad()*this->get_settling_rate(this->get_part_size(i))/this->get_cloud_volume();
-		
-		rate = exp(-rate*dove.getTimeStep());
-		
-		this->part_conc_var(i,0) = this->part_conc_var(i,0)*rate;
-		
+		this->part_conc_var(i,0) = this->part_conc_var(i,0)*exp(-rate*dove.getTimeStep());
 	}
 	
 	this->set_current_time(dove.getCurrentTime());
@@ -3217,6 +3214,32 @@ void Crane::store_variables(Dove &dove)
 
 }
 
+void Crane::print_information(Dove &dove, bool initialPhase)
+{
+	
+	if (initialPhase == true)
+	{
+		
+		
+		fprintf(dove.getFile(), "\n");
+	}
+	else
+	{
+		this->t_count = this->t_count + dove.getTimeStep();
+		
+		if (this->t_count >= (dove.getOutputTime()+sqrt(DBL_EPSILON))
+			|| this->t_count >= (dove.getOutputTime()-sqrt(DBL_EPSILON))
+			|| dove.getCurrentTime() == dove.getEndTime())
+		{
+			
+			
+			fprintf(dove.getFile(), "\n");
+			this->t_count = 0.0;
+		}
+	}
+	
+}
+
 int Crane::run_crane_simulation(Dove &dove)
 {
 	int success = 0;
@@ -3226,7 +3249,8 @@ int Crane::run_crane_simulation(Dove &dove)
 	if (this->get_FileOut() == true)
 	{
 		dove.print_header();
-		dove.print_result();
+		dove.print_result(false);
+		this->print_information(dove, true);
 	}
 	if (this->get_ConsoleOut() == true)
 	{
@@ -3297,7 +3321,10 @@ int Crane::run_crane_simulation(Dove &dove)
 		
 		this->store_variables(dove);
 		if (this->get_FileOut() == true)
-			dove.print_newresult();
+		{
+			dove.print_newresult(false);
+			this->print_information(dove, false);
+		}
 		dove.update_states();
         
         //Check for early termination
