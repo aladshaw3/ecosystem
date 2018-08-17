@@ -223,6 +223,7 @@ public:
 	bool get_isSaturated();						///< Get the isSaturated parameter
 	double get_part_size(int i);				///< Get the i-th particle size parameter
 	double get_settling_rate(double Dj);		///< Get the settling_rate associated with size Dj
+	double get_settling_rate_old(double Dj);	///< Get the settling_rate_old associated with size Dj
 	bool get_ConsoleOut();						///< Get the ConsoleOut parameter
 	bool get_FileOut();							///< Get the FileOut parameter
 	Matrix<double> & get_part_conc_var();		///< Get the part_conc_var parameter
@@ -332,6 +333,7 @@ public:
 	Matrix<double> & return_parcel_alt_bot();					///< Function to return matrix of parcels and particle sizes for bottom of parcel
 	Matrix<double> & return_parcel_rad_top();			///< Function to return matrix of parcels and particle sizes for radius of top of parcel
 	Matrix<double> & return_parcel_rad_bot();			///< Function to return matrix of parcels and particle sizes for radius of bottom of parcel
+	Matrix<double> & return_parcel_conc();				///< Function to return matrix of parcel concentrations (row = parcel, col = particle size)
 	
 	// Below are list functions associated with actions completed outside of the solver in DOVE
 	
@@ -491,6 +493,8 @@ protected:
 	Matrix<double> parcel_alt_bot;				///< Bottom of the stem of ith parcel for jth particle size (m)	(zb_ij)
 	Matrix<double> parcel_rad_top;				///< Radius of the Top of stem of ith parcel for jth particle size (m)			(Rt_ij)
 	Matrix<double> parcel_rad_bot;				///< Radius of the Bottom of the stem of ith parcel for jth particle size (m)	(Rb_ij)
+	std::map<double, double> settling_rate_old;	///< Old Particle settling rate (m/s) by particle size (um)		(f_j)
+	Matrix<double> parcel_conc;					///< Concentration of dust inside each parcel (Gp/m^3)
 	
 private:
 	

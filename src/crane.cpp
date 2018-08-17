@@ -126,20 +126,22 @@ void Crane::display_part_hist()
 	//Iterate through map
 	for (std::map<double,double>::iterator it=this->part_hist.begin(); it!=this->part_hist.end(); ++it)
 	{
-		std::cout << it->first << "\t" << it->second << std::endl;
+		std::cout << it->first << "   \t" << it->second << std::endl;
 	}
+	std::cout << "\n";
 }
 
 void Crane::display_part_conc()
 {
 	std::cout << "Particle Concentration Distribution by Size\n";
 	std::cout << "----------------------------------------\n";
-	std::cout << "Size (um)\tConcDist\n";
+	std::cout << "Size (um)\tConcDist (Gp/m^3)\n";
 	//Iterate through map
 	for (std::map<double,double>::iterator it=this->part_conc.begin(); it!=this->part_conc.end(); ++it)
 	{
-		std::cout << it->first << "\t" << it->second << std::endl;
+		std::cout << it->first << "   \t" << it->second << std::endl;
 	}
+	std::cout << "\n";
 }
 
 ///< Below are the set functions for various parameters
@@ -923,6 +925,11 @@ double Crane::get_settling_rate(double Dj)
 	return this->settling_rate[Dj];
 }
 
+double Crane::get_settling_rate_old(double Dj)
+{
+	return this->settling_rate_old[Dj];
+}
+
 bool Crane::get_ConsoleOut()
 {
 	return this->ConsoleOut;
@@ -1252,8 +1259,8 @@ void Crane::compute_settling_rate(double Dj, double m, double x, double s, doubl
 	else if (this->get_davies_num() <= 84.175)
 	{
 		double Y = log(this->get_davies_num());
-		double exp = -3.18657 + (0.992696*Y) - (0.153193E-2*pow(Y,2.0)) - (0.987059E-3*pow(Y,3.0)) - (0.578878E-3*pow(Y,4.0)) + (0.855176E-4*pow(Y,5.0)) - (0.327815E-5*pow(Y,6.0));
-		this->settling_rate[Dj] = this->get_air_viscosity()*exp*this->get_slip_factor()/rho/dj;
+		double a = -3.18657 + (0.992696*Y) - (0.153193E-2*pow(Y,2.0)) - (0.987059E-3*pow(Y,3.0)) - (0.578878E-3*pow(Y,4.0)) + (0.855176E-4*pow(Y,5.0)) - (0.327815E-5*pow(Y,6.0));
+		this->settling_rate[Dj] = this->get_air_viscosity()*exp(a)*this->get_slip_factor()/rho/dj;
 	}
 	else if (this->get_davies_num() < 140.0)
 	{
@@ -1272,7 +1279,8 @@ void Crane::compute_settling_rate(double Dj, double m, double x, double s, doubl
 		double poly = -1.29536 + (0.986*X) - (0.046677*X*X) + (1.1235E-3*X*X*X);
 		this->settling_rate[Dj] = this->get_air_viscosity()*pow(10.0,poly)/rho/dj;
 	}
-    
+	
+	this->settling_rate[Dj] = this->settling_rate[Dj]*10.0;
 }
 
 void Crane::compute_total_mass_fallout_rate(double m, double x, double s, double w, double T, double P, double z, const Matrix<double> &n)
@@ -1466,11 +1474,11 @@ void Crane::compute_initial_part_hist(double W, double gz, double hb, int size)
 	
 	if (scaled < 180.0)
 	{
-		this->create_part_hist(0.0001, 100, size, 0.407, 4.0);
+		this->create_part_hist(0.001, 100, size, 0.407, 4.0);
 	}
 	else
 	{
-		this->create_part_hist(0.0001, 100, size, 0.15, 2.0);
+		this->create_part_hist(0.001, 100, size, 0.15, 2.0);
 	}
 	
 	int parcels = 15 + (int)log(W);
@@ -1478,6 +1486,7 @@ void Crane::compute_initial_part_hist(double W, double gz, double hb, int size)
 	this->parcel_alt_bot.set_size(parcels, size);
 	this->parcel_rad_top.set_size(parcels, size);
 	this->parcel_rad_bot.set_size(parcels, size);
+	this->parcel_conc.set_size(parcels, size);
 }
 
 void Crane::compute_initial_air_mass(double W, double gz, double hb)
@@ -1587,7 +1596,12 @@ void Crane::compute_initial_part_conc(double W, double gz, double hb, int size)
 		double mass = this->get_part_density() * M_PI * dj*dj*dj / 6.0;
 		this->part_conc[it->first] = it->second * conc / mass / 1.0e9;
 		this->part_conc_var(i,0) = this->part_conc[it->first];
-        
+		
+		for (int p=0; p<this->return_parcel_conc().rows(); p++)
+		{
+			this->return_parcel_conc().edit(p, i, this->part_conc_var(i,0));
+		}
+			
 		i++;
 	}
 }
@@ -1619,6 +1633,7 @@ void Crane::delete_particles()
 	settling_rate.clear();
 	part_conc.clear();
 	part_size.clear();
+	settling_rate_old.clear();
 }
 
 // Below are listed return functions specific for temperature integral related values
@@ -2608,6 +2623,11 @@ Matrix<double> & Crane::return_parcel_rad_bot()
 	return this->parcel_rad_bot;
 }
 
+Matrix<double> & Crane::return_parcel_conc()
+{
+	return this->parcel_conc;
+}
+
 // Below are list functions associated with actions completed outside of the solver in DOVE
 
 int Crane::read_atmosphere_profile(const char *profile)
@@ -2817,26 +2837,50 @@ void Crane::establish_initial_conditions(Dove &dove, double W, double gz, double
 	this->set_alt_bottom_old(this->get_alt_bottom());
 	this->set_rise_top(this->get_cloud_rise());
 	this->set_rise_bottom(this->get_cloud_rise());
-	double dz = 2.0*this->get_vert_rad()/(double)(this->return_parcel_alt_top().rows()-0);
+	double dz = 2.0*this->get_vert_rad()/(double)(this->return_parcel_alt_top().rows());
 	double z = this->get_alt_bottom();
-	//std::cout << "z parcle = " << z << std::endl;
+	double Vol = 0.0;
+	
 	//Loop through i parcels
 	for (int i=0; i<this->return_parcel_alt_top().rows(); i++)
 	{
+		// Bottom radius
+		double mult = (1.0 - ( ((z-this->get_cloud_alt())*(z-this->get_cloud_alt()))/(this->get_vert_rad()*this->get_vert_rad()) ));
+		if (mult < 0.0 + sqrt(DBL_EPSILON))	mult = 0.0;
+		double r_b = sqrt( this->get_horz_rad()*this->get_horz_rad()*mult );
+		
 		//Loop through j particle sizes
 		for (int j=0; j<this->return_parcel_alt_top().columns(); j++)
 		{
-			this->return_parcel_rad_top().edit(i, j, this->get_horz_rad());
-			this->return_parcel_rad_bot().edit(i, j, this->get_horz_rad());
 			this->return_parcel_alt_bot().edit(i, j, z);
 			this->return_parcel_alt_top().edit(i, j, z+dz);
 		}
 		z = dz + z;
 		
-		//std::cout << "z parcle = " << z << std::endl;
+		// Top radius
+		mult = (1.0 - ( ((z-this->get_cloud_alt())*(z-this->get_cloud_alt()))/(this->get_vert_rad()*this->get_vert_rad()) ));
+		if (mult < 0.0 + sqrt(DBL_EPSILON))	mult = 0.0;
+		double r_t = sqrt( this->get_horz_rad()*this->get_horz_rad()*mult );
+		
+		if (r_b < 0.0 + sqrt(DBL_EPSILON)) r_b = (0.45*r_b+0.55*r_t);
+		if (r_t < 0.0 + sqrt(DBL_EPSILON)) r_t = (0.55*r_b+0.45*r_t);
+		
+		//Loop through j particle sizes
+		for (int j=0; j<this->return_parcel_alt_top().columns(); j++)
+		{
+			this->return_parcel_rad_top().edit(i, j, r_t);
+			this->return_parcel_rad_bot().edit(i, j, r_b);
+		}
+		
+		double h = this->return_parcel_alt_top()(i,0) - this->return_parcel_alt_bot()(i,0);
+		Vol += (M_PI*h/3.0)*(r_t*r_t+r_b*r_t+r_b*r_b);
+		
 	}
+	//std::cout << "Actual volume = " << this->get_cloud_volume() << "\tApprox volume = " << Vol << std::endl;
 	this->return_parcel_alt_top().Display("z_t");
 	this->return_parcel_alt_bot().Display("z_b");
+	this->return_parcel_rad_top().Display("R_t");
+	this->return_parcel_rad_bot().Display("R_b");
 	
 	// Setup data
 	dove.set_userdata(this);
@@ -3318,6 +3362,94 @@ void Crane::perform_postprocessing(Dove &dove)
 	this->compute_rise_top(this->get_alt_top(), this->get_alt_top_old(), dove.getTimeStep());
 	this->compute_rise_bottom(this->get_alt_bottom(), this->get_alt_bottom_old(), dove.getTimeStep());
 	
+	//NOTE: Use settling_rate_old here because settling rate for next step has already been calculated
+	double Uu_b = 0.0, Uu_t = 0.0;
+	//Loop through i parcels
+	for (int i=0; i<this->return_parcel_alt_top().rows(); i++)
+	{
+		//Loop through j particle sizes
+		for (int j=0; j<this->return_parcel_alt_top().columns(); j++)
+		{
+			//std::cout << "Particle size (um) = \t" << this->get_part_size(j) << "\tSettling velocity (m/s) = \t" << this->get_settling_rate_old(this->get_part_size(j)) << std::endl;
+			
+			//Inside Cloud Cap for bottom of parcel
+			if (this->return_parcel_alt_bot()(i,j) > this->get_alt_bottom())
+			{
+				Uu_b = this->get_rise_bottom() + ((this->return_parcel_alt_bot()(i,j)-this->get_alt_bottom())*(this->get_rise_top()-this->get_rise_bottom())/(this->get_alt_top()-this->get_alt_bottom()));
+			}
+			//Below Cloud Cap for bottom of parcel
+			else
+			{
+				Uu_b = this->get_rise_bottom() * (1.0 - ((this->get_alt_bottom()-this->return_parcel_alt_bot()(i,j))/(this->get_alt_bottom()-this->get_ground_alt())));
+			}
+			
+			//Inside Cloud Cap for top of parcel
+			if (this->return_parcel_alt_top()(i,j) > this->get_alt_bottom())
+			{
+				Uu_t = this->get_rise_bottom() + ((this->return_parcel_alt_top()(i,j)-this->get_alt_bottom())*(this->get_rise_top()-this->get_rise_bottom())/(this->get_alt_top()-this->get_alt_bottom()));
+			}
+			//Below Cloud Cap for top of parcel
+			else
+			{
+				Uu_t = this->get_rise_bottom() * (1.0 - ((this->get_alt_bottom()-this->return_parcel_alt_top()(i,j))/(this->get_alt_bottom()-this->get_ground_alt())));
+			}
+			
+			//Calculate the new altitudes for top and bottom of the parcel
+			double new_zj_t = this->return_parcel_alt_top()(i,j) + (dove.getTimeStep()*(Uu_t-this->get_settling_rate_old(this->get_part_size(j))));
+			double new_zj_b = this->return_parcel_alt_bot()(i,j) + (dove.getTimeStep()*(Uu_b-this->get_settling_rate_old(this->get_part_size(j))));
+			
+			if (new_zj_t < 0.0) new_zj_t = 0.0;
+			if (new_zj_b < 0.0) new_zj_b = 0.0;
+			
+			this->return_parcel_alt_top().edit(i, j, new_zj_t);
+			this->return_parcel_alt_bot().edit(i, j, new_zj_b);
+			
+			//	Update the top and bottom radii of the parcels
+			// Bottom radius
+			double mult = (1.0 - ( ((new_zj_b-this->get_cloud_alt())*(new_zj_b-this->get_cloud_alt()))/(this->get_vert_rad()*this->get_vert_rad()) ));
+			if (mult < 0.0 + sqrt(DBL_EPSILON))	mult = 0.0;
+			double r_b = sqrt( this->get_horz_rad()*this->get_horz_rad()*mult );
+			
+			// Top radius
+			mult = (1.0 - ( ((new_zj_t-this->get_cloud_alt())*(new_zj_t-this->get_cloud_alt()))/(this->get_vert_rad()*this->get_vert_rad()) ));
+			if (mult < 0.0 + sqrt(DBL_EPSILON))	mult = 0.0;
+			double r_t = sqrt( this->get_horz_rad()*this->get_horz_rad()*mult );
+			
+			if (r_b < 0.0 + sqrt(DBL_EPSILON)) r_b = (0.45*r_b+0.55*r_t);
+			if (r_t < 0.0 + sqrt(DBL_EPSILON)) r_t = (0.55*r_b+0.45*r_t);
+
+			//Inside Cloud Cap for bottom of parcel
+			if (this->return_parcel_alt_bot()(i,j) >= this->get_alt_bottom())
+			{
+				//if (this->return_parcel_rad_bot()(i,j) < r_b)
+					this->return_parcel_rad_bot().edit(i, j, r_b);
+				//else
+					//this->return_parcel_rad_bot().edit(i, j, 0.5*r_b+0.5*this->return_parcel_rad_bot()(i,j));
+			}
+			//Below Cloud Cap for bottom of parcel
+			else
+			{
+				//No update (keeps old radius)
+			}
+			
+			//Inside Cloud Cap for top of parcel
+			if (this->return_parcel_alt_top()(i,j) >= this->get_alt_bottom())
+			{
+				//if (this->return_parcel_rad_top()(i,j) < r_t)
+					this->return_parcel_rad_top().edit(i, j, r_t);
+				//else
+					//this->return_parcel_rad_bot().edit(i, j, 0.5*r_t+0.5*this->return_parcel_rad_top()(i,j));
+			}
+			//Below Cloud Cap for top of parcel
+			else
+			{
+				//No update (keeps old radius)
+			}
+
+		}
+		
+	}
+	
 	this->set_alt_top_old(this->get_alt_top());
 	this->set_alt_bottom_old(this->get_alt_bottom());
 }
@@ -3351,8 +3483,10 @@ void Crane::store_variables(Dove &dove)
 	
 	for (int i=0; i<this->part_conc_var.rows(); i++)
 	{
+		this->settling_rate_old[this->get_part_size(i)] = this->get_settling_rate(this->get_part_size(i));
 		double rate = M_PI*this->get_horz_rad()*this->get_horz_rad()*this->get_settling_rate(this->get_part_size(i))/this->get_cloud_volume();
 		this->part_conc_var(i,0) = this->part_conc_var(i,0)*exp(-rate*dove.getTimeStep());
+		this->part_conc[this->get_part_size(i)] = this->part_conc_var(i,0);
 	}
 	
 	this->set_current_time(dove.getCurrentTime());
@@ -3507,12 +3641,24 @@ int Crane::run_crane_simulation(Dove &dove)
         if (this->get_cloud_rise() <= 0.0 && this->get_energy() < this->get_energy_switch())
         {
 			std::cout << "Cloud has stabilized at " << this->get_current_time() << " (s)... Ending Early...\n";
+			dove.set_endtime(this->get_current_time());
+			if (this->get_FileOut() == true)
+			{
+				dove.print_newresult(false);
+				this->print_information(dove, false);
+			}
             
             break;
         }
 		if (this->get_cloud_rise() <= 0.0 && fabs(this->get_horz_rad_change()) <= (dove.getTimeStep()*this->get_horz_rad()*pow(this->get_bomb_yield(), 0.014778)/1153.0) )
 		{
 			std::cout << "Cloud has stopped expanding at " << this->get_current_time() << " (s)... Ending Early...\n";
+			dove.set_endtime(this->get_current_time());
+			if (this->get_FileOut() == true)
+			{
+				dove.print_newresult(false);
+				this->print_information(dove, false);
+			}
 			
 			break;
 		}
@@ -3603,6 +3749,7 @@ int CRANE_SCENARIO(const char *yaml_input, const char *atmosphere_data)
 	{
 		std::cout << dove.getVariableName(i) << " =\t " << dove.getNewU(i, dove.getNewU()) << std::endl;
 	}
+	crane.display_part_conc();
 	
 	crane.run_crane_simulation(dove);
 	
@@ -3612,6 +3759,12 @@ int CRANE_SCENARIO(const char *yaml_input, const char *atmosphere_data)
 	{
 		std::cout << dove.getVariableName(i) << " =\t " << dove.getNewU(i, dove.getNewU()) << std::endl;
 	}
+	crane.display_part_conc();
+	
+	crane.return_parcel_alt_top().Display("z_t");
+	crane.return_parcel_alt_bot().Display("z_b");
+	crane.return_parcel_rad_top().Display("R_t");
+	crane.return_parcel_rad_bot().Display("R_b");
 	
 	std::cout << "\nSaturation Time (s) =\t";
 	if (crane.get_saturation_time() > 0.0)
@@ -3721,6 +3874,7 @@ int CRANE_TESTS()
 	{
 		std::cout << dove.getVariableName(i) << " =\t " << dove.getNewU(i, dove.getNewU()) << std::endl;
 	}
+	test.display_part_conc();
 	
 	test.run_crane_simulation(dove);
 	
@@ -3730,6 +3884,14 @@ int CRANE_TESTS()
     {
         std::cout << dove.getVariableName(i) << " =\t " << dove.getNewU(i, dove.getNewU()) << std::endl;
     }
+	test.display_part_conc();
+	
+	test.return_parcel_alt_top().Display("z_t");
+	test.return_parcel_alt_bot().Display("z_b");
+	test.return_parcel_rad_top().Display("R_t");
+	test.return_parcel_rad_bot().Display("R_b");
+	
+	test.return_parcel_conc().Display("C_ij");
 	
 	std::cout << "\nSaturation Time (s) =\t";
 	if (test.get_saturation_time() > 0.0)
