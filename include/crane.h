@@ -149,6 +149,7 @@ public:
 	void set_alt_bottom_old(double val);				///< Set the alt_bottom_old parameter
 	void set_rise_top(double val);						///< Set the rise_top parameter
 	void set_rise_bottom(double val);					///< Set the rise_bottom parameter
+	void set_CloudFile(FILE *file);						///< Set the CloudFile parameter
 	
 	// Below are listed all the manual get functions for manually retrieving individual values
 	double get_eps();							///< Get the eps parameter
@@ -495,6 +496,7 @@ protected:
 	Matrix<double> parcel_rad_bot;				///< Radius of the Bottom of the stem of ith parcel for jth particle size (m)	(Rb_ij)
 	std::map<double, double> settling_rate_old;	///< Old Particle settling rate (m/s) by particle size (um)		(f_j)
 	Matrix<double> parcel_conc;					///< Concentration of dust inside each parcel (Gp/m^3)
+	FILE *CloudFile;							///< Output file to show help plot cloud growth over time
 	
 private:
 	

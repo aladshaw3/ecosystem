@@ -560,6 +560,11 @@ void Crane::set_rise_bottom(double val)
 	this->rise_bottom = val;
 }
 
+void Crane::set_CloudFile(FILE *file)
+{
+	this->CloudFile = file;
+}
+
 ///< Below are the get functions for various parameters
 
 double Crane::get_eps()
@@ -2877,10 +2882,10 @@ void Crane::establish_initial_conditions(Dove &dove, double W, double gz, double
 		
 	}
 	//std::cout << "Actual volume = " << this->get_cloud_volume() << "\tApprox volume = " << Vol << std::endl;
-	this->return_parcel_alt_top().Display("z_t");
-	this->return_parcel_alt_bot().Display("z_b");
-	this->return_parcel_rad_top().Display("R_t");
-	this->return_parcel_rad_bot().Display("R_b");
+	//this->return_parcel_alt_top().Display("z_t");
+	//this->return_parcel_alt_bot().Display("z_b");
+	//this->return_parcel_rad_top().Display("R_t");
+	//this->return_parcel_rad_bot().Display("R_b");
 	
 	// Setup data
 	dove.set_userdata(this);
@@ -3372,6 +3377,12 @@ void Crane::perform_postprocessing(Dove &dove)
 		{
 			//std::cout << "Particle size (um) = \t" << this->get_part_size(j) << "\tSettling velocity (m/s) = \t" << this->get_settling_rate_old(this->get_part_size(j)) << std::endl;
 			
+			//Calculate old volume of each parcel
+			double h = this->return_parcel_alt_top()(i,j) - this->return_parcel_alt_bot()(i,j);
+			double Rtop = this->return_parcel_rad_top()(i,j);
+			double Rbot = this->return_parcel_rad_bot()(i,j);
+			double Vol_old = (M_PI*h/3.0)*(Rtop*Rtop+Rbot*Rtop+Rbot*Rbot);
+			
 			//Inside Cloud Cap for bottom of parcel
 			if (this->return_parcel_alt_bot()(i,j) > this->get_alt_bottom())
 			{
@@ -3445,6 +3456,15 @@ void Crane::perform_postprocessing(Dove &dove)
 			{
 				//No update (keeps old radius)
 			}
+			
+			//Now update particle concentrations
+			//Calculate old volume of each parcel
+			h = this->return_parcel_alt_top()(i,j) - this->return_parcel_alt_bot()(i,j);
+			Rtop = this->return_parcel_rad_top()(i,j);
+			Rbot = this->return_parcel_rad_bot()(i,j);
+			double Vol_new = (M_PI*h/3.0)*(Rtop*Rtop+Rbot*Rtop+Rbot*Rbot);
+			
+			this->return_parcel_conc().edit(i, j, this->return_parcel_conc()(i,j)*Vol_old/Vol_new);
 
 		}
 		
@@ -3522,11 +3542,33 @@ void Crane::print_information(Dove &dove, bool initialPhase)
 	
 	if (initialPhase == true)
 	{
+		//Print to standard output file
 		fprintf(dove.getFile(), "\t%.6g\t%.6g\t%.6g", this->get_cloud_volume(), this->get_vert_rad(), this->get_horz_rad());
 		fprintf(dove.getFile(), "\t%.6g\t%.6g", this->get_alt_bottom(), this->get_alt_top());
 		fprintf(dove.getFile(), "\t%.6g\t%.6g", this->get_rise_bottom(), this->get_rise_top());
 		
 		fprintf(dove.getFile(), "\n");
+		
+		//Print to cloud growth file
+		fprintf(this->CloudFile, "Time (s) = \t%.6g\n",this->get_current_time());
+		for (int j=0; j<this->return_parcel_alt_top().columns(); j++)
+		{
+			fprintf(this->CloudFile, "R_%i\tz_%i\t", j, j);
+		}
+		fprintf(this->CloudFile, "\n");
+		for (int i=0; i<this->return_parcel_alt_top().rows(); i++)
+		{
+			for (int j=0; j<this->return_parcel_alt_top().columns(); j++)
+			{
+				fprintf(this->CloudFile, "%.6g\t%.6g\t", this->return_parcel_rad_bot()(i,j),	this->return_parcel_alt_bot()(i,j));
+			}
+			fprintf(this->CloudFile, "\n");
+		}
+		for (int j=0; j<this->return_parcel_alt_top().columns(); j++)
+		{
+			fprintf(this->CloudFile, "%.6g\t%.6g\t", this->return_parcel_rad_top()(this->return_parcel_alt_top().rows()-1,j),	this->return_parcel_alt_top()(this->return_parcel_alt_top().rows()-1,j));
+		}
+		fprintf(this->CloudFile, "\n");
 	}
 	else
 	{
@@ -3536,12 +3578,35 @@ void Crane::print_information(Dove &dove, bool initialPhase)
 			|| this->t_count >= (dove.getOutputTime()-sqrt(DBL_EPSILON))
 			|| dove.getCurrentTime() == dove.getEndTime())
 		{
+			//Print to standard output file
 			fprintf(dove.getFile(), "\t%.6g\t%.6g\t%.6g", this->get_cloud_volume(), this->get_vert_rad(), this->get_horz_rad());
 			fprintf(dove.getFile(), "\t%.6g\t%.6g", this->get_alt_bottom(), this->get_alt_top());
 			fprintf(dove.getFile(), "\t%.6g\t%.6g", this->get_rise_bottom(), this->get_rise_top());
 			
 			fprintf(dove.getFile(), "\n");
 			this->t_count = 0.0;
+			
+			//Print to cloud growth file
+			fprintf(this->CloudFile, "\n");
+			fprintf(this->CloudFile, "Time (s) = \t%.6g\n",this->get_current_time());
+			for (int j=0; j<this->return_parcel_alt_top().columns(); j++)
+			{
+				fprintf(this->CloudFile, "R_%i\tz_%i\t", j, j);
+			}
+			fprintf(this->CloudFile, "\n");
+			for (int i=0; i<this->return_parcel_alt_top().rows(); i++)
+			{
+				for (int j=0; j<this->return_parcel_alt_top().columns(); j++)
+				{
+					fprintf(this->CloudFile, "%.6g\t%.6g\t", this->return_parcel_rad_bot()(i,j),	this->return_parcel_alt_bot()(i,j));
+				}
+				fprintf(this->CloudFile, "\n");
+			}
+			for (int j=0; j<this->return_parcel_alt_top().columns(); j++)
+			{
+				fprintf(this->CloudFile, "%.6g\t%.6g\t", this->return_parcel_rad_top()(this->return_parcel_alt_top().rows()-1,j),	this->return_parcel_alt_top()(this->return_parcel_alt_top().rows()-1,j));
+			}
+			fprintf(this->CloudFile, "\n");
 		}
 	}
 	
@@ -3689,8 +3754,9 @@ int CRANE_SCENARIO(const char *yaml_input, const char *atmosphere_data)
 	yaml_cpp_class yaml;
 	time = clock();
 	
-	FILE *file;
+	FILE *file, *cloud;
 	file = fopen("output/CRANE_Results.txt", "w+");
+	cloud = fopen("output/CRANE_CloudGrowth.txt", "w+");
 	if (crane.get_FileOut() == true)
 	{
 		if (file == nullptr)
@@ -3698,7 +3764,13 @@ int CRANE_SCENARIO(const char *yaml_input, const char *atmosphere_data)
 			system("mkdir output");
 			file = fopen("output/CRANE_Results.txt", "w+");
 		}
+		if (cloud == nullptr)
+		{
+			system("mkdir output");
+			cloud = fopen("output/CRANE_CloudGrowth.txt", "w+");
+		}
 	}
+	crane.set_CloudFile(cloud);
 	
 	std::cout << "\n";
 	
@@ -3716,16 +3788,16 @@ int CRANE_SCENARIO(const char *yaml_input, const char *atmosphere_data)
 	
 	std::cout << "\nCRANE SIMULATION CONDITIONS\n";
 	std::cout <<   "---------------------------\n\n";
-	std::cout << "Shear Velocity = \t";
+	std::cout << "Shear Velocity          = \t";
 	if (crane.get_includeShearVel() == true)
 		std::cout << "True\n";
 	else
 		std::cout << "False\n";
-	std::cout << "Bomb Yield (kT) =\t" << crane.get_bomb_yield() << std::endl;
-	std::cout << "Burst Height (m) =\t" << crane.get_burst_height() << std::endl;
-	std::cout << "Ground Altitude (m) =\t" << crane.get_ground_alt() << std::endl;
-	std::cout << "Initial Time (s) =\t" << crane.get_current_time() << std::endl;
-	std::cout << "Number of air parcels =\t" << crane.return_parcel_alt_top().rows() << std::endl;
+	std::cout << "Bomb Yield (kT)         =\t" << crane.get_bomb_yield() << std::endl;
+	std::cout << "Burst Height (m)        =\t" << crane.get_burst_height() << std::endl;
+	std::cout << "Ground Altitude (m)     =\t" << crane.get_ground_alt() << std::endl;
+	std::cout << "Initial Time (s)        =\t" << crane.get_current_time() << std::endl;
+	std::cout << "Number of air parcels   =\t" << crane.return_parcel_alt_top().rows() << std::endl;
 	std::cout << "Number of particle bins = \t" << crane.return_parcel_alt_top().columns() << std::endl;
 	std::cout << "\n";
 	
@@ -3749,7 +3821,7 @@ int CRANE_SCENARIO(const char *yaml_input, const char *atmosphere_data)
 	{
 		std::cout << dove.getVariableName(i) << " =\t " << dove.getNewU(i, dove.getNewU()) << std::endl;
 	}
-	crane.display_part_conc();
+	//crane.display_part_conc();
 	
 	crane.run_crane_simulation(dove);
 	
@@ -3759,12 +3831,12 @@ int CRANE_SCENARIO(const char *yaml_input, const char *atmosphere_data)
 	{
 		std::cout << dove.getVariableName(i) << " =\t " << dove.getNewU(i, dove.getNewU()) << std::endl;
 	}
-	crane.display_part_conc();
+	//crane.display_part_conc();
 	
-	crane.return_parcel_alt_top().Display("z_t");
-	crane.return_parcel_alt_bot().Display("z_b");
-	crane.return_parcel_rad_top().Display("R_t");
-	crane.return_parcel_rad_bot().Display("R_b");
+	//crane.return_parcel_alt_top().Display("z_t");
+	//crane.return_parcel_alt_bot().Display("z_b");
+	//crane.return_parcel_rad_top().Display("R_t");
+	//crane.return_parcel_rad_bot().Display("R_b");
 	
 	std::cout << "\nSaturation Time (s) =\t";
 	if (crane.get_saturation_time() > 0.0)
@@ -3777,6 +3849,8 @@ int CRANE_SCENARIO(const char *yaml_input, const char *atmosphere_data)
 	
 	if (file!= nullptr)
 		fclose(file);
+	if (cloud!=nullptr)
+		fclose(cloud);
 	
 	return success;
 }
@@ -3791,13 +3865,20 @@ int CRANE_TESTS()
 	Dove dove;
 	time = clock();
 	
-	FILE *file;
+	FILE *file, *cloud;
 	file = fopen("output/CRANE_Tests.txt", "w+");
+	cloud = fopen("output/CRANE_Tests_CloudGrowth.txt", "w+");
 	if (file == nullptr)
 	{
 		system("mkdir output");
 		file = fopen("output/CRANE_Tests.txt", "w+");
 	}
+	if (cloud == nullptr)
+	{
+		system("mkdir output");
+		cloud = fopen("output/CRANE_Tests_CloudGrowth.txt", "w+");
+	}
+	test.set_CloudFile(cloud);
 	
     // Nevada Plumbbob Boltzman Test Case
 	//double W = 12.0; //12 kT
@@ -3827,16 +3908,16 @@ int CRANE_TESTS()
 	
 	std::cout << "\nTesting of the CRANE for the 1979 DELFIC Test Case with Default Atmosphere\n";
 	std::cout <<   "--------------------------------------------------------------------------\n\n";
-	std::cout << "Shear Velocity = \t";
+	std::cout << "Shear Velocity          = \t";
 	if (includeShear == true)
 		std::cout << "True\n";
 	else
 		std::cout << "False\n";
-	std::cout << "Bomb Yield (kT) =\t" << W << std::endl;
-	std::cout << "Burst Height (m) =\t" << hb << std::endl;
-	std::cout << "Ground Altitude (m) =\t" << gz << std::endl;
-    std::cout << "Initial Time (s) =\t" << test.get_current_time() << std::endl;
-	std::cout << "Number of air parcels =\t" << test.return_parcel_alt_top().rows() << std::endl;
+	std::cout << "Bomb Yield (kT)         =\t" << W << std::endl;
+	std::cout << "Burst Height (m)        =\t" << hb << std::endl;
+	std::cout << "Ground Altitude (m)     =\t" << gz << std::endl;
+    std::cout << "Initial Time (s)        =\t" << test.get_current_time() << std::endl;
+	std::cout << "Number of air parcels   =\t" << test.return_parcel_alt_top().rows() << std::endl;
 	std::cout << "Number of particle bins = \t" << test.return_parcel_alt_top().columns() << std::endl;
     std::cout << "\n";
 	
@@ -3874,7 +3955,7 @@ int CRANE_TESTS()
 	{
 		std::cout << dove.getVariableName(i) << " =\t " << dove.getNewU(i, dove.getNewU()) << std::endl;
 	}
-	test.display_part_conc();
+	//test.display_part_conc();
 	
 	test.run_crane_simulation(dove);
 	
@@ -3884,14 +3965,14 @@ int CRANE_TESTS()
     {
         std::cout << dove.getVariableName(i) << " =\t " << dove.getNewU(i, dove.getNewU()) << std::endl;
     }
-	test.display_part_conc();
+	//test.display_part_conc();
 	
-	test.return_parcel_alt_top().Display("z_t");
-	test.return_parcel_alt_bot().Display("z_b");
-	test.return_parcel_rad_top().Display("R_t");
-	test.return_parcel_rad_bot().Display("R_b");
+	//test.return_parcel_alt_top().Display("z_t");
+	//test.return_parcel_alt_bot().Display("z_b");
+	//test.return_parcel_rad_top().Display("R_t");
+	//test.return_parcel_rad_bot().Display("R_b");
 	
-	test.return_parcel_conc().Display("C_ij");
+	//test.return_parcel_conc().Display("C_ij");
 	
 	std::cout << "\nSaturation Time (s) =\t";
 	if (test.get_saturation_time() > 0.0)
@@ -3904,6 +3985,8 @@ int CRANE_TESTS()
 	
 	if (file!= nullptr)
 		fclose(file);
+	if (cloud!=nullptr)
+		fclose(cloud);
 	
 	return success;
 }
