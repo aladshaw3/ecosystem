@@ -2896,6 +2896,7 @@ void Crane::establish_initial_conditions(Dove &dove, double W, double gz, double
 	}
 
 	//Loop through i parcels
+	double z_b = z_start;
 	for (int i = 0; i < 10; i++)
 	{
 		//Loop through j particle sizes
@@ -2904,8 +2905,14 @@ void Crane::establish_initial_conditions(Dove &dove, double W, double gz, double
 			this->return_parcel_alt_bot().edit(i, j, z_start);
 			this->return_parcel_alt_top().edit(i, j, z_start + dz_extra);
 
-			this->return_parcel_rad_top().edit(i, j, low_rad);
-			this->return_parcel_rad_bot().edit(i, j, low_rad);
+			//this->return_parcel_rad_bot().edit(i, j, low_rad);
+			//this->return_parcel_rad_top().edit(i, j, low_rad);
+			double pow_b = (z_start - z_b) / (z_end - z_b);
+			double pow_t = (z_start + dz_extra - z_b) / (z_end - z_b);
+			double bot = high_rad*pow(low_rad / high_rad, pow_b);
+			double top = high_rad*pow(low_rad / high_rad, pow_t);
+			this->return_parcel_rad_bot().edit(i, j, bot);
+			this->return_parcel_rad_top().edit(i, j, top);
 		}
 		z_start = dz_extra + z_start;
 	}
@@ -3405,9 +3412,7 @@ void Crane::perform_postprocessing(Dove &dove)
 	{
 		//Loop through j particle sizes
 		for (int j=0; j<this->return_parcel_alt_top().columns(); j++)
-		{
-			//std::cout << "Particle size (um) = \t" << this->get_part_size(j) << "\tSettling velocity (m/s) = \t" << this->get_settling_rate_old(this->get_part_size(j)) << std::endl;
-			
+		{			
 			//Calculate old volume of each parcel
 			double h = this->return_parcel_alt_top()(i,j) - this->return_parcel_alt_bot()(i,j);
 			double Rtop = this->return_parcel_rad_top()(i,j);
@@ -3440,12 +3445,8 @@ void Crane::perform_postprocessing(Dove &dove)
 			double new_zj_t = this->return_parcel_alt_top()(i,j) + (dove.getTimeStep()*(Uu_t-this->get_settling_rate_old(this->get_part_size(j))));
 			double new_zj_b = this->return_parcel_alt_bot()(i,j) + (dove.getTimeStep()*(Uu_b-this->get_settling_rate_old(this->get_part_size(j))));
 			
-			//if (new_zj_t < 0.0) new_zj_t = 0.0;
 			if (new_zj_b <= this->get_ground_alt()) new_zj_b = this->get_ground_alt();
 			if (new_zj_t <= new_zj_b) new_zj_t = new_zj_b + 1.0;
-			//std::cout << new_zj_t << std::endl;
-
-			//if (new_zj_t-new_zj_b <= sqrt(DBL_EPSILON)) new_zj_t = new_zj_b + 1.0;
 			
 			this->return_parcel_alt_top().edit(i, j, new_zj_t);
 			this->return_parcel_alt_bot().edit(i, j, new_zj_b);
@@ -3594,19 +3595,22 @@ void Crane::print_information(Dove &dove, bool initialPhase)
 			fprintf(this->CloudFile, "R_%i\tz_%i\t", j, j);
 		}
 		fprintf(this->CloudFile, "\n");
+
+		for (int j = 0; j<this->return_parcel_alt_top().columns(); j++)
+		{
+			fprintf(this->CloudFile, "%.6g\t%.6g\t", this->return_parcel_rad_bot()(0, j), this->return_parcel_alt_bot()(0, j));
+		}
+		fprintf(this->CloudFile, "\n");
 		for (int i=0; i<this->return_parcel_alt_top().rows(); i++)
 		{
 			for (int j=0; j<this->return_parcel_alt_top().columns(); j++)
 			{
-				fprintf(this->CloudFile, "%.6g\t%.6g\t", this->return_parcel_rad_bot()(i,j),	this->return_parcel_alt_bot()(i,j));
+				fprintf(this->CloudFile, "%.6g\t%.6g\t", this->return_parcel_rad_top()(i,j),	this->return_parcel_alt_top()(i,j));
 			}
 			fprintf(this->CloudFile, "\n");
 		}
-		for (int j=0; j<this->return_parcel_alt_top().columns(); j++)
-		{
-			fprintf(this->CloudFile, "%.6g\t%.6g\t", this->return_parcel_rad_top()(this->return_parcel_alt_top().rows()-1,j),	this->return_parcel_alt_top()(this->return_parcel_alt_top().rows()-1,j));
-		}
-		fprintf(this->CloudFile, "\n");
+
+		//fprintf(this->CloudFile, "\n");
 	}
 	else
 	{
@@ -3624,19 +3628,23 @@ void Crane::print_information(Dove &dove, bool initialPhase)
 				fprintf(this->CloudFile, "R_%i\tz_%i\t", j, j);
 			}
 			fprintf(this->CloudFile, "\n");
+
+			for (int j = 0; j<this->return_parcel_alt_top().columns(); j++)
+			{
+				fprintf(this->CloudFile, "%.6g\t%.6g\t", this->return_parcel_rad_bot()(0, j), this->return_parcel_alt_bot()(0, j));
+			}
+			fprintf(this->CloudFile, "\n");
 			for (int i = 0; i<this->return_parcel_alt_top().rows(); i++)
 			{
 				for (int j = 0; j<this->return_parcel_alt_top().columns(); j++)
 				{
-					fprintf(this->CloudFile, "%.6g\t%.6g\t", this->return_parcel_rad_bot()(i, j), this->return_parcel_alt_bot()(i, j));
+					fprintf(this->CloudFile, "%.6g\t%.6g\t", this->return_parcel_rad_top()(i, j), this->return_parcel_alt_top()(i, j));
 				}
 				fprintf(this->CloudFile, "\n");
 			}
-			for (int j = 0; j<this->return_parcel_alt_top().columns(); j++)
-			{
-				fprintf(this->CloudFile, "%.6g\t%.6g\t", this->return_parcel_rad_top()(this->return_parcel_alt_top().rows() - 1, j), this->return_parcel_alt_top()(this->return_parcel_alt_top().rows() - 1, j));
-			}
-			fprintf(this->CloudFile, "\n");
+			
+
+			//fprintf(this->CloudFile, "\n");
 
 			this->t_cloud_count = 0.0;
 		}
@@ -4017,7 +4025,7 @@ int CRANE_TESTS()
 	//test.return_parcel_rad_top().Display("R_t");
 	//test.return_parcel_rad_bot().Display("R_b");
 	
-	test.return_parcel_conc().Display("C_ij");
+	//test.return_parcel_conc().Display("C_ij");
 	
 	std::cout << "\nSaturation Time (s) =\t";
 	if (test.get_saturation_time() > 0.0)
