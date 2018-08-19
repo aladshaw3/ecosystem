@@ -497,6 +497,8 @@ protected:
 	std::map<double, double> settling_rate_old;	///< Old Particle settling rate (m/s) by particle size (um)		(f_j)
 	Matrix<double> parcel_conc;					///< Concentration of dust inside each parcel (Gp/m^3)
 	FILE *CloudFile;							///< Output file to show help plot cloud growth over time
+	double t_cloud_out;							///< Time to print out cloud profiles to output file
+	double t_cloud_count;						///< Counter for the cloud output frequency 
 	
 private:
 	

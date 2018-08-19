@@ -97,6 +97,7 @@ Crane::Crane()
 	horz_rad_change = 0.0;
 	energy_switch = 0.0;
 	t_count = 0.0;
+	t_cloud_count = 0.0;
 	
 	alt_top = 0.0;
 	alt_bottom = 0.0;
@@ -104,6 +105,7 @@ Crane::Crane()
 	alt_bottom_old = 0.0;
 	rise_top = 0.0;
 	rise_bottom = 0.0;
+	t_cloud_out = 0.0;
 	
 	create_default_atmosphere();
 	create_default_wind_profile();
@@ -1475,6 +1477,7 @@ void Crane::compute_initial_soil_mass(double W, double gz, double hb)
 void Crane::compute_initial_part_hist(double W, double gz, double hb, int size)
 {
 	this->compute_det_alt(gz, hb);
+	this->compute_initial_vert_rad(W, gz, hb);
 	double scaled = fabs(hb)*3.281 / pow(W, 1.0/3.4);
 	
 	if (scaled < 180.0)
@@ -1487,11 +1490,13 @@ void Crane::compute_initial_part_hist(double W, double gz, double hb, int size)
 	}
 	
 	int parcels = 15 + (int)log(W);
-	this->parcel_alt_top.set_size(parcels, size);
-	this->parcel_alt_bot.set_size(parcels, size);
-	this->parcel_rad_top.set_size(parcels, size);
-	this->parcel_rad_bot.set_size(parcels, size);
-	this->parcel_conc.set_size(parcels, size);
+	double hb_to_bot = (this->get_det_alt() - this->get_vert_rad()) - hb;
+	std::cout << "Distance from cloud to ground = " << hb_to_bot << std::endl;
+	this->parcel_alt_top.set_size(parcels+10, size);
+	this->parcel_alt_bot.set_size(parcels+10, size);
+	this->parcel_rad_top.set_size(parcels+10, size);
+	this->parcel_rad_bot.set_size(parcels+10, size);
+	this->parcel_conc.set_size(parcels+10, size);
 }
 
 void Crane::compute_initial_air_mass(double W, double gz, double hb)
@@ -2842,12 +2847,17 @@ void Crane::establish_initial_conditions(Dove &dove, double W, double gz, double
 	this->set_alt_bottom_old(this->get_alt_bottom());
 	this->set_rise_top(this->get_cloud_rise());
 	this->set_rise_bottom(this->get_cloud_rise());
-	double dz = 2.0*this->get_vert_rad()/(double)(this->return_parcel_alt_top().rows());
+	double dz = 2.0*this->get_vert_rad()/(double)(this->return_parcel_alt_top().rows()-10);
 	double z = this->get_alt_bottom();
 	double Vol = 0.0;
-	
+	double z_start = hb + gz;
+	double z_end = this->get_alt_bottom();
+	double dz_extra = (z_end - z_start) / 10.0;
+	double low_rad = 0.0;	
+	double high_rad = 0.0;
+
 	//Loop through i parcels
-	for (int i=0; i<this->return_parcel_alt_top().rows(); i++)
+	for (int i=10; i<this->return_parcel_alt_top().rows(); i++)
 	{
 		// Bottom radius
 		double mult = (1.0 - ( ((z-this->get_cloud_alt())*(z-this->get_cloud_alt()))/(this->get_vert_rad()*this->get_vert_rad()) ));
@@ -2869,6 +2879,9 @@ void Crane::establish_initial_conditions(Dove &dove, double W, double gz, double
 		
 		if (r_b < 0.0 + sqrt(DBL_EPSILON)) r_b = (0.45*r_b+0.55*r_t);
 		if (r_t < 0.0 + sqrt(DBL_EPSILON)) r_t = (0.55*r_b+0.45*r_t);
+
+		if (i == 10) low_rad = r_b;
+		if (r_b > high_rad) high_rad = r_b;
 		
 		//Loop through j particle sizes
 		for (int j=0; j<this->return_parcel_alt_top().columns(); j++)
@@ -2881,11 +2894,27 @@ void Crane::establish_initial_conditions(Dove &dove, double W, double gz, double
 		Vol += (M_PI*h/3.0)*(r_t*r_t+r_b*r_t+r_b*r_b);
 		
 	}
+
+	//Loop through i parcels
+	for (int i = 0; i < 10; i++)
+	{
+		//Loop through j particle sizes
+		for (int j = 0; j<this->return_parcel_alt_top().columns(); j++)
+		{
+			this->return_parcel_alt_bot().edit(i, j, z_start);
+			this->return_parcel_alt_top().edit(i, j, z_start + dz_extra);
+
+			this->return_parcel_rad_top().edit(i, j, low_rad);
+			this->return_parcel_rad_bot().edit(i, j, low_rad);
+		}
+		z_start = dz_extra + z_start;
+	}
 	//std::cout << "Actual volume = " << this->get_cloud_volume() << "\tApprox volume = " << Vol << std::endl;
 	//this->return_parcel_alt_top().Display("z_t");
 	//this->return_parcel_alt_bot().Display("z_b");
 	//this->return_parcel_rad_top().Display("R_t");
 	//this->return_parcel_rad_bot().Display("R_b");
+	//this->return_parcel_conc().Display("ParCan");
 	
 	// Setup data
 	dove.set_userdata(this);
@@ -3070,6 +3099,8 @@ void Crane::establish_dove_options(Dove &dove, FILE *file, bool fileout, bool co
 	dove.set_timestepmin_converged(dtmin_conv);
 	dove.set_t_out(t_out);
 	dove.set_endtime(endtime);
+
+	this->t_cloud_out = t_out * (double)this->return_parcel_alt_bot().rows();
 	
 	if (dove.getIntegrationType() == EXPLICIT)
 		this->set_isTight(false);
@@ -3409,8 +3440,12 @@ void Crane::perform_postprocessing(Dove &dove)
 			double new_zj_t = this->return_parcel_alt_top()(i,j) + (dove.getTimeStep()*(Uu_t-this->get_settling_rate_old(this->get_part_size(j))));
 			double new_zj_b = this->return_parcel_alt_bot()(i,j) + (dove.getTimeStep()*(Uu_b-this->get_settling_rate_old(this->get_part_size(j))));
 			
-			if (new_zj_t < 0.0) new_zj_t = 0.0;
-			if (new_zj_b < 0.0) new_zj_b = 0.0;
+			//if (new_zj_t < 0.0) new_zj_t = 0.0;
+			if (new_zj_b <= this->get_ground_alt()) new_zj_b = this->get_ground_alt();
+			if (new_zj_t <= new_zj_b) new_zj_t = new_zj_b + 1.0;
+			//std::cout << new_zj_t << std::endl;
+
+			//if (new_zj_t-new_zj_b <= sqrt(DBL_EPSILON)) new_zj_t = new_zj_b + 1.0;
 			
 			this->return_parcel_alt_top().edit(i, j, new_zj_t);
 			this->return_parcel_alt_bot().edit(i, j, new_zj_b);
@@ -3432,7 +3467,7 @@ void Crane::perform_postprocessing(Dove &dove)
 			//Inside Cloud Cap for bottom of parcel
 			if (this->return_parcel_alt_bot()(i,j) >= this->get_alt_bottom())
 			{
-				//if (this->return_parcel_rad_bot()(i,j) < r_b)
+				if (this->return_parcel_rad_bot()(i,j) < r_b)
 					this->return_parcel_rad_bot().edit(i, j, r_b);
 				//else
 					//this->return_parcel_rad_bot().edit(i, j, 0.5*r_b+0.5*this->return_parcel_rad_bot()(i,j));
@@ -3446,7 +3481,7 @@ void Crane::perform_postprocessing(Dove &dove)
 			//Inside Cloud Cap for top of parcel
 			if (this->return_parcel_alt_top()(i,j) >= this->get_alt_bottom())
 			{
-				//if (this->return_parcel_rad_top()(i,j) < r_t)
+				if (this->return_parcel_rad_top()(i,j) < r_t)
 					this->return_parcel_rad_top().edit(i, j, r_t);
 				//else
 					//this->return_parcel_rad_bot().edit(i, j, 0.5*r_t+0.5*this->return_parcel_rad_top()(i,j));
@@ -3460,11 +3495,14 @@ void Crane::perform_postprocessing(Dove &dove)
 			//Now update particle concentrations
 			//Calculate old volume of each parcel
 			h = this->return_parcel_alt_top()(i,j) - this->return_parcel_alt_bot()(i,j);
+			if (h <= 0.0) h = 0.0;
 			Rtop = this->return_parcel_rad_top()(i,j);
 			Rbot = this->return_parcel_rad_bot()(i,j);
 			double Vol_new = (M_PI*h/3.0)*(Rtop*Rtop+Rbot*Rtop+Rbot*Rbot);
-			
-			this->return_parcel_conc().edit(i, j, this->return_parcel_conc()(i,j)*Vol_old/Vol_new);
+			if (Vol_new <= 0.0)
+				this->return_parcel_conc().edit(i, j, 0.0);
+			else
+				this->return_parcel_conc().edit(i, j, this->return_parcel_conc()(i,j)*Vol_old/Vol_new);
 
 		}
 		
@@ -3572,7 +3610,36 @@ void Crane::print_information(Dove &dove, bool initialPhase)
 	}
 	else
 	{
-		this->t_count = this->t_count + dove.getTimeStep();
+		this->t_cloud_count = this->t_cloud_count + dove.getTimeStep();
+		
+		if (this->t_cloud_count >= (this->t_cloud_out + sqrt(DBL_EPSILON))
+			|| this->t_cloud_count >= (this->t_cloud_out - sqrt(DBL_EPSILON))
+			|| dove.getCurrentTime() == dove.getEndTime())
+		{
+			//Print to cloud growth file
+			fprintf(this->CloudFile, "\n");
+			fprintf(this->CloudFile, "Time (s) = \t%.6g\n", this->get_current_time());
+			for (int j = 0; j<this->return_parcel_alt_top().columns(); j++)
+			{
+				fprintf(this->CloudFile, "R_%i\tz_%i\t", j, j);
+			}
+			fprintf(this->CloudFile, "\n");
+			for (int i = 0; i<this->return_parcel_alt_top().rows(); i++)
+			{
+				for (int j = 0; j<this->return_parcel_alt_top().columns(); j++)
+				{
+					fprintf(this->CloudFile, "%.6g\t%.6g\t", this->return_parcel_rad_bot()(i, j), this->return_parcel_alt_bot()(i, j));
+				}
+				fprintf(this->CloudFile, "\n");
+			}
+			for (int j = 0; j<this->return_parcel_alt_top().columns(); j++)
+			{
+				fprintf(this->CloudFile, "%.6g\t%.6g\t", this->return_parcel_rad_top()(this->return_parcel_alt_top().rows() - 1, j), this->return_parcel_alt_top()(this->return_parcel_alt_top().rows() - 1, j));
+			}
+			fprintf(this->CloudFile, "\n");
+
+			this->t_cloud_count = 0.0;
+		}
 		
 		if (this->t_count >= (dove.getOutputTime()+sqrt(DBL_EPSILON))
 			|| this->t_count >= (dove.getOutputTime()-sqrt(DBL_EPSILON))
@@ -3585,28 +3652,6 @@ void Crane::print_information(Dove &dove, bool initialPhase)
 			
 			fprintf(dove.getFile(), "\n");
 			this->t_count = 0.0;
-			
-			//Print to cloud growth file
-			fprintf(this->CloudFile, "\n");
-			fprintf(this->CloudFile, "Time (s) = \t%.6g\n",this->get_current_time());
-			for (int j=0; j<this->return_parcel_alt_top().columns(); j++)
-			{
-				fprintf(this->CloudFile, "R_%i\tz_%i\t", j, j);
-			}
-			fprintf(this->CloudFile, "\n");
-			for (int i=0; i<this->return_parcel_alt_top().rows(); i++)
-			{
-				for (int j=0; j<this->return_parcel_alt_top().columns(); j++)
-				{
-					fprintf(this->CloudFile, "%.6g\t%.6g\t", this->return_parcel_rad_bot()(i,j),	this->return_parcel_alt_bot()(i,j));
-				}
-				fprintf(this->CloudFile, "\n");
-			}
-			for (int j=0; j<this->return_parcel_alt_top().columns(); j++)
-			{
-				fprintf(this->CloudFile, "%.6g\t%.6g\t", this->return_parcel_rad_top()(this->return_parcel_alt_top().rows()-1,j),	this->return_parcel_alt_top()(this->return_parcel_alt_top().rows()-1,j));
-			}
-			fprintf(this->CloudFile, "\n");
 		}
 	}
 	
@@ -3972,7 +4017,7 @@ int CRANE_TESTS()
 	//test.return_parcel_rad_top().Display("R_t");
 	//test.return_parcel_rad_bot().Display("R_b");
 	
-	//test.return_parcel_conc().Display("C_ij");
+	test.return_parcel_conc().Display("C_ij");
 	
 	std::cout << "\nSaturation Time (s) =\t";
 	if (test.get_saturation_time() > 0.0)
