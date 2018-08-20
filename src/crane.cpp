@@ -1066,9 +1066,6 @@ void Crane::compute_vapor_pressure(double P, double x)
 
 void Crane::compute_sat_vapor_pressure(double T)
 {
-	//this->set_sat_vapor_pressure( 611.0*pow(T/273.0, -5.13)*exp(25.0*(T-273.0)/T) );
-	
-	//NOTE: Changed DEFLIC's model because it failed to produce good results at high temperatures
 	if (T < 0.0)	T = 0.0;
 	T = T - 273.15;
 	double Pws = 618.8*exp(17.27*T/(T+237.3));
@@ -1086,14 +1083,6 @@ void Crane::compute_xe(double Te, double P, double HR)
 
 void Crane::compute_air_density(double P, double x, double T)
 {
-	//Assume P and Pws come in as Pa --> convert to mBar
-	//this->compute_sat_vapor_pressure(T);
-	//P = P*0.01;
-	//double Pws = this->get_sat_vapor_pressure()*0.01;
-	//double val = ( P - (Pws*HR*(1.0-this->eps)/100.0) ) / (2.8679*T);
-	//this->set_air_density(val);
-	
-	//NOTE: Changed DEFLIC's model because it failed to produce good results at high humidity
 	if (x < 0.0)	x = 0.0;
 	if (P < 0.0)	P = 0.0;
 	if (T < 0.0)	T = 0.0;
@@ -1244,8 +1233,7 @@ void Crane::compute_davies_num(double Dj, double m, double x, double s, double w
 	this->compute_air_density(P, x, T);
 	this->compute_cloud_density(m, x, s, w, T, P);
 	this->compute_air_viscosity(T);
-	this->set_davies_num( (4.0*this->get_cloud_density()*(this->get_part_density()-this->get_cloud_density())*this->get_grav()*pow(dj,3.0)) / (3.0*pow(this->get_air_viscosity(),2.0)) );
-    //this->set_davies_num( (4.0*this->get_air_density()*(this->get_part_density()-this->get_air_density())*this->get_grav()*pow(dj,3.0)) / (3.0*pow(this->get_air_viscosity(),2.0)) );
+    this->set_davies_num( (4.0*this->get_air_density()*(this->get_part_density()-this->get_air_density())*this->get_grav()*pow(dj,3.0)) / (3.0*pow(this->get_air_viscosity(),2.0)) );
 }
 
 void Crane::compute_settling_rate(double Dj, double m, double x, double s, double w, double T, double P)
@@ -1254,9 +1242,7 @@ void Crane::compute_settling_rate(double Dj, double m, double x, double s, doubl
 	double dj = Dj/1.0E+6;
 	this->compute_slip_factor(Dj, T, P);
 	this->compute_davies_num(Dj, m, x, s, w, T, P);
-    
-    double rho = this->get_cloud_density();
-    //double rho = this->get_air_density();
+    double rho = this->get_air_density();
 	
 	//If statements for flow conditions
 	if (this->get_davies_num() <= 0.3261)
@@ -1286,8 +1272,7 @@ void Crane::compute_settling_rate(double Dj, double m, double x, double s, doubl
 		double poly = -1.29536 + (0.986*X) - (0.046677*X*X) + (1.1235E-3*X*X*X);
 		this->settling_rate[Dj] = this->get_air_viscosity()*pow(10.0,poly)/rho/dj;
 	}
-	
-	this->settling_rate[Dj] = this->settling_rate[Dj]*10.0;
+
 }
 
 void Crane::compute_total_mass_fallout_rate(double m, double x, double s, double w, double T, double P, double z, const Matrix<double> &n)
@@ -1454,7 +1439,6 @@ void Crane::compute_initial_soil_mass(double W, double gz, double hb)
 		double D = 32.7 + 0.851*scaled - 2.52e-5*scaled*scaled*scaled - 1.78e-10*scaled*scaled*scaled*scaled*scaled;
 		
 		this->set_initial_soil_mass( 2.182*pow(W, 3.0/3.4)*Rad*Rad*D );
-		//std::cout << "Below Ground Soil mass (kg)= " << this->get_initial_soil_mass() << std::endl;
 	}
 	else
 	{
@@ -1463,12 +1447,10 @@ void Crane::compute_initial_soil_mass(double W, double gz, double hb)
 		if (scaled <= 180.0)
 		{
 			this->set_initial_soil_mass( 0.07741*pow(W, 3.0/3.4)*pow(180.0-scaled,2.0)*(360.0+scaled) );
-			//std::cout << "Above Ground Soil mass (kg)= " << this->get_initial_soil_mass() << std::endl;
 		}
 		else
 		{
 			this->set_initial_soil_mass( 90.7 );
-			//std::cout << "Pure Air Soil mass (kg)= " << this->get_initial_soil_mass() << std::endl;
 		}
 	}
     
@@ -1491,7 +1473,6 @@ void Crane::compute_initial_part_hist(double W, double gz, double hb, int size)
 	
 	int parcels = 15 + (int)log(W);
 	double hb_to_bot = (this->get_det_alt() - this->get_vert_rad()) - hb;
-	std::cout << "Distance from cloud to ground = " << hb_to_bot << std::endl;
 	this->parcel_alt_top.set_size(parcels+10, size);
 	this->parcel_alt_bot.set_size(parcels+10, size);
 	this->parcel_rad_top.set_size(parcels+10, size);
@@ -2644,8 +2625,6 @@ int Crane::read_atmosphere_profile(const char *profile)
 {
 	int success = 0;
 	
-	//std::cout << "\nReading atmospheric profile...\n";
-	
 	//Check to see if any argument was given
 	if (profile == nullptr || profile == NULL)
 	{
@@ -2732,14 +2711,6 @@ int Crane::read_atmosphere_profile(const char *profile)
 		}
 		
 	} while (!inputFile.eof());
-	
-	/*
-	std::map<double,double>::iterator it=this->rel_humid.begin();
-	for (it=this->rel_humid.begin(); it!=this->rel_humid.end(); ++it)
-	{
-		std::cout << it->first << "\t" << it->second << std::endl;
-	}
-	 */
 
 	
 	//END of Input Read
@@ -2905,8 +2876,6 @@ void Crane::establish_initial_conditions(Dove &dove, double W, double gz, double
 			this->return_parcel_alt_bot().edit(i, j, z_start);
 			this->return_parcel_alt_top().edit(i, j, z_start + dz_extra);
 
-			//this->return_parcel_rad_bot().edit(i, j, low_rad);
-			//this->return_parcel_rad_top().edit(i, j, low_rad);
 			double pow_b = (z_start - z_b) / (z_end - z_b);
 			double pow_t = (z_start + dz_extra - z_b) / (z_end - z_b);
 			double bot = high_rad*pow(low_rad / high_rad, pow_b);
@@ -2916,12 +2885,6 @@ void Crane::establish_initial_conditions(Dove &dove, double W, double gz, double
 		}
 		z_start = dz_extra + z_start;
 	}
-	//std::cout << "Actual volume = " << this->get_cloud_volume() << "\tApprox volume = " << Vol << std::endl;
-	//this->return_parcel_alt_top().Display("z_t");
-	//this->return_parcel_alt_bot().Display("z_b");
-	//this->return_parcel_rad_top().Display("R_t");
-	//this->return_parcel_rad_bot().Display("R_b");
-	//this->return_parcel_conc().Display("ParCan");
 	
 	// Setup data
 	dove.set_userdata(this);
@@ -3355,34 +3318,15 @@ void Crane::estimate_parameters(Dove &dove)
 	else
 		this->set_latent_heat(2.83E+6);
 	
-	//Call the compute functions that are not called by any other compute function
-	this->compute_apparent_amb_temp(Te, this->get_xe());								//NOT CALLED
-	this->compute_vapor_pressure(P, this->get_x_water_vapor());							//NOT CALLED
-	this->compute_sat_vapor_pressure(this->get_temperature());							//NOT CALLED
-	this->compute_spec_heat_entrain_integral(this->get_temperature(), Te);				//NOT CALLED
-	this->compute_mean_spec_heat(this->get_temperature(), this->get_x_water_vapor(), this->get_s_soil(), this->get_w_water_conds());//NOT CALLED
-	this->compute_sigma_turbulence(this->get_energy(), this->get_cloud_alt());			//NOT CALLED
-	this->compute_shear_ratio(this->get_cloud_mass(), this->get_x_water_vapor(), this->get_s_soil(), this->get_w_water_conds(), this->get_temperature(), P, this->get_cloud_alt(), this->get_cloud_rise(), this->get_energy(), v_top, v_bot);	//NOT CALLED
-	this->compute_total_mass_fallout_rate(this->get_cloud_mass(), this->get_x_water_vapor(), this->get_s_soil(), this->get_w_water_conds(), this->get_temperature(), P, this->get_cloud_alt(), this->get_part_conc_var());	//NOT CALLED
-	
-	//Functions below are needed prior to solver, but are all called from the above functions (removes redundancy)
-	/**
-	this->compute_q_xe(this->get_xe());												//called by compute_apparent_temp
-	this->compute_apparent_temp(this->get_temperature(), this->get_x_water_vapor());	//called by compute_cloud_volume
-	this->compute_char_vel(this->get_cloud_rise(), this->get_energy());					//called by compute_shear_ratio
-	this->compute_air_viscosity(this->get_temperature());								//called by compute_slip_factor & compute_davies_num
-	this->compute_air_density(P, this->get_x_water_vapor(), this->get_temperature());	//called by compute_davies_num
-	this->compute_cloud_density(this->get_cloud_mass(), this->get_x_water_vapor(), this->get_s_soil(), this->get_w_water_conds(), this->get_temperature(), P);															//called by compute_davies_num
-	this->compute_spec_heat_entrain(this->get_temperature());							//called by compute_actual_spec_heat
-	this->compute_spec_heat_water(this->get_temperature());								//called by compute_actual_spec_heat
-	this->compute_spec_heat_conds(this->get_temperature());								//called by compute_mean_spec_heat
-	this->compute_actual_spec_heat(this->get_temperature(), this->get_x_water_vapor());	//called by compute_mean_spec_heat
-	this->compute_k_temp(this->get_temperature());										//called by compute_mean_spec_heat
-	this->compute_cloud_volume(this->get_cloud_mass(), this->get_x_water_vapor(), this->get_s_soil(), this->get_w_water_conds(), this->get_temperature(), P);															//called by cloud_dens, shear_rat, & horz_rad
-	this->compute_horz_rad(this->get_cloud_mass(), this->get_x_water_vapor(), this->get_s_soil(), this->get_w_water_conds(), this->get_temperature(), P, this->get_cloud_alt());									//called by surf_area & total_fallout
-	this->compute_surf_area(this->get_cloud_mass(), this->get_x_water_vapor(), this->get_s_soil(), this->get_w_water_conds(), this->get_temperature(), P, this->get_cloud_alt());									//called by shear_ratio
-	this->compute_shear_vel(v_top, v_bot);												//called by shear_ratio
-	*/
+	//Call the compute functions that are not called by any other compute function (note these functions call other functions needed)
+	this->compute_apparent_amb_temp(Te, this->get_xe());
+	this->compute_vapor_pressure(P, this->get_x_water_vapor());
+	this->compute_sat_vapor_pressure(this->get_temperature());
+	this->compute_spec_heat_entrain_integral(this->get_temperature(), Te);
+	this->compute_mean_spec_heat(this->get_temperature(), this->get_x_water_vapor(), this->get_s_soil(), this->get_w_water_conds());
+	this->compute_sigma_turbulence(this->get_energy(), this->get_cloud_alt());
+	this->compute_shear_ratio(this->get_cloud_mass(), this->get_x_water_vapor(), this->get_s_soil(), this->get_w_water_conds(), this->get_temperature(), P, this->get_cloud_alt(), this->get_cloud_rise(), this->get_energy(), v_top, v_bot);
+	this->compute_total_mass_fallout_rate(this->get_cloud_mass(), this->get_x_water_vapor(), this->get_s_soil(), this->get_w_water_conds(), this->get_temperature(), P, this->get_cloud_alt(), this->get_part_conc_var());
 	
 	if (this->get_isSaturated() == false)
 	{
@@ -3470,8 +3414,6 @@ void Crane::perform_postprocessing(Dove &dove)
 			{
 				if (this->return_parcel_rad_bot()(i,j) < r_b)
 					this->return_parcel_rad_bot().edit(i, j, r_b);
-				//else
-					//this->return_parcel_rad_bot().edit(i, j, 0.5*r_b+0.5*this->return_parcel_rad_bot()(i,j));
 			}
 			//Below Cloud Cap for bottom of parcel
 			else
@@ -3484,8 +3426,6 @@ void Crane::perform_postprocessing(Dove &dove)
 			{
 				if (this->return_parcel_rad_top()(i,j) < r_t)
 					this->return_parcel_rad_top().edit(i, j, r_t);
-				//else
-					//this->return_parcel_rad_bot().edit(i, j, 0.5*r_t+0.5*this->return_parcel_rad_top()(i,j));
 			}
 			//Below Cloud Cap for top of parcel
 			else
@@ -3609,8 +3549,6 @@ void Crane::print_information(Dove &dove, bool initialPhase)
 			}
 			fprintf(this->CloudFile, "\n");
 		}
-
-		//fprintf(this->CloudFile, "\n");
 	}
 	else
 	{
@@ -3642,12 +3580,10 @@ void Crane::print_information(Dove &dove, bool initialPhase)
 				}
 				fprintf(this->CloudFile, "\n");
 			}
-			
-
-			//fprintf(this->CloudFile, "\n");
-
 			this->t_cloud_count = 0.0;
 		}
+		
+		this->t_count = this->t_count + dove.getTimeStep();
 		
 		if (this->t_count >= (dove.getOutputTime()+sqrt(DBL_EPSILON))
 			|| this->t_count >= (dove.getOutputTime()-sqrt(DBL_EPSILON))
@@ -3874,7 +3810,6 @@ int CRANE_SCENARIO(const char *yaml_input, const char *atmosphere_data)
 	{
 		std::cout << dove.getVariableName(i) << " =\t " << dove.getNewU(i, dove.getNewU()) << std::endl;
 	}
-	//crane.display_part_conc();
 	
 	crane.run_crane_simulation(dove);
 	
@@ -3884,12 +3819,6 @@ int CRANE_SCENARIO(const char *yaml_input, const char *atmosphere_data)
 	{
 		std::cout << dove.getVariableName(i) << " =\t " << dove.getNewU(i, dove.getNewU()) << std::endl;
 	}
-	//crane.display_part_conc();
-	
-	//crane.return_parcel_alt_top().Display("z_t");
-	//crane.return_parcel_alt_bot().Display("z_b");
-	//crane.return_parcel_rad_top().Display("R_t");
-	//crane.return_parcel_rad_bot().Display("R_b");
 	
 	std::cout << "\nSaturation Time (s) =\t";
 	if (crane.get_saturation_time() > 0.0)
