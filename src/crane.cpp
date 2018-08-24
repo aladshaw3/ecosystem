@@ -1472,7 +1472,6 @@ void Crane::compute_initial_part_hist(double W, double gz, double hb, int size)
 	}
 	
 	int parcels = 15 + (int)log(W);
-	double hb_to_bot = (this->get_det_alt() - this->get_vert_rad()) - hb;
 	this->parcel_alt_top.set_size(parcels+10, size);
 	this->parcel_alt_bot.set_size(parcels+10, size);
 	this->parcel_rad_top.set_size(parcels+10, size);
