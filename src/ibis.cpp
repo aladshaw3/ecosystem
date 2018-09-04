@@ -171,6 +171,79 @@ Isotope::Isotope() : Atom(0)
 	isotope_number = 0;
 }
 
+//Register via atomic number and isotop number
+void Isotope::registerIsotope(int atom_num, int iso_num)
+{
+	this->Register(atom_num);
+	this->isotope_number = iso_num;
+	if (this->Neutrons() + atom_num != iso_num)
+		this->editAtomicWeight(this->AtomicWeight() + (iso_num - atom_num));
+	this->editNeutrons(iso_num - atom_num);
+	
+	this->setConstants();
+	this->computeDecayRate();
+}
+
+//Return isotope number
+int Isotope::IsotopeNumber()
+{
+	return this->isotope_number;
+}
+
+//Return decay rate
+double Isotope::DecayRate()
+{
+	return this->decay_rate;
+}
+
+//Return half-life
+double Isotope::HalfLife(time_units units)
+{
+	return time_conversion(units, this->half_life, this->hl_units);
+}
+
+//Return name
+std::string Isotope::IsotopeName()
+{
+	return this->IsoName;
+}
+
+//Set the decay information based on a registered atomic number and isotope number
+void Isotope::setConstants()
+{
+	// H atom
+	if (this->AtomicNumber() == 1)
+	{
+		//Register decay modes and constants
+		if (this->isotope_number == 1)
+		{
+			
+		}
+		else if (this->isotope_number == 2)
+		{
+			
+		}
+
+		//Unregistered isotope
+		else
+		{
+			
+		}
+	}
+	
+	//Unregistered Atom
+	else
+	{
+		//No action
+	}
+}
+
+//Compute decay rate
+void Isotope::computeDecayRate()
+{
+	
+}
+
 //Default destructor
 Isotope::~Isotope()
 {
@@ -182,3 +255,11 @@ Isotope::~Isotope()
  *	-------------------------------------------------------------------------------------
  *								End: Ibis Class Definitions
  */
+
+//Test function
+int IBIS_TESTS()
+{
+	int success = 0;
+	
+	return success;
+}

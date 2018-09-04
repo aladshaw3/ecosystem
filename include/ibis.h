@@ -48,6 +48,15 @@ public:
 	Isotope();											///< Default constructor
 	~Isotope();											///< Default destructor
 	
+	void registerIsotope(std::string isotope_name);		///< Register an isotope given the isotope name
+	void registerIsotope(std::string symbol, int iso);	///< Register an isotope given an atomic symbol (e.g., H) and isotope number (e.g., 2)
+	void registerIsotope(int atom_num, int iso_num);	///< Register an isotope given both an atomic and isotope number
+	
+	int IsotopeNumber();								///< Return the isotope number of the atom
+	double DecayRate();									///< Return the decay rate of the isotope
+	double HalfLife(time_units units);					///< Return the half-life in the given units
+	std::string IsotopeName();							///< Return the name of the isotope
+	
 protected:
 	std::string IsoName;								///< Name of the isotope (e.g., H-2)
 	std::vector<decay_mode> decay_modes;				///< List of decay modes the given isotope can undergo
@@ -58,8 +67,14 @@ protected:
 	time_units hl_units;								///< Units given for the half-life
 	int isotope_number;									///< isotope number for the object
 	
+	void setConstants();								///< Set the decay_modes, branch_ratios, and other info based on atomic and isotope numbers
+	void computeDecayRate();							///< Compute the decay rate (in 1/s) based on the half-life
+	
 private:
 	
 };
+
+///< Function to test the implementation of Isotope 
+int IBIS_TESTS();
 
 #endif /* IBIS_HPP_ */
