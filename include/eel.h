@@ -87,13 +87,13 @@ protected:
 	int electrons;							///< Holds the number of electrons in the atom
 	int valence_e;							///< Holds the number of valence electrons in the atom
 	double atomic_radii;					///< Holds the van der Waals radii of the element (in angstroms)
-	
-private:
 	std::string Name;						///< Holds the name of the atom
 	std::string Symbol;						///< Holds the atomic symbol for the atom
 	std::string Category;					///< Holds the category of the atom (e.g., Alkali Metal)
 	std::string NaturalState;				///< Holds the natural state of the atom (e.g., Gas)
 	int atomic_number;						///< Holds the atomic number of the atom
+	
+private:
 	
 };
 

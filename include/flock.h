@@ -37,5 +37,6 @@
 #include "crow.h"
 #include "mesh.h"
 #include "crane.h"
+#include "ibis.h"
 
 #endif
