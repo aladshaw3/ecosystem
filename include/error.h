@@ -80,7 +80,8 @@ not_a_token,
 read_error,
 invalid_console_input,
 explicit_invalid,
-distribution_impossible
+distribution_impossible,
+invalid_isotope
 } error_type;
 
 /// Error function customizes output message based on flag

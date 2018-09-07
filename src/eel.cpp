@@ -36,7 +36,22 @@ Atom::~Atom()
 //Constructor by Name
 Atom::Atom(std::string name)
 {
-	if (name.compare("Hydrogen") == 0)
+	if (name.compare("neutron") == 0)
+	{
+		atomic_weight = 1.0081;
+		oxidation_state = 0;
+		protons = 0;
+		neutrons = 1;
+		electrons = 0;
+		valence_e = 0;
+		Name = "neutron";
+		Symbol = "n";
+		Category = "Diatomic Non-metal";
+		NaturalState = "Gas";
+		atomic_number = 0;
+		atomic_radii = 1.2;
+	}
+	else if (name.compare("Hydrogen") == 0)
 	{
 		atomic_weight = 1.0081;
 		oxidation_state = 1;
@@ -1825,7 +1840,22 @@ Atom::Atom(std::string name)
 //Register an instance of an Atom by atomic number
 Atom::Atom(int number)
 {
-	if (number == 1)
+	if (number == 0)
+	{
+		atomic_weight = 1.0081;
+		oxidation_state = 0;
+		protons = 0;
+		neutrons = 1;
+		electrons = 0;
+		valence_e = 0;
+		Name = "neutron";
+		Symbol = "n";
+		Category = "Diatomic Non-metal";
+		NaturalState = "Gas";
+		atomic_number = 0;
+		atomic_radii = 1.2;
+	}
+	else if (number == 1)
 	{
 		atomic_weight = 1.0081;
 		oxidation_state = 1;
@@ -3614,7 +3644,22 @@ Atom::Atom(int number)
 //Register an instance of an Atom object by it's symbol
 void Atom::Register(std::string Symbol)
 {
-	if (Symbol.compare("H") == 0)
+	if (Symbol.compare("n") == 0)
+	{
+		this->atomic_weight = 1.0081;
+		this->oxidation_state = 0;
+		this->protons = 0;
+		this->neutrons = 1;
+		this->electrons = 0;
+		this->valence_e = 0;
+		this->Name = "neutron";
+		this->Symbol= "n";
+		this->Category = "Diatomic Non-metal";
+		this->NaturalState = "Gas";
+		this->atomic_number = 0;
+		this->atomic_radii = 1.2;
+	}
+	else if (Symbol.compare("H") == 0)
 	{
 		this->atomic_weight = 1.0081;
 		this->oxidation_state = 1;
@@ -5406,7 +5451,22 @@ void Atom::Register(std::string Symbol)
 //Register a instance of an Atom object by it's symbol
 void Atom::Register(int number)
 {
-	if (number == 1)
+	if (number == 0)
+	{
+		this->atomic_weight = 1.0081;
+		this->oxidation_state = 0;
+		this->protons = 0;
+		this->neutrons = 1;
+		this->electrons = 0;
+		this->valence_e = 0;
+		this->Name = "neutron";
+		this->Symbol= "n";
+		this->Category = "Diatomic Non-metal";
+		this->NaturalState = "Gas";
+		this->atomic_number = 0;
+		this->atomic_radii = 1.2;
+	}
+	else if (number == 1)
 	{
 		this->atomic_weight = 1.0081;
 		this->oxidation_state = 1;
@@ -7178,7 +7238,7 @@ void Atom::Register(int number)
 	}
 	else
 	{
-		std::cout << "Given Number: " << number << "\tValid Option: 1-118" << std::endl;
+		std::cout << "Given Number: " << number << "\tValid Option: 0-118" << std::endl;
 		mError(invalid_atom);
 		this->atomic_weight = 0.0;
 		this->oxidation_state = 0;

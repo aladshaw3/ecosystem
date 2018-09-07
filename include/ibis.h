@@ -27,7 +27,7 @@
 /// Enumeration for the list of valid decay modes
 /** List of valid types of radioactive decay. The type of decay dictates
 	how the Isotope object will transform the given isotope. */
-typedef enum {alpha, beta} decay_mode;
+typedef enum {alpha, beta_plus, beta_minus, stable, elec_cap, neut_emiss, prot_emiss} decay_mode;
 
 /// Enumeration for the list of valid units of half-life
 /** List of valid units for half-lifes for better readability of code.*/
