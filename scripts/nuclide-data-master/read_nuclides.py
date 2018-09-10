@@ -23,31 +23,23 @@
 # Library of nuclides from n-ENDF-B-VII.1.endf.list
 import nuclide_data as data
 
-#data.nuclides.keys()
-
-#data.nuclides[92,238]
-
-#data.nuclides[92,238][0].keys()
-
-#data.nuclides[92,238][0]['decay modes']
-
-#data.nuclides[92,238][0]['decay modes'].keys() #what are valid keys for decay modes?
-
-# Pick the modes that correspond to keys
-#data.nuclides[92,238][0]['decay modes']['A']['branch fraction']
-
-#data.nuclides[92,238][0]['decay modes']['key for the mode']['branch fraction']
-
-
 #Object nuclides is a map of nuclide data
-A = 0				#atomic number
-Z = 0				#mass number
+A = 0				#mass number
+Z = 0				#atomic number
 hl = 0				#half-life in seconds
 hl_s = ' '			#half-life string
 decay_mode = ' '	#decay modes
 branch_frac = 0		#branching fractions
 n_modes = 0			#number of decay modes
 symbol = ' '		#Element symbol
+units = 'seconds'	#units for half-life
+hl_in_units = 0		#half-life in the specific units
+stable = False		#stability of the nuclide
+
+#Open yaml file to write to
+file = open('NuclideLibrary.yml', 'w')
+file.write('Nuclides:\n')
+file.write('---\n')
 
 #Creat a list of nuclide keys to sort
 key_list = []
@@ -58,28 +50,90 @@ key_list.sort()
 
 #Iterate through the sorted list
 for n in key_list:
-	A = n[0]
-	Z = n[1]
+	Z = n[0] #atomic num
+	A = n[1] #mass num
 	hl = data.nuclides[n][0]['half-life']
+	stable = data.nuclides[n][0]['stable']
+	
+	#Specify unit basis for half-life
+	if hl <= 60: units = 'seconds'
+	if hl > 60: units = 'minutes'
+	if hl > 3600: units = 'hours'
+	if hl > 86400: units = 'days'
+	if hl > 31557600: units = 'years'
+	
+	#Perform unit conversion
+	if units == 'seconds': hl = hl
+	if units == 'minutes': hl = hl/60
+	if units == 'hours': hl = hl/3600
+	if units == 'days': hl = hl/86400
+	if units == 'years': hl = hl/31557600
+	
+	#Make sure a value is given
+	if hl == 0:
+		if stable == False:
+			hl = 1E-20
+		else:
+			hl = inf
+	
 	hl_s = data.nuclides[n][0]['half-life string']
 	symbol = data.nuclides[n][0]['symbol']
 	
 	#Correct some symbols from database
-	if A == 0: symbol = 'n'
-	if A == 112: symbol = 'Cn'
-	if A == 113: symbol = 'Nh'
-	if A == 114: symbol = 'Fl'
-	if A == 115: symbol = 'Mc'
-	if A == 116: symbol = 'Lv'
-	if A == 117: symbol = 'Ts'
-	if A == 118: symbol = 'Og'
+	if Z == 0: symbol = 'n'
+	if Z == 112: symbol = 'Cn'
+	if Z == 113: symbol = 'Nh'
+	if Z == 114: symbol = 'Fl'
+	if Z == 115: symbol = 'Mc'
+	if Z == 116: symbol = 'Lv'
+	if Z == 117: symbol = 'Ts'
+	if Z == 118: symbol = 'Og'
 	
-	print 'Symbol = ' + str(symbol) + ' A = ' + str(A) + ' Z = ' + str(Z) + ' half-life = ' + str(hl_s)
+#print 'Symbol = ' + str(symbol) + ' Z = ' + str(Z) + ' A = ' + str(A) + ' half-life = ' + str(hl) + ' units = ' + str(units) + ' stability = ' + str(stable)
 	
 	#Loop through the decay modes
 	for m in data.nuclides[n][0]['decay modes']:
 		n_modes = len(data.nuclides[n][0]['decay modes'])
 		decay_mode = m
+		
+		#Rename and group some decay modes
+		if stable == True: decay_mode = 'stable'
+		if m == 'A' or m == 'A<': decay_mode = 'alpha'
+		if m == 'SF' or m == 'EF' or m == 'BF': decay_mode = 'spontaneous-fission'
+		if m == 'EC': decay_mode = 'beta+'
+		if m == 'B-': decay_mode = 'beta-'
+		if m == 'IT': decay_mode = 'isomeric-transition'
+		if m == 'N': decay_mode = 'neutron-emission'
+		if m == 'BN' or m == 'BNA': decay_mode = 'beta-/neutron-emission'
+		if m == 'EP': decay_mode = 'beta+/proton-emission'
+		if m == 'P' or m == '2A': decay_mode = 'proton-emission'
+		if m == 'EA': decay_mode = 'beta+/alpha'
+		if m == '2EC': decay_mode = 'beta+/beta+'
+		if m == '2B-': decay_mode = 'beta-/beta-'
+		if m == 'B2N': decay_mode = 'beta-/neutron-emission/neutron-emission'
+		if m == 'BA' or m == 'B3A': decay_mode = 'beta-/alpha'
+		if m == '2P': decay_mode = 'proton-emission/proton-emission'
+		if m == '2N' or m == '2N?': decay_mode = 'neutron-emission/neutron-emission'
+		if m == 'B3N': decay_mode = 'beta-/neutron-emission/neutron-emission/neutron-emission'
+		if m == 'B4N': decay_mode = 'beta-/neutron-emission/neutron-emission/neutron-emission/neutron-emission'
+		if m == 'E2P': decay_mode = 'beta+/proton-emission/proton-emission'
+		if m == 'E3P': decay_mode = 'beta+/proton-emission/proton-emission/proton-emission'
+		
+		#Make additional corrections to data
+		if m == None: decay_mode = 'stable'
 		branch_frac = data.nuclides[n][0]['decay modes'][m]['branch fraction']
-		print '\t Num modes: ' + str(n_modes) + ' Mode: ' + str(m) + ' branch_frac: ' + str(branch_frac)
+		if decay_mode == 'stable': branch_frac = 0
+		if decay_mode == 'stable': stable = True
+		if branch_frac == None: branch_frac = 0
+		
+		
+		#if decay_mode != 'alpha' and decay_mode != 'beta+' and decay_mode != 'beta-' and decay_mode != 'spontaneous-fission' and decay_mode != 'isomeric-transition' and decay_mode != 'neutron-emission' and decay_mode != 'beta-/neutron-emission' and decay_mode != 'beta+/proton-emission' and decay_mode != 'proton-emission' and decay_mode != 'beta+/alpha' and decay_mode != 'beta+/beta+' and decay_mode != 'beta-/beta-' and decay_mode != 'beta-/neutron-emission/neutron-emission' and decay_mode != 'beta-/alpha' and decay_mode != 'proton-emission/proton-emission' and decay_mode != 'neutron-emission/neutron-emission' and decay_mode != 'stable' and decay_mode != 'beta-/neutron-emission/neutron-emission/neutron-emission' and decay_mode != 'beta-/neutron-emission/neutron-emission/neutron-emission/neutron-emission' and decay_mode != 'beta+/proton-emission/proton-emission' and decay_mode != 'beta+/proton-emission/proton-emission/proton-emission':
+#print str(symbol) + '-' + str(A) + ' Mode: ' + str(decay_mode) + ' branch_frac: ' + str(branch_frac)
 
+	#END decay modes loop
+
+#END key_list of nuclides loop
+
+#Close the yaml file
+file.write('...\n')
+file.close()
