@@ -89,9 +89,15 @@ for n in key_list:
 	if Z == 117: symbol = 'Ts'
 	if Z == 118: symbol = 'Og'
 	
-#print 'Symbol = ' + str(symbol) + ' Z = ' + str(Z) + ' A = ' + str(A) + ' half-life = ' + str(hl) + ' units = ' + str(units) + ' stability = ' + str(stable)
+	#write out basic info
+	file.write('\n- ' + str(symbol) + '-' + str(A) + ':\n')
+	file.write('  atom_num: ' + str(Z) + '\n')
+	file.write('  mass_num: ' + str(A) + '\n')
+	file.write('  half_life: ' + str(hl) + '\n')
+	file.write('  hl_units: ' + str(units) + '\n')
 	
 	#Loop through the decay modes
+	i = 0
 	for m in data.nuclides[n][0]['decay modes']:
 		n_modes = len(data.nuclides[n][0]['decay modes'])
 		decay_mode = m
@@ -126,9 +132,14 @@ for n in key_list:
 		if decay_mode == 'stable': stable = True
 		if branch_frac == None: branch_frac = 0
 		
+		#write out stability condition (only on first iteration)
+		if i == 0: file.write('  stable: ' + str(stable) + '\n')
 		
-		#if decay_mode != 'alpha' and decay_mode != 'beta+' and decay_mode != 'beta-' and decay_mode != 'spontaneous-fission' and decay_mode != 'isomeric-transition' and decay_mode != 'neutron-emission' and decay_mode != 'beta-/neutron-emission' and decay_mode != 'beta+/proton-emission' and decay_mode != 'proton-emission' and decay_mode != 'beta+/alpha' and decay_mode != 'beta+/beta+' and decay_mode != 'beta-/beta-' and decay_mode != 'beta-/neutron-emission/neutron-emission' and decay_mode != 'beta-/alpha' and decay_mode != 'proton-emission/proton-emission' and decay_mode != 'neutron-emission/neutron-emission' and decay_mode != 'stable' and decay_mode != 'beta-/neutron-emission/neutron-emission/neutron-emission' and decay_mode != 'beta-/neutron-emission/neutron-emission/neutron-emission/neutron-emission' and decay_mode != 'beta+/proton-emission/proton-emission' and decay_mode != 'beta+/proton-emission/proton-emission/proton-emission':
-#print str(symbol) + '-' + str(A) + ' Mode: ' + str(decay_mode) + ' branch_frac: ' + str(branch_frac)
+		#write out remaining decay info
+		if i == 0: file.write('  - decay_modes:\n')
+		file.write('    ' + str(decay_mode) + ': ' + str(branch_frac) + '\n')
+		
+		i = i + 1
 
 	#END decay modes loop
 
