@@ -1731,7 +1731,7 @@ Atom::Atom(std::string name)
 		atomic_number = 112;
 		atomic_radii = 1.22;
 	}
-	else if (name.compare("Ununtrium") == 0)
+	else if (name.compare("Nihonium") == 0)
 	{
 		atomic_weight = 286.0;
 		oxidation_state = 1;
@@ -1739,8 +1739,8 @@ Atom::Atom(std::string name)
 		neutrons = 173;
 		electrons = 113;
 		valence_e = 3;
-		Name = "Ununtrium";
-		Symbol = "Uut";
+		Name = "Nihonium";
+		Symbol = "Nh";
 		Category = "Post-Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 113;
@@ -1761,7 +1761,7 @@ Atom::Atom(std::string name)
 		atomic_number = 114;
 		atomic_radii = 1.74;
 	}
-	else if (name.compare("Ununpentium") == 0)
+	else if (name.compare("Moscovium") == 0)
 	{
 		atomic_weight = 289.0;
 		oxidation_state = 1;
@@ -1769,8 +1769,8 @@ Atom::Atom(std::string name)
 		neutrons = 174;
 		electrons = 115;
 		valence_e = 5;
-		Name = "Ununpentium";
-		Symbol = "Uup";
+		Name = "Moscovium";
+		Symbol = "Mc";
 		Category = "Post-Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 115;
@@ -1791,7 +1791,7 @@ Atom::Atom(std::string name)
 		atomic_number = 116;
 		atomic_radii = 1.64;
 	}
-	else if (name.compare("Ununseptium") == 0)
+	else if (name.compare("Tennessine") == 0)
 	{
 		atomic_weight = 294.0;
 		oxidation_state = 1;
@@ -1799,14 +1799,14 @@ Atom::Atom(std::string name)
 		neutrons = 177;
 		electrons = 117;
 		valence_e = 7;
-		Name = "Ununseptium";
-		Symbol = "Uus";
+		Name = "Tennessine";
+		Symbol = "Ts";
 		Category = "Metalloid";
 		NaturalState = "Solid";
 		atomic_number = 117;
 		atomic_radii = 1.57;
 	}
-	else if (name.compare("Ununoctium") == 0)
+	else if (name.compare("Oganesson") == 0)
 	{
 		atomic_weight = 294.0;
 		oxidation_state = 0;
@@ -1814,8 +1814,8 @@ Atom::Atom(std::string name)
 		neutrons = 176;
 		electrons = 118;
 		valence_e = 8;
-		Name = "Ununoctium";
-		Symbol = "Uuo";
+		Name = "Oganesson";
+		Symbol = "Og";
 		Category = "Nobel Gas";
 		NaturalState = "Solid";
 		atomic_number = 118;
@@ -3543,8 +3543,8 @@ Atom::Atom(int number)
 		neutrons = 173;
 		electrons = 113;
 		valence_e = 3;
-		Name = "Ununtrium";
-		Symbol = "Uut";
+		Name = "Nihonium";
+		Symbol = "Nh";
 		Category = "Post-Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 113;
@@ -3573,8 +3573,8 @@ Atom::Atom(int number)
 		neutrons = 174;
 		electrons = 115;
 		valence_e = 5;
-		Name = "Ununpentium";
-		Symbol = "Uup";
+		Name = "Moscovium";
+		Symbol = "Mc";
 		Category = "Post-Transition Metal";
 		NaturalState = "Solid";
 		atomic_number = 115;
@@ -3603,8 +3603,8 @@ Atom::Atom(int number)
 		neutrons = 177;
 		electrons = 117;
 		valence_e = 7;
-		Name = "Ununseptium";
-		Symbol = "Uus";
+		Name = "Tennessine";
+		Symbol = "Ts";
 		Category = "Metalloid";
 		NaturalState = "Solid";
 		atomic_number = 117;
@@ -3618,8 +3618,8 @@ Atom::Atom(int number)
 		neutrons = 176;
 		electrons = 118;
 		valence_e = 7;
-		Name = "Ununoctium";
-		Symbol = "Uuo";
+		Name = "Oganesson";
+		Symbol = "Og";
 		Category = "Nobel Gas";
 		NaturalState = "Solid";
 		atomic_number = 118;
@@ -5339,7 +5339,7 @@ void Atom::Register(std::string Symbol)
 		this->atomic_number = 112;
 		this->atomic_radii = 1.22;
 	}
-	else if (Symbol.compare("Uut") == 0)
+	else if (Symbol.compare("Nh") == 0)
 	{
 		this->atomic_weight = 286.0;
 		this->oxidation_state = 1;
@@ -5347,8 +5347,8 @@ void Atom::Register(std::string Symbol)
 		this->neutrons = 173;
 		this->electrons = 113;
 		this->valence_e = 3;
-		this->Name = "Ununtrium";
-		this->Symbol= "Uut";
+		this->Name = "Nihonium";
+		this->Symbol= "Nh";
 		this->Category = "Post-Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 113;
@@ -5369,7 +5369,7 @@ void Atom::Register(std::string Symbol)
 		this->atomic_number = 114;
 		this->atomic_radii = 1.74;
 	}
-	else if (Symbol.compare("Uup") == 0)
+	else if (Symbol.compare("Mc") == 0)
 	{
 		this->atomic_weight = 289.0;
 		this->oxidation_state = 1;
@@ -5377,8 +5377,8 @@ void Atom::Register(std::string Symbol)
 		this->neutrons = 174;
 		this->electrons = 115;
 		this->valence_e = 5;
-		this->Name = "Ununpentium";
-		this->Symbol= "Uup";
+		this->Name = "Moscovium";
+		this->Symbol= "Mc";
 		this->Category = "Post-Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 115;
@@ -5399,7 +5399,7 @@ void Atom::Register(std::string Symbol)
 		this->atomic_number = 116;
 		this->atomic_radii = 1.64;
 	}
-	else if (Symbol.compare("Uus") == 0)
+	else if (Symbol.compare("Ts") == 0)
 	{
 		this->atomic_weight = 294.0;
 		this->oxidation_state = 1;
@@ -5407,14 +5407,14 @@ void Atom::Register(std::string Symbol)
 		this->neutrons = 177;
 		this->electrons = 117;
 		this->valence_e = 7;
-		this->Name = "Ununseptium";
-		this->Symbol= "Uus";
+		this->Name = "Tennessine";
+		this->Symbol= "Ts";
 		this->Category = "Metalloid";
 		this->NaturalState = "Solid";
 		this->atomic_number = 117;
 		this->atomic_radii = 1.57;
 	}
-	else if (Symbol.compare("Uuo") == 0)
+	else if (Symbol.compare("Og") == 0)
 	{
 		this->atomic_weight = 294.0;
 		this->oxidation_state = 0;
@@ -5422,8 +5422,8 @@ void Atom::Register(std::string Symbol)
 		this->neutrons = 176;
 		this->electrons = 118;
 		this->valence_e = 8;
-		this->Name = "Ununoctium";
-		this->Symbol= "Uuo";
+		this->Name = "Oganesson";
+		this->Symbol= "Og";
 		this->Category = "Nobel Gas";
 		this->NaturalState = "Solid";
 		this->atomic_number = 118;
@@ -7154,8 +7154,8 @@ void Atom::Register(int number)
 		this->neutrons = 173;
 		this->electrons = 113;
 		this->valence_e = 3;
-		this->Name = "Ununtrium";
-		this->Symbol= "Uut";
+		this->Name = "Nihonium";
+		this->Symbol= "Nh";
 		this->Category = "Post-Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 113;
@@ -7184,8 +7184,8 @@ void Atom::Register(int number)
 		this->neutrons = 174;
 		this->electrons = 115;
 		this->valence_e = 5;
-		this->Name = "Ununpentium";
-		this->Symbol= "Uup";
+		this->Name = "Moscovium";
+		this->Symbol= "Mc";
 		this->Category = "Post-Transition Metal";
 		this->NaturalState = "Solid";
 		this->atomic_number = 115;
@@ -7214,8 +7214,8 @@ void Atom::Register(int number)
 		this->neutrons = 177;
 		this->electrons = 117;
 		this->valence_e = 7;
-		this->Name = "Ununseptium";
-		this->Symbol= "Uus";
+		this->Name = "Tennessine";
+		this->Symbol= "Ts";
 		this->Category = "Metalloid";
 		this->NaturalState = "Solid";
 		this->atomic_number = 117;
@@ -7229,8 +7229,8 @@ void Atom::Register(int number)
 		this->neutrons = 176;
 		this->electrons = 118;
 		this->valence_e = 8;
-		this->Name = "Ununoctium";
-		this->Symbol= "Uuo";
+		this->Name = "Oganesson";
+		this->Symbol= "Og";
 		this->Category = "Nobel Gas";
 		this->NaturalState = "Solid";
 		this->atomic_number = 118;
@@ -7595,7 +7595,7 @@ int EEL_TESTS()
 	
 	//--------------------Atom Tests---------------------------
 	std::string name1 = "Hydrogen";
-	Atom particle1(name1), particle2("Ununoctium");
+	Atom particle1(name1), particle2("Oganesson");
 	particle1.DisplayInfo();
 	particle2.DisplayInfo();
 	
