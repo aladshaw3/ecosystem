@@ -91,6 +91,7 @@ for n in key_list:
 	
 	#write out basic info
 	file.write('\n- ' + str(symbol) + '-' + str(A) + ':\n')
+	file.write('  symbol: ' + str(symbol) + '\n')
 	file.write('  atom_num: ' + str(Z) + '\n')
 	file.write('  mass_num: ' + str(A) + '\n')
 	file.write('  half_life: ' + str(hl) + '\n')
