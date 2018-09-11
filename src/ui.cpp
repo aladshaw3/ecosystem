@@ -75,6 +75,7 @@ void aui_help()
 	puts("(14) CROW (Coupled Reaction Object Workspace)\n");
 	puts("(15) MESH (NO ACRONYM) - Runs tests associated with mesh objects\n");
 	puts("(16) CRANE (Cloud Rise After Nuclear Explosion) - Runs tests associated with simulating nuclear debris clouds\n");
+	puts("(17) IBIS (Implicit Branching Isotope System) - Runs tests associated with creating branched nuclide decay chains\n");
 	
 	puts("        CURRENTLY AVAILABLE EXECUTABLES        ");
 	puts("-----------------------------------------------\n");
@@ -150,6 +151,9 @@ void bui_help()
 	
 	puts("(16) CRANE (Cloud Rise After Nuclear Explosion) - Runs tests associated with simulating nuclear debris clouds\n");
 	puts("\tThis runs tests associated with the cloud rise estimations following a nuclear explosion. There are a series of 9 coupled ODEs that must be solved. Output for each timestep in the test case is provided in an output file.\n");
+	
+	puts("(17) IBIS (Implicit Branching Isotope System) - Runs tests associated with creating branched nuclide decay chains\n");
+	puts("\tThis runs tests using the Implicit Branching Isotope System. Nuclide information is read in from the NuclideLibrary.yml file located under the database folder of the executable directory. Tests include creating isotope objects, predicting branch chains from that nuclide, and organizing isotopes in order of their mass numbers.\n");
 	
 	puts("        CURRENTLY AVAILABLE EXECUTABLES        ");
 	puts("-----------------------------------------------\n");
@@ -340,6 +344,11 @@ bool valid_test_string(const std::string &input, UI_DATA *ui_dat)
 	else if (allLower(input) == "crane")
 	{
 		ui_dat->option = crane;
+		valid_input = true;
+	}
+	else if (allLower(input) == "ibis")
+	{
+		ui_dat->option = ibis;
 		valid_input = true;
 	}
 	else
@@ -698,7 +707,7 @@ bool valid_input_tests(UI_DATA *ui_dat)
 	std::cout << "(7)  MOLA        (8)  MONKFISH     (9)  SANDBOX\n";
 	std::cout << "(10) SCOPSOWL    (11) SHARK        (12) SKUA\n";
 	std::cout << "(13) DOVE        (14) CROW         (15) MESH\n";
-	std::cout << "(16) CRANE        \n";
+	std::cout << "(16) CRANE       (17) IBIS \n";
 	std::cout << "\nChoice: ";
 	std::cin >> ui_dat->user_input[0];
 	std::cout << std::endl;
@@ -838,6 +847,13 @@ bool valid_input_tests(UI_DATA *ui_dat)
 			case 16:
 			{
 				ui_dat->option = crane;
+				valid_input = true;
+				break;
+			}
+				
+			case 17:
+			{
+				ui_dat->option = ibis;
 				valid_input = true;
 				break;
 			}
@@ -1106,6 +1122,10 @@ int run_test(UI_DATA *ui_dat)
 			
 		case crane:
 			success = CRANE_TESTS();
+			break;
+			
+		case ibis:
+			success = IBIS_TESTS();
 			break;
 			
 		default:

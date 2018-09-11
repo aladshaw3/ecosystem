@@ -71,6 +71,10 @@ The following message provides information on running this software with the bas
 
 	This runs tests associated with the cloud rise estimations following a nuclear explosion. There are a series of 9 coupled ODEs that must be solved. Output for each timestep in the test case is provided in an output file.
 
+(17) IBIS (Implicit Branching Isotope System) - Runs tests associated with creating branched nuclide decay chains
+
+	This runs tests using the Implicit Branching Isotope System. Nuclide information is read in from the NuclideLibrary.yml file located under the database folder of the executable directory. Tests include creating isotope objects, predicting branch chains from that nuclide, and organizing isotopes in order of their mass numbers.
+
         CURRENTLY AVAILABLE EXECUTABLES        
 -----------------------------------------------
 

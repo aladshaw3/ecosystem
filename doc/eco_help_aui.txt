@@ -68,6 +68,7 @@ Usage Notes
 (14) CROW (Coupled Reaction Object Workspace)
 (15) MESH (NO ACRONYM) - Runs tests associated with mesh objects
 (16) CRANE (Cloud Rise After Nuclear Explosion) - Runs tests associated with simulating nuclear debris clouds
+(17) IBIS (Implicit Branching Isotope System) - Runs tests associated with creating branched nuclide decay chains
 
         CURRENTLY AVAILABLE EXECUTABLES        
 -----------------------------------------------

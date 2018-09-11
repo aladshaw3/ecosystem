@@ -22,6 +22,7 @@
 #define IBIS_HPP_
 
 #include "eel.h"
+#include "yaml_wrapper.h"
 
 
 /// Enumeration for the list of valid decay modes
@@ -66,6 +67,8 @@ protected:
 	double half_life;									///< Half-life of the isotope (in hl_units)
 	time_units hl_units;								///< Units given for the half-life
 	int isotope_number;									///< isotope number for the object
+	
+	yaml_cpp_class *nuclides;							///< Pointer to a yaml object storing the digital library of all nuclides
 	
 	void setConstants();								///< Set the decay_modes, branch_ratios, and other info based on atomic and isotope numbers
 	void computeDecayRate();							///< Compute the decay rate (in 1/s) based on the half-life
