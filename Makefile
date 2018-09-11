@@ -54,8 +54,10 @@ clean:
 install:
 	cp $(EXE) $(INSDIR)
 	mkdir $(INSDIR)/ecodoc
+	mkdir $(INSDIR)/database
 	cp doc/eco_help_bui.txt $(INSDIR)/ecodoc
 	cp doc/eco_help_aui.txt $(INSDIR)/ecodoc
+	cp database/NuclideLibrary.yml $(INSDIR)/database
 cleanall:
 	rm -f $(EXE) $(ODIR)/*.o *~ core $(INCDIR)/*~
 	rm -f $(INSDIR)/$(EXE)
