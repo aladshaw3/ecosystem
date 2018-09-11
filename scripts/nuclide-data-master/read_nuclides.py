@@ -35,11 +35,11 @@ symbol = ' '		#Element symbol
 units = 'seconds'	#units for half-life
 hl_in_units = 0		#half-life in the specific units
 stable = False		#stability of the nuclide
+AW = 0				#atomic weight of the nuclide
+iso = False			#True if nuclide is an excited state
 
 #Open yaml file to write to
-file = open('NuclideLibrary.yml', 'w')
-file.write('Nuclides:\n')
-file.write('---\n')
+file = open('../../database/NuclideLibrary.yml', 'w')
 
 #Creat a list of nuclide keys to sort
 key_list = []
@@ -54,6 +54,14 @@ for n in key_list:
 	A = n[1] #mass num
 	hl = data.nuclides[n][0]['half-life']
 	stable = data.nuclides[n][0]['stable']
+	try:
+		AW = data.weight(Z,A,0)
+	except:
+		AW = A
+	iso = data.nuclides[n][0]['isomeric']
+
+	#Manual correction for blanks
+	if not AW: AW = A
 	
 	#Specify unit basis for half-life
 	if hl <= 60: units = 'seconds'
@@ -90,12 +98,15 @@ for n in key_list:
 	if Z == 118: symbol = 'Og'
 	
 	#write out basic info
-	file.write('\n- ' + str(symbol) + '-' + str(A) + ':\n')
-	file.write('  symbol: ' + str(symbol) + '\n')
-	file.write('  atom_num: ' + str(Z) + '\n')
-	file.write('  mass_num: ' + str(A) + '\n')
-	file.write('  half_life: ' + str(hl) + '\n')
-	file.write('  hl_units: ' + str(units) + '\n')
+	file.write(str(symbol) + '-' + str(A) + ':\n')
+	file.write('---\n')
+	file.write('symbol: ' + str(symbol) + '\n')
+	file.write('atom_num: ' + str(Z) + '\n')
+	file.write('mass_num: ' + str(A) + '\n')
+	file.write('atom_weight: ' + str(AW) + '\n')
+	file.write('isomeric: ' + str(iso) + '\n')
+	file.write('half_life: ' + str(hl) + '\n')
+	file.write('hl_units: ' + str(units) + '\n')
 	
 	#Loop through the decay modes
 	i = 0
@@ -134,18 +145,21 @@ for n in key_list:
 		if branch_frac == None: branch_frac = 0
 		
 		#write out stability condition (only on first iteration)
-		if i == 0: file.write('  stable: ' + str(stable) + '\n')
+		if i == 0: file.write('stable: ' + str(stable) + '\n')
 		
 		#write out remaining decay info
-		if i == 0: file.write('  - decay_modes:\n')
-		file.write('    ' + str(decay_mode) + ': ' + str(branch_frac) + '\n')
+		if i == 0: file.write('\n- decay_modes:\n')
+		file.write('  - mode' + str(i) + ':\n')
+		file.write('    type: ' + str(decay_mode) + '\n')
+		file.write('    branch_frac: ' + str(branch_frac) + '\n')
+		file.write('\n')
 		
 		i = i + 1
 
 	#END decay modes loop
 
+	file.write('...\n\n')
 #END key_list of nuclides loop
 
 #Close the yaml file
-file.write('...\n')
 file.close()
