@@ -497,6 +497,7 @@ public:
 	YamlWrapper& getYamlWrapper();						///< Returns reference to the YamlWrapper Object
 	
 	void DisplayContents();								///< Print out the contents of the read to the console window
+	void DeleteContents();								///< Delete the data in the yaml_wrapper to free up space 
 	
 protected:
 	

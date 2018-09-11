@@ -49,6 +49,8 @@ public:
 	Isotope();											///< Default constructor
 	~Isotope();											///< Default destructor
 	
+	void loadNuclides(yaml_cpp_class &data);			///< Function to load the nuclide library into the pointer
+	void unloadNuclides();								///< Delete the pointer to nuclide library to free space
 	void registerIsotope(std::string isotope_name);		///< Register an isotope given the isotope name
 	void registerIsotope(std::string symbol, int iso);	///< Register an isotope given an atomic symbol (e.g., H) and isotope number (e.g., 2)
 	void registerIsotope(int atom_num, int iso_num);	///< Register an isotope given both an atomic and isotope number
@@ -70,8 +72,9 @@ protected:
 	
 	yaml_cpp_class *nuclides;							///< Pointer to a yaml object storing the digital library of all nuclides
 	
-	void setConstants();								///< Set the decay_modes, branch_ratios, and other info based on atomic and isotope numbers
+	void setConstants();								///< Set the decay_modes, branch_ratios, and other info based on load library
 	void computeDecayRate();							///< Compute the decay rate (in 1/s) based on the half-life
+	YamlWrapper& getNuclideLibrary();					///< Return reference to the nuclide library
 	
 private:
 	

@@ -2462,6 +2462,12 @@ void yaml_cpp_class::DisplayContents()
 	this->yaml_wrapper.DisplayContents();
 }
 
+//Delete data
+void yaml_cpp_class::DeleteContents()
+{
+	this->yaml_wrapper.clear();
+}
+
 //Return reference to the YamlWrapper object
 YamlWrapper& yaml_cpp_class::getYamlWrapper()
 {

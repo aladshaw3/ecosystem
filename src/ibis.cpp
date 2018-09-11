@@ -177,6 +177,19 @@ Isotope::~Isotope()
 {
 	decay_modes.clear();
 	branch_ratios.clear();
+	nuclides->DeleteContents();
+}
+
+//Load library
+void Isotope::loadNuclides(yaml_cpp_class &data)
+{
+	this->nuclides = &data;
+}
+
+//Unload library
+void Isotope::unloadNuclides()
+{
+	this->nuclides->DeleteContents();
 }
 
 //Register via atomic number and isotop number
@@ -184,8 +197,6 @@ void Isotope::registerIsotope(int atom_num, int iso_num)
 {
 	this->Register(atom_num);
 	this->isotope_number = iso_num;
-	if (this->Neutrons() + atom_num != iso_num)
-		this->editAtomicWeight(this->AtomicWeight() + (iso_num - atom_num));
 	this->editNeutrons(iso_num - atom_num);
 	
 	this->setConstants();
@@ -228,6 +239,12 @@ void Isotope::computeDecayRate()
 	
 }
 
+//Return library
+YamlWrapper& Isotope::getNuclideLibrary()
+{
+	return this->nuclides->getYamlWrapper();
+}
+
 /*
  *	-------------------------------------------------------------------------------------
  *								End: Ibis Class Definitions
@@ -237,6 +254,20 @@ void Isotope::computeDecayRate()
 int IBIS_TESTS()
 {
 	int success = 0;
+	yaml_cpp_class nuc_data;
+	
+	//Read in the library (uses ~ 7.3 MB to hold)
+	nuc_data.executeYamlRead("database/NuclideLibrary.yml");
+	
+	//Create test isotope
+	Isotope a, b;
+	a.loadNuclides(nuc_data);
+	b.loadNuclides(nuc_data);
+	
+	a.unloadNuclides();
+	b.unloadNuclides();
+	
+	nuc_data.DisplayContents();
 	
 	return success;
 }
