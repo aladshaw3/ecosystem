@@ -37,6 +37,7 @@ hl_in_units = 0		#half-life in the specific units
 stable = False		#stability of the nuclide
 AW = 0				#atomic weight of the nuclide
 iso = False			#True if nuclide is an excited state
+iso_name = ' '		#Name of isotope for specific-isotope decay
 
 #Open yaml file to write to
 file = open('../../database/NuclideLibrary.yml', 'w')
@@ -147,11 +148,29 @@ for n in key_list:
 		#write out stability condition (only on first iteration)
 		if i == 0: file.write('stable: ' + str(stable) + '\n')
 		
+		#Check for specific atom emission
+		if decay_mode != 'stable' and decay_mode != 'alpha' and decay_mode != 'spontaneous-fission' and decay_mode != 'beta+' and decay_mode != 'beta-' and decay_mode != 'isomeric-transition' and decay_mode != 'neutron-emission' and decay_mode != 'beta-/neutron-emission' and decay_mode != 'beta+/proton-emission' and decay_mode != 'proton-emission' and decay_mode != 'beta+/alpha' and decay_mode != 'beta+/beta+' and decay_mode != 'beta-/beta-' and decay_mode != 'beta-/neutron-emission/neutron-emission' and decay_mode != 'beta-/alpha' and decay_mode != 'proton-emission/proton-emission' and decay_mode != 'neutron-emission/neutron-emission' and decay_mode != 'beta-/neutron-emission/neutron-emission/neutron-emission' and decay_mode != 'beta-/neutron-emission/neutron-emission/neutron-emission/neutron-emission' and decay_mode != 'beta+/proton-emission/proton-emission' and decay_mode != 'beta+/proton-emission/proton-emission/proton-emission':
+			
+			decay_mode = 'specific-isotope'
+			
+			#Set the isotope name for the specific isotope emission during decay
+			try:
+				tempA = data.Nuclide(m).A
+				tempEle = data.Nuclide(m).element
+				iso_name = str(tempEle) + '-' + str(tempA)
+			except:
+				tempA = int(data.weight(m))
+				tempEle = m
+				iso_name = str(tempEle) + '-' + str(tempA)
+		
+		#End if statement
+		
 		#write out remaining decay info
 		if i == 0: file.write('\n- decay_modes:\n')
 		file.write('  - mode' + str(i) + ':\n')
 		file.write('    type: ' + str(decay_mode) + '\n')
 		file.write('    branch_frac: ' + str(branch_frac) + '\n')
+		if decay_mode == 'specific-isotope': file.write('    isotope: ' + str(iso_name) + '\n')
 		file.write('\n')
 		
 		i = i + 1
@@ -160,6 +179,8 @@ for n in key_list:
 
 	file.write('...\n\n')
 #END key_list of nuclides loop
+
+print '\nYaml Library Construction Complete!\n'
 
 #Close the yaml file
 file.close()

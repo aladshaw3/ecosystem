@@ -30993,8 +30993,9 @@ stable: False
     branch_frac: 0.009
 
   - mode1:
-    type: 12C
+    type: specific-isotope
     branch_frac: 3.4e-05
+    isotope: C-12
 
   - mode2:
     type: beta+/proton-emission
@@ -55409,8 +55410,9 @@ stable: False
     branch_frac: 1.0
 
   - mode1:
-    type: 14C
+    type: specific-isotope
     branch_frac: 1e-14
+    isotope: C-14
 
 ...
 
@@ -55431,8 +55433,9 @@ stable: False
     branch_frac: 1.0
 
   - mode1:
-    type: 14C
+    type: specific-isotope
     branch_frac: 3e-10
+    isotope: C-14
 
 ...
 
@@ -55453,8 +55456,9 @@ stable: False
     branch_frac: 1.0
 
   - mode1:
-    type: 14C
+    type: specific-isotope
     branch_frac: 8.9e-10
+    isotope: C-14
 
 ...
 
@@ -55475,8 +55479,9 @@ stable: False
     branch_frac: 1.0
 
   - mode1:
-    type: 14C
+    type: specific-isotope
     branch_frac: 4e-11
+    isotope: C-14
 
 ...
 
@@ -55515,8 +55520,9 @@ stable: False
     branch_frac: 1.0
 
   - mode1:
-    type: 14C
+    type: specific-isotope
     branch_frac: 3.2e-11
+    isotope: C-14
 
 ...
 
@@ -56093,8 +56099,9 @@ stable: False
     branch_frac: 1.0
 
   - mode1:
-    type: 14C
+    type: specific-isotope
     branch_frac: 4e-14
+    isotope: C-14
 
 ...
 
@@ -56727,8 +56734,9 @@ stable: False
     branch_frac: 1.0
 
   - mode1:
-    type: 20O
+    type: specific-isotope
     branch_frac: 1e-13
+    isotope: O-20
 
 ...
 
@@ -56767,8 +56775,9 @@ stable: False
     branch_frac: 1.0
 
   - mode1:
-    type: 24Ne
+    type: specific-isotope
     branch_frac: 6e-13
+    isotope: Ne-24
 
   - mode2:
     type: spontaneous-fission
@@ -57797,8 +57806,9 @@ stable: False
     branch_frac: 1e-12
 
   - mode2:
-    type: 22Ne
+    type: specific-isotope
     branch_frac: 5e-14
+    isotope: Ne-22
 
 ...
 
@@ -57863,16 +57873,18 @@ stable: False
     branch_frac: 1.0
 
   - mode1:
-    type: 24Ne
+    type: specific-isotope
     branch_frac: 9e-12
+    isotope: Ne-24
 
   - mode2:
     type: spontaneous-fission
     branch_frac: 6e-13
 
   - mode3:
-    type: 28Mg
+    type: specific-isotope
     branch_frac: 1e-15
+    isotope: Mg-28
 
 ...
 
@@ -57893,16 +57905,18 @@ stable: False
     branch_frac: 1.0
 
   - mode1:
-    type: Mg
+    type: specific-isotope
     branch_frac: 1e-13
+    isotope: Mg-24
 
   - mode2:
     type: spontaneous-fission
     branch_frac: 1.6e-11
 
   - mode3:
-    type: Ne
+    type: specific-isotope
     branch_frac: 9e-14
+    isotope: Ne-20
 
 ...
 
@@ -57927,12 +57941,14 @@ stable: False
     branch_frac: 7e-11
 
   - mode2:
-    type: 28Mg
+    type: specific-isotope
     branch_frac: 8e-12
+    isotope: Mg-28
 
   - mode3:
-    type: Ne
+    type: specific-isotope
     branch_frac: 8e-12
+    isotope: Ne-20
 
 ...
 
@@ -59577,8 +59593,9 @@ stable: False
     branch_frac: 1.0
 
   - mode1:
-    type: 34Si
+    type: specific-isotope
     branch_frac: 1e-16
+    isotope: Si-34
 
   - mode2:
     type: spontaneous-fission
