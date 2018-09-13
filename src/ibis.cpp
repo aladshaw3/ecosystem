@@ -31,12 +31,15 @@ double time_conversion(time_units end_unit, double start_value, time_units start
 					
 				case hours:
 					end_value = start_value * 60.0 * 60.0;
+					break;
 					
 				case days:
 					end_value = start_value * 60.0 * 60.0 * 24.0;
+					break;
 					
 				case years:
 					end_value = start_value * 60.0 * 60.0 * 24.0 * 365.25;
+					break;
 					
 				default:
 					end_value = start_value;
@@ -46,7 +49,7 @@ double time_conversion(time_units end_unit, double start_value, time_units start
 			
 		case minutes:
 			switch (start_unit)
-		{
+			{
 			case seconds:
 				end_value = start_value / 60.0;
 				break;
@@ -57,22 +60,25 @@ double time_conversion(time_units end_unit, double start_value, time_units start
 				
 			case hours:
 				end_value = start_value * 60.0;
+				break;
 				
 			case days:
 				end_value = start_value * 60.0 * 24.0;
+				break;
 				
 			case years:
 				end_value = start_value * 60.0 * 24.0 * 365.25;
+				break;
 				
 			default:
 				end_value = start_value;
 				break;
-		}
+			}
 			break;
 			
 		case hours:
 			switch (start_unit)
-		{
+			{
 			case seconds:
 				end_value = start_value / 60.0 / 60.0;
 				break;
@@ -83,22 +89,25 @@ double time_conversion(time_units end_unit, double start_value, time_units start
 				
 			case hours:
 				end_value = start_value;
+				break;
 				
 			case days:
 				end_value = start_value * 24.0;
+				break;
 				
 			case years:
 				end_value = start_value * 24.0 * 365.25;
+				break;
 				
 			default:
 				end_value = start_value;
 				break;
-		}
+			}
 			break;
 			
 		case days:
 			switch (start_unit)
-		{
+			{
 			case seconds:
 				end_value = start_value / 60.0 / 60.0 / 24.0;
 				break;
@@ -109,22 +118,25 @@ double time_conversion(time_units end_unit, double start_value, time_units start
 				
 			case hours:
 				end_value = start_value / 24.0;
+				break;
 				
 			case days:
 				end_value = start_value;
+				break;
 				
 			case years:
 				end_value = start_value * 365.25;
+				break;
 				
 			default:
 				end_value = start_value;
 				break;
-		}
+			}
 			break;
 			
 		case years:
 			switch (start_unit)
-		{
+			{
 			case seconds:
 				end_value = start_value / 60.0 / 60.0 / 24.0 / 365.25;
 				break;
@@ -135,17 +147,20 @@ double time_conversion(time_units end_unit, double start_value, time_units start
 				
 			case hours:
 				end_value = start_value / 24.0 / 365.25;
+				break;
 				
 			case days:
 				end_value = start_value / 365.25;
+				break;
 				
 			case years:
 				end_value = start_value;
+				break;
 				
 			default:
 				end_value = start_value;
 				break;
-		}
+			}
 			break;
 			
 		default:
@@ -154,6 +169,226 @@ double time_conversion(time_units end_unit, double start_value, time_units start
 	}
 	
 	return end_value;
+}
+
+//Pick out time units
+time_units timeunits_choice(std::string &choice)
+{
+	time_units units = seconds;
+	
+	std::string copy = choice;
+	for (int i=0; i<copy.size(); i++)
+		copy[i] = tolower(copy[i]);
+	
+	if (copy == "seconds" || copy == "s")
+		units = seconds;
+	else if (copy == "minutes" || copy == "min")
+		units = minutes;
+	else if (copy == "hours" || copy == "hr" || copy == "h")
+		units = hours;
+	else if (copy == "days" || copy == "d")
+		units = days;
+	else if (copy == "years" || copy == "yr" || copy == "y")
+		units = years;
+	else
+		units = seconds;
+	
+	return units;
+}
+
+//Pick decay mode
+decay_mode decaymode_choice(std::string &choice)
+{
+	decay_mode mode = stable;
+	
+	std::string copy = choice;
+	for (int i=0; i<copy.size(); i++)
+		copy[i] = tolower(copy[i]);
+	
+	if (copy == "stable")
+		mode = stable;
+	else if (copy == "alpha")
+		mode = alpha;
+	else if (copy == "spontaneous-fission")
+		mode = spon_fiss;
+	else if (copy == "beta+")
+		mode = beta_plus;
+	else if (copy == "beta-")
+		mode = beta_min;
+	else if (copy == "isomeric-transition")
+		mode = iso_trans;
+	else if (copy == "neutron-emission")
+		mode = neutron_em;
+	else if (copy == "beta-/neutron-emission")
+		mode = beta_min_neutron_em;
+	else if (copy == "beta+/proton-emission")
+		mode = beta_plus_proton_em;
+	else if (copy == "proton-emission")
+		mode = proton_em;
+	else if (copy == "beta+/alpha")
+		mode = beta_plus_alpha;
+	else if (copy == "beta+/beta+")
+		mode = beta_plus_beta_plus;
+	else if (copy == "beta-/beta-")
+		mode = beta_min_beta_min;
+	else if (copy == "beta-/neutron-emission/neutron-emission")
+		mode = beta_min_2neutron_em;
+	else if (copy == "beta-/alpha")
+		mode = beta_min_alpha;
+	else if (copy == "proton-emission/proton-emission")
+		mode = proton_em_proton_em;
+	else if (copy == "neutron-emission/neutron-emission")
+		mode = neutron_em_neutron_em;
+	else if (copy == "beta-/neutron-emission/neutron-emission/neutron-emission")
+		mode = beta_min_3neutron_em;
+	else if (copy == "beta-/neutron-emission/neutron-emission/neutron-emission/neutron-emission")
+		mode = beta_min_4neutron_em;
+	else if (copy == "beta+/proton-emission/proton-emission")
+		mode = beta_plus_2proton_em;
+	else if (copy == "beta+/proton-emission/proton-emission/proton-emission")
+		mode = beta_plus_3proton_em;
+	else if (copy == "specific-isotope")
+		mode = specific_isotope;
+	else
+		mode = stable;
+	
+	return mode;
+}
+
+// Return name of mode
+std::string decaymode_string(decay_mode mode)
+{
+	std::string name = "stable";
+	
+	switch (mode)
+	{
+		case stable:
+			name = "stable";
+			break;
+			
+		case alpha:
+			name = "alpha";
+			break;
+			
+		case spon_fiss:
+			name = "spontaneous-fission";
+			break;
+			
+		case beta_plus:
+			name = "beta+";
+			break;
+			
+		case beta_min:
+			name = "beta-";
+			break;
+			
+		case iso_trans:
+			name = "isomeric-transition";
+			break;
+			
+		case neutron_em:
+			name = "neutron-emission";
+			break;
+			
+		case beta_min_neutron_em:
+			name = "beta-/neutron-emission";
+			break;
+			
+		case beta_plus_proton_em:
+			name = "beta+/proton-emission";
+			break;
+			
+		case proton_em:
+			name = "proton-emission";
+			break;
+			
+		case beta_plus_alpha:
+			name = "beta+/alpha";
+			break;
+			
+		case beta_plus_beta_plus:
+			name = "beta+/beta+";
+			break;
+			
+		case beta_min_beta_min:
+			name = "beta-/beta-";
+			break;
+			
+		case beta_min_2neutron_em:
+			name = "beta-/neutron-emission/neutron-emission";
+			break;
+			
+		case beta_min_alpha:
+			name = "beta-/alpha";
+			break;
+			
+		case proton_em_proton_em:
+			name = "proton-emission/proton-emission";
+			break;
+			
+		case neutron_em_neutron_em:
+			name = "neutron-emission/neutron-emission";
+			break;
+			
+		case beta_min_3neutron_em:
+			name = "beta-/neutron-emission/neutron-emission/neutron-emission";
+			break;
+			
+		case beta_min_4neutron_em:
+			name = "beta-/neutron-emission/neutron-emission/neutron-emission/neutron-emission";
+			break;
+			
+		case beta_plus_2proton_em:
+			name = "beta+/proton-emission/proton-emission";
+			break;
+			
+		case beta_plus_3proton_em:
+			name = "beta+/proton-emission/proton-emission/proton-emission";
+			break;
+			
+		case specific_isotope:
+			name = "specific-isotope";
+			break;
+			
+		default:
+			break;
+	}
+	
+	return name;
+}
+
+// String of units
+std::string timeunits_string(time_units units)
+{
+	std::string name = "seconds";
+	
+	switch (units)
+	{
+		case seconds:
+			name = "seconds";
+			break;
+			
+		case minutes:
+			name = "minutes";
+			break;
+			
+		case hours:
+			name = "hours";
+			break;
+			
+		case days:
+			name = "days";
+			break;
+			
+		case years:
+			name = "years";
+			break;
+			
+		default:
+			break;
+	}
+	
+	return name;
 }
 
 /*
@@ -170,6 +405,8 @@ Isotope::Isotope() : Atom(0)
 	hl_units = years;
 	isotope_number = 0;
 	nuclides = nullptr;
+	Stable = false;
+	IsomericState = false;
 }
 
 //Default destructor
@@ -177,6 +414,7 @@ Isotope::~Isotope()
 {
 	decay_modes.clear();
 	branch_ratios.clear();
+	spec_iso.clear();
 	nuclides->DeleteContents();
 }
 
@@ -192,15 +430,90 @@ void Isotope::unloadNuclides()
 	this->nuclides->DeleteContents();
 }
 
-//Register via atomic number and isotop number
+//Register via isotope name (e.g., H-2)
+void Isotope::registerIsotope(std::string isotope_name)
+{
+	char *str;
+	char iso[256];
+	strcpy(iso, isotope_name.c_str());
+	str = strtok(iso, "-");
+	std::string sym;
+	int iso_num;
+	
+	int i=0;
+	while (str != NULL)
+	{
+		if (i == 0)
+			sym = str;
+		if (i == 1)
+			iso_num = atoi(str);
+		str = strtok(NULL, "-");
+		i++;
+	}
+	
+	this->registerIsotope(sym, iso_num);
+}
+
+//Register via atomic symbol and isotope number
+void Isotope::registerIsotope(std::string sym, int iso)
+{
+	this->Register(sym);
+	this->isotope_number = iso;
+	this->editNeutrons(iso - this->AtomicNumber());
+	this->setConstants();
+	this->computeDecayRate();
+}
+
+//Register via atomic number and isotope number
 void Isotope::registerIsotope(int atom_num, int iso_num)
 {
 	this->Register(atom_num);
 	this->isotope_number = iso_num;
 	this->editNeutrons(iso_num - atom_num);
-	
 	this->setConstants();
 	this->computeDecayRate();
+}
+
+//Display isotope information
+void Isotope::DisplayInfo()
+{
+	std::cout << std::endl;
+	
+	std::cout << "                    Isotope: " << this->IsotopeName() << std::endl;
+	std::cout << "--------------------------------------------------" << std::endl;
+	std::cout << "Atomic Number: " << this->AtomicNumber() << std::endl;
+	std::cout << "Mass Number: " << this->IsotopeNumber() << std::endl;
+	std::cout << "Weight (g/mol): " << this->AtomicWeight() << std::endl;
+	std::cout << "Isomeric: ";
+	if (this->isIsomericState() == true)
+		std::cout << "True\n";
+	else
+		std::cout << "False\n";
+	std::cout << "Stable: ";
+	if (this->isStable() == true)
+		std::cout << "True\n";
+	else
+		std::cout << "False\n";
+	
+	if (this->isStable() == false)
+	{
+		std::cout << "Half-life (" << timeunits_string(this->HalfLifeUnits()) << "): " << this->HalfLife(this->HalfLifeUnits()) << std::endl;
+		std::cout << "Decay Rate (s): " << this->DecayRate() << std::endl;
+		std::cout << "Decay Modes:\n";
+		std::cout << "------------\n";
+		std::cout << "\tMode : Fraction (: isotope) \n";
+		std::cout << "\t---------------------------\n";
+		for (int i=0; i<this->DecayModes(); i++)
+		{
+			std::cout << "\t" << decaymode_string(this->DecayMode(i)) << " : " << this->BranchFraction(i);
+			if (this->DecayMode(i) == specific_isotope)
+				std::cout << " : " << this->IsotopeEmitted(i);
+			std::cout << std::endl;
+		}
+		std::cout << std::endl;
+	}
+	
+	std::cout << std::endl;
 }
 
 //Return isotope number
@@ -221,22 +534,127 @@ double Isotope::HalfLife(time_units units)
 	return time_conversion(units, this->half_life, this->hl_units);
 }
 
+//Return units
+time_units Isotope::HalfLifeUnits()
+{
+	return this->hl_units;
+}
+
 //Return name
 std::string Isotope::IsotopeName()
 {
 	return this->IsoName;
 }
 
+//Return stability
+bool Isotope::isStable()
+{
+	return this->Stable;
+}
+
+//Return isomeric state
+bool Isotope::isIsomericState()
+{
+	return this->IsomericState;
+}
+
+//Return number of decay modes
+int Isotope::DecayModes()
+{
+	return (int)this->decay_modes.size();
+}
+
+//return decay mode
+decay_mode Isotope::DecayMode(int i)
+{
+	if (i < 0 || i >= this->DecayModes())
+		return stable;
+	else
+		return this->decay_modes[i];
+		
+}
+
+//return branch fraction
+double Isotope::BranchFraction(int i)
+{
+	if (i < 0 || i >= this->DecayModes())
+		return 0.0;
+	else
+		return this->branch_ratios[i];
+	
+}
+
+//return isotope emission
+std::string Isotope::IsotopeEmitted(int i)
+{
+	if (i < 0 || i >= this->DecayModes())
+		return "None";
+	else
+		return this->spec_iso[i];
+	
+}
+
 //Set the decay information based on a registered atomic number and isotope number
 void Isotope::setConstants()
 {
+	//Set the name of the isotope
+	char buff[10];
+	sprintf(buff, "-%i", this->IsotopeNumber());
+	std::string name = this->Atom::AtomSymbol();
+	name.append(buff);
+	this->IsoName = name;
 	
+	this->decay_modes.clear();
+	this->branch_ratios.clear();
+	this->spec_iso.clear();
+	
+	//Read from the library to find the isotope
+	try
+	{
+		this->editAtomicWeight( this->getNuclideLibrary()(this->IsotopeName())["atom_weight"].getDouble() );
+		this->IsomericState = this->getNuclideLibrary()(this->IsotopeName())["isomeric"].getBool();
+		this->Stable = this->getNuclideLibrary()(this->IsotopeName())["stable"].getBool();
+		this->half_life = this->getNuclideLibrary()(this->IsotopeName())["half_life"].getDouble();
+		std::string read_units = this->getNuclideLibrary()(this->IsotopeName())["hl_units"].getString();
+		this->hl_units = timeunits_choice( read_units );
+		
+		//Loop through the decay_modes header
+		int i = 0;
+		for (auto &x: this->getNuclideLibrary()(this->IsotopeName())("decay_modes").getSubMap())
+		{
+			std::string read_decay = this->getNuclideLibrary()(this->IsotopeName())("decay_modes")(x.first)["type"].getString();
+			this->decay_modes.push_back( decaymode_choice(read_decay) );
+			this->branch_ratios.push_back(this->getNuclideLibrary()(this->IsotopeName())("decay_modes")(x.first)["branch_frac"].getDouble());
+			if (this->decay_modes[i] == specific_isotope)
+				this->spec_iso.push_back(this->getNuclideLibrary()(this->IsotopeName())("decay_modes")(x.first)["isotope"].getString());
+			else
+				this->spec_iso.push_back("None");
+			i++;
+		}
+	}
+	//If isotope is not found, assume it is stable and set default values
+	catch (std::out_of_range)
+	{
+		mError(invalid_isotope);
+		std::cout << "\nSetting some default values...\n\n";
+		
+		this->editAtomicWeight(this->IsotopeNumber());
+		this->IsomericState = false;
+		this->Stable = true;
+		this->half_life = INFINITY;
+		this->hl_units = years;
+		
+		this->decay_modes.push_back(stable);
+		this->branch_ratios.push_back(0.0);
+		this->spec_iso.push_back("None");
+	}
 }
 
 //Compute decay rate
 void Isotope::computeDecayRate()
 {
-	
+	double hl_sec = time_conversion(seconds, this->half_life, this->hl_units);
+	this->decay_rate = log(2.0)/hl_sec;
 }
 
 //Return library
@@ -260,14 +678,25 @@ int IBIS_TESTS()
 	nuc_data.executeYamlRead("database/NuclideLibrary.yml");
 	
 	//Create test isotope
-	Isotope a, b;
+	Isotope a, b, c;
 	a.loadNuclides(nuc_data);
 	b.loadNuclides(nuc_data);
+	c.loadNuclides(nuc_data);
 	
+	a.registerIsotope(2, 5);
+	b.registerIsotope("Ba-114");
+	c.registerIsotope("C", 14);
+	
+	a.DisplayInfo();
+	b.DisplayInfo();
+	c.DisplayInfo();
+	
+	//Clear the library when no longer needed
 	a.unloadNuclides();
 	b.unloadNuclides();
+	c.unloadNuclides();
 	
-	nuc_data.DisplayContents();
+	//nuc_data.DisplayContents();
 	
 	return success;
 }
