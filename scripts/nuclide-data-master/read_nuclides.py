@@ -143,7 +143,7 @@ for n in key_list:
 		branch_frac = data.nuclides[n][0]['decay modes'][m]['branch fraction']
 		if decay_mode == 'stable': branch_frac = 0
 		if decay_mode == 'stable': stable = True
-		if branch_frac == None: branch_frac = 0
+		if branch_frac == None: branch_frac = 1
 		
 		#write out stability condition (only on first iteration)
 		if i == 0: file.write('stable: ' + str(stable) + '\n')

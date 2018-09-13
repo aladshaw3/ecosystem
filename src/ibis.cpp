@@ -685,7 +685,7 @@ int IBIS_TESTS()
 	
 	a.registerIsotope(2, 5);
 	b.registerIsotope("Ba-114");
-	c.registerIsotope("C", 14);
+	c.registerIsotope("C", 8);
 	
 	a.DisplayInfo();
 	b.DisplayInfo();

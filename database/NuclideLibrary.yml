@@ -138,7 +138,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: neutron-emission/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -232,7 +232,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -308,7 +308,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -494,7 +494,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -530,7 +530,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -686,7 +686,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -730,7 +730,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -748,7 +748,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: neutron-emission/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -766,7 +766,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -784,11 +784,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -970,7 +970,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -1022,7 +1022,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -1102,7 +1102,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: proton-emission
@@ -1324,7 +1324,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
@@ -1368,7 +1368,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -1704,11 +1704,11 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: beta-/neutron-emission/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -1726,7 +1726,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -1762,7 +1762,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -2030,7 +2030,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -2048,7 +2048,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -2066,7 +2066,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -2084,7 +2084,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -2396,7 +2396,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -2414,11 +2414,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -2454,7 +2454,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+/proton-emission
@@ -2742,7 +2742,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -2764,7 +2764,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -2782,7 +2782,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -2800,11 +2800,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -2840,7 +2840,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -3196,7 +3196,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -3214,7 +3214,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -3232,11 +3232,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -3552,7 +3552,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -3596,7 +3596,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -3618,7 +3618,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -3636,11 +3636,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -3658,7 +3658,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -3676,11 +3676,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -3698,7 +3698,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -4048,11 +4048,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -4070,11 +4070,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -4092,11 +4092,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -4114,7 +4114,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -4132,11 +4132,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -4154,11 +4154,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -4496,11 +4496,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -4518,11 +4518,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -4540,11 +4540,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -4562,11 +4562,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -4588,7 +4588,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -4606,11 +4606,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -4628,11 +4628,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -4668,11 +4668,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -4708,7 +4708,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
@@ -5072,11 +5072,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -5094,7 +5094,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -5148,7 +5148,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -5438,7 +5438,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -5576,7 +5576,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -5594,7 +5594,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -5612,7 +5612,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -5630,7 +5630,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -5648,7 +5648,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -6004,7 +6004,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -6022,7 +6022,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -6040,11 +6040,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -6062,7 +6062,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -6080,7 +6080,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -6486,7 +6486,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -6504,7 +6504,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -6522,15 +6522,15 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: beta-/neutron-emission/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -6548,7 +6548,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -6566,7 +6566,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -6584,7 +6584,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -7010,11 +7010,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -7032,15 +7032,15 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: beta-/neutron-emission/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -7058,7 +7058,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -7182,7 +7182,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -7290,7 +7290,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-/beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -7384,7 +7384,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -7468,7 +7468,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -7486,11 +7486,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -7508,15 +7508,15 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: beta-/neutron-emission/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -7534,11 +7534,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -7556,7 +7556,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -7574,7 +7574,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -7592,7 +7592,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -7874,7 +7874,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -7958,7 +7958,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -7980,7 +7980,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -7998,11 +7998,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -8020,11 +8020,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -8042,11 +8042,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -8108,7 +8108,7 @@ stable: False
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -8404,7 +8404,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -8426,7 +8426,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -8448,7 +8448,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -8484,7 +8484,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -8506,7 +8506,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -8524,11 +8524,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -8546,11 +8546,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -8568,7 +8568,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -8586,7 +8586,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -8604,7 +8604,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -8640,7 +8640,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
@@ -8868,7 +8868,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -8890,7 +8890,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -8912,7 +8912,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -8956,7 +8956,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -9000,7 +9000,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -9062,7 +9062,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -9080,11 +9080,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -9270,7 +9270,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -9472,7 +9472,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -9494,7 +9494,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -9516,7 +9516,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -9588,7 +9588,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -9606,11 +9606,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -9628,11 +9628,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -9980,7 +9980,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -10002,7 +10002,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -10104,7 +10104,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -10140,11 +10140,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -10162,15 +10162,15 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: beta-/neutron-emission/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -10244,7 +10244,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+/proton-emission
@@ -10314,7 +10314,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
@@ -10700,7 +10700,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -10740,15 +10740,15 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: beta-/neutron-emission/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -10766,15 +10766,15 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: beta-/neutron-emission/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -10846,7 +10846,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+/proton-emission
@@ -10872,7 +10872,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -11276,7 +11276,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -11294,7 +11294,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
@@ -11334,15 +11334,15 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: beta-/neutron-emission/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -11364,7 +11364,7 @@ stable: False
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -11404,7 +11404,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+/proton-emission
@@ -11434,7 +11434,7 @@ stable: False
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -11860,7 +11860,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -11904,7 +11904,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -11948,7 +11948,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -11966,15 +11966,15 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: beta-/neutron-emission/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -11992,7 +11992,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -12010,11 +12010,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -12032,7 +12032,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -12532,7 +12532,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -12550,15 +12550,15 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: beta-/neutron-emission/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -12576,15 +12576,15 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: beta-/neutron-emission/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -12802,7 +12802,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -12910,7 +12910,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-/beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -12964,11 +12964,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: isomeric-transition
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -13142,7 +13142,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -13160,11 +13160,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -13182,15 +13182,15 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: beta-/neutron-emission/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -13208,15 +13208,15 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: beta-/neutron-emission/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -13234,7 +13234,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -13252,7 +13252,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -13270,7 +13270,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -13288,7 +13288,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -13354,7 +13354,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
@@ -13742,7 +13742,7 @@ stable: False
 
   - mode2:
     type: isomeric-transition
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -13786,7 +13786,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -13804,7 +13804,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
@@ -13826,11 +13826,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -13848,15 +13848,15 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: beta-/neutron-emission/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -13874,7 +13874,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -13892,7 +13892,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -13910,11 +13910,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -13954,7 +13954,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
@@ -14402,11 +14402,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -14428,7 +14428,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -14464,7 +14464,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -14482,15 +14482,15 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: beta-/neutron-emission/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -14508,7 +14508,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -14526,7 +14526,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -14544,7 +14544,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -14562,7 +14562,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -15050,11 +15050,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -15072,11 +15072,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -15094,7 +15094,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -15430,7 +15430,7 @@ stable: True
 - decay_modes:
   - mode0:
     type: beta-/beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -15622,11 +15622,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -15720,15 +15720,15 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: beta-/neutron-emission/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -15746,7 +15746,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -15764,7 +15764,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -15782,7 +15782,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -16232,7 +16232,7 @@ stable: False
 
   - mode2:
     type: isomeric-transition
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -16338,7 +16338,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -16356,15 +16356,15 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: beta-/neutron-emission/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -16560,7 +16560,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -16992,7 +16992,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -17010,15 +17010,15 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: beta-/neutron-emission/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -17036,7 +17036,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -17054,7 +17054,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -17076,7 +17076,7 @@ stable: False
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -17680,11 +17680,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -17724,7 +17724,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -18282,7 +18282,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -18300,7 +18300,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -18318,7 +18318,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -18336,15 +18336,15 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: beta-/neutron-emission/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -18362,15 +18362,15 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: beta-/neutron-emission/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -18388,11 +18388,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -18410,11 +18410,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: beta+
@@ -18436,7 +18436,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
@@ -18458,7 +18458,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
@@ -18480,7 +18480,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
@@ -18704,7 +18704,7 @@ stable: False
 
   - mode1:
     type: isomeric-transition
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -18952,7 +18952,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -18970,7 +18970,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
@@ -18992,7 +18992,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -19028,11 +19028,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -19050,15 +19050,15 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: beta-/neutron-emission/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -19076,7 +19076,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -19094,11 +19094,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -19116,7 +19116,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
@@ -19178,7 +19178,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
@@ -19416,7 +19416,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-/beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -19656,7 +19656,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: isomeric-transition
@@ -19678,11 +19678,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -19700,7 +19700,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -19718,15 +19718,15 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: beta-/neutron-emission/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -19744,15 +19744,15 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: beta-/neutron-emission/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -19770,7 +19770,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -19788,7 +19788,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
@@ -19828,7 +19828,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
@@ -19850,11 +19850,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: isomeric-transition
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -20354,7 +20354,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -20372,7 +20372,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -20390,7 +20390,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -20408,15 +20408,15 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: beta-/neutron-emission/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -20434,15 +20434,15 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: beta-/neutron-emission/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -20478,7 +20478,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
@@ -20504,7 +20504,7 @@ stable: False
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -20988,7 +20988,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
@@ -21010,7 +21010,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -21028,7 +21028,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -21046,7 +21046,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -21064,11 +21064,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -21086,11 +21086,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -21108,15 +21108,15 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: beta-/neutron-emission/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -21134,7 +21134,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -21152,7 +21152,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
@@ -21666,7 +21666,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
@@ -21692,7 +21692,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -21710,11 +21710,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -21732,7 +21732,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -21750,7 +21750,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -21768,7 +21768,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -21786,15 +21786,15 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: beta-/neutron-emission/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -21812,15 +21812,15 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: beta-/neutron-emission/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -21838,7 +21838,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -21914,7 +21914,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: isomeric-transition
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
@@ -22358,7 +22358,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -22376,7 +22376,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -22416,7 +22416,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -22434,7 +22434,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -22452,7 +22452,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -22470,11 +22470,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -22492,11 +22492,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -22514,15 +22514,15 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: beta-/neutron-emission/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -22540,11 +22540,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -22562,11 +22562,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -22584,7 +22584,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -22602,7 +22602,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -22928,7 +22928,7 @@ stable: False
 
   - mode1:
     type: isomeric-transition
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -23178,7 +23178,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -23196,11 +23196,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -23218,11 +23218,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -23240,15 +23240,15 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: beta-/neutron-emission/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -23266,11 +23266,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -23288,15 +23288,15 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: beta-/neutron-emission/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -23314,7 +23314,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -23350,7 +23350,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
@@ -23902,7 +23902,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -23938,11 +23938,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -23960,11 +23960,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -23982,11 +23982,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -24004,15 +24004,15 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -24052,7 +24052,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
@@ -24574,15 +24574,15 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: isomeric-transition
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -24648,7 +24648,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -24670,7 +24670,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -24710,7 +24710,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -24728,11 +24728,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -24750,11 +24750,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -24772,11 +24772,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -24990,7 +24990,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -25026,7 +25026,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -25134,7 +25134,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-/beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -25170,7 +25170,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-/beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -25492,11 +25492,11 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: beta-/neutron-emission/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -25514,11 +25514,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -25536,7 +25536,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -25554,7 +25554,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -25594,11 +25594,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -26262,7 +26262,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -26280,11 +26280,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -26534,7 +26534,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -26750,7 +26750,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-/beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -26880,7 +26880,7 @@ stable: False
 
   - mode1:
     type: isomeric-transition
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -27026,11 +27026,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -27048,7 +27048,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -27114,7 +27114,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -27754,15 +27754,15 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: beta-/neutron-emission/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -27916,7 +27916,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
@@ -28436,11 +28436,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -28458,11 +28458,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -28480,11 +28480,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -28520,15 +28520,15 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: beta-/neutron-emission/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -28708,7 +28708,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
@@ -29248,7 +29248,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -29266,7 +29266,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -29284,7 +29284,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -29302,11 +29302,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -29364,11 +29364,11 @@ stable: False
 
   - mode1:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -29442,7 +29442,7 @@ stable: False
 
   - mode3:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -29652,7 +29652,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -29832,7 +29832,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-/beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -29868,7 +29868,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-/beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -30090,7 +30090,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
@@ -30112,11 +30112,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -30152,7 +30152,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: proton-emission
@@ -30252,7 +30252,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -30778,7 +30778,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
@@ -30888,11 +30888,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -30910,11 +30910,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -30932,11 +30932,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -31091,7 +31091,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
@@ -31315,7 +31315,7 @@ stable: True
 - decay_modes:
   - mode0:
     type: beta+/beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -31351,7 +31351,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -31695,7 +31695,7 @@ stable: False
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -31713,11 +31713,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -31735,11 +31735,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -31757,7 +31757,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -31797,7 +31797,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -31815,7 +31815,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -31873,7 +31873,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
@@ -31949,11 +31949,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: isomeric-transition
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -32423,11 +32423,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -32463,7 +32463,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -32481,7 +32481,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -32499,7 +32499,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -32517,7 +32517,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -32535,7 +32535,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -32575,11 +32575,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -32637,7 +32637,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
@@ -32839,7 +32839,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -32947,7 +32947,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-/beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -33109,7 +33109,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -33145,7 +33145,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -33181,7 +33181,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -33199,7 +33199,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -33217,7 +33217,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -33253,7 +33253,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -33271,7 +33271,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -33311,7 +33311,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
@@ -33333,7 +33333,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
@@ -33863,7 +33863,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -33881,7 +33881,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -33899,7 +33899,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -33917,7 +33917,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -33935,7 +33935,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -33953,7 +33953,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -33993,11 +33993,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -34015,7 +34015,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
@@ -34037,7 +34037,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
@@ -34571,7 +34571,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -34607,7 +34607,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -34625,7 +34625,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -34643,7 +34643,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -34661,7 +34661,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -34679,11 +34679,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -34701,11 +34701,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: beta+
@@ -34745,7 +34745,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
@@ -35301,7 +35301,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -35319,7 +35319,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -35337,7 +35337,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -35355,7 +35355,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -35373,11 +35373,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -35417,7 +35417,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -35457,7 +35457,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
@@ -35479,15 +35479,15 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: isomeric-transition
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -36031,7 +36031,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -36049,7 +36049,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -36067,7 +36067,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -36125,11 +36125,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -36147,7 +36147,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -36187,7 +36187,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
@@ -36495,7 +36495,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -36773,7 +36773,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -36791,7 +36791,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -36827,7 +36827,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -36885,7 +36885,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
@@ -37319,7 +37319,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-/beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -37445,7 +37445,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -37463,7 +37463,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -37481,7 +37481,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -37517,7 +37517,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -37535,11 +37535,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -37557,7 +37557,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
@@ -37579,11 +37579,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -37663,7 +37663,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -38159,7 +38159,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -38177,7 +38177,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -38195,7 +38195,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -38213,7 +38213,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -38231,11 +38231,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -38253,7 +38253,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -38271,7 +38271,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
@@ -38315,7 +38315,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
@@ -38337,7 +38337,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
@@ -38851,7 +38851,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -38869,7 +38869,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -38887,7 +38887,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -38963,11 +38963,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -38985,7 +38985,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
@@ -39539,7 +39539,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -39557,7 +39557,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -39575,7 +39575,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -39611,7 +39611,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -39647,7 +39647,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -40237,7 +40237,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -40255,7 +40255,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -40309,11 +40309,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -40473,7 +40473,7 @@ stable: False
 
   - mode1:
     type: isomeric-transition
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: beta+
@@ -40557,7 +40557,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -40933,7 +40933,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -40951,7 +40951,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -40969,7 +40969,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -41009,7 +41009,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -41027,7 +41027,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
@@ -41053,7 +41053,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+/proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
@@ -41603,7 +41603,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -41837,7 +41837,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
@@ -41967,11 +41967,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: isomeric-transition
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -42295,7 +42295,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -42313,7 +42313,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
@@ -42957,7 +42957,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -43015,7 +43015,7 @@ stable: False
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -43125,11 +43125,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -43627,7 +43627,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -43645,7 +43645,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -43681,7 +43681,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -43717,7 +43717,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -44221,7 +44221,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -44275,7 +44275,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-/beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -44365,7 +44365,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -44383,7 +44383,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -44401,7 +44401,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -44419,7 +44419,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -44573,11 +44573,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -44665,11 +44665,11 @@ stable: False
 
   - mode1:
     type: isomeric-transition
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -45113,7 +45113,7 @@ stable: True
 
   - mode1:
     type: isomeric-transition
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -45149,7 +45149,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -45243,7 +45243,7 @@ stable: False
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -45463,7 +45463,7 @@ stable: False
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -45557,7 +45557,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
@@ -45669,7 +45669,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -45867,7 +45867,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -45979,7 +45979,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -45997,7 +45997,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -46015,7 +46015,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: proton-emission
@@ -46023,7 +46023,7 @@ stable: False
 
   - mode2:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -46041,11 +46041,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -46115,7 +46115,7 @@ stable: False
 
   - mode1:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: beta+
@@ -46141,11 +46141,11 @@ stable: False
 
   - mode1:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -46733,7 +46733,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -46751,7 +46751,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -46769,7 +46769,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -46805,7 +46805,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -46917,7 +46917,7 @@ stable: False
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -46983,7 +46983,7 @@ stable: False
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -47611,7 +47611,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -47629,11 +47629,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -47673,7 +47673,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: proton-emission
@@ -47703,7 +47703,7 @@ stable: False
 
   - mode2:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -47725,11 +47725,11 @@ stable: False
 
   - mode1:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -47787,7 +47787,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: stable
@@ -47795,7 +47795,7 @@ stable: False
 
   - mode2:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -47817,7 +47817,7 @@ stable: False
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -47993,7 +47993,7 @@ stable: False
 
   - mode1:
     type: isomeric-transition
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: beta+
@@ -48399,7 +48399,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -48417,11 +48417,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -48439,11 +48439,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -48461,11 +48461,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -48483,11 +48483,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -49279,7 +49279,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -49297,11 +49297,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -49319,11 +49319,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -49341,11 +49341,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -49363,11 +49363,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -49385,11 +49385,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -49407,11 +49407,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -49495,15 +49495,15 @@ stable: False
 
   - mode1:
     type: proton-emission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: isomeric-transition
-    branch_frac: 0
+    branch_frac: 1
 
   - mode3:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -49551,7 +49551,7 @@ stable: False
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -49591,7 +49591,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
@@ -49635,7 +49635,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -50123,7 +50123,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -50141,7 +50141,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -50159,7 +50159,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -50177,11 +50177,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -50199,11 +50199,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -50221,11 +50221,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -50243,11 +50243,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -50403,7 +50403,7 @@ stable: False
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -50637,7 +50637,7 @@ stable: False
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -50781,7 +50781,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -50983,7 +50983,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -51001,7 +51001,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -51019,7 +51019,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -51037,7 +51037,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -51055,7 +51055,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -51073,7 +51073,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -51171,7 +51171,7 @@ stable: False
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -51785,7 +51785,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -51803,7 +51803,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -51821,11 +51821,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -51843,7 +51843,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -51861,11 +51861,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -51883,11 +51883,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -51941,7 +51941,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
@@ -52061,7 +52061,7 @@ stable: False
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -52539,7 +52539,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -52579,7 +52579,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -52597,7 +52597,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -52615,7 +52615,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -52633,7 +52633,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -52651,7 +52651,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -52669,7 +52669,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -52687,7 +52687,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -52705,7 +52705,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -52723,7 +52723,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -52795,7 +52795,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -53435,7 +53435,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -53453,7 +53453,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -53471,7 +53471,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -53489,7 +53489,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -53507,7 +53507,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -53525,11 +53525,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-/neutron-emission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -53641,11 +53641,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -53707,11 +53707,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -54277,7 +54277,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -54295,7 +54295,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -54317,7 +54317,7 @@ stable: False
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -54985,7 +54985,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -55007,7 +55007,7 @@ stable: False
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -55083,7 +55083,7 @@ stable: False
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -55576,7 +55576,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -56315,7 +56315,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -56369,7 +56369,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -56409,7 +56409,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -57369,7 +57369,7 @@ stable: False
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -57513,7 +57513,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -57603,11 +57603,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -58064,7 +58064,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -58982,11 +58982,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -59030,7 +59030,7 @@ stable: False
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -59048,7 +59048,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
@@ -59092,11 +59092,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -59366,7 +59366,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -59432,11 +59432,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -59454,11 +59454,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -59851,11 +59851,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -59891,11 +59891,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -59965,7 +59965,7 @@ stable: False
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -59983,11 +59983,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -60133,7 +60133,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta-
@@ -60239,7 +60239,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -60315,11 +60315,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -60587,7 +60587,7 @@ stable: False
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -60715,11 +60715,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -60737,11 +60737,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -60873,7 +60873,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
@@ -61097,11 +61097,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: beta-
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -61119,11 +61119,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -61589,11 +61589,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -61615,11 +61615,11 @@ stable: False
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -61681,7 +61681,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
@@ -61765,7 +61765,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
@@ -61887,7 +61887,7 @@ stable: False
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
   - mode2:
     type: beta+
@@ -61961,7 +61961,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -61979,11 +61979,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -62001,7 +62001,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -62067,7 +62067,7 @@ stable: False
 
   - mode2:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -62119,7 +62119,7 @@ stable: False
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -62295,7 +62295,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -62331,11 +62331,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -62353,7 +62353,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -62371,11 +62371,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -62397,7 +62397,7 @@ stable: False
 
   - mode1:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -62613,7 +62613,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: spontaneous-fission
@@ -62621,7 +62621,7 @@ stable: False
 
   - mode2:
     type: beta+
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -62639,7 +62639,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -62657,11 +62657,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -62679,11 +62679,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -62701,11 +62701,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -62885,7 +62885,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: spontaneous-fission
@@ -62955,7 +62955,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: spontaneous-fission
@@ -62977,7 +62977,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -62995,7 +62995,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -63013,11 +63013,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -63053,11 +63053,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -63127,7 +63127,7 @@ stable: False
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -63171,7 +63171,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -63241,7 +63241,7 @@ stable: False
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -63285,7 +63285,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -63303,7 +63303,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -63321,11 +63321,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -63379,11 +63379,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -63401,7 +63401,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: spontaneous-fission
@@ -63423,7 +63423,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: spontaneous-fission
@@ -63537,7 +63537,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: spontaneous-fission
@@ -63545,7 +63545,7 @@ stable: False
 
   - mode2:
     type: isomeric-transition
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -63647,11 +63647,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -63687,11 +63687,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -63731,11 +63731,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -63753,7 +63753,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -63825,7 +63825,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -63861,7 +63861,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -63951,7 +63951,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -63969,7 +63969,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -64005,11 +64005,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -64031,7 +64031,7 @@ stable: False
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -64049,7 +64049,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -64177,7 +64177,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -64231,11 +64231,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -64253,11 +64253,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -64275,7 +64275,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -64293,11 +64293,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -64333,11 +64333,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -64373,7 +64373,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -64409,7 +64409,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -64481,7 +64481,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -64499,11 +64499,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -64521,11 +64521,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -64547,7 +64547,7 @@ stable: False
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -64623,7 +64623,7 @@ stable: False
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -64641,11 +64641,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -64681,7 +64681,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -64743,7 +64743,7 @@ stable: False
 
   - mode1:
     type: isomeric-transition
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -64761,7 +64761,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -64797,11 +64797,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -64819,7 +64819,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -64837,11 +64837,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -64859,7 +64859,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -64877,11 +64877,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -64979,7 +64979,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -65015,7 +65015,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -65033,11 +65033,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -65055,11 +65055,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -65081,7 +65081,7 @@ stable: False
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -65135,7 +65135,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: spontaneous-fission
@@ -65161,7 +65161,7 @@ stable: False
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -65179,11 +65179,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -65237,11 +65237,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -65259,11 +65259,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -65281,11 +65281,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -65303,7 +65303,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -65527,7 +65527,7 @@ stable: False
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -65549,7 +65549,7 @@ stable: False
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -65567,11 +65567,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -65589,7 +65589,7 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -65723,7 +65723,7 @@ stable: False
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -65745,7 +65745,7 @@ stable: False
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -65763,11 +65763,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -65875,11 +65875,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -65897,11 +65897,11 @@ stable: False
 - decay_modes:
   - mode0:
     type: alpha
-    branch_frac: 0
+    branch_frac: 1
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
@@ -65923,7 +65923,7 @@ stable: False
 
   - mode1:
     type: spontaneous-fission
-    branch_frac: 0
+    branch_frac: 1
 
 ...
 
