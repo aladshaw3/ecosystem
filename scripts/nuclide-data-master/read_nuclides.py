@@ -42,6 +42,11 @@ daughter = ' '		#Name of the daughter isotope produced from decay mode (check to
 particle_em = ' '	#Name of the particle emitted (if any) to produce the daughter
 part_num = 0		#Number of those particles emitted
 
+react_sum = 0.0		#add all protons and neutrons for the isotope
+prod_sum = 0.0		#add all protons and neutrons for each daughter and emitted particle (modulated by branch fraction)
+d_A = 0				#mass number of the daughter
+ep_A = 0			#mass number of the emitted particle
+
 #Open yaml file to write to
 file = open('../../database/NuclideLibrary.yml', 'w')
 
@@ -56,6 +61,8 @@ key_list.sort()
 for n in key_list:
 	Z = n[0] #atomic num
 	A = n[1] #mass num
+	react_sum = float(A)
+	prod_sum = 0
 	hl = data.nuclides[n][0]['half-life']
 	stable = data.nuclides[n][0]['stable']
 	try:
@@ -147,6 +154,8 @@ for n in key_list:
 			daughter = 'None'
 			particle_em = 'None'
 			part_num = 0
+			d_A = 0
+			ep_A = 0
 		
 		if decay_mode == 'alpha':
 			#daughter
@@ -166,11 +175,15 @@ for n in key_list:
 				daughter = str(sym) + '-' + str(An)
 				particle_em = 'He-4'
 				part_num = 1
+				d_A = An
+				ep_A = 4
 			except:
 				decay_mode = 'undefined'
 				daughter = 'None'
 				particle_em = 'None'
 				part_num = 0
+				d_A = 0
+				ep_A = 0
 					
 		if decay_mode == 'spontaneous-fission':
 			#daughter
@@ -202,11 +215,15 @@ for n in key_list:
 				daughter = str(sym1) + '-' + str(An)
 				particle_em = str(sym2) + '-' + str(Am)
 				part_num = 1
+				d_A = An
+				ep_A = Am
 			except:
 				decay_mode = 'undefined'
 				daughter = 'None'
 				particle_em = 'None'
 				part_num = 0
+				d_A = 0
+				ep_A = 0
 
 		if decay_mode == 'beta+':
 			#daughter
@@ -226,11 +243,15 @@ for n in key_list:
 				daughter = str(sym) + '-' + str(An)
 				particle_em = 'None'
 				part_num = 0
+				d_A = An
+				ep_A = 0
 			except:
 				decay_mode = 'undefined'
 				daughter = 'None'
 				particle_em = 'None'
 				part_num = 0
+				d_A = 0
+				ep_A = 0
 
 		if decay_mode == 'beta-':
 			#daughter
@@ -250,11 +271,15 @@ for n in key_list:
 				daughter = str(sym) + '-' + str(An)
 				particle_em = 'None'
 				part_num = 0
+				d_A = An
+				ep_A = 0
 			except:
 				decay_mode = 'undefined'
 				daughter = 'None'
 				particle_em = 'None'
 				part_num = 0
+				d_A = 0
+				ep_A = 0
 
 		if decay_mode == 'isomeric-transition':
 			#daughter
@@ -274,11 +299,15 @@ for n in key_list:
 				daughter = str(sym) + '-' + str(An)
 				particle_em = 'None'
 				part_num = 0
+				d_A = An
+				ep_A = 0
 			except:
 				decay_mode = 'undefined'
 				daughter = 'None'
 				particle_em = 'None'
 				part_num = 0
+				d_A = 0
+				ep_A = 0
 
 		if decay_mode == 'neutron-emission':
 			#daughter
@@ -298,11 +327,15 @@ for n in key_list:
 				daughter = str(sym) + '-' + str(An)
 				particle_em = 'n-1'
 				part_num = 1
+				d_A = An
+				ep_A = 1
 			except:
 				decay_mode = 'undefined'
 				daughter = 'None'
 				particle_em = 'None'
 				part_num = 0
+				d_A = 0
+				ep_A = 0
 
 		if decay_mode == 'beta-/neutron-emission':
 			#daughter
@@ -322,11 +355,15 @@ for n in key_list:
 				daughter = str(sym) + '-' + str(An)
 				particle_em = 'n-1'
 				part_num = 1
+				d_A = An
+				ep_A = 1
 			except:
 				decay_mode = 'undefined'
 				daughter = 'None'
 				particle_em = 'None'
 				part_num = 0
+				d_A = 0
+				ep_A = 0
 
 		if decay_mode == 'beta+/proton-emission':
 			#daughter
@@ -346,11 +383,15 @@ for n in key_list:
 				daughter = str(sym) + '-' + str(An)
 				particle_em = 'H-1'
 				part_num = 1
+				d_A = An
+				ep_A = 1
 			except:
 				decay_mode = 'undefined'
 				daughter = 'None'
 				particle_em = 'None'
 				part_num = 0
+				d_A = 0
+				ep_A = 0
 
 		if decay_mode == 'proton-emission':
 			#daughter
@@ -370,11 +411,15 @@ for n in key_list:
 				daughter = str(sym) + '-' + str(An)
 				particle_em = 'H-1'
 				part_num = 1
+				d_A = An
+				ep_A = 1
 			except:
 				decay_mode = 'undefined'
 				daughter = 'None'
 				particle_em = 'None'
 				part_num = 0
+				d_A = 0
+				ep_A = 0
 
 		if decay_mode == 'beta+/alpha':
 			#daughter
@@ -394,11 +439,15 @@ for n in key_list:
 				daughter = str(sym) + '-' + str(An)
 				particle_em = 'He-4'
 				part_num = 1
+				d_A = An
+				ep_A = 4
 			except:
 				decay_mode = 'undefined'
 				daughter = 'None'
 				particle_em = 'None'
 				part_num = 0
+				d_A = 0
+				ep_A = 0
 
 		if decay_mode == 'beta+/beta+':
 			#daughter
@@ -418,11 +467,15 @@ for n in key_list:
 				daughter = str(sym) + '-' + str(An)
 				particle_em = 'None'
 				part_num = 0
+				d_A = An
+				ep_A = 0
 			except:
 				decay_mode = 'undefined'
 				daughter = 'None'
 				particle_em = 'None'
 				part_num = 0
+				d_A = 0
+				ep_A = 0
 
 		if decay_mode == 'beta-/beta-':
 			#daughter
@@ -442,11 +495,15 @@ for n in key_list:
 				daughter = str(sym) + '-' + str(An)
 				particle_em = 'None'
 				part_num = 0
+				d_A = An
+				ep_A = 0
 			except:
 				decay_mode = 'undefined'
 				daughter = 'None'
 				particle_em = 'None'
 				part_num = 0
+				d_A = 0
+				ep_A = 0
 
 		if decay_mode == 'beta-/neutron-emission/neutron-emission':
 			#daughter
@@ -466,11 +523,15 @@ for n in key_list:
 				daughter = str(sym) + '-' + str(An)
 				particle_em = 'n-1'
 				part_num = 2
+				d_A = An
+				ep_A = 1
 			except:
 				decay_mode = 'undefined'
 				daughter = 'None'
 				particle_em = 'None'
 				part_num = 0
+				d_A = 0
+				ep_A = 0
 
 		if decay_mode == 'beta-/alpha':
 			#daughter
@@ -490,11 +551,15 @@ for n in key_list:
 				daughter = str(sym) + '-' + str(An)
 				particle_em = 'He-4'
 				part_num = 1
+				d_A = An
+				ep_A = 4
 			except:
 				decay_mode = 'undefined'
 				daughter = 'None'
 				particle_em = 'None'
 				part_num = 0
+				d_A = 0
+				ep_A = 0
 
 		if decay_mode == 'proton-emission/proton-emission':
 			#daughter
@@ -514,11 +579,15 @@ for n in key_list:
 				daughter = str(sym) + '-' + str(An)
 				particle_em = 'H-1'
 				part_num = 2
+				d_A = An
+				ep_A = 1
 			except:
 				decay_mode = 'undefined'
 				daughter = 'None'
 				particle_em = 'None'
 				part_num = 0
+				d_A = 0
+				ep_A = 0
 
 		if decay_mode == 'neutron-emission/neutron-emission':
 			#daughter
@@ -538,11 +607,15 @@ for n in key_list:
 				daughter = str(sym) + '-' + str(An)
 				particle_em = 'n-1'
 				part_num = 2
+				d_A = An
+				ep_A = 1
 			except:
 				decay_mode = 'undefined'
 				daughter = 'None'
 				particle_em = 'None'
 				part_num = 0
+				d_A = 0
+				ep_A = 0
 
 		if decay_mode == 'beta-/neutron-emission/neutron-emission/neutron-emission':
 			#daughter
@@ -562,11 +635,15 @@ for n in key_list:
 				daughter = str(sym) + '-' + str(An)
 				particle_em = 'n-1'
 				part_num = 3
+				d_A = An
+				ep_A = 1
 			except:
 				decay_mode = 'undefined'
 				daughter = 'None'
 				particle_em = 'None'
 				part_num = 0
+				d_A = 0
+				ep_A = 0
 
 		if decay_mode == 'beta-/neutron-emission/neutron-emission/neutron-emission/neutron-emission':
 			#daughter
@@ -586,11 +663,15 @@ for n in key_list:
 				daughter = str(sym) + '-' + str(An)
 				particle_em = 'n-1'
 				part_num = 4
+				d_A = An
+				ep_A = 1
 			except:
 				decay_mode = 'undefined'
 				daughter = 'None'
 				particle_em = 'None'
 				part_num = 0
+				d_A = 0
+				ep_A = 0
 
 		if decay_mode == 'beta+/proton-emission/proton-emission':
 			#daughter
@@ -610,11 +691,15 @@ for n in key_list:
 				daughter = str(sym) + '-' + str(An)
 				particle_em = 'H-1'
 				part_num = 2
+				d_A = An
+				ep_A = 1
 			except:
 				decay_mode = 'undefined'
 				daughter = 'None'
 				particle_em = 'None'
 				part_num = 0
+				d_A = 0
+				ep_A = 0
 
 		if decay_mode == 'beta+/proton-emission/proton-emission/proton-emission':
 			#daughter
@@ -634,11 +719,15 @@ for n in key_list:
 				daughter = str(sym) + '-' + str(An)
 				particle_em = 'H-1'
 				part_num = 3
+				d_A = An
+				ep_A = 1
 			except:
 				decay_mode = 'undefined'
 				daughter = 'None'
 				particle_em = 'None'
 				part_num = 0
+				d_A = 0
+				ep_A = 0
 		
 		#End if statements
 	
@@ -679,11 +768,15 @@ for n in key_list:
 					daughter = str(sym) + '-' + str(An)
 					particle_em = iso_name
 					part_num = 1
+					d_A = An
+					ep_A = tempA
 				except:
 					decay_mode = 'undefined'
 					daughter = 'None'
 					particle_em = 'None'
 					part_num = 0
+					d_A = 0
+					ep_A = 0
 			except:
 				tempA = int(data.weight(m))
 				tempEle = m
@@ -705,18 +798,32 @@ for n in key_list:
 						daughter = str(sym) + '-' + str(An)
 						particle_em = iso_name
 						part_num = 1
+						d_A = An
+						ep_A = tempA
 					except:
 						decay_mode = 'undefined'
 						daughter = 'None'
 						particle_em = 'None'
 						part_num = 0
+						d_A = 0
+						ep_A = 0
 				except:
 					decay_mode = 'undefined'
 					daughter = 'None'
 					particle_em = 'None'
 					part_num = 0
-		
+					d_A = 0
+					ep_A = 0
+	
 		#End if statement
+		
+		#Check the summation of particles
+		if daughter != 'None':
+			prod_sum = float(prod_sum + branch_frac*d_A + branch_frac*part_num*ep_A)
+			#If react_sum != prod_sum, then we need to change how the branch fractions are represented
+			print str(symbol) + '-' + str(A) + ' : ' + str(react_sum) + '-' + str(prod_sum)
+				#WARNING!!! YOU ARE STILL INSIDE THE DECAY MODES LOOP HERE!!!
+		#End if
 		
 		#write out remaining decay info
 		if i == 0: file.write('\n- decay_modes:\n')
@@ -732,6 +839,8 @@ for n in key_list:
 		i = i + 1
 
 	#END decay modes loop
+
+	#Check summations outside of the loop, then may have to go back and fix 
 
 	file.write('...\n\n')
 #END key_list of nuclides loop
