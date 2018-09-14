@@ -249,6 +249,8 @@ decay_mode decaymode_choice(std::string &choice)
 		mode = beta_plus_3proton_em;
 	else if (copy == "specific-isotope")
 		mode = specific_isotope;
+	else if (copy == "undefined")
+		mode = undefined;
 	else
 		mode = stable;
 	
@@ -350,6 +352,10 @@ std::string decaymode_string(decay_mode mode)
 			name = "specific-isotope";
 			break;
 			
+		case undefined:
+			name = "undefined";
+			break;
+			
 		default:
 			break;
 	}
@@ -414,7 +420,9 @@ Isotope::~Isotope()
 {
 	decay_modes.clear();
 	branch_ratios.clear();
-	spec_iso.clear();
+	particle_emitted.clear();
+	num_particles.clear();
+	daughter.clear();
 	nuclides->DeleteContents();
 }
 
@@ -501,13 +509,12 @@ void Isotope::DisplayInfo()
 		std::cout << "Decay Rate (s): " << this->DecayRate() << std::endl;
 		std::cout << "Decay Modes:\n";
 		std::cout << "------------\n";
-		std::cout << "\tMode : Fraction (: isotope) \n";
-		std::cout << "\t---------------------------\n";
+		std::cout << "\tMode : Fraction : Emission : Number Emitted : Daughter \n";
+		std::cout << "\t------------------------------------------------------\n";
 		for (int i=0; i<this->DecayModes(); i++)
 		{
 			std::cout << "\t" << decaymode_string(this->DecayMode(i)) << " : " << this->BranchFraction(i);
-			if (this->DecayMode(i) == specific_isotope)
-				std::cout << " : " << this->IsotopeEmitted(i);
+			std::cout << " : " << this->ParticleEmitted(i) << " : " << this->NumberParticlesEmitted(i) << " : " << this->Daughter(i);
 			std::cout << std::endl;
 		}
 		std::cout << std::endl;
@@ -585,12 +592,31 @@ double Isotope::BranchFraction(int i)
 }
 
 //return isotope emission
-std::string Isotope::IsotopeEmitted(int i)
+std::string Isotope::ParticleEmitted(int i)
 {
 	if (i < 0 || i >= this->DecayModes())
 		return "None";
 	else
-		return this->spec_iso[i];
+		return this->particle_emitted[i];
+	
+}
+
+//return the number of particles emitted
+int Isotope::NumberParticlesEmitted(int i)
+{
+	if (i < 0 || i >= this->DecayModes())
+		return 0;
+	else
+		return this->num_particles[i];
+}
+
+//return name of daughter
+std::string Isotope::Daughter(int i)
+{
+	if (i < 0 || i >= this->DecayModes())
+		return "None";
+	else
+		return this->daughter[i];
 	
 }
 
@@ -606,7 +632,9 @@ void Isotope::setConstants()
 	
 	this->decay_modes.clear();
 	this->branch_ratios.clear();
-	this->spec_iso.clear();
+	this->particle_emitted.clear();
+	this->num_particles.clear();
+	this->daughter.clear();
 	
 	//Read from the library to find the isotope
 	try
@@ -625,10 +653,9 @@ void Isotope::setConstants()
 			std::string read_decay = this->getNuclideLibrary()(this->IsotopeName())("decay_modes")(x.first)["type"].getString();
 			this->decay_modes.push_back( decaymode_choice(read_decay) );
 			this->branch_ratios.push_back(this->getNuclideLibrary()(this->IsotopeName())("decay_modes")(x.first)["branch_frac"].getDouble());
-			if (this->decay_modes[i] == specific_isotope)
-				this->spec_iso.push_back(this->getNuclideLibrary()(this->IsotopeName())("decay_modes")(x.first)["isotope"].getString());
-			else
-				this->spec_iso.push_back("None");
+			this->particle_emitted.push_back( this->getNuclideLibrary()(this->IsotopeName())("decay_modes")(x.first)["part_emitted"].getString() );
+			this->num_particles.push_back(this->getNuclideLibrary()(this->IsotopeName())("decay_modes")(x.first)["num_parts"].getInt());
+			this->daughter.push_back( this->getNuclideLibrary()(this->IsotopeName())("decay_modes")(x.first)["daughter"].getString() );
 			i++;
 		}
 	}
@@ -646,7 +673,9 @@ void Isotope::setConstants()
 		
 		this->decay_modes.push_back(stable);
 		this->branch_ratios.push_back(0.0);
-		this->spec_iso.push_back("None");
+		this->particle_emitted.push_back("None");
+		this->num_particles.push_back(0);
+		this->daughter.push_back("None");
 	}
 }
 
@@ -678,18 +707,21 @@ int IBIS_TESTS()
 	nuc_data.executeYamlRead("database/NuclideLibrary.yml");
 	
 	//Create test isotope
-	Isotope a, b, c;
+	Isotope a, b, c, d;
 	a.loadNuclides(nuc_data);
 	b.loadNuclides(nuc_data);
 	c.loadNuclides(nuc_data);
+	d.loadNuclides(nuc_data);
 	
 	a.registerIsotope(2, 5);
 	b.registerIsotope("Ba-114");
 	c.registerIsotope("C", 8);
+	d.registerIsotope("Be", 8);
 	
 	a.DisplayInfo();
 	b.DisplayInfo();
 	c.DisplayInfo();
+	d.DisplayInfo();
 	
 	//Clear the library when no longer needed
 	a.unloadNuclides();

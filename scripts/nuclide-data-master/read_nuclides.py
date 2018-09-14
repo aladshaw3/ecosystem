@@ -38,6 +38,9 @@ stable = False		#stability of the nuclide
 AW = 0				#atomic weight of the nuclide
 iso = False			#True if nuclide is an excited state
 iso_name = ' '		#Name of isotope for specific-isotope decay
+daughter = ' '		#Name of the daughter isotope produced from decay mode (check to make sure daughter is real)
+particle_em = ' '	#Name of the particle emitted (if any) to produce the daughter
+part_num = 0		#Number of those particles emitted
 
 #Open yaml file to write to
 file = open('../../database/NuclideLibrary.yml', 'w')
@@ -116,6 +119,7 @@ for n in key_list:
 		decay_mode = m
 		
 		#Rename and group some decay modes
+		if m == None: decay_mode = 'stable'
 		if stable == True: decay_mode = 'stable'
 		if m == 'A' or m == 'A<': decay_mode = 'alpha'
 		if m == 'SF' or m == 'EF' or m == 'BF': decay_mode = 'spontaneous-fission'
@@ -138,10 +142,509 @@ for n in key_list:
 		if m == 'E2P': decay_mode = 'beta+/proton-emission/proton-emission'
 		if m == 'E3P': decay_mode = 'beta+/proton-emission/proton-emission/proton-emission'
 		
+		#Determine daughters and particle_emissions
+		if decay_mode == 'stable':
+			daughter = 'None'
+			particle_em = 'None'
+			part_num = 0
+		
+		if decay_mode == 'alpha':
+			#daughter
+			Zn = Z - 2
+			An = A - 4
+			try:
+				sym = data.nuclides[(Zn,An)][0]['symbol']
+				#Correct some symbols from database
+				if Zn == 0: sym = 'n'
+				if Zn == 112: sym = 'Cn'
+				if Zn == 113: sym = 'Nh'
+				if Zn == 114: sym = 'Fl'
+				if Zn == 115: sym = 'Mc'
+				if Zn == 116: sym = 'Lv'
+				if Zn == 117: sym = 'Ts'
+				if Zn == 118: sym = 'Og'
+				daughter = str(sym) + '-' + str(An)
+				particle_em = 'He-4'
+				part_num = 1
+			except:
+				decay_mode = 'undefined'
+				daughter = 'None'
+				particle_em = 'None'
+				part_num = 0
+					
+		if decay_mode == 'spontaneous-fission':
+			#daughter
+			Zn = int(Z/2)
+			An = int(A/2)
+			Zm = Z - Zn
+			Am = A - An
+			try:
+				sym1 = data.nuclides[(Zn,An)][0]['symbol']
+				#Correct some symbols from database
+				if Zn == 0: sym1 = 'n'
+				if Zn == 112: sym1 = 'Cn'
+				if Zn == 113: sym1 = 'Nh'
+				if Zn == 114: sym1 = 'Fl'
+				if Zn == 115: sym1 = 'Mc'
+				if Zn == 116: sym1 = 'Lv'
+				if Zn == 117: sym1 = 'Ts'
+				if Zn == 118: sym1 = 'Og'
+				sym2 = data.nuclides[(Zm,Am)][0]['symbol']
+				#Correct some symbols from database
+				if Zm == 0: sym2 = 'n'
+				if Zm == 112: sym2 = 'Cn'
+				if Zm == 113: sym2 = 'Nh'
+				if Zm == 114: sym2 = 'Fl'
+				if Zm == 115: sym2 = 'Mc'
+				if Zm == 116: sym2 = 'Lv'
+				if Zm == 117: sym2 = 'Ts'
+				if Zm == 118: sym2 = 'Og'
+				daughter = str(sym1) + '-' + str(An)
+				particle_em = str(sym2) + '-' + str(Am)
+				part_num = 1
+			except:
+				decay_mode = 'undefined'
+				daughter = 'None'
+				particle_em = 'None'
+				part_num = 0
+
+		if decay_mode == 'beta+':
+			#daughter
+			Zn = Z - 1
+			An = A
+			try:
+				sym = data.nuclides[(Zn,An)][0]['symbol']
+				#Correct some symbols from database
+				if Zn == 0: sym = 'n'
+				if Zn == 112: sym = 'Cn'
+				if Zn == 113: sym = 'Nh'
+				if Zn == 114: sym = 'Fl'
+				if Zn == 115: sym = 'Mc'
+				if Zn == 116: sym = 'Lv'
+				if Zn == 117: sym = 'Ts'
+				if Zn == 118: sym = 'Og'
+				daughter = str(sym) + '-' + str(An)
+				particle_em = 'None'
+				part_num = 0
+			except:
+				decay_mode = 'undefined'
+				daughter = 'None'
+				particle_em = 'None'
+				part_num = 0
+
+		if decay_mode == 'beta-':
+			#daughter
+			Zn = Z + 1
+			An = A
+			try:
+				sym = data.nuclides[(Zn,An)][0]['symbol']
+				#Correct some symbols from database
+				if Zn == 0: sym = 'n'
+				if Zn == 112: sym = 'Cn'
+				if Zn == 113: sym = 'Nh'
+				if Zn == 114: sym = 'Fl'
+				if Zn == 115: sym = 'Mc'
+				if Zn == 116: sym = 'Lv'
+				if Zn == 117: sym = 'Ts'
+				if Zn == 118: sym = 'Og'
+				daughter = str(sym) + '-' + str(An)
+				particle_em = 'None'
+				part_num = 0
+			except:
+				decay_mode = 'undefined'
+				daughter = 'None'
+				particle_em = 'None'
+				part_num = 0
+
+		if decay_mode == 'isomeric-transition':
+			#daughter
+			Zn = Z
+			An = A
+			try:
+				sym = data.nuclides[(Zn,An)][0]['symbol']
+				#Correct some symbols from database
+				if Zn == 0: sym = 'n'
+				if Zn == 112: sym = 'Cn'
+				if Zn == 113: sym = 'Nh'
+				if Zn == 114: sym = 'Fl'
+				if Zn == 115: sym = 'Mc'
+				if Zn == 116: sym = 'Lv'
+				if Zn == 117: sym = 'Ts'
+				if Zn == 118: sym = 'Og'
+				daughter = str(sym) + '-' + str(An)
+				particle_em = 'None'
+				part_num = 0
+			except:
+				decay_mode = 'undefined'
+				daughter = 'None'
+				particle_em = 'None'
+				part_num = 0
+
+		if decay_mode == 'neutron-emission':
+			#daughter
+			Zn = Z
+			An = A - 1
+			try:
+				sym = data.nuclides[(Zn,An)][0]['symbol']
+				#Correct some symbols from database
+				if Zn == 0: sym = 'n'
+				if Zn == 112: sym = 'Cn'
+				if Zn == 113: sym = 'Nh'
+				if Zn == 114: sym = 'Fl'
+				if Zn == 115: sym = 'Mc'
+				if Zn == 116: sym = 'Lv'
+				if Zn == 117: sym = 'Ts'
+				if Zn == 118: sym = 'Og'
+				daughter = str(sym) + '-' + str(An)
+				particle_em = 'n-1'
+				part_num = 1
+			except:
+				decay_mode = 'undefined'
+				daughter = 'None'
+				particle_em = 'None'
+				part_num = 0
+
+		if decay_mode == 'beta-/neutron-emission':
+			#daughter
+			Zn = Z + 1
+			An = A - 1
+			try:
+				sym = data.nuclides[(Zn,An)][0]['symbol']
+				#Correct some symbols from database
+				if Zn == 0: sym = 'n'
+				if Zn == 112: sym = 'Cn'
+				if Zn == 113: sym = 'Nh'
+				if Zn == 114: sym = 'Fl'
+				if Zn == 115: sym = 'Mc'
+				if Zn == 116: sym = 'Lv'
+				if Zn == 117: sym = 'Ts'
+				if Zn == 118: sym = 'Og'
+				daughter = str(sym) + '-' + str(An)
+				particle_em = 'n-1'
+				part_num = 1
+			except:
+				decay_mode = 'undefined'
+				daughter = 'None'
+				particle_em = 'None'
+				part_num = 0
+
+		if decay_mode == 'beta+/proton-emission':
+			#daughter
+			Zn = Z - 2
+			An = A - 1
+			try:
+				sym = data.nuclides[(Zn,An)][0]['symbol']
+				#Correct some symbols from database
+				if Zn == 0: sym = 'n'
+				if Zn == 112: sym = 'Cn'
+				if Zn == 113: sym = 'Nh'
+				if Zn == 114: sym = 'Fl'
+				if Zn == 115: sym = 'Mc'
+				if Zn == 116: sym = 'Lv'
+				if Zn == 117: sym = 'Ts'
+				if Zn == 118: sym = 'Og'
+				daughter = str(sym) + '-' + str(An)
+				particle_em = 'H-1'
+				part_num = 1
+			except:
+				decay_mode = 'undefined'
+				daughter = 'None'
+				particle_em = 'None'
+				part_num = 0
+
+		if decay_mode == 'proton-emission':
+			#daughter
+			Zn = Z - 1
+			An = A - 1
+			try:
+				sym = data.nuclides[(Zn,An)][0]['symbol']
+				#Correct some symbols from database
+				if Zn == 0: sym = 'n'
+				if Zn == 112: sym = 'Cn'
+				if Zn == 113: sym = 'Nh'
+				if Zn == 114: sym = 'Fl'
+				if Zn == 115: sym = 'Mc'
+				if Zn == 116: sym = 'Lv'
+				if Zn == 117: sym = 'Ts'
+				if Zn == 118: sym = 'Og'
+				daughter = str(sym) + '-' + str(An)
+				particle_em = 'H-1'
+				part_num = 1
+			except:
+				decay_mode = 'undefined'
+				daughter = 'None'
+				particle_em = 'None'
+				part_num = 0
+
+		if decay_mode == 'beta+/alpha':
+			#daughter
+			Zn = Z - 3
+			An = A - 4
+			try:
+				sym = data.nuclides[(Zn,An)][0]['symbol']
+				#Correct some symbols from database
+				if Zn == 0: sym = 'n'
+				if Zn == 112: sym = 'Cn'
+				if Zn == 113: sym = 'Nh'
+				if Zn == 114: sym = 'Fl'
+				if Zn == 115: sym = 'Mc'
+				if Zn == 116: sym = 'Lv'
+				if Zn == 117: sym = 'Ts'
+				if Zn == 118: sym = 'Og'
+				daughter = str(sym) + '-' + str(An)
+				particle_em = 'He-4'
+				part_num = 1
+			except:
+				decay_mode = 'undefined'
+				daughter = 'None'
+				particle_em = 'None'
+				part_num = 0
+
+		if decay_mode == 'beta+/beta+':
+			#daughter
+			Zn = Z - 2
+			An = A
+			try:
+				sym = data.nuclides[(Zn,An)][0]['symbol']
+				#Correct some symbols from database
+				if Zn == 0: sym = 'n'
+				if Zn == 112: sym = 'Cn'
+				if Zn == 113: sym = 'Nh'
+				if Zn == 114: sym = 'Fl'
+				if Zn == 115: sym = 'Mc'
+				if Zn == 116: sym = 'Lv'
+				if Zn == 117: sym = 'Ts'
+				if Zn == 118: sym = 'Og'
+				daughter = str(sym) + '-' + str(An)
+				particle_em = 'None'
+				part_num = 0
+			except:
+				decay_mode = 'undefined'
+				daughter = 'None'
+				particle_em = 'None'
+				part_num = 0
+
+		if decay_mode == 'beta-/beta-':
+			#daughter
+			Zn = Z + 2
+			An = A
+			try:
+				sym = data.nuclides[(Zn,An)][0]['symbol']
+				#Correct some symbols from database
+				if Zn == 0: sym = 'n'
+				if Zn == 112: sym = 'Cn'
+				if Zn == 113: sym = 'Nh'
+				if Zn == 114: sym = 'Fl'
+				if Zn == 115: sym = 'Mc'
+				if Zn == 116: sym = 'Lv'
+				if Zn == 117: sym = 'Ts'
+				if Zn == 118: sym = 'Og'
+				daughter = str(sym) + '-' + str(An)
+				particle_em = 'None'
+				part_num = 0
+			except:
+				decay_mode = 'undefined'
+				daughter = 'None'
+				particle_em = 'None'
+				part_num = 0
+
+		if decay_mode == 'beta-/neutron-emission/neutron-emission':
+			#daughter
+			Zn = Z + 1
+			An = A - 2
+			try:
+				sym = data.nuclides[(Zn,An)][0]['symbol']
+				#Correct some symbols from database
+				if Zn == 0: sym = 'n'
+				if Zn == 112: sym = 'Cn'
+				if Zn == 113: sym = 'Nh'
+				if Zn == 114: sym = 'Fl'
+				if Zn == 115: sym = 'Mc'
+				if Zn == 116: sym = 'Lv'
+				if Zn == 117: sym = 'Ts'
+				if Zn == 118: sym = 'Og'
+				daughter = str(sym) + '-' + str(An)
+				particle_em = 'n-1'
+				part_num = 2
+			except:
+				decay_mode = 'undefined'
+				daughter = 'None'
+				particle_em = 'None'
+				part_num = 0
+
+		if decay_mode == 'beta-/alpha':
+			#daughter
+			Zn = Z + 1 - 2
+			An = A - 4
+			try:
+				sym = data.nuclides[(Zn,An)][0]['symbol']
+				#Correct some symbols from database
+				if Zn == 0: sym = 'n'
+				if Zn == 112: sym = 'Cn'
+				if Zn == 113: sym = 'Nh'
+				if Zn == 114: sym = 'Fl'
+				if Zn == 115: sym = 'Mc'
+				if Zn == 116: sym = 'Lv'
+				if Zn == 117: sym = 'Ts'
+				if Zn == 118: sym = 'Og'
+				daughter = str(sym) + '-' + str(An)
+				particle_em = 'He-4'
+				part_num = 1
+			except:
+				decay_mode = 'undefined'
+				daughter = 'None'
+				particle_em = 'None'
+				part_num = 0
+
+		if decay_mode == 'proton-emission/proton-emission':
+			#daughter
+			Zn = Z - 2
+			An = A - 2
+			try:
+				sym = data.nuclides[(Zn,An)][0]['symbol']
+				#Correct some symbols from database
+				if Zn == 0: sym = 'n'
+				if Zn == 112: sym = 'Cn'
+				if Zn == 113: sym = 'Nh'
+				if Zn == 114: sym = 'Fl'
+				if Zn == 115: sym = 'Mc'
+				if Zn == 116: sym = 'Lv'
+				if Zn == 117: sym = 'Ts'
+				if Zn == 118: sym = 'Og'
+				daughter = str(sym) + '-' + str(An)
+				particle_em = 'H-1'
+				part_num = 2
+			except:
+				decay_mode = 'undefined'
+				daughter = 'None'
+				particle_em = 'None'
+				part_num = 0
+
+		if decay_mode == 'neutron-emission/neutron-emission':
+			#daughter
+			Zn = Z
+			An = A - 2
+			try:
+				sym = data.nuclides[(Zn,An)][0]['symbol']
+				#Correct some symbols from database
+				if Zn == 0: sym = 'n'
+				if Zn == 112: sym = 'Cn'
+				if Zn == 113: sym = 'Nh'
+				if Zn == 114: sym = 'Fl'
+				if Zn == 115: sym = 'Mc'
+				if Zn == 116: sym = 'Lv'
+				if Zn == 117: sym = 'Ts'
+				if Zn == 118: sym = 'Og'
+				daughter = str(sym) + '-' + str(An)
+				particle_em = 'n-1'
+				part_num = 2
+			except:
+				decay_mode = 'undefined'
+				daughter = 'None'
+				particle_em = 'None'
+				part_num = 0
+
+		if decay_mode == 'beta-/neutron-emission/neutron-emission/neutron-emission':
+			#daughter
+			Zn = Z + 1
+			An = A - 3
+			try:
+				sym = data.nuclides[(Zn,An)][0]['symbol']
+				#Correct some symbols from database
+				if Zn == 0: sym = 'n'
+				if Zn == 112: sym = 'Cn'
+				if Zn == 113: sym = 'Nh'
+				if Zn == 114: sym = 'Fl'
+				if Zn == 115: sym = 'Mc'
+				if Zn == 116: sym = 'Lv'
+				if Zn == 117: sym = 'Ts'
+				if Zn == 118: sym = 'Og'
+				daughter = str(sym) + '-' + str(An)
+				particle_em = 'n-1'
+				part_num = 3
+			except:
+				decay_mode = 'undefined'
+				daughter = 'None'
+				particle_em = 'None'
+				part_num = 0
+
+		if decay_mode == 'beta-/neutron-emission/neutron-emission/neutron-emission/neutron-emission':
+			#daughter
+			Zn = Z + 1
+			An = A - 4
+			try:
+				sym = data.nuclides[(Zn,An)][0]['symbol']
+				#Correct some symbols from database
+				if Zn == 0: sym = 'n'
+				if Zn == 112: sym = 'Cn'
+				if Zn == 113: sym = 'Nh'
+				if Zn == 114: sym = 'Fl'
+				if Zn == 115: sym = 'Mc'
+				if Zn == 116: sym = 'Lv'
+				if Zn == 117: sym = 'Ts'
+				if Zn == 118: sym = 'Og'
+				daughter = str(sym) + '-' + str(An)
+				particle_em = 'n-1'
+				part_num = 4
+			except:
+				decay_mode = 'undefined'
+				daughter = 'None'
+				particle_em = 'None'
+				part_num = 0
+
+		if decay_mode == 'beta+/proton-emission/proton-emission':
+			#daughter
+			Zn = Z - 1 - 2
+			An = A - 2
+			try:
+				sym = data.nuclides[(Zn,An)][0]['symbol']
+				#Correct some symbols from database
+				if Zn == 0: sym = 'n'
+				if Zn == 112: sym = 'Cn'
+				if Zn == 113: sym = 'Nh'
+				if Zn == 114: sym = 'Fl'
+				if Zn == 115: sym = 'Mc'
+				if Zn == 116: sym = 'Lv'
+				if Zn == 117: sym = 'Ts'
+				if Zn == 118: sym = 'Og'
+				daughter = str(sym) + '-' + str(An)
+				particle_em = 'H-1'
+				part_num = 2
+			except:
+				decay_mode = 'undefined'
+				daughter = 'None'
+				particle_em = 'None'
+				part_num = 0
+
+		if decay_mode == 'beta+/proton-emission/proton-emission/proton-emission':
+			#daughter
+			Zn = Z - 1 - 3
+			An = A - 3
+			try:
+				sym = data.nuclides[(Zn,An)][0]['symbol']
+				#Correct some symbols from database
+				if Zn == 0: sym = 'n'
+				if Zn == 112: sym = 'Cn'
+				if Zn == 113: sym = 'Nh'
+				if Zn == 114: sym = 'Fl'
+				if Zn == 115: sym = 'Mc'
+				if Zn == 116: sym = 'Lv'
+				if Zn == 117: sym = 'Ts'
+				if Zn == 118: sym = 'Og'
+				daughter = str(sym) + '-' + str(An)
+				particle_em = 'H-1'
+				part_num = 3
+			except:
+				decay_mode = 'undefined'
+				daughter = 'None'
+				particle_em = 'None'
+				part_num = 0
+		
+		#End if statements
+	
 		#Make additional corrections to data
-		if m == None: decay_mode = 'stable'
 		branch_frac = data.nuclides[n][0]['decay modes'][m]['branch fraction']
-		if decay_mode == 'stable': branch_frac = 0
+		if decay_mode == 'stable' or decay_mode == 'undefined': branch_frac = 0
 		if decay_mode == 'stable': stable = True
 		if branch_frac == None: branch_frac = 1
 		
@@ -149,19 +652,69 @@ for n in key_list:
 		if i == 0: file.write('stable: ' + str(stable) + '\n')
 		
 		#Check for specific atom emission
-		if decay_mode != 'stable' and decay_mode != 'alpha' and decay_mode != 'spontaneous-fission' and decay_mode != 'beta+' and decay_mode != 'beta-' and decay_mode != 'isomeric-transition' and decay_mode != 'neutron-emission' and decay_mode != 'beta-/neutron-emission' and decay_mode != 'beta+/proton-emission' and decay_mode != 'proton-emission' and decay_mode != 'beta+/alpha' and decay_mode != 'beta+/beta+' and decay_mode != 'beta-/beta-' and decay_mode != 'beta-/neutron-emission/neutron-emission' and decay_mode != 'beta-/alpha' and decay_mode != 'proton-emission/proton-emission' and decay_mode != 'neutron-emission/neutron-emission' and decay_mode != 'beta-/neutron-emission/neutron-emission/neutron-emission' and decay_mode != 'beta-/neutron-emission/neutron-emission/neutron-emission/neutron-emission' and decay_mode != 'beta+/proton-emission/proton-emission' and decay_mode != 'beta+/proton-emission/proton-emission/proton-emission':
+		if decay_mode != 'stable' and decay_mode != 'alpha' and decay_mode != 'spontaneous-fission' and decay_mode != 'beta+' and decay_mode != 'beta-' and decay_mode != 'isomeric-transition' and decay_mode != 'neutron-emission' and decay_mode != 'beta-/neutron-emission' and decay_mode != 'beta+/proton-emission' and decay_mode != 'proton-emission' and decay_mode != 'beta+/alpha' and decay_mode != 'beta+/beta+' and decay_mode != 'beta-/beta-' and decay_mode != 'beta-/neutron-emission/neutron-emission' and decay_mode != 'beta-/alpha' and decay_mode != 'proton-emission/proton-emission' and decay_mode != 'neutron-emission/neutron-emission' and decay_mode != 'beta-/neutron-emission/neutron-emission/neutron-emission' and decay_mode != 'beta-/neutron-emission/neutron-emission/neutron-emission/neutron-emission' and decay_mode != 'beta+/proton-emission/proton-emission' and decay_mode != 'beta+/proton-emission/proton-emission/proton-emission' and decay_mode != 'undefined':
 			
 			decay_mode = 'specific-isotope'
 			
 			#Set the isotope name for the specific isotope emission during decay
+			#NOTE: particle emitted is the specific isotope, while daughter is the result of the emission
 			try:
 				tempA = data.Nuclide(m).A
 				tempEle = data.Nuclide(m).element
 				iso_name = str(tempEle) + '-' + str(tempA)
+				#daughter
+				Zn = Z - data.Nuclide(m).Z
+				An = A - tempA
+				try:
+					sym = data.nuclides[(Zn,An)][0]['symbol']
+					#Correct some symbols from database
+					if Zn == 0: sym = 'n'
+					if Zn == 112: sym = 'Cn'
+					if Zn == 113: sym = 'Nh'
+					if Zn == 114: sym = 'Fl'
+					if Zn == 115: sym = 'Mc'
+					if Zn == 116: sym = 'Lv'
+					if Zn == 117: sym = 'Ts'
+					if Zn == 118: sym = 'Og'
+					daughter = str(sym) + '-' + str(An)
+					particle_em = iso_name
+					part_num = 1
+				except:
+					decay_mode = 'undefined'
+					daughter = 'None'
+					particle_em = 'None'
+					part_num = 0
 			except:
 				tempA = int(data.weight(m))
 				tempEle = m
 				iso_name = str(tempEle) + '-' + str(tempA)
+				try:
+					Zn = Z - data.Nuclide(iso_name).Z
+					An = A - tempA
+					try:
+						sym = data.nuclides[(Zn,An)][0]['symbol']
+						#Correct some symbols from database
+						if Zn == 0: sym = 'n'
+						if Zn == 112: sym = 'Cn'
+						if Zn == 113: sym = 'Nh'
+						if Zn == 114: sym = 'Fl'
+						if Zn == 115: sym = 'Mc'
+						if Zn == 116: sym = 'Lv'
+						if Zn == 117: sym = 'Ts'
+						if Zn == 118: sym = 'Og'
+						daughter = str(sym) + '-' + str(An)
+						particle_em = iso_name
+						part_num = 1
+					except:
+						decay_mode = 'undefined'
+						daughter = 'None'
+						particle_em = 'None'
+						part_num = 0
+				except:
+					decay_mode = 'undefined'
+					daughter = 'None'
+					particle_em = 'None'
+					part_num = 0
 		
 		#End if statement
 		
@@ -171,6 +724,9 @@ for n in key_list:
 		file.write('    type: ' + str(decay_mode) + '\n')
 		file.write('    branch_frac: ' + str(branch_frac) + '\n')
 		if decay_mode == 'specific-isotope': file.write('    isotope: ' + str(iso_name) + '\n')
+		file.write('    daughter: ' + str(daughter) + '\n')
+		file.write('    part_emitted: ' + str(particle_em) + '\n')
+		file.write('    num_parts: ' + str(part_num) + '\n')
 		file.write('\n')
 		
 		i = i + 1

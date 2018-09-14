@@ -32,7 +32,7 @@ typedef enum {alpha, beta_min, beta_plus, stable, spon_fiss, iso_trans, neutron_
 				beta_min_neutron_em, beta_plus_neutron_em, beta_plus_alpha, beta_plus_beta_plus,
 				beta_min_beta_min, beta_min_2neutron_em, beta_min_alpha, proton_em_proton_em,
 				neutron_em_neutron_em, beta_min_3neutron_em, beta_min_4neutron_em, beta_plus_2proton_em,
-				beta_plus_3proton_em, specific_isotope, beta_plus_proton_em} decay_mode;
+				beta_plus_3proton_em, specific_isotope, beta_plus_proton_em, undefined} decay_mode;
 
 /// Enumeration for the list of valid units of half-life
 /** List of valid units for half-lifes for better readability of code.*/
@@ -84,13 +84,17 @@ public:
 	
 	decay_mode DecayMode(int i);						///< Return the ith decay mode
 	double BranchFraction(int i);						///< Return the ith branch fraction
-	std::string IsotopeEmitted(int i);					///< Return the name of the isotope emitted for the ith decay mode
+	std::string ParticleEmitted(int i);					///< Return the name of the particle emitted for the ith decay mode
+	int NumberParticlesEmitted(int i);					///< Return the number of particles that get emitted
+	std::string Daughter(int i);						///< Return the name of the daughter isotope 
 	
 protected:
 	std::string IsoName;								///< Name of the isotope (e.g., H-2)
 	std::vector<decay_mode> decay_modes;				///< List of decay modes the given isotope can undergo
 	std::vector<double> branch_ratios;					///< Branching ratios for each possible decay mode
-	std::vector<std::string> spec_iso;					///< Name of the specific isotope ejected during spec_iso decay
+	std::vector<std::string> particle_emitted;			///< Name of the particle(s) ejected during spec_iso decay
+	std::vector<int> num_particles;						///< Numbers of particles emitted during decay mode
+	std::vector<std::string> daughter;					///< Name of the daughter isotope formed
 	
 	double decay_rate;									///< Rate of decay for the given isotope (1/s)
 	double half_life;									///< Half-life of the isotope (in hl_units)
