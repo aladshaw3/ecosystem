@@ -44,8 +44,16 @@ part_num = 0		#Number of those particles emitted
 
 react_sum = 0.0		#add all protons and neutrons for the isotope
 prod_sum = 0.0		#add all protons and neutrons for each daughter and emitted particle (modulated by branch fraction)
+combo_sum = 0.0		#Sum of combo decay modes
 d_A = 0				#mass number of the daughter
 ep_A = 0			#mass number of the emitted particle
+
+modes = {}			#create a map object where keys are decay modes and values are branch fractions
+daughters = {}		#create a map object where keys are decay modes and values are daughter particles
+emissions = {}		#create a map object where keys are decay modes and values are emitted particles
+number_parts = {}	#create a map object where keys are decay modes and values are number of emitted particles
+daughter_A = {}
+emission_A = {}
 
 #Open yaml file to write to
 file = open('../../database/NuclideLibrary.yml', 'w')
@@ -58,11 +66,13 @@ for n in data.nuclides:
 key_list.sort()
 
 #Iterate through the sorted list
+problems = 0
 for n in key_list:
 	Z = n[0] #atomic num
 	A = n[1] #mass num
 	react_sum = float(A)
 	prod_sum = 0
+	combo_sum = 0.0
 	hl = data.nuclides[n][0]['half-life']
 	stable = data.nuclides[n][0]['stable']
 	try:
@@ -121,6 +131,7 @@ for n in key_list:
 	
 	#Loop through the decay modes
 	i = 0
+	combo_sum = 0.0
 	for m in data.nuclides[n][0]['decay modes']:
 		n_modes = len(data.nuclides[n][0]['decay modes'])
 		decay_mode = m
@@ -735,7 +746,13 @@ for n in key_list:
 		branch_frac = data.nuclides[n][0]['decay modes'][m]['branch fraction']
 		if decay_mode == 'stable' or decay_mode == 'undefined': branch_frac = 0
 		if decay_mode == 'stable': stable = True
-		if branch_frac == None: branch_frac = 1
+		if branch_frac == None: branch_frac = 0.01
+		if decay_mode == 'isomeric-transition': branch_frac = 0
+
+		#Combo sum
+		if decay_mode == 'beta-/neutron-emission' or decay_mode == 'beta+/proton-emission' or decay_mode == 'beta+/alpha' or decay_mode == 'beta-/neutron-emission/neutron-emission' or decay_mode == 'beta-/alpha' or decay_mode == 'beta-/neutron-emission/neutron-emission/neutron-emission' or decay_mode == 'beta-/neutron-emission/neutron-emission/neutron-emission/neutron-emission' or decay_mode == 'beta+/proton-emission/proton-emission' or decay_mode == 'beta+/proton-emission/proton-emission/proton-emission':
+			
+			combo_sum = combo_sum + branch_frac
 		
 		#write out stability condition (only on first iteration)
 		if i == 0: file.write('stable: ' + str(stable) + '\n')
@@ -817,35 +834,161 @@ for n in key_list:
 	
 		#End if statement
 		
+		#Set the modes and branch fractions
+		modes[decay_mode] = branch_frac
+		daughters[decay_mode] = daughter
+		emissions[decay_mode] = particle_em
+		number_parts[decay_mode] = part_num
+		daughter_A[decay_mode] = d_A
+		emission_A[decay_mode] = ep_A
+		
 		#Check the summation of particles
 		if daughter != 'None':
 			prod_sum = float(prod_sum + branch_frac*d_A + branch_frac*part_num*ep_A)
-			#If react_sum != prod_sum, then we need to change how the branch fractions are represented
-			print str(symbol) + '-' + str(A) + ' : ' + str(react_sum) + '-' + str(prod_sum)
-				#WARNING!!! YOU ARE STILL INSIDE THE DECAY MODES LOOP HERE!!!
 		#End if
-		
-		#write out remaining decay info
-		if i == 0: file.write('\n- decay_modes:\n')
-		file.write('  - mode' + str(i) + ':\n')
-		file.write('    type: ' + str(decay_mode) + '\n')
-		file.write('    branch_frac: ' + str(branch_frac) + '\n')
-		if decay_mode == 'specific-isotope': file.write('    isotope: ' + str(iso_name) + '\n')
-		file.write('    daughter: ' + str(daughter) + '\n')
-		file.write('    part_emitted: ' + str(particle_em) + '\n')
-		file.write('    num_parts: ' + str(part_num) + '\n')
-		file.write('\n')
 		
 		i = i + 1
 
 	#END decay modes loop
 
-	#Check summations outside of the loop, then may have to go back and fix 
+	#Check summations outside of the loop, then may have to go back and fix
+	SumError = False
+	if daughter != 'None':
+		if abs(react_sum - prod_sum) > 1e-10:
+			SumError = True
+	#End if
+	
+	i = 0
+	#Start new decay loop for editing
+	prod_sum = 0.0
+	branch_sum = 0.0;
+	for m in modes:
+		
+		if SumError == True:
+			if m == 'beta-' or m == 'beta+':
+				#manual corrections
+				if Z == 3 and A == 11:
+					modes[m] = 0.95873
+				elif Z == 51 and A == 104:
+					modes[m] = 0.92
+				elif Z == 52 and A == 108:
+					modes[m] = 0.486
+				elif Z == 26 and A == 45:
+					modes[m] = 0.129
+				elif Z == 52 and A == 109:
+					modes[m] = 0.8670
+				elif Z == 53 and A == 110:
+					modes[m] = 0.709
+				elif Z == 54 and A == 113:
+					modes[m] = 0.92983
+				elif Z == 54 and A == 115:
+					modes[m] = 0.996597
+				elif Z == 55 and A == 114:
+					modes[m] = 0.9109
+				elif Z == 56 and A == 114:
+					modes[m] = 0.790966
+				elif Z == 61 and A == 128:
+					modes[m] = 1.0
+				elif Z == 80 and A == 179:
+					modes[m] = 0.4485
+				elif Z == 80 and A == 181:
+					modes[m] = 0.72989991
+				elif Z == 80 and A == 183:
+					modes[m] = 0.8829974
+				#automatic corrections (works for 90% of errors with combination decay)
+				else:
+					modes[m] = 1.0 - combo_sum
+			if m == 'proton-emission' or m == 'neutron-emission':
+				#manual corrections
+				if Z == 39 and A == 77:
+					modes[m] = 0
+				elif Z == 47 and A == 93:
+					modes[m] = 0
+			if m == 'proton-emission/proton-emission':
+				#manual corrections
+				if Z == 26 and A == 45:
+					modes[m] = 0.57
+			if m == 'alpha':
+				#manual corrections
+				if Z == 52 and A == 109:
+					modes[m] = 0.03895
+				elif Z == 61 and A == 128:
+					modes[m] = 0
+			if m == 'beta+/proton-emission':
+				if Z == 54 and A == 110:
+					modes[m] = 0.36
+				elif Z == 61 and A == 128:
+					modes[m] = 0.0
+	
+		branch_sum = branch_sum + modes[m]
+		
+		#Check the summation of particles
+		if m != 'None':
+			prod_sum = float(prod_sum + modes[m]*daughter_A[m] + modes[m]*number_parts[m]*emission_A[m])
+		
+		#write out remaining decay info
+#if i == 0: file.write('\n- decay_modes:\n')
+#		file.write('  - mode' + str(i) + ':\n')
+#		file.write('    type: ' + str(m) + '\n')
+#		file.write('    branch_frac: ' + str(modes[m]) + '\n')
+#		file.write('    daughter: ' + str(daughters[m]) + '\n')
+#		file.write('    part_emitted: ' + str(emissions[m]) + '\n')
+#		file.write('    num_parts: ' + str(number_parts[m]) + '\n')
+#		file.write('\n')
+		
+		i = i + 1
+	#End new decay loop
+	
+	i = 0
+	#Start new decay loop for final editing
+	prod_sum = 0.0
+	for m in modes:
+		
+		#Fix modes
+		if branch_sum > 0.0:
+			modes[m] = modes[m]/branch_sum
+		else: modes[m] = 1.0/len(modes)
 
+		if Z == 75 and A == 193: modes[m] = 1.0
+	
+		#Check the summation of particles
+		if m != 'None':
+			prod_sum = float(prod_sum + modes[m]*daughter_A[m] + modes[m]*number_parts[m]*emission_A[m])
+		
+		#write out remaining decay info
+		if i == 0: file.write('\n- decay_modes:\n')
+		file.write('  - mode' + str(i) + ':\n')
+		file.write('    type: ' + str(m) + '\n')
+		file.write('    branch_frac: ' + str(modes[m]) + '\n')
+		file.write('    daughter: ' + str(daughters[m]) + '\n')
+		file.write('    part_emitted: ' + str(emissions[m]) + '\n')
+		file.write('    num_parts: ' + str(number_parts[m]) + '\n')
+		file.write('\n')
+		i = i + 1
+	#End new decay loop
+
+	#Check summations outside of the loop, then may have to go back and fix
+	SumError = False
+	if daughter != 'None':
+		if abs(react_sum - prod_sum) > 1e-10:
+			SumError = True
+			problems = problems + 1
+			print str(symbol) + '-' + str(A) + ': ' + str(react_sum) + '-' + str(prod_sum)
+			print str(combo_sum)
+			print modes
+	#End if
+
+	modes = {}
+	daughters = {}
+	emissions = {}
+	number_parts = {}
+	daughter_A = {}
+	emission_A = {}
 	file.write('...\n\n')
 #END key_list of nuclides loop
 
 print '\nYaml Library Construction Complete!\n'
+print 'Number problems = ' + str(problems)
 
 #Close the yaml file
 file.close()
