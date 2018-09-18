@@ -398,7 +398,7 @@ std::string timeunits_string(time_units units)
 }
 
 /*
- *								Start: Ibis Class Definitions
+ *								Start: Isotope Class Definitions
  *	-------------------------------------------------------------------------------------
  */
 
@@ -413,6 +413,7 @@ Isotope::Isotope() : Atom(0)
 	nuclides = nullptr;
 	Stable = false;
 	IsomericState = false;
+	initial_condition = 0.0;
 }
 
 //Default destructor
@@ -437,6 +438,12 @@ void Isotope::loadNuclides(yaml_cpp_class &data)
 void Isotope::unloadNuclides()
 {
 	this->nuclides->DeleteContents();
+}
+
+//Clear chain
+void Isotope::clearChain()
+{
+	this->chain.clear();
 }
 
 //Register via isotope name (e.g., H-2)
@@ -579,9 +586,14 @@ void Isotope::createChain()
 					
 					if (all_stable == false) break;
 				}
-				if (all_stable == true) {break;}
+				if (all_stable == true)
+				{
+					//No Action
+				}
 				else
 				{
+					this->chain.push_back(temp);
+					
 					for (int j=0; j<this->chain[i-1].size(); j++)
 					{
 						if (this->chain[i-1][j].second == "stable")
@@ -596,15 +608,6 @@ void Isotope::createChain()
 							}
 							else
 							{
-								this->chain.push_back(temp);
-								if (this->getNuclideLibrary()(this->chain[i-1][j].second)["stable"].getBool() == true)
-								{
-									std::cout << this->chain[i-1][j].second << " is stable\n";
-								}
-								else
-								{
-									std::cout << this->chain[i-1][j].second << " is NOT stable\n";
-								}
 								success = this->addPairs(i, this->chain[i-1][j].second);
 							}
 						}
@@ -621,6 +624,14 @@ void Isotope::createChain()
 		
 		i++;
 	} while (all_stable == false);
+}
+
+//set initial cond
+void Isotope::setInitialCondition(double ic)
+{
+	if (ic < 0.0)
+		ic = 0.0;
+	this->initial_condition = ic;
 }
 
 //Return isotope number
@@ -671,6 +682,12 @@ int Isotope::DecayModes()
 	return (int)this->decay_modes.size();
 }
 
+//Return initial cond
+double Isotope::getInitialCondition()
+{
+	return this->initial_condition;
+}
+
 //return decay mode
 decay_mode Isotope::DecayMode(int i)
 {
@@ -718,6 +735,68 @@ std::string Isotope::Daughter(int i)
 	else
 		return this->daughter[i];
 	
+}
+
+//return list of decay mode indices that form this isotope
+std::vector<int> Isotope::DaughterIndices(std::string parent)
+{
+	std::vector<int> indices;
+	
+	//Read from the library to find the isotope
+	try
+	{
+		//Loop through the decay_modes header
+		int i = 0;
+		for (auto &x: this->getNuclideLibrary()(parent)("decay_modes").getSubMap())
+		{
+			std::string dau = this->getNuclideLibrary()(parent)("decay_modes")(x.first)["daughter"].getString();
+			
+			if (dau == this->IsotopeName())
+				indices.push_back(i);
+			else
+				indices.push_back(-1);
+			
+			i++;
+		}
+	}
+	catch (std::out_of_range)
+	{
+		//Parent not found
+		indices.clear();
+	}
+	
+	return indices;
+}
+
+//return list of decay mode indices that form this isotope
+std::vector<int> Isotope::EmissionIndices(std::string parent)
+{
+	std::vector<int> indices;
+	
+	//Read from the library to find the isotope
+	try
+	{
+		//Loop through the decay_modes header
+		int i = 0;
+		for (auto &x: this->getNuclideLibrary()(parent)("decay_modes").getSubMap())
+		{
+			std::string part = this->getNuclideLibrary()(parent)("decay_modes")(x.first)["part_emitted"].getString();
+			
+			if (part == this->IsotopeName())
+				indices.push_back(i);
+			else
+				indices.push_back(-1);
+			
+			i++;
+		}
+	}
+	catch (std::out_of_range)
+	{
+		//Parent not found
+		indices.clear();
+	}
+	
+	return indices;
 }
 
 //Set the decay information based on a registered atomic number and isotope number
@@ -811,7 +890,6 @@ int Isotope::addPairs(int i, std::string parent)
 				if (read_mode == stable || read_mode == undefined || read_mode == iso_trans)
 				{
 					//If stable, don't push back
-					//this->chain[i].push_back(temp);
 				}
 				else
 				{
@@ -844,7 +922,30 @@ YamlWrapper& Isotope::getNuclideLibrary()
 
 /*
  *	-------------------------------------------------------------------------------------
- *								End: Ibis Class Definitions
+ *								End: Isotope Class Definitions
+ */
+
+/*
+ *								Start: DecayChain Class Definitions
+ *	-------------------------------------------------------------------------------------
+ */
+
+//Default constructor
+DecayChain::DecayChain()
+{
+	
+}
+
+//Default destructor
+DecayChain::~DecayChain()
+{
+	initial_nuc.clear();
+	final_nuc.clear();
+}
+
+/*
+ *	-------------------------------------------------------------------------------------
+ *								End: DecayChain Class Definitions
  */
 
 //Test function
@@ -865,7 +966,7 @@ int IBIS_TESTS()
 	
 	a.registerIsotope(2, 5);
 	b.registerIsotope("Ba-114");
-	c.registerIsotope("C", 8);
+	c.registerIsotope("U", 235);
 	d.registerIsotope("Be", 8);
 	
 	a.DisplayInfo();
@@ -879,13 +980,30 @@ int IBIS_TESTS()
 	c.createChain();
 	c.DisplayChain();
 	
+	b.createChain();
+	b.DisplayChain();
+	
+	a.createChain();
+	a.DisplayChain();
+	
 	//Clear the library when no longer needed
 	a.unloadNuclides();
 	b.unloadNuclides();
 	c.unloadNuclides();
 	d.unloadNuclides();
 	
-	//nuc_data.DisplayContents();
+	/**
+	std::map< std::pair<int,int>, double, std::greater< std::pair<int,int> > > mymap;
+	
+	mymap[std::make_pair(0,1)] = 1.0;
+	mymap[std::make_pair(0,0)] = 2.0;
+	mymap[std::make_pair(5,8)] = 101.0;
+	
+	for (std::map< std::pair<int,int>, double, std::greater<int> >::iterator it=mymap.begin(); it!=mymap.end(); it++)
+	{
+		std::cout << it->first.first << "," << it->first.second << "\t" << it->second << std::endl;
+	}
+	 */
 	
 	return success;
 }

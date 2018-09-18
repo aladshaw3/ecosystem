@@ -67,13 +67,16 @@ public:
 	
 	void loadNuclides(yaml_cpp_class &data);			///< Function to load the nuclide library into the pointer
 	void unloadNuclides();								///< Delete the pointer to nuclide library to free space
-	void registerIsotope(std::string isotope_name);		///< Register an isotope given the isotope name
+	void clearChain();									///< Delete the chain for this isotope to free space
+	void registerIsotope(std::string isotope_name);		///< Register an isotope given the isotope name (e.g., H-2)
 	void registerIsotope(std::string symbol, int iso);	///< Register an isotope given an atomic symbol (e.g., H) and isotope number (e.g., 2)
-	void registerIsotope(int atom_num, int iso_num);	///< Register an isotope given both an atomic and isotope number
+	void registerIsotope(int atom_num, int iso_num);	///< Register an isotope given both an atomic and isotope number (e.g., H-2 = 1, 2)
 	
 	void DisplayInfo();									///< Print out isotope information to the console
 	void DisplayChain();								///< Print out chain information to the console
 	void createChain();									///< Function to create and fill in the chain of nuclides for this starting isotope
+	
+	void setInitialCondition(double ic);				///< Set the value for the initial condition of this nuclide
 	
 	int IsotopeNumber();								///< Return the isotope number of the atom
 	double DecayRate();									///< Return the decay rate of the isotope
@@ -83,12 +86,29 @@ public:
 	bool isStable();									///< Return stability condition
 	bool isIsomericState();								///< Return isomeric condition
 	int DecayModes();									///< Return the number of decay modes
+	double getInitialCondition();						///< Return the value of the initial condition 
 	
 	decay_mode DecayMode(int i);						///< Return the ith decay mode
 	double BranchFraction(int i);						///< Return the ith branch fraction
 	std::string ParticleEmitted(int i);					///< Return the name of the particle emitted for the ith decay mode
 	int NumberParticlesEmitted(int i);					///< Return the number of particles that get emitted
-	std::string Daughter(int i);						///< Return the name of the daughter isotope 
+	std::string Daughter(int i);						///< Return the name of the daughter isotope
+	
+	/// Return a list of indices of the decay modes that this daughter isotope is formed from given the parent isotope's name
+	/** This function will iterate through the decay modes for the parent isotope we are investigating and return a
+		list of indices that represent the modes of decay that form this isotope from the given parent. If the mode
+		does not form this isotope, then it will have an index of -1. The size of the vector on return will equal
+		the size of the list of decay modes for the parent. If the parent is invalid, then it will return a vector
+		of size 0. If the parent does not form this isotope, then all indices will be -1. */
+	std::vector<int> DaughterIndices(std::string parent);
+	
+	/// Return a list of indices of the decay modes that this particle emission is formed from given the parent isotope's name
+	/** This function will iterate through the decay modes for the parent isotope we are investigating and return a
+		list of indices that represent the modes of decay that form this isotope from the given parent. If the mode
+		does not form this isotope, then it will have an index of -1. The size of the vector on return will equal
+		the size of the list of decay modes for the parent. If the parent is invalid, then it will return a vector
+		of size 0. If the parent does not form this isotope, then all indices will be -1. */
+	std::vector<int> EmissionIndices(std::string parent);
 	
 protected:
 	std::string IsoName;								///< Name of the isotope (e.g., H-2)
@@ -106,7 +126,7 @@ protected:
 		chain[i] = contains lists of parent daughter pairs at the ith level of the chain
 		chain[i][j] = contains the jth pair at the ith level
 		chain[i][j].first = contains the name of the parent
-		chain[i][j].second = contains the name of the daughter 
+		chain[i][j].second = contains the name of the daughter/particle emitted
 		
 		Example:
 		--------
@@ -128,6 +148,7 @@ protected:
 	int isotope_number;									///< isotope number for the object
 	bool Stable;										///< Boolean is True if isotope is stable
 	bool IsomericState;									///< Boolean is True if isotope is in an isomeric state
+	double initial_condition;							///< Value to hold initial condition for this nuclide
 	
 	yaml_cpp_class *nuclides;							///< Pointer to a yaml object storing the digital library of all nuclides
 	
@@ -137,6 +158,27 @@ protected:
 	YamlWrapper& getNuclideLibrary();					///< Return reference to the nuclide library
 	
 private:
+	
+};
+
+/// DecayChain object to hold and store a set of unique isotopes in a branched decay chain
+/** C++ style object that will contain a list of unique nuclides that can be used to numerically
+	solve a decay chain system. User will provide a list of initial nuclides present and this
+	object will then use that information to build the list of all possible nuclides that can
+	be formed. One of the key features of this object is that the nuclide list will be unique
+	(i.e., no duplicate nuclides) so that we can iterate through that list to apply the branch
+	fractions and decay constants to solve the fractionation as a function of time.*/
+class DecayChain
+{
+public:
+	DecayChain();											///< Default constructor
+	~DecayChain();											///< Default destructor
+	
+protected:
+	
+private:
+	std::vector<Isotope> initial_nuc;						///< List of starting nuclides from which to build a decay chain
+	std::vector<Isotope> final_nuc;							///< List of all nuclides that make up the decay chain
 	
 };
 
