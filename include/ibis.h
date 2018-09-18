@@ -86,7 +86,7 @@ public:
 	bool isStable();									///< Return stability condition
 	bool isIsomericState();								///< Return isomeric condition
 	int DecayModes();									///< Return the number of decay modes
-	double getInitialCondition();						///< Return the value of the initial condition 
+	double getInitialCondition();						///< Return the value of the initial condition
 	
 	decay_mode DecayMode(int i);						///< Return the ith decay mode
 	double BranchFraction(int i);						///< Return the ith branch fraction
