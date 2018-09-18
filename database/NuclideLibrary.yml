@@ -357,7 +357,7 @@ atom_weight: 3.03078
 isomeric: False
 half_life: 1e-20
 hl_units: seconds
-stable: False
+stable: True
 
 - decay_modes:
   - mode0:
@@ -52199,7 +52199,7 @@ atom_weight: 159.96149
 isomeric: False
 half_life: 1.55
 hl_units: seconds
-stable: False
+stable: True
 
 - decay_modes:
   - mode0:
@@ -53795,7 +53795,7 @@ atom_weight: 159
 isomeric: False
 half_life: 1e-20
 hl_units: seconds
-stable: False
+stable: True
 
 - decay_modes:
   - mode0:
@@ -57883,7 +57883,7 @@ atom_weight: 175.9801
 isomeric: False
 half_life: 1e-20
 hl_units: seconds
-stable: False
+stable: True
 
 - decay_modes:
   - mode0:

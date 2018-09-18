@@ -72,6 +72,8 @@ public:
 	void registerIsotope(int atom_num, int iso_num);	///< Register an isotope given both an atomic and isotope number
 	
 	void DisplayInfo();									///< Print out isotope information to the console
+	void DisplayChain();								///< Print out chain information to the console
+	void createChain();									///< Function to create and fill in the chain of nuclides for this starting isotope
 	
 	int IsotopeNumber();								///< Return the isotope number of the atom
 	double DecayRate();									///< Return the decay rate of the isotope
@@ -96,6 +98,30 @@ protected:
 	std::vector<int> num_particles;						///< Numbers of particles emitted during decay mode
 	std::vector<std::string> daughter;					///< Name of the daughter isotope formed
 	
+	/// List of all parent and daughter/particles pairs in a chain given this isotope
+	/** Stores the list of parent and daughter pairs. If the parent produces emitted particles, those go
+		in this list as well. If the parent produces more than one daughter, all those daughters go in the 
+		list as well. 
+	 
+		chain[i] = contains lists of parent daughter pairs at the ith level of the chain
+		chain[i][j] = contains the jth pair at the ith level
+		chain[i][j].first = contains the name of the parent
+		chain[i][j].second = contains the name of the daughter 
+		
+		Example:
+		--------
+	 
+		Levels:							A					A = Principal Parent
+		-------						   / \
+		level 0:					  B   C					B = 1st Daughter (pair A/B), C = 1st particle emission (pair A/C)
+									 / \   \
+		level 1:                    D   E   F               D = 1st Daugher of 1st Daughter, E = 2nd Daughter of 1st Daughter, F = Stable Daughter
+								  / |   | \
+		level 2:                 G  H   I  J				So on and so forth...
+	 
+	 */
+	std::vector< std::vector< std::pair<std::string,std::string> > > chain;
+	
 	double decay_rate;									///< Rate of decay for the given isotope (1/s)
 	double half_life;									///< Half-life of the isotope (in hl_units)
 	time_units hl_units;								///< Units given for the half-life
@@ -107,6 +133,7 @@ protected:
 	
 	void setConstants();								///< Set the decay_modes, branch_ratios, and other info based on load library
 	void computeDecayRate();							///< Compute the decay rate (in 1/s) based on the half-life
+	int addPairs(int i, std::string parent);			///< Function to add parent/daughter pairs given the parent's name and the current level
 	YamlWrapper& getNuclideLibrary();					///< Return reference to the nuclide library
 	
 private:

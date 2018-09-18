@@ -119,15 +119,15 @@ for n in key_list:
 	if Z == 118: symbol = 'Og'
 	
 	#write out basic info
-	file.write(str(symbol) + '-' + str(A) + ':\n')
-	file.write('---\n')
-	file.write('symbol: ' + str(symbol) + '\n')
-	file.write('atom_num: ' + str(Z) + '\n')
-	file.write('mass_num: ' + str(A) + '\n')
-	file.write('atom_weight: ' + str(AW) + '\n')
-	file.write('isomeric: ' + str(iso) + '\n')
-	file.write('half_life: ' + str(hl) + '\n')
-	file.write('hl_units: ' + str(units) + '\n')
+	#	file.write(str(symbol) + '-' + str(A) + ':\n')
+	#file.write('---\n')
+	#file.write('symbol: ' + str(symbol) + '\n')
+	#file.write('atom_num: ' + str(Z) + '\n')
+	#file.write('mass_num: ' + str(A) + '\n')
+	#file.write('atom_weight: ' + str(AW) + '\n')
+	#file.write('isomeric: ' + str(iso) + '\n')
+	#file.write('half_life: ' + str(hl) + '\n')
+	#file.write('hl_units: ' + str(units) + '\n')
 	
 	#Loop through the decay modes
 	i = 0
@@ -755,7 +755,7 @@ for n in key_list:
 			combo_sum = combo_sum + branch_frac
 		
 		#write out stability condition (only on first iteration)
-		if i == 0: file.write('stable: ' + str(stable) + '\n')
+		#if i == 0: file.write('stable: ' + str(stable) + '\n')
 		
 		#Check for specific atom emission
 		if decay_mode != 'stable' and decay_mode != 'alpha' and decay_mode != 'spontaneous-fission' and decay_mode != 'beta+' and decay_mode != 'beta-' and decay_mode != 'isomeric-transition' and decay_mode != 'neutron-emission' and decay_mode != 'beta-/neutron-emission' and decay_mode != 'beta+/proton-emission' and decay_mode != 'proton-emission' and decay_mode != 'beta+/alpha' and decay_mode != 'beta+/beta+' and decay_mode != 'beta-/beta-' and decay_mode != 'beta-/neutron-emission/neutron-emission' and decay_mode != 'beta-/alpha' and decay_mode != 'proton-emission/proton-emission' and decay_mode != 'neutron-emission/neutron-emission' and decay_mode != 'beta-/neutron-emission/neutron-emission/neutron-emission' and decay_mode != 'beta-/neutron-emission/neutron-emission/neutron-emission/neutron-emission' and decay_mode != 'beta+/proton-emission/proton-emission' and decay_mode != 'beta+/proton-emission/proton-emission/proton-emission' and decay_mode != 'undefined':
@@ -862,6 +862,7 @@ for n in key_list:
 	#Start new decay loop for editing
 	prod_sum = 0.0
 	branch_sum = 0.0;
+	all_modes_bad = True
 	for m in modes:
 		
 		if SumError == True:
@@ -925,19 +926,27 @@ for n in key_list:
 		#Check the summation of particles
 		if m != 'None':
 			prod_sum = float(prod_sum + modes[m]*daughter_A[m] + modes[m]*number_parts[m]*emission_A[m])
-		
-		#write out remaining decay info
-#if i == 0: file.write('\n- decay_modes:\n')
-#		file.write('  - mode' + str(i) + ':\n')
-#		file.write('    type: ' + str(m) + '\n')
-#		file.write('    branch_frac: ' + str(modes[m]) + '\n')
-#		file.write('    daughter: ' + str(daughters[m]) + '\n')
-#		file.write('    part_emitted: ' + str(emissions[m]) + '\n')
-#		file.write('    num_parts: ' + str(number_parts[m]) + '\n')
-#		file.write('\n')
-		
+
+		if all_modes_bad == True:
+			if m != 'undefined' and m!= 'stable' and m != 'isomeric-transition': all_modes_bad = False
+			else: all_modes_bad = True
+	
 		i = i + 1
 	#End new decay loop
+	
+	#redefine stability
+	if all_modes_bad == True: stable = 'True'
+	
+	#Print out basic info
+	file.write(str(symbol) + '-' + str(A) + ':\n')
+	file.write('---\n')
+	file.write('symbol: ' + str(symbol) + '\n')
+	file.write('atom_num: ' + str(Z) + '\n')
+	file.write('mass_num: ' + str(A) + '\n')
+	file.write('atom_weight: ' + str(AW) + '\n')
+	file.write('isomeric: ' + str(iso) + '\n')
+	file.write('half_life: ' + str(hl) + '\n')
+	file.write('hl_units: ' + str(units) + '\n')
 	
 	i = 0
 	#Start new decay loop for final editing
@@ -956,6 +965,8 @@ for n in key_list:
 			prod_sum = float(prod_sum + modes[m]*daughter_A[m] + modes[m]*number_parts[m]*emission_A[m])
 		
 		#write out remaining decay info
+		#write out stability condition (only on first iteration)
+		if i == 0: file.write('stable: ' + str(stable) + '\n')
 		if i == 0: file.write('\n- decay_modes:\n')
 		file.write('  - mode' + str(i) + ':\n')
 		file.write('    type: ' + str(m) + '\n')

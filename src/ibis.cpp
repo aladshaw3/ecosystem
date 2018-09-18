@@ -423,6 +423,7 @@ Isotope::~Isotope()
 	particle_emitted.clear();
 	num_particles.clear();
 	daughter.clear();
+	chain.clear();
 	nuclides->DeleteContents();
 }
 
@@ -521,6 +522,105 @@ void Isotope::DisplayInfo()
 	}
 	
 	std::cout << std::endl;
+}
+
+//Display chain
+void Isotope::DisplayChain()
+{
+	//Level loop
+	for (int i=0; i<this->chain.size(); i++)
+	{
+		std::cout << "Level " << i << ":\n";
+		std::cout << "------------\n";
+		//Daughters loop
+		for (int j=0; j<this->chain[i].size(); j++)
+		{
+			std::cout << this->chain[i][j].first << " ---> " << this->chain[i][j].second << std::endl;
+		}
+		std::cout << std::endl;
+	}
+}
+
+//Create branching decay chain
+void Isotope::createChain()
+{
+	bool all_stable = true;
+	int success = 0;
+	std::vector< std::pair<std::string,std::string> > temp;
+	int i = 0;
+	do
+	{
+		all_stable = true;
+		try
+		{
+			if (i == 0)
+			{
+				all_stable = this->isStable();
+				
+				if (all_stable == true) break;
+				else
+				{
+					this->chain.push_back(temp);
+					success = this->addPairs(i, this->IsotopeName());
+					if (success != 0) {mError(read_error); all_stable = true; break;}
+				}
+			}
+			else
+			{
+				for (int j=0; j<this->chain[i-1].size(); j++)
+				{
+					if (this->chain[i-1][j].second == "stable")
+					{
+						this->chain[i-1].erase(this->chain[i-1].begin()+j);
+						all_stable = true;
+					}
+					else
+						all_stable = this->getNuclideLibrary()(this->chain[i-1][j].second)["stable"].getBool();
+					
+					if (all_stable == false) break;
+				}
+				if (all_stable == true) {break;}
+				else
+				{
+					for (int j=0; j<this->chain[i-1].size(); j++)
+					{
+						if (this->chain[i-1][j].second == "stable")
+						{
+							this->chain[i-1].erase(this->chain[i-1].begin()+j);
+						}
+						else
+						{
+							if (this->getNuclideLibrary()(this->chain[i-1][j].second)["stable"].getBool() == true)
+							{
+								//Only push_back is daughter for next level in chain is not stable
+							}
+							else
+							{
+								this->chain.push_back(temp);
+								if (this->getNuclideLibrary()(this->chain[i-1][j].second)["stable"].getBool() == true)
+								{
+									std::cout << this->chain[i-1][j].second << " is stable\n";
+								}
+								else
+								{
+									std::cout << this->chain[i-1][j].second << " is NOT stable\n";
+								}
+								success = this->addPairs(i, this->chain[i-1][j].second);
+							}
+						}
+						if (success != 0) {mError(read_error); all_stable = true; break;}
+					}
+				}
+			}
+		}
+		catch (std::out_of_range)
+		{
+			mError(invalid_isotope);
+			all_stable = true;
+		}
+		
+		i++;
+	} while (all_stable == false);
 }
 
 //Return isotope number
@@ -686,6 +786,56 @@ void Isotope::computeDecayRate()
 	this->decay_rate = log(2.0)/hl_sec;
 }
 
+//Append pairs to end of vectors
+int Isotope::addPairs(int i, std::string parent)
+{
+	int success = 0;
+	std::pair<std::string, std::string> temp = std::make_pair(parent, "stable");
+	
+	try
+	{
+		if (this->getNuclideLibrary()(parent)["stable"].getBool() == true)
+		{
+			this->chain[i].push_back(temp);
+		}
+		else
+		{
+			//Loop through the decay_modes header
+			int m = 0;
+			for (auto &x: this->getNuclideLibrary()(parent)("decay_modes").getSubMap())
+			{
+				std::string read_decay = this->getNuclideLibrary()(parent)("decay_modes")(x.first)["type"].getString();
+				decay_mode read_mode = decaymode_choice(read_decay);
+				std::string dau = this->getNuclideLibrary()(parent)("decay_modes")(x.first)["daughter"].getString();
+				std::string part = this->getNuclideLibrary()(parent)("decay_modes")(x.first)["part_emitted"].getString();
+				if (read_mode == stable || read_mode == undefined || read_mode == iso_trans)
+				{
+					//If stable, don't push back
+					//this->chain[i].push_back(temp);
+				}
+				else
+				{
+					temp = std::make_pair(parent, part);
+					if (part != "None")
+					{
+						this->chain[i].push_back(temp);
+					}
+					temp = std::make_pair(parent, dau);
+					this->chain[i].push_back(temp);
+				}
+				m++;
+			}
+		}
+	}
+	catch (std::out_of_range)
+	{
+		mError(invalid_isotope);
+		return -1;
+	}
+	
+	return success;
+}
+
 //Return library
 YamlWrapper& Isotope::getNuclideLibrary()
 {
@@ -723,10 +873,17 @@ int IBIS_TESTS()
 	c.DisplayInfo();
 	d.DisplayInfo();
 	
+	d.createChain();
+	d.DisplayChain();
+	
+	c.createChain();
+	c.DisplayChain();
+	
 	//Clear the library when no longer needed
 	a.unloadNuclides();
 	b.unloadNuclides();
 	c.unloadNuclides();
+	d.unloadNuclides();
 	
 	//nuc_data.DisplayContents();
 	
