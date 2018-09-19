@@ -425,7 +425,7 @@ Isotope::~Isotope()
 	num_particles.clear();
 	daughter.clear();
 	chain.clear();
-	nuclides->DeleteContents();
+	//nuclides->DeleteContents();  //Must not delete contents on destructor or this invalidates usage of temporary isotopes
 }
 
 //Load library
@@ -842,7 +842,8 @@ void Isotope::setConstants()
 	catch (std::out_of_range)
 	{
 		mError(invalid_isotope);
-		std::cout << "\nSetting some default values...\n\n";
+		std::cout << std::endl << this->IsoName << std::endl;
+		std::cout << "Setting some default values...\n\n";
 		
 		this->editAtomicWeight(this->IsotopeNumber());
 		this->IsomericState = false;
@@ -943,6 +944,123 @@ DecayChain::~DecayChain()
 	final_nuc.clear();
 }
 
+//Display initial list
+void DecayChain::DisplayInitialList()
+{
+	std::cout << "Initial List of Nuclides:\n";
+	std::cout << "-------------------------\n";
+	
+	for (int i=0; i<this->initial_nuc.size(); i++)
+	{
+		std::cout << this->initial_nuc[i].IsotopeName() << std::endl;
+	}
+	std::cout << std::endl;
+}
+
+//Display final list
+void DecayChain::DisplayFinalList()
+{
+	std::cout << "Final List of Nuclides:\n";
+	std::cout << "-----------------------\n";
+	
+	for (int i=0; i<this->final_nuc.size(); i++)
+	{
+		std::cout << this->final_nuc[i].IsotopeName() << std::endl;
+	}
+	std::cout << std::endl;
+}
+
+//Display all nuclide and decay chain information
+void DecayChain::DisplayInfo()
+{
+	std::cout << "List of Nuclide Information:\n";
+	std::cout << "----------------------------\n";
+	std::cout << "----------------------------\n";
+	
+	for (int i=0; i<this->final_nuc.size(); i++)
+	{
+		std::cout << "Nuclide Index: " << i << "\tName: " << this->final_nuc[i].IsotopeName() << std::endl;
+		std::cout << "------------ List of Parents --------------\n";
+		for (int j=0; j<this->parents[i].size(); j++)
+		{
+			std::cout << "\t" << this->final_nuc[ this->parents[i][j] ].IsotopeName() << "\tFraction(s): ";
+			for (int k=0; k<this->branches[i][j].size(); k++)
+			{
+				std::cout << this->final_nuc[ this->parents[i][j] ].BranchFraction( this->branches[i][j][k] ) << "\t";
+			}
+			std::cout << std::endl;
+		}
+		std::cout << std::endl;
+	}
+	std::cout << std::endl;
+}
+
+//Load library
+void DecayChain::loadNuclides(yaml_cpp_class &data)
+{
+	this->nuclides = &data;
+}
+
+//Unload library
+void DecayChain::unloadNuclides()
+{
+	this->nuclides->DeleteContents();
+}
+
+//Register initial nuclide
+void DecayChain::registerInitialNuclide(std::string isotope_name)
+{
+	Isotope temp;
+	temp.loadNuclides(*this->nuclides);
+	temp.registerIsotope(isotope_name);
+	this->roughInsertSort(temp);
+}
+
+//Register initial nuclide
+void DecayChain::registerInitialNuclide(std::string symb, int iso)
+{
+	Isotope temp;
+	temp.loadNuclides(*this->nuclides);
+	temp.registerIsotope(symb, iso);
+	this->roughInsertSort(temp);
+}
+
+//Register initial nuclide
+void DecayChain::registerInitialNuclide(int atom_num, int iso_num)
+{
+	Isotope temp;
+	temp.loadNuclides(*this->nuclides);
+	temp.registerIsotope(atom_num, iso_num);
+	this->roughInsertSort(temp);
+}
+
+//Create the decay chains and list of final nuclides
+void DecayChain::createChains()
+{
+	//Create a temporary unordered_map (automatically checks if key is registered)
+}
+
+//Insert an isotope to the initial list
+void DecayChain::roughInsertSort(Isotope iso)
+{
+	Isotope pivot;
+	pivot = iso;
+	int i = 0;
+	for (i=0; i<this->initial_nuc.size(); i++)
+	{
+		//Check temp vs ith nuclide
+		if (iso.IsotopeNumber() > this->initial_nuc[i].IsotopeNumber())
+		{
+			//Replace ith nuclide with temp and push all other nuclides downward
+			pivot = this->initial_nuc[i];
+			this->initial_nuc[i] = iso;
+			iso = pivot;
+			//break;
+		}
+	}
+	this->initial_nuc.push_back(iso);
+}
+
 /*
  *	-------------------------------------------------------------------------------------
  *								End: DecayChain Class Definitions
@@ -966,7 +1084,7 @@ int IBIS_TESTS()
 	
 	a.registerIsotope(2, 5);
 	b.registerIsotope("Ba-114");
-	c.registerIsotope("U", 235);
+	c.registerIsotope("U", 238);
 	d.registerIsotope("Be", 8);
 	
 	a.DisplayInfo();
@@ -986,12 +1104,6 @@ int IBIS_TESTS()
 	a.createChain();
 	a.DisplayChain();
 	
-	//Clear the library when no longer needed
-	a.unloadNuclides();
-	b.unloadNuclides();
-	c.unloadNuclides();
-	d.unloadNuclides();
-	
 	/**
 	std::map< std::pair<int,int>, double, std::greater< std::pair<int,int> > > mymap;
 	
@@ -1004,6 +1116,22 @@ int IBIS_TESTS()
 		std::cout << it->first.first << "," << it->first.second << "\t" << it->second << std::endl;
 	}
 	 */
+	
+	DecayChain test;
+	test.loadNuclides(nuc_data);
+	
+	test.registerInitialNuclide("Ba-114");
+	test.registerInitialNuclide("U-235");
+	test.registerInitialNuclide("U-238");
+	
+	test.DisplayInitialList();
+	
+	//Clear the library when no longer needed
+	a.unloadNuclides();
+	b.unloadNuclides();
+	c.unloadNuclides();
+	d.unloadNuclides();
+	test.unloadNuclides();
 	
 	return success;
 }

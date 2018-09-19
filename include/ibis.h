@@ -23,6 +23,7 @@
 
 #include "eel.h"
 #include "yaml_wrapper.h"
+#include <unordered_map>
 
 
 /// Enumeration for the list of valid decay modes
@@ -167,18 +168,56 @@ private:
 	object will then use that information to build the list of all possible nuclides that can
 	be formed. One of the key features of this object is that the nuclide list will be unique
 	(i.e., no duplicate nuclides) so that we can iterate through that list to apply the branch
-	fractions and decay constants to solve the fractionation as a function of time.*/
+	fractions and decay constants to solve the fractionation as a function of time.
+ 
+	First, create chains of isotope from the initial nuclides given. Then, reduce chains to remove
+	redundant isotopes and order the isotopes in final_nuc list to ensure that only the highest
+	mass number isotopes are listed first. Lastly, fill out the parents and branches lists to
+	allow for direct access to all necessary decay information to speed up computation and
+	evaluation of the chains. */
 class DecayChain
 {
 public:
 	DecayChain();											///< Default constructor
 	~DecayChain();											///< Default destructor
 	
+	void DisplayInitialList();								///< Display list of initial nuclides to console
+	void DisplayFinalList();								///< Display final list of nuclide to console
+	void DisplayInfo();										///< Display final nuclides and their parents and branches
+	
+	void loadNuclides(yaml_cpp_class &data);				///< Function to load the nuclide library into the pointer
+	void unloadNuclides();									///< Delete the pointer to nuclide library to free space
+	
+	void registerInitialNuclide(std::string isotope_name);	///< Register an initial nuclide by name (e.g., H-2)
+	void registerInitialNuclide(std::string symb, int iso);	///< Register an initial nuclide by symbol (e.g., H) and isotope number (e.g., 2)
+	void registerInitialNuclide(int atom_num, int iso_num);	///< Register an initial nuclide by atomic and mass numbers (e.g., H-2 = 1, 2)
+	
+	void createChains();									///< Function to create unique list of final nuclides from decay chains of initial
+	
 protected:
+	
+	void roughInsertSort(Isotope iso);						///< Insert an isotope to the initial nuclide list and sort according to isotope number
 	
 private:
 	std::vector<Isotope> initial_nuc;						///< List of starting nuclides from which to build a decay chain
 	std::vector<Isotope> final_nuc;							///< List of all nuclides that make up the decay chain
+	
+	/// List of the indices that each isotope has from the final_nuc list
+	/** List of indices for all parents of an isotope in the list of all isotopes. 
+		
+		parents[i] = list of parent indices for the ith isotope
+		parents[i][j] = jth parent index of the ith isotope */
+	std::vector< std::vector<int> > parents;
+	
+	/// List of the indices for all branches of a parent to an isotope in final_nuc list
+	/** List of indices for direct access to necessary information to develop the chain scheme.
+	 
+		branches[i] = list of a list of all branch indices (by parent) for ith isotope
+		branches[i][j] = list of all branches that contribute to formation of ith isotope by jth parent
+		branches[i][j][k] = kth branch index for the jth parent that forms the ith isotope */
+	std::vector< std::vector< std::vector<int> > > branches;
+	
+	yaml_cpp_class *nuclides;							///< Pointer to a yaml object storing the digital library of all nuclides
 	
 };
 
