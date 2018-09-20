@@ -1048,6 +1048,10 @@ void DecayChain::roughInsertSort(Isotope iso)
 	int i = 0;
 	for (i=0; i<this->initial_nuc.size(); i++)
 	{
+		//Check is temp == ith nuclide
+		if (iso.IsotopeName() == this->initial_nuc[i].IsotopeName())
+			return;	//Don't add a redundant isotope
+		
 		//Check temp vs ith nuclide
 		if (iso.IsotopeNumber() > this->initial_nuc[i].IsotopeNumber())
 		{
@@ -1055,7 +1059,6 @@ void DecayChain::roughInsertSort(Isotope iso)
 			pivot = this->initial_nuc[i];
 			this->initial_nuc[i] = iso;
 			iso = pivot;
-			//break;
 		}
 	}
 	this->initial_nuc.push_back(iso);
@@ -1123,6 +1126,7 @@ int IBIS_TESTS()
 	test.registerInitialNuclide("Ba-114");
 	test.registerInitialNuclide("U-235");
 	test.registerInitialNuclide("U-238");
+	test.registerInitialNuclide("U-235"); //Not added to list because it is redundant 
 	
 	test.DisplayInitialList();
 	
