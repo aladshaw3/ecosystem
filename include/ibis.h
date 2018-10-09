@@ -193,6 +193,10 @@ public:
 	
 	void createChains();									///< Function to create unique list of final nuclides from decay chains of initial
 	
+	std::vector<int>& getParentList(int i);					///< Return the vector list of parents for the ith isotope in the nuclide list
+	std::vector<int>& getBranchList(int i, int j);			///< Return the vector list of branch fractions for the jth parent of the ith nuclide
+	Isotope& getIsotope(int i);								///< Return the ith isotope in the nuclide list
+	
 protected:
 	
 	void roughInsertSort(Isotope iso);						///< Insert an isotope to the initial nuclide list and sort according to isotope number
@@ -202,6 +206,8 @@ protected:
 	/** All isotopes in the list given will have the same isotope number, so we are 
 		sorting the list based on partents and daughters. */
 	std::vector<Isotope> sameIsoNumSort(std::vector<Isotope> &list);
+	
+	void fillOutBranchData();								///< Function to fill out all branching data and parent indices
 	
 private:
 	std::vector<Isotope> nuc_list;							///< List of (ith) nuclides that make up the decay chain

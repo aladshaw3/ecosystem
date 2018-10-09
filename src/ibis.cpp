@@ -968,14 +968,14 @@ void DecayChain::DisplayInfo()
 	
 	for (int i=0; i<this->nuc_list.size(); i++)
 	{
-		std::cout << "Nuclide Index: " << i << "\tName: " << this->nuc_list[i].IsotopeName() << std::endl;
-		std::cout << "------------ List of Parents --------------\n";
-		for (int j=0; j<this->parents[i].size(); j++)
+		std::cout << "Nuclide Index: " << i << "\tName: " << this->getIsotope(i).IsotopeName() << "\tDecay Const = " << this->getIsotope(i).DecayRate() << std::endl;
+		for (int j=0; j<this->getParentList(i).size(); j++)
 		{
-			std::cout << "\t" << this->nuc_list[ this->parents[i][j] ].IsotopeName() << "\tFraction(s): ";
-			for (int k=0; k<this->branches[i][j].size(); k++)
+			if (j == 0) std::cout << "----------------------- List of Parents ------------------------\n";
+			std::cout << "\t" << this->getIsotope( this->getParentList(i)[j] ).IsotopeName() << "\tDecay Const = " << this->getIsotope( this->getParentList(i)[j] ).DecayRate()	<< "\tFraction(s): ";
+			for (int k=0; k<this->getBranchList(i, j).size(); k++)
 			{
-				std::cout << this->nuc_list[ this->parents[i][j] ].BranchFraction( this->branches[i][j][k] ) << "\t";
+				std::cout << this->getIsotope( this->getParentList(i)[j] ).BranchFraction( this->getBranchList(i, j)[k] ) << "\t";
 			}
 			std::cout << std::endl;
 		}
@@ -1042,6 +1042,48 @@ void DecayChain::createChains()
 	}//End nuc_list loop
 	
 	this->finalSort();
+	this->parents.resize(this->nuc_list.size());
+	this->branches.resize(this->nuc_list.size());
+	this->fillOutBranchData();
+	
+}
+
+//Return parents
+std::vector<int>& DecayChain::getParentList(int i)
+{
+	if (i >= (int)this->nuc_list.size() || i < 0)
+	{
+		i = 0;
+		mError(out_of_bounds);
+	}
+	return this->parents[i];
+}
+
+//Return branches
+std::vector<int>& DecayChain::getBranchList(int i, int j)
+{
+	if (i >= (int)this->nuc_list.size() || i < 0)
+	{
+		i = 0;
+		mError(out_of_bounds);
+	}
+	if (j >= (int)this->parents[i].size() || j < 0)
+	{
+		j = 0;
+		mError(out_of_bounds);
+	}
+	return this->branches[i][j];
+}
+
+//Return isotope
+Isotope& DecayChain::getIsotope(int i)
+{
+	if (i >= (int)this->nuc_list.size() || i < 0)
+	{
+		i = 0;
+		mError(out_of_bounds);
+	}
+	return this->nuc_list[i];
 }
 
 //Insert an isotope to the initial list
@@ -1168,6 +1210,39 @@ std::vector<Isotope> DecayChain::sameIsoNumSort(std::vector<Isotope> &list)
 	return sorted;
 }
 
+// Fill out all data
+void DecayChain::fillOutBranchData()
+{
+	std::vector<int> temp;
+	//Loop over all i nuclides (daughters)
+	for (int i=(int)this->nuc_list.size()-1; i>=0; i--)
+	{
+		//Loop over all j nuclides for j<i
+		for (int j=i-1; j>=0; j--)
+		{
+			bool hasPushed = false;
+			//Check daughters and particles emitted from j
+			for (int d=0; d<this->nuc_list[j].DecayModes(); d++)
+			{
+				if (this->nuc_list[j].Daughter(d) == this->nuc_list[i].IsotopeName() ||
+					this->nuc_list[j].ParticleEmitted(d) == this->nuc_list[i].IsotopeName())
+				{
+					if (hasPushed == false)
+					{
+						this->parents[i].push_back(j);
+						hasPushed = true;
+					}
+					temp.push_back(d);
+					
+				}
+			}
+			if (hasPushed == true)
+				this->branches[i].push_back(temp);
+			temp.clear();
+		}
+	}
+}
+
 /*
  *	-------------------------------------------------------------------------------------
  *								End: DecayChain Class Definitions
@@ -1242,8 +1317,10 @@ int IBIS_TESTS()
 	
 	test.DisplayList();
 	
-	test.createChains();
+	test.createChains();					//Creates list of nuclides and sorts the list from parent to daughter
 	test.DisplayList();
+	
+	test.DisplayInfo();
 	
 	//Clear the library when no longer needed
 	a.unloadNuclides();
