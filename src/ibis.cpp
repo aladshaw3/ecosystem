@@ -821,7 +821,10 @@ void Isotope::setConstants()
 		this->editAtomicWeight( this->getNuclideLibrary()(this->IsotopeName())["atom_weight"].getDouble() );
 		this->IsomericState = this->getNuclideLibrary()(this->IsotopeName())["isomeric"].getBool();
 		this->Stable = this->getNuclideLibrary()(this->IsotopeName())["stable"].getBool();
-		this->half_life = this->getNuclideLibrary()(this->IsotopeName())["half_life"].getDouble();
+		if (this->Stable == false)
+			this->half_life = this->getNuclideLibrary()(this->IsotopeName())["half_life"].getDouble();
+		else
+			this->half_life = INFINITY;
 		std::string read_units = this->getNuclideLibrary()(this->IsotopeName())["hl_units"].getString();
 		this->hl_units = timeunits_choice( read_units );
 		
@@ -940,32 +943,18 @@ DecayChain::DecayChain()
 //Default destructor
 DecayChain::~DecayChain()
 {
-	initial_nuc.clear();
-	final_nuc.clear();
+	nuc_list.clear();
 }
 
-//Display initial list
-void DecayChain::DisplayInitialList()
+//Display list
+void DecayChain::DisplayList()
 {
-	std::cout << "Initial List of Nuclides:\n";
-	std::cout << "-------------------------\n";
+	std::cout << "List of Nuclides:\n";
+	std::cout << "-----------------\n";
 	
-	for (int i=0; i<this->initial_nuc.size(); i++)
+	for (int i=0; i<this->nuc_list.size(); i++)
 	{
-		std::cout << this->initial_nuc[i].IsotopeName() << std::endl;
-	}
-	std::cout << std::endl;
-}
-
-//Display final list
-void DecayChain::DisplayFinalList()
-{
-	std::cout << "Final List of Nuclides:\n";
-	std::cout << "-----------------------\n";
-	
-	for (int i=0; i<this->final_nuc.size(); i++)
-	{
-		std::cout << this->final_nuc[i].IsotopeName() << std::endl;
+		std::cout << this->nuc_list[i].IsotopeName() << std::endl;
 	}
 	std::cout << std::endl;
 }
@@ -977,16 +966,16 @@ void DecayChain::DisplayInfo()
 	std::cout << "----------------------------\n";
 	std::cout << "----------------------------\n";
 	
-	for (int i=0; i<this->final_nuc.size(); i++)
+	for (int i=0; i<this->nuc_list.size(); i++)
 	{
-		std::cout << "Nuclide Index: " << i << "\tName: " << this->final_nuc[i].IsotopeName() << std::endl;
+		std::cout << "Nuclide Index: " << i << "\tName: " << this->nuc_list[i].IsotopeName() << std::endl;
 		std::cout << "------------ List of Parents --------------\n";
 		for (int j=0; j<this->parents[i].size(); j++)
 		{
-			std::cout << "\t" << this->final_nuc[ this->parents[i][j] ].IsotopeName() << "\tFraction(s): ";
+			std::cout << "\t" << this->nuc_list[ this->parents[i][j] ].IsotopeName() << "\tFraction(s): ";
 			for (int k=0; k<this->branches[i][j].size(); k++)
 			{
-				std::cout << this->final_nuc[ this->parents[i][j] ].BranchFraction( this->branches[i][j][k] ) << "\t";
+				std::cout << this->nuc_list[ this->parents[i][j] ].BranchFraction( this->branches[i][j][k] ) << "\t";
 			}
 			std::cout << std::endl;
 		}
@@ -1037,31 +1026,146 @@ void DecayChain::registerInitialNuclide(int atom_num, int iso_num)
 //Create the decay chains and list of final nuclides
 void DecayChain::createChains()
 {
-	//Create a temporary unordered_map (automatically checks if key is registered)
+	std::string name;
+	for (int i=0; i<this->nuc_list.size(); i++)
+	{
+		for (int j=0; j<this->nuc_list[i].DecayModes(); j++)
+		{
+			name = this->nuc_list[i].Daughter(j);
+			if (name != "None" && name != "none")
+				this->registerInitialNuclide(name);
+			name = this->nuc_list[i].ParticleEmitted(j);
+			if (name != "None" && name != "none")
+				this->registerInitialNuclide(name);
+		}//End decay_mode loop
+		
+	}//End nuc_list loop
+	
+	this->finalSort();
 }
 
 //Insert an isotope to the initial list
 void DecayChain::roughInsertSort(Isotope iso)
 {
+	//If iso is stable, do not insert
+	if (iso.isStable() == true)
+		return;
+	
 	Isotope pivot;
 	pivot = iso;
 	int i = 0;
-	for (i=0; i<this->initial_nuc.size(); i++)
+	for (i=0; i<this->nuc_list.size(); i++)
 	{
 		//Check is temp == ith nuclide
-		if (iso.IsotopeName() == this->initial_nuc[i].IsotopeName())
+		if (iso.IsotopeName() == this->nuc_list[i].IsotopeName())
 			return;	//Don't add a redundant isotope
 		
 		//Check temp vs ith nuclide
-		if (iso.IsotopeNumber() > this->initial_nuc[i].IsotopeNumber())
+		if (iso.IsotopeNumber() > this->nuc_list[i].IsotopeNumber())
 		{
 			//Replace ith nuclide with temp and push all other nuclides downward
-			pivot = this->initial_nuc[i];
-			this->initial_nuc[i] = iso;
+			pivot = this->nuc_list[i];
+			this->nuc_list[i] = iso;
 			iso = pivot;
 		}
 	}
-	this->initial_nuc.push_back(iso);
+	this->nuc_list.push_back(iso);
+}
+
+//Perform final sort
+void DecayChain::finalSort()
+{
+	std::vector<int> common_iso;
+	std::vector<Isotope> iso_list;
+	std::vector<Isotope> sorted_list;
+	
+	for (int i=0; i<this->nuc_list.size(); i++)
+	{
+		//std::cout << "i = " << i << std::endl;
+		common_iso.push_back(i);
+		iso_list.push_back(this->nuc_list[i]);
+		//Look ahead
+		for (int j=i+1; j<this->nuc_list.size(); j++)
+		{
+			if (this->nuc_list[i].IsotopeNumber() == this->nuc_list[j].IsotopeNumber())
+			{
+				common_iso.push_back(j);
+				iso_list.push_back(this->nuc_list[j]);
+			}
+			else
+				break;
+		}//End look ahead
+		
+		//Check common_iso size
+		if (common_iso.size() < 2)
+		{
+			common_iso.clear();
+			iso_list.clear();
+		}
+		else
+		{
+			sorted_list = this->sameIsoNumSort(iso_list);
+			for (int j=0; j<common_iso.size(); j++)
+				this->nuc_list[common_iso[j]] = sorted_list[j];
+			
+			//std::cout << "size = " << common_iso.size() << std::endl;
+			i = i + (int)common_iso.size() - 1;
+			//std::cout << "iterate = " << i << std::endl;
+			common_iso.clear();
+			iso_list.clear();
+		}
+		
+	}//End nuc_list loop
+}
+
+std::vector<Isotope> DecayChain::sameIsoNumSort(std::vector<Isotope> &list)
+{
+	std::vector<Isotope> sorted;
+	int size = (int)list.size();
+	bool daughter = false;
+	
+	//Loop through all isotopes
+	for (int i=0; i<size; i++)
+	{
+		//Loop through the current list to check j
+		for (int j=0; j<list.size(); j++)
+		{
+			daughter = false;
+			
+			//Loop through list to check k against j
+			for (int k=0; k<list.size(); k++)
+			{
+				//Check only if we are looking at a different isotope
+				if (k!=j && daughter == false)
+				{
+					//check daughters of k against j
+					for (int d=0; d<list[k].DecayModes(); d++)
+					{
+						if (list[k].Daughter(d) == list[j].IsotopeName())
+						{
+							daughter = true;
+							break;
+						}
+					}
+				}
+				
+				if (daughter == true)
+					break;
+			}
+			
+			if (daughter == false)
+			{
+				sorted.push_back(list[j]);
+				list.erase(list.begin()+j);
+				break;
+			}
+			
+		}
+		
+		//std::cout << sorted[i].IsotopeName() << std::endl;
+	}
+	
+	return sorted;
 }
 
 /*
@@ -1088,7 +1192,7 @@ int IBIS_TESTS()
 	a.registerIsotope(2, 5);
 	b.registerIsotope("Ba-114");
 	c.registerIsotope("U", 238);
-	d.registerIsotope("Be", 8);
+	d.registerIsotope("H", 1);
 	
 	a.DisplayInfo();
 	b.DisplayInfo();
@@ -1126,9 +1230,20 @@ int IBIS_TESTS()
 	test.registerInitialNuclide("Ba-114");
 	test.registerInitialNuclide("U-235");
 	test.registerInitialNuclide("U-238");
-	test.registerInitialNuclide("U-235"); //Not added to list because it is redundant 
+	test.registerInitialNuclide("U-235");	//Not added to list because it is redundant
+	test.registerInitialNuclide("H-1");		//Not added to list because it is stable
+	test.registerInitialNuclide("O-20");
+	test.registerInitialNuclide("F-20");
+	test.registerInitialNuclide("Na-20");
+	test.registerInitialNuclide("N-20");
+	test.registerInitialNuclide("O-19");
+	test.registerInitialNuclide("N-19");
+	test.registerInitialNuclide("Th-234");
 	
-	test.DisplayInitialList();
+	test.DisplayList();
+	
+	test.createChains();
+	test.DisplayList();
 	
 	//Clear the library when no longer needed
 	a.unloadNuclides();

@@ -181,8 +181,7 @@ public:
 	DecayChain();											///< Default constructor
 	~DecayChain();											///< Default destructor
 	
-	void DisplayInitialList();								///< Display list of initial nuclides to console
-	void DisplayFinalList();								///< Display final list of nuclide to console
+	void DisplayList();										///< Display list of nuclides to console
 	void DisplayInfo();										///< Display final nuclides and their parents and branches
 	
 	void loadNuclides(yaml_cpp_class &data);				///< Function to load the nuclide library into the pointer
@@ -197,10 +196,15 @@ public:
 protected:
 	
 	void roughInsertSort(Isotope iso);						///< Insert an isotope to the initial nuclide list and sort according to isotope number
+	void finalSort();										///< Sort the list of nuclides after creating the chains
+	
+	/// Return a sorted list of isotopes given reference to another list
+	/** All isotopes in the list given will have the same isotope number, so we are 
+		sorting the list based on partents and daughters. */
+	std::vector<Isotope> sameIsoNumSort(std::vector<Isotope> &list);
 	
 private:
-	std::vector<Isotope> initial_nuc;						///< List of starting nuclides from which to build a decay chain
-	std::vector<Isotope> final_nuc;							///< List of all nuclides that make up the decay chain
+	std::vector<Isotope> nuc_list;							///< List of (ith) nuclides that make up the decay chain
 	
 	/// List of the indices that each isotope has from the final_nuc list
 	/** List of indices for all parents of an isotope in the list of all isotopes. 
