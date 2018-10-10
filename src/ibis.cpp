@@ -1082,6 +1082,59 @@ void DecayChain::createChains()
 	
 }
 
+//Form eigenvectors
+void DecayChain::formEigenvectors()
+{
+	if (this->CoefMap.size() != this->nuc_list.size())
+	{
+		mError(empty_matrix);
+		return;
+	}
+	
+	Matrix<double> v((int)this->CoefMap.size(),1);
+	Matrix<double> e((int)this->CoefMap.size(),1);
+	this->Eigs.set_size((int)this->CoefMap.size(), (int)this->CoefMap.size());
+	this->invEigs.set_size((int)this->CoefMap.size(), (int)this->CoefMap.size());
+	
+	//Loop for the kth eigenvector
+	for (int k=0; k<this->nuc_list.size(); k++)
+	{
+		double eigenvalue = this->CoefMap[k][k];
+		double sum = 0.0;
+		v.edit(k, 0, 1.0);
+		for (int i=0; i<k; i++)
+		{
+			v.edit(i,0, 0.0);
+		}
+		
+		//Loop over the ith elements of the kth eigenvector
+		for (int i=k+1; i<this->nuc_list.size(); i++)
+		{
+			sum = 0.0;
+			//Iterate through the map (loop over j columns)
+			for (std::map<int,double>::iterator jt=this->CoefMap[i].begin(); jt!=this->CoefMap[i].end(); jt++)
+			{
+				sum = sum + v(jt->first,0)*jt->second;
+			}
+			
+			v.edit(i,0, -sum/(this->CoefMap[i][i]-eigenvalue));
+		}
+		
+		this->Eigs.columnReplace(k, v);
+	}
+	
+	//Loop for the kth eigenvector
+	for (int k=0; k<this->nuc_list.size(); k++)
+	{
+		e.zeros();
+		e.edit(k, 0, 1.0);
+		
+		v.lowerTriangularSolve(this->Eigs, e);
+		
+		this->invEigs.columnReplace(k, v);
+	}
+}
+
 //Return parents
 std::vector<int>& DecayChain::getParentList(int i)
 {
@@ -1118,6 +1171,18 @@ Isotope& DecayChain::getIsotope(int i)
 		mError(out_of_bounds);
 	}
 	return this->nuc_list[i];
+}
+
+//Return eigenvectors
+Matrix<double>& DecayChain::getEigenvectors()
+{
+	return this->Eigs;
+}
+
+//Return eigenvectors inverse
+Matrix<double>& DecayChain::getInverseEigenvectors()
+{
+	return this->invEigs;
 }
 
 //Insert an isotope to the initial list
@@ -1364,20 +1429,21 @@ int IBIS_TESTS()
 	DecayChain test;
 	test.loadNuclides(nuc_data);
 	
-	test.registerInitialNuclide("Ba-114");
-	test.registerInitialNuclide("U-235");
-	test.registerInitialNuclide("U-238");
-	test.registerInitialNuclide("U-235");	//Not added to list because it is redundant
-	test.registerInitialNuclide("H-1");		//Not added to list because it is stable
-	test.registerInitialNuclide("O-20");
-	test.registerInitialNuclide("F-20");
-	test.registerInitialNuclide("Na-20");
-	test.registerInitialNuclide("N-20");
-	test.registerInitialNuclide("O-19");
-	test.registerInitialNuclide("N-19");
-	test.registerInitialNuclide("Th-234");
+	//test.registerInitialNuclide("Ba-114");
+	//test.registerInitialNuclide("U-235");
+	//test.registerInitialNuclide("U-238");
+	//test.registerInitialNuclide("U-235");	//Not added to list because it is redundant
+	//test.registerInitialNuclide("H-1");		//Not added to list because it is stable
+	//test.registerInitialNuclide("O-20");
+	//test.registerInitialNuclide("F-20");
+	//test.registerInitialNuclide("Na-20");
+	//test.registerInitialNuclide("N-20");
+	//test.registerInitialNuclide("O-19");
+	//test.registerInitialNuclide("N-19");
+	//test.registerInitialNuclide("Th-234");
 	test.registerInitialNuclide("He-5");
 	test.registerInitialNuclide("Be-8");
+	test.registerInitialNuclide("Rn-222");
 	
 	test.DisplayList();
 	
@@ -1387,6 +1453,10 @@ int IBIS_TESTS()
 	test.DisplayInfo();
 	
 	//test.DisplayMap();					//Working
+	test.formEigenvectors();
+	//test.getEigenvectors().Display("V");
+	//test.getInverseEigenvectors().Display("V^-1");
+	(test.getEigenvectors()*test.getInverseEigenvectors()).Display("I");
 	
 	//Clear the library when no longer needed
 	a.unloadNuclides();

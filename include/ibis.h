@@ -194,10 +194,13 @@ public:
 	void registerInitialNuclide(int atom_num, int iso_num);	///< Register an initial nuclide by atomic and mass numbers (e.g., H-2 = 1, 2)
 	
 	void createChains();									///< Function to create unique list of final nuclides from decay chains of initial
+	void formEigenvectors();								///< Function to produce eigenvectors from coefficient matrix
 	
 	std::vector<int>& getParentList(int i);					///< Return the vector list of parents for the ith isotope in the nuclide list
 	std::vector<int>& getBranchList(int i, int j);			///< Return the vector list of branch fractions for the jth parent of the ith nuclide
 	Isotope& getIsotope(int i);								///< Return the ith isotope in the nuclide list
+	Matrix<double>& getEigenvectors();						///< Return the eigenvectors matrix
+	Matrix<double>& getInverseEigenvectors();				///< Return the eigenvectors inverse matrix 
 	
 protected:
 	
@@ -232,6 +235,9 @@ private:
 	std::vector< std::vector< std::vector<int> > > branches;
 	
 	std::vector< std::map<int, double> > CoefMap;		///< Coefficient Map for matrix representing the ODE system
+	
+	Matrix<double> Eigs;								///< Matrix of eigenvectors for the coefficient matrix
+	Matrix<double> invEigs;								///< Inverse matrix of eigenvectors for the coefficient matrix
 	
 	yaml_cpp_class *nuclides;							///< Pointer to a yaml object storing the digital library of all nuclides
 	
