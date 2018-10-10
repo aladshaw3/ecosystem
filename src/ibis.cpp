@@ -944,6 +944,9 @@ DecayChain::DecayChain()
 DecayChain::~DecayChain()
 {
 	nuc_list.clear();
+	parents.clear();
+	branches.clear();
+	CoefMap.clear();
 }
 
 //Display list
@@ -982,6 +985,35 @@ void DecayChain::DisplayInfo()
 		std::cout << std::endl;
 	}
 	std::cout << std::endl;
+}
+
+//Display map
+void DecayChain::DisplayMap()
+{
+	std::cout << "Coefficient Map:\n";
+	std::cout << "----------------\n";
+	
+	for (int i=0; i<this->nuc_list.size(); i++)
+	{
+		for (int j=0; j<this->nuc_list.size(); j++)
+		{
+			try
+			{
+				double val = this->CoefMap[i].at(j);
+				if (val < 0 && i!=j)
+				{
+					std::cout << "Error!\n";
+					break;
+				}
+				std::cout << "X ";
+			}
+			catch (std::out_of_range)
+			{
+				std::cout << "O ";
+			}
+		}
+		std::cout << std::endl;
+	}
 }
 
 //Load library
@@ -1045,6 +1077,8 @@ void DecayChain::createChains()
 	this->parents.resize(this->nuc_list.size());
 	this->branches.resize(this->nuc_list.size());
 	this->fillOutBranchData();
+	this->CoefMap.resize(this->nuc_list.size());
+	this->fillOutCoefMap();
 	
 }
 
@@ -1243,6 +1277,34 @@ void DecayChain::fillOutBranchData()
 	}
 }
 
+//Fill out coef map
+void DecayChain::fillOutCoefMap()
+{
+	//Loop over all nuclides (daughters)
+	for (int i=0; i<this->nuc_list.size(); i++)
+	{
+		//Element [i][i] == -DecayConst
+		this->CoefMap[i][i] = -this->nuc_list[i].DecayRate();
+		
+		//Loop over all parents
+		for (int j=0; j<this->getParentList(i).size(); j++)
+		{
+			int J = this->getParentList(i)[j]; //Index in 'Matrix'
+			double coef = 0.0;
+			double decay = this->getIsotope( this->getParentList(i)[j] ).DecayRate();
+			
+			//Loop over branches of parent that forms daughter
+			for (int k=0; k<this->getBranchList(i, j).size(); k++)
+			{
+				coef = coef + decay*this->getIsotope( this->getParentList(i)[j] ).BranchFraction( this->getBranchList(i, j)[k] );
+			}
+			
+			//Fill out off-diags
+			this->CoefMap[i][J] = coef;
+		}
+	}
+}
+
 /*
  *	-------------------------------------------------------------------------------------
  *								End: DecayChain Class Definitions
@@ -1314,6 +1376,8 @@ int IBIS_TESTS()
 	test.registerInitialNuclide("O-19");
 	test.registerInitialNuclide("N-19");
 	test.registerInitialNuclide("Th-234");
+	test.registerInitialNuclide("He-5");
+	test.registerInitialNuclide("Be-8");
 	
 	test.DisplayList();
 	
@@ -1321,6 +1385,8 @@ int IBIS_TESTS()
 	test.DisplayList();
 	
 	test.DisplayInfo();
+	
+	//test.DisplayMap();					//Working
 	
 	//Clear the library when no longer needed
 	a.unloadNuclides();

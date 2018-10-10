@@ -23,6 +23,7 @@
 
 #include "eel.h"
 #include "yaml_wrapper.h"
+#include "dove.h"
 #include <unordered_map>
 
 
@@ -183,6 +184,7 @@ public:
 	
 	void DisplayList();										///< Display list of nuclides to console
 	void DisplayInfo();										///< Display final nuclides and their parents and branches
+	void DisplayMap();										///< Display the coefficient map to the console
 	
 	void loadNuclides(yaml_cpp_class &data);				///< Function to load the nuclide library into the pointer
 	void unloadNuclides();									///< Delete the pointer to nuclide library to free space
@@ -209,6 +211,8 @@ protected:
 	
 	void fillOutBranchData();								///< Function to fill out all branching data and parent indices
 	
+	void fillOutCoefMap();									///< Function to fill out all coefficients in the map
+	
 private:
 	std::vector<Isotope> nuc_list;							///< List of (ith) nuclides that make up the decay chain
 	
@@ -226,6 +230,8 @@ private:
 		branches[i][j] = list of all branches that contribute to formation of ith isotope by jth parent
 		branches[i][j][k] = kth branch index for the jth parent that forms the ith isotope */
 	std::vector< std::vector< std::vector<int> > > branches;
+	
+	std::vector< std::map<int, double> > CoefMap;		///< Coefficient Map for matrix representing the ODE system
 	
 	yaml_cpp_class *nuclides;							///< Pointer to a yaml object storing the digital library of all nuclides
 	
