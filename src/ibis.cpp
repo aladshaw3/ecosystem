@@ -1088,6 +1088,7 @@ void DecayChain::formEigenvectors()
 	if (this->CoefMap.size() != this->nuc_list.size())
 	{
 		mError(empty_matrix);
+		std::cout << "Call the 'createChains() function first...\n";
 		return;
 	}
 	
@@ -1114,7 +1115,10 @@ void DecayChain::formEigenvectors()
 			//Iterate through the map (loop over j columns)
 			for (std::map<int,double>::iterator jt=this->CoefMap[i].begin(); jt!=this->CoefMap[i].end(); jt++)
 			{
-				sum = sum + v(jt->first,0)*jt->second;
+				if (jt->first >= i)
+					sum += 0.0;
+				else
+					sum = sum + v(jt->first,0)*jt->second;
 			}
 			
 			v.edit(i,0, -sum/(this->CoefMap[i][i]-eigenvalue));
@@ -1133,6 +1137,61 @@ void DecayChain::formEigenvectors()
 		
 		this->invEigs.columnReplace(k, v);
 	}
+}
+
+//verfiy eigenvectors and eigenvalues
+void DecayChain::verifyEigenSoln()
+{
+	if (this->Eigs.rows() != this->Eigs.columns() && this->Eigs.rows() != this->nuc_list.size())
+	{
+		mError(empty_matrix);
+		std::cout << "Call the 'formEigenvectors() function first...\n";
+		return;
+	}
+	
+	std::cout << "Verifying Eigen Solution...\n";
+	std::cout << "---------------------------\n";
+	
+	Matrix<double> zero((int)this->CoefMap.size(),1);
+	
+	//Loop over kth eigenvector and eigenvalue pair
+	for (int k=0; k<this->nuc_list.size(); k++)
+	{
+		double eigenvalue = this->CoefMap[k][k];
+		double sum = 0.0;
+		
+		//Loop over the ith elements of the kth eigenvector
+		for (int i=0; i<this->nuc_list.size(); i++)
+		{
+			sum = 0.0;
+			
+			//Iterate through the map (loop over j columns)
+			for (std::map<int,double>::iterator jt=this->CoefMap[i].begin(); jt!=this->CoefMap[i].end(); jt++)
+			{
+				sum = sum + this->Eigs(jt->first,k)*jt->second;
+			}
+			zero.edit(i, 0, sum - eigenvalue*this->Eigs(i,k));
+		}
+		//zero.Display("zero");
+		
+		double error = zero.norm();
+		if (error > MIN_TOL)
+		{
+			std::cout << "Eigen Solution NOT within tolerance (" << MIN_TOL << ") at " << k << "-th eigen pair!\n";
+			std::cout << "\tNorm = " << error << std::endl;
+			zero.Display("error");
+		}
+		else
+		{
+			std::cout << "Eigen Solution is tolerance (" << MIN_TOL << ") at " << k << "-th eigen pair!\n";
+		}
+	}
+}
+
+//Return num nuc
+int DecayChain::getNumberNuclides()
+{
+	return (int)this->nuc_list.size();
 }
 
 //Return parents
@@ -1429,18 +1488,18 @@ int IBIS_TESTS()
 	DecayChain test;
 	test.loadNuclides(nuc_data);
 	
-	//test.registerInitialNuclide("Ba-114");
-	//test.registerInitialNuclide("U-235");
-	//test.registerInitialNuclide("U-238");
-	//test.registerInitialNuclide("U-235");	//Not added to list because it is redundant
-	//test.registerInitialNuclide("H-1");		//Not added to list because it is stable
-	//test.registerInitialNuclide("O-20");
-	//test.registerInitialNuclide("F-20");
-	//test.registerInitialNuclide("Na-20");
-	//test.registerInitialNuclide("N-20");
-	//test.registerInitialNuclide("O-19");
-	//test.registerInitialNuclide("N-19");
-	//test.registerInitialNuclide("Th-234");
+	test.registerInitialNuclide("Ba-114");
+	test.registerInitialNuclide("U-235");
+	test.registerInitialNuclide("U-238");
+	test.registerInitialNuclide("U-235");	//Not added to list because it is redundant
+	test.registerInitialNuclide("H-1");		//Not added to list because it is stable
+	test.registerInitialNuclide("O-20");
+	test.registerInitialNuclide("F-20");
+	test.registerInitialNuclide("Na-20");
+	test.registerInitialNuclide("N-20");
+	test.registerInitialNuclide("O-19");
+	test.registerInitialNuclide("N-19");
+	test.registerInitialNuclide("Th-234");
 	test.registerInitialNuclide("He-5");
 	test.registerInitialNuclide("Be-8");
 	test.registerInitialNuclide("Rn-222");
@@ -1456,7 +1515,21 @@ int IBIS_TESTS()
 	test.formEigenvectors();
 	//test.getEigenvectors().Display("V");
 	//test.getInverseEigenvectors().Display("V^-1");
-	(test.getEigenvectors()*test.getInverseEigenvectors()).Display("I");
+	//(test.getEigenvectors()*test.getInverseEigenvectors()).Display("I");
+	Matrix<double> ident(test.getNumberNuclides(), test.getNumberNuclides());
+	Matrix<double> e(test.getNumberNuclides(),1);
+	
+	//form identity matrix
+	for (int k=0; k<test.getNumberNuclides(); k++)
+	{
+		e.zeros();
+		e.edit(k, 0, 1.0);
+		ident.columnReplace(k, e);
+	}
+	//ident.Display("I");
+	std::cout << "Norm of error = " << ((test.getEigenvectors()*test.getInverseEigenvectors())-ident).norm() << std::endl << std::endl;
+	
+	test.verifyEigenSoln();
 	
 	//Clear the library when no longer needed
 	a.unloadNuclides();

@@ -195,12 +195,14 @@ public:
 	
 	void createChains();									///< Function to create unique list of final nuclides from decay chains of initial
 	void formEigenvectors();								///< Function to produce eigenvectors from coefficient matrix
+	void verifyEigenSoln();									///< Function will verify that the eigenvectors and eigenvalues are correct 
 	
+	int getNumberNuclides();								///< Return the number of nuclides in the decay chain
 	std::vector<int>& getParentList(int i);					///< Return the vector list of parents for the ith isotope in the nuclide list
 	std::vector<int>& getBranchList(int i, int j);			///< Return the vector list of branch fractions for the jth parent of the ith nuclide
 	Isotope& getIsotope(int i);								///< Return the ith isotope in the nuclide list
 	Matrix<double>& getEigenvectors();						///< Return the eigenvectors matrix
-	Matrix<double>& getInverseEigenvectors();				///< Return the eigenvectors inverse matrix 
+	Matrix<double>& getInverseEigenvectors();				///< Return the eigenvectors inverse matrix
 	
 protected:
 	
