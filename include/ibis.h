@@ -79,6 +79,7 @@ public:
 	void createChain();									///< Function to create and fill in the chain of nuclides for this starting isotope
 	
 	void setInitialCondition(double ic);				///< Set the value for the initial condition of this nuclide
+	void setConcentration(double c);					///< Set the concentration value for the nuclide
 	
 	int IsotopeNumber();								///< Return the isotope number of the atom
 	double DecayRate();									///< Return the decay rate of the isotope
@@ -89,6 +90,7 @@ public:
 	bool isIsomericState();								///< Return isomeric condition
 	int DecayModes();									///< Return the number of decay modes
 	double getInitialCondition();						///< Return the value of the initial condition
+	double getConcentration();							///< Return the concentration value of the nuclide 
 	
 	decay_mode DecayMode(int i);						///< Return the ith decay mode
 	double BranchFraction(int i);						///< Return the ith branch fraction
@@ -151,6 +153,7 @@ protected:
 	bool Stable;										///< Boolean is True if isotope is stable
 	bool IsomericState;									///< Boolean is True if isotope is in an isomeric state
 	double initial_condition;							///< Value to hold initial condition for this nuclide
+	double concentration;								///< Value to hold concentration after a point in time
 	
 	yaml_cpp_class *nuclides;							///< Pointer to a yaml object storing the digital library of all nuclides
 	
