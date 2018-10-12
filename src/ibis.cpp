@@ -1206,6 +1206,35 @@ void DecayChain::verifyEigenSoln()
 	}
 }
 
+//Estimate fractionation
+void DecayChain::calculateFractionation(double t)
+{
+	if (this->Eigs.rows() != this->Eigs.columns() && this->Eigs.rows() != this->nuc_list.size())
+	{
+		mError(empty_matrix);
+		std::cout << "Call the 'formEigenvectors() function first...\n";
+		return;
+	}
+	
+	//Loop over all ith isotopes
+	for (int i=0; i<this->nuc_list.size(); i++)
+	{
+		double sum_outer = 0.0;
+		//Loop over all j columns of the eigenvector matrices
+		for (int j=0; j<=i; j++)
+		{
+			double sum_inner = 0.0;
+			//Loop over all k eigenvalues
+			for (int k=j; k<=i; k++)
+			{
+				sum_inner = sum_inner + this->Eigs(i,k)*this->invEigs(k,j)*exp(-this->nuc_list[k].DecayRate()*t);
+			}
+			sum_outer = sum_outer + sum_inner*this->nuc_list[j].getInitialCondition();
+		}
+		this->nuc_list[i].setConcentration(sum_outer);
+	}
+}
+
 //Return num nuc
 int DecayChain::getNumberNuclides()
 {
@@ -1465,27 +1494,37 @@ int IBIS_TESTS()
 	DecayChain test;
 	test.loadNuclides(nuc_data);
 	
-	test.registerInitialNuclide("Ba-114");
-	test.registerInitialNuclide("U-235");
-	test.registerInitialNuclide("U-238");
-	test.registerInitialNuclide("U-235");	//Not added to list because it is redundant
-	test.registerInitialNuclide("H-1");		//Not added to list because it is stable
-	test.registerInitialNuclide("O-20");
-	test.registerInitialNuclide("F-20");
-	test.registerInitialNuclide("Na-20");
-	test.registerInitialNuclide("N-20");
-	test.registerInitialNuclide("O-19");
-	test.registerInitialNuclide("N-19");
-	test.registerInitialNuclide("Th-234");
-	test.registerInitialNuclide("He-5");
-	test.registerInitialNuclide("Be-8");
-	test.registerInitialNuclide("Rn-222");
+	//test.registerInitialNuclide("Ba-114");
+	//test.registerInitialNuclide("U-235");
+	//test.registerInitialNuclide("U-238");
+	//test.registerInitialNuclide("U-235");	//Not added to list because it is redundant
+	//test.registerInitialNuclide("H-1");		//Not added to list because it is stable
+	//test.registerInitialNuclide("O-20");
+	//test.registerInitialNuclide("F-20");
+	//test.registerInitialNuclide("Na-20");
+	//test.registerInitialNuclide("N-20");
+	//test.registerInitialNuclide("O-19");
+	//test.registerInitialNuclide("N-19");
+	//test.registerInitialNuclide("Th-234");
+	//test.registerInitialNuclide("He-5");
+	//test.registerInitialNuclide("Be-8");
+	//test.registerInitialNuclide("Rn-222");
 	test.registerInitialNuclide("n-1");
 	
 	test.createChains();					//Creates list of nuclides and sorts the list from parent to daughter
 	test.DisplayInfo();
 	test.formEigenvectors();
-	test.verifyEigenSoln();					//Completely optional 
+	test.verifyEigenSoln();					//Completely optional
+	
+	test.getIsotope(0).setInitialCondition(100.0);
+	std::cout << "0\t" << test.getIsotope(0).getInitialCondition() << std::endl;
+	double time=0;
+	for (int i=0; i<40; i++)
+	{
+		time = (double)(i+1)*50.0;
+		test.calculateFractionation(time);
+		std::cout << time << "\t" << test.getIsotope(0).getConcentration() << std::endl;
+	}
 	
 	//Clear the library when no longer needed (redundant)
 	test.unloadNuclides();

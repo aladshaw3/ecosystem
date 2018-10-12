@@ -90,7 +90,7 @@ public:
 	bool isIsomericState();								///< Return isomeric condition
 	int DecayModes();									///< Return the number of decay modes
 	double getInitialCondition();						///< Return the value of the initial condition
-	double getConcentration();							///< Return the concentration value of the nuclide 
+	double getConcentration();							///< Return the concentration value of the nuclide
 	
 	decay_mode DecayMode(int i);						///< Return the ith decay mode
 	double BranchFraction(int i);						///< Return the ith branch fraction
@@ -198,7 +198,17 @@ public:
 	
 	void createChains();									///< Function to create unique list of final nuclides from decay chains of initial
 	void formEigenvectors();								///< Function to produce eigenvectors from coefficient matrix
-	void verifyEigenSoln();									///< Function will verify that the eigenvectors and eigenvalues are correct 
+	void verifyEigenSoln();									///< Function will verify that the eigenvectors and eigenvalues are correct
+	
+	/// Function to calculate the isotope fractionation given a time t in seconds
+	/** This function must be called after createChains() and after formEigenvectors().
+		It will use the eigenvector solution to estimate the isotope concentrations for
+		each isotope in the chain at the given time t. Those concentrations are based on
+		values given for the initial concentrations of each isotope and are stored in
+		each isotope object as the current concentration value. 
+	 
+		Use an analytical solution based on linear combinations of eigenvectors. */
+	void calculateFractionation(double t);
 	
 	int getNumberNuclides();								///< Return the number of nuclides in the decay chain
 	std::vector<int>& getParentList(int i);					///< Return the vector list of parents for the ith isotope in the nuclide list
