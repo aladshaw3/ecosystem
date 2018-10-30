@@ -957,9 +957,13 @@ DecayChain::DecayChain()
 DecayChain::~DecayChain()
 {
 	nuc_list.clear();
+	stable_list.clear();
 	parents.clear();
 	branches.clear();
 	CoefMap.clear();
+	stable_parents.clear();
+	stable_branches.clear();
+	stable_CoefMap.clear();
 }
 
 //Display list
@@ -971,6 +975,19 @@ void DecayChain::DisplayList()
 	for (int i=0; i<this->nuc_list.size(); i++)
 	{
 		std::cout << this->nuc_list[i].IsotopeName() << std::endl;
+	}
+	std::cout << std::endl;
+}
+
+//Display stable list
+void DecayChain::DisplayStableList()
+{
+	std::cout << "List of Stable Nuclides:\n";
+	std::cout << "------------------------\n";
+	
+	for (int i=0; i<this->stable_list.size(); i++)
+	{
+		std::cout << this->stable_list[i].IsotopeName() << std::endl;
 	}
 	std::cout << std::endl;
 }
@@ -1296,7 +1313,28 @@ void DecayChain::roughInsertSort(Isotope iso)
 {
 	//If iso is stable, do not insert
 	if (iso.isStable() == true)
+	{
+		Isotope pivot;
+		pivot = iso;
+		int i = 0;
+		for (i=0; i<this->stable_list.size(); i++)
+		{
+			//Check is temp == ith stable nuclide
+			if (iso.IsotopeName() == this->stable_list[i].IsotopeName())
+				return;	//Don't add a redundant isotope
+			
+			//Check temp vs ith stable nuclide
+			if (iso.IsotopeNumber() > this->stable_list[i].IsotopeNumber())
+			{
+				//Replace ith nuclide with temp and push all other nuclides downward
+				pivot = this->stable_list[i];
+				this->stable_list[i] = iso;
+				iso = pivot;
+			}
+		}
+		this->stable_list.push_back(iso);
 		return;
+	}
 	
 	Isotope pivot;
 	pivot = iso;
@@ -1490,27 +1528,29 @@ int IBIS_TESTS()
 	DecayChain test;
 	test.loadNuclides(nuc_data);
 	
-	//test.registerInitialNuclide("Ba-114");
-	//test.registerInitialNuclide("U-235");
-	//test.registerInitialNuclide("U-238");
-	//test.registerInitialNuclide("U-235");		//Not added to list because it is redundant
-	//test.registerInitialNuclide("H-1");		//Not added to list because it is stable
-	//test.registerInitialNuclide("O-20");
-	//test.registerInitialNuclide("F-20");
-	//test.registerInitialNuclide("Na-20");
-	//test.registerInitialNuclide("N-20");
-	//test.registerInitialNuclide("O-19");
-	//test.registerInitialNuclide("N-19");
-	//test.registerInitialNuclide("Th-234");
-	//test.registerInitialNuclide("He-5");
-	//test.registerInitialNuclide("Be-8");
-	//test.registerInitialNuclide("Rn-222");
-	//test.registerInitialNuclide("n-1");
+	test.registerInitialNuclide("Ba-114");
+	test.registerInitialNuclide("U-235");
+	test.registerInitialNuclide("U-238");
+	test.registerInitialNuclide("U-235");		//Not added to list because it is redundant
+	test.registerInitialNuclide("H-1");		//Not added to list because it is stable
+	test.registerInitialNuclide("O-20");
+	test.registerInitialNuclide("F-20");
+	test.registerInitialNuclide("Na-20");
+	test.registerInitialNuclide("N-20");
+	test.registerInitialNuclide("O-19");
+	test.registerInitialNuclide("N-19");
+	test.registerInitialNuclide("Th-234");
+	test.registerInitialNuclide("He-5");
+	test.registerInitialNuclide("Be-8");
+	test.registerInitialNuclide("Rn-222");
+	test.registerInitialNuclide("n-1");
 	test.registerInitialNuclide("Te-132");
+	test.registerInitialNuclide("Xe-132");
 	
 	test.createChains();					//Creates list of nuclides and sorts the list from parent to daughter
+	test.DisplayStableList();
 	test.DisplayInfo();
-	test.formEigenvectors();
+	test.formEigenvectors();				//Mandatory before solving
 	test.verifyEigenSoln();					//Completely optional
 	
 	test.getIsotope(0).setInitialCondition(100.0);

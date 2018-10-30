@@ -186,6 +186,7 @@ public:
 	~DecayChain();											///< Default destructor
 	
 	void DisplayList();										///< Display list of nuclides to console
+	void DisplayStableList();								///< Display list of stable nuclides to the console
 	void DisplayInfo();										///< Display final nuclides and their parents and branches
 	void DisplayMap();										///< Display the coefficient map to the console
 	
@@ -233,15 +234,16 @@ protected:
 	
 private:
 	std::vector<Isotope> nuc_list;							///< List of (ith) nuclides that make up the decay chain
+	std::vector<Isotope> stable_list;						///< List of stable nuclides that terminate decay chains
 	
-	/// List of the indices that each isotope has from the final_nuc list
+	/// List of the indices that each isotope has from the nuc_list
 	/** List of indices for all parents of an isotope in the list of all isotopes. 
 		
 		parents[i] = list of parent indices for the ith isotope
 		parents[i][j] = jth parent index of the ith isotope */
 	std::vector< std::vector<int> > parents;
 	
-	/// List of the indices for all branches of a parent to an isotope in final_nuc list
+	/// List of the indices for all branches of a parent to an isotope in nuc_list
 	/** List of indices for direct access to necessary information to develop the chain scheme.
 	 
 		branches[i] = list of a list of all branch indices (by parent) for ith isotope
@@ -250,6 +252,23 @@ private:
 	std::vector< std::vector< std::vector<int> > > branches;
 	
 	std::vector< std::map<int, double> > CoefMap;		///< Coefficient Map for matrix representing the ODE system
+	
+	/// List of the indices that each stable isotope has from the stable_list
+	/** List of indices for all parents of a stable isotope in the list of all isotopes.
+		
+		stable_parents[i] = list of parent indices for the ith isotope
+		stable_parents[i][j] = jth parent index of the ith isotope */
+	std::vector< std::vector<int> > stable_parents;
+	
+	/// List of the indices for all branches of a parent to a stable isotope in stable_list
+	/** List of indices for direct access to necessary information to develop the chain scheme.
+	 
+		stable_branches[i] = list of a list of all branch indices (by parent) for ith isotope
+		stable_branches[i][j] = list of all branches that contribute to formation of ith isotope by jth parent
+		stable_branches[i][j][k] = kth branch index for the jth parent that forms the ith isotope */
+	std::vector< std::vector< std::vector<int> > > stable_branches;
+	
+	std::vector< std::map<int, double> > stable_CoefMap;		///< Coefficient Map for matrix representing the ODE system for stable isotopes
 	
 	Matrix<double> Eigs;								///< Matrix of eigenvectors for the coefficient matrix
 	Matrix<double> invEigs;								///< Inverse Matrix of eigenvectors for the coefficient matrix
