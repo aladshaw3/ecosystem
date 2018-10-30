@@ -1518,7 +1518,7 @@ int IBIS_TESTS()
 	double time=0;
 	for (int i=0; i<40; i++)
 	{
-		time = (double)(i+1)*50.0;
+		time = (double)(i+1)*500.0;
 		test.calculateFractionation(time);
 		std::cout << time << "\t" << test.getIsotope(0).getConcentration() << std::endl;
 	}
