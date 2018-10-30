@@ -215,7 +215,7 @@ public:
 	std::vector<int>& getBranchList(int i, int j);			///< Return the vector list of branch fractions for the jth parent of the ith nuclide
 	Isotope& getIsotope(int i);								///< Return the ith isotope in the nuclide list
 	Matrix<double>& getEigenvectors();						///< Return the eigenvectors matrix
-	Matrix<double>& getInverseEigenvectors();				///< Return the inverse eigenvectors matrix 
+	Matrix<double>& getInverseEigenvectors();				///< Return the inverse eigenvectors matrix
 	
 protected:
 	

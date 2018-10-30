@@ -1493,7 +1493,7 @@ int IBIS_TESTS()
 	//test.registerInitialNuclide("Ba-114");
 	//test.registerInitialNuclide("U-235");
 	//test.registerInitialNuclide("U-238");
-	//test.registerInitialNuclide("U-235");	//Not added to list because it is redundant
+	//test.registerInitialNuclide("U-235");		//Not added to list because it is redundant
 	//test.registerInitialNuclide("H-1");		//Not added to list because it is stable
 	//test.registerInitialNuclide("O-20");
 	//test.registerInitialNuclide("F-20");
@@ -1514,13 +1514,14 @@ int IBIS_TESTS()
 	test.verifyEigenSoln();					//Completely optional
 	
 	test.getIsotope(0).setInitialCondition(100.0);
-	std::cout << "0\t" << test.getIsotope(0).getInitialCondition() << std::endl;
+	std::cout << "Time(s)\t" << test.getIsotope(0).IsotopeName() << "\t" << test.getIsotope(1).IsotopeName() << "\n";
+	std::cout << "0\t" << test.getIsotope(0).getInitialCondition() << "\t" << test.getIsotope(1).getInitialCondition() << std::endl;
 	double time=0;
 	for (int i=0; i<40; i++)
 	{
-		time = (double)(i+1)*500.0;
+		time = (double)(i+1)*10000.0;
 		test.calculateFractionation(time);
-		std::cout << time << "\t" << test.getIsotope(0).getConcentration() << std::endl;
+		std::cout << time << "\t" << test.getIsotope(0).getConcentration() << "\t" << test.getIsotope(1).getConcentration() << std::endl;
 	}
 	
 	//Clear the library when no longer needed (redundant)
