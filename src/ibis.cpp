@@ -1285,7 +1285,7 @@ Matrix<double>& DecayChain::getEigenvectors()
 	return this->Eigs;
 }
 
-//Return eigenvectors inverse
+//Return inverse eigenvectors
 Matrix<double>& DecayChain::getInverseEigenvectors()
 {
 	return this->invEigs;
@@ -1328,7 +1328,6 @@ void DecayChain::finalSort()
 	
 	for (int i=0; i<this->nuc_list.size(); i++)
 	{
-		//std::cout << "i = " << i << std::endl;
 		common_iso.push_back(i);
 		iso_list.push_back(this->nuc_list[i]);
 		//Look ahead
@@ -1355,9 +1354,7 @@ void DecayChain::finalSort()
 			for (int j=0; j<common_iso.size(); j++)
 				this->nuc_list[common_iso[j]] = sorted_list[j];
 			
-			//std::cout << "size = " << common_iso.size() << std::endl;
 			i = i + (int)common_iso.size() - 1;
-			//std::cout << "iterate = " << i << std::endl;
 			common_iso.clear();
 			iso_list.clear();
 		}
@@ -1409,7 +1406,6 @@ std::vector<Isotope> DecayChain::sameIsoNumSort(std::vector<Isotope> &list)
 			
 		}
 		
-		//std::cout << sorted[i].IsotopeName() << std::endl;
 	}
 	
 	return sorted;
@@ -1509,7 +1505,8 @@ int IBIS_TESTS()
 	//test.registerInitialNuclide("He-5");
 	//test.registerInitialNuclide("Be-8");
 	//test.registerInitialNuclide("Rn-222");
-	test.registerInitialNuclide("n-1");
+	//test.registerInitialNuclide("n-1");
+	test.registerInitialNuclide("Te-132");
 	
 	test.createChains();					//Creates list of nuclides and sorts the list from parent to daughter
 	test.DisplayInfo();

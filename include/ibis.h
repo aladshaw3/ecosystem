@@ -215,7 +215,7 @@ public:
 	std::vector<int>& getBranchList(int i, int j);			///< Return the vector list of branch fractions for the jth parent of the ith nuclide
 	Isotope& getIsotope(int i);								///< Return the ith isotope in the nuclide list
 	Matrix<double>& getEigenvectors();						///< Return the eigenvectors matrix
-	Matrix<double>& getInverseEigenvectors();				///< Return the eigenvectors inverse matrix
+	Matrix<double>& getInverseEigenvectors();				///< Return the inverse eigenvectors matrix 
 	
 protected:
 	
@@ -252,7 +252,7 @@ private:
 	std::vector< std::map<int, double> > CoefMap;		///< Coefficient Map for matrix representing the ODE system
 	
 	Matrix<double> Eigs;								///< Matrix of eigenvectors for the coefficient matrix
-	Matrix<double> invEigs;								///< Inverse matrix of eigenvectors for the coefficient matrix
+	Matrix<double> invEigs;								///< Inverse Matrix of eigenvectors for the coefficient matrix
 	
 	yaml_cpp_class *nuclides;							///< Pointer to a yaml object storing the digital library of all nuclides
 	
