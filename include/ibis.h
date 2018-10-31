@@ -188,6 +188,7 @@ public:
 	void DisplayList();										///< Display list of nuclides to console
 	void DisplayStableList();								///< Display list of stable nuclides to the console
 	void DisplayInfo();										///< Display final nuclides and their parents and branches
+	void DisplayStableInfo();								///< Display stable nuclides and their direct parents and branches
 	void DisplayMap();										///< Display the coefficient map to the console
 	
 	void loadNuclides(yaml_cpp_class &data);				///< Function to load the nuclide library into the pointer
@@ -212,9 +213,13 @@ public:
 	void calculateFractionation(double t);
 	
 	int getNumberNuclides();								///< Return the number of nuclides in the decay chain
+	int getNumberStableNuclides();							///< Return the number of stable nuclides
 	std::vector<int>& getParentList(int i);					///< Return the vector list of parents for the ith isotope in the nuclide list
+	std::vector<int>& getStableParentList(int i);			///< Return the vector list of parents for the ith stable isotope
 	std::vector<int>& getBranchList(int i, int j);			///< Return the vector list of branch fractions for the jth parent of the ith nuclide
+	std::vector<int>& getStableBranchList(int i, int j);	///< Return the list of branch fractions for the jth parent of the ith stable nuclide
 	Isotope& getIsotope(int i);								///< Return the ith isotope in the nuclide list
+	Isotope& getStableIsotope(int i);						///< Return the ith stable isotope
 	Matrix<double>& getEigenvectors();						///< Return the eigenvectors matrix
 	Matrix<double>& getInverseEigenvectors();				///< Return the inverse eigenvectors matrix
 	
@@ -234,7 +239,7 @@ protected:
 	
 private:
 	std::vector<Isotope> nuc_list;							///< List of (ith) nuclides that make up the decay chain
-	std::vector<Isotope> stable_list;						///< List of stable nuclides that terminate decay chains
+	std::vector<Isotope> stable_list;						///< List of (ith) stable nuclides that terminate decay chains
 	
 	/// List of the indices that each isotope has from the nuc_list
 	/** List of indices for all parents of an isotope in the list of all isotopes. 

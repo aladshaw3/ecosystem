@@ -992,6 +992,31 @@ void DecayChain::DisplayStableList()
 	std::cout << std::endl;
 }
 
+//Display all stable nuclide and decay chain information
+void DecayChain::DisplayStableInfo()
+{
+	std::cout << "List of Stable Nuclide Information:\n";
+	std::cout << "-----------------------------------\n";
+	std::cout << "-----------------------------------\n";
+	
+	for (int i=0; i<this->stable_list.size(); i++)
+	{
+		std::cout << "Stable Nuc Index: " << i << "\tName: " << this->getStableIsotope(i).IsotopeName() << std::endl;
+		for (int j=0; j<this->getStableParentList(i).size(); j++)
+		{
+			if (j == 0) std::cout << "----------------------- List of Parents ------------------------\n";
+			std::cout << "\t" << this->getIsotope( this->getStableParentList(i)[j] ).IsotopeName() << "\tDecay Const = " << this->getIsotope( this->getStableParentList(i)[j] ).DecayRate() << "\tFraction(s): ";
+			for (int k=0; k<this->getStableBranchList(i, j).size(); k++)
+			{
+				std::cout << this->getIsotope( this->getStableParentList(i)[j] ).BranchFraction( this->getStableBranchList(i, j)[k] ) << "\t";
+			}
+			std::cout << std::endl;
+		}
+		std::cout << std::endl;
+	}
+	std::cout << std::endl;
+}
+
 //Display all nuclide and decay chain information
 void DecayChain::DisplayInfo()
 {
@@ -1106,8 +1131,11 @@ void DecayChain::createChains()
 	this->finalSort();
 	this->parents.resize(this->nuc_list.size());
 	this->branches.resize(this->nuc_list.size());
+	this->stable_parents.resize(this->stable_list.size());
+	this->stable_branches.resize(this->stable_list.size());
 	this->fillOutBranchData();
 	this->CoefMap.resize(this->nuc_list.size());
+	this->stable_CoefMap.resize(this->stable_list.size());
 	this->fillOutCoefMap();
 	
 	//Unload library to save memory
@@ -1258,6 +1286,12 @@ int DecayChain::getNumberNuclides()
 	return (int)this->nuc_list.size();
 }
 
+//Return num stable nuc
+int DecayChain::getNumberStableNuclides()
+{
+	return (int)this->stable_list.size();
+}
+
 //Return parents
 std::vector<int>& DecayChain::getParentList(int i)
 {
@@ -1267,6 +1301,17 @@ std::vector<int>& DecayChain::getParentList(int i)
 		mError(out_of_bounds);
 	}
 	return this->parents[i];
+}
+
+//Return stable parents
+std::vector<int>& DecayChain::getStableParentList(int i)
+{
+	if (i >= (int)this->stable_list.size() || i < 0)
+	{
+		i = 0;
+		mError(out_of_bounds);
+	}
+	return this->stable_parents[i];
 }
 
 //Return branches
@@ -1285,6 +1330,22 @@ std::vector<int>& DecayChain::getBranchList(int i, int j)
 	return this->branches[i][j];
 }
 
+//Return stable branches
+std::vector<int>& DecayChain::getStableBranchList(int i, int j)
+{
+	if (i >= (int)this->stable_list.size() || i < 0)
+	{
+		i = 0;
+		mError(out_of_bounds);
+	}
+	if (j >= (int)this->stable_parents[i].size() || j < 0)
+	{
+		j = 0;
+		mError(out_of_bounds);
+	}
+	return this->stable_branches[i][j];
+}
+
 //Return isotope
 Isotope& DecayChain::getIsotope(int i)
 {
@@ -1294,6 +1355,17 @@ Isotope& DecayChain::getIsotope(int i)
 		mError(out_of_bounds);
 	}
 	return this->nuc_list[i];
+}
+
+//Return stable isotope
+Isotope& DecayChain::getStableIsotope(int i)
+{
+	if (i >= (int)this->stable_list.size() || i < 0)
+	{
+		i = 0;
+		mError(out_of_bounds);
+	}
+	return this->stable_list[i];
 }
 
 //Return eigenvectors
@@ -1480,6 +1552,35 @@ void DecayChain::fillOutBranchData()
 			temp.clear();
 		}
 	}
+	
+	temp.clear();
+	//Loop over all i stable nuclides (daughters)
+	for (int i=0; i<(int)this->stable_list.size(); i++)
+	{
+		//Loop over all j unstable nuclides (potential parents)
+		for (int j=0; j<(int)this->nuc_list.size(); j++)
+		{
+			bool hasPushed = false;
+			//Check daughters and particles emitted from j
+			for (int d=0; d<this->nuc_list[j].DecayModes(); d++)
+			{
+				if (this->nuc_list[j].Daughter(d) == this->stable_list[i].IsotopeName() ||
+					this->nuc_list[j].ParticleEmitted(d) == this->stable_list[i].IsotopeName())
+				{
+					if (hasPushed == false)
+					{
+						this->stable_parents[i].push_back(j);
+						hasPushed = true;
+					}
+					temp.push_back(d);
+					
+				}
+			}
+			if (hasPushed == true)
+				this->stable_branches[i].push_back(temp);
+			temp.clear();
+		}
+	}
 }
 
 //Fill out coef map
@@ -1506,6 +1607,27 @@ void DecayChain::fillOutCoefMap()
 			
 			//Fill out off-diags
 			this->CoefMap[i][J] = coef;
+		}
+	}
+	
+	//Loop over all stable nuclides (daughters)
+	for (int i=0; i<this->stable_list.size(); i++)
+	{
+		//Loop over all parents
+		for (int j=0; j<this->getStableParentList(i).size(); j++)
+		{
+			int J = this->getStableParentList(i)[j]; //Index in 'Matrix'
+			double coef = 0.0;
+			double decay = this->getIsotope( this->getStableParentList(i)[j] ).DecayRate();
+			
+			//Loop over branches of parent that forms daughter
+			for (int k=0; k<this->getStableBranchList(i, j).size(); k++)
+			{
+				coef = coef + decay*this->getIsotope( this->getStableParentList(i)[j] ).BranchFraction( this->getStableBranchList(i, j)[k] );
+			}
+			
+			//Fill out map
+			this->stable_CoefMap[i][J] = coef;
 		}
 	}
 }
@@ -1548,8 +1670,8 @@ int IBIS_TESTS()
 	test.registerInitialNuclide("Xe-132");
 	
 	test.createChains();					//Creates list of nuclides and sorts the list from parent to daughter
-	test.DisplayStableList();
 	test.DisplayInfo();
+	test.DisplayStableInfo();
 	test.formEigenvectors();				//Mandatory before solving
 	test.verifyEigenSoln();					//Completely optional
 	
