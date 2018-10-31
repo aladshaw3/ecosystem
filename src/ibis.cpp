@@ -1278,6 +1278,32 @@ void DecayChain::calculateFractionation(double t)
 		}
 		this->nuc_list[i].setConcentration(sum_outer);
 	}
+	
+	//Loop over all ith stable isotopes
+	for (int i=0; i<this->stable_list.size(); i++)
+	{
+		//Iterate through the map (loop over j columns)
+		double j_sum = 0.0;
+		for (std::map<int,double>::iterator jt=this->stable_CoefMap[i].begin(); jt!=this->stable_CoefMap[i].end(); jt++)
+		{
+			int j = jt->first;
+			
+			//Loop over k
+			double k_sum = 0.0;
+			for (int k=0; k<=j; k++)
+			{
+				//Loop over l
+				double l_sum = 0.0;
+				for (int l=k; l<=j; l++)
+				{
+					l_sum = l_sum + ( this->Eigs(j,l)*this->invEigs(l,k)*(1.0-exp(-this->nuc_list[l].DecayRate()*t))/this->nuc_list[l].DecayRate() );
+				}
+				k_sum = k_sum + this->nuc_list[k].getInitialCondition()*l_sum;
+			}
+			j_sum = j_sum + k_sum*jt->second;
+		}
+		this->stable_list[i].setConcentration( this->stable_list[i].getInitialCondition() + j_sum );
+	}
 }
 
 //Return num nuc
@@ -1650,22 +1676,22 @@ int IBIS_TESTS()
 	DecayChain test;
 	test.loadNuclides(nuc_data);
 	
-	test.registerInitialNuclide("Ba-114");
-	test.registerInitialNuclide("U-235");
-	test.registerInitialNuclide("U-238");
-	test.registerInitialNuclide("U-235");		//Not added to list because it is redundant
-	test.registerInitialNuclide("H-1");		//Not added to list because it is stable
-	test.registerInitialNuclide("O-20");
-	test.registerInitialNuclide("F-20");
-	test.registerInitialNuclide("Na-20");
-	test.registerInitialNuclide("N-20");
-	test.registerInitialNuclide("O-19");
-	test.registerInitialNuclide("N-19");
-	test.registerInitialNuclide("Th-234");
-	test.registerInitialNuclide("He-5");
-	test.registerInitialNuclide("Be-8");
-	test.registerInitialNuclide("Rn-222");
-	test.registerInitialNuclide("n-1");
+	//test.registerInitialNuclide("Ba-114");
+	//test.registerInitialNuclide("U-235");
+	//test.registerInitialNuclide("U-238");
+	//test.registerInitialNuclide("U-235");		//Not added to list because it is redundant
+	//test.registerInitialNuclide("H-1");		//Not added to list because it is stable
+	//test.registerInitialNuclide("O-20");
+	//test.registerInitialNuclide("F-20");
+	//test.registerInitialNuclide("Na-20");
+	//test.registerInitialNuclide("N-20");
+	//test.registerInitialNuclide("O-19");
+	//test.registerInitialNuclide("N-19");
+	//test.registerInitialNuclide("Th-234");
+	//test.registerInitialNuclide("He-5");
+	//test.registerInitialNuclide("Be-8");
+	//test.registerInitialNuclide("Rn-222");
+	//test.registerInitialNuclide("n-1");
 	test.registerInitialNuclide("Te-132");
 	test.registerInitialNuclide("Xe-132");
 	
@@ -1676,14 +1702,32 @@ int IBIS_TESTS()
 	test.verifyEigenSoln();					//Completely optional
 	
 	test.getIsotope(0).setInitialCondition(100.0);
-	std::cout << "Time(s)\t" << test.getIsotope(0).IsotopeName() << "\t" << test.getIsotope(1).IsotopeName() << "\n";
-	std::cout << "0\t" << test.getIsotope(0).getInitialCondition() << "\t" << test.getIsotope(1).getInitialCondition() << std::endl;
-	double time=0;
-	for (int i=0; i<40; i++)
+	std::cout << "Time(s)";
+	for (int i=0; i<test.getNumberNuclides(); i++)
 	{
-		time = (double)(i+1)*10000.0;
+		std::cout << "\t" << test.getIsotope(i).IsotopeName();
+	}
+	for (int i=0; i<test.getNumberStableNuclides(); i++)
+	{
+		std::cout << "\t" << test.getStableIsotope(i).IsotopeName();
+	}
+	std::cout << std::endl;
+	double time=0;
+	for (int i=0; i<=40; i++)
+	{
+		time = (double)(i)*10000.0;
 		test.calculateFractionation(time);
-		std::cout << time << "\t" << test.getIsotope(0).getConcentration() << "\t" << test.getIsotope(1).getConcentration() << std::endl;
+		std::cout << time;
+		for (int j=0; j<test.getNumberNuclides(); j++)
+		{
+			std::cout << "\t" << test.getIsotope(j).getConcentration();
+		}
+		for (int j=0; j<test.getNumberStableNuclides(); j++)
+		{
+			std::cout << "\t" << test.getStableIsotope(j).getConcentration();
+		}
+		std::cout << std::endl;
+		
 	}
 	
 	//Clear the library when no longer needed (redundant)
