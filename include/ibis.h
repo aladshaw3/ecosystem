@@ -220,6 +220,7 @@ public:
 	std::vector<int>& getStableBranchList(int i, int j);	///< Return the list of branch fractions for the jth parent of the ith stable nuclide
 	Isotope& getIsotope(int i);								///< Return the ith isotope in the nuclide list
 	Isotope& getStableIsotope(int i);						///< Return the ith stable isotope
+	Isotope& getIsotope(std::string iso_name);				///< Return the isotope (Stable or Unstable) that corresponds to the given name
 	Matrix<double>& getEigenvectors();						///< Return the eigenvectors matrix
 	Matrix<double>& getInverseEigenvectors();				///< Return the inverse eigenvectors matrix
 	
@@ -239,7 +240,9 @@ protected:
 	
 private:
 	std::vector<Isotope> nuc_list;							///< List of (ith) nuclides that make up the decay chain
+	std::unordered_map< std::string, int> nuc_map;			///< Map of unstable nuclides by isotope name (maps to index in nuc_list)
 	std::vector<Isotope> stable_list;						///< List of (ith) stable nuclides that terminate decay chains
+	std::unordered_map< std::string, int> stable_map;		///< Map of stable nuclides by isotope name (maps to index in stable_list)
 	
 	/// List of the indices that each isotope has from the nuc_list
 	/** List of indices for all parents of an isotope in the list of all isotopes. 

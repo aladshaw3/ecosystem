@@ -957,7 +957,9 @@ DecayChain::DecayChain()
 DecayChain::~DecayChain()
 {
 	nuc_list.clear();
+	nuc_map.clear();
 	stable_list.clear();
+	stable_map.clear();
 	parents.clear();
 	branches.clear();
 	CoefMap.clear();
@@ -1177,7 +1179,9 @@ void DecayChain::formEigenvectors()
 			{
 				mError(unstable_matrix);
 				std::cout << "Non-unique eigenvalues breakdown formation of eigenvectors!\n";
-				return;
+				std::cout << "Problem Isotopes: " << this->nuc_list[k].IsotopeName() << "\t" << this->nuc_list[i].IsotopeName() << std::endl;
+				//Fix with small adjustment to the kth eigenvalue
+				diff = -this->nuc_list[i].DecayRate()-(eigenvalue+sqrt(DBL_EPSILON));
 			}
 			this->Eigs.edit(i, k, -sum/diff);
 		}
@@ -1392,6 +1396,28 @@ Isotope& DecayChain::getStableIsotope(int i)
 		mError(out_of_bounds);
 	}
 	return this->stable_list[i];
+}
+
+//Return stable or unstable isotope
+Isotope& DecayChain::getIsotope(std::string iso_name)
+{
+	try
+	{
+		return this->nuc_list[ this->nuc_map.at(iso_name) ];
+	}
+	catch (std::out_of_range)
+	{
+		//Test for stable isotope
+	}
+	try
+	{
+		return this->stable_list[ this->stable_map.at(iso_name) ];
+	}
+	catch (std::out_of_range)
+	{
+		mError(out_of_bounds);
+		return this->nuc_list[0];
+	}
 }
 
 //Return eigenvectors
@@ -1615,6 +1641,8 @@ void DecayChain::fillOutCoefMap()
 	//Loop over all nuclides (daughters)
 	for (int i=0; i<this->nuc_list.size(); i++)
 	{
+		this->nuc_map[this->nuc_list[i].IsotopeName()] = i;
+		
 		//Element [i][i] == -DecayConst
 		this->CoefMap[i][i] = -this->nuc_list[i].DecayRate();
 		
@@ -1639,6 +1667,8 @@ void DecayChain::fillOutCoefMap()
 	//Loop over all stable nuclides (daughters)
 	for (int i=0; i<this->stable_list.size(); i++)
 	{
+		this->stable_map[this->stable_list[i].IsotopeName()] = i;
+		
 		//Loop over all parents
 		for (int j=0; j<this->getStableParentList(i).size(); j++)
 		{
@@ -1692,8 +1722,16 @@ int IBIS_TESTS()
 	//test.registerInitialNuclide("Be-8");
 	//test.registerInitialNuclide("Rn-222");
 	//test.registerInitialNuclide("n-1");
-	test.registerInitialNuclide("Te-132");
-	test.registerInitialNuclide("Xe-132");
+	
+	//test.registerInitialNuclide("Te-132");
+	//test.registerInitialNuclide("Xe-132");
+	
+	//test.registerInitialNuclide("Cf-252");
+	//test.registerInitialNuclide("H-3");
+	//test.registerInitialNuclide("Tm-172");
+	
+	test.registerInitialNuclide("Cd-121");
+	test.registerInitialNuclide("O-20");
 	
 	test.createChains();					//Creates list of nuclides and sorts the list from parent to daughter
 	test.DisplayInfo();
@@ -1701,7 +1739,15 @@ int IBIS_TESTS()
 	test.formEigenvectors();				//Mandatory before solving
 	test.verifyEigenSoln();					//Completely optional
 	
-	test.getIsotope(0).setInitialCondition(100.0);
+	//test.getIsotope( "Te-132" ).setInitialCondition(100.0);
+	
+	//test.getIsotope("Cf-252").setInitialCondition(1.0);
+	//test.getIsotope("Tm-172").setInitialCondition(2.0);
+	//test.getIsotope("H-3").setInitialCondition(0.5);
+	
+	test.getIsotope("Cd-121").setInitialCondition(1.0);
+	test.getIsotope("O-20").setInitialCondition(2.0);
+	
 	std::cout << "Time(s)";
 	for (int i=0; i<test.getNumberNuclides(); i++)
 	{
@@ -1715,7 +1761,7 @@ int IBIS_TESTS()
 	double time=0;
 	for (int i=0; i<=40; i++)
 	{
-		time = (double)(i)*10000.0;
+		time = (double)(i)*10.0;
 		test.calculateFractionation(time);
 		std::cout << time;
 		for (int j=0; j<test.getNumberNuclides(); j++)
