@@ -212,8 +212,14 @@ public:
 		Use an analytical solution based on linear combinations of eigenvectors. */
 	void calculateFractionation(double t);
 	
+	double returnUnstableFractionation(int i, double t);			///< Return the fractionation of the ith unstable nuclide
+	double returnStableFractionation(int i, double t);				///< Return the fractionation of the ith stable nuclide
+	double returnFractionation(std::string iso_name, double t);		///< Return the fractionation of the given nuclide
+	
 	int getNumberNuclides();								///< Return the number of nuclides in the decay chain
 	int getNumberStableNuclides();							///< Return the number of stable nuclides
+	int getIsotopeIndex(std::string iso_name);				///< Return the unstable isotope index that corresponds to the given name
+	int getStableIsotopeIndex(std::string iso_name);		///< Return the stable isotope index that corresponds to the given name
 	std::vector<int>& getParentList(int i);					///< Return the vector list of parents for the ith isotope in the nuclide list
 	std::vector<int>& getStableParentList(int i);			///< Return the vector list of parents for the ith stable isotope
 	std::vector<int>& getBranchList(int i, int j);			///< Return the vector list of branch fractions for the jth parent of the ith nuclide

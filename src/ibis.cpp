@@ -1310,6 +1310,88 @@ void DecayChain::calculateFractionation(double t)
 	}
 }
 
+//Return unstable frac at t
+double DecayChain::returnUnstableFractionation(int i, double t)
+{
+	if (i >= (int)this->nuc_list.size() || i < 0)
+	{
+		i = 0;
+		mError(out_of_bounds);
+	}
+	
+	double sum_outer = 0.0;
+	//Loop over all j columns of the eigenvector matrices
+	for (int j=0; j<=i; j++)
+	{
+		double sum_inner = 0.0;
+		//Loop over all k eigenvalues
+		for (int k=j; k<=i; k++)
+		{
+			sum_inner = sum_inner + this->Eigs(i,k)*this->invEigs(k,j)*exp(-this->nuc_list[k].DecayRate()*t);
+		}
+		sum_outer = sum_outer + sum_inner*this->nuc_list[j].getInitialCondition();
+	}
+	this->nuc_list[i].setConcentration(sum_outer);
+	
+	return this->nuc_list[i].getConcentration();
+}
+
+//Return stable frac at t
+double DecayChain::returnStableFractionation(int i, double t)
+{
+	if (i >= (int)this->stable_list.size() || i < 0)
+	{
+		i = 0;
+		mError(out_of_bounds);
+	}
+	
+	//Iterate through the map (loop over j columns)
+	double j_sum = 0.0;
+	for (std::map<int,double>::iterator jt=this->stable_CoefMap[i].begin(); jt!=this->stable_CoefMap[i].end(); jt++)
+	{
+		int j = jt->first;
+		
+		//Loop over k
+		double k_sum = 0.0;
+		for (int k=0; k<=j; k++)
+		{
+			//Loop over l
+			double l_sum = 0.0;
+			for (int l=k; l<=j; l++)
+			{
+				l_sum = l_sum + ( this->Eigs(j,l)*this->invEigs(l,k)*(1.0-exp(-this->nuc_list[l].DecayRate()*t))/this->nuc_list[l].DecayRate() );
+			}
+			k_sum = k_sum + this->nuc_list[k].getInitialCondition()*l_sum;
+		}
+		j_sum = j_sum + k_sum*jt->second;
+	}
+	this->stable_list[i].setConcentration( this->stable_list[i].getInitialCondition() + j_sum );
+	
+	return this->stable_list[i].getConcentration();
+}
+
+//Return fractionation of given isotope
+double DecayChain::returnFractionation(std::string iso_name, double t)
+{
+	try
+	{
+		return this->returnUnstableFractionation(this->nuc_map.at(iso_name), t);
+	}
+	catch (std::out_of_range)
+	{
+		//Test for stable isotope
+	}
+	try
+	{
+		return this->returnStableFractionation(this->stable_map.at(iso_name), t);
+	}
+	catch (std::out_of_range)
+	{
+		mError(out_of_bounds);
+		return 0.0;
+	}
+}
+
 //Return num nuc
 int DecayChain::getNumberNuclides()
 {
@@ -1320,6 +1402,34 @@ int DecayChain::getNumberNuclides()
 int DecayChain::getNumberStableNuclides()
 {
 	return (int)this->stable_list.size();
+}
+
+//Return unstable index
+int DecayChain::getIsotopeIndex(std::string iso_name)
+{
+	try
+	{
+		return  this->nuc_map.at(iso_name);
+	}
+	catch (std::out_of_range)
+	{
+		mError(out_of_bounds);
+		return 0;
+	}
+}
+
+//Return stable index
+int DecayChain::getStableIsotopeIndex(std::string iso_name)
+{
+	try
+	{
+		return  this->stable_map.at(iso_name);
+	}
+	catch (std::out_of_range)
+	{
+		mError(out_of_bounds);
+		return 0;
+	}
 }
 
 //Return parents
@@ -1767,14 +1877,18 @@ int IBIS_TESTS()
 		for (int j=0; j<test.getNumberNuclides(); j++)
 		{
 			std::cout << "\t" << test.getIsotope(j).getConcentration();
+			//std::cout << "\t" << test.returnUnstableFractionation(j, time);
 		}
 		for (int j=0; j<test.getNumberStableNuclides(); j++)
 		{
 			std::cout << "\t" << test.getStableIsotope(j).getConcentration();
+			//std::cout << "\t" << test.returnStableFractionation(j, time);
 		}
 		std::cout << std::endl;
 		
 	}
+	
+	//std::cout << test.returnFractionation("Ne-20", time) << std::endl;
 	
 	//Clear the library when no longer needed (redundant)
 	test.unloadNuclides();
