@@ -641,6 +641,12 @@ void Isotope::setConcentration(double c)
 	this->concentration = c;
 }
 
+//update decay rate
+void Isotope::updateDecayRate()
+{
+	this->decay_rate = this->decay_rate*1.001;
+}
+
 //Return isotope number
 int Isotope::IsotopeNumber()
 {
@@ -1178,10 +1184,14 @@ void DecayChain::formEigenvectors()
 			if (diff == 0.0)
 			{
 				mError(unstable_matrix);
-				std::cout << "Non-unique eigenvalues breakdown formation of eigenvectors!\n";
-				std::cout << "Problem Isotopes: " << this->nuc_list[k].IsotopeName() << "\t" << this->nuc_list[i].IsotopeName() << std::endl;
+				std::cout << "\nNon-unique eigenvalues!\n";
+				std::cout << "Problem Isotopes:\t" << this->nuc_list[k].IsotopeName() << "\t" << this->nuc_list[i].IsotopeName() << std::endl;
+				std::cout << "Adjusting eigenvalue by 0.1% to remove redundancy..." << std::endl;
 				//Fix with small adjustment to the kth eigenvalue
-				diff = -this->nuc_list[i].DecayRate()-(eigenvalue+sqrt(DBL_EPSILON));
+				this->nuc_list[k].updateDecayRate();
+				eigenvalue = -this->nuc_list[k].DecayRate();
+				diff = -this->nuc_list[i].DecayRate()-eigenvalue;
+				//diff = -this->nuc_list[i].DecayRate()-(eigenvalue+sqrt(DBL_EPSILON));
 			}
 			this->Eigs.edit(i, k, -sum/diff);
 		}
@@ -1308,6 +1318,55 @@ void DecayChain::calculateFractionation(double t)
 		}
 		this->stable_list[i].setConcentration( this->stable_list[i].getInitialCondition() + j_sum );
 	}
+}
+
+//Print results to a file
+void DecayChain::print_results(double end_time, int points)
+{
+	//Open a file to print results to
+	FILE *file;
+	file = fopen("output/IBIS_Results.txt", "w+");
+	if (file == nullptr)
+	{
+		system("mkdir output");
+		file = fopen("output/IBIS_Results.txt", "w+");
+	}
+	
+	//Header
+	fprintf(file, "Time(s)");
+	for (int i=0; i<this->getNumberNuclides(); i++)
+		fprintf(file, "\t%s", this->getIsotope(i).IsotopeName().c_str());
+	for (int i=0; i<this->getNumberStableNuclides(); i++)
+		fprintf(file, "\t%s", this->getStableIsotope(i).IsotopeName().c_str());
+	fprintf(file, "\n");
+	
+	//IC
+	fprintf(file, "0");
+	for (int i=0; i<this->getNumberNuclides(); i++)
+		fprintf(file, "\t%.6g", this->getIsotope(i).getInitialCondition());
+	for (int i=0; i<this->getNumberStableNuclides(); i++)
+		fprintf(file, "\t%.6g", this->getStableIsotope(i).getInitialCondition());
+	fprintf(file, "\n");
+	
+	//Simulations
+	double dt = end_time/(double)points;
+	double time = 0.0;
+	for (int n=0; n<points; n++)
+	{
+		time = time + dt;
+		this->calculateFractionation(time);
+		
+		fprintf(file, "%.6g", time);
+		for (int i=0; i<this->getNumberNuclides(); i++)
+			fprintf(file, "\t%.6g", this->getIsotope(i).getConcentration());
+		for (int i=0; i<this->getNumberStableNuclides(); i++)
+			fprintf(file, "\t%.6g", this->getStableIsotope(i).getConcentration());
+		fprintf(file, "\n");
+	}
+	
+	//Close the open file
+	if (file != nullptr)
+		fclose(file);
 }
 
 //Return unstable frac at t
@@ -1807,12 +1866,14 @@ void DecayChain::fillOutCoefMap()
 int IBIS_TESTS()
 {
 	int success = 0;
+	double time;
 	yaml_cpp_class nuc_data;
 	
 	//Read in the library (uses ~ 7.3 MB to hold)
 	nuc_data.executeYamlRead("database/NuclideLibrary.yml");
 	
 	//Test decay chain object
+	time = clock();
 	DecayChain test;
 	test.loadNuclides(nuc_data);
 	
@@ -1836,62 +1897,33 @@ int IBIS_TESTS()
 	//test.registerInitialNuclide("Te-132");
 	//test.registerInitialNuclide("Xe-132");
 	
-	//test.registerInitialNuclide("Cf-252");
-	//test.registerInitialNuclide("H-3");
-	//test.registerInitialNuclide("Tm-172");
+	test.registerInitialNuclide("Cf-252");
+	test.registerInitialNuclide("H-3");
+	test.registerInitialNuclide("Tm-172");
 	
-	test.registerInitialNuclide("Cd-121");
-	test.registerInitialNuclide("O-20");
+	//test.registerInitialNuclide("Cd-121");
+	//test.registerInitialNuclide("O-20");
 	
 	test.createChains();					//Creates list of nuclides and sorts the list from parent to daughter
-	test.DisplayInfo();
-	test.DisplayStableInfo();
 	test.formEigenvectors();				//Mandatory before solving
-	test.verifyEigenSoln();					//Completely optional
+	//test.verifyEigenSoln();				//Completely optional
 	
 	//test.getIsotope( "Te-132" ).setInitialCondition(100.0);
 	
-	//test.getIsotope("Cf-252").setInitialCondition(1.0);
-	//test.getIsotope("Tm-172").setInitialCondition(2.0);
-	//test.getIsotope("H-3").setInitialCondition(0.5);
+	test.getIsotope("Cf-252").setInitialCondition(1.0);
+	test.getIsotope("Tm-172").setInitialCondition(2.0);
+	test.getIsotope("H-3").setInitialCondition(0.5);
 	
-	test.getIsotope("Cd-121").setInitialCondition(1.0);
-	test.getIsotope("O-20").setInitialCondition(2.0);
+	//test.getIsotope("Cd-121").setInitialCondition(1.0);
+	//test.getIsotope("O-20").setInitialCondition(2.0);
 	
-	std::cout << "Time(s)";
-	for (int i=0; i<test.getNumberNuclides(); i++)
-	{
-		std::cout << "\t" << test.getIsotope(i).IsotopeName();
-	}
-	for (int i=0; i<test.getNumberStableNuclides(); i++)
-	{
-		std::cout << "\t" << test.getStableIsotope(i).IsotopeName();
-	}
-	std::cout << std::endl;
-	double time=0;
-	for (int i=0; i<=40; i++)
-	{
-		time = (double)(i)*10.0;
-		test.calculateFractionation(time);
-		std::cout << time;
-		for (int j=0; j<test.getNumberNuclides(); j++)
-		{
-			std::cout << "\t" << test.getIsotope(j).getConcentration();
-			//std::cout << "\t" << test.returnUnstableFractionation(j, time);
-		}
-		for (int j=0; j<test.getNumberStableNuclides(); j++)
-		{
-			std::cout << "\t" << test.getStableIsotope(j).getConcentration();
-			//std::cout << "\t" << test.returnStableFractionation(j, time);
-		}
-		std::cout << std::endl;
-		
-	}
-	
-	//std::cout << test.returnFractionation("Ne-20", time) << std::endl;
+	test.print_results(3.1536e8, 40);			//Print results to file
 	
 	//Clear the library when no longer needed (redundant)
 	test.unloadNuclides();
+	
+	time = clock() - time;
+	std::cout << "\nSimulation Runtime: " << (time / CLOCKS_PER_SEC) << " seconds\n";
 	
 	return success;
 }

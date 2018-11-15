@@ -80,6 +80,7 @@ public:
 	
 	void setInitialCondition(double ic);				///< Set the value for the initial condition of this nuclide
 	void setConcentration(double c);					///< Set the concentration value for the nuclide
+	void updateDecayRate();								///< Increase decay rate by 1% (used to correct issues with same eigenvalues)
 	
 	int IsotopeNumber();								///< Return the isotope number of the atom
 	double DecayRate();									///< Return the decay rate of the isotope
@@ -152,8 +153,8 @@ protected:
 	int isotope_number;									///< isotope number for the object
 	bool Stable;										///< Boolean is True if isotope is stable
 	bool IsomericState;									///< Boolean is True if isotope is in an isomeric state
-	double initial_condition;							///< Value to hold initial condition for this nuclide
-	double concentration;								///< Value to hold concentration after a point in time
+	double initial_condition;							///< Value to hold initial condition for this nuclide (moles or atoms)
+	double concentration;								///< Value to hold concentration after a point in time (moles or atoms)
 	
 	yaml_cpp_class *nuclides;							///< Pointer to a yaml object storing the digital library of all nuclides
 	
@@ -211,6 +212,16 @@ public:
 	 
 		Use an analytical solution based on linear combinations of eigenvectors. */
 	void calculateFractionation(double t);
+	
+	/// Function to print results to file based on end_time and number of points
+	/** This function will open an output file named IBIS_Results.txt and print the
+		simulation results to that file starting from time = 0 s to end_time in (s).
+		The integer 'points' is used to determine how many points at which the 
+		calculation of fractionation will take place. The output file will be opened
+		and closed within this function so the user is not responsible for keeping
+		track of the file. All output is printed to the 'output/' folder from the
+		working directory. */
+	void print_results(double end_time, int points);
 	
 	double returnUnstableFractionation(int i, double t);			///< Return the fractionation of the ith unstable nuclide
 	double returnStableFractionation(int i, double t);				///< Return the fractionation of the ith stable nuclide
