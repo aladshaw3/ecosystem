@@ -1897,12 +1897,92 @@ int IBIS_TESTS()
 	//test.registerInitialNuclide("Te-132");
 	//test.registerInitialNuclide("Xe-132");
 	
-	test.registerInitialNuclide("Cf-252");
-	test.registerInitialNuclide("H-3");
-	test.registerInitialNuclide("Tm-172");
+	//test.registerInitialNuclide("Cf-252");
+	//test.registerInitialNuclide("H-3");
+	//test.registerInitialNuclide("Tm-172");
 	
 	//test.registerInitialNuclide("Cd-121");
 	//test.registerInitialNuclide("O-20");
+	
+	test.registerInitialNuclide("H-3");
+	test.registerInitialNuclide("He-6");
+	test.registerInitialNuclide("Be-7");
+	test.registerInitialNuclide("Be-10");
+	test.registerInitialNuclide("Be-11");
+	test.registerInitialNuclide("B-12");
+	
+	test.registerInitialNuclide("N-13");
+	test.registerInitialNuclide("C-14");
+	test.registerInitialNuclide("C-15");
+	test.registerInitialNuclide("N-16");
+	test.registerInitialNuclide("Ne-23");
+	test.registerInitialNuclide("Na-22");
+	
+	test.registerInitialNuclide("Na-24");
+	test.registerInitialNuclide("Mg-27");
+	test.registerInitialNuclide("Al-28");
+	test.registerInitialNuclide("Al-26");
+	test.registerInitialNuclide("Si-31");
+	test.registerInitialNuclide("P-32");
+	
+	test.registerInitialNuclide("P-33");
+	test.registerInitialNuclide("P-34");
+	test.registerInitialNuclide("S-35");
+	test.registerInitialNuclide("S-37");
+	test.registerInitialNuclide("Cl-36");
+	test.registerInitialNuclide("Cl-38");
+	
+	test.registerInitialNuclide("Ar-37");
+	test.registerInitialNuclide("Ar-39");
+	test.registerInitialNuclide("Ar-41");
+	test.registerInitialNuclide("Ar-42");
+	test.registerInitialNuclide("K-40");
+	test.registerInitialNuclide("K-42");
+	
+	test.registerInitialNuclide("K-43");
+	test.registerInitialNuclide("Ca-41");
+	test.registerInitialNuclide("Ca-45");
+	test.registerInitialNuclide("Ca-47");
+	test.registerInitialNuclide("Ca-48");
+	test.registerInitialNuclide("Ca-49");
+	test.registerInitialNuclide("Sc-44");
+	test.registerInitialNuclide("Sc-46");
+	test.registerInitialNuclide("Sc-47");
+	test.registerInitialNuclide("Sc-48");
+	test.registerInitialNuclide("Sc-49");
+	test.registerInitialNuclide("Sc-50");
+	
+	test.registerInitialNuclide("Ti-45");
+	test.registerInitialNuclide("Ti-44");
+	test.registerInitialNuclide("Ti-51");
+	test.registerInitialNuclide("V-50");
+	test.registerInitialNuclide("V-49");
+	test.registerInitialNuclide("V-48");
+	test.registerInitialNuclide("V-52");
+	test.registerInitialNuclide("V-53");
+	test.registerInitialNuclide("V-54");
+	test.registerInitialNuclide("Cr-51");
+	test.registerInitialNuclide("Cr-50");
+	test.registerInitialNuclide("Cr-49");
+	
+	test.registerInitialNuclide("Mn-54");
+	test.registerInitialNuclide("Mn-53");
+	test.registerInitialNuclide("Mn-52");
+	test.registerInitialNuclide("Mn-56");
+	test.registerInitialNuclide("Mn-57");
+	test.registerInitialNuclide("Mn-58");
+	test.registerInitialNuclide("Fe-55");
+	test.registerInitialNuclide("Fe-59");
+	test.registerInitialNuclide("Fe-60");
+	test.registerInitialNuclide("Co-58");
+	test.registerInitialNuclide("Co-57");
+	test.registerInitialNuclide("Co-56");
+	test.registerInitialNuclide("Co-55");
+	test.registerInitialNuclide("Co-60");
+	test.registerInitialNuclide("Co-61");
+	test.registerInitialNuclide("Co-62");
+	test.registerInitialNuclide("Ni-57");
+	test.registerInitialNuclide("Ni-59");
 	
 	test.createChains();					//Creates list of nuclides and sorts the list from parent to daughter
 	test.formEigenvectors();				//Mandatory before solving
@@ -1910,20 +1990,20 @@ int IBIS_TESTS()
 	
 	//test.getIsotope( "Te-132" ).setInitialCondition(100.0);
 	
-	test.getIsotope("Cf-252").setInitialCondition(1.0);
-	test.getIsotope("Tm-172").setInitialCondition(2.0);
-	test.getIsotope("H-3").setInitialCondition(0.5);
+	//test.getIsotope("Cf-252").setInitialCondition(1.0);
+	//test.getIsotope("Tm-172").setInitialCondition(2.0);
+	//test.getIsotope("H-3").setInitialCondition(0.5);
 	
 	//test.getIsotope("Cd-121").setInitialCondition(1.0);
 	//test.getIsotope("O-20").setInitialCondition(2.0);
 	
-	test.print_results(3.1536e8, 40);			//Print results to file
+	test.print_results(3.1536e8, 100);			//Print results to file
 	
 	//Clear the library when no longer needed (redundant)
 	test.unloadNuclides();
 	
 	time = clock() - time;
-	std::cout << "\nSimulation Runtime: " << (time / CLOCKS_PER_SEC) << " seconds\n";
+	std::cout << "\nSimulation Runtime: " << (time / CLOCKS_PER_SEC) << " seconds for " << test.getNumberNuclides()+test.getNumberStableNuclides() << " isotopes \n";
 	
 	return success;
 }
