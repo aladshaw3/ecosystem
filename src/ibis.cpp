@@ -1965,24 +1965,24 @@ int IBIS_TESTS()
 	test.registerInitialNuclide("Cr-50");
 	test.registerInitialNuclide("Cr-49");
 	
-	test.registerInitialNuclide("Mn-54");
-	test.registerInitialNuclide("Mn-53");
-	test.registerInitialNuclide("Mn-52");
-	test.registerInitialNuclide("Mn-56");
-	test.registerInitialNuclide("Mn-57");
-	test.registerInitialNuclide("Mn-58");
-	test.registerInitialNuclide("Fe-55");
-	test.registerInitialNuclide("Fe-59");
-	test.registerInitialNuclide("Fe-60");
-	test.registerInitialNuclide("Co-58");
-	test.registerInitialNuclide("Co-57");
-	test.registerInitialNuclide("Co-56");
-	test.registerInitialNuclide("Co-55");
-	test.registerInitialNuclide("Co-60");
-	test.registerInitialNuclide("Co-61");
-	test.registerInitialNuclide("Co-62");
-	test.registerInitialNuclide("Ni-57");
-	test.registerInitialNuclide("Ni-59");
+	//test.registerInitialNuclide("Mn-54");
+	//test.registerInitialNuclide("Mn-53");
+	//test.registerInitialNuclide("Mn-52");
+	//test.registerInitialNuclide("Mn-56");
+	//test.registerInitialNuclide("Mn-57");
+	//test.registerInitialNuclide("Mn-58");
+	//test.registerInitialNuclide("Fe-55");
+	//test.registerInitialNuclide("Fe-59");
+	//test.registerInitialNuclide("Fe-60");
+	//test.registerInitialNuclide("Co-58");
+	//test.registerInitialNuclide("Co-57");
+	//test.registerInitialNuclide("Co-56");
+	//test.registerInitialNuclide("Co-55");
+	//test.registerInitialNuclide("Co-60");
+	//test.registerInitialNuclide("Co-61");
+	//test.registerInitialNuclide("Co-62");
+	//test.registerInitialNuclide("Ni-57");
+	//test.registerInitialNuclide("Ni-59");
 	
 	test.createChains();					//Creates list of nuclides and sorts the list from parent to daughter
 	test.formEigenvectors();				//Mandatory before solving
@@ -1997,7 +1997,12 @@ int IBIS_TESTS()
 	//test.getIsotope("Cd-121").setInitialCondition(1.0);
 	//test.getIsotope("O-20").setInitialCondition(2.0);
 	
-	test.print_results(3.1536e8, 100);			//Print results to file
+	for (int i=0; i<test.getNumberNuclides(); i++)
+	{
+		test.getIsotope(i).setInitialCondition(1.0);
+	}
+	
+	test.print_results(3.1536e8, 10);			//Print results to file
 	
 	//Clear the library when no longer needed (redundant)
 	test.unloadNuclides();
