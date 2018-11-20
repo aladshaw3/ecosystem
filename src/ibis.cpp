@@ -1879,8 +1879,8 @@ int IBIS_TESTS()
 	
 	//test.registerInitialNuclide("Ba-114");
 	//test.registerInitialNuclide("U-235");
-	//test.registerInitialNuclide("U-238");
-	//test.registerInitialNuclide("U-235");		//Not added to list because it is redundant
+	test.registerInitialNuclide("U-238");
+	test.registerInitialNuclide("U-235");		//Not added to list because it is redundant
 	//test.registerInitialNuclide("H-1");		//Not added to list because it is stable
 	//test.registerInitialNuclide("O-20");
 	//test.registerInitialNuclide("F-20");
@@ -1904,6 +1904,7 @@ int IBIS_TESTS()
 	//test.registerInitialNuclide("Cd-121");
 	//test.registerInitialNuclide("O-20");
 	
+	/*
 	test.registerInitialNuclide("H-3");
 	test.registerInitialNuclide("He-6");
 	test.registerInitialNuclide("Be-7");
@@ -1964,7 +1965,7 @@ int IBIS_TESTS()
 	test.registerInitialNuclide("Cr-51");
 	test.registerInitialNuclide("Cr-50");
 	test.registerInitialNuclide("Cr-49");
-	
+	*/
 	//test.registerInitialNuclide("Mn-54");
 	//test.registerInitialNuclide("Mn-53");
 	//test.registerInitialNuclide("Mn-52");
@@ -1997,12 +1998,17 @@ int IBIS_TESTS()
 	//test.getIsotope("Cd-121").setInitialCondition(1.0);
 	//test.getIsotope("O-20").setInitialCondition(2.0);
 	
+	test.getIsotope("U-235").setInitialCondition(90);
+	test.getIsotope("U-238").setInitialCondition(10);
+	
+	/*
 	for (int i=0; i<test.getNumberNuclides(); i++)
 	{
 		test.getIsotope(i).setInitialCondition(1.0);
 	}
+	 */
 	
-	test.print_results(3.1536e8, 10);			//Print results to file
+	test.print_results(3600, 10);			//Print results to file
 	
 	//Clear the library when no longer needed (redundant)
 	test.unloadNuclides();
