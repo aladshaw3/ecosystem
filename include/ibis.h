@@ -223,6 +223,10 @@ public:
 		working directory. */
 	void print_results(double end_time, int points);
 	
+	int read_conditions(yaml_cpp_class &yaml);						///< Read the Runtime conditions for the simulation case
+	int read_isotopes(yaml_cpp_class &yaml);						///< Read the Isotope conditions for the simulation case
+	int run_simulation();											///< Runs the simulation set up by the input files 
+	
 	double returnUnstableFractionation(int i, double t);			///< Return the fractionation of the ith unstable nuclide
 	double returnStableFractionation(int i, double t);				///< Return the fractionation of the ith stable nuclide
 	double returnFractionation(std::string iso_name, double t);		///< Return the fractionation of the given nuclide
@@ -300,7 +304,56 @@ private:
 	
 	yaml_cpp_class *nuclides;							///< Pointer to a yaml object storing the digital library of all nuclides
 	
+	int time_steps;										///< Integer option to hold number of time steps to simulate
+	double end_time;									///< Time at which to end decay simulations
+	time_units t_units;									///< Units of time for which the end time is given
+	bool VerifyEigen;									///< Boolean option to check eigenvector solution
+	bool PrintChain;									///< Boolean option to print decay chain data to output file
+	bool PrintResults;									///< Boolean option to print simulation results to output file
+	bool PrintSparsity;									///< Boolean option to print sparsity pattern to output file
+	
 };
+
+/// IBIS Executable given an input file
+/** Main IBIS executable from the ecosystem cli. User must provide a yaml-style input file directing
+	all simulation, isotope, and runtime options. See example yaml-style input file below.
+ 
+	Input file has a Runtime block and an Isotopes block. The Runtime block is used to direct the 
+	type of simulation to be run, what time units to use, and what information to print to the
+	output file. If print_results is false, then the simulations are not carried out for the
+	isotope fractionation. If verify is false, then IBIS will skip the verification of the eigen
+	solution.
+ 
+	The Isotopes block is where you provide the inital conditions for a starting set of isotopes. 
+	Each sub-block in Isotopes must be the name of an isotope registered in the Nuclide library. 
+	Currently, initial conditions for isotopes can only be given in moles of isotopes.
+ 
+	Yaml Input File Example
+	-----------------------
+ 
+	Runtime:
+	---
+	time_units: seconds
+	end_time: 3600
+	time_steps: 10
+ 
+	verify: true
+	print_sparsity: true
+	print_chain: true
+	print_results: false
+	...
+ 
+	Isotopes:
+	---
+	- U-235:
+	  initial_cond: 90
+ 
+	- U-238:
+	  initial_cond: 10
+	...
+
+ */
+int IBIS_SCENARIO(const char *yaml_input);
 
 ///< Function to test the implementation of Isotope 
 int IBIS_TESTS();

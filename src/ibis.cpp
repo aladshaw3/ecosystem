@@ -956,7 +956,13 @@ YamlWrapper& Isotope::getNuclideLibrary()
 //Default constructor
 DecayChain::DecayChain()
 {
-	
+	time_steps = 10;
+	end_time = 3600;
+	t_units = hours;
+	VerifyEigen = false;
+	PrintChain = false;
+	PrintSparsity = false;
+	PrintResults = true;
 }
 
 //Default destructor
@@ -1367,6 +1373,30 @@ void DecayChain::print_results(double end_time, int points)
 	//Close the open file
 	if (file != nullptr)
 		fclose(file);
+}
+
+//Read Runtime block
+int DecayChain::read_conditions(yaml_cpp_class &yaml)
+{
+	int success = 0;
+	
+	return success;
+}
+
+//Read Isotopes block
+int DecayChain::read_isotopes(yaml_cpp_class &yaml)
+{
+	int success = 0;
+	
+	return success;
+}
+
+//Run simulation
+int DecayChain::run_simulation()
+{
+	int success = 0;
+	
+	return success;
 }
 
 //Return unstable frac at t
@@ -1862,6 +1892,32 @@ void DecayChain::fillOutCoefMap()
  *								End: DecayChain Class Definitions
  */
 
+//Executable
+int IBIS_SCENARIO(const char *yaml_input)
+{
+	int success = 0;
+	double time;
+	yaml_cpp_class nuc_data;
+	yaml_cpp_class input_data;
+	DecayChain decay;
+	
+	//Read in the library and set the clock
+	nuc_data.executeYamlRead("database/NuclideLibrary.yml");
+	time = clock();
+	decay.loadNuclides(nuc_data);
+	
+	//Execule yaml read of input file
+	success = input_data.executeYamlRead(yaml_input);
+	if (success != 0) {mError(file_dne); return -1;}
+	
+	
+	//End the timer and print final information to screen
+	time = clock() - time;
+	std::cout << "\nSimulation Runtime: " << (time / CLOCKS_PER_SEC) << " seconds for " << decay.getNumberNuclides()+decay.getNumberStableNuclides() << " isotopes \n";
+	
+	return success;
+}
+
 //Test function
 int IBIS_TESTS()
 {
@@ -1876,6 +1932,16 @@ int IBIS_TESTS()
 	time = clock();
 	DecayChain test;
 	test.loadNuclides(nuc_data);
+	
+	//Open a file to print results to
+	FILE *file;
+	file = fopen("output/IBIS_Results.txt", "w+");
+	if (file == nullptr)
+	{
+		system("mkdir output");
+		file = fopen("output/IBIS_Results.txt", "w+");
+	}
+	fprintf(file, "This is the header\n\n");
 	
 	//test.registerInitialNuclide("Ba-114");
 	//test.registerInitialNuclide("U-235");
@@ -1987,7 +2053,7 @@ int IBIS_TESTS()
 	
 	test.createChains();					//Creates list of nuclides and sorts the list from parent to daughter
 	test.formEigenvectors();				//Mandatory before solving
-	//test.verifyEigenSoln();				//Completely optional
+	test.verifyEigenSoln();					//Completely optional
 	
 	//test.getIsotope( "Te-132" ).setInitialCondition(100.0);
 	
@@ -2010,11 +2076,12 @@ int IBIS_TESTS()
 	
 	test.print_results(3600, 10);			//Print results to file
 	
-	//Clear the library when no longer needed (redundant)
-	test.unloadNuclides();
-	
 	time = clock() - time;
 	std::cout << "\nSimulation Runtime: " << (time / CLOCKS_PER_SEC) << " seconds for " << test.getNumberNuclides()+test.getNumberStableNuclides() << " isotopes \n";
+	
+	//Close the open file
+	if (file != nullptr)
+		fclose(file);
 	
 	return success;
 }

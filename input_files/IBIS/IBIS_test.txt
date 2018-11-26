@@ -1,0 +1,24 @@
+Runtime:
+---
+
+time_units: seconds
+end_time: 3600
+time_steps: 10
+
+verify: true
+print_sparsity: true
+print_chain: true
+print_results: false
+
+...
+
+Isotopes:
+---
+
+- U-235:
+  initial_cond: 90
+
+- U-238:
+  initial_cond: 10
+
+...

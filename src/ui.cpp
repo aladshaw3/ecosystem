@@ -89,6 +89,7 @@ void aui_help()
 	puts("(7) SHARK (Speciation and Kinetic simulation for aqueous and/or mixed multi-species systems)\n");
 	puts("(8) CROW (Coupled Reaction Object Workspace)\n");
 	puts("(9) CRANE (Cloud Rise After Nuclear Explosion)\n");
+	puts("(10) IBIS (Implicit Branching Isotope System)\n");
 	
 }
 
@@ -184,6 +185,9 @@ void bui_help()
 	
 	puts("(9) CRANE (Cloud Rise After Nuclear Explosion)\n");
 	puts("\tThis algorithm requires one input file and has an optional input file you can provide: (i) a yaml file detailing all system conditions, the integration options, the solver options, as well as a section allowing the user to give a custom wind profile for the atmosphere and (ii) an optional atmospheric profile input file, which in a line-by-line read out of temperature, pressure, and relative humidity at specific altitudes. If the second file is not given, then the routine will use a default atmosphere. NOTE: Simulations are sensitive to atmospheric conditions, so the more accurate information given, the better the results will be.\n");
+	
+	puts("(10) IBIS (Implicit Branching Isotope System)\n");
+	puts("\tThis algorithm requires one input file: (i) a yaml file detailing all simulation conditions, the output options, and the initial starting isotope conditions. Based on those initial conditions, decay chains will be formulated and ordered by mass number and parent-daughter relationships. Those relationships are based on how each nuclide decays under natural decay processes, such as alpha and beta decay. Data for each nuclide is given in a Nuclide Library yaml file, which is automatically read by the kernel. That library is located in the 'database/' sub-directory of the 'ecosystem/' working folder.\n");
 }
 
 //Check user string input for keyword "exit"
@@ -411,6 +415,11 @@ bool valid_exec_string(const std::string &input, UI_DATA *ui_dat)
 		ui_dat->option = crane;
 		valid_input = true;
 	}
+	else if (allLower(input) == "ibis")
+	{
+		ui_dat->option = ibis;
+		valid_input = true;
+	}
 	else
 	{
 		valid_input = false;
@@ -477,6 +486,12 @@ int number_files(UI_DATA *ui_dat)
 		}
 			
 		case crane:
+		{
+			num = 1;
+			break;
+		}
+			
+		case ibis:
 		{
 			num = 1;
 			break;
@@ -889,6 +904,7 @@ bool valid_input_execute(UI_DATA *ui_dat)
 	std::cout << "(1)  GSTA_OPT      (2)  MAGPIE   (3)  SCOPSOWL\n";
 	std::cout << "(4)  SCOPSOWL_OPT  (5)  SKUA     (6)  SKUA_OPT\n";
 	std::cout << "(7)  SHARK         (8)  CROW     (9)  CRANE\n";
+	std::cout << "(10) IBIS         \n";
 	std::cout << "\nChoice: ";
 	std::cin >> ui_dat->user_input[0];
 	std::cout << std::endl;
@@ -978,6 +994,13 @@ bool valid_input_execute(UI_DATA *ui_dat)
 			case 9:
 			{
 				ui_dat->option = crane;
+				valid_input = true;
+				break;
+			}
+				
+			case 10:
+			{
+				ui_dat->option = ibis;
 				valid_input = true;
 				break;
 			}
@@ -1348,6 +1371,22 @@ int run_exec(UI_DATA *ui_dat)
 				success = CRANE_SCENARIO(ui_dat->input_files[0].c_str(), ui_dat->input_files[1].c_str());
 			else
 				success = CRANE_SCENARIO(ui_dat->input_files[0].c_str(), NULL);
+			break;
+		}
+			
+		case ibis:
+		{
+			if (ui_dat->argc == 1 || ui_dat->MissingArg == true)
+			{
+				ui_dat->input_files.resize(1);
+				std::cout << "IBIS needs 1 yaml structured input file containing all information about the simulation.\n";
+				std::cout << "Please provide the file and full path...\n\n";
+				std::cout << "IBIS input: ";
+				std::cin >> ui_dat->input_files[0];
+				std::cout << std::endl;
+			}
+			
+			success = IBIS_SCENARIO(ui_dat->input_files[0].c_str());
 			break;
 		}
 			

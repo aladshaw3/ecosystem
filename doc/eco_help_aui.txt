@@ -82,3 +82,4 @@ Usage Notes
 (7) SHARK (Speciation and Kinetic simulation for aqueous and/or mixed multi-species systems)
 (8) CROW (Coupled Reaction Object Workspace)
 (9) CRANE (Cloud Rise After Nuclear Explosion)
+(10) IBIS (Implicit Branching Isotope System)

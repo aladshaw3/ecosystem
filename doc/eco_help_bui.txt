@@ -113,3 +113,7 @@ The following message provides information on running this software with the bas
 (9) CRANE (Cloud Rise After Nuclear Explosion)
 
 	This algorithm requires one input file and has an optional input file you can provide: (i) a yaml file detailing all system conditions, the integration options, the solver options, as well as a section allowing the user to give a custom wind profile for the atmosphere and (ii) an optional atmospheric profile input file, which in a line-by-line read out of temperature, pressure, and relative humidity at specific altitudes. If the second file is not given, then the routine will use a default atmosphere. NOTE: Simulations are sensitive to atmospheric conditions, so the more accurate information given, the better the results will be.
+
+(10) IBIS (Implicit Branching Isotope System)
+
+	This algorithm requires one input file: (i) a yaml file detailing all simulation conditions, the output options, and the initial starting isotope conditions. Based on those initial conditions, decay chains will be formulated and ordered by mass number and parent-daughter relationships. Those relationships are based on how each nuclide decays under natural decay processes, such as alpha and beta decay. Data for each nuclide is given in a Nuclide Library yaml file, which is automatically read by the kernel. That library is located in the 'database/' sub-directory of the 'ecosystem/' working folder.
