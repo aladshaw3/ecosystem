@@ -1622,7 +1622,7 @@ int DecayChain::run_simulation()
 		
 		for (int i=0; i<this->stable_list.size(); i++)
 		{
-			fprintf(file, "Stable Nuc Index: %i\tName: %s", i, this->getStableIsotope(i).IsotopeName().c_str());
+			fprintf(file, "Stable Nuc Index: %i\tName: %s\n", i, this->getStableIsotope(i).IsotopeName().c_str());
 			for (int j=0; j<this->getStableParentList(i).size(); j++)
 			{
 				if (j == 0) fprintf(file, "----------------------- List of Parents ------------------------\n");
