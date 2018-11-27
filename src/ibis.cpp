@@ -963,6 +963,7 @@ DecayChain::DecayChain()
 	PrintChain = false;
 	PrintSparsity = false;
 	PrintResults = true;
+	avg_eig_error = 0.0;
 }
 
 //Default destructor
@@ -1224,13 +1225,13 @@ void DecayChain::formEigenvectors()
 }
 
 //verfiy eigenvectors and eigenvalues
-void DecayChain::verifyEigenSoln()
+int DecayChain::verifyEigenSoln()
 {
 	if (this->Eigs.rows() != this->Eigs.columns() && this->Eigs.rows() != this->nuc_list.size())
 	{
 		mError(empty_matrix);
 		std::cout << "Call the 'formEigenvectors() function first...\n";
-		return;
+		return -1;
 	}
 	
 	std::cout << "Verifying Eigen Solution...\n";
@@ -1239,6 +1240,8 @@ void DecayChain::verifyEigenSoln()
 	Matrix<double> zero((int)this->CoefMap.size(),1);
 	
 	//Loop over kth eigenvector and eigenvalue pair
+	int errors = 0;
+	this->avg_eig_error = 0.0;
 	for (int k=0; k<this->nuc_list.size(); k++)
 	{
 		double eigenvalue = -this->nuc_list[k].DecayRate();
@@ -1263,12 +1266,26 @@ void DecayChain::verifyEigenSoln()
 		{
 			std::cout << "Eigen Solution NOT within tolerance (" << MIN_TOL << ") at " << k << "-th eigen pair!\n";
 			std::cout << "\tNorm = " << error << std::endl;
+			this->avg_eig_error += error;
+			errors++;
 		}
 		else
 		{
-			std::cout << "Eigen Solution is within tolerance (" << MIN_TOL << ") at " << k << "-th eigen pair!\n";
+			//std::cout << "Eigen Solution is within tolerance (" << MIN_TOL << ") at " << k << "-th eigen pair!\n";
 		}
 	}
+	if (errors > 0)
+	{
+		std::cout << "\nEigen Solution outside of prescribed tolerance (" << MIN_TOL << "). ";
+		this->avg_eig_error = this->avg_eig_error/(double)errors;
+		std::cout << "Average Error = " << this->avg_eig_error << " with " << errors << " errors.\n\n";
+	}
+	else
+	{
+		this->avg_eig_error = MIN_TOL;
+		std::cout << "Eigenvector Solution Verified! No Errors Present\n\n";
+	}
+	return errors;
 }
 
 //Estimate fractionation
@@ -1327,19 +1344,36 @@ void DecayChain::calculateFractionation(double t)
 }
 
 //Print results to a file
-void DecayChain::print_results(double end_time, int points)
+void DecayChain::print_results(FILE *file, time_units units, double end_time, int points)
 {
-	//Open a file to print results to
-	FILE *file;
-	file = fopen("output/IBIS_Results.txt", "w+");
-	if (file == nullptr)
-	{
-		system("mkdir output");
-		file = fopen("output/IBIS_Results.txt", "w+");
-	}
-	
 	//Header
-	fprintf(file, "Time(s)");
+	fprintf(file, "Time");
+	switch (units)
+	{
+		case seconds:
+			fprintf(file, "(s)");
+			break;
+			
+		case minutes:
+			fprintf(file, "(min)");
+			break;
+			
+		case hours:
+			fprintf(file, "(hr)");
+			break;
+			
+		case days:
+			fprintf(file, "(day)");
+			break;
+			
+		case years:
+			fprintf(file, "(yr)");
+			break;
+			
+		default:
+			fprintf(file, "(s)");
+			break;
+	}
 	for (int i=0; i<this->getNumberNuclides(); i++)
 		fprintf(file, "\t%s", this->getIsotope(i).IsotopeName().c_str());
 	for (int i=0; i<this->getNumberStableNuclides(); i++)
@@ -1355,14 +1389,17 @@ void DecayChain::print_results(double end_time, int points)
 	fprintf(file, "\n");
 	
 	//Simulations
-	double dt = end_time/(double)points;
+	double dt = time_conversion(seconds, end_time, units)/(double)points;
+	double pdt = end_time/(double)points;
 	double time = 0.0;
+	double ptime = 0.0;
 	for (int n=0; n<points; n++)
 	{
 		time = time + dt;
+		ptime = ptime + pdt;
 		this->calculateFractionation(time);
 		
-		fprintf(file, "%.6g", time);
+		fprintf(file, "%.6g", ptime);
 		for (int i=0; i<this->getNumberNuclides(); i++)
 			fprintf(file, "\t%.6g", this->getIsotope(i).getConcentration());
 		for (int i=0; i<this->getNumberStableNuclides(); i++)
@@ -1380,6 +1417,66 @@ int DecayChain::read_conditions(yaml_cpp_class &yaml)
 {
 	int success = 0;
 	
+	std::string opt;
+	try
+	{
+		opt = yaml.getYamlWrapper()("Runtime")["time_units"].getString();
+	}
+	catch (std::out_of_range)
+	{
+		opt = "seconds";
+	}
+	this->t_units = timeunits_choice(opt);
+	try
+	{
+		this->end_time = yaml.getYamlWrapper()("Runtime")["end_time"].getDouble();
+	}
+	catch (std::out_of_range)
+	{
+		this->end_time = 0.0;
+	}
+	try
+	{
+		this->time_steps = yaml.getYamlWrapper()("Runtime")["time_steps"].getInt();
+	}
+	catch (std::out_of_range)
+	{
+		this->time_steps = 1;
+	}
+	
+	try
+	{
+		this->VerifyEigen = yaml.getYamlWrapper()("Runtime")["verify"].getBool();
+	}
+	catch (std::out_of_range)
+	{
+		this->VerifyEigen = true;
+	}
+	try
+	{
+		this->PrintSparsity = yaml.getYamlWrapper()("Runtime")["print_sparsity"].getBool();
+	}
+	catch (std::out_of_range)
+	{
+		this->PrintSparsity = true;
+	}
+	try
+	{
+		this->PrintChain = yaml.getYamlWrapper()("Runtime")["print_chain"].getBool();
+	}
+	catch (std::out_of_range)
+	{
+		this->PrintChain = true;
+	}
+	try
+	{
+		this->PrintResults = yaml.getYamlWrapper()("Runtime")["print_results"].getBool();
+	}
+	catch (std::out_of_range)
+	{
+		this->PrintResults = true;
+	}
+	
 	return success;
 }
 
@@ -1388,6 +1485,53 @@ int DecayChain::read_isotopes(yaml_cpp_class &yaml)
 {
 	int success = 0;
 	
+	int num_iso;
+	try
+	{
+		num_iso = (int)yaml.getYamlWrapper()("Isotopes").getHeadMap().size();
+	}
+	catch (std::out_of_range)
+	{
+		mError(read_error);
+		std::cout << "Could not find 'Isotopes' block...\n";
+		return -1;
+	}
+	if (num_iso < 1) {mError(missing_information); std::cout << "No starting isotopes given...\n"; return -1;}
+	
+	//Register all initial nuclides
+	for (auto &x: yaml.getYamlWrapper()("Isotopes").getHeadMap())
+	{
+		//Check for existance of the isotope (if no exception is thrown, the isotope is valid)
+		std::string sym;
+		try
+		{
+			sym = this->nuclides->getYamlWrapper()(x.first)["symbol"].getString();
+		}
+		catch (std::out_of_range)
+		{
+			mError(invalid_isotope);
+			return -1;
+		}
+		
+		this->registerInitialNuclide(x.first);
+	}
+	
+	//Create chains and form eigenvectors after registering all nuclides
+	this->createChains();
+	this->formEigenvectors();
+	
+	for (auto &x: yaml.getYamlWrapper()("Isotopes").getHeadMap())
+	{
+		try
+		{
+			this->getIsotope(x.first).setInitialCondition( x.second["initial_cond"].getDouble() );
+		}
+		catch (std::out_of_range)
+		{
+			this->getIsotope(x.first).setInitialCondition(0.0);
+		}
+	}
+	
 	return success;
 }
 
@@ -1395,6 +1539,114 @@ int DecayChain::read_isotopes(yaml_cpp_class &yaml)
 int DecayChain::run_simulation()
 {
 	int success = 0;
+	
+	//Open a file to print results to
+	FILE *file;
+	file = fopen("output/IBIS_Results.txt", "w+");
+	if (file == nullptr)
+	{
+		system("mkdir output");
+		file = fopen("output/IBIS_Results.txt", "w+");
+	}
+	
+	if (this->VerifyEigen == true)
+	{
+		int errors = this->verifyEigenSoln();
+		if (errors < 0) {return -1;}
+		else if (errors == 0)
+		{
+			fprintf(file, "Eigenvector Solution Verified! No Errors Present\n\n");
+		}
+		else
+		{
+			fprintf(file, "Eigenvector Solution outside of prescribed tolerance (%.6g). Average Error =\t%.6g\t for \t%i\t errors.\n\n", MIN_TOL, this->avg_eig_error, errors);
+		}
+		
+	}
+	
+	if (this->PrintSparsity == true)
+	{
+		fprintf(file, "Sparsity Pattern in Coefficient Matrix:\n------------------------------\n\n");
+		for (int i=0; i<this->nuc_list.size(); i++)
+		{
+			fprintf(file, "| ");
+			for (int j=0; j<this->nuc_list.size(); j++)
+			{
+				try
+				{
+					double val = this->CoefMap[i].at(j);
+					if (val < 0 && i!=j)
+					{
+						mError(simulation_fail);
+						return -1;
+					}
+					fprintf(file, "X ");
+				}
+				catch (std::out_of_range)
+				{
+					fprintf(file, "- ");
+				}
+			}
+			fprintf(file, "|\n");
+		}
+		fprintf(file, "\n");
+	}
+	
+	if (this->PrintChain == true)
+	{
+		fprintf(file, "List of Nuclide Information:\n");
+		fprintf(file, "----------------------------\n");
+		fprintf(file, "----------------------------\n");
+		
+		for (int i=0; i<this->nuc_list.size(); i++)
+		{
+			fprintf(file, "Nuclide Index: %i\tName: %s\tDecay Const = %.6g per sec\n", i, this->getIsotope(i).IsotopeName().c_str(), this->getIsotope(i).DecayRate());
+			for (int j=0; j<this->getParentList(i).size(); j++)
+			{
+				if (j == 0) fprintf(file, "----------------------- List of Parents ------------------------\n");
+				fprintf(file, "\t%s\tDecay Const = %.6g per sec\tFraction(s): ", this->getIsotope( this->getParentList(i)[j] ).IsotopeName().c_str(), this->getIsotope( this->getParentList(i)[j] ).DecayRate());
+				for (int k=0; k<this->getBranchList(i, j).size(); k++)
+				{
+					fprintf(file, "%.6g\t", this->getIsotope( this->getParentList(i)[j] ).BranchFraction( this->getBranchList(i, j)[k] ));
+				}
+				fprintf(file, "\n");
+			}
+			fprintf(file, "\n");
+		}
+		fprintf(file, "\n");
+		
+		
+		fprintf(file, "List of Stable Nuclide Information:\n");
+		fprintf(file, "-----------------------------------\n");
+		fprintf(file, "-----------------------------------\n");
+		
+		for (int i=0; i<this->stable_list.size(); i++)
+		{
+			fprintf(file, "Stable Nuc Index: %i\tName: %s", i, this->getStableIsotope(i).IsotopeName().c_str());
+			for (int j=0; j<this->getStableParentList(i).size(); j++)
+			{
+				if (j == 0) fprintf(file, "----------------------- List of Parents ------------------------\n");
+				fprintf(file, "\t%s\tDecay Const = %.6g per sec\tFraction(s): ", this->getIsotope( this->getStableParentList(i)[j] ).IsotopeName().c_str(), this->getIsotope( this->getStableParentList(i)[j] ).DecayRate());
+				for (int k=0; k<this->getStableBranchList(i, j).size(); k++)
+				{
+					fprintf(file, "%.6g\t", this->getIsotope( this->getStableParentList(i)[j] ).BranchFraction( this->getStableBranchList(i, j)[k] ));
+				}
+				fprintf(file, "\n");
+			}
+			fprintf(file, "\n");
+		}
+		fprintf(file, "\n");
+		
+	}
+	
+	if (this->PrintResults == true)
+	{
+		this->print_results(file, this->t_units, this->end_time, this->time_steps);
+	}
+	
+	//Close the open file
+	if (file != nullptr)
+		fclose(file);
 	
 	return success;
 }
@@ -1910,6 +2162,17 @@ int IBIS_SCENARIO(const char *yaml_input)
 	success = input_data.executeYamlRead(yaml_input);
 	if (success != 0) {mError(file_dne); return -1;}
 	
+	//Read the Runtime block
+	success = decay.read_conditions(input_data);
+	if (success != 0) {mError(read_error); return -1;}
+	
+	//Read the Isotopes block
+	success = decay.read_isotopes(input_data);
+	if (success != 0) {mError(read_error); return -1;}
+	
+	//Run simulations
+	success = decay.run_simulation();
+	if (success != 0) {mError(simulation_fail); return -1;}
 	
 	//End the timer and print final information to screen
 	time = clock() - time;
@@ -2074,7 +2337,7 @@ int IBIS_TESTS()
 	}
 	 */
 	
-	test.print_results(3600, 10);			//Print results to file
+	test.print_results(file, hours, 1, 10);			//Print results to file
 	
 	time = clock() - time;
 	std::cout << "\nSimulation Runtime: " << (time / CLOCKS_PER_SEC) << " seconds for " << test.getNumberNuclides()+test.getNumberStableNuclides() << " isotopes \n";

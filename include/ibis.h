@@ -201,7 +201,7 @@ public:
 	
 	void createChains();									///< Function to create unique list of final nuclides from decay chains of initial
 	void formEigenvectors();								///< Function to produce eigenvectors from coefficient matrix
-	void verifyEigenSoln();									///< Function will verify that the eigenvectors and eigenvalues are correct
+	int verifyEigenSoln();									///< Function will verify that the eigenvectors and eigenvalues are correct
 	
 	/// Function to calculate the isotope fractionation given a time t in seconds
 	/** This function must be called after createChains() and after formEigenvectors().
@@ -221,11 +221,11 @@ public:
 		and closed within this function so the user is not responsible for keeping
 		track of the file. All output is printed to the 'output/' folder from the
 		working directory. */
-	void print_results(double end_time, int points);
+	void print_results(FILE *file, time_units units, double end_time, int points);
 	
 	int read_conditions(yaml_cpp_class &yaml);						///< Read the Runtime conditions for the simulation case
 	int read_isotopes(yaml_cpp_class &yaml);						///< Read the Isotope conditions for the simulation case
-	int run_simulation();											///< Runs the simulation set up by the input files 
+	int run_simulation();											///< Runs the simulation set up by the input files
 	
 	double returnUnstableFractionation(int i, double t);			///< Return the fractionation of the ith unstable nuclide
 	double returnStableFractionation(int i, double t);				///< Return the fractionation of the ith stable nuclide
@@ -311,6 +311,7 @@ private:
 	bool PrintChain;									///< Boolean option to print decay chain data to output file
 	bool PrintResults;									///< Boolean option to print simulation results to output file
 	bool PrintSparsity;									///< Boolean option to print sparsity pattern to output file
+	double avg_eig_error;								///< Stores the average error in eigen solution 
 	
 };
 

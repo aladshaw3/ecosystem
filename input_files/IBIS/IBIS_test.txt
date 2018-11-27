@@ -1,14 +1,14 @@
 Runtime:
 ---
 
-time_units: seconds
-end_time: 3600
+time_units: hours
+end_time: 10
 time_steps: 10
 
 verify: true
 print_sparsity: true
 print_chain: true
-print_results: false
+print_results: true
 
 ...
 
