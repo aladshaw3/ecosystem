@@ -1,0 +1,109 @@
+Runtime:
+---
+
+time_units: hours
+end_time: 1
+time_steps: 10
+
+verify: true
+print_sparsity: false
+print_chain: false
+print_results: true
+
+...
+
+#Isotopes from Fission of U-235 in % per fission
+Isotopes:
+---
+
+- Sr-89:
+  initial_cond: 4.733
+
+- Y-90:
+  initial_cond: 5.782
+
+- Y-91:
+  initial_cond: 5.828
+
+- Zr-95:
+  initial_cond: 6.503
+
+- Zr-97:
+  initial_cond: 5.984
+
+- Mo-99:
+  initial_cond: 6.109
+
+- Ru-103:
+  initial_cond: 3.031
+
+- Rh-105:
+  initial_cond: 0.964
+
+- Ru-106:
+  initial_cond: 0.4016
+
+- Pd-109:
+  initial_cond: 0.03122
+
+- Ag-111:
+  initial_cond: 0.01738
+
+- Pd-112:
+  initial_cond: 0.01304
+
+- Cd-115:
+  initial_cond: 0.012585
+
+- Sb-125:
+  initial_cond: 0.034
+
+- Sb-127:
+  initial_cond: 0.157
+
+- I-131:
+  initial_cond: 2.89
+
+- Te-132:
+  initial_cond: 4.295
+
+- I-133:
+  initial_cond: 6.697
+
+- Cs-136:
+  initial_cond: 0.0055
+
+- Cs-137:
+  initial_cond: 6.188
+
+- Ba-140:
+  initial_cond: 6.215
+
+- Ce-141:
+  initial_cond: 5.847
+
+- Pr-143:
+  initial_cond: 5.956
+
+- Ce-144:
+  initial_cond: 5.5
+
+- Nd-147:
+  initial_cond: 2.247
+
+- Sm-153:
+  initial_cond: 0.1583
+
+- Eu-155:
+  initial_cond: 0.0321
+
+- Eu-156:
+  initial_cond: 0.01485
+
+- Gd-159:
+  initial_cond: 0.001009
+
+- Tb-161:
+  initial_cond: 0.0000853
+
+...

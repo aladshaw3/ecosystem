@@ -1346,6 +1346,23 @@ void DecayChain::calculateFractionation(double t)
 //Print results to a file
 void DecayChain::print_results(FILE *file, time_units units, double end_time, int points)
 {
+	//Stable v Unstable Header
+	for (int i=0; i<this->getNumberNuclides(); i++)
+	{
+		if (i==0)
+			fprintf(file, "\tUnstable");
+		else
+			fprintf(file, "\t***");
+	}
+	for (int i=0; i<this->getNumberStableNuclides(); i++)
+	{
+		if (i==0)
+			fprintf(file, "\tStable");
+		else
+			fprintf(file, "\t###");
+	}
+	fprintf(file, "\n");
+	
 	//Header
 	fprintf(file, "Time");
 	switch (units)
