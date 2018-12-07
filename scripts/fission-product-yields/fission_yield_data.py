@@ -32,12 +32,6 @@ class FPY_Iso:
 
 # --------------------- End Class ------------------------------
 
-# ----------- Class Object to Hold ENDF Data for all isotopes --------------
-class FPY_All:
-	Iso = {}		#List of all FPY_Iso objects and associated data
-
-# --------------------- End Class ------------------------------
-
 # --------------------- Utility Functions ------------------------------
 def parse_num(s_flt):
 	ZA = {}
@@ -165,6 +159,7 @@ def read_fpy(filepath):
 	
 	#Initialize
 	FPs = FPY_Iso()
+	FPs.Levels = {}
 	start = False
 	c = {}
 	NN = 0		#Total number of items to read for given energy level (=4*NFP)
@@ -176,6 +171,7 @@ def read_fpy(filepath):
 	odd = True	#Boolean to determine if we are odd or even line
 	id = ''		#id value carried over between lines
 	includeState = False		#True to differentiate between states, False to combine states
+	name = ''	#FP name
 	
 	if filepath[0] == "n":
 		FPs.NIFP = True
@@ -207,7 +203,8 @@ def read_fpy(filepath):
 			FPs.Levels[cur] = FPY_Energy()
 			num = sci_notation(c[1])
 			FPs.Levels[cur].Energy = float(num)
-			FPs.Levels[cur].Yield.clear()  #Line to make sure existing keys are not copied over
+			FPs.Levels[cur].Yield = {}
+			FPs.Levels[cur].DY = {}
 			NN = int(c[5])
 			NFP = int(c[6])
 			NewLevel = False
@@ -230,7 +227,7 @@ def read_fpy(filepath):
 						FPs.Levels[cur-1].Yield[name] = float(sci_notation(c[3]))
 						FPs.Levels[cur-1].DY[name] = float(sci_notation(c[4]))
 					id = ''
-				
+			
 				#First half of second set
 				if c[5].strip():
 					ZA = parse_num(c[5])
@@ -290,9 +287,56 @@ def read_fpy(filepath):
 		#End c[10] check
 
 	#End line loop
-	
+
+	#Done reading
+
 	return FPs
 # --------------------- End read_fpy ------------------------------
+
+# ----------- Function to  Write output to a file --------------
+def write_fpy(nfile, iso):
+	#Loop through all isotopes and yields and make corrections
+	yield_sum = 0.0
+	cor = 1.0
+
+	nfile.write(iso.ZAID + ':\n')
+	nfile.write('---\n')
+	print 'Expanding Isotope data... ' + iso.ZAID
+	for levels in iso.Levels:
+		yield_sum = 0.0
+		unc_sum = 0.0
+		nfile.write('- EL-' + str(levels) + ':\n')
+		nfile.write('  Energy: ' + str(iso.Levels[levels].Energy) + '  # (eV)\n')
+		nfile.write('\n')
+		
+		#Make Corrections
+		for keys in iso.Levels[levels].Yield:
+			yield_sum+= iso.Levels[levels].Yield[keys]
+		cor = 2.0/yield_sum
+		yield_sum = 0.0
+		for keys in iso.Levels[levels].Yield:
+			iso.Levels[levels].Yield[keys] = iso.Levels[levels].Yield[keys]*cor
+			yield_sum+= iso.Levels[levels].Yield[keys]
+		#End Corrections
+		if abs(yield_sum-2.0) > 1E-10:
+			print 'Yield Sum Error\n'
+			print yield_sum
+		else:
+			for keys in iso.Levels[levels].Yield:
+				if iso.Levels[levels].Yield[keys] != 0.0:
+					nfile.write('  - ' + keys + ':\n')
+					nfile.write('    Yield: ' + str(iso.Levels[levels].Yield[keys]) + '\n')
+					nfile.write('    DY: ' + str(iso.Levels[levels].DY[keys]) + '\n')
+					nfile.write('\n')
+			#End keys loop
+
+		nfile.write('\n')
+	#End level loop
+
+	nfile.write('...\n\n')
+	
+	return
+# --------------------- End write_fpy ------------------------------
 
 #Open yaml file to write to
 nfile = open('../../database/NeutronFissionProductYields.yml', 'w')
@@ -302,117 +346,45 @@ sfile = open('../../database/SpontaneousFissionProductYields.yml', 'w')
 basepath = os.path.dirname(__file__)
 nfy_path = os.path.join(basepath, "nfy")
 sfy_path = os.path.join(basepath, "sfy")
-FPs = FPY_All()
+
+#Preserve below for testing
+#path = "nfy/nfy-092_U_235.endf"
+#print 'Reading Neutron file... ' + path
+#iso = read_fpy(path)
+#write_fpy(nfile,iso)
+#path = "nfy/nfy-092_U_238.endf"
+#print 'Reading Neutron file... ' + path
+#iso = read_fpy(path)
+#write_fpy(nfile,iso)
+#nfile.close()
+#sfile.close()
+
 
 # Loop through all files in path
 i = 0
 for filename in os.listdir(nfy_path):
 	path = os.path.join(nfy_path, filename)
 	print 'Reading Neutron file... ' + path
-	FPs.Iso[i] = read_fpy(path)
+	iso = read_fpy(path)
+	write_fpy(nfile,iso)
 	i+=1
 #End filename Loop
-
-print '\n'
-
-#Loop through all isotopes and yields and make corrections
-yield_sum = 0.0
-cor = 1.0
-for iso in FPs.Iso:
-	nfile.write(FPs.Iso[iso].ZAID + ':\n')
-	nfile.write('---\n')
-	print 'Expanding Isotope data... ' + FPs.Iso[iso].ZAID
-	for levels in FPs.Iso[iso].Levels:
-		yield_sum = 0.0
-		unc_sum = 0.0
-		nfile.write('- EL-' + str(levels) + ':\n')
-		nfile.write('  Energy: ' + str(FPs.Iso[iso].Levels[levels].Energy) + '  # (eV)\n')
-		nfile.write('\n')
-		
-		#Make Corrections
-		for keys in FPs.Iso[iso].Levels[levels].Yield:
-			yield_sum+= FPs.Iso[iso].Levels[levels].Yield[keys]
-		cor = 2.0/yield_sum
-		yield_sum = 0.0
-		for keys in FPs.Iso[iso].Levels[levels].Yield:
-			FPs.Iso[iso].Levels[levels].Yield[keys] = FPs.Iso[iso].Levels[levels].Yield[keys]*cor
-			yield_sum+= FPs.Iso[iso].Levels[levels].Yield[keys]
-		#End Corrections
-		if abs(yield_sum-2.0) > 1E-10:
-			print 'Yield Sum Error\n'
-			print yield_sum
-		else:
-			for keys in FPs.Iso[iso].Levels[levels].Yield:
-				if FPs.Iso[iso].Levels[levels].Yield[keys] != 0.0:
-					nfile.write('  - ' + keys + ':\n')
-					nfile.write('    Yield: ' + str(FPs.Iso[iso].Levels[levels].Yield[keys]) + '\n')
-					nfile.write('    DY: ' + str(FPs.Iso[iso].Levels[levels].DY[keys]) + '\n')
-					nfile.write('\n')
-			#End keys loop
-
-		nfile.write('\n')
-	#End level loop
-
-	nfile.write('...\n\n')
-#End iso loop
 
 #Close the yaml file
 print '\nNeutron FPY Library Complete!\n'
 nfile.close()
 
 # Loop through all files in path
-FPs.Iso.clear()
 i = 0
 for filename in os.listdir(sfy_path):
 	path = os.path.join(sfy_path, filename)
 	print 'Reading Spontaneous file... ' + path
-	FPs.Iso[i] = read_fpy(path)
+	iso = read_fpy(path)
+	write_fpy(sfile,iso)
 	i+=1
 #End filename Loop
-
-print '\n'
-
-#Loop through all isotopes and yields and make corrections
-yield_sum = 0.0
-cor = 1.0
-for iso in FPs.Iso:
-	sfile.write(FPs.Iso[iso].ZAID + ':\n')
-	sfile.write('---\n')
-	print 'Expanding Isotope data... ' + FPs.Iso[iso].ZAID
-	for levels in FPs.Iso[iso].Levels:
-		yield_sum = 0.0
-		unc_sum = 0.0
-		sfile.write('- EL-' + str(levels) + ':\n')
-		sfile.write('  Energy: ' + str(FPs.Iso[iso].Levels[levels].Energy) + '  # (eV)\n')
-		sfile.write('\n')
-		
-		#Make Corrections
-		for keys in FPs.Iso[iso].Levels[levels].Yield:
-			yield_sum+= FPs.Iso[iso].Levels[levels].Yield[keys]
-		cor = 2.0/yield_sum
-		yield_sum = 0.0
-		for keys in FPs.Iso[iso].Levels[levels].Yield:
-			FPs.Iso[iso].Levels[levels].Yield[keys] = FPs.Iso[iso].Levels[levels].Yield[keys]*cor
-			yield_sum+= FPs.Iso[iso].Levels[levels].Yield[keys]
-		#End Corrections
-		if abs(yield_sum-2.0) > 1E-10:
-			print 'Yield Sum Error\n'
-			print yield_sum
-		else:
-			for keys in FPs.Iso[iso].Levels[levels].Yield:
-				if FPs.Iso[iso].Levels[levels].Yield[keys] != 0.0:
-					sfile.write('  - ' + keys + ':\n')
-					sfile.write('    Yield: ' + str(FPs.Iso[iso].Levels[levels].Yield[keys]) + '\n')
-					sfile.write('    DY: ' + str(FPs.Iso[iso].Levels[levels].DY[keys]) + '\n')
-					sfile.write('\n')
-		#End keys loop
-
-	sfile.write('\n')
-#End level loop
-
-sfile.write('...\n\n')
-#End iso loop
 
 #Close the yaml file
 print '\nSpontaneous FPY Library Complete!\n'
 sfile.close()
+
