@@ -69,6 +69,7 @@ Usage Notes
 (15) MESH (NO ACRONYM) - Runs tests associated with mesh objects
 (16) CRANE (Cloud Rise After Nuclear Explosion) - Runs tests associated with simulating nuclear debris clouds
 (17) IBIS (Implicit Branching Isotope System) - Runs tests associated with creating branched nuclide decay chains
+(18) FAIRY (Fission-products from Atomic Incident and their Respective Yields) - Runs tests associated with fission product yields
 
         CURRENTLY AVAILABLE EXECUTABLES        
 -----------------------------------------------

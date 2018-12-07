@@ -38,5 +38,6 @@
 #include "mesh.h"
 #include "crane.h"
 #include "ibis.h"
+#include "fairy.h"
 
 #endif

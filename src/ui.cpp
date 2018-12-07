@@ -76,6 +76,7 @@ void aui_help()
 	puts("(15) MESH (NO ACRONYM) - Runs tests associated with mesh objects\n");
 	puts("(16) CRANE (Cloud Rise After Nuclear Explosion) - Runs tests associated with simulating nuclear debris clouds\n");
 	puts("(17) IBIS (Implicit Branching Isotope System) - Runs tests associated with creating branched nuclide decay chains\n");
+	puts("(18) FAIRY (Fission-products from Atomic Incident and their Respective Yields) - Runs tests associated with fission product yields\n");
 	
 	puts("        CURRENTLY AVAILABLE EXECUTABLES        ");
 	puts("-----------------------------------------------\n");
@@ -155,6 +156,9 @@ void bui_help()
 	
 	puts("(17) IBIS (Implicit Branching Isotope System) - Runs tests associated with creating branched nuclide decay chains\n");
 	puts("\tThis runs tests using the Implicit Branching Isotope System. Nuclide information is read in from the NuclideLibrary.yml file located under the database folder of the executable directory. Tests include creating isotope objects, predicting branch chains from that nuclide, and organizing isotopes in order of their mass numbers.\n");
+	
+	puts("(18) FAIRY (Fission-products from Atomic Incident and their Respective Yields) - Runs tests associated with fission product yields\n");
+	puts("\tThis runs tests using the fission product yield libraries imported from the ENDF-6 data to a yaml formatted data base. Total yields for various isotopes are calculated based on (i) energy of event or neutron source, (ii) type of fission, (iii) starting materials for fuel or weapon, and/or (iv) the extent of fission.\n");
 	
 	puts("        CURRENTLY AVAILABLE EXECUTABLES        ");
 	puts("-----------------------------------------------\n");
@@ -353,6 +357,11 @@ bool valid_test_string(const std::string &input, UI_DATA *ui_dat)
 	else if (allLower(input) == "ibis")
 	{
 		ui_dat->option = ibis;
+		valid_input = true;
+	}
+	else if (allLower(input) == "fairy")
+	{
+		ui_dat->option = fairy;
 		valid_input = true;
 	}
 	else
@@ -722,7 +731,7 @@ bool valid_input_tests(UI_DATA *ui_dat)
 	std::cout << "(7)  MOLA        (8)  MONKFISH     (9)  SANDBOX\n";
 	std::cout << "(10) SCOPSOWL    (11) SHARK        (12) SKUA\n";
 	std::cout << "(13) DOVE        (14) CROW         (15) MESH\n";
-	std::cout << "(16) CRANE       (17) IBIS \n";
+	std::cout << "(16) CRANE       (17) IBIS         (18) FAIRY\n";
 	std::cout << "\nChoice: ";
 	std::cin >> ui_dat->user_input[0];
 	std::cout << std::endl;
@@ -869,6 +878,13 @@ bool valid_input_tests(UI_DATA *ui_dat)
 			case 17:
 			{
 				ui_dat->option = ibis;
+				valid_input = true;
+				break;
+			}
+				
+			case 18:
+			{
+				ui_dat->option = fairy;
 				valid_input = true;
 				break;
 			}
@@ -1149,6 +1165,10 @@ int run_test(UI_DATA *ui_dat)
 			
 		case ibis:
 			success = IBIS_TESTS();
+			break;
+			
+		case fairy:
+			success = FAIRY_TESTS();
 			break;
 			
 		default:

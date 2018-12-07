@@ -75,6 +75,10 @@ The following message provides information on running this software with the bas
 
 	This runs tests using the Implicit Branching Isotope System. Nuclide information is read in from the NuclideLibrary.yml file located under the database folder of the executable directory. Tests include creating isotope objects, predicting branch chains from that nuclide, and organizing isotopes in order of their mass numbers.
 
+(18) FAIRY (Fission-products from Atomic Incident and their Respective Yields) - Runs tests associated with fission product yields
+
+	This runs tests using the fission product yield libraries imported from the ENDF-6 data to a yaml formatted data base. Total yields for various isotopes are calculated based on (i) energy of event or neutron source, (ii) type of fission, (iii) starting materials for fuel or weapon, and/or (iv) the extent of fission.
+
         CURRENTLY AVAILABLE EXECUTABLES        
 -----------------------------------------------
 
