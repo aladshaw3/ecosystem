@@ -2171,8 +2171,8 @@ int IBIS_SCENARIO(const char *yaml_input)
 	DecayChain decay;
 	
 	//Read in the library and set the clock
-	nuc_data.executeYamlRead("database/NuclideLibrary.yml");
 	time = clock();
+	nuc_data.executeYamlRead("database/NuclideLibrary.yml");
 	decay.loadNuclides(nuc_data);
 	
 	//Execule yaml read of input file
@@ -2206,10 +2206,10 @@ int IBIS_TESTS()
 	yaml_cpp_class nuc_data;
 	
 	//Read in the library (uses ~ 7.3 MB to hold)
+	time = clock();
 	nuc_data.executeYamlRead("database/NuclideLibrary.yml");
 	
 	//Test decay chain object
-	time = clock();
 	DecayChain test;
 	test.loadNuclides(nuc_data);
 	

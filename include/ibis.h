@@ -246,7 +246,7 @@ public:
 	Matrix<double>& getInverseEigenvectors();				///< Return the inverse eigenvectors matrix
 	
 protected:
-	
+	yaml_cpp_class *nuclides;							///< Pointer to a yaml object storing the digital library of all nuclides
 	void roughInsertSort(Isotope iso);						///< Insert an isotope to the initial nuclide list and sort according to isotope number
 	void finalSort();										///< Sort the list of nuclides after creating the chains
 	
@@ -301,8 +301,6 @@ private:
 	
 	Matrix<double> Eigs;								///< Matrix of eigenvectors for the coefficient matrix
 	Matrix<double> invEigs;								///< Inverse Matrix of eigenvectors for the coefficient matrix
-	
-	yaml_cpp_class *nuclides;							///< Pointer to a yaml object storing the digital library of all nuclides
 	
 	int time_steps;										///< Integer option to hold number of time steps to simulate
 	double end_time;									///< Time at which to end decay simulations
