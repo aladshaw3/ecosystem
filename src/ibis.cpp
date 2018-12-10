@@ -448,8 +448,9 @@ void Isotope::clearChain()
 }
 
 //Register via isotope name (e.g., H-2)
-void Isotope::registerIsotope(std::string isotope_name)
+int Isotope::registerIsotope(std::string isotope_name)
 {
+	int success = 0;
 	char *str;
 	char iso[256];
 	strcpy(iso, isotope_name.c_str());
@@ -468,27 +469,33 @@ void Isotope::registerIsotope(std::string isotope_name)
 		i++;
 	}
 	
-	this->registerIsotope(sym, iso_num);
+	success = this->registerIsotope(sym, iso_num);
+	
+	return success;
 }
 
 //Register via atomic symbol and isotope number
-void Isotope::registerIsotope(std::string sym, int iso)
+int Isotope::registerIsotope(std::string sym, int iso)
 {
+	int success = 0;
 	this->Register(sym);
 	this->isotope_number = iso;
 	this->editNeutrons(iso - this->AtomicNumber());
-	this->setConstants();
+	success = this->setConstants();
 	this->computeDecayRate();
+	return success;
 }
 
 //Register via atomic number and isotope number
-void Isotope::registerIsotope(int atom_num, int iso_num)
+int Isotope::registerIsotope(int atom_num, int iso_num)
 {
+	int success = 0;
 	this->Register(atom_num);
 	this->isotope_number = iso_num;
 	this->editNeutrons(iso_num - atom_num);
-	this->setConstants();
+	success = this->setConstants();
 	this->computeDecayRate();
+	return success;
 }
 
 //Display isotope information
@@ -707,6 +714,12 @@ double Isotope::getConcentration()
 	return this->concentration;
 }
 
+//Return weight
+double Isotope::AtomicWeight()
+{
+	return this->Atom::AtomicWeight();
+}
+
 //return decay mode
 decay_mode Isotope::DecayMode(int i)
 {
@@ -819,9 +832,10 @@ std::vector<int> Isotope::EmissionIndices(std::string parent)
 }
 
 //Set the decay information based on a registered atomic number and isotope number
-void Isotope::setConstants()
+int Isotope::setConstants()
 {
 	//Set the name of the isotope
+	int success = 0;
 	char buff[10];
 	sprintf(buff, "-%i", this->IsotopeNumber());
 	std::string name = this->Atom::AtomSymbol();
@@ -863,9 +877,9 @@ void Isotope::setConstants()
 	//If isotope is not found, assume it is stable and set default values
 	catch (std::out_of_range)
 	{
-		mError(invalid_isotope);
-		std::cout << std::endl << this->IsoName << std::endl;
-		std::cout << "Setting some default values...\n\n";
+		//mError(invalid_isotope);
+		//std::cout << std::endl << this->IsoName << std::endl;
+		//std::cout << "Setting some default values...\n\n";
 		
 		this->editAtomicWeight(this->IsotopeNumber());
 		this->IsomericState = false;
@@ -878,7 +892,9 @@ void Isotope::setConstants()
 		this->particle_emitted.push_back("None");
 		this->num_particles.push_back(0);
 		this->daughter.push_back("None");
+		success = -1;
 	}
+	return success;
 }
 
 //Compute decay rate
@@ -1103,8 +1119,9 @@ void DecayChain::registerInitialNuclide(std::string isotope_name)
 {
 	Isotope temp;
 	temp.loadNuclides(*this->nuclides);
-	temp.registerIsotope(isotope_name);
-	this->roughInsertSort(temp);
+	int success = temp.registerIsotope(isotope_name);
+	if (success == 0)
+		this->roughInsertSort(temp);
 }
 
 //Register initial nuclide
@@ -1112,8 +1129,9 @@ void DecayChain::registerInitialNuclide(std::string symb, int iso)
 {
 	Isotope temp;
 	temp.loadNuclides(*this->nuclides);
-	temp.registerIsotope(symb, iso);
-	this->roughInsertSort(temp);
+	int success = temp.registerIsotope(symb, iso);
+	if (success == 0)
+		this->roughInsertSort(temp);
 }
 
 //Register initial nuclide
@@ -1121,8 +1139,42 @@ void DecayChain::registerInitialNuclide(int atom_num, int iso_num)
 {
 	Isotope temp;
 	temp.loadNuclides(*this->nuclides);
-	temp.registerIsotope(atom_num, iso_num);
-	this->roughInsertSort(temp);
+	int success = temp.registerIsotope(atom_num, iso_num);
+	if (success == 0)
+		this->roughInsertSort(temp);
+}
+
+//Register initial nuclide
+void DecayChain::registerInitialNuclide(std::string isotope_name, double ic)
+{
+	Isotope temp;
+	temp.loadNuclides(*this->nuclides);
+	int success = temp.registerIsotope(isotope_name);
+	temp.setInitialCondition(ic);
+	if (success == 0)
+		this->roughInsertSort(temp);
+}
+
+//Register initial nuclide
+void DecayChain::registerInitialNuclide(std::string symb, int iso, double ic)
+{
+	Isotope temp;
+	temp.loadNuclides(*this->nuclides);
+	int success = temp.registerIsotope(symb, iso);
+	temp.setInitialCondition(ic);
+	if (success == 0)
+		this->roughInsertSort(temp);
+}
+
+//Register initial nuclide
+void DecayChain::registerInitialNuclide(int atom_num, int iso_num, double ic)
+{
+	Isotope temp;
+	temp.loadNuclides(*this->nuclides);
+	int success = temp.registerIsotope(atom_num, iso_num);
+	temp.setInitialCondition(ic);
+	if (success == 0)
+		this->roughInsertSort(temp);
 }
 
 //Create the decay chains and list of final nuclides
@@ -1190,15 +1242,14 @@ void DecayChain::formEigenvectors()
 			double diff = -this->nuc_list[i].DecayRate()-eigenvalue;
 			if (diff == 0.0)
 			{
-				mError(unstable_matrix);
-				std::cout << "\nNon-unique eigenvalues!\n";
-				std::cout << "Problem Isotopes:\t" << this->nuc_list[k].IsotopeName() << "\t" << this->nuc_list[i].IsotopeName() << std::endl;
-				std::cout << "Adjusting eigenvalue by 0.1% to remove redundancy..." << std::endl;
+				//mError(unstable_matrix);
+				//std::cout << "\nNon-unique eigenvalues!\n";
+				//std::cout << "Problem Isotopes:\t" << this->nuc_list[k].IsotopeName() << "\t" << this->nuc_list[i].IsotopeName() << std::endl;
+				//std::cout << "Adjusting eigenvalue by 0.1% to remove redundancy..." << std::endl;
 				//Fix with small adjustment to the kth eigenvalue
 				this->nuc_list[k].updateDecayRate();
 				eigenvalue = -this->nuc_list[k].DecayRate();
 				diff = -this->nuc_list[i].DecayRate()-eigenvalue;
-				//diff = -this->nuc_list[i].DecayRate()-(eigenvalue+sqrt(DBL_EPSILON));
 			}
 			this->Eigs.edit(i, k, -sum/diff);
 		}
@@ -1234,7 +1285,7 @@ int DecayChain::verifyEigenSoln()
 		return -1;
 	}
 	
-	std::cout << "Verifying Eigen Solution...\n";
+	std::cout << "\nVerifying Eigen Solution...\n";
 	std::cout << "---------------------------\n";
 	
 	Matrix<double> zero((int)this->CoefMap.size(),1);
@@ -1913,7 +1964,11 @@ void DecayChain::roughInsertSort(Isotope iso)
 		{
 			//Check is temp == ith stable nuclide
 			if (iso.IsotopeName() == this->stable_list[i].IsotopeName())
+			{
+				//Add initial conditions
+				this->stable_list[i].setInitialCondition( this->stable_list[i].getInitialCondition()+iso.getInitialCondition() );
 				return;	//Don't add a redundant isotope
+			}
 			
 			//Check temp vs ith stable nuclide
 			if (iso.IsotopeNumber() > this->stable_list[i].IsotopeNumber())
@@ -1935,7 +1990,11 @@ void DecayChain::roughInsertSort(Isotope iso)
 	{
 		//Check is temp == ith nuclide
 		if (iso.IsotopeName() == this->nuc_list[i].IsotopeName())
+		{
+			//Add initial conditions
+			this->nuc_list[i].setInitialCondition( this->nuc_list[i].getInitialCondition()+iso.getInitialCondition() );
 			return;	//Don't add a redundant isotope
+		}
 		
 		//Check temp vs ith nuclide
 		if (iso.IsotopeNumber() > this->nuc_list[i].IsotopeNumber())
@@ -2225,8 +2284,8 @@ int IBIS_TESTS()
 	
 	//test.registerInitialNuclide("Ba-114");
 	//test.registerInitialNuclide("U-235");
-	test.registerInitialNuclide("U-238");
-	test.registerInitialNuclide("U-235");		//Not added to list because it is redundant
+	//test.registerInitialNuclide("U-238");
+	//test.registerInitialNuclide("U-235");		//Not added to list because it is redundant
 	//test.registerInitialNuclide("H-1");		//Not added to list because it is stable
 	//test.registerInitialNuclide("O-20");
 	//test.registerInitialNuclide("F-20");
@@ -2331,6 +2390,10 @@ int IBIS_TESTS()
 	//test.registerInitialNuclide("Ni-57");
 	//test.registerInitialNuclide("Ni-59");
 	
+	test.registerInitialNuclide("U-238", 10.0); ///NOTE: Must give decimals or state as doubles
+	test.registerInitialNuclide("U-235", 45.0);
+	test.registerInitialNuclide("U-235", 45.0);
+	
 	test.createChains();					//Creates list of nuclides and sorts the list from parent to daughter
 	test.formEigenvectors();				//Mandatory before solving
 	test.verifyEigenSoln();					//Completely optional
@@ -2344,8 +2407,8 @@ int IBIS_TESTS()
 	//test.getIsotope("Cd-121").setInitialCondition(1.0);
 	//test.getIsotope("O-20").setInitialCondition(2.0);
 	
-	test.getIsotope("U-235").setInitialCondition(90);
-	test.getIsotope("U-238").setInitialCondition(10);
+	//test.getIsotope("U-235").setInitialCondition(90);
+	//test.getIsotope("U-238").setInitialCondition(10);
 	
 	/*
 	for (int i=0; i<test.getNumberNuclides(); i++)

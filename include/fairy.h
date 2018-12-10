@@ -59,11 +59,14 @@ public:
 	void addIsotopeMaterial(std::string sym, int iso_num, double percent);	///< Add an isotope for the fissible material (by symbol and mass num)
 	void addIsotopeMaterial(int atom_num, int iso_num, double percent);		///< Add an isotope for the fissible material (by atom num and mass num)
 	
+	void checkFractions();							///< Check fractions of materials in fuel/weapone and correct if necessary
+	int evaluateYields();							///< Read yield data and set isotope fractionation based on yields
+	
 protected:
 	
 private:
 	fiss_type type;								///< Type of fission products to be produced
-	std::vector<Isotope> InitialMat;			///< Initial materials/isotopes to undergoe fission
+	std::vector<Isotope> InitialMat;			///< Initial materials/isotopes to undergoe fission (Conc. in moles)
 	std::vector<double> MatFrac;				///< Material fractionation of the initial material (%)
 	double total_mass;							///< Total mass of the weapon or fuel rod (kg)
 	double fiss_extent;							///< Percentage of the starting material that undergoes fission (%)

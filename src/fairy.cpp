@@ -202,6 +202,112 @@ void FissionProducts::addIsotopeMaterial(int atom_num, int iso_num, double perce
 	this->MatFrac.push_back(percent);
 }
 
+//Check mass error
+void FissionProducts::checkFractions()
+{
+	double sum = 0.0;
+	for (int i=0; i<this->MatFrac.size(); i++)
+	{
+		sum += this->MatFrac[i];
+	}
+	if (sum <= 0.0) {mError(invalid_molefraction); return;}
+	if (sum-100.0 > 0.0)
+	{
+		double correction = 100.0/sum;
+		for (int i=0; i<this->MatFrac.size(); i++)
+		{
+			this->MatFrac[i] = this->MatFrac[i]*correction;
+		}
+	}
+}
+
+//Evaluate the yields from data
+int FissionProducts::evaluateYields()
+{
+	int success = 0;
+	if (this->type == explosion)
+	{
+		std::string high_key;
+		for (int i=0; i<this->InitialMat.size(); i++)
+		{
+			//Calculate moles of isotope and find header
+			double moles;
+			moles = this->total_mass*this->MatFrac[i]*1000.0/this->InitialMat[i].AtomicWeight();
+			int levels = 0;
+			try
+			{
+				levels = (int)this->fpy_data.getYamlWrapper()(this->InitialMat[i].IsotopeName()).getHeadMap().size();
+				//std::cout << levels << std::endl;
+				//std::cout << moles << std::endl;
+			}
+			catch (std::out_of_range)
+			{
+				mError(key_not_found);
+				std::cout << this->InitialMat[i].IsotopeName() << " does not exist in yield data...\n\n";
+				return -1;
+			}
+			
+			//Loop through energy levels to find high key value
+			double high = 0.0;
+			for (auto &x: this->fpy_data.getYamlWrapper()(this->InitialMat[i].IsotopeName()).getHeadMap())
+			{
+				try
+				{
+					double energy = x.second["Energy"].getDouble();
+					if (energy >= high)
+					{
+						high = energy;
+						high_key = x.first;
+					}
+				}
+				catch (std::out_of_range)
+				{
+					mError(key_not_found);
+					std::cout << "Energy key does not exist in yield data...\n\n";
+					return -1;
+				}
+			}
+			
+			//Read in yields for all isotopes from high_key
+			try
+			{
+				levels = (int)this->fpy_data.getYamlWrapper()(this->InitialMat[i].IsotopeName())(high_key).getSubMap().size();
+			}
+			catch (std::out_of_range)
+			{
+				mError(key_not_found);
+				std::cout << "Error in determining the High_Key value...\n\n";
+				return -1;
+			}
+			
+			//Loop through all isotopes produced in fission
+			double yield = 0.0;
+			for (auto &x: this->fpy_data.getYamlWrapper()(this->InitialMat[i].IsotopeName())(high_key).getSubMap())
+			{
+				try
+				{
+					yield = x.second["Yield"].getDouble();
+					this->registerInitialNuclide(x.first, yield*moles*this->fiss_extent/100.0);
+				}
+				catch (std::out_of_range)
+				{
+					mError(key_not_found);
+					std::cout << "Missing Yield key value pair...\n\n";
+					return -1;
+				}
+			}
+		}
+	}
+	else
+	{
+		
+	}
+	this->createChains();
+	this->formEigenvectors();
+	this->verifyEigenSoln();
+	return success;
+}
+
 /*
  *	-------------------------------------------------------------------------------------
  *								End: FissionProducts Class Definitions
@@ -221,18 +327,22 @@ int FAIRY_TESTS()
 	nuc_data.executeYamlRead("database/NuclideLibrary.yml");
 	FissionProducts test;
 	test.loadNuclides(nuc_data);
-	test.loadFissionProductYields();
 	
-	test.setTotalMass(1.0);
+	test.setTotalMass(9.7);
 	test.setFissionExtent(100);
-	test.setFissionType(neutron);
+	test.setFissionType(explosion);
+	test.setEnergyLevel(1000.0);
 	test.addIsotopeMaterial("U-235", 90);
 	test.addIsotopeMaterial("U-238", 10);
+	test.checkFractions();
 	
 	test.DisplayInfo();
 	
-	test.unloadNuclides();
-	test.unloadFissionProductYields();
+	test.loadFissionProductYields();
+	test.evaluateYields();
+	
+	test.unloadNuclides();					//May be redundant
+	test.unloadFissionProductYields();		//May be redundant
 	time = clock() - time;
 	std::cout << "\nRuntime: " << (time / CLOCKS_PER_SEC) << " seconds\n";
 	

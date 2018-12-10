@@ -70,9 +70,9 @@ public:
 	void loadNuclides(yaml_cpp_class &data);			///< Function to load the nuclide library into the pointer
 	void unloadNuclides();								///< Delete the pointer to nuclide library to free space
 	void clearChain();									///< Delete the chain for this isotope to free space
-	void registerIsotope(std::string isotope_name);		///< Register an isotope given the isotope name (e.g., H-2)
-	void registerIsotope(std::string symbol, int iso);	///< Register an isotope given an atomic symbol (e.g., H) and isotope number (e.g., 2)
-	void registerIsotope(int atom_num, int iso_num);	///< Register an isotope given both an atomic and isotope number (e.g., H-2 = 1, 2)
+	int registerIsotope(std::string isotope_name);		///< Register an isotope given the isotope name (e.g., H-2)
+	int registerIsotope(std::string symbol, int iso);	///< Register an isotope given an atomic symbol (e.g., H) and isotope number (e.g., 2)
+	int registerIsotope(int atom_num, int iso_num);	///< Register an isotope given both an atomic and isotope number (e.g., H-2 = 1, 2)
 	
 	void DisplayInfo();									///< Print out isotope information to the console
 	void DisplayChain();								///< Print out chain information to the console
@@ -92,6 +92,7 @@ public:
 	int DecayModes();									///< Return the number of decay modes
 	double getInitialCondition();						///< Return the value of the initial condition
 	double getConcentration();							///< Return the concentration value of the nuclide
+	double AtomicWeight();								///< Return the atomic weight of the isotope
 	
 	decay_mode DecayMode(int i);						///< Return the ith decay mode
 	double BranchFraction(int i);						///< Return the ith branch fraction
@@ -158,7 +159,7 @@ protected:
 	
 	yaml_cpp_class *nuclides;							///< Pointer to a yaml object storing the digital library of all nuclides
 	
-	void setConstants();								///< Set the decay_modes, branch_ratios, and other info based on load library
+	int setConstants();									///< Set the decay_modes, branch_ratios, and other info based on load library
 	void computeDecayRate();							///< Compute the decay rate (in 1/s) based on the half-life
 	int addPairs(int i, std::string parent);			///< Function to add parent/daughter pairs given the parent's name and the current level
 	YamlWrapper& getNuclideLibrary();					///< Return reference to the nuclide library
@@ -198,6 +199,11 @@ public:
 	void registerInitialNuclide(std::string isotope_name);	///< Register an initial nuclide by name (e.g., H-2)
 	void registerInitialNuclide(std::string symb, int iso);	///< Register an initial nuclide by symbol (e.g., H) and isotope number (e.g., 2)
 	void registerInitialNuclide(int atom_num, int iso_num);	///< Register an initial nuclide by atomic and mass numbers (e.g., H-2 = 1, 2)
+	
+	/// NOTE: The below functions will register isotopes with their initial conditions as well
+	void registerInitialNuclide(std::string isotope_name, double ic);///< Register an initial nuclide by name (e.g., H-2)
+	void registerInitialNuclide(std::string symb, int iso, double ic);///< Register an initial nuclide by symbol (e.g., H) and iso number (e.g., 2)
+	void registerInitialNuclide(int atom_num, int iso_num, double ic);///< Register an initial nuclide by atomic and mass numbers (e.g., H-2 = 1, 2)
 	
 	void createChains();									///< Function to create unique list of final nuclides from decay chains of initial
 	void formEigenvectors();								///< Function to produce eigenvectors from coefficient matrix
