@@ -72,7 +72,7 @@ public:
 	void clearChain();									///< Delete the chain for this isotope to free space
 	int registerIsotope(std::string isotope_name);		///< Register an isotope given the isotope name (e.g., H-2)
 	int registerIsotope(std::string symbol, int iso);	///< Register an isotope given an atomic symbol (e.g., H) and isotope number (e.g., 2)
-	int registerIsotope(int atom_num, int iso_num);	///< Register an isotope given both an atomic and isotope number (e.g., H-2 = 1, 2)
+	int registerIsotope(int atom_num, int iso_num);		///< Register an isotope given both an atomic and isotope number (e.g., H-2 = 1, 2)
 	
 	void DisplayInfo();									///< Print out isotope information to the console
 	void DisplayChain();								///< Print out chain information to the console
@@ -80,6 +80,8 @@ public:
 	
 	void setInitialCondition(double ic);				///< Set the value for the initial condition of this nuclide
 	void setConcentration(double c);					///< Set the concentration value for the nuclide
+	void setWarnings(bool opt);							///< Set the warnings boolean value
+	void setThreshold(double val);						///< Set the threshold value for half-life (in sec)
 	void updateDecayRate();								///< Increase decay rate by 1% (used to correct issues with same eigenvalues)
 	
 	int IsotopeNumber();								///< Return the isotope number of the atom
@@ -151,11 +153,13 @@ protected:
 	double decay_rate;									///< Rate of decay for the given isotope (1/s)
 	double half_life;									///< Half-life of the isotope (in hl_units)
 	time_units hl_units;								///< Units given for the half-life
+	double hl_threshold;								///< Half-life value (in seconds) at which 99% of isotope has been converted
 	int isotope_number;									///< isotope number for the object
 	bool Stable;										///< Boolean is True if isotope is stable
 	bool IsomericState;									///< Boolean is True if isotope is in an isomeric state
 	double initial_condition;							///< Value to hold initial condition for this nuclide (moles or atoms)
 	double concentration;								///< Value to hold concentration after a point in time (moles or atoms)
+	bool Warnings;										///< Boolean is True if you want to print warnings to console
 	
 	yaml_cpp_class *nuclides;							///< Pointer to a yaml object storing the digital library of all nuclides
 	
@@ -196,15 +200,17 @@ public:
 	void loadNuclides(yaml_cpp_class &data);				///< Function to load the nuclide library into the pointer
 	void unloadNuclides();									///< Delete the pointer to nuclide library to free space
 	
-	void registerInitialNuclide(std::string isotope_name);	///< Register an initial nuclide by name (e.g., H-2)
-	void registerInitialNuclide(std::string symb, int iso);	///< Register an initial nuclide by symbol (e.g., H) and isotope number (e.g., 2)
-	void registerInitialNuclide(int atom_num, int iso_num);	///< Register an initial nuclide by atomic and mass numbers (e.g., H-2 = 1, 2)
+	int registerInitialNuclide(std::string isotope_name);	///< Register an initial nuclide by name (e.g., H-2)
+	int registerInitialNuclide(std::string symb, int iso);	///< Register an initial nuclide by symbol (e.g., H) and isotope number (e.g., 2)
+	int registerInitialNuclide(int atom_num, int iso_num);	///< Register an initial nuclide by atomic and mass numbers (e.g., H-2 = 1, 2)
 	
 	/// NOTE: The below functions will register isotopes with their initial conditions as well
-	void registerInitialNuclide(std::string isotope_name, double ic);///< Register an initial nuclide by name (e.g., H-2)
-	void registerInitialNuclide(std::string symb, int iso, double ic);///< Register an initial nuclide by symbol (e.g., H) and iso number (e.g., 2)
-	void registerInitialNuclide(int atom_num, int iso_num, double ic);///< Register an initial nuclide by atomic and mass numbers (e.g., H-2 = 1, 2)
+	int registerInitialNuclide(std::string isotope_name, double ic);///< Register an initial nuclide by name (e.g., H-2)
+	int registerInitialNuclide(std::string symb, int iso, double ic);///< Register an initial nuclide by symbol (e.g., H) and iso number (e.g., 2)
+	int registerInitialNuclide(int atom_num, int iso_num, double ic);///< Register an initial nuclide by atomic and mass numbers (e.g., H-2 = 1, 2)
 	
+	void setWarnings(bool opt);								///< Set the warnings boolean value
+	void setThreshold(double val);						///< Set the threshold value for half-life (in sec)
 	void createChains();									///< Function to create unique list of final nuclides from decay chains of initial
 	void formEigenvectors();								///< Function to produce eigenvectors from coefficient matrix
 	int verifyEigenSoln();									///< Function will verify that the eigenvectors and eigenvalues are correct
@@ -315,7 +321,9 @@ private:
 	bool PrintChain;									///< Boolean option to print decay chain data to output file
 	bool PrintResults;									///< Boolean option to print simulation results to output file
 	bool PrintSparsity;									///< Boolean option to print sparsity pattern to output file
-	double avg_eig_error;								///< Stores the average error in eigen solution 
+	bool Warnings;										///< Boolean is True if you want to print warnings to console
+	double avg_eig_error;								///< Stores the average error in eigen solution
+	double hl_threshold;								///< Half-life value (in seconds) at which 99% of isotope has been converted
 	
 };
 

@@ -160,6 +160,14 @@ void FissionProducts::setEnergyLevel(double el)
 	this->energy_level = el;
 }
 
+//set threshold
+void FissionProducts::setThreshold(double val)
+{
+	if (val < 0.0)
+		val = 0.0;
+	this->DecayChain::setThreshold(val);
+}
+
 //Add isotope
 void FissionProducts::addIsotopeMaterial(std::string iso, double percent)
 {
@@ -237,8 +245,6 @@ int FissionProducts::evaluateYields()
 			try
 			{
 				levels = (int)this->fpy_data.getYamlWrapper()(this->InitialMat[i].IsotopeName()).getHeadMap().size();
-				//std::cout << levels << std::endl;
-				//std::cout << moles << std::endl;
 			}
 			catch (std::out_of_range)
 			{
@@ -282,12 +288,18 @@ int FissionProducts::evaluateYields()
 			
 			//Loop through all isotopes produced in fission
 			double yield = 0.0;
+			double sum = 0.0;
 			for (auto &x: this->fpy_data.getYamlWrapper()(this->InitialMat[i].IsotopeName())(high_key).getSubMap())
 			{
 				try
 				{
 					yield = x.second["Yield"].getDouble();
-					this->registerInitialNuclide(x.first, yield*moles*this->fiss_extent/100.0);
+					success = this->registerInitialNuclide(x.first, yield*moles*this->fiss_extent/100.0);
+					if (success != 0)
+					{
+						success = 0;
+						sum += yield;
+					}
 				}
 				catch (std::out_of_range)
 				{
@@ -296,15 +308,24 @@ int FissionProducts::evaluateYields()
 					return -1;
 				}
 			}
+			success = this->registerInitialNuclide(this->InitialMat[i].IsotopeName(), moles*(100.0-this->fiss_extent)/100.0);
+			if (sum >= 1e-6)
+			{
+				mError(invalid_molefraction);
+				std::cout << "Sum of independent yields contains too much error...\n\n";
+				return -1;
+			}
 		}
 	}
 	else
 	{
-		
+		//Need to do linear interpolation for neutron energy sources
 	}
 	this->createChains();
 	this->formEigenvectors();
-	this->verifyEigenSoln();
+	//this->verifyEigenSoln();
+	
+	//this->DisplayList();
 	return success;
 }
 
@@ -329,9 +350,10 @@ int FAIRY_TESTS()
 	test.loadNuclides(nuc_data);
 	
 	test.setTotalMass(9.7);
-	test.setFissionExtent(100);
+	test.setFissionExtent(99);
 	test.setFissionType(explosion);
 	test.setEnergyLevel(1000.0);
+	test.setThreshold(3.0*log(0.5)/log(1-0.99)); //Set yeild to 3 sec cutoff based on 99% conversion to daughters
 	test.addIsotopeMaterial("U-235", 90);
 	test.addIsotopeMaterial("U-238", 10);
 	test.checkFractions();

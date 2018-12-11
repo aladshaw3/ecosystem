@@ -53,6 +53,7 @@ public:
 	void setTotalMass(double mass);					///< Set the total mass of fissible materials (kg)
 	void setFissionExtent(double per);				///< Set the extent of fission parameter (%)
 	void setEnergyLevel(double el);					///< Set the energy level for neutron source (eV)
+	void setThreshold(double val);					///< Set the threshold value for half-life (in sec)
 	
 	/// NOTE: For each of the below functions, you must first call the loadNuclides function
 	void addIsotopeMaterial(std::string iso, double percent);				///< Add an isotope for the fissible material (checks string value)

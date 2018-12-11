@@ -30147,6 +30147,27 @@ stable: False
 
 ...
 
+Ag-131:
+---
+symbol: Ag
+atom_num: 47
+mass_num: 131
+atom_weight: 130.95045
+isomeric: False
+half_life: 0.035
+hl_units: seconds
+stable: False
+
+- decay_modes:
+  - mode0:
+    type: beta-
+    branch_frac: 1.0
+    daughter: Cd-131
+    part_emitted: None
+    num_parts: 0
+
+...
+
 Cd-95:
 ---
 symbol: Cd

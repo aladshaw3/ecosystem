@@ -408,11 +408,13 @@ Isotope::Isotope() : Atom(0)
 	IsoName = "No Name";
 	decay_rate = 0.0;
 	half_life = INFINITY;
+	hl_threshold = 0.0;
 	hl_units = years;
 	isotope_number = 0;
 	nuclides = nullptr;
 	Stable = false;
 	IsomericState = false;
+	Warnings = false;
 	initial_condition = 0.0;
 	concentration = 0.0;
 }
@@ -648,6 +650,20 @@ void Isotope::setConcentration(double c)
 	this->concentration = c;
 }
 
+//set warnings
+void Isotope::setWarnings(bool opt)
+{
+	this->Warnings = opt;
+}
+
+//set threshold
+void Isotope::setThreshold(double val)
+{
+	if (val < 0.0)
+		val = 0.0;
+	this->hl_threshold = val;
+}
+
 //update decay rate
 void Isotope::updateDecayRate()
 {
@@ -851,6 +867,9 @@ int Isotope::setConstants()
 	//Read from the library to find the isotope
 	try
 	{
+		bool reg = true;
+		std::string daughter_reg;
+		double frac = 0.0;
 		this->editAtomicWeight( this->getNuclideLibrary()(this->IsotopeName())["atom_weight"].getDouble() );
 		this->IsomericState = this->getNuclideLibrary()(this->IsotopeName())["isomeric"].getBool();
 		this->Stable = this->getNuclideLibrary()(this->IsotopeName())["stable"].getBool();
@@ -860,6 +879,8 @@ int Isotope::setConstants()
 			this->half_life = INFINITY;
 		std::string read_units = this->getNuclideLibrary()(this->IsotopeName())["hl_units"].getString();
 		this->hl_units = timeunits_choice( read_units );
+		if (this->HalfLife(seconds) < this->hl_threshold)
+			reg = false;
 		
 		//Loop through the decay_modes header
 		int i = 0;
@@ -867,19 +888,30 @@ int Isotope::setConstants()
 		{
 			std::string read_decay = this->getNuclideLibrary()(this->IsotopeName())("decay_modes")(x.first)["type"].getString();
 			this->decay_modes.push_back( decaymode_choice(read_decay) );
+			if (this->getNuclideLibrary()(this->IsotopeName())("decay_modes")(x.first)["branch_frac"].getDouble() > frac)
+			{
+				frac = this->getNuclideLibrary()(this->IsotopeName())("decay_modes")(x.first)["branch_frac"].getDouble();
+				daughter_reg = this->getNuclideLibrary()(this->IsotopeName())("decay_modes")(x.first)["daughter"].getString();
+			}
 			this->branch_ratios.push_back(this->getNuclideLibrary()(this->IsotopeName())("decay_modes")(x.first)["branch_frac"].getDouble());
 			this->particle_emitted.push_back( this->getNuclideLibrary()(this->IsotopeName())("decay_modes")(x.first)["part_emitted"].getString() );
 			this->num_particles.push_back(this->getNuclideLibrary()(this->IsotopeName())("decay_modes")(x.first)["num_parts"].getInt());
 			this->daughter.push_back( this->getNuclideLibrary()(this->IsotopeName())("decay_modes")(x.first)["daughter"].getString() );
 			i++;
 		}
+		
+		if (reg == false)
+			this->registerIsotope(daughter_reg);
 	}
 	//If isotope is not found, assume it is stable and set default values
 	catch (std::out_of_range)
 	{
-		//mError(invalid_isotope);
-		//std::cout << std::endl << this->IsoName << std::endl;
-		//std::cout << "Setting some default values...\n\n";
+		if (this->Warnings == true)
+		{
+			mError(invalid_isotope);
+			std::cout << std::endl << this->IsoName << std::endl;
+			std::cout << "Setting some default values...\n\n";
+		}
 		
 		this->editAtomicWeight(this->IsotopeNumber());
 		this->IsomericState = false;
@@ -979,7 +1011,9 @@ DecayChain::DecayChain()
 	PrintChain = false;
 	PrintSparsity = false;
 	PrintResults = true;
+	Warnings = false;
 	avg_eig_error = 0.0;
+	hl_threshold = 0.0;
 }
 
 //Default destructor
@@ -1115,66 +1149,96 @@ void DecayChain::unloadNuclides()
 }
 
 //Register initial nuclide
-void DecayChain::registerInitialNuclide(std::string isotope_name)
+int DecayChain::registerInitialNuclide(std::string isotope_name)
 {
 	Isotope temp;
 	temp.loadNuclides(*this->nuclides);
+	temp.setThreshold(this->hl_threshold);
 	int success = temp.registerIsotope(isotope_name);
 	if (success == 0)
 		this->roughInsertSort(temp);
+	return success;
 }
 
 //Register initial nuclide
-void DecayChain::registerInitialNuclide(std::string symb, int iso)
+int DecayChain::registerInitialNuclide(std::string symb, int iso)
 {
 	Isotope temp;
 	temp.loadNuclides(*this->nuclides);
+	temp.setThreshold(this->hl_threshold);
 	int success = temp.registerIsotope(symb, iso);
 	if (success == 0)
 		this->roughInsertSort(temp);
+	return success;
 }
 
 //Register initial nuclide
-void DecayChain::registerInitialNuclide(int atom_num, int iso_num)
+int DecayChain::registerInitialNuclide(int atom_num, int iso_num)
 {
 	Isotope temp;
 	temp.loadNuclides(*this->nuclides);
+	temp.setThreshold(this->hl_threshold);
 	int success = temp.registerIsotope(atom_num, iso_num);
 	if (success == 0)
 		this->roughInsertSort(temp);
+	return success;
 }
 
 //Register initial nuclide
-void DecayChain::registerInitialNuclide(std::string isotope_name, double ic)
+int DecayChain::registerInitialNuclide(std::string isotope_name, double ic)
 {
 	Isotope temp;
 	temp.loadNuclides(*this->nuclides);
+	temp.setThreshold(this->hl_threshold);
 	int success = temp.registerIsotope(isotope_name);
 	temp.setInitialCondition(ic);
 	if (success == 0)
 		this->roughInsertSort(temp);
+	return success;
 }
 
 //Register initial nuclide
-void DecayChain::registerInitialNuclide(std::string symb, int iso, double ic)
+int DecayChain::registerInitialNuclide(std::string symb, int iso, double ic)
 {
 	Isotope temp;
 	temp.loadNuclides(*this->nuclides);
+	temp.setThreshold(this->hl_threshold);
 	int success = temp.registerIsotope(symb, iso);
 	temp.setInitialCondition(ic);
 	if (success == 0)
 		this->roughInsertSort(temp);
+	return success;
 }
 
 //Register initial nuclide
-void DecayChain::registerInitialNuclide(int atom_num, int iso_num, double ic)
+int DecayChain::registerInitialNuclide(int atom_num, int iso_num, double ic)
 {
 	Isotope temp;
 	temp.loadNuclides(*this->nuclides);
+	temp.setThreshold(this->hl_threshold);
 	int success = temp.registerIsotope(atom_num, iso_num);
 	temp.setInitialCondition(ic);
 	if (success == 0)
 		this->roughInsertSort(temp);
+	return success;
+}
+
+//set warnings
+void DecayChain::setWarnings(bool opt)
+{
+	this->Warnings = opt;
+	for (int i=0; i<this->nuc_list.size(); i++)
+		this->nuc_list[i].setWarnings(opt);
+	for (int i=0; i<this->stable_list.size(); i++)
+		this->stable_list[i].setWarnings(opt);
+}
+
+//set threshold
+void DecayChain::setThreshold(double val)
+{
+	if (val < 0.0)
+		val = 0.0;
+	this->hl_threshold = val;
 }
 
 //Create the decay chains and list of final nuclides
@@ -1242,10 +1306,13 @@ void DecayChain::formEigenvectors()
 			double diff = -this->nuc_list[i].DecayRate()-eigenvalue;
 			if (diff == 0.0)
 			{
-				//mError(unstable_matrix);
-				//std::cout << "\nNon-unique eigenvalues!\n";
-				//std::cout << "Problem Isotopes:\t" << this->nuc_list[k].IsotopeName() << "\t" << this->nuc_list[i].IsotopeName() << std::endl;
-				//std::cout << "Adjusting eigenvalue by 0.1% to remove redundancy..." << std::endl;
+				if (this->Warnings == true)
+				{
+					mError(unstable_matrix);
+					std::cout << "\nNon-unique eigenvalues!\n";
+					std::cout << "Problem Isotopes:\t" << this->nuc_list[k].IsotopeName() << "\t" << this->nuc_list[i].IsotopeName() << std::endl;
+					std::cout << "Adjusting eigenvalue by 0.1% to remove redundancy..." << std::endl;
+				}
 				//Fix with small adjustment to the kth eigenvalue
 				this->nuc_list[k].updateDecayRate();
 				eigenvalue = -this->nuc_list[k].DecayRate();
