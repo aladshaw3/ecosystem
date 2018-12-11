@@ -237,7 +237,7 @@ public:
 	
 	int read_conditions(yaml_cpp_class &yaml);						///< Read the Runtime conditions for the simulation case
 	int read_isotopes(yaml_cpp_class &yaml);						///< Read the Isotope conditions for the simulation case
-	int run_simulation();											///< Runs the simulation set up by the input files
+	int run_simulation(std::string file_name);						///< Runs the simulation set up by the input files
 	
 	double returnUnstableFractionation(int i, double t);			///< Return the fractionation of the ith unstable nuclide
 	double returnStableFractionation(int i, double t);				///< Return the fractionation of the ith stable nuclide
@@ -270,6 +270,18 @@ protected:
 	void fillOutBranchData();								///< Function to fill out all branching data and parent indices
 	
 	void fillOutCoefMap();									///< Function to fill out all coefficients in the map
+	
+	int time_steps;										///< Integer option to hold number of time steps to simulate
+	double end_time;									///< Time at which to end decay simulations
+	time_units t_units;									///< Units of time for which the end time is given
+	bool VerifyEigen;									///< Boolean option to check eigenvector solution
+	bool PrintChain;									///< Boolean option to print decay chain data to output file
+	bool PrintResults;									///< Boolean option to print simulation results to output file
+	bool PrintSparsity;									///< Boolean option to print sparsity pattern to output file
+	bool Warnings;										///< Boolean is True if you want to print warnings to console
+	double avg_eig_error;								///< Stores the average error in eigen solution
+	double hl_threshold;								///< Half-life value (in seconds) at which 99% of isotope has been converted
+	bool ConsoleOut;									///< Boolean is True if you want to print console messages 
 	
 private:
 	std::vector<Isotope> nuc_list;							///< List of (ith) nuclides that make up the decay chain
@@ -313,17 +325,6 @@ private:
 	
 	Matrix<double> Eigs;								///< Matrix of eigenvectors for the coefficient matrix
 	Matrix<double> invEigs;								///< Inverse Matrix of eigenvectors for the coefficient matrix
-	
-	int time_steps;										///< Integer option to hold number of time steps to simulate
-	double end_time;									///< Time at which to end decay simulations
-	time_units t_units;									///< Units of time for which the end time is given
-	bool VerifyEigen;									///< Boolean option to check eigenvector solution
-	bool PrintChain;									///< Boolean option to print decay chain data to output file
-	bool PrintResults;									///< Boolean option to print simulation results to output file
-	bool PrintSparsity;									///< Boolean option to print sparsity pattern to output file
-	bool Warnings;										///< Boolean is True if you want to print warnings to console
-	double avg_eig_error;								///< Stores the average error in eigen solution
-	double hl_threshold;								///< Half-life value (in seconds) at which 99% of isotope has been converted
 	
 };
 

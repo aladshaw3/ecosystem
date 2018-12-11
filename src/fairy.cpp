@@ -41,7 +41,7 @@ fiss_type fisstype_choice(std::string &choice)
 //Default constructor
 FissionProducts::FissionProducts()
 {
-	type = neutron;
+	type = explosion;
 	total_mass = 1.0;
 	fiss_extent = 100.0;
 	energy_level = 0.0;
@@ -168,6 +168,64 @@ void FissionProducts::setThreshold(double val)
 	this->DecayChain::setThreshold(val);
 }
 
+//set time units
+void FissionProducts::setTimeUnits(time_units units)
+{
+	this->t_units = units;
+}
+
+//set end time
+void FissionProducts::setEndTime(double end)
+{
+	if (end < 0.0)
+		end = 0;
+	this->end_time = end;
+}
+
+//set time steps
+void FissionProducts::setTimeSteps(int steps)
+{
+	if (steps < 0)
+		steps = 0;
+	this->time_steps = steps;
+}
+
+//set verify
+void FissionProducts::setVerifySoln(bool opt)
+{
+	this->VerifyEigen = opt;
+}
+
+//set sparsity
+void FissionProducts::setPrintSparsity(bool opt)
+{
+	this->PrintSparsity = opt;
+}
+
+//set chain
+void FissionProducts::setPrintChain(bool opt)
+{
+	this->PrintChain = opt;
+}
+
+//set results
+void FissionProducts::setPrintResults(bool opt)
+{
+	this->PrintResults = opt;
+}
+
+//set console out
+void FissionProducts::setConsoleOut(bool opt)
+{
+	this->ConsoleOut = opt;
+}
+
+//run simulation
+int FissionProducts::run_simulation(std::string file_name)
+{
+	return this->DecayChain::run_simulation(file_name);
+}
+
 //Add isotope
 void FissionProducts::addIsotopeMaterial(std::string iso, double percent)
 {
@@ -233,6 +291,7 @@ void FissionProducts::checkFractions()
 int FissionProducts::evaluateYields()
 {
 	int success = 0;
+	this->checkFractions();
 	if (this->type == explosion)
 	{
 		std::string high_key;
@@ -240,7 +299,7 @@ int FissionProducts::evaluateYields()
 		{
 			//Calculate moles of isotope and find header
 			double moles;
-			moles = this->total_mass*this->MatFrac[i]*1000.0/this->InitialMat[i].AtomicWeight();
+			moles = this->total_mass*this->MatFrac[i]/100.0*1000.0/this->InitialMat[i].AtomicWeight();
 			int levels = 0;
 			try
 			{
@@ -308,7 +367,8 @@ int FissionProducts::evaluateYields()
 					return -1;
 				}
 			}
-			success = this->registerInitialNuclide(this->InitialMat[i].IsotopeName(), moles*(100.0-this->fiss_extent)/100.0);
+			if (this->fiss_extent < 100.0)
+				success = this->registerInitialNuclide(this->InitialMat[i].IsotopeName(), moles*(100.0-this->fiss_extent)/100.0);
 			if (sum >= 1e-6)
 			{
 				mError(invalid_molefraction);
@@ -320,12 +380,13 @@ int FissionProducts::evaluateYields()
 	else
 	{
 		//Need to do linear interpolation for neutron energy sources
+		mError(opt_no_support);
+		std::cout << "Must choose type = explosion for now...\n\n";
+		return -1;
 	}
 	this->createChains();
 	this->formEigenvectors();
-	//this->verifyEigenSoln();
-	
-	//this->DisplayList();
+	this->unloadFissionProductYields();
 	return success;
 }
 
@@ -350,21 +411,30 @@ int FAIRY_TESTS()
 	test.loadNuclides(nuc_data);
 	
 	test.setTotalMass(9.7);
-	test.setFissionExtent(99);
+	test.setFissionExtent(100.0);
 	test.setFissionType(explosion);
 	test.setEnergyLevel(1000.0);
 	test.setThreshold(3.0*log(0.5)/log(1-0.99)); //Set yeild to 3 sec cutoff based on 99% conversion to daughters
 	test.addIsotopeMaterial("U-235", 90);
 	test.addIsotopeMaterial("U-238", 10);
-	test.checkFractions();
 	
 	test.DisplayInfo();
 	
 	test.loadFissionProductYields();
 	test.evaluateYields();
 	
-	test.unloadNuclides();					//May be redundant
-	test.unloadFissionProductYields();		//May be redundant
+	//Run simulation after setting options
+	test.setTimeUnits(hours);
+	test.setEndTime(1.0);
+	test.setTimeSteps(10);
+	test.setPrintSparsity(false);
+	test.setVerifySoln(true);
+	test.setPrintChain(false);
+	test.setPrintResults(true);
+	test.setConsoleOut(true);
+	
+	test.run_simulation("output/FAIRY_Results.txt");
+	
 	time = clock() - time;
 	std::cout << "\nRuntime: " << (time / CLOCKS_PER_SEC) << " seconds\n";
 	

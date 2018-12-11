@@ -1014,6 +1014,7 @@ DecayChain::DecayChain()
 	Warnings = false;
 	avg_eig_error = 0.0;
 	hl_threshold = 0.0;
+	ConsoleOut = false;
 }
 
 //Default destructor
@@ -1528,8 +1529,21 @@ void DecayChain::print_results(FILE *file, time_units units, double end_time, in
 	double pdt = end_time/(double)points;
 	double time = 0.0;
 	double ptime = 0.0;
+	double percent_comp = 0.0;
+	double print_comp = 0.0;
+	if (this->ConsoleOut == true)
+		std::cout << "Running Fractionation Simulation\nPercent Completion...\n";
 	for (int n=0; n<points; n++)
 	{
+		percent_comp = (double)(n) / (double)points;
+		if ( (percent_comp - print_comp) >= 0.0)
+		{
+			print_comp = print_comp + 0.1;
+			
+			if (this->ConsoleOut == true)
+				std::cout << "\t[" << (int)(percent_comp*100.0) << " %]\n";
+		}
+		
 		time = time + dt;
 		ptime = ptime + pdt;
 		this->calculateFractionation(time);
@@ -1541,6 +1555,8 @@ void DecayChain::print_results(FILE *file, time_units units, double end_time, in
 			fprintf(file, "\t%.6g", this->getStableIsotope(i).getConcentration());
 		fprintf(file, "\n");
 	}
+	if (this->ConsoleOut == true)
+		std::cout << "\t[100 %]\n\n";
 	
 	//Close the open file
 	if (file != nullptr)
@@ -1671,17 +1687,17 @@ int DecayChain::read_isotopes(yaml_cpp_class &yaml)
 }
 
 //Run simulation
-int DecayChain::run_simulation()
+int DecayChain::run_simulation(std::string file_name)
 {
 	int success = 0;
 	
 	//Open a file to print results to
 	FILE *file;
-	file = fopen("output/IBIS_Results.txt", "w+");
+	file = fopen(file_name.c_str(), "w+");
 	if (file == nullptr)
 	{
 		system("mkdir output");
-		file = fopen("output/IBIS_Results.txt", "w+");
+		file = fopen(file_name.c_str(), "w+");
 	}
 	
 	if (this->VerifyEigen == true)
@@ -2314,7 +2330,7 @@ int IBIS_SCENARIO(const char *yaml_input)
 	if (success != 0) {mError(read_error); return -1;}
 	
 	//Run simulations
-	success = decay.run_simulation();
+	success = decay.run_simulation("output/IBIS_Results.txt");
 	if (success != 0) {mError(simulation_fail); return -1;}
 	
 	//End the timer and print final information to screen

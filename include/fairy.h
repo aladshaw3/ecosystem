@@ -55,6 +55,17 @@ public:
 	void setEnergyLevel(double el);					///< Set the energy level for neutron source (eV)
 	void setThreshold(double val);					///< Set the threshold value for half-life (in sec)
 	
+	void setTimeUnits(time_units units);			///< Set the time units for the simulation
+	void setEndTime(double end);					///< Set the end time for the simulation (in choosen units)
+	void setTimeSteps(int steps);					///< Set the number of time steps to simulate
+	void setVerifySoln(bool opt);					///< Set boolean to verify eigen solution
+	void setPrintSparsity(bool opt);				///< Set boolean to print sparsity on output
+	void setPrintChain(bool opt);					///< Set boolean to print chain info
+	void setPrintResults(bool opt);					///< Set boolean to print results of simulation
+	void setConsoleOut(bool opt);					///< Set boolean to print output to console
+	
+	int run_simulation(std::string file_name);		///< Run a decay simulation from Fission Products
+	
 	/// NOTE: For each of the below functions, you must first call the loadNuclides function
 	void addIsotopeMaterial(std::string iso, double percent);				///< Add an isotope for the fissible material (checks string value)
 	void addIsotopeMaterial(std::string sym, int iso_num, double percent);	///< Add an isotope for the fissible material (by symbol and mass num)
