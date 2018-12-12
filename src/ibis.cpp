@@ -1286,7 +1286,7 @@ void DecayChain::formEigenvectors()
 	}
 	
 	this->Eigs.set_size((int)this->CoefMap.size(), (int)this->CoefMap.size());
-	this->invEigs.set_size((int)this->CoefMap.size(), (int)this->CoefMap.size());
+	//this->invEigs.set_size((int)this->CoefMap.size(), (int)this->CoefMap.size());
 	
 	//Loop for the kth eigenvector
 	for (int k=0; k<this->nuc_list.size(); k++)
@@ -1325,9 +1325,12 @@ void DecayChain::formEigenvectors()
 	}
 	
 	//Loop for the kth eigenvector
+	Matrix<double> temp;
+	temp.set_size((int)this->CoefMap.size(), (int)this->CoefMap.size());
 	for (int k=0; k<this->nuc_list.size(); k++)
 	{
-		this->invEigs.edit(k, k, 1.0);
+		//this->invEigs.edit(k, k, 1.0);
+		temp.edit(k, k, 1.0);
 		double sum = 0.0;
 		//Loop over the ith elements of the kth eigenvector
 		for (int i=k+1; i<this->nuc_list.size(); i++)
@@ -1336,9 +1339,13 @@ void DecayChain::formEigenvectors()
 			//Loop over the jth columns
 			for (int j=0; j<i; j++)
 			{
-				sum = sum + this->invEigs(j,k)*this->Eigs(i,j);
+				//sum = sum + this->invEigs(j,k)*this->Eigs(i,j);
+				//sum = sum + this->Eigs(k,j)*this->Eigs(i,j);
+				sum = sum + temp(j,k)*this->Eigs(i,j);
 			}
-			this->invEigs.edit(i, k, -sum);
+			//this->invEigs.edit(i, k, -sum);
+			temp.edit(i, k, -sum);
+			this->Eigs.edit(k, i, -sum);
 		}
 	}
 }
@@ -1374,12 +1381,15 @@ int DecayChain::verifyEigenSoln()
 			//Iterate through the map (loop over j columns)
 			for (std::map<int,double>::iterator jt=this->CoefMap[i].begin(); jt!=this->CoefMap[i].end(); jt++)
 			{
-				sum = sum + this->Eigs(jt->first,k)*jt->second;
+				if (jt->first >= k)
+					sum = sum + this->Eigs(jt->first,k)*jt->second;
 			}
 			//Use relative error for comparison because machine precicision is based on relative error
-			zero.edit(i, 0, (sum - eigenvalue*this->Eigs(i,k))/sum);
+			if (i >= k)
+				zero.edit(i, 0, (sum - eigenvalue*this->Eigs(i,k))/sum);
+			else
+				zero.edit(i, 0, 0.0);
 		}
-		
 		double error = zero.norm();
 		if (error > MIN_TOL)
 		{
@@ -1410,6 +1420,7 @@ int DecayChain::verifyEigenSoln()
 //Estimate fractionation
 void DecayChain::calculateFractionation(double t)
 {
+	/// CHANGE THIS LINE!!!
 	if (this->Eigs.rows() != this->Eigs.columns() && this->Eigs.rows() != this->nuc_list.size())
 	{
 		mError(empty_matrix);
@@ -1428,7 +1439,8 @@ void DecayChain::calculateFractionation(double t)
 			//Loop over all k eigenvalues
 			for (int k=j; k<=i; k++)
 			{
-				sum_inner = sum_inner + this->Eigs(i,k)*this->invEigs(k,j)*exp(-this->nuc_list[k].DecayRate()*t);
+				//sum_inner = sum_inner + this->Eigs(i,k)*this->invEigs(k,j)*exp(-this->nuc_list[k].DecayRate()*t);
+				sum_inner = sum_inner + this->Eigs(i,k)*this->Eigs(j,k)*exp(-this->nuc_list[k].DecayRate()*t);
 			}
 			sum_outer = sum_outer + sum_inner*this->nuc_list[j].getInitialCondition();
 		}
@@ -1452,7 +1464,8 @@ void DecayChain::calculateFractionation(double t)
 				double l_sum = 0.0;
 				for (int l=k; l<=j; l++)
 				{
-					l_sum = l_sum + ( this->Eigs(j,l)*this->invEigs(l,k)*(1.0-exp(-this->nuc_list[l].DecayRate()*t))/this->nuc_list[l].DecayRate() );
+					//l_sum = l_sum + ( this->Eigs(j,l)*this->invEigs(l,k)*(1.0-exp(-this->nuc_list[l].DecayRate()*t))/this->nuc_list[l].DecayRate() );
+					l_sum = l_sum + ( this->Eigs(j,l)*this->Eigs(k,l)*(1.0-exp(-this->nuc_list[l].DecayRate()*t))/this->nuc_list[l].DecayRate() );
 				}
 				k_sum = k_sum + this->nuc_list[k].getInitialCondition()*l_sum;
 			}
@@ -1819,7 +1832,8 @@ double DecayChain::returnUnstableFractionation(int i, double t)
 		//Loop over all k eigenvalues
 		for (int k=j; k<=i; k++)
 		{
-			sum_inner = sum_inner + this->Eigs(i,k)*this->invEigs(k,j)*exp(-this->nuc_list[k].DecayRate()*t);
+			//sum_inner = sum_inner + this->Eigs(i,k)*this->invEigs(k,j)*exp(-this->nuc_list[k].DecayRate()*t);
+			sum_inner = sum_inner + this->Eigs(i,k)*this->Eigs(j,k)*exp(-this->nuc_list[k].DecayRate()*t);
 		}
 		sum_outer = sum_outer + sum_inner*this->nuc_list[j].getInitialCondition();
 	}
@@ -1851,7 +1865,8 @@ double DecayChain::returnStableFractionation(int i, double t)
 			double l_sum = 0.0;
 			for (int l=k; l<=j; l++)
 			{
-				l_sum = l_sum + ( this->Eigs(j,l)*this->invEigs(l,k)*(1.0-exp(-this->nuc_list[l].DecayRate()*t))/this->nuc_list[l].DecayRate() );
+				//l_sum = l_sum + ( this->Eigs(j,l)*this->invEigs(l,k)*(1.0-exp(-this->nuc_list[l].DecayRate()*t))/this->nuc_list[l].DecayRate() );
+				l_sum = l_sum + ( this->Eigs(j,l)*this->Eigs(k,l)*(1.0-exp(-this->nuc_list[l].DecayRate()*t))/this->nuc_list[l].DecayRate() );
 			}
 			k_sum = k_sum + this->nuc_list[k].getInitialCondition()*l_sum;
 		}
@@ -2029,10 +2044,10 @@ Matrix<double>& DecayChain::getEigenvectors()
 }
 
 //Return inverse eigenvectors
-Matrix<double>& DecayChain::getInverseEigenvectors()
-{
-	return this->invEigs;
-}
+//Matrix<double>& DecayChain::getInverseEigenvectors()
+//{
+	//return this->invEigs;
+//}
 
 //Insert an isotope to the initial list
 void DecayChain::roughInsertSort(Isotope iso)
@@ -2473,9 +2488,21 @@ int IBIS_TESTS()
 	//test.registerInitialNuclide("Ni-57");
 	//test.registerInitialNuclide("Ni-59");
 	
-	test.registerInitialNuclide("U-238", 10.0); ///NOTE: Must give decimals or state as doubles
-	test.registerInitialNuclide("U-235", 45.0);
-	test.registerInitialNuclide("U-235", 45.0);
+	//test.registerInitialNuclide("U-238", 10.0); ///NOTE: Must give decimals or state as doubles
+	//test.registerInitialNuclide("U-235", 45.0);
+	//test.registerInitialNuclide("U-235", 45.0);
+	
+	//test.registerInitialNuclide("H-3", 1.0);
+	//test.registerInitialNuclide("Be-7", 1.0);
+	//test.registerInitialNuclide("U-235", 45.0);
+	//test.registerInitialNuclide("U-238", 10.0);
+	
+	test.registerInitialNuclide("He-5");
+	test.registerInitialNuclide("He-8");
+	test.registerInitialNuclide("Li-5");
+	test.registerInitialNuclide("Li-9");
+	test.registerInitialNuclide("Li-11");
+	test.registerInitialNuclide("Be-14");
 	
 	test.createChains();					//Creates list of nuclides and sorts the list from parent to daughter
 	test.formEigenvectors();				//Mandatory before solving
@@ -2493,14 +2520,12 @@ int IBIS_TESTS()
 	//test.getIsotope("U-235").setInitialCondition(90);
 	//test.getIsotope("U-238").setInitialCondition(10);
 	
-	/*
 	for (int i=0; i<test.getNumberNuclides(); i++)
 	{
 		test.getIsotope(i).setInitialCondition(1.0);
 	}
-	 */
 	
-	test.print_results(file, hours, 1, 10);			//Print results to file
+	test.print_results(file, seconds, 0.1, 10);			//Print results to file
 	
 	time = clock() - time;
 	std::cout << "\nSimulation Runtime: " << (time / CLOCKS_PER_SEC) << " seconds for " << test.getNumberNuclides()+test.getNumberStableNuclides() << " isotopes \n";

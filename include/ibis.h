@@ -255,7 +255,7 @@ public:
 	Isotope& getStableIsotope(int i);						///< Return the ith stable isotope
 	Isotope& getIsotope(std::string iso_name);				///< Return the isotope (Stable or Unstable) that corresponds to the given name
 	Matrix<double>& getEigenvectors();						///< Return the eigenvectors matrix
-	Matrix<double>& getInverseEigenvectors();				///< Return the inverse eigenvectors matrix
+	//Matrix<double>& getInverseEigenvectors();				///< Return the inverse eigenvectors matrix
 	
 protected:
 	yaml_cpp_class *nuclides;							///< Pointer to a yaml object storing the digital library of all nuclides
@@ -323,8 +323,8 @@ private:
 	
 	std::vector< std::map<int, double> > stable_CoefMap;		///< Coefficient Map for matrix representing the ODE system for stable isotopes
 	
-	Matrix<double> Eigs;								///< Matrix of eigenvectors for the coefficient matrix
-	Matrix<double> invEigs;								///< Inverse Matrix of eigenvectors for the coefficient matrix
+	Matrix<double> Eigs;		///< Matrix of eigenvectors for the coefficient matrix (stores inverse elemens in upper triangular portion)
+	//Matrix<double> invEigs;								///< Inverse Matrix of eigenvectors for the coefficient matrix
 	
 };
 
