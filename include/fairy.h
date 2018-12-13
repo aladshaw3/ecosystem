@@ -66,6 +66,8 @@ public:
 	
 	int run_simulation(std::string file_name);		///< Run a decay simulation from Fission Products
 	
+	int print_yields();								///< Print yield data for weapon or fuel to output file 
+	
 	/// NOTE: For each of the below functions, you must first call the loadNuclides function
 	void addIsotopeMaterial(std::string iso, double percent);				///< Add an isotope for the fissible material (checks string value)
 	void addIsotopeMaterial(std::string sym, int iso_num, double percent);	///< Add an isotope for the fissible material (by symbol and mass num)
@@ -80,6 +82,7 @@ private:
 	fiss_type type;								///< Type of fission products to be produced
 	std::vector<Isotope> InitialMat;			///< Initial materials/isotopes to undergoe fission (Conc. in moles)
 	std::vector<double> MatFrac;				///< Material fractionation of the initial material (%)
+	std::map<int, double> Yields;				///< Map of fission yields of material based on atomic mass
 	double total_mass;							///< Total mass of the weapon or fuel rod (kg)
 	double fiss_extent;							///< Percentage of the starting material that undergoes fission (%)
 	double energy_level;						///< Energy level of neutron source (eV)

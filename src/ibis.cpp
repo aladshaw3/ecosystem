@@ -1340,7 +1340,6 @@ void DecayChain::formEigenvectors()
 			for (int j=0; j<i; j++)
 			{
 				//sum = sum + this->invEigs(j,k)*this->Eigs(i,j);
-				//sum = sum + this->Eigs(k,j)*this->Eigs(i,j);
 				sum = sum + temp(j,k)*this->Eigs(i,j);
 			}
 			//this->invEigs.edit(i, k, -sum);

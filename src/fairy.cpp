@@ -52,6 +52,7 @@ FissionProducts::~FissionProducts()
 {
 	InitialMat.clear();
 	MatFrac.clear();
+	Yields.clear();
 }
 
 //Display information
@@ -223,7 +224,38 @@ void FissionProducts::setConsoleOut(bool opt)
 //run simulation
 int FissionProducts::run_simulation(std::string file_name)
 {
-	return this->DecayChain::run_simulation(file_name);
+	int success = 0;
+	success = this->DecayChain::run_simulation(file_name);
+	success = this->print_yields();
+	return success;
+}
+
+//print yields
+int FissionProducts::print_yields()
+{
+	int success = 0;
+	
+	//Open a file to print results to
+	FILE *file;
+	file = fopen("output/FAIRY_Yields.txt", "w+");
+	if (file == nullptr)
+	{
+		system("mkdir output");
+		file = fopen("output/FAIRY_Yields.txt", "w+");
+	}
+	
+	//Loop through yield map and print data
+	fprintf(file, "Mass Number\tYield (%%)\n");
+	for (std::map<int,double>::iterator it=this->Yields.begin(); it!=this->Yields.end(); it++)
+	{
+		fprintf(file, "%i\t%.6g\n", it->first, it->second);
+	}
+	
+	//Close the open file
+	if (file != nullptr)
+		fclose(file);
+	
+	return success;
 }
 
 //Add isotope
@@ -353,11 +385,41 @@ int FissionProducts::evaluateYields()
 				try
 				{
 					yield = x.second["Yield"].getDouble();
-					success = this->registerInitialNuclide(x.first, yield*moles*this->fiss_extent/100.0);
-					if (success != 0)
+					if (moles > 0.0)
 					{
-						success = 0;
-						sum += yield;
+						success = this->registerInitialNuclide(x.first, yield*moles*this->fiss_extent/100.0);
+						if (success != 0)
+						{
+							success = 0;
+							sum += yield;
+						}
+						else
+						{
+							char *str;
+							char iso[256];
+							strcpy(iso, x.first.c_str());
+							str = strtok(iso, "-");
+							std::string sym;
+							int iso_num;
+						
+							int a=0;
+							while (str != NULL)
+							{
+								if (a == 0)
+									sym = str;
+								if (a == 1)
+									iso_num = atoi(str);
+								str = strtok(NULL, "-");
+								a++;
+							}
+						
+							std::map<int, double>::iterator it;
+							it = this->Yields.find(iso_num);
+							if (it != this->Yields.end())
+								this->Yields[iso_num] = this->Yields[iso_num]+yield*this->MatFrac[i];
+							else
+								this->Yields[iso_num] = yield*this->MatFrac[i];
+						}
 					}
 				}
 				catch (std::out_of_range)
@@ -415,8 +477,8 @@ int FAIRY_TESTS()
 	test.setFissionType(explosion);
 	test.setEnergyLevel(1000.0);
 	test.setThreshold(3.0*log(0.5)/log(1-0.99)); //Set yeild to 3 sec cutoff based on 99% conversion to daughters
-	test.addIsotopeMaterial("U-235", 90);
-	test.addIsotopeMaterial("U-238", 10);
+	test.addIsotopeMaterial("U-235", 100.0);
+	test.addIsotopeMaterial("U-238", 0.0);
 	
 	test.DisplayInfo();
 	
