@@ -55,6 +55,9 @@ public:
 	void setEnergyLevel(double el);					///< Set the energy level for neutron source (eV)
 	void setThreshold(double val);					///< Set the threshold value for half-life (in sec)
 	
+	/// Automatically sets the threshold value given time (in sec) after detonation and percent conversion rate (default 99%)
+	void timeSinceDetonation(double time, double per);
+	
 	void setTimeUnits(time_units units);			///< Set the time units for the simulation
 	void setEndTime(double end);					///< Set the end time for the simulation (in choosen units)
 	void setTimeSteps(int steps);					///< Set the number of time steps to simulate

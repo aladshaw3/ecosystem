@@ -139,13 +139,13 @@ protected:
 		Example:
 		--------
 	 
-		Levels:							A					A = Principal Parent
+		Levels:							A			A = Principal Parent
 		-------						   / \
-		level 0:					  B   C					B = 1st Daughter (pair A/B), C = 1st particle emission (pair A/C)
+		level 0:					  B   C			B = 1st Daughter (pair A/B), C = 1st particle emission (pair A/C)
 									 / \   \
-		level 1:                    D   E   F               D = 1st Daugher of 1st Daughter, E = 2nd Daughter of 1st Daughter, F = Stable Daughter
+		level 1:                    D   E   F       D = 1st Daugher of 1st Daughter, E = 2nd Daughter of 1st Daughter, F = Stable Daughter
 								  / |   | \
-		level 2:                 G  H   I  J				So on and so forth...
+		level 2:                 G  H   I  J		So on and so forth...
 	 
 	 */
 	std::vector< std::vector< std::pair<std::string,std::string> > > chain;

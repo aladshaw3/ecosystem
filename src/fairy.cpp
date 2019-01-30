@@ -169,6 +169,19 @@ void FissionProducts::setThreshold(double val)
 	this->DecayChain::setThreshold(val);
 }
 
+//set threshold from time of detonation
+void FissionProducts::timeSinceDetonation(double time, double per)
+{
+	if (time < 0.0)
+		time = 0.0;
+	per = per/100.0;
+	if (per < 0.0)
+		per = 0.0;
+	if (per >= 1.0)
+		per = 0.99;
+	this->setThreshold(time*log(0.5)/log(1-per));
+}
+
 //set time units
 void FissionProducts::setTimeUnits(time_units units)
 {
@@ -476,7 +489,7 @@ int FAIRY_TESTS()
 	test.setFissionExtent(100.0);
 	test.setFissionType(explosion);
 	test.setEnergyLevel(1000.0);
-	test.setThreshold(3.0*log(0.5)/log(1-0.99)); //Set yeild to 3 sec cutoff based on 99% conversion to daughters
+	test.timeSinceDetonation(3.0, 99.0); //Set yeild to 3 sec cutoff based on 99% conversion to daughters
 	test.addIsotopeMaterial("U-235", 100.0);
 	test.addIsotopeMaterial("U-238", 0.0);
 	
