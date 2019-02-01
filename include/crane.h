@@ -129,7 +129,10 @@ public:
 	void set_current_time(double val);					///< Set the current_time parameter
 	void set_vapor_pressure(double val);				///< Set the vapor_pressure parameter
 	void set_sat_vapor_pressure(double val);			///< Set the sat_vapor_pressure parameter
+	void set_solidification_temp(double val);			///< Set the solidification_temp parameter
+	void set_vaporization_temp(double val);				///< Set the vaporization_temp parameter
 	void set_initial_soil_mass(double val);				///< Set the initial_soil_mass parameter
+	void set_initial_soil_vapor(double val);			///< Set the initial_soil_vapor parameter
 	void set_initial_water_mass(double val);			///< Set the initial_water_mass parameter
 	void set_initial_air_mass(double val);				///< Set the initial_air_mass parameter
 	void set_current_amb_temp(double val);				///< Set the current_amb_temp parameter
@@ -139,6 +142,7 @@ public:
 	void set_ConsoleOut(bool val);						///< Set the ConsoleOut parameter
 	void set_FileOut(bool val);							///< Set the FileOut parameter
 	void set_saturation_time(double val);				///< Set the saturation_time parameter
+	void set_solidification_time(double val);			///< Set the solidification_time parameter
 	void set_isTight(bool val);							///< Set the isTight parameter
 	void set_cloud_density(double val);					///< Set the cloud_density parameter
 	void set_horz_rad_change(double val);				///< Set the horz_rad_change parameter
@@ -215,7 +219,10 @@ public:
 	double get_current_time();					///< Get the current_time parameter
 	double get_vapor_pressure();				///< Get the vapor_pressure parameter
 	double get_sat_vapor_pressure();			///< Get the sat_vapor_pressure parameter
+	double get_solidification_temp();			///< Get the solidification_temp parameter
+	double get_vaporization_temp();				///< Get the vaporization_temp parameter
 	double get_initial_soil_mass();				///< Get the initial_soil_mass parameter
+	double get_initial_soil_vapor();			///< Get the initial_soil_vapor parameter
 	double get_initial_water_mass();			///< Get the initial_water_mass parameter
 	double get_initial_air_mass();				///< Get the initial_air_mass parameter
 	double get_current_amb_temp();				///< Get the current_amb_temp parameter
@@ -229,6 +236,7 @@ public:
 	bool get_FileOut();							///< Get the FileOut parameter
 	Matrix<double> & get_part_conc_var();		///< Get the part_conc_var parameter
 	double get_saturation_time();				///< Get the saturation_time parameter
+	double get_solidification_time();			///< Get the solidification_time parameter
 	bool get_isTight();							///< Get the isTight parameter
 	double get_cloud_density();					///< Get the cloud_density parameter
 	double get_horz_rad_change();				///< Get the horz_rad_change parameter
@@ -324,6 +332,11 @@ public:
 	double return_wind_speed(double z);							///< Function to return wind speed (m/s) given an altitude (m)
 	void compute_current_amb_temp(double z);					///< Function to set the current_amb_temp parameter given an altitude (m)
 	void compute_current_atm_press(double z);					///< Function to set the current_amb_press parameter given an altitude (m)
+	
+	// Below are listed functions associated with the soil composition
+	void add_solid_param(std::string name, int pow, double param);	///< Function to add a solidification parameter based on oxide name
+	void add_vapor_param(std::string name, int pow, double param);	///< Function to add a vaporization parameter based on oxide name
+	void default_soil_components();								///< Function to setup the default soil component parameters
 	
 	// Below are listed function to compute some post-processing/post-solver information to form the cloud stem
 	void compute_alt_top(double z, double Hc);					///< Function to compute cloud cap top given center z and height Hc
@@ -432,7 +445,10 @@ protected:
 	double davies_num;				///< Unitless number for particle settling analysis (-)						(ND)
 	double vapor_pressure;			///< Vapor pressure inside the cloud at cloud altitude (Pa)					(Pv)
 	double sat_vapor_pressure;		///< Saturation vapor pressure inside the cloud (Pa)						(Pws)
+	double solidification_temp;		///< Temperature at which soil debris will solidify	(K)						(Ts)
+	double vaporization_temp;		///< Temperature at which soil debris will vaporize (K)						(Tm)
 	double initial_soil_mass;		///< Initial value for soil mass in debris cloud (kg)						(m_ri)
+	double initial_soil_vapor;		///< Initial value for the vaporized amount of soil (kg)					(m_vi)
 	double initial_water_mass;		///< Initial value for water mass in debris cloud (kg)						(m_wi)
 	double initial_air_mass;		///< Initial value for air mass in debris cloud (kg)						(m_ai)
 	double current_amb_temp;		///< Current value of ambient temperature (set based on atm profile)		(Te)
@@ -458,6 +474,12 @@ protected:
 	double std_dia;								///< Standard deviation for lognormal distribution				(sigma)
 	int num_bins;								///< Number of desired size bins for particles					(N)
 	
+	std::map<std::string, double> soil_molefrac;	///< Stores the molefraction of the soil components
+	/// Polynominal parameters for specific oxides in soil used to determine the solidification temperature
+	std::unordered_map<std::string, std::map<int, double> > solid_params;
+	/// Polynominal parameters for specific oxides in soil used to determine the vaporization temperature
+	std::unordered_map<std::string, std::map<int, double> > vapor_params;
+	
 	/// List of Variables to be solved for by Dove
 	/** These variables are stored internally by Dove,
 		but will be placed into these parameters below
@@ -476,6 +498,7 @@ protected:
 	
 	Matrix<double> part_conc_var;				///< Storage matrix for particle concentrations (Gp/m^3) in order of size
 	double saturation_time;						///< Time at which saturation has occurred (s)
+	double solidification_time;					///< Time at which the melted debris has solidified (s)
 	double cloud_density;						///< Density of the cloud materials	(kg/m^3)
 	double horz_rad_change;						///< Change in horizontal radius between time steps (m)			(d(Rc))
 	double energy_switch;						///< Energy switch parameter for determining termination (J/kg)

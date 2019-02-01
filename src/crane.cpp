@@ -67,7 +67,10 @@ Crane::Crane()
 	davies_num = 1.0;
 	vapor_pressure = 0.0;
 	sat_vapor_pressure = 1.0;
+	solidification_temp = 1973.0;
+	vaporization_temp = 3000.0;
 	initial_soil_mass = 0.0;
+	initial_soil_vapor = 0.0;
 	initial_water_mass = 0.0;
 	initial_air_mass = 0.0;
 	current_amb_temp = 298.0;
@@ -78,6 +81,7 @@ Crane::Crane()
 	FileOut = false;
 	isTight = true;
 	saturation_time = 0.0;
+	solidification_time = 0.0;
 	min_dia = 0.0001;
 	max_dia = 10000.0;
 	mean_dia = 0.407;
@@ -462,9 +466,24 @@ void Crane::set_sat_vapor_pressure(double val)
 	this->sat_vapor_pressure = val;
 }
 
+void Crane::set_solidification_temp(double val)
+{
+	this->solidification_temp = val;
+}
+
+void Crane::set_vaporization_temp(double val)
+{
+	this->vaporization_temp = val;
+}
+
 void Crane::set_initial_soil_mass(double val)
 {
 	this->initial_soil_mass = val;
+}
+
+void Crane::set_initial_soil_vapor(double val)
+{
+	this->initial_soil_vapor = val;
 }
 
 void Crane::set_initial_water_mass(double val)
@@ -510,6 +529,11 @@ void Crane::set_FileOut(bool val)
 void Crane::set_saturation_time(double val)
 {
 	this->saturation_time = val;
+}
+
+void Crane::set_solidification_time(double val)
+{
+	this->solidification_time = val;
 }
 
 void Crane::set_isTight(bool val)
@@ -884,9 +908,24 @@ double Crane::get_sat_vapor_pressure()
 	return this->sat_vapor_pressure;
 }
 
+double Crane::get_solidification_temp()
+{
+	return this->solidification_temp;
+}
+
+double Crane::get_vaporization_temp()
+{
+	return this->vaporization_temp;
+}
+
 double Crane::get_initial_soil_mass()
 {
 	return this->initial_soil_mass;
+}
+
+double Crane::get_initial_soil_vapor()
+{
+	return this->initial_soil_vapor;
 }
 
 double Crane::get_initial_water_mass()
@@ -955,6 +994,11 @@ Matrix<double> & Crane::get_part_conc_var()
 double Crane::get_saturation_time()
 {
 	return this->saturation_time;
+}
+
+double Crane::get_solidification_time()
+{
+	return this->solidification_time;
 }
 
 bool Crane::get_isTight()
@@ -2068,6 +2112,25 @@ void Crane::delete_atmosphere()
 void Crane::delete_wind_profile()
 {
 	this->wind_vel.clear();
+}
+
+void Crane::add_solid_param(std::string name, int pow, double param)
+{
+	std::map<int, double> temp;
+	temp[pow] = param;
+	this->solid_params[name] = temp;
+}
+
+void Crane::add_vapor_param(std::string name, int pow, double param)
+{
+	std::map<int, double> temp;
+	temp[pow] = param;
+	this->vapor_params[name] = temp;
+}
+
+void Crane::default_soil_components()
+{
+	
 }
 
 double Crane::return_amb_temp(double z)
@@ -3900,6 +3963,7 @@ int CRANE_TESTS()
     std::cout << "Initial Time (s)        =\t" << test.get_current_time() << std::endl;
 	std::cout << "Number of air parcels   =\t" << test.return_parcel_alt_top().rows() << std::endl;
 	std::cout << "Number of particle bins = \t" << test.return_parcel_alt_top().columns() << std::endl;
+	test.display_part_hist();
     std::cout << "\n";
 	
 	bool fileout = true;
