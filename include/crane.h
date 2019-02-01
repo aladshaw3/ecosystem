@@ -32,6 +32,15 @@
  *			C.J. Brasefield, "Winds at Altitudes up to 80 Kilometers," J. of Geophysical Research, 59,
  *				233-237, 1954.
  *
+ *			References for Default Soil Characteristics
+ *			-------------------------------------------
+ *			J.B. Hanni, E. Pressly, J.V. Crum, K.B.C. Minister, D.Tran, "Liquidus temperature measurements 
+ *				for modeling oxide glass systems relevant to nuclear waste vitrification," J. Mater. Res., 
+ *				20, 3346-3357, 2005.
+ *			
+ *			Q. Rao, G.F. Piepel, P. Hrma, J.V. Crum, "Liquidus temperatures of HLW glasses with zirconium-
+ *				containing primary crystalline phases," J. Non-Crystalline Solids, 220, 17-29, 1997. 
+ *
  *
  *  \author Austin Ladshaw
  *	\date 05/30/2018
