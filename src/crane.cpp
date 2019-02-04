@@ -81,10 +81,11 @@ Crane::Crane()
 	ConsoleOut = false;
 	FileOut = false;
 	isTight = true;
+	useCustomDist = false;
 	saturation_time = 0.0;
 	solidification_time = 0.0;
-	min_dia = 0.0001;
-	max_dia = 10000.0;
+	min_dia = 0.001;
+	max_dia = 100.0;
 	mean_dia = 0.407;
 	std_dia = 4.0;
 	num_bins = 22;
@@ -157,11 +158,11 @@ void Crane::display_soil_characteristics()
 {
 	std::cout << "Approximate Soil Components (by molefraction)\n";
 	std::cout << "---------------------------------------------\n";
-	std::cout << "Comp\tMolefrac\n";
+	std::cout << "Comp\t    Molefrac\n";
 	//Iterate through map
 	for (std::map<std::string, double>::iterator it=this->soil_molefrac.begin(); it!=this->soil_molefrac.end(); ++it)
 	{
-		std::cout << it->first << "   \t" << it->second << std::endl;
+		std::cout << it->first << "      \t" << it->second << std::endl;
 	}
 	std::cout << "\n";
 }
@@ -560,6 +561,11 @@ void Crane::set_solidification_time(double val)
 void Crane::set_isTight(bool val)
 {
 	this->isTight = val;
+}
+
+void Crane::set_useCustomDist(bool val)
+{
+	this->useCustomDist = val;
 }
 
 void Crane::set_cloud_density(double val)
@@ -1030,6 +1036,11 @@ double Crane::get_solidification_time()
 bool Crane::get_isTight()
 {
 	return this->isTight;
+}
+
+bool Crane::get_useCustomDist()
+{
+	return this->useCustomDist;
 }
 
 double Crane::get_cloud_density()
@@ -1532,14 +1543,22 @@ void Crane::compute_initial_part_hist(double W, double gz, double hb, int size)
 	this->compute_initial_vert_rad(W, gz, hb);
 	double scaled = fabs(hb)*3.281 / pow(W, 1.0/3.4);
 	
-	if (scaled < 180.0)
+	if (this->get_useCustomDist() == false)
 	{
-		this->create_part_hist(0.001, 100, size, 0.407, 4.0);
+		if (scaled < 180.0)
+		{
+			this->create_part_hist(0.001, 100, size, 0.407, 4.0);
+		}
+		else
+		{
+			this->create_part_hist(0.001, 100, size, 0.15, 2.0);
+		}
 	}
 	else
 	{
-		this->create_part_hist(0.001, 100, size, 0.15, 2.0);
+		this->create_part_hist(this->min_dia, this->max_dia, size, this->mean_dia, this->std_dia);
 	}
+	
 	
 	int parcels = 15 + (int)log(W);
 	this->parcel_alt_top.set_size(parcels+10, size);
@@ -2247,11 +2266,24 @@ void Crane::verify_soil_components()
 	}
 	else
 	{
-		if ( fabs(1.0-sum) >= 1.0e-6 )
+		if ( sum > 1.0 )
 		{
 			for (it=this->soil_molefrac.begin(); it!=this->soil_molefrac.end(); it++)
 			{
 				it->second = it->second / sum;
+			}
+		}
+		if ( sum < 1.0 )
+		{
+			double diff = 1.0 - sum;
+			it = this->soil_molefrac.find("Other");
+			if (it == this->soil_molefrac.end())
+			{
+				this->add_soil_component("Other", diff);
+			}
+			else
+			{
+				this->soil_molefrac["Other"] += diff;
 			}
 		}
 	}
@@ -3023,6 +3055,64 @@ int Crane::read_conditions(Dove &dove, yaml_cpp_class &yaml)
 	}
 	
 	if (bins > 20) isTight = false;
+	
+	//Read in optional Particle size distribution parameters
+	try
+	{
+		this->set_useCustomDist( yaml.getYamlWrapper()("Simulation_Conditions")("part_dist")["useCustom"].getBool() );
+	}
+	catch (std::out_of_range)
+	{
+		this->set_useCustomDist(false);
+	}
+	if (this->get_useCustomDist() == true)
+	{
+		try
+		{
+			this->set_min_dia( yaml.getYamlWrapper()("Simulation_Conditions")("part_dist")["min_dia"].getDouble() );
+		}
+		catch (std::out_of_range)
+		{
+			this->set_min_dia( 0.001 );
+		}
+		try
+		{
+			this->set_max_dia( yaml.getYamlWrapper()("Simulation_Conditions")("part_dist")["max_dia"].getDouble() );
+		}
+		catch (std::out_of_range)
+		{
+			this->set_max_dia( 100.0 );
+		}
+		try
+		{
+			this->set_mean_dia( yaml.getYamlWrapper()("Simulation_Conditions")("part_dist")["mean_dia"].getDouble() );
+		}
+		catch (std::out_of_range)
+		{
+			this->set_mean_dia( 0.407 );
+		}
+		try
+		{
+			this->set_std_dia( yaml.getYamlWrapper()("Simulation_Conditions")("part_dist")["std_dia"].getDouble() );
+		}
+		catch (std::out_of_range)
+		{
+			this->set_std_dia( 4.0 );
+		}
+	}
+	
+	//Read in optional soil components
+	try
+	{
+		for (auto &x: yaml.getYamlWrapper()("Simulation_Conditions")("soil_comp").getDataMap())
+		{
+			this->add_soil_component(x.first, x.second.getDouble());
+		}
+	}
+	catch (std::out_of_range)
+	{
+		//Do nothing
+	}
 	
 	this->establish_initial_conditions(dove, W, gz, hb, bins, includeShear, isTight);
 	
@@ -4156,7 +4246,7 @@ int CRANE_TESTS()
 	bool includeShear = true;
 	bool isTight = true;
 	
-	//test.add_soil_component("SiO2", 0.75);
+	test.add_soil_component("SiO2", 0.75);
 	//test.add_soil_component("CaO", 0.25);
 	
 	test.establish_initial_conditions(dove, W, gz, hb, bins, includeShear, isTight);

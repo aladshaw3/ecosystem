@@ -7,6 +7,32 @@ particle_bins: 10      #number of particle size distributions
 tight_coupling: true   #use tight or loose coupling for variables
 shear_correction: true #use a correction for shear velocity (requires wind profile)
 
+#Particle size distribution parameters for log-normal distribution (optional)
+- part_dist:
+  useCustom: false    # True if you want to use values below, otherwise system uses defaults
+  min_dia: 0.001      # in um
+  max_dia: 100.0      # in um
+  mean_dia: 0.407     # in um
+  std_dia: 4.0        # in um
+
+#Soil components are by mineral formula and values are molefractions (optional)
+- soil_comp:
+  Al2O3: 0.0
+  B2O3: 0.0
+  CaO: 0.20
+  Na2O: 0.0
+  SiO2: 0.70
+  Fe2O3: 0.0
+  Li2O: 0.0
+  NiO: 0.0
+  ZrO2: 0.0
+  Cr2O3: 0.0
+  ZnO: 0.0
+  MnO: 0.0
+  K2O: 0.0
+  Other: 0.05
+#NOTE: Do not need to list all components if they are not part of soil
+
 ...
 
 ODE_Options:

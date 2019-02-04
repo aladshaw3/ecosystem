@@ -155,6 +155,7 @@ public:
 	void set_saturation_time(double val);				///< Set the saturation_time parameter
 	void set_solidification_time(double val);			///< Set the solidification_time parameter
 	void set_isTight(bool val);							///< Set the isTight parameter
+	void set_useCustomDist(bool val);					///< Set the useCustomDist parameter
 	void set_cloud_density(double val);					///< Set the cloud_density parameter
 	void set_horz_rad_change(double val);				///< Set the horz_rad_change parameter
 	void set_energy_switch(double val);					///< Set the energy_switch parameter
@@ -250,6 +251,7 @@ public:
 	double get_saturation_time();				///< Get the saturation_time parameter
 	double get_solidification_time();			///< Get the solidification_time parameter
 	bool get_isTight();							///< Get the isTight parameter
+	bool get_useCustomDist();					///< Get the useCustomDist parameter
 	double get_cloud_density();					///< Get the cloud_density parameter
 	double get_horz_rad_change();				///< Get the horz_rad_change parameter
 	double get_energy_switch();					///< Get the energy_switch parameter
@@ -475,6 +477,7 @@ protected:
 	bool isSaturated;				///< Boolean state used to determine whether or not to use Saturated Functions
 	bool isSolidified;				///< Boolean state used to determine whether or not the soils have solidified
 	bool isTight;					///< Boolean state used to determine whether or not to use Tight Coulpling
+	bool useCustomDist;				///< Boolean state used to determine whether or not to use a Custom Particle Distribution
 	bool ConsoleOut;				///< Boolean state used to determine whether or not to include console output
 	bool FileOut;					///< Boolean state used to determine whether or not to include file output
 	
