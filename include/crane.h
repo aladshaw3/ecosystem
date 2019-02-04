@@ -73,6 +73,7 @@ public:
 	// Below are some display functions used for testing different functions
 	void display_part_hist();
 	void display_part_conc();
+	void display_soil_characteristics();
 	
 	// Below are listed all the manual set functions for manually changing individual values
 	void set_eps(double val);							///< Set the eps parameter
@@ -148,6 +149,7 @@ public:
 	void set_current_atm_press(double val);				///< Set the current_atm_press parameter
 	void set_includeShearVel(bool val);					///< Set the includeShearVel parameter
 	void set_isSaturated(bool val);						///< Set the isSaturated parameter
+	void set_isSolidified(bool val);					///< Set the isSolidified parameter
 	void set_ConsoleOut(bool val);						///< Set the ConsoleOut parameter
 	void set_FileOut(bool val);							///< Set the FileOut parameter
 	void set_saturation_time(double val);				///< Set the saturation_time parameter
@@ -238,6 +240,7 @@ public:
 	double get_current_atm_press();				///< Get the current_atm_press parameter
 	bool get_includeShearVel();					///< Get the includeShearVel parameter
 	bool get_isSaturated();						///< Get the isSaturated parameter
+	bool get_isSolidified();					///< Get the isSolidified parameter
 	double get_part_size(int i);				///< Get the i-th particle size parameter
 	double get_settling_rate(double Dj);		///< Get the settling_rate associated with size Dj
 	double get_settling_rate_old(double Dj);	///< Get the settling_rate_old associated with size Dj
@@ -345,7 +348,13 @@ public:
 	// Below are listed functions associated with the soil composition
 	void add_solid_param(std::string name, int pow, double param);	///< Function to add a solidification parameter based on oxide name
 	void add_vapor_param(std::string name, int pow, double param);	///< Function to add a vaporization parameter based on oxide name
-	void default_soil_components();								///< Function to setup the default soil component parameters
+	void create_default_soil_components();						///< Function to setup the default soil component parameters
+	void delete_soil_components();								///< Function to remove all soil components and parameters
+	void add_soil_component(std::string name, double frac);	///< Function to add soil components and corresponding molefraction
+	void verify_soil_components();							///< Function to check soil components for errors and correct
+	void compute_solidification_temp();						///< Function to compute soil solidification temperature based on components
+	void compute_vaporization_temp();						///< Function to compute soil vaporization temperature based on components
+	void compute_initial_soil_vapor();						///< Function to compute the initial vaporized soil mass (kg)
 	
 	// Below are listed function to compute some post-processing/post-solver information to form the cloud stem
 	void compute_alt_top(double z, double Hc);					///< Function to compute cloud cap top given center z and height Hc
@@ -464,6 +473,7 @@ protected:
 	double current_atm_press;		///< Current value of atmospheric pressure (set based on atm profile)		(P)
 	bool includeShearVel;			///< Boolean statement used to include (true) or ignore (false) wind shear
 	bool isSaturated;				///< Boolean state used to determine whether or not to use Saturated Functions
+	bool isSolidified;				///< Boolean state used to determine whether or not the soils have solidified
 	bool isTight;					///< Boolean state used to determine whether or not to use Tight Coulpling
 	bool ConsoleOut;				///< Boolean state used to determine whether or not to include console output
 	bool FileOut;					///< Boolean state used to determine whether or not to include file output

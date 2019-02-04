@@ -67,8 +67,8 @@ Crane::Crane()
 	davies_num = 1.0;
 	vapor_pressure = 0.0;
 	sat_vapor_pressure = 1.0;
-	solidification_temp = 1973.0;
-	vaporization_temp = 3000.0;
+	solidification_temp = 1673.0;
+	vaporization_temp = 2500.0;
 	initial_soil_mass = 0.0;
 	initial_soil_vapor = 0.0;
 	initial_water_mass = 0.0;
@@ -77,6 +77,7 @@ Crane::Crane()
 	current_atm_press = 101325.0;
 	includeShearVel = false;
 	isSaturated = false;
+	isSolidified = false;
 	ConsoleOut = false;
 	FileOut = false;
 	isTight = true;
@@ -113,6 +114,7 @@ Crane::Crane()
 	
 	create_default_atmosphere();
 	create_default_wind_profile();
+	create_default_soil_components();
 }
 
 //Default destructor
@@ -121,6 +123,7 @@ Crane::~Crane()
 	delete_atmosphere();
 	delete_particles();
 	delete_wind_profile();
+	delete_soil_components();
 }
 
 // Below are some display functions used for testing different functions
@@ -144,6 +147,19 @@ void Crane::display_part_conc()
 	std::cout << "Size (um)\tConcDist (Gp/m^3)\n";
 	//Iterate through map
 	for (std::map<double,double>::iterator it=this->part_conc.begin(); it!=this->part_conc.end(); ++it)
+	{
+		std::cout << it->first << "   \t" << it->second << std::endl;
+	}
+	std::cout << "\n";
+}
+
+void Crane::display_soil_characteristics()
+{
+	std::cout << "Approximate Soil Components (by molefraction)\n";
+	std::cout << "---------------------------------------------\n";
+	std::cout << "Comp\tMolefrac\n";
+	//Iterate through map
+	for (std::map<std::string, double>::iterator it=this->soil_molefrac.begin(); it!=this->soil_molefrac.end(); ++it)
 	{
 		std::cout << it->first << "   \t" << it->second << std::endl;
 	}
@@ -514,6 +530,11 @@ void Crane::set_includeShearVel(bool val)
 void Crane::set_isSaturated(bool val)
 {
 	this->isSaturated = val;
+}
+
+void Crane::set_isSolidified(bool val)
+{
+	this->isSolidified = val;
 }
 
 void Crane::set_ConsoleOut(bool val)
@@ -956,6 +977,11 @@ bool Crane::get_includeShearVel()
 bool Crane::get_isSaturated()
 {
 	return this->isSaturated;
+}
+
+bool Crane::get_isSolidified()
+{
+	return this->isSolidified;
 }
 
 double Crane::get_part_size(int i)
@@ -2116,21 +2142,177 @@ void Crane::delete_wind_profile()
 
 void Crane::add_solid_param(std::string name, int pow, double param)
 {
-	std::map<int, double> temp;
-	temp[pow] = param;
-	this->solid_params[name] = temp;
+	this->solid_params[name][pow] = param;
 }
 
 void Crane::add_vapor_param(std::string name, int pow, double param)
 {
-	std::map<int, double> temp;
-	temp[pow] = param;
-	this->vapor_params[name] = temp;
+	this->vapor_params[name][pow] = param;
 }
 
-void Crane::default_soil_components()
+void Crane::create_default_soil_components()
 {
+	this->add_solid_param("Al2O3", 1, 2291.808);
 	
+	this->add_solid_param("B2O3", 1, 470.728);
+	this->add_solid_param("B2O3", 2, 0.0);
+	this->add_solid_param("B2O3", 3, 0.863);
+	
+	this->add_solid_param("CaO", 1, 1470.932);
+	this->add_solid_param("CaO", 2, 1117.638);
+	
+	this->add_solid_param("Na2O", 1, 721.183);
+	this->add_solid_param("Na2O", 4, 409.184);
+	
+	this->add_solid_param("SiO2", 1, 748.503);
+	this->add_solid_param("SiO2", 4, 943.883);
+	
+	this->add_solid_param("Fe2O3", 1, 488.275);
+	this->add_solid_param("Fe2O3", 2, 388.747);
+	this->add_solid_param("Fe2O3", 3, 347.072);
+	this->add_solid_param("Fe2O3", 4, 340.824);
+	
+	this->add_solid_param("Li2O", 2, 1002.059);
+	this->add_solid_param("Li2O", 3, 283.818);
+	this->add_solid_param("Li2O", 4, 152.218);
+	
+	this->add_solid_param("NiO", 1, 61.949);
+	this->add_solid_param("NiO", 2, 680.155);
+	this->add_solid_param("NiO", 3, 616.105);
+	this->add_solid_param("NiO", 4, 596.780);
+	
+	this->add_solid_param("ZrO2", 1, 2732.195);
+	
+	this->add_solid_param("Cr2O3", 1, 2435.526);
+	
+	this->add_solid_param("ZnO", 1, 1939.413);
+	this->add_solid_param("ZnO", 3, 35.571);
+	
+	this->add_solid_param("MnO", 1, 1124.363);
+	this->add_solid_param("MnO", 2, 264.251);
+	this->add_solid_param("MnO", 3, 250.261);
+	this->add_solid_param("MnO", 4, 306.210);
+	
+	this->add_solid_param("K2O", 2, 1.588);
+	this->add_solid_param("K2O", 4, 737.881);
+	
+	this->add_solid_param("Other", 1, 1174);
+	
+	this->add_vapor_param("Al2O3", 1, 2977);
+	this->add_vapor_param("B2O3", 1, 1860);
+	this->add_vapor_param("CaO", 1, 2850);
+	this->add_vapor_param("Na2O", 1, 1950);
+	this->add_vapor_param("SiO2", 1, 2950);
+	this->add_vapor_param("Fe2O3", 1, 1565);
+	this->add_vapor_param("Li2O", 1, 2600);
+	this->add_vapor_param("NiO", 1, 1955);
+	this->add_vapor_param("ZrO2", 1, 4300);
+	this->add_vapor_param("Cr2O3", 1, 4000);
+	this->add_vapor_param("ZnO", 1, 2360);
+	this->add_vapor_param("MnO", 1, 3127);
+	this->add_vapor_param("K2O", 1, 740);
+	this->add_vapor_param("Other", 1, 2556);
+}
+
+void Crane::delete_soil_components()
+{
+	this->vapor_params.clear();
+	this->solid_params.clear();
+	this->soil_molefrac.clear();
+}
+
+void Crane::add_soil_component(std::string name, double frac)
+{
+	if (frac < 0.0)
+		frac = 0.0;
+	if (frac > 1.0)
+		frac = 1.0;
+	this->soil_molefrac[name] = frac;
+}
+
+void Crane::verify_soil_components()
+{
+	//Iterate through the map
+	std::map<std::string,double>::iterator it;
+	double sum = 0.0;
+	int count = 0;
+	for (it=this->soil_molefrac.begin(); it!=this->soil_molefrac.end(); it++)
+	{
+		sum += it->second;
+		count++;
+	}
+	if (count == 0)
+	{
+		this->add_soil_component("Other", 1.0);
+	}
+	else
+	{
+		if ( fabs(1.0-sum) >= 1.0e-6 )
+		{
+			for (it=this->soil_molefrac.begin(); it!=this->soil_molefrac.end(); it++)
+			{
+				it->second = it->second / sum;
+			}
+		}
+	}
+}
+
+void Crane::compute_solidification_temp()
+{
+	//Iterate through the map
+	std::map<std::string,double>::iterator it;
+	std::unordered_map<std::string, std::map<int, double> >::const_iterator jt;
+	double temp = 0.0;
+	std::string name;
+	for (it=this->soil_molefrac.begin(); it!=this->soil_molefrac.end(); it++)
+	{
+		jt = this->solid_params.find(it->first);
+		if (jt == this->solid_params.end())
+			name = "Other";
+		else
+			name = it->first;
+		
+		for (auto &x: this->solid_params[name])
+		{
+			temp += x.second*pow(it->second, (double)x.first);
+		}
+	}
+	
+	this->set_solidification_temp(temp+273.15);
+}
+
+void Crane::compute_vaporization_temp()
+{
+	//Iterate through the map
+	std::map<std::string,double>::iterator it;
+	std::unordered_map<std::string, std::map<int, double> >::const_iterator jt;
+	double temp = 0.0;
+	std::string name;
+	for (it=this->soil_molefrac.begin(); it!=this->soil_molefrac.end(); it++)
+	{
+		jt = this->vapor_params.find(it->first);
+		if (jt == this->vapor_params.end())
+			name = "Other";
+		else
+			name = it->first;
+		
+		for (auto &x: this->vapor_params[name])
+		{
+			temp += x.second*pow(it->second, (double)x.first);
+		}
+	}
+	
+	this->set_vaporization_temp(temp+273.15);
+}
+
+void Crane::compute_initial_soil_vapor()
+{
+	double mass = 0.00015*this->get_initial_soil_mass()*(this->get_temperature() - this->get_vaporization_temp());
+	if (mass < 0.0)
+		mass = 0.0;
+	if (mass > this->get_initial_soil_mass())
+		mass = this->get_initial_soil_mass();
+	this->set_initial_soil_vapor(mass);
 }
 
 double Crane::return_amb_temp(double z)
@@ -2872,6 +3054,10 @@ void Crane::establish_initial_conditions(Dove &dove, double W, double gz, double
 	this->set_includeShearVel(includeShear);
 	this->set_isTight(isTight);
 	this->set_isSaturated(false);
+	this->verify_soil_components();
+	this->compute_solidification_temp();
+	this->compute_vaporization_temp();
+	this->compute_initial_soil_vapor();
 	
 	// Post-processing ICs
 	this->compute_alt_top(this->get_cloud_alt(), this->get_vert_rad());
@@ -3401,7 +3587,19 @@ void Crane::estimate_parameters(Dove &dove)
 		else
 			this->set_isSaturated(false);
 	}
-    
+	
+	if (this->get_isSolidified() == false)
+	{
+		if (this->get_temperature() <= this->get_solidification_temp())
+		{
+			this->set_isSolidified(true);
+			if (this->get_solidification_time() <= 0.0)
+				this->set_solidification_time(this->get_current_time());
+		}
+		else
+			this->set_isSolidified(false);
+	}
+		
 }
 
 void Crane::perform_postprocessing(Dove &dove)
@@ -3850,6 +4048,11 @@ int CRANE_SCENARIO(const char *yaml_input, const char *atmosphere_data)
 	std::cout << "Initial Time (s)        =\t" << crane.get_current_time() << std::endl;
 	std::cout << "Number of air parcels   =\t" << crane.return_parcel_alt_top().rows() << std::endl;
 	std::cout << "Number of particle bins = \t" << crane.return_parcel_alt_top().columns() << std::endl;
+	crane.display_part_hist();
+	std::cout << "Soil Solid. Temp. (K)   =\t" << crane.get_solidification_temp() << std::endl;
+	std::cout << "Soil Vapor. Temp. (K)   =\t" << crane.get_vaporization_temp() << std::endl;
+	std::cout << "Vaporized Soil (kg)     =\t" << crane.get_initial_soil_vapor() << std::endl;
+	crane.display_soil_characteristics();
 	std::cout << "\n";
 	
 	//Read in ODE_Options
@@ -3882,11 +4085,16 @@ int CRANE_SCENARIO(const char *yaml_input, const char *atmosphere_data)
 		std::cout << dove.getVariableName(i) << " =\t " << dove.getNewU(i, dove.getNewU()) << std::endl;
 	}
 	
-	std::cout << "\nSaturation Time (s) =\t";
+	std::cout << "\nSaturation Time (s)     =\t";
 	if (crane.get_saturation_time() > 0.0)
 		std::cout << crane.get_saturation_time() << std::endl;
 	else
 		std::cout << "Unsaturated\n";
+	std::cout << "Solidification Time (s) =\t";
+	if (crane.get_saturation_time() > 0.0)
+		std::cout << crane.get_solidification_time() << std::endl;
+	else
+		std::cout << "Unsolidified\n";
 	
 	time = clock() - time;
 	std::cout << "\nCRANE Runtime: " << (time / CLOCKS_PER_SEC) << " seconds\n";
@@ -3948,6 +4156,9 @@ int CRANE_TESTS()
 	bool includeShear = true;
 	bool isTight = true;
 	
+	//test.add_soil_component("SiO2", 0.75);
+	//test.add_soil_component("CaO", 0.25);
+	
 	test.establish_initial_conditions(dove, W, gz, hb, bins, includeShear, isTight);
 	
 	std::cout << "\nTesting of the CRANE for the 1979 DELFIC Test Case with Default Atmosphere\n";
@@ -3962,8 +4173,12 @@ int CRANE_TESTS()
 	std::cout << "Ground Altitude (m)     =\t" << gz << std::endl;
     std::cout << "Initial Time (s)        =\t" << test.get_current_time() << std::endl;
 	std::cout << "Number of air parcels   =\t" << test.return_parcel_alt_top().rows() << std::endl;
-	std::cout << "Number of particle bins = \t" << test.return_parcel_alt_top().columns() << std::endl;
+	std::cout << "Number of particle bins =\t" << test.return_parcel_alt_top().columns() << std::endl;
 	test.display_part_hist();
+	std::cout << "Soil Solid. Temp. (K)   =\t" << test.get_solidification_temp() << std::endl;
+	std::cout << "Soil Vapor. Temp. (K)   =\t" << test.get_vaporization_temp() << std::endl;
+	std::cout << "Vaporized Soil (kg)     =\t" << test.get_initial_soil_vapor() << std::endl;
+	test.display_soil_characteristics();
     std::cout << "\n";
 	
 	bool fileout = true;
@@ -4019,11 +4234,16 @@ int CRANE_TESTS()
 	
 	//test.return_parcel_conc().Display("C_ij");
 	
-	std::cout << "\nSaturation Time (s) =\t";
+	std::cout << "\nSaturation Time (s)     =\t";
 	if (test.get_saturation_time() > 0.0)
 		std::cout << test.get_saturation_time() << std::endl;
 	else
 		std::cout << "Unsaturated\n";
+	std::cout << "Solidification Time (s) =\t";
+	if (test.get_saturation_time() > 0.0)
+		std::cout << test.get_solidification_time() << std::endl;
+	else
+		std::cout << "Unsolidified\n";
     
 	time = clock() - time;
 	std::cout << "\nTest Runtime: " << (time / CLOCKS_PER_SEC) << " seconds\n";
