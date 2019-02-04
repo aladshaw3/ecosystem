@@ -24,7 +24,9 @@ Symbol("N/A"),
 Category("N/A"),
 NaturalState("N/A"),
 atomic_number(0),
-atomic_radii(0)
+atomic_radii(0),
+melting_point(0),
+boiling_point(0)
 {
 }
 
@@ -7339,6 +7341,18 @@ void Atom::editRadii(double r)
 		this->atomic_radii = r;
 }
 
+//Edit melting point
+void Atom::editMeltingPoint(double val)
+{
+	this->melting_point = val;
+}
+
+//Edit boiling point
+void Atom::editBoilingPoint(double val)
+{
+	this->boiling_point = val;
+}
+
 //Remove a proton
 void Atom::removeProton()
 {
@@ -7426,6 +7440,18 @@ int Atom::BondingElectrons()
 double Atom::AtomicRadii()
 {
 	return this->atomic_radii;
+}
+
+//Return melting point
+double Atom::MeltingPoint()
+{
+	return this->melting_point;
+}
+
+//Return boiling point
+double Atom::BoilingPoint()
+{
+	return this->boiling_point;
 }
 
 //Return the name of the atom

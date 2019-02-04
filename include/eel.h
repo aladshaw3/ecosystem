@@ -58,6 +58,8 @@ public:
 	void editElectrons(int electron);		///< Manually changes the number of electrons
 	void editValence(int val);				///< Manually changes the number of valence electrons
 	void editRadii(double r);				///< Manually changes the van der Waals radii
+	void editMeltingPoint(double val);		///< Manually changes the melting point
+	void editBoilingPoint(double val);		///< Manually changes the boiling point
 	
 	void removeProton();					///< Manually removes 1 proton and adjusts weight
 	void removeNeutron();					///< Manually removes 1 neutron and adjusts weight
@@ -70,6 +72,8 @@ public:
 	int Electrons();						///< Returns the current number of electrons
 	int BondingElectrons();					///< Returns the number of electrons available for bonding
 	double AtomicRadii();					///< Returns the current van der Waals radii (in angstroms)
+	double MeltingPoint();					///< Returns the melting point
+	double BoilingPoint();					///< Returns the boiling point
 	
 	std::string AtomName();					///< Returns the name of the atom
 	std::string AtomSymbol();				///< Returns the symbol of the atom
@@ -87,6 +91,8 @@ protected:
 	int electrons;							///< Holds the number of electrons in the atom
 	int valence_e;							///< Holds the number of valence electrons in the atom
 	double atomic_radii;					///< Holds the van der Waals radii of the element (in angstroms)
+	double melting_point;					///< Holds the melting point of the element (in K)
+	double boiling_point;					///< Holds the boiling point of the element (in K)
 	std::string Name;						///< Holds the name of the atom
 	std::string Symbol;						///< Holds the atomic symbol for the atom
 	std::string Category;					///< Holds the category of the atom (e.g., Alkali Metal)
