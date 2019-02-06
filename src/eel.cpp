@@ -1191,6 +1191,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 67;
 		atomic_radii = 1.92;
+		melting_point = 1734;
+		boiling_point = 2873;
 	}
 	else if (name.compare("Erbium") == 0)
 	{
@@ -1206,6 +1208,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 68;
 		atomic_radii = 1.89;
+		melting_point = 1802;
+		boiling_point = 3141;
 	}
 	else if (name.compare("Thulium") == 0)
 	{
@@ -1221,6 +1225,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 69;
 		atomic_radii = 1.90;
+		melting_point = 1818;
+		boiling_point = 2223;
 	}
 	else if (name.compare("Ytterbium") == 0)
 	{
@@ -1236,6 +1242,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 70;
 		atomic_radii = 1.87;
+		melting_point = 1097;
+		boiling_point = 1469;
 	}
 	else if (name.compare("Lutetium") == 0)
 	{
@@ -1251,6 +1259,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 71;
 		atomic_radii = 1.87;
+		melting_point = 1925;
+		boiling_point = 3675;
 	}
 	else if (name.compare("Hafnium") == 0)
 	{
@@ -1266,6 +1276,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 72;
 		atomic_radii = 1.75;
+		melting_point = 2506;
+		boiling_point = 4876;
 	}
 	else if (name.compare("Tantalum") == 0)
 	{
@@ -1281,6 +1293,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 73;
 		atomic_radii = 1.70;
+		melting_point = 3290;
+		boiling_point = 5463;
 	}
 	else if (name.compare("Tungsten") == 0)
 	{
@@ -1296,6 +1310,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 74;
 		atomic_radii = 1.62;
+		melting_point = 3695;
+		boiling_point = 6203;
 	}
 	else if (name.compare("Rhenium") == 0)
 	{
@@ -1311,6 +1327,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 75;
 		atomic_radii = 1.51;
+		melting_point = 3459;
+		boiling_point = 5903;
 	}
 	else if (name.compare("Osmium") == 0)
 	{
@@ -1326,6 +1344,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 76;
 		atomic_radii = 1.44;
+		melting_point = 3306;
+		boiling_point = 5285;
 	}
 	else if (name.compare("Iridium") == 0)
 	{
@@ -1341,6 +1361,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 77;
 		atomic_radii = 1.41;
+		melting_point = 2719;
+		boiling_point = 4403;
 	}
 	else if (name.compare("Platinum") == 0)
 	{
@@ -1356,6 +1378,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 78;
 		atomic_radii = 1.75;
+		melting_point = 2041.4;
+		boiling_point = 4098;
 	}
 	else if (name.compare("Gold") == 0)
 	{
@@ -1371,6 +1395,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 79;
 		atomic_radii = 1.66;
+		melting_point = 1337.33;
+		boiling_point = 3243;
 	}
 	else if (name.compare("Mercury") == 0)
 	{
@@ -1386,6 +1412,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Liquid";
 		atomic_number = 80;
 		atomic_radii = 1.55;
+		melting_point = 234.321;
+		boiling_point = 629.88;
 	}
 	else if (name.compare("Thallium") == 0)
 	{
@@ -1401,6 +1429,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 81;
 		atomic_radii = 1.96;
+		melting_point = 577;
+		boiling_point = 1746;
 	}
 	else if (name.compare("Lead") == 0)
 	{
@@ -1416,6 +1446,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 82;
 		atomic_radii = 2.02;
+		melting_point = 600.61;
+		boiling_point = 2022;
 	}
 	else if (name.compare("Bismuth") == 0)
 	{
@@ -1431,6 +1463,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 83;
 		atomic_radii = 2.07;
+		melting_point = 544.7;
+		boiling_point = 1837;
 	}
 	else if (name.compare("Polonium") == 0)
 	{
@@ -1446,6 +1480,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 84;
 		atomic_radii = 1.97;
+		melting_point = 527;
+		boiling_point = 1235;
 	}
 	else if (name.compare("Astatine") == 0)
 	{
@@ -1461,6 +1497,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 85;
 		atomic_radii = 2.02;
+		melting_point = 575;
+		boiling_point = 610;
 	}
 	else if (name.compare("Radon") == 0)
 	{
@@ -1476,6 +1514,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Gas";
 		atomic_number = 86;
 		atomic_radii = 2.20;
+		melting_point = 202;
+		boiling_point = 211.5;
 	}
 	else if (name.compare("Francium") == 0)
 	{
@@ -1491,6 +1531,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 87;
 		atomic_radii = 3.48;
+		melting_point = 300;
+		boiling_point = 950;
 	}
 	else if (name.compare("Radium") == 0)
 	{
@@ -1506,6 +1548,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 88;
 		atomic_radii = 2.83;
+		melting_point = 973;
+		boiling_point = 2010;
 	}
 	else if (name.compare("Actinium") == 0)
 	{
@@ -1521,6 +1565,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 89;
 		atomic_radii = 2.15;
+		melting_point = 1500;
+		boiling_point = 3500;
 	}
 	else if (name.compare("Thorium") == 0)
 	{
@@ -1536,6 +1582,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 90;
 		atomic_radii = 2.06;
+		melting_point = 2023;
+		boiling_point = 5061;
 	}
 	else if (name.compare("Protactinium") == 0)
 	{
@@ -1551,6 +1599,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 91;
 		atomic_radii = 2.00;
+		melting_point = 1841;
+		boiling_point = 4300;
 	}
 	else if (name.compare("Uranium") == 0)
 	{
@@ -1566,6 +1616,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 92;
 		atomic_radii = 1.86;
+		melting_point = 1405.3;
+		boiling_point = 4404;
 	}
 	else if (name.compare("Neptunium") == 0)
 	{
@@ -1581,6 +1633,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 93;
 		atomic_radii = 1.90;
+		melting_point = 912;
+		boiling_point = 4447;
 	}
 	else if (name.compare("Plutonium") == 0)
 	{
@@ -1596,6 +1650,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 94;
 		atomic_radii = 1.87;
+		melting_point = 912.5;
+		boiling_point = 3505;
 	}
 	else if (name.compare("Americium") == 0)
 	{
@@ -1611,6 +1667,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 95;
 		atomic_radii = 1.80;
+		melting_point = 1449;
+		boiling_point = 2880;
 	}
 	else if (name.compare("Curium") == 0)
 	{
@@ -1626,6 +1684,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 96;
 		atomic_radii = 1.69;
+		melting_point = 1613;
+		boiling_point = 3383;
 	}
 	else if (name.compare("Berkelium") == 0)
 	{
@@ -1641,6 +1701,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 97;
 		atomic_radii = 1.70;
+		melting_point = 1259;
+		boiling_point = 2900;
 	}
 	else if (name.compare("Californium") == 0)
 	{
@@ -1656,6 +1718,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 98;
 		atomic_radii = 1.70;
+		melting_point = 1173;
+		boiling_point = 1743;
 	}
 	else if (name.compare("Einsteinium") == 0)
 	{
@@ -1671,6 +1735,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 99;
 		atomic_radii = 1.70;
+		melting_point = 1133;
+		boiling_point = 1269;
 	}
 	else if (name.compare("Fermium") == 0)
 	{
@@ -1686,6 +1752,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 100;
 		atomic_radii = 1.70;
+		melting_point = 1800;
+		boiling_point = 3000;
 	}
 	else if (name.compare("Mendelevium") == 0)
 	{
@@ -1701,6 +1769,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 101;
 		atomic_radii = 1.70;
+		melting_point = 1100;
+		boiling_point = 2500;
 	}
 	else if (name.compare("Nobelium") == 0)
 	{
@@ -1716,6 +1786,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 102;
 		atomic_radii = 1.70;
+		melting_point = 1100;
+		boiling_point = 2500;
 	}
 	else if (name.compare("Lawrencium") == 0)
 	{
@@ -1731,6 +1803,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 103;
 		atomic_radii = 1.70;
+		melting_point = 1900;
+		boiling_point = 3100;
 	}
 	else if (name.compare("Rutherfordium") == 0)
 	{
@@ -1746,6 +1820,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 104;
 		atomic_radii = 1.57;
+		melting_point = 2400;
+		boiling_point = 5800;
 	}
 	else if (name.compare("Dubnium") == 0)
 	{
@@ -1761,6 +1837,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 105;
 		atomic_radii = 1.49;
+		melting_point = 2400;
+		boiling_point = 5800;
 	}
 	else if (name.compare("Seaborgium") == 0)
 	{
@@ -1776,6 +1854,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 106;
 		atomic_radii = 1.43;
+		melting_point = 2400;
+		boiling_point = 5800;
 	}
 	else if (name.compare("Bohrium") == 0)
 	{
@@ -1791,6 +1871,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 107;
 		atomic_radii = 1.41;
+		melting_point = 2400;
+		boiling_point = 5800;
 	}
 	else if (name.compare("Hassium") == 0)
 	{
@@ -1806,6 +1888,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 108;
 		atomic_radii = 1.34;
+		melting_point = 2400;
+		boiling_point = 5800;
 	}
 	else if (name.compare("Meitnerium") == 0)
 	{
@@ -1821,6 +1905,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 109;
 		atomic_radii = 1.29;
+		melting_point = 2400;
+		boiling_point = 5800;
 	}
 	else if (name.compare("Darmstadium") == 0)
 	{
@@ -1836,6 +1922,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 110;
 		atomic_radii = 1.28;
+		melting_point = 2400;
+		boiling_point = 5800;
 	}
 	else if (name.compare("Roentgenium") == 0)
 	{
@@ -1851,6 +1939,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 111;
 		atomic_radii = 1.21;
+		melting_point = 2400;
+		boiling_point = 5800;
 	}
 	else if (name.compare("Copernicium") == 0)
 	{
@@ -1866,6 +1956,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 112;
 		atomic_radii = 1.22;
+		melting_point = 2400;
+		boiling_point = 5800;
 	}
 	else if (name.compare("Nihonium") == 0)
 	{
@@ -1881,6 +1973,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 113;
 		atomic_radii = 1.76;
+		melting_point = 700;
+		boiling_point = 1430;
 	}
 	else if (name.compare("Flerovium") == 0)
 	{
@@ -1896,6 +1990,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 114;
 		atomic_radii = 1.74;
+		melting_point = 200;
+		boiling_point = 210;
 	}
 	else if (name.compare("Moscovium") == 0)
 	{
@@ -1911,6 +2007,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 115;
 		atomic_radii = 1.57;
+		melting_point = 670;
+		boiling_point = 1400;
 	}
 	else if (name.compare("Livermorium") == 0)
 	{
@@ -1926,6 +2024,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 116;
 		atomic_radii = 1.64;
+		melting_point = 740;
+		boiling_point = 1085;
 	}
 	else if (name.compare("Tennessine") == 0)
 	{
@@ -1941,6 +2041,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 117;
 		atomic_radii = 1.57;
+		melting_point = 723;
+		boiling_point = 883;
 	}
 	else if (name.compare("Oganesson") == 0)
 	{
@@ -1956,6 +2058,8 @@ Atom::Atom(std::string name)
 		NaturalState = "Solid";
 		atomic_number = 118;
 		atomic_radii = 1.57;
+		melting_point = 300;
+		boiling_point = 350;
 	}
 	else
 	{
@@ -3129,6 +3233,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 67;
 		atomic_radii = 1.92;
+		melting_point = 1734;
+		boiling_point = 2873;
 	}
 	else if (number == 68)
 	{
@@ -3144,6 +3250,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 68;
 		atomic_radii = 1.89;
+		melting_point = 1802;
+		boiling_point = 3141;
 	}
 	else if (number == 69)
 	{
@@ -3159,6 +3267,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 69;
 		atomic_radii = 1.90;
+		melting_point = 1818;
+		boiling_point = 2223;
 	}
 	else if (number == 70)
 	{
@@ -3174,6 +3284,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 70;
 		atomic_radii = 1.87;
+		melting_point = 1097;
+		boiling_point = 1469;
 	}
 	else if (number == 71)
 	{
@@ -3189,6 +3301,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 71;
 		atomic_radii = 1.87;
+		melting_point = 1925;
+		boiling_point = 3675;
 	}
 	else if (number == 72)
 	{
@@ -3204,6 +3318,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 72;
 		atomic_radii = 1.75;
+		melting_point = 2506;
+		boiling_point = 4876;
 	}
 	else if (number == 73)
 	{
@@ -3219,6 +3335,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 73;
 		atomic_radii = 1.70;
+		melting_point = 3290;
+		boiling_point = 5463;
 	}
 	else if (number == 74)
 	{
@@ -3234,6 +3352,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 74;
 		atomic_radii = 1.62;
+		melting_point = 3695;
+		boiling_point = 6203;
 	}
 	else if (number == 75)
 	{
@@ -3249,6 +3369,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 75;
 		atomic_radii = 1.51;
+		melting_point = 3459;
+		boiling_point = 5903;
 	}
 	else if (number == 76)
 	{
@@ -3264,6 +3386,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 76;
 		atomic_radii = 1.44;
+		melting_point = 3306;
+		boiling_point = 5285;
 	}
 	else if (number == 77)
 	{
@@ -3279,6 +3403,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 77;
 		atomic_radii = 1.41;
+		melting_point = 2719;
+		boiling_point = 4403;
 	}
 	else if (number == 78)
 	{
@@ -3294,6 +3420,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 78;
 		atomic_radii = 1.75;
+		melting_point = 2041.4;
+		boiling_point = 4098;
 	}
 	else if (number == 79)
 	{
@@ -3309,6 +3437,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 79;
 		atomic_radii = 1.66;
+		melting_point = 1337.33;
+		boiling_point = 3243;
 	}
 	else if (number == 80)
 	{
@@ -3324,6 +3454,8 @@ Atom::Atom(int number)
 		NaturalState = "Liquid";
 		atomic_number = 80;
 		atomic_radii = 1.55;
+		melting_point = 234.321;
+		boiling_point = 629.88;
 	}
 	else if (number == 81)
 	{
@@ -3339,6 +3471,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 81;
 		atomic_radii = 1.96;
+		melting_point = 577;
+		boiling_point = 1746;
 	}
 	else if (number == 82)
 	{
@@ -3354,6 +3488,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 82;
 		atomic_radii = 2.02;
+		melting_point = 600.61;
+		boiling_point = 2022;
 	}
 	else if (number == 83)
 	{
@@ -3369,6 +3505,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 83;
 		atomic_radii = 2.07;
+		melting_point = 544.7;
+		boiling_point = 1837;
 	}
 	else if (number == 84)
 	{
@@ -3384,6 +3522,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 84;
 		atomic_radii = 1.97;
+		melting_point = 527;
+		boiling_point = 1235;
 	}
 	else if (number == 85)
 	{
@@ -3399,6 +3539,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 85;
 		atomic_radii = 2.02;
+		melting_point = 575;
+		boiling_point = 610;
 	}
 	else if (number == 86)
 	{
@@ -3414,6 +3556,8 @@ Atom::Atom(int number)
 		NaturalState = "Gas";
 		atomic_number = 86;
 		atomic_radii = 2.20;
+		melting_point = 202;
+		boiling_point = 211.5;
 	}
 	else if (number == 87)
 	{
@@ -3429,6 +3573,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 87;
 		atomic_radii = 3.48;
+		melting_point = 300;
+		boiling_point = 950;
 	}
 	else if (number == 88)
 	{
@@ -3444,6 +3590,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 88;
 		atomic_radii = 2.83;
+		melting_point = 973;
+		boiling_point = 2010;
 	}
 	else if (number == 89)
 	{
@@ -3459,6 +3607,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 89;
 		atomic_radii = 2.15;
+		melting_point = 1500;
+		boiling_point = 3500;
 	}
 	else if (number == 90)
 	{
@@ -3474,6 +3624,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 90;
 		atomic_radii = 2.06;
+		melting_point = 2023;
+		boiling_point = 5061;
 	}
 	else if (number == 91)
 	{
@@ -3489,6 +3641,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 91;
 		atomic_radii = 2.00;
+		melting_point = 1841;
+		boiling_point = 4300;
 	}
 	else if (number == 92)
 	{
@@ -3504,6 +3658,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 92;
 		atomic_radii = 1.86;
+		melting_point = 1405.3;
+		boiling_point = 4404;
 	}
 	else if (number == 93)
 	{
@@ -3519,6 +3675,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 93;
 		atomic_radii = 1.90;
+		melting_point = 912;
+		boiling_point = 4447;
 	}
 	else if (number == 94)
 	{
@@ -3534,6 +3692,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 94;
 		atomic_radii = 1.87;
+		melting_point = 912.5;
+		boiling_point = 3505;
 	}
 	else if (number == 95)
 	{
@@ -3549,6 +3709,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 95;
 		atomic_radii = 1.80;
+		melting_point = 1449;
+		boiling_point = 2880;
 	}
 	else if (number == 96)
 	{
@@ -3564,6 +3726,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 96;
 		atomic_radii = 1.69;
+		melting_point = 1613;
+		boiling_point = 3383;
 	}
 	else if (number == 97)
 	{
@@ -3579,6 +3743,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 97;
 		atomic_radii = 1.70;
+		melting_point = 1259;
+		boiling_point = 2900;
 	}
 	else if (number == 98)
 	{
@@ -3594,6 +3760,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 98;
 		atomic_radii = 1.70;
+		melting_point = 1173;
+		boiling_point = 1743;
 	}
 	else if (number == 99)
 	{
@@ -3609,6 +3777,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 99;
 		atomic_radii = 1.70;
+		melting_point = 1133;
+		boiling_point = 1269;
 	}
 	else if (number == 100)
 	{
@@ -3624,6 +3794,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 100;
 		atomic_radii = 1.70;
+		melting_point = 1800;
+		boiling_point = 3000;
 	}
 	else if (number == 101)
 	{
@@ -3639,6 +3811,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 101;
 		atomic_radii = 1.70;
+		melting_point = 1100;
+		boiling_point = 2500;
 	}
 	else if (number == 102)
 	{
@@ -3654,6 +3828,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 102;
 		atomic_radii = 1.70;
+		melting_point = 1100;
+		boiling_point = 2500;
 	}
 	else if (number == 103)
 	{
@@ -3669,6 +3845,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 103;
 		atomic_radii = 1.70;
+		melting_point = 1900;
+		boiling_point = 3100;
 	}
 	else if (number == 104)
 	{
@@ -3684,6 +3862,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 104;
 		atomic_radii = 1.57;
+		melting_point = 2400;
+		boiling_point = 5800;
 	}
 	else if (number == 105)
 	{
@@ -3699,6 +3879,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 105;
 		atomic_radii = 1.49;
+		melting_point = 2400;
+		boiling_point = 5800;
 	}
 	else if (number == 106)
 	{
@@ -3714,6 +3896,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 106;
 		atomic_radii = 1.43;
+		melting_point = 2400;
+		boiling_point = 5800;
 	}
 	else if (number == 107)
 	{
@@ -3729,6 +3913,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 107;
 		atomic_radii = 1.41;
+		melting_point = 2400;
+		boiling_point = 5800;
 	}
 	else if (number == 108)
 	{
@@ -3744,6 +3930,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 108;
 		atomic_radii = 1.34;
+		melting_point = 2400;
+		boiling_point = 5800;
 	}
 	else if (number == 109)
 	{
@@ -3759,6 +3947,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 109;
 		atomic_radii = 1.29;
+		melting_point = 2400;
+		boiling_point = 5800;
 	}
 	else if (number == 110)
 	{
@@ -3774,6 +3964,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 110;
 		atomic_radii = 1.28;
+		melting_point = 2400;
+		boiling_point = 5800;
 	}
 	else if (number == 111)
 	{
@@ -3789,6 +3981,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 111;
 		atomic_radii = 1.21;
+		melting_point = 2400;
+		boiling_point = 5800;
 	}
 	else if (number == 112)
 	{
@@ -3804,6 +3998,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 112;
 		atomic_radii = 1.22;
+		melting_point = 2400;
+		boiling_point = 5800;
 	}
 	else if (number == 113)
 	{
@@ -3819,6 +4015,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 113;
 		atomic_radii = 1.76;
+		melting_point = 700;
+		boiling_point = 1430;
 	}
 	else if (number == 114)
 	{
@@ -3834,6 +4032,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 114;
 		atomic_radii = 1.74;
+		melting_point = 200;
+		boiling_point = 210;
 	}
 	else if (number == 115)
 	{
@@ -3849,6 +4049,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 115;
 		atomic_radii = 1.57;
+		melting_point = 670;
+		boiling_point = 1400;
 	}
 	else if (number == 116)
 	{
@@ -3864,6 +4066,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 116;
 		atomic_radii = 1.64;
+		melting_point = 740;
+		boiling_point = 1085;
 	}
 	else if (number == 117)
 	{
@@ -3879,6 +4083,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 117;
 		atomic_radii = 1.57;
+		melting_point = 723;
+		boiling_point = 883;
 	}
 	else if (number == 118)
 	{
@@ -3894,6 +4100,8 @@ Atom::Atom(int number)
 		NaturalState = "Solid";
 		atomic_number = 118;
 		atomic_radii = 1.57;
+		melting_point = 300;
+		boiling_point = 350;
 	}
 	else
 	{
@@ -5067,6 +5275,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 67;
 		this->atomic_radii = 1.92;
+		this->melting_point = 1734;
+		this->boiling_point = 2873;
 	}
 	else if (Symbol.compare("Er") == 0)
 	{
@@ -5082,6 +5292,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 68;
 		this->atomic_radii = 1.89;
+		this->melting_point = 1802;
+		this->boiling_point = 3141;
 	}
 	else if (Symbol.compare("Tm") == 0)
 	{
@@ -5097,6 +5309,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 69;
 		this->atomic_radii = 1.90;
+		this->melting_point = 1818;
+		this->boiling_point = 2223;
 	}
 	else if (Symbol.compare("Yb") == 0)
 	{
@@ -5112,6 +5326,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 70;
 		this->atomic_radii = 1.87;
+		this->melting_point = 1097;
+		this->boiling_point = 1469;
 	}
 	else if (Symbol.compare("Lu") == 0)
 	{
@@ -5127,6 +5343,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 71;
 		this->atomic_radii = 1.87;
+		this->melting_point = 1925;
+		this->boiling_point = 3675;
 	}
 	else if (Symbol.compare("Hf") == 0)
 	{
@@ -5142,6 +5360,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 72;
 		this->atomic_radii = 1.75;
+		this->melting_point = 2506;
+		this->boiling_point = 4876;
 	}
 	else if (Symbol.compare("Ta") == 0)
 	{
@@ -5157,6 +5377,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 73;
 		this->atomic_radii = 1.70;
+		this->melting_point = 3290;
+		this->boiling_point = 5463;
 	}
 	else if (Symbol.compare("W") == 0)
 	{
@@ -5172,6 +5394,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 74;
 		this->atomic_radii = 1.62;
+		this->melting_point = 3695;
+		this->boiling_point = 6203;
 	}
 	else if (Symbol.compare("Re") == 0)
 	{
@@ -5187,6 +5411,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 75;
 		this->atomic_radii = 1.51;
+		this->melting_point = 3459;
+		this->boiling_point = 5903;
 	}
 	else if (Symbol.compare("Os") == 0)
 	{
@@ -5202,6 +5428,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 76;
 		this->atomic_radii = 1.44;
+		this->melting_point = 3306;
+		this->boiling_point = 5285;
 	}
 	else if (Symbol.compare("Ir") == 0)
 	{
@@ -5217,6 +5445,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 77;
 		this->atomic_radii = 1.41;
+		this->melting_point = 2719;
+		this->boiling_point = 4403;
 	}
 	else if (Symbol.compare("Pt") == 0)
 	{
@@ -5232,6 +5462,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 78;
 		this->atomic_radii = 1.75;
+		this->melting_point = 2041.4;
+		this->boiling_point = 4098;
 	}
 	else if (Symbol.compare("Au") == 0)
 	{
@@ -5247,6 +5479,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 79;
 		this->atomic_radii = 1.66;
+		this->melting_point = 1337.33;
+		this->boiling_point = 3243;
 	}
 	else if (Symbol.compare("Hg") == 0)
 	{
@@ -5262,6 +5496,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Liquid";
 		this->atomic_number = 80;
 		this->atomic_radii = 1.55;
+		this->melting_point = 234.321;
+		this->boiling_point = 629.88;
 	}
 	else if (Symbol.compare("Tl") == 0)
 	{
@@ -5277,6 +5513,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 81;
 		this->atomic_radii = 1.96;
+		this->melting_point = 577;
+		this->boiling_point = 1746;
 	}
 	else if (Symbol.compare("Pb") == 0)
 	{
@@ -5292,6 +5530,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 82;
 		this->atomic_radii = 2.02;
+		this->melting_point = 600.61;
+		this->boiling_point = 2022;
 	}
 	else if (Symbol.compare("Bi") == 0)
 	{
@@ -5307,6 +5547,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 83;
 		this->atomic_radii = 2.07;
+		this->melting_point = 544.7;
+		this->boiling_point = 1837;
 	}
 	else if (Symbol.compare("Po") == 0)
 	{
@@ -5322,6 +5564,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 84;
 		this->atomic_radii = 1.97;
+		this->melting_point = 527;
+		this->boiling_point = 1235;
 	}
 	else if (Symbol.compare("At") == 0)
 	{
@@ -5337,6 +5581,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 85;
 		this->atomic_radii = 2.02;
+		this->melting_point = 575;
+		this->boiling_point = 610;
 	}
 	else if (Symbol.compare("Rn") == 0)
 	{
@@ -5352,6 +5598,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Gas";
 		this->atomic_number = 86;
 		this->atomic_radii = 2.20;
+		this->melting_point = 202;
+		this->boiling_point = 211.5;
 	}
 	else if (Symbol.compare("Fr") == 0)
 	{
@@ -5367,6 +5615,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 87;
 		this->atomic_radii = 3.48;
+		this->melting_point = 300;
+		this->boiling_point = 950;
 	}
 	else if (Symbol.compare("Ra") == 0)
 	{
@@ -5382,6 +5632,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 88;
 		this->atomic_radii = 2.83;
+		this->melting_point = 973;
+		this->boiling_point = 2010;
 	}
 	else if (Symbol.compare("Ac") == 0)
 	{
@@ -5397,6 +5649,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 89;
 		this->atomic_radii = 2.15;
+		this->melting_point = 1500;
+		this->boiling_point = 3500;
 	}
 	else if (Symbol.compare("Th") == 0)
 	{
@@ -5412,6 +5666,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 90;
 		this->atomic_radii = 2.06;
+		this->melting_point = 2023;
+		this->boiling_point = 5061;
 	}
 	else if (Symbol.compare("Pa") == 0)
 	{
@@ -5427,6 +5683,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 91;
 		this->atomic_radii = 2.00;
+		this->melting_point = 1841;
+		this->boiling_point = 4300;
 	}
 	else if (Symbol.compare("U") == 0)
 	{
@@ -5442,6 +5700,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 92;
 		this->atomic_radii = 1.86;
+		this->melting_point = 1405.3;
+		this->boiling_point = 4404;
 	}
 	else if (Symbol.compare("Np") == 0)
 	{
@@ -5457,6 +5717,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 93;
 		this->atomic_radii = 1.90;
+		this->melting_point = 912;
+		this->boiling_point = 4447;
 	}
 	else if (Symbol.compare("Pu") == 0)
 	{
@@ -5472,6 +5734,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 94;
 		this->atomic_radii = 1.87;
+		this->melting_point = 912.5;
+		this->boiling_point = 3505;
 	}
 	else if (Symbol.compare("Am") == 0)
 	{
@@ -5487,6 +5751,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 95;
 		this->atomic_radii = 1.80;
+		this->melting_point = 1449;
+		this->boiling_point = 2880;
 	}
 	else if (Symbol.compare("Cm") == 0)
 	{
@@ -5502,6 +5768,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 96;
 		this->atomic_radii = 1.69;
+		this->melting_point = 1613;
+		this->boiling_point = 3383;
 	}
 	else if (Symbol.compare("Bk") == 0)
 	{
@@ -5517,6 +5785,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 97;
 		this->atomic_radii = 1.70;
+		this->melting_point = 1259;
+		this->boiling_point = 2900;
 	}
 	else if (Symbol.compare("Cf") == 0)
 	{
@@ -5532,6 +5802,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 98;
 		this->atomic_radii = 1.70;
+		this->melting_point = 1173;
+		this->boiling_point = 1743;
 	}
 	else if (Symbol.compare("Es") == 0)
 	{
@@ -5547,6 +5819,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 99;
 		this->atomic_radii = 1.70;
+		this->melting_point = 1133;
+		this->boiling_point = 1269;
 	}
 	else if (Symbol.compare("Fm") == 0)
 	{
@@ -5562,6 +5836,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 100;
 		this->atomic_radii = 1.70;
+		this->melting_point = 1800;
+		this->boiling_point = 3000;
 	}
 	else if (Symbol.compare("Md") == 0)
 	{
@@ -5577,6 +5853,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 101;
 		this->atomic_radii = 1.70;
+		this->melting_point = 1100;
+		this->boiling_point = 2500;
 	}
 	else if (Symbol.compare("No") == 0)
 	{
@@ -5592,6 +5870,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 102;
 		this->atomic_radii = 1.70;
+		this->melting_point = 1100;
+		this->boiling_point = 2500;
 	}
 	else if (Symbol.compare("Lr") == 0)
 	{
@@ -5607,6 +5887,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 103;
 		this->atomic_radii = 1.70;
+		this->melting_point = 1900;
+		this->boiling_point = 3100;
 	}
 	else if (Symbol.compare("Rf") == 0)
 	{
@@ -5622,6 +5904,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 104;
 		this->atomic_radii = 1.57;
+		this->melting_point = 2400;
+		this->boiling_point = 5800;
 	}
 	else if (Symbol.compare("Db") == 0)
 	{
@@ -5637,6 +5921,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 105;
 		this->atomic_radii = 1.49;
+		this->melting_point = 2400;
+		this->boiling_point = 5800;
 	}
 	else if (Symbol.compare("Sg") == 0)
 	{
@@ -5652,6 +5938,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 106;
 		this->atomic_radii = 1.43;
+		this->melting_point = 2400;
+		this->boiling_point = 5800;
 	}
 	else if (Symbol.compare("Bh") == 0)
 	{
@@ -5667,6 +5955,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 107;
 		this->atomic_radii = 1.41;
+		this->melting_point = 2400;
+		this->boiling_point = 5800;
 	}
 	else if (Symbol.compare("Hs") == 0)
 	{
@@ -5682,6 +5972,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 108;
 		this->atomic_radii = 1.34;
+		this->melting_point = 2400;
+		this->boiling_point = 5800;
 	}
 	else if (Symbol.compare("Mt") == 0)
 	{
@@ -5697,6 +5989,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 109;
 		this->atomic_radii = 1.29;
+		this->melting_point = 2400;
+		this->boiling_point = 5800;
 	}
 	else if (Symbol.compare("Ds") == 0)
 	{
@@ -5712,6 +6006,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 110;
 		this->atomic_radii = 1.28;
+		this->melting_point = 2400;
+		this->boiling_point = 5800;
 	}
 	else if (Symbol.compare("Rg") == 0)
 	{
@@ -5727,6 +6023,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 111;
 		this->atomic_radii = 1.21;
+		this->melting_point = 2400;
+		this->boiling_point = 5800;
 	}
 	else if (Symbol.compare("Cn") == 0)
 	{
@@ -5742,6 +6040,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 112;
 		this->atomic_radii = 1.22;
+		this->melting_point = 2400;
+		this->boiling_point = 5800;
 	}
 	else if (Symbol.compare("Nh") == 0)
 	{
@@ -5757,6 +6057,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 113;
 		this->atomic_radii = 1.76;
+		this->melting_point = 700;
+		this->boiling_point = 1430;
 	}
 	else if (Symbol.compare("Fl") == 0)
 	{
@@ -5772,6 +6074,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 114;
 		this->atomic_radii = 1.74;
+		this->melting_point = 200;
+		this->boiling_point = 210;
 	}
 	else if (Symbol.compare("Mc") == 0)
 	{
@@ -5787,6 +6091,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 115;
 		this->atomic_radii = 1.57;
+		this->melting_point = 670;
+		this->boiling_point = 1400;
 	}
 	else if (Symbol.compare("Lv") == 0)
 	{
@@ -5802,6 +6108,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 116;
 		this->atomic_radii = 1.64;
+		this->melting_point = 740;
+		this->boiling_point = 1085;
 	}
 	else if (Symbol.compare("Ts") == 0)
 	{
@@ -5817,6 +6125,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 117;
 		this->atomic_radii = 1.57;
+		this->melting_point = 723;
+		this->boiling_point = 883;
 	}
 	else if (Symbol.compare("Og") == 0)
 	{
@@ -5832,6 +6142,8 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "Solid";
 		this->atomic_number = 118;
 		this->atomic_radii = 1.57;
+		this->melting_point = 300;
+		this->boiling_point = 350;
 	}
 	else
 	{
@@ -7008,6 +7320,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 67;
 		this->atomic_radii = 1.92;
+		this->melting_point = 1734;
+		this->boiling_point = 2873;
 	}
 	else if (number == 68)
 	{
@@ -7023,6 +7337,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 68;
 		this->atomic_radii = 1.89;
+		this->melting_point = 1802;
+		this->boiling_point = 3141;
 	}
 	else if (number == 69)
 	{
@@ -7038,6 +7354,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 69;
 		this->atomic_radii = 1.90;
+		this->melting_point = 1818;
+		this->boiling_point = 2223;
 	}
 	else if (number == 70)
 	{
@@ -7053,6 +7371,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 70;
 		this->atomic_radii = 1.87;
+		this->melting_point = 1097;
+		this->boiling_point = 1469;
 	}
 	else if (number == 71)
 	{
@@ -7068,6 +7388,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 71;
 		this->atomic_radii = 1.87;
+		this->melting_point = 1925;
+		this->boiling_point = 3675;
 	}
 	else if (number == 72)
 	{
@@ -7083,6 +7405,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 72;
 		this->atomic_radii = 1.75;
+		this->melting_point = 2506;
+		this->boiling_point = 4876;
 	}
 	else if (number == 73)
 	{
@@ -7098,6 +7422,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 73;
 		this->atomic_radii = 1.70;
+		this->melting_point = 3290;
+		this->boiling_point = 5463;
 	}
 	else if (number == 74)
 	{
@@ -7113,6 +7439,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 74;
 		this->atomic_radii = 1.62;
+		this->melting_point = 3695;
+		this->boiling_point = 6203;
 	}
 	else if (number == 75)
 	{
@@ -7128,6 +7456,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 75;
 		this->atomic_radii = 1.51;
+		this->melting_point = 3459;
+		this->boiling_point = 5903;
 	}
 	else if (number == 76)
 	{
@@ -7143,6 +7473,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 76;
 		this->atomic_radii = 1.44;
+		this->melting_point = 3306;
+		this->boiling_point = 5285;
 	}
 	else if (number == 77)
 	{
@@ -7158,6 +7490,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 77;
 		this->atomic_radii = 1.41;
+		this->melting_point = 2719;
+		this->boiling_point = 4403;
 	}
 	else if (number == 78)
 	{
@@ -7173,6 +7507,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 78;
 		this->atomic_radii = 1.75;
+		this->melting_point = 2041.4;
+		this->boiling_point = 4098;
 	}
 	else if (number == 79)
 	{
@@ -7188,6 +7524,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 79;
 		this->atomic_radii = 1.66;
+		this->melting_point = 1337.33;
+		this->boiling_point = 3243;
 	}
 	else if (number == 80)
 	{
@@ -7203,6 +7541,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Liquid";
 		this->atomic_number = 80;
 		this->atomic_radii = 1.55;
+		this->melting_point = 234.321;
+		this->boiling_point = 629.88;
 	}
 	else if (number == 81)
 	{
@@ -7218,6 +7558,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 81;
 		this->atomic_radii = 1.96;
+		this->melting_point = 577;
+		this->boiling_point = 1746;
 	}
 	else if (number == 82)
 	{
@@ -7233,6 +7575,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 82;
 		this->atomic_radii = 2.02;
+		this->melting_point = 600.61;
+		this->boiling_point = 2022;
 	}
 	else if (number == 83)
 	{
@@ -7248,6 +7592,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 83;
 		this->atomic_radii = 2.07;
+		this->melting_point = 544.7;
+		this->boiling_point = 1837;
 	}
 	else if (number == 84)
 	{
@@ -7263,6 +7609,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 84;
 		this->atomic_radii = 1.97;
+		this->melting_point = 527;
+		this->boiling_point = 1235;
 	}
 	else if (number == 85)
 	{
@@ -7278,6 +7626,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 85;
 		this->atomic_radii = 2.02;
+		this->melting_point = 575;
+		this->boiling_point = 610;
 	}
 	else if (number == 86)
 	{
@@ -7293,6 +7643,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Gas";
 		this->atomic_number = 86;
 		this->atomic_radii = 2.20;
+		this->melting_point = 202;
+		this->boiling_point = 211.5;
 	}
 	else if (number == 87)
 	{
@@ -7308,6 +7660,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 87;
 		this->atomic_radii = 3.48;
+		this->melting_point = 300;
+		this->boiling_point = 950;
 	}
 	else if (number == 88)
 	{
@@ -7323,6 +7677,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 88;
 		this->atomic_radii = 2.83;
+		this->melting_point = 973;
+		this->boiling_point = 2010;
 	}
 	else if (number == 89)
 	{
@@ -7338,6 +7694,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 89;
 		this->atomic_radii = 2.15;
+		this->melting_point = 1500;
+		this->boiling_point = 3500;
 	}
 	else if (number == 90)
 	{
@@ -7353,6 +7711,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 90;
 		this->atomic_radii = 2.06;
+		this->melting_point = 2023;
+		this->boiling_point = 5061;
 	}
 	else if (number == 91)
 	{
@@ -7368,6 +7728,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 91;
 		this->atomic_radii = 2.00;
+		this->melting_point = 1841;
+		this->boiling_point = 4300;
 	}
 	else if (number == 92)
 	{
@@ -7383,6 +7745,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 92;
 		this->atomic_radii = 1.86;
+		this->melting_point = 1405.3;
+		this->boiling_point = 4404;
 	}
 	else if (number == 93)
 	{
@@ -7398,6 +7762,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 93;
 		this->atomic_radii = 1.90;
+		this->melting_point = 912;
+		this->boiling_point = 4447;
 	}
 	else if (number == 94)
 	{
@@ -7413,6 +7779,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 94;
 		this->atomic_radii = 1.87;
+		this->melting_point = 912.5;
+		this->boiling_point = 3505;
 	}
 	else if (number == 95)
 	{
@@ -7428,6 +7796,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 95;
 		this->atomic_radii = 1.80;
+		this->melting_point = 1449;
+		this->boiling_point = 2880;
 	}
 	else if (number == 96)
 	{
@@ -7443,6 +7813,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 96;
 		this->atomic_radii = 1.69;
+		this->melting_point = 1613;
+		this->boiling_point = 3383;
 	}
 	else if (number == 97)
 	{
@@ -7458,6 +7830,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 97;
 		this->atomic_radii = 1.70;
+		this->melting_point = 1259;
+		this->boiling_point = 2900;
 	}
 	else if (number == 98)
 	{
@@ -7473,6 +7847,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 98;
 		this->atomic_radii = 1.70;
+		this->melting_point = 1173;
+		this->boiling_point = 1743;
 	}
 	else if (number == 99)
 	{
@@ -7488,6 +7864,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 99;
 		this->atomic_radii = 1.70;
+		this->melting_point = 1133;
+		this->boiling_point = 1269;
 	}
 	else if (number == 100)
 	{
@@ -7503,6 +7881,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 100;
 		this->atomic_radii = 1.70;
+		this->melting_point = 1800;
+		this->boiling_point = 3000;
 	}
 	else if (number == 101)
 	{
@@ -7518,6 +7898,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 101;
 		this->atomic_radii = 1.70;
+		this->melting_point = 1100;
+		this->boiling_point = 2500;
 	}
 	else if (number == 102)
 	{
@@ -7533,6 +7915,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 102;
 		this->atomic_radii = 1.70;
+		this->melting_point = 1100;
+		this->boiling_point = 2500;
 	}
 	else if (number == 103)
 	{
@@ -7548,6 +7932,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 103;
 		this->atomic_radii = 1.70;
+		this->melting_point = 1900;
+		this->boiling_point = 3100;
 	}
 	else if (number == 104)
 	{
@@ -7563,6 +7949,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 104;
 		this->atomic_radii = 1.57;
+		this->melting_point = 2400;
+		this->boiling_point = 5800;
 	}
 	else if (number == 105)
 	{
@@ -7578,6 +7966,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 105;
 		this->atomic_radii = 1.49;
+		this->melting_point = 2400;
+		this->boiling_point = 5800;
 	}
 	else if (number == 106)
 	{
@@ -7593,6 +7983,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 106;
 		this->atomic_radii = 1.43;
+		this->melting_point = 2400;
+		this->boiling_point = 5800;
 	}
 	else if (number == 107)
 	{
@@ -7608,6 +8000,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 107;
 		this->atomic_radii = 1.41;
+		this->melting_point = 2400;
+		this->boiling_point = 5800;
 	}
 	else if (number == 108)
 	{
@@ -7623,6 +8017,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 108;
 		this->atomic_radii = 1.34;
+		this->melting_point = 2400;
+		this->boiling_point = 5800;
 	}
 	else if (number == 109)
 	{
@@ -7638,6 +8034,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 109;
 		this->atomic_radii = 1.29;
+		this->melting_point = 2400;
+		this->boiling_point = 5800;
 	}
 	else if (number == 110)
 	{
@@ -7653,6 +8051,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 110;
 		this->atomic_radii = 1.28;
+		this->melting_point = 2400;
+		this->boiling_point = 5800;
 	}
 	else if (number == 111)
 	{
@@ -7668,6 +8068,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 111;
 		this->atomic_radii = 1.21;
+		this->melting_point = 2400;
+		this->boiling_point = 5800;
 	}
 	else if (number == 112)
 	{
@@ -7683,6 +8085,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 112;
 		this->atomic_radii = 1.22;
+		this->melting_point = 2400;
+		this->boiling_point = 5800;
 	}
 	else if (number == 113)
 	{
@@ -7698,6 +8102,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 113;
 		this->atomic_radii = 1.76;
+		this->melting_point = 700;
+		this->boiling_point = 1430;
 	}
 	else if (number == 114)
 	{
@@ -7713,6 +8119,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 114;
 		this->atomic_radii = 1.74;
+		this->melting_point = 200;
+		this->boiling_point = 210;
 	}
 	else if (number == 115)
 	{
@@ -7728,6 +8136,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 115;
 		this->atomic_radii = 1.57;
+		this->melting_point = 670;
+		this->boiling_point = 1400;
 	}
 	else if (number == 116)
 	{
@@ -7743,6 +8153,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 116;
 		this->atomic_radii = 1.64;
+		this->melting_point = 740;
+		this->boiling_point = 1085;
 	}
 	else if (number == 117)
 	{
@@ -7758,6 +8170,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 117;
 		this->atomic_radii = 1.57;
+		this->melting_point = 723;
+		this->boiling_point = 883;
 	}
 	else if (number == 118)
 	{
@@ -7773,6 +8187,8 @@ void Atom::Register(int number)
 		this->NaturalState = "Solid";
 		this->atomic_number = 118;
 		this->atomic_radii = 1.57;
+		this->melting_point = 300;
+		this->boiling_point = 350;
 	}
 	else
 	{
