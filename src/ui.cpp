@@ -77,6 +77,7 @@ void aui_help()
 	puts("(16) CRANE (Cloud Rise After Nuclear Explosion) - Runs tests associated with simulating nuclear debris clouds\n");
 	puts("(17) IBIS (Implicit Branching Isotope System) - Runs tests associated with creating branched nuclide decay chains\n");
 	puts("(18) FAIRY (Fission-products from Atomic Incident and their Respective Yields) - Runs tests associated with fission product yields\n");
+	puts("(19) KEA (Kernel for Estimating Activity-distribution) - Runs tests associated with activity-size distributions\n");
 	
 	puts("        CURRENTLY AVAILABLE EXECUTABLES        ");
 	puts("-----------------------------------------------\n");
@@ -159,6 +160,9 @@ void bui_help()
 	
 	puts("(18) FAIRY (Fission-products from Atomic Incident and their Respective Yields) - Runs tests associated with fission product yields\n");
 	puts("\tThis runs tests using the fission product yield libraries imported from the ENDF-6 data to a yaml formatted data base. Total yields for various isotopes are calculated based on (i) energy of event or neutron source, (ii) type of fission, (iii) starting materials for fuel or weapon, and/or (iv) the extent of fission.\n");
+	
+	puts("(19) KEA (Kernel for Estimating Activity-distribution) - Runs tests associated with activity-size distributions\n");
+	puts("\tThis runs tests using various activity-size distribution methods. The default option is to use the modified Freiling model, which distributes activity/nuclides by their mass chains onto particles of specific sizes based on a ratio of refractory to volatile nuclides at the time the debris cloud cools to the soil solidification temperature.\n");
 	
 	puts("        CURRENTLY AVAILABLE EXECUTABLES        ");
 	puts("-----------------------------------------------\n");
@@ -362,6 +366,11 @@ bool valid_test_string(const std::string &input, UI_DATA *ui_dat)
 	else if (allLower(input) == "fairy")
 	{
 		ui_dat->option = fairy;
+		valid_input = true;
+	}
+	else if (allLower(input) == "kea")
+	{
+		ui_dat->option = kea;
 		valid_input = true;
 	}
 	else
@@ -732,6 +741,7 @@ bool valid_input_tests(UI_DATA *ui_dat)
 	std::cout << "(10) SCOPSOWL    (11) SHARK        (12) SKUA\n";
 	std::cout << "(13) DOVE        (14) CROW         (15) MESH\n";
 	std::cout << "(16) CRANE       (17) IBIS         (18) FAIRY\n";
+	std::cout << "(19) KEA       \n";
 	std::cout << "\nChoice: ";
 	std::cin >> ui_dat->user_input[0];
 	std::cout << std::endl;
@@ -885,6 +895,13 @@ bool valid_input_tests(UI_DATA *ui_dat)
 			case 18:
 			{
 				ui_dat->option = fairy;
+				valid_input = true;
+				break;
+			}
+				
+			case 19:
+			{
+				ui_dat->option = kea;
 				valid_input = true;
 				break;
 			}
@@ -1169,6 +1186,10 @@ int run_test(UI_DATA *ui_dat)
 			
 		case fairy:
 			success = FAIRY_TESTS();
+			break;
+			
+		case kea:
+			success = KEA_TESTS();
 			break;
 			
 		default:

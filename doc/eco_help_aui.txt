@@ -70,6 +70,7 @@ Usage Notes
 (16) CRANE (Cloud Rise After Nuclear Explosion) - Runs tests associated with simulating nuclear debris clouds
 (17) IBIS (Implicit Branching Isotope System) - Runs tests associated with creating branched nuclide decay chains
 (18) FAIRY (Fission-products from Atomic Incident and their Respective Yields) - Runs tests associated with fission product yields
+(19) KEA (Kernel for Estimating Activity-distribution) - Runs tests associated with activity-size distributions
 
         CURRENTLY AVAILABLE EXECUTABLES        
 -----------------------------------------------

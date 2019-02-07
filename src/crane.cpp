@@ -143,6 +143,8 @@ void Crane::display_part_hist()
 
 void Crane::display_part_conc()
 {
+	std::cout << "\nCloud Volume (m^3) =\t" << this->get_cloud_volume() << std::endl;
+	std::cout << "Soil Mass (kg) =\t" << this->get_initial_soil_mass() << std::endl;
 	std::cout << "Particle Concentration Distribution by Size\n";
 	std::cout << "----------------------------------------\n";
 	std::cout << "Size (um)\tConcDist (Gp/m^3)\n";
@@ -4305,7 +4307,7 @@ int CRANE_TESTS()
 	{
 		std::cout << dove.getVariableName(i) << " =\t " << dove.getNewU(i, dove.getNewU()) << std::endl;
 	}
-	//test.display_part_conc();
+	test.display_part_conc();
 	
 	test.run_crane_simulation(dove);
 	
@@ -4315,7 +4317,7 @@ int CRANE_TESTS()
     {
         std::cout << dove.getVariableName(i) << " =\t " << dove.getNewU(i, dove.getNewU()) << std::endl;
     }
-	//test.display_part_conc();
+	test.display_part_conc();
 	
 	//test.return_parcel_alt_top().Display("z_t");
 	//test.return_parcel_alt_bot().Display("z_b");

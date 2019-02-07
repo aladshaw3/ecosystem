@@ -39,5 +39,6 @@
 #include "crane.h"
 #include "ibis.h"
 #include "fairy.h"
+#include "kea.h"
 
 #endif
