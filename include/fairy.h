@@ -80,8 +80,6 @@ public:
 	int evaluateYields();							///< Read yield data and set isotope fractionation based on yields
 	
 protected:
-	
-private:
 	fiss_type type;								///< Type of fission products to be produced
 	std::vector<Isotope> InitialMat;			///< Initial materials/isotopes to undergoe fission (Conc. in moles)
 	std::vector<double> MatFrac;				///< Material fractionation of the initial material (%)
@@ -90,6 +88,9 @@ private:
 	double fiss_extent;							///< Percentage of the starting material that undergoes fission (%)
 	double energy_level;						///< Energy level of neutron source (eV)
 	yaml_cpp_class fpy_data;					///< Yaml object to read and store the FPY library files
+	
+private:
+	
 };
 
 /// Test function for FAIRY

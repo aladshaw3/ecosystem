@@ -50,6 +50,31 @@
 /** List of valid models for activity-size distributions.*/
 typedef enum {freiling, freiling_tompkins, mod_freiling, mod_freiling_tompkins} asd_model;
 
+/// Function to determine the activity-size distribution model type
+asd_model activitymodel_choice(std::string &choice);
+
+/// C++ Object for determining the activity-size distribution
+/** This object inherits from FissionProducts and will determine the activity-size distributions
+	of nuclides in a nuclear debris cloud. It will also be used to determine the induced activity
+	in soil particles and from weapon material absorbtion of neutrons. While this kernel is developed
+	independently from CRANE, it will be coupled with the size distributions and other parameters
+	from CRANE. Then CRANE and KEA will be implemented together to fully describe the nuclear debris
+	cloud post-detonation and to the time of cloud stabilization.
+ */
+class ActivityDistribution : FissionProducts
+{
+public:
+	ActivityDistribution();											///< Default constructor
+	~ActivityDistribution();										///< Default destructor
+	
+protected:
+	asd_model model_type;											///< Type of activity-size distribution model to use
+	double capfis_ratio;											///< Neutron capture-to-fission ratio for induced activity
+	
+private:
+	
+};
+
 /// Test function for KEA
 int KEA_TESTS();
 

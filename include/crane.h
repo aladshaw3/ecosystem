@@ -261,6 +261,8 @@ public:
 	double get_alt_bottom_old();				///< Get the alt_bottom parameter
 	double get_rise_top();						///< Get the rise_top parameter
 	double get_rise_bottom();					///< Get the rise_bottom parameter
+	std::map<double, double> & get_part_conc();		///< Get the part_conc map parameter
+	std::map<std::string, double> & get_soil_molefrac();///< Get the soil_molefrac map parameter
 	
 	// Below are listed all the compute functions for various parameter values
 	void compute_beta_prime(double x, double s, double w);		///< Function to compute ratio of cloud gas density to local density

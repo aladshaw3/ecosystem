@@ -1090,6 +1090,16 @@ double Crane::get_rise_bottom()
 	return this->rise_bottom;
 }
 
+std::map<double, double> & Crane::get_part_conc()
+{
+	return this->part_conc;
+}
+
+std::map<std::string, double> & Crane::get_soil_molefrac()
+{
+	return this->soil_molefrac;
+}
+
 // Below are listed all the compute function for various parameters
 void Crane::compute_beta_prime(double x, double s, double w)
 {
