@@ -51,6 +51,7 @@
  */
 
 #include "dove.h"
+#include "mola.h"
 
 #ifndef CRANE_HPP_
 #define CRANE_HPP_
@@ -263,6 +264,7 @@ public:
 	double get_rise_bottom();					///< Get the rise_bottom parameter
 	std::map<double, double> & get_part_conc();		///< Get the part_conc map parameter
 	std::map<std::string, double> & get_soil_molefrac();///< Get the soil_molefrac map parameter
+	std::map<std::string, Molecule> & get_soil_comp();///< Get the soil_comp map parameter
 	
 	// Below are listed all the compute functions for various parameter values
 	void compute_beta_prime(double x, double s, double w);		///< Function to compute ratio of cloud gas density to local density
@@ -498,6 +500,7 @@ protected:
 	double std_dia;								///< Standard deviation for lognormal distribution				(sigma)
 	int num_bins;								///< Number of desired size bins for particles					(N)
 	
+	std::map<std::string, Molecule> soil_comp;		///< Stores the soil component molecule information
 	std::map<std::string, double> soil_molefrac;	///< Stores the molefraction of the soil components
 	/// Polynominal parameters for specific oxides in soil used to determine the solidification temperature
 	std::unordered_map<std::string, std::map<int, double> > solid_params;

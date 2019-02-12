@@ -51,6 +51,7 @@
 #define KEA_HPP_
 
 #include "fairy.h"
+#include "mola.h"
 
 /// Enumeration for the list of valid activity-size distribution methods
 /** List of valid models for activity-size distributions.*/
@@ -76,6 +77,16 @@ public:
 protected:
 	asd_model model_type;											///< Type of activity-size distribution model to use
 	double capfis_ratio;											///< Neutron capture-to-fission ratio for induced activity
+	double neutrons_emit;											///< Neutrons emitted per fission (No)
+	double fusion_yield;											///< Fusion yield in kT (Wfu)
+	double fission_yield;											///< Fission yield in kT (Wfis)
+	double casing_cap;												///< Weapon casing capture (Sigma)
+	double casing_den;												///< Weapon casing material density in g/cm^3 (rho_c)
+	double casing_thickness;										///< Weapon casing material thickness in cm (X)
+	double casing_mw;												///< Weapon casing average molecular weight in g/mol (A)
+	double casing_thermal;											///< Weapon casing average thermal neutron x-sec in barns (sigma_c)
+	std::map<std::string, Molecule> casing_mat;						///< Weapon casing molecular composition
+	std::map<std::string, double> casing_frac;						///< Weapon casing molefractions
 	
 private:
 	

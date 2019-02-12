@@ -1100,6 +1100,11 @@ std::map<std::string, double> & Crane::get_soil_molefrac()
 	return this->soil_molefrac;
 }
 
+std::map<std::string, Molecule> & Crane::get_soil_comp()
+{
+	return this->soil_comp;
+}
+
 // Below are listed all the compute function for various parameters
 void Crane::compute_beta_prime(double x, double s, double w)
 {
@@ -2250,6 +2255,7 @@ void Crane::delete_soil_components()
 	this->vapor_params.clear();
 	this->solid_params.clear();
 	this->soil_molefrac.clear();
+	this->soil_comp.clear();
 }
 
 void Crane::add_soil_component(std::string name, double frac)
@@ -2259,6 +2265,12 @@ void Crane::add_soil_component(std::string name, double frac)
 	if (frac > 1.0)
 		frac = 1.0;
 	this->soil_molefrac[name] = frac;
+	Molecule temp;
+	if (name == "Other")
+		temp.Register(0, 0, 0, 0, false, false, "Solid", name, name, "C5H7O2N");
+	else
+		temp.Register(0, 0, 0, 0, false, false, "Solid", name, name, name);
+	this->soil_comp[name] = temp;
 }
 
 void Crane::verify_soil_components()
