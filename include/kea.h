@@ -33,6 +33,12 @@
  *			D.A. Hooper, V.J. Jodoin, "Revision of the DELFIC Particle Activity Module,"
  *				Oak Ridge National Laboratory, ORNL/TM-2010/220, 2010.
  *
+ *			Reference for Induced-Soil Activity
+ *			-----------------------------------
+ *			T.H. Jones, "A Prediction System for the Neutron-Induced Activity Contribution
+ *				to Fallout Exposure Rates," U.S. Naval Radiological Defense Laboratory,
+ *				USNRDL-TR-1056, 1966.
+ *
  *  \author Austin Ladshaw
  *	\date 02/07/2019
  *	\copyright This software was designed and built at the Georgia Institute
@@ -61,7 +67,7 @@ asd_model activitymodel_choice(std::string &choice);
 	from CRANE. Then CRANE and KEA will be implemented together to fully describe the nuclear debris
 	cloud post-detonation and to the time of cloud stabilization.
  */
-class ActivityDistribution : FissionProducts
+class ActivityDistribution
 {
 public:
 	ActivityDistribution();											///< Default constructor

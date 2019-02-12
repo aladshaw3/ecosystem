@@ -43,19 +43,14 @@ asd_model activitymodel_choice(std::string &choice)
 //Constructor
 ActivityDistribution::ActivityDistribution()
 {
-	type = explosion;
-	total_mass = 1.0;
-	fiss_extent = 100.0;
-	energy_level = 0.0;
+
 	model_type = freiling;
 }
 
 //Destructor
 ActivityDistribution::~ActivityDistribution()
 {
-	InitialMat.clear();
-	MatFrac.clear();
-	Yields.clear();
+	
 }
 
 /*

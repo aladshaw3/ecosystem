@@ -403,7 +403,7 @@ std::string timeunits_string(time_units units)
  */
 
 //Default constructor
-Isotope::Isotope() : Atom(0)
+Isotope::Isotope()
 {
 	IsoName = "No Name";
 	decay_rate = 0.0;
