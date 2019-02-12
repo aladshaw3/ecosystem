@@ -39,7 +39,7 @@
 /** C++ class object holding data and functions associated with atoms. Objects can be 
 	registered at the time of object construction, or after declaring an Atom object.
 	Registration can be done via the atomic symbol or atomic number. Valid atoms go 
-	from Hydrogen (1) to Ununoctium (118). */
+	from Hydrogen (1) to Oganesson (118). */
 class Atom
 {
 public:
@@ -59,6 +59,7 @@ public:
 	void editMeltingPoint(double val);		///< Manually changes the melting point
 	void editBoilingPoint(double val);		///< Manually changes the boiling point
 	void editThermalXSection(double val);	///< Manually changes the thermal cross section
+	void editScatterXSection(double val);	///< Manually changes the scattering cross section
 	
 	void removeProton();					///< Manually removes 1 proton and adjusts weight
 	void removeNeutron();					///< Manually removes 1 neutron and adjusts weight
@@ -73,7 +74,8 @@ public:
 	double AtomicRadii();					///< Returns the current van der Waals radii (in angstroms)
 	double MeltingPoint();					///< Returns the melting point
 	double BoilingPoint();					///< Returns the boiling point
-	double ThermalXSection();				///< Returns the thermal cross section 
+	double ThermalXSection();				///< Returns the thermal cross section
+	double ScatterXSection();				///< Returns the scattering cross section
 	
 	std::string AtomName();					///< Returns the name of the atom
 	std::string AtomSymbol();				///< Returns the symbol of the atom
@@ -94,6 +96,7 @@ protected:
 	double melting_point;					///< Holds the melting point of the element (in K)
 	double boiling_point;					///< Holds the boiling point of the element (in K)
 	double thermal_x_sec;					///< Holds the thermal neutron cross section of the element (in barns)
+	double scatter_x_sec;					///< Holds the scattering neutron cross section of the element (in barns)
 	std::string Name;						///< Holds the name of the atom
 	std::string Symbol;						///< Holds the atomic symbol for the atom
 	std::string Category;					///< Holds the category of the atom (e.g., Alkali Metal)

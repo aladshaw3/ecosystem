@@ -39,6 +39,11 @@
  *				to Fallout Exposure Rates," U.S. Naval Radiological Defense Laboratory,
  *				USNRDL-TR-1056, 1966.
  *
+ *			Reference for Neutron Absorption and Scattering Cross Sections (in EEL)
+ *			-----------------------------------------------------------------------
+ *			V.F. Sears, "Neutron Scattering Lengths and Cross Sections," Neutron News, 3,
+ *				26-37, 1992. 
+ *
  *  \author Austin Ladshaw
  *	\date 02/07/2019
  *	\copyright This software was designed and built at the Georgia Institute
@@ -77,9 +82,12 @@ public:
 protected:
 	asd_model model_type;											///< Type of activity-size distribution model to use
 	double capfis_ratio;											///< Neutron capture-to-fission ratio for induced activity
+	
+	/// Below are all the parameters associated with the induced-soil-activity models
 	double neutrons_emit;											///< Neutrons emitted per fission (No)
 	double fusion_yield;											///< Fusion yield in kT (Wfu)
 	double fission_yield;											///< Fission yield in kT (Wfis)
+	double fus_yield_frac;											///< Fraction of total yield that is fusion
 	double casing_cap;												///< Weapon casing capture (Sigma)
 	double casing_den;												///< Weapon casing material density in g/cm^3 (rho_c)
 	double casing_thickness;										///< Weapon casing material thickness in cm (X)
@@ -87,6 +95,7 @@ protected:
 	double casing_thermal;											///< Weapon casing average thermal neutron x-sec in barns (sigma_c)
 	std::map<std::string, Molecule> casing_mat;						///< Weapon casing molecular composition
 	std::map<std::string, double> casing_frac;						///< Weapon casing molefractions
+	double burst_height;											///< Weapon burst height above ground (ft)
 	
 private:
 	
