@@ -66,6 +66,9 @@ public:
 	void setPrintChain(bool opt);					///< Set boolean to print chain info
 	void setPrintResults(bool opt);					///< Set boolean to print results of simulation
 	void setConsoleOut(bool opt);					///< Set boolean to print output to console
+    
+    double getTotalMoles();                         ///< Return total moles of weapon
+    double getFissionExtent();                      ///< Return the % of fission extent
 	
 	int run_simulation(std::string file_name);		///< Run a decay simulation from Fission Products
 	
@@ -85,6 +88,7 @@ protected:
 	std::vector<double> MatFrac;				///< Material fractionation of the initial material (%)
 	std::map<int, double> Yields;				///< Map of fission yields of material based on atomic mass
 	double total_mass;							///< Total mass of the weapon or fuel rod (kg)
+    double total_moles;                         ///< Total moles of fissionable materials (mol)
 	double fiss_extent;							///< Percentage of the starting material that undergoes fission (%)
 	double energy_level;						///< Energy level of neutron source (eV)
 	yaml_cpp_class fpy_data;					///< Yaml object to read and store the FPY library files

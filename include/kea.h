@@ -81,13 +81,14 @@ public:
 	
 protected:
 	asd_model model_type;											///< Type of activity-size distribution model to use
+    // capfis_ratio = No*(fc)_i
 	double capfis_ratio;											///< Neutron capture-to-fission ratio for induced activity
 	
 	/// Below are all the parameters associated with the induced-soil-activity models
 	double neutrons_emit;											///< Neutrons emitted per fission (No)
 	double fusion_yield;											///< Fusion yield in kT (Wfu)
 	double fission_yield;											///< Fission yield in kT (Wfis)
-	double fus_yield_frac;											///< Fraction of total yield that is fusion
+    double total_yield;                                             ///< Total weapon yield in kT (W)
 	double casing_cap;												///< Weapon casing capture (Sigma)
 	double casing_den;												///< Weapon casing material density in g/cm^3 (rho_c)
 	double casing_thickness;										///< Weapon casing material thickness in cm (X)
@@ -95,7 +96,13 @@ protected:
 	double casing_thermal;											///< Weapon casing average thermal neutron x-sec in barns (sigma_c)
 	std::map<std::string, Molecule> casing_mat;						///< Weapon casing molecular composition
 	std::map<std::string, double> casing_frac;						///< Weapon casing molefractions
+    std::map<std::string, Isotope> weapon_mat;                      ///< Weapon molecular composition
+    std::map<std::string, double> weapon_frac;                      ///< Weapon molefractions
 	double burst_height;											///< Weapon burst height above ground (ft)
+    
+    /// Below are the parameters associated with the activity-size distributions
+    std::map<double, FissionProducts> nuc_fractionation;            ///< Fractionation of nuclides with particle size (um)
+    std::map<int, double> freiling_rat;                             ///< Freiling ratios for each mass number chain
 	
 private:
 	

@@ -234,6 +234,18 @@ void FissionProducts::setConsoleOut(bool opt)
 	this->ConsoleOut = opt;
 }
 
+//return total moles
+double FissionProducts::getTotalMoles()
+{
+    return this->total_moles;
+}
+
+//return extent
+double FissionProducts::getFissionExtent()
+{
+    return this->fiss_extent;
+}
+
 //run simulation
 int FissionProducts::run_simulation(std::string file_name)
 {
@@ -340,11 +352,13 @@ int FissionProducts::evaluateYields()
 	if (this->type == explosion)
 	{
 		std::string high_key;
+        this->total_moles = 0.0;
 		for (int i=0; i<this->InitialMat.size(); i++)
 		{
 			//Calculate moles of isotope and find header
 			double moles;
 			moles = this->total_mass*this->MatFrac[i]/100.0*1000.0/this->InitialMat[i].AtomicWeight();
+            this->total_moles += moles;
 			int levels = 0;
 			try
 			{
@@ -497,6 +511,7 @@ int FAIRY_TESTS()
 	
 	test.loadFissionProductYields();
 	test.evaluateYields();
+    std::cout << "Total Moles = " << test.getTotalMoles() << std::endl;
 	
 	//Run simulation after setting options
 	test.setTimeUnits(hours);
