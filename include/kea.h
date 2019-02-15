@@ -79,6 +79,51 @@ public:
 	ActivityDistribution();											///< Default constructor
 	~ActivityDistribution();										///< Default destructor
 	
+	void set_model_type(asd_model type);							///< Set the model_type parameter
+	void set_capfis_ratio(double val);								///< Set the capfis_ratio parameter
+	void set_neutrons_emit(double val);								///< Set the neutrons_emit parameter
+	void set_fusion_yield(double val);								///< Set the fusion_yield parameter
+	void set_fission_yield(double val);								///< Set the fission_yield parameter
+	void set_total_yield(double val);								///< Set the total_yield parameter
+	void set_casing_cap(double val);								///< Set the casing_cap parameter
+	void set_casing_den(double val);								///< Set the casing_den parameter
+	void set_casing_thickness(double val);							///< Set the casing_thickness parameter
+	void set_casing_mw(double val);									///< Set the casing_mw parameter
+	void set_casing_thermal(double val);							///< Set the casing_thermal parameter
+	void set_soil_thermal(double val);								///< Set the soil_thermal parameter
+	void set_soil_scattering(double val);							///< Set the soil_scattering parameter
+	void set_burst_height(double val);								///< Set the burst_height parameter
+	void set_escape_fraction(double val);							///< Set the escape_fraction parameter
+	void set_volatile_fraction(double val);							///< Set the volatile_fraction parameter
+	void set_soil_capture_fraction(double val);						///< Set the soil_capture_fraction parameter
+	
+	void initialize_fractionation_map(std::map<double, double> & part_conc);	///< Setup nuc_frac given the part_conc from CRANE
+	
+	void delete_casing_components();								///< Function to remove all casing components and parameters
+	void add_casing_component(std::string name, double frac);	///< Function to add casing components and corresponding molefraction
+	void verify_casing_components();							///< Function to check casing components for errors and correct
+	
+	void delete_fractionation();								///< Function to remove all maps with isotope fractionation
+	void delete_capture_fractions();							///< Function to delete all maps with neutron capture fractions
+	
+	asd_model get_model_type();								///< Get the model_type parameter
+	double get_capfis_ratio();								///< Get the capfis_ratio parameter
+	double get_neutrons_emit();								///< Get the neutrons_emit parameter
+	double get_fusion_yield();								///< Get the fusion_yield parameter
+	double get_fission_yield();								///< Get the fission_yield parameter
+	double get_total_yield();								///< Get the total_yield parameter
+	double get_casing_cap();								///< Get the casing_cap parameter
+	double get_casing_den();								///< Get the casing_den parameter
+	double get_casing_thickness();							///< Get the casing_thickness parameter
+	double get_casing_mw();									///< Get the casing_mw parameter
+	double get_casing_thermal();							///< Get the casing_thermal parameter
+	double get_soil_thermal();								///< Get the soil_thermal parameter
+	double get_soil_scattering();							///< Get the soil_scattering parameter
+	double get_burst_height();								///< Get the burst_height parameter
+	double get_escape_fraction();							///< Get the escape_fraction parameter
+	double get_volatile_fraction();							///< Get the volatile_fraction parameter
+	double get_soil_capture_fraction();						///< Get the soil_capture_fraction parameter
+	
 protected:
 	asd_model model_type;											///< Type of activity-size distribution model to use
     // capfis_ratio = No*(fc)_i
@@ -94,15 +139,24 @@ protected:
 	double casing_thickness;										///< Weapon casing material thickness in cm (X)
 	double casing_mw;												///< Weapon casing average molecular weight in g/mol (A)
 	double casing_thermal;											///< Weapon casing average thermal neutron x-sec in barns (sigma_c)
+	double soil_thermal;											///< Soil material average thermal neutron x-sec in barns (sigma_s)
+	double soil_scattering;											///< Soil material average neutron scattering in barns (sigma_ssc)
+	std::map<std::string, double> casing_atom_frac;					///< Stores a map of casing atom components (key is the atom)
 	std::map<std::string, Molecule> casing_mat;						///< Weapon casing molecular composition
 	std::map<std::string, double> casing_frac;						///< Weapon casing molefractions
-    std::map<std::string, Isotope> weapon_mat;                      ///< Weapon molecular composition
-    std::map<std::string, double> weapon_frac;                      ///< Weapon molefractions
 	double burst_height;											///< Weapon burst height above ground (ft)
+	double escape_fraction;											///< Neutron fraction that escapes casing (e^-Sigma*X)
+	double volatile_fraction;										///< Neutron fraction that enters volatilized soil
+	double soil_capture_fraction;									///< Neutron fraction that is captured by soil
     
     /// Below are the parameters associated with the activity-size distributions
     std::map<double, FissionProducts> nuc_fractionation;            ///< Fractionation of nuclides with particle size (um)
     std::map<int, double> freiling_rat;                             ///< Freiling ratios for each mass number chain
+	
+	/// Neutron fractional captures by all atomic materials
+	std::map<std::string, double> casing_capfrac;					///< Casing neutron capture fractions
+	std::map<std::string, double> soil_capfrac;						///< Soil neutron capture fractions
+	std::map<std::string, double> weapon_capfrac;					///< Weapon neutron capture fractions
 	
 private:
 	

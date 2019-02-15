@@ -2050,6 +2050,12 @@ int Molecule::MoleculePhaseID()
 	return this->PhaseID;
 }
 
+//Return atoms
+std::vector<Atom> & Molecule::getAtoms()
+{
+	return this->atoms;
+}
+
 //Display molecule information
 void Molecule::DisplayInfo()
 {	

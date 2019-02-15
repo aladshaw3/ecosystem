@@ -246,6 +246,18 @@ double FissionProducts::getFissionExtent()
     return this->fiss_extent;
 }
 
+//return isotopes
+std::vector<Isotope> & FissionProducts::getWeaponMat()
+{
+	return this->InitialMat;
+}
+
+//return isotope molefractions
+std::vector<double> & FissionProducts::getWeaponFrac()
+{
+	return this->MatFrac;
+}
+
 //run simulation
 int FissionProducts::run_simulation(std::string file_name)
 {

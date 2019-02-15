@@ -1105,6 +1105,16 @@ std::map<std::string, Molecule> & Crane::get_soil_comp()
 	return this->soil_comp;
 }
 
+std::map<std::string, double> & Crane::get_soil_atom_frac()
+{
+	return this->soil_atom_frac;
+}
+
+std::map<std::string, Atom> & Crane::get_soil_atom()
+{
+	return this->soil_atom;
+}
+
 // Below are listed all the compute function for various parameters
 void Crane::compute_beta_prime(double x, double s, double w)
 {
@@ -2310,6 +2320,30 @@ void Crane::verify_soil_components()
 				this->soil_molefrac["Other"] += diff;
 			}
 		}
+	}
+	
+	//Create the soil atom map
+	for (it=this->soil_molefrac.begin(); it!=this->soil_molefrac.end(); it++)
+	{
+		for (int i=0; i<this->soil_comp[it->first].getAtoms().size(); i++)
+		{
+			this->soil_atom_frac[this->soil_comp[it->first].getAtoms()[i].AtomSymbol()] = 0.0;
+		}
+	}
+	//Fill the soil atom map
+	for (it=this->soil_molefrac.begin(); it!=this->soil_molefrac.end(); it++)
+	{
+		for (int i=0; i<this->soil_comp[it->first].getAtoms().size(); i++)
+		{
+			this->soil_atom_frac[this->soil_comp[it->first].getAtoms()[i].AtomSymbol()] += it->second*(1.0/(double)this->soil_comp[it->first].getAtoms().size());
+		}
+	}
+	
+	for (it=this->soil_atom_frac.begin(); it!=this->soil_atom_frac.end(); it++)
+	{
+		Atom temp;
+		temp.Register(it->first);
+		this->soil_atom[it->first] = temp;
 	}
 }
 

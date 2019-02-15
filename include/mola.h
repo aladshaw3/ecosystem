@@ -557,6 +557,7 @@ public:
 	std::string MolecularFormula();			///< Return the molecular formula of the molecule
 	std::string MoleculePhase();			///< Return the phase of the molecule
 	int MoleculePhaseID();					///< Return the enum phase ID of the molecule
+	std::vector<Atom> & getAtoms();			///< Return reference to the vector of atoms
 	
 	void DisplayInfo();						///< Function to display molecule information
 	
