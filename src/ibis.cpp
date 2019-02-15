@@ -736,6 +736,26 @@ double Isotope::AtomicWeight()
 	return this->Atom::AtomicWeight();
 }
 
+double Isotope::MeltingPoint()
+{
+	return this->Atom::MeltingPoint();
+}
+
+double Isotope::BoilingPoint()
+{
+	return this->Atom::BoilingPoint();
+}
+
+double Isotope::ThermalXSection()
+{
+	return this->Atom::ThermalXSection();
+}
+
+double Isotope::ScatterXSection()
+{
+	return this->Atom::ScatterXSection();
+}
+
 //return decay mode
 decay_mode Isotope::DecayMode(int i)
 {

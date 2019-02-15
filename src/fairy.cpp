@@ -485,10 +485,14 @@ int FissionProducts::evaluateYields()
 		std::cout << "Must choose type = explosion for now...\n\n";
 		return -1;
 	}
+	return success;
+}
+
+void FissionProducts::evaluateEigenSolution()
+{
 	this->createChains();
 	this->formEigenvectors();
 	this->unloadFissionProductYields();
-	return success;
 }
 
 /*
@@ -523,6 +527,7 @@ int FAIRY_TESTS()
 	
 	test.loadFissionProductYields();
 	test.evaluateYields();
+	test.evaluateEigenSolution();
     std::cout << "Total Moles = " << test.getTotalMoles() << std::endl;
 	
 	//Run simulation after setting options

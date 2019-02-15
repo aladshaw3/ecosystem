@@ -84,6 +84,7 @@ public:
 	
 	void checkFractions();							///< Check fractions of materials in fuel/weapone and correct if necessary
 	int evaluateYields();							///< Read yield data and set isotope fractionation based on yields
+	void evaluateEigenSolution();					///< Take the initialized yield info and form the eigenvectors 
 	
 protected:
 	fiss_type type;								///< Type of fission products to be produced

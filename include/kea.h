@@ -92,6 +92,7 @@ public:
 	void set_casing_thermal(double val);							///< Set the casing_thermal parameter
 	void set_soil_thermal(double val);								///< Set the soil_thermal parameter
 	void set_soil_scattering(double val);							///< Set the soil_scattering parameter
+	void set_weapon_thermal(double val);							///< Set the weapon_thermal parameter
 	void set_burst_height(double val);								///< Set the burst_height parameter
 	void set_escape_fraction(double val);							///< Set the escape_fraction parameter
 	void set_volatile_fraction(double val);							///< Set the volatile_fraction parameter
@@ -119,10 +120,28 @@ public:
 	double get_casing_thermal();							///< Get the casing_thermal parameter
 	double get_soil_thermal();								///< Get the soil_thermal parameter
 	double get_soil_scattering();							///< Get the soil_scattering parameter
+	double get_weapon_thermal();							///< Get the weapon_thermal parameter
 	double get_burst_height();								///< Get the burst_height parameter
 	double get_escape_fraction();							///< Get the escape_fraction parameter
 	double get_volatile_fraction();							///< Get the volatile_fraction parameter
 	double get_soil_capture_fraction();						///< Get the soil_capture_fraction parameter
+	
+	void compute_neutrons_emit(double fission, double fusion);		///< Compute the neutrons emitted per fission (atoms/fission)
+	void compute_casing_mw();										///< Compute the casing MW (must have initialized materials first)
+	void compute_casing_thermal();									///< Compute the casing thermal capture cross-section
+	
+	/// Compute the soil thermal capture cross-section
+	void compute_soil_thermal(std::map<std::string, double> & soil_atom_frac, std::map<std::string, Atom> & soil_atom);
+	/// Compute the soil scattering cross-section
+	void compute_soil_scattering(std::map<std::string, double> & soil_atom_frac, std::map<std::string, Atom> & soil_atom);
+	
+	/// Compute the weapon thermal capture cross-section
+	void compute_weapon_thermal(FissionProducts & weapon);
+	
+	/// Functions below compute all the capture fractions and will call the above functions for thermal and scattering info
+	void compute_casing_capfrac();
+	void compute_soil_capfrac(std::map<std::string, double> & soil_atom_frac, std::map<std::string, Atom> & soil_atom);
+	void compute_weapon_capfrac(FissionProducts & weapon);
 	
 protected:
 	asd_model model_type;											///< Type of activity-size distribution model to use
@@ -130,7 +149,7 @@ protected:
 	double capfis_ratio;											///< Neutron capture-to-fission ratio for induced activity
 	
 	/// Below are all the parameters associated with the induced-soil-activity models
-	double neutrons_emit;											///< Neutrons emitted per fission (No)
+	double neutrons_emit;											///< Neutrons emitted per fission in atoms/fission (No)
 	double fusion_yield;											///< Fusion yield in kT (Wfu)
 	double fission_yield;											///< Fission yield in kT (Wfis)
     double total_yield;                                             ///< Total weapon yield in kT (W)
@@ -141,6 +160,8 @@ protected:
 	double casing_thermal;											///< Weapon casing average thermal neutron x-sec in barns (sigma_c)
 	double soil_thermal;											///< Soil material average thermal neutron x-sec in barns (sigma_s)
 	double soil_scattering;											///< Soil material average neutron scattering in barns (sigma_ssc)
+	double weapon_thermal;											///< Weapone material thermal neutron x-sec in barns
+	std::map<std::string, Atom> casing_atom;						///< Stores a map of casing atom components (key is the atom)
 	std::map<std::string, double> casing_atom_frac;					///< Stores a map of casing atom components (key is the atom)
 	std::map<std::string, Molecule> casing_mat;						///< Weapon casing molecular composition
 	std::map<std::string, double> casing_frac;						///< Weapon casing molefractions
@@ -154,9 +175,9 @@ protected:
     std::map<int, double> freiling_rat;                             ///< Freiling ratios for each mass number chain
 	
 	/// Neutron fractional captures by all atomic materials
-	std::map<std::string, double> casing_capfrac;					///< Casing neutron capture fractions
-	std::map<std::string, double> soil_capfrac;						///< Soil neutron capture fractions
-	std::map<std::string, double> weapon_capfrac;					///< Weapon neutron capture fractions
+	std::map<std::string, double> casing_capfrac;					///< Casing neutron capture fractions (by atom symbol)
+	std::map<std::string, double> soil_capfrac;						///< Soil neutron capture fractions (by atom symbol)
+	std::map<std::string, double> weapon_capfrac;					///< Weapon neutron capture fractions (by isotope name)
 	
 private:
 	

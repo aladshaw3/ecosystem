@@ -95,6 +95,10 @@ public:
 	double getInitialCondition();						///< Return the value of the initial condition
 	double getConcentration();							///< Return the concentration value of the nuclide
 	double AtomicWeight();								///< Return the atomic weight of the isotope
+	double MeltingPoint();								///< Returns the melting point
+	double BoilingPoint();								///< Returns the boiling point
+	double ThermalXSection();							///< Returns the thermal cross section
+	double ScatterXSection();							///< Returns the scattering cross section
 	
 	decay_mode DecayMode(int i);						///< Return the ith decay mode
 	double BranchFraction(int i);						///< Return the ith branch fraction
