@@ -84,6 +84,7 @@ Crane::Crane()
 	useCustomDist = false;
 	saturation_time = 0.0;
 	solidification_time = 0.0;
+	stabilization_time = 0.0;
 	min_dia = 0.001;
 	max_dia = 100.0;
 	mean_dia = 0.407;
@@ -560,6 +561,11 @@ void Crane::set_solidification_time(double val)
 	this->solidification_time = val;
 }
 
+void Crane::set_stabilization_time(double val)
+{
+	this->stabilization_time = val;
+}
+
 void Crane::set_isTight(bool val)
 {
 	this->isTight = val;
@@ -1033,6 +1039,11 @@ double Crane::get_saturation_time()
 double Crane::get_solidification_time()
 {
 	return this->solidification_time;
+}
+
+double Crane::get_stabilization_time()
+{
+	return this->stabilization_time;
 }
 
 bool Crane::get_isTight()
@@ -4104,6 +4115,7 @@ int Crane::run_crane_simulation(Dove &dove)
         {
 			std::cout << "Cloud has stabilized at " << this->get_current_time() << " (s)... Ending Early...\n";
 			dove.set_endtime(this->get_current_time());
+			this->set_stabilization_time(this->get_current_time());
 			if (this->get_FileOut() == true)
 			{
 				dove.print_newresult(false);

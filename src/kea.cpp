@@ -50,7 +50,7 @@ ActivityDistribution::ActivityDistribution()
 	fission_yield = 25.0;
 	total_yield = 50.0;
 	casing_cap = 0.2;
-	casing_den = 2600.0;
+	casing_den = 8.05;
 	casing_thickness = 10.0;
 	casing_mw = 100.0;
 	casing_thermal = 0.2;
@@ -194,7 +194,7 @@ void ActivityDistribution::verify_casing_components()
 	std::map<std::string,double>::iterator it;
 	double sum = 0.0;
 	int count = 0;
-	for (it=this->casing_frac.begin(); it!=this->casing_frac.end(); it++)
+	for (it=this->casing_frac.begin(); it!=this->casing_frac.end(); ++it)
 	{
 		sum += it->second;
 		count++;
@@ -207,7 +207,7 @@ void ActivityDistribution::verify_casing_components()
 	{
 		if ( sum > 1.0 )
 		{
-			for (it=this->casing_frac.begin(); it!=this->casing_frac.end(); it++)
+			for (it=this->casing_frac.begin(); it!=this->casing_frac.end(); ++it)
 			{
 				it->second = it->second / sum;
 			}
@@ -228,7 +228,7 @@ void ActivityDistribution::verify_casing_components()
 	}
 	
 	//Create the soil atom map
-	for (it=this->casing_frac.begin(); it!=this->casing_frac.end(); it++)
+	for (it=this->casing_frac.begin(); it!=this->casing_frac.end(); ++it)
 	{
 		for (int i=0; i<this->casing_mat[it->first].getAtoms().size(); i++)
 		{
@@ -236,7 +236,7 @@ void ActivityDistribution::verify_casing_components()
 		}
 	}
 	//Fill the soil atom map
-	for (it=this->casing_frac.begin(); it!=this->casing_frac.end(); it++)
+	for (it=this->casing_frac.begin(); it!=this->casing_frac.end(); ++it)
 	{
 		for (int i=0; i<this->casing_mat[it->first].getAtoms().size(); i++)
 		{
@@ -244,7 +244,7 @@ void ActivityDistribution::verify_casing_components()
 		}
 	}
 	
-	for (it=this->casing_atom_frac.begin(); it!=this->casing_atom_frac.end(); it++)
+	for (it=this->casing_atom_frac.begin(); it!=this->casing_atom_frac.end(); ++it)
 	{
 		Atom temp;
 		temp.Register(it->first);
@@ -255,7 +255,9 @@ void ActivityDistribution::verify_casing_components()
 void ActivityDistribution::delete_fractionation()
 {
 	this->nuc_fractionation.clear();
-	this->freiling_rat.clear();
+	this->total_moles.clear();
+	this->refractory_moles.clear();
+	this->freiling_numbers.clear();
 }
 
 void ActivityDistribution::delete_capture_fractions()
@@ -428,7 +430,6 @@ void ActivityDistribution::compute_casing_capfrac()
 	for (it=this->casing_atom_frac.begin(); it!=this->casing_atom_frac.end(); it++)
 	{
 		this->casing_capfrac[it->first] = it->second*this->casing_atom[it->first].ThermalXSection()/this->get_casing_thermal();
-		std::cout << it->first << "\t" << this->casing_capfrac[it->first] << std::endl;
 	}
 }
 
@@ -441,7 +442,6 @@ void ActivityDistribution::compute_soil_capfrac(std::map<std::string, double> & 
 	for (it=soil_atom_frac.begin(); it!=soil_atom_frac.end(); it++)
 	{
 		this->soil_capfrac[it->first] = it->second*soil_atom[it->first].ThermalXSection()/this->get_soil_thermal();
-		std::cout << it->first << "\t" << this->soil_capfrac[it->first] << std::endl;
 	}
 }
 
@@ -457,11 +457,195 @@ void ActivityDistribution::compute_weapon_capfrac(FissionProducts & weapon)
 		this->weapon_capfrac[weapon.getWeaponMat()[i].IsotopeName()] += weapon.getWeaponFrac()[i]/100.0*weapon.getWeaponMat()[i].ThermalXSection()/this->get_weapon_thermal();
 	}
 	
-	//Iterate through the map
+}
+
+void ActivityDistribution::compute_casing_cap()
+{
+	this->compute_casing_mw();
+	this->compute_casing_thermal();
+	this->set_casing_cap( this->get_casing_den()*Na*this->get_casing_thermal()*1.0E-24/this->get_casing_mw() );
+}
+
+void ActivityDistribution::compute_escape_fraction()
+{
+	this->compute_casing_cap();
+	this->set_escape_fraction( exp(-this->get_casing_thickness()*this->get_casing_cap()) );
+}
+
+void ActivityDistribution::compute_volatile_fraction(double h, double W)
+{
+	//Convert h (m) to h (ft)
+	this->set_burst_height(h*3.28084);
+	
+	//Form the scaled burst height
+	double scaled = this->get_burst_height()/pow(W,(1.0/3.0));
+	if (scaled < 0.0) scaled = 0.0;
+	double val = 0.0;
+	
+	if (scaled > 36.0)
+		val = 0.0;
+	else
+		val = 1.0 - (scaled / pow(4.24*scaled*scaled - 234.0*scaled + 4225.0, 0.5));
+	
+	this->set_volatile_fraction(val);
+}
+
+void ActivityDistribution::compute_soil_capture_fraction(std::map<std::string, double> & soil_atom_frac, std::map<std::string, Atom> & soil_atom)
+{
+	this->compute_soil_thermal(soil_atom_frac, soil_atom);
+	this->compute_soil_scattering(soil_atom_frac, soil_atom);
+	
+	this->set_soil_capture_fraction( 1.155*pow(this->get_soil_thermal()/(this->get_soil_thermal()+this->get_soil_scattering()), 0.5) );
+}
+
+void ActivityDistribution::initialize_fractionation(FissionProducts & yields)
+{
+	yields.loadFissionProductYields();
+	yields.evaluateYields();
+	this->initial_frac = yields;
+}
+
+void ActivityDistribution::evaluate_initial_fractionation()
+{
+	/** Must have finished initializing and calculating all related neutron capture fractions first */
 	std::map<std::string,double>::iterator it;
-	for (it=this->weapon_capfrac.begin(); it!=this->weapon_capfrac.end(); it++)
+	
+	//Registering Soil Nuclides
+	for (it=this->soil_capfrac.begin(); it!=this->soil_capfrac.end(); ++it)
 	{
-		std::cout << it->first << "\t" << this->weapon_capfrac[it->first] << std::endl;
+		double preprod = this->initial_frac.getTotalMoles()*this->initial_frac.getFissionExtent()/100.0*this->get_neutrons_emit()*this->get_escape_fraction()*this->get_soil_capture_fraction()*this->get_volatile_fraction();
+		Atom temp;
+		temp.Register(it->first);
+		int iso_num = temp.Neutrons()+temp.Protons()+1;
+		double ic = preprod*it->second;
+		this->initial_frac.registerInitialNuclide(it->first, iso_num, ic);
+	}
+	
+	//Registering Casing Nuclides
+	for (it=this->casing_capfrac.begin(); it!=this->casing_capfrac.end(); ++it)
+	{
+		double preprod = this->initial_frac.getTotalMoles()*this->initial_frac.getFissionExtent()/100.0*this->get_neutrons_emit()*(1.0-this->get_escape_fraction());
+		Atom temp;
+		temp.Register(it->first);
+		int iso_num = temp.Neutrons()+temp.Protons()+1;
+		double ic = preprod*it->second;
+		this->initial_frac.registerInitialNuclide(it->first, iso_num, ic);
+	}
+	
+	//Registering Weapon Nuclides
+	for (it=this->weapon_capfrac.begin(); it!=this->weapon_capfrac.end(); ++it)
+	{
+		int iso_num = 1;
+		std::string symb = "n";
+		
+		char *str = new char[it->first.length()+1];
+		strcpy(str, it->first.c_str());
+		char * pch;
+		pch = strtok(str, "-");
+		while (pch != NULL)
+		{
+			if (isdigit(pch[0]) != 0)
+				iso_num = atoi(pch)+1;
+			else
+				symb = pch;
+			pch = strtok (NULL, " ,.-");
+		}
+		delete [] str;
+		
+		double ic = this->initial_frac.getTotalMoles()*this->initial_frac.getFissionExtent()/100.0*this->get_neutrons_emit()*(1.0-this->initial_frac.getFissionExtent()/100.0)*it->second;
+		this->initial_frac.registerInitialNuclide(symb, iso_num, ic);
+	}
+	this->initial_frac.evaluateEigenSolution();
+	this->initial_frac.verifyEigenSoln();
+}
+
+void ActivityDistribution::evaluate_freiling_ratios(double solid_time, double solid_temp)
+{
+	this->initial_frac.calculateFractionation(solid_time);
+	
+	//Reset all initial conditions
+	double conc = 0.0;
+	for (int i=0; i<this->initial_frac.getNumberNuclides(); i++)
+	{
+		conc = this->initial_frac.getIsotope(i).getConcentration();
+		if (conc < 0.0) conc = 0.0;
+		this->initial_frac.getIsotope(i).setInitialCondition(conc);
+		
+		//std::cout << this->initial_frac.getIsotope(i).IsotopeName() << "\t" << conc << std::endl;
+	}
+	for (int i=0; i<this->initial_frac.getNumberStableNuclides(); i++)
+	{
+		conc = this->initial_frac.getStableIsotope(i).getConcentration();
+		if (conc < 0.0) conc = 0.0;
+		this->initial_frac.getStableIsotope(i).setInitialCondition(conc);
+		
+		//std::cout << this->initial_frac.getStableIsotope(i).IsotopeName() << "\t" << conc << std::endl;
+	}
+	
+	//Setup all Freiling Ratios
+	int mass_num = this->initial_frac.getIsotope(0).IsotopeNumber();
+	this->total_moles[mass_num] = 0.0;
+	this->refractory_moles[mass_num] = 0.0;
+	for (int i=0; i<this->initial_frac.getNumberNuclides(); i++)
+	{
+		if (mass_num == this->initial_frac.getIsotope(i).IsotopeNumber())
+		{
+			this->total_moles[mass_num] += this->initial_frac.getIsotope(i).getInitialCondition();
+			if (this->initial_frac.getIsotope(i).BoilingPoint() >= solid_temp)
+				this->refractory_moles[mass_num] += this->initial_frac.getIsotope(i).getInitialCondition();
+		}
+		else
+		{
+			mass_num = this->initial_frac.getIsotope(i).IsotopeNumber();
+			this->total_moles[mass_num] = this->initial_frac.getIsotope(i).getInitialCondition();
+			if (this->initial_frac.getIsotope(i).BoilingPoint() >= solid_temp)
+				this->refractory_moles[mass_num] = this->initial_frac.getIsotope(i).getInitialCondition();
+		}
+	}
+	std::map<int, double>::iterator it;
+	mass_num = this->initial_frac.getStableIsotope(0).IsotopeNumber();
+	it = this->total_moles.find(mass_num);
+	if (it == this->total_moles.end())
+	{
+		this->total_moles[mass_num] = 0.0;
+		this->refractory_moles[mass_num] = 0.0;
+	}
+	for (int i=0; i<this->initial_frac.getNumberStableNuclides(); i++)
+	{
+		if (mass_num == this->initial_frac.getStableIsotope(i).IsotopeNumber())
+		{
+			this->total_moles[mass_num] += this->initial_frac.getStableIsotope(i).getInitialCondition();
+			if (this->initial_frac.getStableIsotope(i).BoilingPoint() >= solid_temp)
+				this->refractory_moles[mass_num] += this->initial_frac.getStableIsotope(i).getInitialCondition();
+		}
+		else
+		{
+			mass_num = this->initial_frac.getStableIsotope(i).IsotopeNumber();
+			it = this->total_moles.find(mass_num);
+			if (it == this->total_moles.end())
+			{
+				this->total_moles[mass_num] = this->initial_frac.getStableIsotope(i).getInitialCondition();
+				if (this->initial_frac.getStableIsotope(i).BoilingPoint() >= solid_temp)
+					this->refractory_moles[mass_num] = this->initial_frac.getStableIsotope(i).getInitialCondition();
+			}
+			else
+			{
+				this->total_moles[mass_num] += this->initial_frac.getStableIsotope(i).getInitialCondition();
+				if (this->initial_frac.getStableIsotope(i).BoilingPoint() >= solid_temp)
+					this->refractory_moles[mass_num] += this->initial_frac.getStableIsotope(i).getInitialCondition();
+			}
+		}
+	}
+	
+	for (it=this->total_moles.begin(); it!=this->total_moles.end(); ++it)
+	{
+		//std::cout << it->first << "\tTotalMoles\t" << it->second << "\tRefractoryMoles\t" << this->refractory_moles[it->first] << std::endl;
+		if (it->second > 0.0)
+			this->freiling_numbers[it->first] = sqrt(this->refractory_moles[it->first]/it->second);
+		else
+			this->freiling_numbers[it->first] = 1.0;
+		
+		//std::cout << it->first << "\tb_i=\t" << this->freiling_numbers[it->first] << std::endl;
 	}
 }
 
@@ -489,32 +673,28 @@ int KEA_TESTS()
 	nuc_data.executeYamlRead("database/NuclideLibrary.yml");
 	yeildtest.loadNuclides(nuc_data);
 	
-	yeildtest.setTotalMass(9.7);
-	yeildtest.setFissionExtent(99.0);
+	yeildtest.setTotalMass(50.0);
+	yeildtest.setFissionExtent(3.0);
 	yeildtest.setFissionType(explosion);
 	yeildtest.setEnergyLevel(1000.0);
 	yeildtest.timeSinceDetonation(3.0, 99.0); //Set yeild to 3 sec cutoff based on 99% conversion to daughters
 	yeildtest.addIsotopeMaterial("U-235", 90.0);
 	yeildtest.addIsotopeMaterial("U-238", 10.0);
 	
-	yeildtest.loadFissionProductYields();
-	yeildtest.evaluateYields();
-	//Don't form eigenvectors yet... sets ICs for FPY data
-	
 	/// ----------------- END Initialize FAIRY for the Weapon Components ----------------------------------
 	
 	FILE *file, *cloud;
-	file = fopen("output/KEA_Tests.txt", "w+");
-	cloud = fopen("output/KEA_Tests_CloudGrowth.txt", "w+");
+	file = fopen("output/KEA_CRANE_Tests.txt", "w+");
+	cloud = fopen("output/KEA_CRANE_CloudGrowth.txt", "w+");
 	if (file == nullptr)
 	{
 		system("mkdir output");
-		file = fopen("output/KEA_Tests.txt", "w+");
+		file = fopen("output/KEA_CRANE_Tests.txt", "w+");
 	}
 	if (cloud == nullptr)
 	{
 		system("mkdir output");
-		cloud = fopen("output/KEA_Tests_CloudGrowth.txt", "w+");
+		cloud = fopen("output/KEA_CRANE_CloudGrowth.txt", "w+");
 	}
 	cranetest.set_CloudFile(cloud);
 	
@@ -523,13 +703,11 @@ int KEA_TESTS()
 	test.add_casing_component("PbBi", 0.1);
 	test.verify_casing_components();
 	
+	//Determine number of neutrons emitted per fission
 	test.set_fission_yield(25.0);
 	test.set_fusion_yield(25.0);
 	test.set_total_yield(test.get_fission_yield()+test.get_fusion_yield());
 	test.compute_neutrons_emit(test.get_fission_yield(), test.get_fusion_yield());
-	
-	test.compute_casing_mw();
-	//test.compute_casing_thermal();
 	
 	/// ----------------- Initialize CRANE for the Soil Components ----------------------------------
 	
@@ -564,15 +742,81 @@ int KEA_TESTS()
 	cranetest.display_soil_characteristics();
 	std::cout << "\n";
 	
+	bool fileout = true;
+	bool consoleout = false;
+	double tol = 0.1;
+	double dtmin = 1e-8;
+	double dtmax = 0.1; //ABS MAX!!! Beyond this point the numerical errors become too large...
+	double dtmin_conv = 0.0001;
+	double t_out = 1.0;
+	double endtime = 1000.0;
+	
+	cranetest.establish_dove_options(dove, file, fileout, consoleout, BDF2, ADAPTIVE, SGS, tol, dtmin, dtmax, dtmin_conv, t_out, endtime);
+	
+	bool isLinear = false;
+	bool isPrecon = false;
+	bool nl_out = true;
+	bool l_out = false;
+	int max_nlit = 50;
+	int max_lit = 200;
+	int restart = 20;
+	int recursive = 2;
+	double nl_abstol = 1e-6;
+	double nl_reltol = 1e-6;
+	double l_abstol = 1e-6;
+	double l_reltol = 1e-4;
+	
+	cranetest.establish_pjfnk_options(dove, QR, BT, isLinear, isPrecon, nl_out, l_out, max_nlit, max_lit, restart, recursive, nl_abstol, nl_reltol, l_abstol, l_reltol);
+	
+	std::cout << "\nInitial Conditions for Non-linear Variables\n";
+	std::cout <<   "-------------------------------------------\n\n";
+	cranetest.estimate_parameters(dove);
+	for (int i=0; i<8; i++)
+	{
+		std::cout << dove.getVariableName(i) << " =\t " << dove.getNewU(i, dove.getNewU()) << std::endl;
+	}
+	cranetest.display_part_conc();
+	
+	cranetest.run_crane_simulation(dove);
+	
+	std::cout << "\nFinal Results for Non-linear Variables\n";
+	std::cout <<   "---------------------------------------\n\n";
+	for (int i=0; i<8; i++)
+	{
+		std::cout << dove.getVariableName(i) << " =\t " << dove.getNewU(i, dove.getNewU()) << std::endl;
+	}
+	cranetest.display_part_conc();
+	
+	std::cout << "\nSaturation Time (s)     =\t";
+	if (cranetest.get_saturation_time() > 0.0)
+		std::cout << cranetest.get_saturation_time() << std::endl;
+	else
+		std::cout << "Unsaturated\n";
+	std::cout << "Solidification Time (s) =\t";
+	if (cranetest.get_saturation_time() > 0.0)
+		std::cout << cranetest.get_solidification_time() << std::endl;
+	else
+		std::cout << "Unsolidified\n";
+	std::cout << "Stabilization Time (s) =\t" << cranetest.get_stabilization_time() << std::endl;
+	
 	/// ----------------- END Initialize CRANE for the Soil Components ----------------------------------
 	
-	//test.compute_soil_thermal(cranetest.get_soil_atom_frac(), cranetest.get_soil_atom());
-	//test.compute_soil_scattering(cranetest.get_soil_atom_frac(), cranetest.get_soil_atom());
-	//test.compute_weapon_thermal(yeildtest);
-	
+	//Setup all neutron captures
 	test.compute_casing_capfrac();
 	test.compute_soil_capfrac(cranetest.get_soil_atom_frac(), cranetest.get_soil_atom());
 	test.compute_weapon_capfrac(yeildtest);
+	
+	//Compute all capture fractions
+	test.compute_escape_fraction();
+	test.compute_volatile_fraction(cranetest.get_burst_height(), cranetest.get_bomb_yield());
+	test.compute_soil_capture_fraction(cranetest.get_soil_atom_frac(), cranetest.get_soil_atom());
+	
+	//Now we need to incorporate neutron captures into initial fission products
+	test.initialize_fractionation(yeildtest);
+	test.evaluate_initial_fractionation();
+	
+	//Simulate fractionations
+	test.evaluate_freiling_ratios(cranetest.get_solidification_time(), cranetest.get_solidification_temp());
 	
 	if (file!= nullptr)
 		fclose(file);

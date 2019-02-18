@@ -42,9 +42,19 @@ public:
 	~FissionProducts();								///< Default Destructor
 	
 	void DisplayInfo();								///< Display the FAIRY information, initial materials and fractions
+	void DisplayMap();								///< Display the map for the DecayChain object
 	
 	void loadNuclides(yaml_cpp_class &data);		///< Function to load the nuclide library into the pointer
 	void unloadNuclides();							///< Delete the pointer to nuclide library to free space
+	
+	int registerInitialNuclide(std::string isotope_name);	///< Register an initial nuclide by name (e.g., H-2)
+	int registerInitialNuclide(std::string symb, int iso);	///< Register an initial nuclide by symbol (e.g., H) and isotope number (e.g., 2)
+	int registerInitialNuclide(int atom_num, int iso_num);	///< Register an initial nuclide by atomic and mass numbers (e.g., H-2 = 1, 2)
+	
+	/// NOTE: The below functions will register isotopes with their initial conditions as well
+	int registerInitialNuclide(std::string isotope_name, double ic);///< Register an initial nuclide by name (e.g., H-2)
+	int registerInitialNuclide(std::string symb, int iso, double ic);///< Register an initial nuclide by symbol (e.g., H) and iso number (e.g., 2)
+	int registerInitialNuclide(int atom_num, int iso_num, double ic);///< Register an initial nuclide by atomic and mass numbers (e.g., H-2 = 1, 2)
 	
 	void loadFissionProductYields();				///< Function to read in the library and put into the Yaml object
 	void unloadFissionProductYields();				///< Function to delete the items in the Yaml object
@@ -84,7 +94,32 @@ public:
 	
 	void checkFractions();							///< Check fractions of materials in fuel/weapone and correct if necessary
 	int evaluateYields();							///< Read yield data and set isotope fractionation based on yields
-	void evaluateEigenSolution();					///< Take the initialized yield info and form the eigenvectors 
+	void evaluateEigenSolution();					///< Take the initialized yield info and form the eigenvectors
+	int verifyEigenSoln();							///< Function will verify that the eigenvectors and eigenvalues are correct
+	
+	/// Function to calculate the isotope fractionation given a time t in seconds
+	/** This function must be called after createChains() and after formEigenvectors().
+		It will use the eigenvector solution to estimate the isotope concentrations for
+		each isotope in the chain at the given time t. Those concentrations are based on
+		values given for the initial concentrations of each isotope and are stored in
+		each isotope object as the current concentration value.
+	 
+		Use an analytical solution based on linear combinations of eigenvectors. */
+	void calculateFractionation(double t);
+	double returnFractionation(std::string iso_name, double t);		///< Return the fractionation of the given nuclide
+	
+	int getNumberNuclides();								///< Return the number of nuclides in the decay chain
+	int getNumberStableNuclides();							///< Return the number of stable nuclides
+	int getIsotopeIndex(std::string iso_name);				///< Return the unstable isotope index that corresponds to the given name
+	int getStableIsotopeIndex(std::string iso_name);		///< Return the stable isotope index that corresponds to the given name
+	std::vector<int>& getParentList(int i);					///< Return the vector list of parents for the ith isotope in the nuclide list
+	std::vector<int>& getStableParentList(int i);			///< Return the vector list of parents for the ith stable isotope
+	std::vector<int>& getBranchList(int i, int j);			///< Return the vector list of branch fractions for the jth parent of the ith nuclide
+	std::vector<int>& getStableBranchList(int i, int j);	///< Return the list of branch fractions for the jth parent of the ith stable nuclide
+	Isotope& getIsotope(int i);								///< Return the ith isotope in the nuclide list
+	Isotope& getStableIsotope(int i);						///< Return the ith stable isotope
+	Isotope& getIsotope(std::string iso_name);				///< Return the isotope (Stable or Unstable) that corresponds to the given name
+	Matrix<double>& getEigenvectors();						///< Return the eigenvectors matrix
 	
 protected:
 	fiss_type type;								///< Type of fission products to be produced

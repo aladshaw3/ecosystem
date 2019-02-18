@@ -155,6 +155,7 @@ public:
 	void set_FileOut(bool val);							///< Set the FileOut parameter
 	void set_saturation_time(double val);				///< Set the saturation_time parameter
 	void set_solidification_time(double val);			///< Set the solidification_time parameter
+	void set_stabilization_time(double val);			///< Set the stabilization_time parameter
 	void set_isTight(bool val);							///< Set the isTight parameter
 	void set_useCustomDist(bool val);					///< Set the useCustomDist parameter
 	void set_cloud_density(double val);					///< Set the cloud_density parameter
@@ -251,6 +252,7 @@ public:
 	Matrix<double> & get_part_conc_var();		///< Get the part_conc_var parameter
 	double get_saturation_time();				///< Get the saturation_time parameter
 	double get_solidification_time();			///< Get the solidification_time parameter
+	double get_stabilization_time();			///< Get the stabilization_time parameter
 	bool get_isTight();							///< Get the isTight parameter
 	bool get_useCustomDist();					///< Get the useCustomDist parameter
 	double get_cloud_density();					///< Get the cloud_density parameter
@@ -530,6 +532,7 @@ protected:
 	Matrix<double> part_conc_var;				///< Storage matrix for particle concentrations (Gp/m^3) in order of size
 	double saturation_time;						///< Time at which saturation has occurred (s)
 	double solidification_time;					///< Time at which the melted debris has solidified (s)
+	double stabilization_time;					///< Time at which the debris cloud has stabilized (s)
 	double cloud_density;						///< Density of the cloud materials	(kg/m^3)
 	double horz_rad_change;						///< Change in horizontal radius between time steps (m)			(d(Rc))
 	double energy_switch;						///< Energy switch parameter for determining termination (J/kg)

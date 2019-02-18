@@ -143,6 +143,20 @@ public:
 	void compute_soil_capfrac(std::map<std::string, double> & soil_atom_frac, std::map<std::string, Atom> & soil_atom);
 	void compute_weapon_capfrac(FissionProducts & weapon);
 	
+	void compute_casing_cap();										///< Compute the casing capture fraction (Sigma)
+	void compute_escape_fraction();									///< Compute the casing escape fraction
+	
+	void compute_volatile_fraction(double h, double W);				///< Compute the neutron fraction entering soil given h (m) and W (kT)
+	
+	/// Compute the fraction of neutrons captured by soil
+	void compute_soil_capture_fraction(std::map<std::string, double> & soil_atom_frac, std::map<std::string, Atom> & soil_atom);
+	
+	void initialize_fractionation(FissionProducts & yields);		///< Initialize fractionation via yield data
+	
+	void evaluate_initial_fractionation();							///< Go through all soil, casing, and weapon data to add nuclides
+	
+	void evaluate_freiling_ratios(double solid_time, double solid_temp);///< Evaluate the initial fractionation to the solidification time
+	
 protected:
 	asd_model model_type;											///< Type of activity-size distribution model to use
     // capfis_ratio = No*(fc)_i
@@ -171,8 +185,11 @@ protected:
 	double soil_capture_fraction;									///< Neutron fraction that is captured by soil
     
     /// Below are the parameters associated with the activity-size distributions
+	FissionProducts initial_frac;									///< Initial fractionation prior to size differentiation
     std::map<double, FissionProducts> nuc_fractionation;            ///< Fractionation of nuclides with particle size (um)
-    std::map<int, double> freiling_rat;                             ///< Freiling ratios for each mass number chain
+	std::map<int, double> total_moles;								///< Total moles of nuclides for each mass number chain
+    std::map<int, double> refractory_moles;							///< Refractory moles of nuclides for each mass number chain
+	std::unordered_map<int, double> freiling_numbers;				///< Map of the Freiling ratio numbers (b_i)
 	
 	/// Neutron fractional captures by all atomic materials
 	std::map<std::string, double> casing_capfrac;					///< Casing neutron capture fractions (by atom symbol)

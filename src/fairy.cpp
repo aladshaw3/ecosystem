@@ -43,7 +43,7 @@ FissionProducts::FissionProducts()
 {
 	type = explosion;
 	total_mass = 1.0;
-	fiss_extent = 100.0;
+	fiss_extent = 50.0;
 	energy_level = 0.0;
 }
 
@@ -86,6 +86,14 @@ void FissionProducts::DisplayInfo()
 	{
 		std::cout << "\t" << this->InitialMat[i].IsotopeName() << "\t\t" << this->MatFrac[i] << std::endl;
 	}
+	this->DecayChain::DisplayInfo();
+	this->DecayChain::DisplayStableInfo();
+}
+
+//Display map
+void FissionProducts::DisplayMap()
+{
+	this->DecayChain::DisplayMap();
 }
 
 //Load library
@@ -98,6 +106,42 @@ void FissionProducts::loadNuclides(yaml_cpp_class &data)
 void FissionProducts::unloadNuclides()
 {
 	this->DecayChain::unloadNuclides();
+}
+
+//Register initial nuclide
+int FissionProducts::registerInitialNuclide(std::string isotope_name)
+{
+	return this->DecayChain::registerInitialNuclide(isotope_name);
+}
+
+//Register initial nuclide
+int FissionProducts::registerInitialNuclide(std::string symb, int iso)
+{
+	return this->DecayChain::registerInitialNuclide(symb, iso);
+}
+
+//Register initial nuclide
+int FissionProducts::registerInitialNuclide(int atom_num, int iso_num)
+{
+	return this->DecayChain::registerInitialNuclide(atom_num, iso_num);
+}
+
+//Register initial nuclide
+int FissionProducts::registerInitialNuclide(std::string isotope_name, double ic)
+{
+	return this->DecayChain::registerInitialNuclide(isotope_name,ic);
+}
+
+//Register initial nuclide
+int FissionProducts::registerInitialNuclide(std::string symb, int iso, double ic)
+{
+	return this->DecayChain::registerInitialNuclide(symb, iso, ic);
+}
+
+//Register initial nuclide
+int FissionProducts::registerInitialNuclide(int atom_num, int iso_num, double ic)
+{
+	return this->DecayChain::registerInitialNuclide(atom_num, iso_num, ic);
 }
 
 //Load FPY library
@@ -495,6 +539,97 @@ void FissionProducts::evaluateEigenSolution()
 	this->unloadFissionProductYields();
 }
 
+//verfiy eigenvectors and eigenvalues
+int FissionProducts::verifyEigenSoln()
+{
+	return this->DecayChain::verifyEigenSoln();
+}
+
+//Calculate fractionation
+void FissionProducts::calculateFractionation(double t)
+{
+	this->DecayChain::calculateFractionation(t);
+}
+
+//Calculate fractionation for given isotope
+double FissionProducts::returnFractionation(std::string iso_name, double t)
+{
+	return this->DecayChain::returnFractionation(iso_name, t);
+}
+
+//Return num nuc
+int FissionProducts::getNumberNuclides()
+{
+	return this->DecayChain::getNumberNuclides();
+}
+
+//Return num stable nuc
+int FissionProducts::getNumberStableNuclides()
+{
+	return this->DecayChain::getNumberStableNuclides();
+}
+
+//Return unstable index
+int FissionProducts::getIsotopeIndex(std::string iso_name)
+{
+	return this->DecayChain::getIsotopeIndex(iso_name);
+}
+
+//Return stable index
+int FissionProducts::getStableIsotopeIndex(std::string iso_name)
+{
+	return this->DecayChain::getStableIsotopeIndex(iso_name);
+}
+
+//Return parents
+std::vector<int>& FissionProducts::getParentList(int i)
+{
+	return this->DecayChain::getParentList(i);
+}
+
+//Return stable parents
+std::vector<int>& FissionProducts::getStableParentList(int i)
+{
+	return this->DecayChain::getStableParentList(i);
+}
+
+//Return branches
+std::vector<int>& FissionProducts::getBranchList(int i, int j)
+{
+	return this->DecayChain::getBranchList(i, j);
+}
+
+//Return stable branches
+std::vector<int>& FissionProducts::getStableBranchList(int i, int j)
+{
+	return this->DecayChain::getStableBranchList(i, j);
+}
+
+//Return isotope
+Isotope& FissionProducts::getIsotope(int i)
+{
+	return this->DecayChain::getIsotope(i);
+}
+
+//Return stable isotope
+Isotope& FissionProducts::getStableIsotope(int i)
+{
+	return this->DecayChain::getStableIsotope(i);
+}
+
+//Return stable or unstable isotope
+Isotope& FissionProducts::getIsotope(std::string iso_name)
+{
+	return this->DecayChain::getIsotope(iso_name);
+}
+
+//Return eigenvectors
+Matrix<double>& FissionProducts::getEigenvectors()
+{
+	return this->DecayChain::getEigenvectors();
+}
+
+
 /*
  *	-------------------------------------------------------------------------------------
  *								End: FissionProducts Class Definitions
@@ -515,8 +650,8 @@ int FAIRY_TESTS()
 	FissionProducts test;
 	test.loadNuclides(nuc_data);
 	
-	test.setTotalMass(9.7);
-	test.setFissionExtent(100.0);
+	test.setTotalMass(50.0);
+	test.setFissionExtent(3.0);
 	test.setFissionType(explosion);
 	test.setEnergyLevel(1000.0);
 	test.timeSinceDetonation(3.0, 99.0); //Set yeild to 3 sec cutoff based on 99% conversion to daughters

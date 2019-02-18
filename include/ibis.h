@@ -84,7 +84,7 @@ public:
 	void setThreshold(double val);						///< Set the threshold value for half-life (in sec)
 	void updateDecayRate();								///< Increase decay rate by 1% (used to correct issues with same eigenvalues)
 	
-	int IsotopeNumber();								///< Return the isotope number of the atom
+	int IsotopeNumber();								///< Return the isotope number of the atom (i.e., mass number)
 	double DecayRate();									///< Return the decay rate of the isotope
 	double HalfLife(time_units units);					///< Return the half-life in the given units
 	time_units HalfLifeUnits();							///< Return the half-life units
@@ -158,7 +158,7 @@ protected:
 	double half_life;									///< Half-life of the isotope (in hl_units)
 	time_units hl_units;								///< Units given for the half-life
 	double hl_threshold;								///< Half-life value (in seconds) at which 99% of isotope has been converted
-	int isotope_number;									///< isotope number for the object
+	int isotope_number;									///< isotope number for the object (i.e., mass number)
 	bool Stable;										///< Boolean is True if isotope is stable
 	bool IsomericState;									///< Boolean is True if isotope is in an isomeric state
 	double initial_condition;							///< Value to hold initial condition for this nuclide (moles or atoms)
