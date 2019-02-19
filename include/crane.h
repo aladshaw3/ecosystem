@@ -265,6 +265,7 @@ public:
 	double get_rise_top();						///< Get the rise_top parameter
 	double get_rise_bottom();					///< Get the rise_bottom parameter
 	std::map<double, double> & get_part_conc();		///< Get the part_conc map parameter
+	std::map<double, double> & get_part_hist();		///< Get the part_hist map parameter
 	std::map<std::string, double> & get_soil_molefrac();///< Get the soil_molefrac map parameter
 	std::map<std::string, Molecule> & get_soil_comp();///< Get the soil_comp map parameter
 	std::map<std::string, double> & get_soil_atom_frac();///< Get the soil_atom_frac map parameter

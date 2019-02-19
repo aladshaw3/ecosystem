@@ -57,6 +57,7 @@ ActivityDistribution::ActivityDistribution()
 	soil_thermal = 0.2;
 	soil_scattering = 2.0;
 	weapon_thermal = 0.2;
+	size_cutoff = 100.0;
 	burst_height = 0.0;
 	escape_fraction = 0.0;
 	volatile_fraction = 0.0;
@@ -139,6 +140,11 @@ void ActivityDistribution::set_soil_scattering(double val)
 void ActivityDistribution::set_weapon_thermal(double val)
 {
 	this->weapon_thermal = val;
+}
+
+void ActivityDistribution::set_size_cutoff(double val)
+{
+	this->size_cutoff = val;
 }
 
 void ActivityDistribution::set_burst_height(double val)
@@ -258,6 +264,7 @@ void ActivityDistribution::delete_fractionation()
 	this->total_moles.clear();
 	this->refractory_moles.clear();
 	this->freiling_numbers.clear();
+	this->distribution.clear();
 }
 
 void ActivityDistribution::delete_capture_fractions()
@@ -335,6 +342,11 @@ double ActivityDistribution::get_soil_scattering()
 double ActivityDistribution::get_weapon_thermal()
 {
 	return this->weapon_thermal;
+}
+
+double ActivityDistribution::get_size_cutoff()
+{
+	return this->size_cutoff;
 }
 
 double ActivityDistribution::get_burst_height()
@@ -643,9 +655,55 @@ void ActivityDistribution::evaluate_freiling_ratios(double solid_time, double so
 		if (it->second > 0.0)
 			this->freiling_numbers[it->first] = sqrt(this->refractory_moles[it->first]/it->second);
 		else
-			this->freiling_numbers[it->first] = 1.0;
+			this->freiling_numbers[it->first] = 0.0;
 		
 		//std::cout << it->first << "\tb_i=\t" << this->freiling_numbers[it->first] << std::endl;
+	}
+}
+
+void ActivityDistribution::evalute_freiling_dist(std::map<double, double> & part_conc)
+{
+	
+}
+
+void ActivityDistribution::evalute_freiling_tompkins_dist(std::map<double, double> & part_hist)
+{
+	
+}
+
+void ActivityDistribution::evalute_mod_freiling_dist(std::map<double, double> & part_conc)
+{
+	
+}
+
+void ActivityDistribution::evalute_mod_freiling_tompkins_dist(std::map<double, double> & part_hist)
+{
+	
+}
+
+void ActivityDistribution::evalute_distribution(std::map<double, double> & part_conc, std::map<double, double> & part_hist)
+{
+	switch (this->model_type)
+	{
+		case freiling:
+			this->evalute_freiling_dist(part_conc);
+			break;
+			
+		case freiling_tompkins:
+			this->evalute_freiling_tompkins_dist(part_hist);
+			break;
+			
+		case mod_freiling:
+			this->evalute_mod_freiling_dist(part_conc);
+			break;
+			
+		case mod_freiling_tompkins:
+			this->evalute_mod_freiling_tompkins_dist(part_hist);
+			break;
+			
+		default:
+			this->evalute_freiling_dist(part_conc);
+			break;
 	}
 }
 
@@ -817,6 +875,7 @@ int KEA_TESTS()
 	
 	//Simulate fractionations
 	test.evaluate_freiling_ratios(cranetest.get_solidification_time(), cranetest.get_solidification_temp());
+	test.evalute_distribution(cranetest.get_part_conc(), cranetest.get_part_hist());
 	
 	if (file!= nullptr)
 		fclose(file);

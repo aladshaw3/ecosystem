@@ -1106,6 +1106,11 @@ std::map<double, double> & Crane::get_part_conc()
 	return this->part_conc;
 }
 
+std::map<double, double> & Crane::get_part_hist()
+{
+	return this->part_hist;
+}
+
 std::map<std::string, double> & Crane::get_soil_molefrac()
 {
 	return this->soil_molefrac;

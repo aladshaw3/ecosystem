@@ -93,6 +93,7 @@ public:
 	void set_soil_thermal(double val);								///< Set the soil_thermal parameter
 	void set_soil_scattering(double val);							///< Set the soil_scattering parameter
 	void set_weapon_thermal(double val);							///< Set the weapon_thermal parameter
+	void set_size_cutoff(double val);								///< Set the size_cutoff parameter
 	void set_burst_height(double val);								///< Set the burst_height parameter
 	void set_escape_fraction(double val);							///< Set the escape_fraction parameter
 	void set_volatile_fraction(double val);							///< Set the volatile_fraction parameter
@@ -121,6 +122,7 @@ public:
 	double get_soil_thermal();								///< Get the soil_thermal parameter
 	double get_soil_scattering();							///< Get the soil_scattering parameter
 	double get_weapon_thermal();							///< Get the weapon_thermal parameter
+	double get_size_cutoff();								///< Get the size_cutoff parameter
 	double get_burst_height();								///< Get the burst_height parameter
 	double get_escape_fraction();							///< Get the escape_fraction parameter
 	double get_volatile_fraction();							///< Get the volatile_fraction parameter
@@ -157,6 +159,14 @@ public:
 	
 	void evaluate_freiling_ratios(double solid_time, double solid_temp);///< Evaluate the initial fractionation to the solidification time
 	
+	void evalute_freiling_dist(std::map<double, double> & part_conc);				///< Evaluate the freiling distribution
+	void evalute_freiling_tompkins_dist(std::map<double, double> & part_hist);		///< Evaluate the freiling-tompkins distribution
+	void evalute_mod_freiling_dist(std::map<double, double> & part_conc);			///< Evaluate the modified freiling distribution
+	void evalute_mod_freiling_tompkins_dist(std::map<double, double> & part_hist);	///< Evaluate the modified freiling-tompkins distribution
+	
+	/// Call and evaluate the appropriate distribution function
+	void evalute_distribution(std::map<double, double> & part_conc, std::map<double, double> & part_hist);
+	
 protected:
 	asd_model model_type;											///< Type of activity-size distribution model to use
     // capfis_ratio = No*(fc)_i
@@ -175,6 +185,7 @@ protected:
 	double soil_thermal;											///< Soil material average thermal neutron x-sec in barns (sigma_s)
 	double soil_scattering;											///< Soil material average neutron scattering in barns (sigma_ssc)
 	double weapon_thermal;											///< Weapone material thermal neutron x-sec in barns
+	double size_cutoff;												///< Size cutoff point for the Freiling-Tompkins distributions in um (D)
 	std::map<std::string, Atom> casing_atom;						///< Stores a map of casing atom components (key is the atom)
 	std::map<std::string, double> casing_atom_frac;					///< Stores a map of casing atom components (key is the atom)
 	std::map<std::string, Molecule> casing_mat;						///< Weapon casing molecular composition
@@ -190,6 +201,7 @@ protected:
 	std::map<int, double> total_moles;								///< Total moles of nuclides for each mass number chain
     std::map<int, double> refractory_moles;							///< Refractory moles of nuclides for each mass number chain
 	std::unordered_map<int, double> freiling_numbers;				///< Map of the Freiling ratio numbers (b_i)
+	std::map<int, std::map<double, double> > distribution;			///< Map of the distributions for nuclides [i] ==> mass num [k] ==> particle size
 	
 	/// Neutron fractional captures by all atomic materials
 	std::map<std::string, double> casing_capfrac;					///< Casing neutron capture fractions (by atom symbol)
