@@ -582,16 +582,12 @@ void ActivityDistribution::evaluate_freiling_ratios(double solid_time, double so
 		conc = this->initial_frac.getIsotope(i).getConcentration();
 		if (conc < 0.0) conc = 0.0;
 		this->initial_frac.getIsotope(i).setInitialCondition(conc);
-		
-		//std::cout << this->initial_frac.getIsotope(i).IsotopeName() << "\t" << conc << std::endl;
 	}
 	for (int i=0; i<this->initial_frac.getNumberStableNuclides(); i++)
 	{
 		conc = this->initial_frac.getStableIsotope(i).getConcentration();
 		if (conc < 0.0) conc = 0.0;
 		this->initial_frac.getStableIsotope(i).setInitialCondition(conc);
-		
-		//std::cout << this->initial_frac.getStableIsotope(i).IsotopeName() << "\t" << conc << std::endl;
 	}
 	
 	//Setup all Freiling Ratios
@@ -651,34 +647,105 @@ void ActivityDistribution::evaluate_freiling_ratios(double solid_time, double so
 	
 	for (it=this->total_moles.begin(); it!=this->total_moles.end(); ++it)
 	{
-		//std::cout << it->first << "\tTotalMoles\t" << it->second << "\tRefractoryMoles\t" << this->refractory_moles[it->first] << std::endl;
 		if (it->second > 0.0)
 			this->freiling_numbers[it->first] = sqrt(this->refractory_moles[it->first]/it->second);
 		else
 			this->freiling_numbers[it->first] = 0.0;
-		
-		//std::cout << it->first << "\tb_i=\t" << this->freiling_numbers[it->first] << std::endl;
 	}
 }
 
 void ActivityDistribution::evalute_freiling_dist(std::map<double, double> & part_conc)
 {
-	
+	//Loop through all mass numbers
+	std::map<int, double>::iterator it;
+	for (it=this->freiling_numbers.begin(); it!=this->freiling_numbers.end(); ++it)
+	{
+		//Loop through all the particle sizes
+		std::map<double, double>::iterator kt;
+		for (kt=part_conc.begin(); kt!=part_conc.end(); ++kt)
+		{
+			//Now calculuate the distribution (j loop over part_conc)
+			double denom = 0.0;
+			std::map<double, double>::iterator jt;
+			for (jt=part_conc.begin(); jt!=part_conc.end(); ++jt)
+			{
+				denom += jt->second*pow(jt->first, (it->second+2.0) );
+			}
+			this->distribution[it->first][kt->first] = kt->second*pow(kt->first, (it->second+2.0))/denom;
+		}
+	}
 }
 
 void ActivityDistribution::evalute_freiling_tompkins_dist(std::map<double, double> & part_hist)
 {
-	
+	//Loop through all mass numbers
+	std::map<int, double>::iterator it;
+	for (it=this->freiling_numbers.begin(); it!=this->freiling_numbers.end(); ++it)
+	{
+		//Loop through all the particle sizes
+		std::map<double, double>::iterator kt;
+		for (kt=part_hist.begin(); kt!=part_hist.end(); ++kt)
+		{
+			//Now calculuate the distribution (j loop over part_hist)
+			double denom = 0.0;
+			std::map<double, double>::iterator jt;
+			for (jt=part_hist.begin(); jt!=part_hist.end(); ++jt)
+			{
+				denom += jt->second*pow(jt->first, (it->second-1.0) );
+			}
+			double E_factor = 1.0/denom;
+			this->distribution[it->first][kt->first] = (E_factor/(1.0+E_factor*pow(this->get_size_cutoff(), (it->second-1.0)) ) ) * (pow(this->get_size_cutoff(), (it->second-1.0))+pow(kt->first, (it->second-1.0))) * kt->second;
+			
+		}
+	}
 }
 
-void ActivityDistribution::evalute_mod_freiling_dist(std::map<double, double> & part_conc)
+void ActivityDistribution::evalute_mod_freiling_dist(std::map<double, double> & part_hist)
 {
-	
+	//Loop through all mass numbers
+	std::map<int, double>::iterator it;
+	for (it=this->freiling_numbers.begin(); it!=this->freiling_numbers.end(); ++it)
+	{
+		double FR = it->second*it->second;
+		//Loop through all the particle sizes
+		std::map<double, double>::iterator kt;
+		for (kt=part_hist.begin(); kt!=part_hist.end(); ++kt)
+		{
+			//Now calculuate the distribution sum (j loop over part_conc)
+			double sum = 0.0;
+			std::map<double, double>::iterator jt;
+			for (jt=part_hist.begin(); jt!=part_hist.end(); ++jt)
+			{
+				sum += jt->second*pow(jt->first, -1.0 );
+			}
+			this->distribution[it->first][kt->first] = kt->second*(FR + ((1.0-FR)*pow(kt->first, -1.0)/sum) );
+		}
+	}
 }
 
 void ActivityDistribution::evalute_mod_freiling_tompkins_dist(std::map<double, double> & part_hist)
 {
-	
+	//Loop through all mass numbers
+	std::map<int, double>::iterator it;
+	for (it=this->freiling_numbers.begin(); it!=this->freiling_numbers.end(); ++it)
+	{
+		double FR = it->second*it->second;
+		//Loop through all the particle sizes
+		std::map<double, double>::iterator kt;
+		for (kt=part_hist.begin(); kt!=part_hist.end(); ++kt)
+		{
+			//Now calculuate the distribution (j loop over part_hist)
+			double denom = 0.0;
+			std::map<double, double>::iterator jt;
+			for (jt=part_hist.begin(); jt!=part_hist.end(); ++jt)
+			{
+				denom += jt->second*pow(jt->first, -1.0 );
+			}
+			double Ri = 1.0 + FR + ((1.0-FR)*(1.0 - (pow(this->get_size_cutoff(), -1.0)/denom)));
+			Ri = 1.0/Ri;
+			this->distribution[it->first][kt->first] = kt->second*(1.0-(Ri*(1.0-FR)*(1.0-(pow(kt->first, -1.0)/denom))));
+		}
+	}
 }
 
 void ActivityDistribution::evalute_distribution(std::map<double, double> & part_conc, std::map<double, double> & part_hist)
@@ -694,7 +761,7 @@ void ActivityDistribution::evalute_distribution(std::map<double, double> & part_
 			break;
 			
 		case mod_freiling:
-			this->evalute_mod_freiling_dist(part_conc);
+			this->evalute_mod_freiling_dist(part_hist);
 			break;
 			
 		case mod_freiling_tompkins:
@@ -705,6 +772,61 @@ void ActivityDistribution::evalute_distribution(std::map<double, double> & part_
 			this->evalute_freiling_dist(part_conc);
 			break;
 	}
+	
+	//Iterate through distribution map and correct by normalization
+	/**
+	std::unordered_map<int, std::unordered_map<double, double> >::iterator it;
+	for (it=this->distribution.begin(); it!=this->distribution.end(); ++it)
+	{
+		double sum = 0.0;
+		std::unordered_map<double, double>::iterator kt;
+		for (kt=it->second.begin(); kt!=it->second.end(); ++kt)
+		{
+			sum += kt->second;
+		}
+		std::cout << sum << std::endl;
+	}
+	*/
+}
+
+void ActivityDistribution::distribute_nuclides(std::map<double, double> & part_hist)
+{
+	//Loop through all the particle sizes and initialize FissionProducts
+	std::map<double, double>::iterator kt;
+	for (kt=part_hist.begin(); kt!=part_hist.end(); ++kt)
+	{
+		this->nuc_fractionation[kt->first] = this->initial_frac;
+	}
+	
+	//Loop through nuclides fraction map
+	std::map<double, FissionProducts>::iterator it;
+	for (it=this->nuc_fractionation.begin(); it!=this->nuc_fractionation.end(); ++it)
+	{
+		//Looping through the stable and unstable nuclides
+		for (int i=0; i<it->second.getNumberNuclides(); i++)
+		{
+			int mass_num = it->second.getIsotope(i).IsotopeNumber();
+			it->second.getIsotope(i).setInitialCondition(it->second.getIsotope(i).getInitialCondition()*this->distribution[mass_num][it->first]);
+		}
+		for (int i=0; i<it->second.getNumberStableNuclides(); i++)
+		{
+			int mass_num = it->second.getStableIsotope(i).IsotopeNumber();
+			it->second.getStableIsotope(i).setInitialCondition(it->second.getStableIsotope(i).getInitialCondition()*this->distribution[mass_num][it->first]);
+		}
+	}
+	
+	//Loop for mass checkfor
+	/**
+	for (int i=0; i<this->initial_frac.getNumberNuclides(); i++)
+	{
+		double sum = 0.0;
+		for (it=this->nuc_fractionation.begin(); it!=this->nuc_fractionation.end(); ++it)
+		{
+			sum += it->second.getIsotope(i).getInitialCondition();
+		}
+		std::cout << sum - this->initial_frac.getIsotope(i).getInitialCondition() << std::endl;
+	}
+	 */
 }
 
 /*
@@ -874,8 +996,10 @@ int KEA_TESTS()
 	test.evaluate_initial_fractionation();
 	
 	//Simulate fractionations
+	test.set_model_type(mod_freiling_tompkins);
 	test.evaluate_freiling_ratios(cranetest.get_solidification_time(), cranetest.get_solidification_temp());
 	test.evalute_distribution(cranetest.get_part_conc(), cranetest.get_part_hist());
+	test.distribute_nuclides(cranetest.get_part_hist());
 	
 	if (file!= nullptr)
 		fclose(file);

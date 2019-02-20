@@ -161,11 +161,13 @@ public:
 	
 	void evalute_freiling_dist(std::map<double, double> & part_conc);				///< Evaluate the freiling distribution
 	void evalute_freiling_tompkins_dist(std::map<double, double> & part_hist);		///< Evaluate the freiling-tompkins distribution
-	void evalute_mod_freiling_dist(std::map<double, double> & part_conc);			///< Evaluate the modified freiling distribution
+	void evalute_mod_freiling_dist(std::map<double, double> & part_hist);			///< Evaluate the modified freiling distribution
 	void evalute_mod_freiling_tompkins_dist(std::map<double, double> & part_hist);	///< Evaluate the modified freiling-tompkins distribution
 	
 	/// Call and evaluate the appropriate distribution function
 	void evalute_distribution(std::map<double, double> & part_conc, std::map<double, double> & part_hist);
+	
+	void distribute_nuclides(std::map<double, double> & part_hist);	///< Distribute nuclides on particle sizes according to distribution fractions
 	
 protected:
 	asd_model model_type;											///< Type of activity-size distribution model to use
@@ -200,8 +202,8 @@ protected:
     std::map<double, FissionProducts> nuc_fractionation;            ///< Fractionation of nuclides with particle size (um)
 	std::map<int, double> total_moles;								///< Total moles of nuclides for each mass number chain
     std::map<int, double> refractory_moles;							///< Refractory moles of nuclides for each mass number chain
-	std::unordered_map<int, double> freiling_numbers;				///< Map of the Freiling ratio numbers (b_i)
-	std::map<int, std::map<double, double> > distribution;			///< Map of the distributions for nuclides [i] ==> mass num [k] ==> particle size
+	std::map<int, double> freiling_numbers;							///< Map of the Freiling ratio numbers (b_i)
+	std::unordered_map<int, std::unordered_map<double, double> > distribution;///< Map of the distributions for nuclides [i] ==> mass num [k] ==> particle size
 	
 	/// Neutron fractional captures by all atomic materials
 	std::map<std::string, double> casing_capfrac;					///< Casing neutron capture fractions (by atom symbol)
