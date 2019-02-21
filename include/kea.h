@@ -155,7 +155,7 @@ public:
 	
 	void initialize_fractionation(FissionProducts & yields);		///< Initialize fractionation via yield data
 	
-	void evaluate_initial_fractionation();							///< Go through all soil, casing, and weapon data to add nuclides
+	int evaluate_initial_fractionation();							///< Go through all soil, casing, and weapon data to add nuclides
 	
 	void evaluate_freiling_ratios(double solid_time, double solid_temp);///< Evaluate the initial fractionation to the solidification time
 	
@@ -168,6 +168,9 @@ public:
 	void evalute_distribution(std::map<double, double> & part_conc, std::map<double, double> & part_hist);
 	
 	void distribute_nuclides(std::map<double, double> & part_hist);	///< Distribute nuclides on particle sizes according to distribution fractions
+	
+	/// Run fractionation simulation to cloud stabilization time and print results to file
+	void evaluate_fractionation(std::string file_name, double solid_time, double stab_time);
 	
 protected:
 	asd_model model_type;											///< Type of activity-size distribution model to use
