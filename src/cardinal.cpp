@@ -299,7 +299,7 @@ int CARDINAL_SCENARIO(const char *yaml_input, const char *atmosphere_data, const
 	Cardinal cardinal;
 	time = clock();
 	
-	cardinal.setConsoleOut(true);
+	cardinal.setConsoleOut(false);
 	
 	//Opening output files (optional)
 	FILE *file, *cloud;
