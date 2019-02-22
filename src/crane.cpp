@@ -78,7 +78,7 @@ Crane::Crane()
 	includeShearVel = false;
 	isSaturated = false;
 	isSolidified = false;
-	ConsoleOut = false;
+	ConsoleOut = true;
 	FileOut = false;
 	isTight = true;
 	useCustomDist = false;
@@ -3087,6 +3087,14 @@ int Crane::read_conditions(Dove &dove, yaml_cpp_class &yaml)
 	}
 	try
 	{
+		this->set_ConsoleOut( yaml.getYamlWrapper()("Simulation_Conditions")["console_output"].getBool() );
+	}
+	catch (std::out_of_range)
+	{
+		this->set_ConsoleOut( true );
+	}
+	try
+	{
 		hb = yaml.getYamlWrapper()("Simulation_Conditions")["burst_height"].getDouble();
 	}
 	catch (std::out_of_range)
@@ -3471,7 +3479,6 @@ void Crane::establish_dove_options(Dove &dove, FILE *file, bool fileout, bool co
 	dove.set_headeroutput(fileout);
 	this->set_FileOut(fileout);
 	dove.set_output(consoleout);
-	this->set_ConsoleOut(consoleout);
 	dove.set_integrationtype(inttype);
 	dove.set_timestepper(timetype);
 	dove.set_preconditioner(type);
@@ -3637,12 +3644,8 @@ void Crane::establish_pjfnk_options(Dove &dove, krylov_method lin_method, linese
 	dove.set_NonlinearRelTol(nl_reltol);
 	dove.set_LinearAbsTol(l_abstol);
 	dove.set_LinearRelTol(l_reltol);
-	
-	if (this->get_ConsoleOut() == false)
-	{
-		dove.set_NonlinearOutput(false);
-		dove.set_LinearOutput(false);
-	}
+	dove.set_NonlinearOutput(false);
+	dove.set_LinearOutput(false);
 }
 
 int Crane::read_wind_profile(yaml_cpp_class &yaml)
@@ -4040,7 +4043,7 @@ int Crane::run_crane_simulation(Dove &dove)
 	}
 	if (this->get_ConsoleOut() == true)
 	{
-		std::cout << "Dove Scheme: ";
+		std::cout << "\nDove Scheme: ";
 		switch (dove.getIntegrationMethod())
 		{
 			case BE:
@@ -4079,7 +4082,7 @@ int Crane::run_crane_simulation(Dove &dove)
 	this->estimate_parameters(dove);
 	double percent_comp = 0.0;
 	double print_comp = 0.0;
-	if (this->get_ConsoleOut() == false)
+	if (this->get_ConsoleOut() == true)
 		std::cout << "\nPercent Completion...\n";
 	do
 	{
@@ -4089,15 +4092,11 @@ int Crane::run_crane_simulation(Dove &dove)
 		{
 			print_comp = print_comp + 0.1;
 			
-			if (this->get_ConsoleOut() == false)
+			if (this->get_ConsoleOut() == true)
 				std::cout << "\t[" << (int)(percent_comp*100.0) << " %]\n";
 		}
 		
 		dove.update_timestep();
-		if (this->get_ConsoleOut() == true)
-		{
-			std::cout << "\nSolving (" << dove.getNumFunc() << ") equation(s) at time (" << dove.getCurrentTime() << ") with time step (" << dove.getTimeStep() << "). Please wait...\n";
-		}
 		success = dove.solve_timestep();
 		if (success != 0)
 		{
@@ -4118,7 +4117,8 @@ int Crane::run_crane_simulation(Dove &dove)
         //Check for early termination
         if (this->get_cloud_rise() <= 0.0 && this->get_energy() < this->get_energy_switch())
         {
-			std::cout << "Cloud has stabilized at " << this->get_current_time() << " (s)... Ending Early...\n";
+			if (this->get_ConsoleOut() == true)
+				std::cout << "Cloud has stabilized at " << this->get_current_time() << " (s)... Ending Early...\n";
 			dove.set_endtime(this->get_current_time());
 			this->set_stabilization_time(this->get_current_time());
 			if (this->get_FileOut() == true)
@@ -4131,7 +4131,8 @@ int Crane::run_crane_simulation(Dove &dove)
         }
 		if (this->get_cloud_rise() <= 0.0 && fabs(this->get_horz_rad_change()) <= (dove.getTimeStep()*this->get_horz_rad()*pow(this->get_bomb_yield(), 0.014778)/1153.0) )
 		{
-			std::cout << "Cloud has stopped expanding at " << this->get_current_time() << " (s)... Ending Early...\n";
+			if (this->get_ConsoleOut() == true)
+				std::cout << "Cloud has stopped expanding at " << this->get_current_time() << " (s)... Ending Early...\n";
 			dove.set_endtime(this->get_current_time());
 			if (this->get_FileOut() == true)
 			{
@@ -4144,10 +4145,8 @@ int Crane::run_crane_simulation(Dove &dove)
 		
 	} while (dove.getEndTime() > (dove.getCurrentTime()+dove.getMinTimeStep()) );
 	
-	if (this->get_ConsoleOut() == false)
-		std::cout << "\t[100 %]\n\n";
 	if (this->get_ConsoleOut() == true)
-		std::cout << "------------------------------------------------------\n\n";
+		std::cout << "\t[100 %]\n\n";
 	
 	return success;
 }

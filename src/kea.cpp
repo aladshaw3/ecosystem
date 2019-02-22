@@ -882,11 +882,23 @@ void ActivityDistribution::evaluate_fractionation(std::string file_name, bool fi
 	}
 	
 	//Run simulations
-	std::cout << "\tRunning fractionation simulation for all size classes. Please wait...\n";
+	if (this->initial_frac.isConsoleOut() == true)
+		std::cout << "Running fractionation simulation for all size classes. Please wait...\n";
+	double percent_comp = 0.0;
+	int points = (int)this->nuc_fractionation.size();
+	int current_point = 0;
 	for (kt=this->nuc_fractionation.begin(); kt!=nuc_fractionation.end(); ++kt)
 	{
+		percent_comp = (double)current_point / (double)points;
+			
+		if (this->initial_frac.isConsoleOut() == true)
+			std::cout << "\t[" << (int)(percent_comp*100.0) << " %]\n";
+	
 		kt->second.calculateFractionation((stab_time-solid_time));
+		current_point++;
 	}
+	if (this->initial_frac.isConsoleOut() == true)
+		std::cout << "\t[100 %]\n\n";
 	
 	//Print out final result (at stabilization time)
 	if (file_out == true)

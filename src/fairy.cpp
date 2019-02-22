@@ -298,6 +298,12 @@ double FissionProducts::getFissionExtent()
     return this->fiss_extent;
 }
 
+//return console bool
+bool FissionProducts::isConsoleOut()
+{
+	return this->ConsoleOut;
+}
+
 //return isotopes
 std::vector<Isotope> & FissionProducts::getWeaponMat()
 {

@@ -1254,6 +1254,12 @@ void DecayChain::setWarnings(bool opt)
 		this->stable_list[i].setWarnings(opt);
 }
 
+//set console out
+void DecayChain::setConsoleOut(bool op)
+{
+	this->ConsoleOut = op;
+}
+
 //set threshold
 void DecayChain::setThreshold(double val)
 {
@@ -1379,8 +1385,11 @@ int DecayChain::verifyEigenSoln()
 		return -1;
 	}
 	
-	std::cout << "\nVerifying Eigen Solution...\n";
-	std::cout << "---------------------------\n";
+	if (this->ConsoleOut == true)
+	{
+		std::cout << "\nVerifying Eigen Solution...\n";
+		std::cout << "---------------------------\n";
+	}
 	
 	Matrix<double> zero((int)this->CoefMap.size(),1);
 	
@@ -1412,8 +1421,11 @@ int DecayChain::verifyEigenSoln()
 		double error = zero.norm();
 		if (error > MIN_TOL)
 		{
-			std::cout << "Eigen Solution NOT within tolerance (" << MIN_TOL << ") at " << k << "-th eigen pair!\n";
-			std::cout << "\tNorm = " << error << std::endl;
+			if (this->ConsoleOut == true)
+			{
+				std::cout << "Eigen Solution NOT within tolerance (" << MIN_TOL << ") at " << k << "-th eigen pair!\n";
+				std::cout << "\tNorm = " << error << std::endl;
+			}
 			this->avg_eig_error += error;
 			errors++;
 		}
@@ -1424,14 +1436,17 @@ int DecayChain::verifyEigenSoln()
 	}
 	if (errors > 0)
 	{
-		std::cout << "\nEigen Solution outside of prescribed tolerance (" << MIN_TOL << "). ";
+		if (this->ConsoleOut == true)
+			std::cout << "\nEigen Solution outside of prescribed tolerance (" << MIN_TOL << "). ";
 		this->avg_eig_error = this->avg_eig_error/(double)errors;
-		std::cout << "Average Error = " << this->avg_eig_error << " with " << errors << " errors.\n\n";
+		if (this->ConsoleOut == true)
+			std::cout << "Average Error = " << this->avg_eig_error << " with " << errors << " errors.\n\n";
 	}
 	else
 	{
 		this->avg_eig_error = MIN_TOL;
-		std::cout << "Eigenvector Solution Verified! No Errors Present\n\n";
+		if (this->ConsoleOut == true)
+			std::cout << "Eigenvector Solution Verified! No Errors Present\n\n";
 	}
 	return errors;
 }

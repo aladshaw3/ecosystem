@@ -80,6 +80,7 @@ public:
     
     double getTotalMoles();                         ///< Return total moles of weapon
     double getFissionExtent();                      ///< Return the % of fission extent
+	bool isConsoleOut();							///< Return boolean option for console output
 	
 	std::vector<Isotope> & getWeaponMat();			///< Return reference to vector of isotopes in weapon
 	std::vector<double> & getWeaponFrac();			///< Return reference to vector of molefractions of weapon isotopes

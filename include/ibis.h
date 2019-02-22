@@ -214,6 +214,7 @@ public:
 	int registerInitialNuclide(int atom_num, int iso_num, double ic);///< Register an initial nuclide by atomic and mass numbers (e.g., H-2 = 1, 2)
 	
 	void setWarnings(bool opt);								///< Set the warnings boolean value
+	void setConsoleOut(bool opt);							///< Set the ConsoleOut boolean value
 	void setThreshold(double val);						///< Set the threshold value for half-life (in sec)
 	void createChains();									///< Function to create unique list of final nuclides from decay chains of initial
 	void formEigenvectors();								///< Function to produce eigenvectors from coefficient matrix

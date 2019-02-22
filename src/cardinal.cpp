@@ -29,6 +29,7 @@ Cardinal::~Cardinal()
 void Cardinal::setConsoleOut(bool val)
 {
 	this->ConsoleOut = val;
+	this->yields.setConsoleOut(val);
 }
 
 bool Cardinal::isConsoleOut()
@@ -63,6 +64,7 @@ int Cardinal::setupCloudRiseSimulation(FILE *outfile)
 	//Read in Simulation_Options
 	success = this->cloudrise.read_conditions(dove, this->input_file);
 	if (success != 0) {mError(read_error); return -1;}
+	this->setConsoleOut(this->cloudrise.get_ConsoleOut());
 	
 	if (this->isConsoleOut() == true)
 	{
@@ -275,7 +277,7 @@ int Cardinal::runSimulations()
 	//Now we need to incorporate neutron captures into initial fission products
 	this->activity.initialize_fractionation(this->yields, this->yield_data);
 	success = this->activity.evaluate_initial_fractionation();
-	if (success != 0) {mError(simulation_fail); return -1;}
+	if (success != 0) {mError(simulation_fail); std::cout << "\nEigen Solution not tolerable...\n\n"; return -1;}
 	
 	//Simulate fractionation
 	this->activity.evaluate_freiling_ratios(this->cloudrise.get_solidification_time(), this->cloudrise.get_solidification_temp());
@@ -298,8 +300,6 @@ int CARDINAL_SCENARIO(const char *yaml_input, const char *atmosphere_data, const
 	double time;
 	Cardinal cardinal;
 	time = clock();
-	
-	cardinal.setConsoleOut(false);
 	
 	//Opening output files (optional)
 	FILE *file, *cloud;

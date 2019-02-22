@@ -3,9 +3,10 @@ Simulation_Conditions:
 bomb_yield: 50         #50 kT
 burst_height: 0        #0 m above ground
 ground_level: 500      #500 m above mean sea level
-particle_bins: 10      #number of particle size distributions 
+particle_bins: 15      #number of particle size distributions 
 tight_coupling: true   #use tight or loose coupling for variables
 shear_correction: true #use a correction for shear velocity (requires wind profile)
+console_output: true   #print output to console
 
 #Particle size distribution parameters for log-normal distribution (optional)
 - part_dist:
