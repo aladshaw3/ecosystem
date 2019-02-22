@@ -830,52 +830,56 @@ void ActivityDistribution::distribute_nuclides(std::map<double, double> & part_h
 	 */
 }
 
-void ActivityDistribution::evaluate_fractionation(std::string file_name, double solid_time, double stab_time)
+void ActivityDistribution::evaluate_fractionation(std::string file_name, bool file_out, double solid_time, double stab_time)
 {
 	
 	//Open a file to print results to
-	FILE *file;
 	std::map<double, FissionProducts>::iterator kt;
-	file = fopen(file_name.c_str(), "w+");
-	if (file == nullptr)
-	{
-		system("mkdir output");
-		file = fopen(file_name.c_str(), "w+");
-	}
+	FILE *file;
 	
-	//Print out initial conditions (at solidification time)
-	fprintf(file, "Solidification Time (s) =\t%.6g\n",solid_time);
-	for (int i=0; i<this->initial_frac.getNumberNuclides(); i++)
+	if (file_out == true)
 	{
-		if (i==0)
-			fprintf(file, "\tUnstable");
-		else
-			fprintf(file, "\t***");
-	}
-	for (int i=0; i<this->initial_frac.getNumberStableNuclides(); i++)
-	{
-		if (i==0)
-			fprintf(file, "\tStable");
-		else
-			fprintf(file, "\t###");
-	}
-	fprintf(file, "\n");
-	fprintf(file, "Size (um)");
-	for (int i=0; i<this->initial_frac.getNumberNuclides(); i++)
-		fprintf(file, "\t%s", this->initial_frac.getIsotope(i).IsotopeName().c_str());
-	for (int i=0; i<this->initial_frac.getNumberStableNuclides(); i++)
-		fprintf(file, "\t%s", this->initial_frac.getStableIsotope(i).IsotopeName().c_str());
-	fprintf(file, "\n");
-	for (kt=this->nuc_fractionation.begin(); kt!=nuc_fractionation.end(); ++kt)
-	{
-		fprintf(file, "%.6g", kt->first);
-		for (int i=0; i<kt->second.getNumberNuclides(); i++)
-			fprintf(file, "\t%.6g", kt->second.getIsotope(i).getInitialCondition());
-		for (int i=0; i<kt->second.getNumberStableNuclides(); i++)
-			fprintf(file, "\t%.6g", kt->second.getStableIsotope(i).getInitialCondition());
+		file = fopen(file_name.c_str(), "w+");
+		if (file == nullptr)
+		{
+			system("mkdir output");
+			file = fopen(file_name.c_str(), "w+");
+		}
+	
+		//Print out initial conditions (at solidification time)
+		fprintf(file, "Solidification Time (s) =\t%.6g\n",solid_time);
+		for (int i=0; i<this->initial_frac.getNumberNuclides(); i++)
+		{
+			if (i==0)
+				fprintf(file, "\tUnstable");
+			else
+				fprintf(file, "\t***");
+		}
+		for (int i=0; i<this->initial_frac.getNumberStableNuclides(); i++)
+		{
+			if (i==0)
+				fprintf(file, "\tStable");
+			else
+				fprintf(file, "\t###");
+		}
+		fprintf(file, "\n");
+		fprintf(file, "Size (um)");
+		for (int i=0; i<this->initial_frac.getNumberNuclides(); i++)
+			fprintf(file, "\t%s", this->initial_frac.getIsotope(i).IsotopeName().c_str());
+		for (int i=0; i<this->initial_frac.getNumberStableNuclides(); i++)
+			fprintf(file, "\t%s", this->initial_frac.getStableIsotope(i).IsotopeName().c_str());
+		fprintf(file, "\n");
+		for (kt=this->nuc_fractionation.begin(); kt!=nuc_fractionation.end(); ++kt)
+		{
+			fprintf(file, "%.6g", kt->first);
+			for (int i=0; i<kt->second.getNumberNuclides(); i++)
+				fprintf(file, "\t%.6g", kt->second.getIsotope(i).getInitialCondition());
+			for (int i=0; i<kt->second.getNumberStableNuclides(); i++)
+				fprintf(file, "\t%.6g", kt->second.getStableIsotope(i).getInitialCondition());
+			fprintf(file, "\n");
+		}
 		fprintf(file, "\n");
 	}
-	fprintf(file, "\n");
 	
 	//Run simulations
 	std::cout << "\tRunning fractionation simulation for all size classes. Please wait...\n";
@@ -885,36 +889,39 @@ void ActivityDistribution::evaluate_fractionation(std::string file_name, double 
 	}
 	
 	//Print out final result (at stabilization time)
-	fprintf(file, "Stabilization Time (s) =\t%.6g\n",stab_time);
-	for (int i=0; i<this->initial_frac.getNumberNuclides(); i++)
+	if (file_out == true)
 	{
-		if (i==0)
-			fprintf(file, "\tUnstable");
-		else
-			fprintf(file, "\t***");
-	}
-	for (int i=0; i<this->initial_frac.getNumberStableNuclides(); i++)
-	{
-		if (i==0)
-			fprintf(file, "\tStable");
-		else
-			fprintf(file, "\t###");
-	}
-	fprintf(file, "\n");
-	fprintf(file, "Size (um)");
-	for (int i=0; i<this->initial_frac.getNumberNuclides(); i++)
-		fprintf(file, "\t%s", this->initial_frac.getIsotope(i).IsotopeName().c_str());
-	for (int i=0; i<this->initial_frac.getNumberStableNuclides(); i++)
-		fprintf(file, "\t%s", this->initial_frac.getStableIsotope(i).IsotopeName().c_str());
-	fprintf(file, "\n");
-	for (kt=this->nuc_fractionation.begin(); kt!=nuc_fractionation.end(); ++kt)
-	{
-		fprintf(file, "%.6g", kt->first);
-		for (int i=0; i<kt->second.getNumberNuclides(); i++)
-			fprintf(file, "\t%.6g", kt->second.getIsotope(i).getConcentration());
-		for (int i=0; i<kt->second.getNumberStableNuclides(); i++)
-			fprintf(file, "\t%.6g", kt->second.getStableIsotope(i).getConcentration());
+		fprintf(file, "Stabilization Time (s) =\t%.6g\n",stab_time);
+		for (int i=0; i<this->initial_frac.getNumberNuclides(); i++)
+		{
+			if (i==0)
+				fprintf(file, "\tUnstable");
+			else
+				fprintf(file, "\t***");
+		}
+		for (int i=0; i<this->initial_frac.getNumberStableNuclides(); i++)
+		{
+			if (i==0)
+				fprintf(file, "\tStable");
+			else
+				fprintf(file, "\t###");
+		}
 		fprintf(file, "\n");
+		fprintf(file, "Size (um)");
+		for (int i=0; i<this->initial_frac.getNumberNuclides(); i++)
+			fprintf(file, "\t%s", this->initial_frac.getIsotope(i).IsotopeName().c_str());
+		for (int i=0; i<this->initial_frac.getNumberStableNuclides(); i++)
+			fprintf(file, "\t%s", this->initial_frac.getStableIsotope(i).IsotopeName().c_str());
+		fprintf(file, "\n");
+		for (kt=this->nuc_fractionation.begin(); kt!=nuc_fractionation.end(); ++kt)
+		{
+			fprintf(file, "%.6g", kt->first);
+			for (int i=0; i<kt->second.getNumberNuclides(); i++)
+				fprintf(file, "\t%.6g", kt->second.getIsotope(i).getConcentration());
+			for (int i=0; i<kt->second.getNumberStableNuclides(); i++)
+				fprintf(file, "\t%.6g", kt->second.getStableIsotope(i).getConcentration());
+			fprintf(file, "\n");
+		}
 	}
 	
 	//Close the open file
@@ -1101,7 +1108,7 @@ int KEA_TESTS()
 	test.evaluate_freiling_ratios(cranetest.get_solidification_time(), cranetest.get_solidification_temp());
 	test.evalute_distribution(cranetest.get_part_conc(), cranetest.get_part_hist());
 	test.distribute_nuclides(cranetest.get_part_hist());
-	test.evaluate_fractionation("output/KEA_Nuclides.txt", cranetest.get_solidification_time(), cranetest.get_stabilization_time());
+	test.evaluate_fractionation("output/KEA_Nuclides.txt", true, cranetest.get_solidification_time(), cranetest.get_stabilization_time());
 	
 	if (file!= nullptr)
 		fclose(file);

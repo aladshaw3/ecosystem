@@ -170,7 +170,7 @@ public:
 	void distribute_nuclides(std::map<double, double> & part_hist);	///< Distribute nuclides on particle sizes according to distribution fractions
 	
 	/// Run fractionation simulation to cloud stabilization time and print results to file
-	void evaluate_fractionation(std::string file_name, double solid_time, double stab_time);
+	void evaluate_fractionation(std::string file_name, bool file_out, double solid_time, double stab_time);
 	
 protected:
 	asd_model model_type;											///< Type of activity-size distribution model to use

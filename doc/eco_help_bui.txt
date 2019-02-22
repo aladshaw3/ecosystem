@@ -125,3 +125,7 @@ The following message provides information on running this software with the bas
 (10) IBIS (Implicit Branching Isotope System)
 
 	This algorithm requires one input file: (i) a yaml file detailing all simulation conditions, the output options, and the initial starting isotope conditions. Based on those initial conditions, decay chains will be formulated and ordered by mass number and parent-daughter relationships. Those relationships are based on how each nuclide decays under natural decay processes, such as alpha and beta decay. Data for each nuclide is given in a Nuclide Library yaml file, which is automatically read by the kernel. That library is located in the 'database/' sub-directory of the 'ecosystem/' working folder.
+
+(11) CARDINAL (Cloud-rise And Radioactivity Distribution Invoked from Nuclear Arms Launch)
+
+	This algorithm requires three inputs: (i) Input Control File, (ii) Atomspheric Data File, and (iii) Path to the location of the common database files for Nuclides and Fission Products. The Input Control File will have essentially all the same information that the CRANE yaml file contains and the Atomspheric Data File will be structured in the same way that CRANE requires. Databases for nuclide information and fission product yields must be held in the same sub-directory. The last argument passed to CARDINAL must be the path to that sub-directory.

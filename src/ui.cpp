@@ -92,6 +92,7 @@ void aui_help()
 	puts("(8) CROW (Coupled Reaction Object Workspace)\n");
 	puts("(9) CRANE (Cloud Rise After Nuclear Explosion)\n");
 	puts("(10) IBIS (Implicit Branching Isotope System)\n");
+	puts("(11) CARDINAL (Cloud-rise And Radioactivity Distribution Invoked from Nuclear Arms Launch)\n");
 	
 }
 
@@ -196,6 +197,9 @@ void bui_help()
 	
 	puts("(10) IBIS (Implicit Branching Isotope System)\n");
 	puts("\tThis algorithm requires one input file: (i) a yaml file detailing all simulation conditions, the output options, and the initial starting isotope conditions. Based on those initial conditions, decay chains will be formulated and ordered by mass number and parent-daughter relationships. Those relationships are based on how each nuclide decays under natural decay processes, such as alpha and beta decay. Data for each nuclide is given in a Nuclide Library yaml file, which is automatically read by the kernel. That library is located in the 'database/' sub-directory of the 'ecosystem/' working folder.\n");
+	
+	puts("(11) CARDINAL (Cloud-rise And Radioactivity Distribution Invoked from Nuclear Arms Launch)\n");
+	puts("\tThis algorithm requires three inputs: (i) Input Control File, (ii) Atomspheric Data File, and (iii) Path to the location of the common database files for Nuclides and Fission Products. The Input Control File will have essentially all the same information that the CRANE yaml file contains and the Atomspheric Data File will be structured in the same way that CRANE requires. Databases for nuclide information and fission product yields must be held in the same sub-directory. The last argument passed to CARDINAL must be the path to that sub-directory.\n");
 }
 
 //Check user string input for keyword "exit"
@@ -438,6 +442,11 @@ bool valid_exec_string(const std::string &input, UI_DATA *ui_dat)
 		ui_dat->option = ibis;
 		valid_input = true;
 	}
+	else if (allLower(input) == "cardinal")
+	{
+		ui_dat->option = cardinal;
+		valid_input = true;
+	}
 	else
 	{
 		valid_input = false;
@@ -512,6 +521,12 @@ int number_files(UI_DATA *ui_dat)
 		case ibis:
 		{
 			num = 1;
+			break;
+		}
+			
+		case cardinal:
+		{
+			num = 3;
 			break;
 		}
 			
@@ -937,7 +952,7 @@ bool valid_input_execute(UI_DATA *ui_dat)
 	std::cout << "(1)  GSTA_OPT      (2)  MAGPIE   (3)  SCOPSOWL\n";
 	std::cout << "(4)  SCOPSOWL_OPT  (5)  SKUA     (6)  SKUA_OPT\n";
 	std::cout << "(7)  SHARK         (8)  CROW     (9)  CRANE\n";
-	std::cout << "(10) IBIS         \n";
+	std::cout << "(10) IBIS          (11) CARDINAL\n";
 	std::cout << "\nChoice: ";
 	std::cin >> ui_dat->user_input[0];
 	std::cout << std::endl;
@@ -1034,6 +1049,13 @@ bool valid_input_execute(UI_DATA *ui_dat)
 			case 10:
 			{
 				ui_dat->option = ibis;
+				valid_input = true;
+				break;
+			}
+				
+			case 11:
+			{
+				ui_dat->option = cardinal;
 				valid_input = true;
 				break;
 			}
@@ -1428,6 +1450,28 @@ int run_exec(UI_DATA *ui_dat)
 			}
 			
 			success = IBIS_SCENARIO(ui_dat->input_files[0].c_str());
+			break;
+		}
+			
+		case cardinal:
+		{
+			if (ui_dat->argc == 1 || ui_dat->MissingArg == true)
+			{
+				ui_dat->input_files.resize(3);
+				std::cout << "CARDINAL requires 1 input control file to run, 1 atmospheric data file, and 1 path to database sub-directory.\n";
+				std::cout << "Please provide each necessary file and full path for the requested information...\n";
+				std::cout << "Input File: ";
+				std::cin >> ui_dat->input_files[0];
+				std::cout << std::endl;
+				std::cout << "Atomspheric Data: ";
+				std::cin >> ui_dat->input_files[1];
+				std::cout << std::endl;
+				std::cout << "Database Path: ";
+				std::cin >> ui_dat->input_files[2];
+				std::cout << std::endl;
+			}
+			
+			success = CARDINAL_SCENARIO(ui_dat->input_files[0].c_str(), ui_dat->input_files[1].c_str(), ui_dat->input_files[2].c_str());
 			break;
 		}
 			
