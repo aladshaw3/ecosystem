@@ -40,5 +40,6 @@
 #include "ibis.h"
 #include "fairy.h"
 #include "kea.h"
+#include "cardinal.h"
 
 #endif

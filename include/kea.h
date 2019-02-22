@@ -153,7 +153,7 @@ public:
 	/// Compute the fraction of neutrons captured by soil
 	void compute_soil_capture_fraction(std::map<std::string, double> & soil_atom_frac, std::map<std::string, Atom> & soil_atom);
 	
-	void initialize_fractionation(FissionProducts & yields);		///< Initialize fractionation via yield data
+	void initialize_fractionation(FissionProducts & yields, yaml_cpp_class & data);		///< Initialize fractionation via yield data
 	
 	int evaluate_initial_fractionation();							///< Go through all soil, casing, and weapon data to add nuclides
 	

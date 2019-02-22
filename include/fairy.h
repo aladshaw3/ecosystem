@@ -56,7 +56,8 @@ public:
 	int registerInitialNuclide(std::string symb, int iso, double ic);///< Register an initial nuclide by symbol (e.g., H) and iso number (e.g., 2)
 	int registerInitialNuclide(int atom_num, int iso_num, double ic);///< Register an initial nuclide by atomic and mass numbers (e.g., H-2 = 1, 2)
 	
-	void loadFissionProductYields();				///< Function to read in the library and put into the Yaml object
+	std::string fileFissionProductYields();			///< Function to read in the library and put into the Yaml object
+	void loadFissionProductYields(yaml_cpp_class & data);	///< Function to load the fission product library into the Yaml object
 	void unloadFissionProductYields();				///< Function to delete the items in the Yaml object
 	
 	void setFissionType(fiss_type opt);				///< Set the fission type for the Fission Products
@@ -130,7 +131,7 @@ protected:
     double total_moles;                         ///< Total moles of fissionable materials (mol)
 	double fiss_extent;							///< Percentage of the starting material that undergoes fission (%)
 	double energy_level;						///< Energy level of neutron source (eV)
-	yaml_cpp_class fpy_data;					///< Yaml object to read and store the FPY library files
+	yaml_cpp_class *fpy_data;					///< Yaml object to read and store the FPY library files
 	
 private:
 	

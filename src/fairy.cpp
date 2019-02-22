@@ -86,8 +86,8 @@ void FissionProducts::DisplayInfo()
 	{
 		std::cout << "\t" << this->InitialMat[i].IsotopeName() << "\t\t" << this->MatFrac[i] << std::endl;
 	}
-	this->DecayChain::DisplayInfo();
-	this->DecayChain::DisplayStableInfo();
+	//this->DecayChain::DisplayInfo();
+	//this->DecayChain::DisplayStableInfo();
 }
 
 //Display map
@@ -145,32 +145,40 @@ int FissionProducts::registerInitialNuclide(int atom_num, int iso_num, double ic
 }
 
 //Load FPY library
-void FissionProducts::loadFissionProductYields()
+std::string FissionProducts::fileFissionProductYields()
 {
+	std::string file;
 	switch (this->type)
 	{
 		case neutron:
-			this->fpy_data.executeYamlRead("database/NeutronFissionProductYields.yml");
+			file = "NeutronFissionProductYields.yml";
 			break;
 			
 		case spontaneous:
-			this->fpy_data.executeYamlRead("database/SpontaneousFissionProductYields.yml");
+			file = "SpontaneousFissionProductYields.yml";
 			break;
 			
 		case explosion:
-			this->fpy_data.executeYamlRead("database/NeutronFissionProductYields.yml");
+			file = "NeutronFissionProductYields.yml";
 			break;
 			
 		default:
-			this->fpy_data.executeYamlRead("database/NeutronFissionProductYields.yml");
+			file = "NeutronFissionProductYields.yml";
 			break;
 	}
+	return file;
+}
+
+//Load FPY library
+void FissionProducts::loadFissionProductYields(yaml_cpp_class & data)
+{
+	this->fpy_data = &data;
 }
 
 //Unload FPY library
 void FissionProducts::unloadFissionProductYields()
 {
-	this->fpy_data.DeleteContents();
+	this->fpy_data->DeleteContents();
 }
 
 //Set type
@@ -418,7 +426,7 @@ int FissionProducts::evaluateYields()
 			int levels = 0;
 			try
 			{
-				levels = (int)this->fpy_data.getYamlWrapper()(this->InitialMat[i].IsotopeName()).getHeadMap().size();
+				levels = (int)this->fpy_data->getYamlWrapper()(this->InitialMat[i].IsotopeName()).getHeadMap().size();
 			}
 			catch (std::out_of_range)
 			{
@@ -429,7 +437,7 @@ int FissionProducts::evaluateYields()
 			
 			//Loop through energy levels to find high key value
 			double high = 0.0;
-			for (auto &x: this->fpy_data.getYamlWrapper()(this->InitialMat[i].IsotopeName()).getHeadMap())
+			for (auto &x: this->fpy_data->getYamlWrapper()(this->InitialMat[i].IsotopeName()).getHeadMap())
 			{
 				try
 				{
@@ -451,7 +459,7 @@ int FissionProducts::evaluateYields()
 			//Read in yields for all isotopes from high_key
 			try
 			{
-				levels = (int)this->fpy_data.getYamlWrapper()(this->InitialMat[i].IsotopeName())(high_key).getSubMap().size();
+				levels = (int)this->fpy_data->getYamlWrapper()(this->InitialMat[i].IsotopeName())(high_key).getSubMap().size();
 			}
 			catch (std::out_of_range)
 			{
@@ -463,7 +471,7 @@ int FissionProducts::evaluateYields()
 			//Loop through all isotopes produced in fission
 			double yield = 0.0;
 			double sum = 0.0;
-			for (auto &x: this->fpy_data.getYamlWrapper()(this->InitialMat[i].IsotopeName())(high_key).getSubMap())
+			for (auto &x: this->fpy_data->getYamlWrapper()(this->InitialMat[i].IsotopeName())(high_key).getSubMap())
 			{
 				try
 				{
@@ -513,7 +521,8 @@ int FissionProducts::evaluateYields()
 				}
 			}
 			if (this->fiss_extent < 100.0)
-				success = this->registerInitialNuclide(this->InitialMat[i].IsotopeName(), moles*(100.0-this->fiss_extent)/100.0);
+				if (moles > 0.0)
+					success = this->registerInitialNuclide(this->InitialMat[i].IsotopeName(), moles*(100.0-this->fiss_extent)/100.0);
 			if (sum >= 1e-6)
 			{
 				mError(invalid_molefraction);
@@ -642,11 +651,14 @@ int FAIRY_TESTS()
 	int success = 0;
 	double time;
 	yaml_cpp_class nuc_data;
+	yaml_cpp_class yield_data;
+	std::string path = "database/";
 	std::cout << "\nRunning FAIRY tests...\n";
 	
 	//Declarations
 	time = clock();
-	nuc_data.executeYamlRead("database/NuclideLibrary.yml");
+	path = path + "NuclideLibrary.yml";
+	nuc_data.executeYamlRead(path.c_str());
 	FissionProducts test;
 	test.loadNuclides(nuc_data);
 	
@@ -660,7 +672,8 @@ int FAIRY_TESTS()
 	
 	test.DisplayInfo();
 	
-	test.loadFissionProductYields();
+	yield_data.executeYamlRead("database/NeutronFissionProductYields.yml");
+	test.loadFissionProductYields(yield_data);
 	test.evaluateYields();
 	test.evaluateEigenSolution();
     std::cout << "Total Moles = " << test.getTotalMoles() << std::endl;

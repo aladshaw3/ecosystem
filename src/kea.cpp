@@ -510,9 +510,10 @@ void ActivityDistribution::compute_soil_capture_fraction(std::map<std::string, d
 	this->set_soil_capture_fraction( 1.155*pow(this->get_soil_thermal()/(this->get_soil_thermal()+this->get_soil_scattering()), 0.5) );
 }
 
-void ActivityDistribution::initialize_fractionation(FissionProducts & yields)
+void ActivityDistribution::initialize_fractionation(FissionProducts & yields, yaml_cpp_class & data)
 {
-	yields.loadFissionProductYields();
+	//yields.loadFissionProductYields();
+	yields.loadFissionProductYields(data);
 	yields.evaluateYields();
 	this->initial_frac = yields;
 }
@@ -939,10 +940,15 @@ int KEA_TESTS()
 	FissionProducts yeildtest;
 	Dove dove;
 	yaml_cpp_class nuc_data;
+	yaml_cpp_class yeild_data;
+	std::string path = "database/";
 	time = clock();
 	
 	/// ----------------- Initialize FAIRY for the Weapon Components ----------------------------------
-	nuc_data.executeYamlRead("database/NuclideLibrary.yml");
+	std::string file1 = path + "NuclideLibrary.yml";
+	std::string file2 = path + "NeutronFissionProductYields.yml";
+	nuc_data.executeYamlRead(file1.c_str());
+	yeild_data.executeYamlRead(file2.c_str());
 	yeildtest.loadNuclides(nuc_data);
 	
 	yeildtest.setTotalMass(50.0);
@@ -1086,7 +1092,7 @@ int KEA_TESTS()
 	test.compute_soil_capture_fraction(cranetest.get_soil_atom_frac(), cranetest.get_soil_atom());
 	
 	//Now we need to incorporate neutron captures into initial fission products
-	test.initialize_fractionation(yeildtest);
+	test.initialize_fractionation(yeildtest, yeild_data);
 	success = test.evaluate_initial_fractionation();
 	if (success != 0) {mError(simulation_fail); return -1;}
 	
