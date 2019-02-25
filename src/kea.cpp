@@ -970,6 +970,7 @@ int KEA_TESTS()
 	yeild_data.executeYamlRead(file2.c_str());
 	yeildtest.loadNuclides(nuc_data);
 	
+	yeildtest.setConsoleOut(true);
 	yeildtest.setTotalMass(50.0);
 	yeildtest.setFissionExtent(3.0);
 	yeildtest.setFissionType(explosion);

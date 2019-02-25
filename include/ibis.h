@@ -200,6 +200,7 @@ public:
 	void DisplayInfo();										///< Display final nuclides and their parents and branches
 	void DisplayStableInfo();								///< Display stable nuclides and their direct parents and branches
 	void DisplayMap();										///< Display the coefficient map to the console
+	void DisplayEigenMap();									///< Display the eigenvector map to the console
 	
 	void loadNuclides(yaml_cpp_class &data);				///< Function to load the nuclide library into the pointer
 	void unloadNuclides();									///< Delete the pointer to nuclide library to free space
@@ -330,6 +331,7 @@ private:
 	
 	Matrix<double> Eigs;		///< Matrix of eigenvectors for the coefficient matrix (stores inverse elemens in upper triangular portion)
 	//Matrix<double> invEigs;								///< Inverse Matrix of eigenvectors for the coefficient matrix
+	std::vector< std::map<int, double> > EigenMap;			///< Map for all eigenvalues (row x column)
 	
 };
 
