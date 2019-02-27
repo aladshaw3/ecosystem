@@ -815,19 +815,7 @@ void ActivityDistribution::distribute_nuclides(std::map<double, double> & part_h
 			it->second.getStableIsotope(i).setInitialCondition(it->second.getStableIsotope(i).getInitialCondition()*this->distribution[mass_num][it->first]);
 		}
 	}
-	
-	//Loop for mass checkfor
-	/**
-	for (int i=0; i<this->initial_frac.getNumberNuclides(); i++)
-	{
-		double sum = 0.0;
-		for (it=this->nuc_fractionation.begin(); it!=this->nuc_fractionation.end(); ++it)
-		{
-			sum += it->second.getIsotope(i).getInitialCondition();
-		}
-		std::cout << sum - this->initial_frac.getIsotope(i).getInitialCondition() << std::endl;
-	}
-	 */
+
 }
 
 void ActivityDistribution::evaluate_fractionation(std::string file_name, bool file_out, double solid_time, double stab_time)

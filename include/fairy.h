@@ -121,7 +121,6 @@ public:
 	Isotope& getIsotope(int i);								///< Return the ith isotope in the nuclide list
 	Isotope& getStableIsotope(int i);						///< Return the ith stable isotope
 	Isotope& getIsotope(std::string iso_name);				///< Return the isotope (Stable or Unstable) that corresponds to the given name
-	Matrix<double>& getEigenvectors();						///< Return the eigenvectors matrix
 	
 protected:
 	fiss_type type;								///< Type of fission products to be produced

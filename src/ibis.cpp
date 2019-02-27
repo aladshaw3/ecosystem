@@ -428,7 +428,6 @@ Isotope::~Isotope()
 	num_particles.clear();
 	daughter.clear();
 	chain.clear();
-	//nuclides->DeleteContents();  //Must not delete contents on destructor or this invalidates usage of temporary isotopes
 }
 
 //Load library
@@ -1171,6 +1170,11 @@ void DecayChain::DisplayEigenMap()
 			try
 			{
 				double val = this->EigenMap[i].at(j);
+				if (val == 0.0)
+				{
+					std::cout << "Error!\n";
+					break;
+				}
 				std::cout << "X ";
 			}
 			catch (std::out_of_range)
@@ -1336,16 +1340,16 @@ void DecayChain::formEigenvectors()
 		return;
 	}
 	
-	this->Eigs.set_size((int)this->CoefMap.size(), (int)this->CoefMap.size());
 	this->EigenMap.resize((int)this->CoefMap.size());
-	//this->invEigs.set_size((int)this->CoefMap.size(), (int)this->CoefMap.size());
 	
+	Matrix<double> temp;
+	temp.set_size((int)this->CoefMap.size(), 1);
 	//Loop for the kth eigenvector
 	for (int k=0; k<this->nuc_list.size(); k++)
 	{
 		double eigenvalue = -this->nuc_list[k].DecayRate();
 		double sum = 0.0;
-		this->Eigs.edit(k, k, 1.0);
+		temp.edit(k, 0, 1.0);
 		this->EigenMap[k][k] = 1.0;
 		
 		//Loop over the ith elements of the kth eigenvector
@@ -1355,7 +1359,7 @@ void DecayChain::formEigenvectors()
 			//Iterate through the map (loop over j columns)
 			for (std::map<int,double>::iterator jt=this->CoefMap[i].begin(); jt!=this->CoefMap[i].end(); jt++)
 			{
-				sum = sum + this->Eigs(jt->first,k)*jt->second;
+				sum = sum + temp(jt->first,0)*jt->second;
 			}
 			double diff = -this->nuc_list[i].DecayRate()-eigenvalue;
 			if (diff == 0.0)
@@ -1374,42 +1378,40 @@ void DecayChain::formEigenvectors()
 			}
 			if (sum != 0.0)
 				this->EigenMap[i][k] = -sum/diff;
-			this->Eigs.edit(i, k, -sum/diff);
+			temp.edit(i, 0, -sum/diff);
 		}
+		temp.zeros();
 		
 	}
 	
 	//Loop for the kth eigenvector
-	Matrix<double> temp;
-	temp.set_size((int)this->CoefMap.size(), (int)this->CoefMap.size());
+	temp.zeros();
 	for (int k=0; k<this->nuc_list.size(); k++)
 	{
-		//this->invEigs.edit(k, k, 1.0);
-		temp.edit(k, k, 1.0);
+		temp.edit(k, 0, 1.0);
 		double sum = 0.0;
 		//Loop over the ith elements of the kth eigenvector
 		for (int i=k+1; i<this->nuc_list.size(); i++)
 		{
 			sum = 0.0;
-			//Loop over the jth columns
-			for (int j=0; j<i; j++)
+
+			//Iterate through the map (j loop)
+			for (std::map<int,double>::iterator ij=this->EigenMap[i].begin(); ij!=this->EigenMap[i].end(); ij++)
 			{
-				//sum = sum + this->invEigs(j,k)*this->Eigs(i,j);
-				sum = sum + temp(j,k)*this->Eigs(i,j);
+				sum = sum + temp(ij->first,0)*ij->second;
 			}
-			//this->invEigs.edit(i, k, -sum);
-			temp.edit(i, k, -sum);
-			this->Eigs.edit(k, i, -sum);
+			temp.edit(i, 0, -sum);
 			if (sum != 0.0)
 				this->EigenMap[k][i] = -sum;
 		}
+		temp.zeros();
 	}
 }
 
 //verfiy eigenvectors and eigenvalues
 int DecayChain::verifyEigenSoln()
 {
-	if (this->Eigs.rows() != this->Eigs.columns() && this->Eigs.rows() != this->nuc_list.size())
+	if (this->EigenMap.size() != this->nuc_list.size())
 	{
 		mError(empty_matrix);
 		std::cout << "Call the 'formEigenvectors() function first...\n";
@@ -1442,15 +1444,21 @@ int DecayChain::verifyEigenSoln()
 			{
 				if (jt->first >= k)
 				{
-					sum = sum + this->Eigs(jt->first,k)*jt->second;
-					//sum = sum + this->EigenMap[jt->first][k]*jt->second;
+					std::map<int,double>::iterator it = this->EigenMap[jt->first].find(k);
+					if (it != this->EigenMap[jt->first].end())
+					{
+						sum = sum + it->second*jt->second;
+					}
 				}
 			}
 			//Use relative error for comparison because machine precicision is based on relative error
 			if (i >= k)
 			{
-				zero.edit(i, 0, (sum - eigenvalue*this->Eigs(i,k))/sum);
-				//zero.edit(i, 0, (sum - eigenvalue*this->EigenMap[i][k])/sum);
+				std::map<int,double>::iterator it = this->EigenMap[i].find(k);
+				if (it != this->EigenMap[i].end())
+					zero.edit(i, 0, (sum - eigenvalue*it->second)/sum);
+				else
+					zero.edit(i, 0, (sum - eigenvalue*0.0)/sum);
 			}
 			else
 				zero.edit(i, 0, 0.0);
@@ -1491,8 +1499,8 @@ int DecayChain::verifyEigenSoln()
 //Estimate fractionation
 void DecayChain::calculateFractionation(double t)
 {
-	/// CHANGE THIS LINE!!!
-	if (this->Eigs.rows() != this->Eigs.columns() && this->Eigs.rows() != this->nuc_list.size())
+
+	if (this->EigenMap.size() != this->nuc_list.size())
 	{
 		mError(empty_matrix);
 		std::cout << "Call the 'formEigenvectors() function first...\n";
@@ -1503,20 +1511,6 @@ void DecayChain::calculateFractionation(double t)
 	for (int i=0; i<this->nuc_list.size(); i++)
 	{
 		double sum_outer = 0.0;
-		/**
-		//Loop over all j columns of the eigenvector matrices
-		for (int j=0; j<=i; j++)
-		{
-			double sum_inner = 0.0;
-			//Loop over all k eigenvalues
-			for (int k=j; k<=i; k++)
-			{
-				//sum_inner = sum_inner + this->Eigs(i,k)*this->invEigs(k,j)*exp(-this->nuc_list[k].DecayRate()*t);
-				sum_inner = sum_inner + this->Eigs(i,k)*this->Eigs(j,k)*exp(-this->nuc_list[k].DecayRate()*t);
-			}
-			sum_outer = sum_outer + sum_inner*this->nuc_list[j].getInitialCondition();
-		}
-		*/
 		//loop over j columns
 		for (int j=0; j<=i; j++)
 		{
@@ -1553,14 +1547,6 @@ void DecayChain::calculateFractionation(double t)
 			for (int k=0; k<=j; k++)
 			{
 				double l_sum = 0.0;
-				/**
-				//Loop over l
-				for (int l=k; l<=j; l++)
-				{
-					//l_sum = l_sum + ( this->Eigs(j,l)*this->invEigs(l,k)*(1.0-exp(-this->nuc_list[l].DecayRate()*t))/this->nuc_list[l].DecayRate() );
-					l_sum = l_sum + ( this->Eigs(j,l)*this->Eigs(k,l)*(1.0-exp(-this->nuc_list[l].DecayRate()*t))/this->nuc_list[l].DecayRate() );
-				}
-				 */
 				//Iterate through the map (loop over l eigenvalues)
 				for (std::map<int,double>::iterator kl=this->EigenMap[k].begin(); kl!=this->EigenMap[k].end(); kl++)
 				{
@@ -1933,21 +1919,6 @@ double DecayChain::returnUnstableFractionation(int i, double t)
 	}
 	
 	double sum_outer = 0.0;
-	/**
-	//Loop over all j columns of the eigenvector matrices
-	for (int j=0; j<=i; j++)
-	{
-		double sum_inner = 0.0;
-		//Loop over all k eigenvalues
-		for (int k=j; k<=i; k++)
-		{
-			//sum_inner = sum_inner + this->Eigs(i,k)*this->invEigs(k,j)*exp(-this->nuc_list[k].DecayRate()*t);
-			sum_inner = sum_inner + this->Eigs(i,k)*this->Eigs(j,k)*exp(-this->nuc_list[k].DecayRate()*t);
-		}
-		sum_outer = sum_outer + sum_inner*this->nuc_list[j].getInitialCondition();
-	}
-	this->nuc_list[i].setConcentration(sum_outer);
-	 */
 	
 	//loop over j columns
 	for (int j=0; j<=i; j++)
@@ -1982,31 +1953,6 @@ double DecayChain::returnStableFractionation(int i, double t)
 		i = 0;
 		mError(out_of_bounds);
 	}
-	
-	/**
-	//Iterate through the map (loop over j columns)
-	double j_sum = 0.0;
-	for (std::map<int,double>::iterator jt=this->stable_CoefMap[i].begin(); jt!=this->stable_CoefMap[i].end(); jt++)
-	{
-		int j = jt->first;
-		
-		//Loop over k
-		double k_sum = 0.0;
-		for (int k=0; k<=j; k++)
-		{
-			//Loop over l
-			double l_sum = 0.0;
-			for (int l=k; l<=j; l++)
-			{
-				//l_sum = l_sum + ( this->Eigs(j,l)*this->invEigs(l,k)*(1.0-exp(-this->nuc_list[l].DecayRate()*t))/this->nuc_list[l].DecayRate() );
-				l_sum = l_sum + ( this->Eigs(j,l)*this->Eigs(k,l)*(1.0-exp(-this->nuc_list[l].DecayRate()*t))/this->nuc_list[l].DecayRate() );
-			}
-			k_sum = k_sum + this->nuc_list[k].getInitialCondition()*l_sum;
-		}
-		j_sum = j_sum + k_sum*jt->second;
-	}
-	this->stable_list[i].setConcentration( this->stable_list[i].getInitialCondition() + j_sum );
-	 */
 	
 	//Iterate through the map (loop over j columns)
 	double j_sum = 0.0;
@@ -2201,18 +2147,6 @@ Isotope& DecayChain::getIsotope(std::string iso_name)
 		return this->nuc_list[0];
 	}
 }
-
-//Return eigenvectors
-Matrix<double>& DecayChain::getEigenvectors()
-{
-	return this->Eigs;
-}
-
-//Return inverse eigenvectors
-//Matrix<double>& DecayChain::getInverseEigenvectors()
-//{
-	//return this->invEigs;
-//}
 
 //Insert an isotope to the initial list
 void DecayChain::roughInsertSort(Isotope iso)
@@ -2674,7 +2608,7 @@ int IBIS_TESTS()
 	test.formEigenvectors();				//Mandatory before solving
 	test.verifyEigenSoln();					//Completely optional
 	
-	test.getEigenvectors().Display("V");
+	//test.getEigenvectors().Display("V");
 	test.DisplayEigenMap();
 	
 	//test.getIsotope( "Te-132" ).setInitialCondition(100.0);

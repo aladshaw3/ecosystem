@@ -86,8 +86,6 @@ void FissionProducts::DisplayInfo()
 	{
 		std::cout << "\t" << this->InitialMat[i].IsotopeName() << "\t\t" << this->MatFrac[i] << std::endl;
 	}
-	//this->DecayChain::DisplayInfo();
-	//this->DecayChain::DisplayStableInfo();
 }
 
 //Display map
@@ -637,13 +635,6 @@ Isotope& FissionProducts::getIsotope(std::string iso_name)
 {
 	return this->DecayChain::getIsotope(iso_name);
 }
-
-//Return eigenvectors
-Matrix<double>& FissionProducts::getEigenvectors()
-{
-	return this->DecayChain::getEigenvectors();
-}
-
 
 /*
  *	-------------------------------------------------------------------------------------

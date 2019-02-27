@@ -260,8 +260,6 @@ public:
 	Isotope& getIsotope(int i);								///< Return the ith isotope in the nuclide list
 	Isotope& getStableIsotope(int i);						///< Return the ith stable isotope
 	Isotope& getIsotope(std::string iso_name);				///< Return the isotope (Stable or Unstable) that corresponds to the given name
-	Matrix<double>& getEigenvectors();						///< Return the eigenvectors matrix
-	//Matrix<double>& getInverseEigenvectors();				///< Return the inverse eigenvectors matrix
 	
 protected:
 	yaml_cpp_class *nuclides;								///< Pointer to a yaml object storing the digital library of all nuclides
@@ -310,7 +308,7 @@ private:
 		branches[i][j][k] = kth branch index for the jth parent that forms the ith isotope */
 	std::vector< std::vector< std::vector<int> > > branches;
 	
-	std::vector< std::map<int, double> > CoefMap;		///< Coefficient Map for matrix representing the ODE system
+	std::vector< std::map<int, double> > CoefMap;				///< Coefficient Map for matrix representing the ODE system
 	
 	/// List of the indices that each stable isotope has from the stable_list
 	/** List of indices for all parents of a stable isotope in the list of all isotopes.
@@ -329,9 +327,7 @@ private:
 	
 	std::vector< std::map<int, double> > stable_CoefMap;		///< Coefficient Map for matrix representing the ODE system for stable isotopes
 	
-	Matrix<double> Eigs;		///< Matrix of eigenvectors for the coefficient matrix (stores inverse elemens in upper triangular portion)
-	//Matrix<double> invEigs;								///< Inverse Matrix of eigenvectors for the coefficient matrix
-	std::vector< std::map<int, double> > EigenMap;			///< Map for all eigenvalues (row x column)
+	std::vector< std::map<int, double> > EigenMap;				///< Map for all eigenvalues (row x column)
 	
 };
 
