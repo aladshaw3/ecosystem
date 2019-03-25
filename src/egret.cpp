@@ -200,6 +200,10 @@ int EGRET_TESTS()
 	dat.species_dat[4].specific_heat = 1.97;
 	
 	//Set Variables
+	double pellet_radius = 0.08;
+	double gas_vel = 1.83;
+	double porosity = 0.384;
+	double macropore = 2.65E-6;
 	std::vector<double> y;
 	y.resize(dat.N);
 	double T = 273.15;
@@ -210,7 +214,7 @@ int EGRET_TESTS()
 		y[2] = 0.00934;
 		y[3] = 0.000314;
 		y[4] = 0.00003;
-		success = set_variables(101.35, T, 0.0, 1.0, y, &dat);
+		success = set_variables(101.35, T, gas_vel, pellet_radius*2.0, y, &dat);
 		if (success != 0) {mError(simulation_fail); return -1;}
 		
 		//Calculate Properties
@@ -224,18 +228,23 @@ int EGRET_TESTS()
 		std::cout << "Char.Length (cm): " << dat.char_length << std::endl;
 		std::cout << "\n";
 		dat.binary_diffusion.Display("Binary Diffusion Tensor (cm^2/s)");
-		std::cout << "H2O Diffusivity (cm^2/s): " << dat.species_dat[4].molecular_diffusion << std::endl;
-		std::cout << "H2O Schmidt Num: " << dat.species_dat[4].Schmidt << std::endl;
+		std::cout << "O2 Diffusivity (cm^2/s): " << dat.species_dat[1].molecular_diffusion << std::endl;
+		std::cout << "O2 Schmidt Num: " << dat.species_dat[1].Schmidt << std::endl;
 		std::cout << "Gas MW (g/mol): " << dat.total_molecular_weight << std::endl;
 		std::cout << "Gas Density (g/cm^3): " << dat.total_density << std::endl;
 		std::cout << "Gas Viscosity (g/cm/s): " << dat.total_dyn_vis << std::endl;
 		std::cout << "Gas Kin. Vis. (cm^2/s): " << dat.kinematic_viscosity << std::endl;
 		std::cout << "Gas Specific Heat (J/g/K): " << dat.total_specific_heat << std::endl;
 		std::cout << "Reynolds Number: " << dat.Reynolds << std::endl;
-		std::cout << "\nH2O Film Mass Transfer Coeff (cm/s): " << FilmMTCoeff(dat.species_dat[4].molecular_diffusion, dat.char_length, dat.Reynolds, dat.species_dat[4].Schmidt) << std::endl;
+		std::cout << "\nO2 Film Mass Transfer Coeff (cm/s): " << FilmMTCoeff(dat.species_dat[1].molecular_diffusion, dat.char_length, dat.Reynolds, dat.species_dat[1].Schmidt) << std::endl;
+		double Dp = porosity*dat.species_dat[1].molecular_diffusion;
+		double Dk = 9700.0*macropore*pow((T/dat.species_dat[1].molecular_weight),0.5);
+		double avgDp = pow(((1/Dp)+(1/Dk)),-1.0);
+		std::cout << "\nO2 Effective Pore Diff. (cm^2/s): " << avgDp << std::endl;
+		
 		std::cout << "\n";
-		T+=10.0;
-	} while (T <= 373.15);
+		T+=50.0;
+	} while (T <= 573.15);
 	
 	std::cout << "-------------------------------------------\n";
 	time = clock() - time;
