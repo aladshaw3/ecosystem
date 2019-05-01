@@ -19,6 +19,8 @@ This README file outlines how to get setup using the ecosystem codes and executa
 	+ clone the ecosystem project to your machine
 	+ type "make" in the ecosystem directory to build the project
 	+ type "make install" to install the executable to your /usr/local/bin
+	+ type "make lib" to build a shared library (used with some python scripts)
+	+ type "make all" to build the executable and a shared library
 
 * Configuration
 
@@ -27,11 +29,15 @@ This README file outlines how to get setup using the ecosystem codes and executa
 
 * Dependencies: No outside dependencies
 
-* Database configuration: Currently, no database files are necessary
+* Database configuration: 
+	+ Necessary database files include Fission Yields and a Nuclide Library
+	+ All database files are distributed with the software source code
+	+ Optional database files include atmospheric information (see input_files/CARDINAL)
 
 * How to run tests
 
 	+ The executable will have built-in tests you can run to check for runtime errors. To run these tests, first build the project from source, then type "eco -t" to open a test menu. You can then choose a test to run.
+	+ Tests will report errors if any are present (no error messages = good to go)
 
 * Deployment instructions: No special instructions
 
@@ -44,7 +50,7 @@ This README file outlines how to get setup using the ecosystem codes and executa
 * Other guidelines: 
 
 	+ If you are changing any of the provided source code, it may be better to create your own branch off the master branch so that you do not alter any existing algorithms. 
-	+ Please contact Austin Ladshaw to request any source code changes and do not try to change the source code yourself. 
+	+ Please contact Austin Ladshaw (aladshaw3@outlook.com) to request any source code changes and do not try to change the source code yourself. 
 
 ### Who do I talk to? ###
 

@@ -41,12 +41,14 @@ $(ODIR)/%.o: src/%.cpp $(DEPS)
 $(EXE): $(OBJ)
 	$(CXX) -O3 -o $@ $^ $(CXXFLAGS)
 
-.PHONY: clean install cleanall lib
+.PHONY: clean install cleanall lib all
 
 lib:$(LIB)
 
 $(LIB): $(LOBJ)
 	$(CXX) -shared -o $@ $^
+
+all: $(EXE) $(LIB)
 
 clean:
 	rm -f $(EXE) $(ODIR)/*.o *~ core $(INCDIR)/*~
