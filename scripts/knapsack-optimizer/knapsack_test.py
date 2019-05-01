@@ -6,33 +6,38 @@
 
 import knapsack as ns
 
-def size_con(list, args):
-    a = 0
-    # Try catch block used to prevent error if args not initialized
-    try:
-        a = len(list)
-    except:
-        a = 0
-        print('catch')
-    if a < 1:
+def size_con(list, size, args):
+    if size < 1:
         return False
     else:
         return True
 
-def max_obj(list, args):
+def size_con2(list, size, args):
+    if size > 1:
+        return False
+    else:
+        return True
+
+def max_obj(list, size, args):
     total = 0
     for obj in list:
         total += obj.get_value()
     return total
 
-def min_obj(list, args):
+def simple_max(list, size, args):
+    total = 0
+    for val in list:
+        total += val
+    return total
+
+def min_obj(list, size, args):
     total = 0
     for obj in list:
         total -= obj.get_value()
     return total
 
 #NOTE: args come in as Tuple, for this case, we only want first tuple item and that is a dictionary
-def calories_con(list, args):
+def calories_con(list, size, args):
     cal = 0
     for obj in list:
         if obj.get_name() in args[0]:
@@ -43,7 +48,7 @@ def calories_con(list, args):
     else:
         return False
 
-def score(list, args):
+def score(list, size, args):
     #args is a tuple with dictionary variables F, ps1 [a], ps2 [b], ps3 [c], ps4 [d], and ps5 [e]
     sum1 = 0
     sum2 = 0
@@ -58,7 +63,7 @@ def score(list, args):
         total = sum1
     return total
 
-def score_con(list, args):
+def score_con(list, size, args):
     sum = 0
     for obj in list:
         sum += obj.get_value()
@@ -169,6 +174,27 @@ print(val3)
 print(status3)
 print('\nTaken')
 for obj in new_list3:
+    print(obj)
+
+### New Test ###
+print('\nTest 04')
+print('-------')
+
+vals = [1,2,3]
+for obj in vals:
+    print(obj)
+
+prob4 = ns.ZeroOneKnapsack()
+prob4.register_objective_func(simple_max)
+prob4.register_constraints(size_con2)
+prob4.exhaustive_search(True)
+(val4, new_list4, status4) = prob4.Optimize(vals)
+
+print('\nAfter Optimization: Test 01 Results')
+print(val4)
+print(status4)
+print('\nTaken')
+for obj in new_list4:
     print(obj)
 
 # This makes no fucking sense!!!

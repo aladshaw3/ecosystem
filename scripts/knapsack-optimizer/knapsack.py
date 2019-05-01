@@ -64,10 +64,10 @@ class ZeroOneKnapsack(object):
         '''
     
     def eval_constraints(self, list):
-        return self.constraint_func[0](list, *self.constraint_args)
+        return self.constraint_func[0](list, len(list), *self.constraint_args)
 
     def eval_objective_func(self, list):
-        return self.obj_func[0](list, *self.obj_args)
+        return self.obj_func[0](list, len(list), *self.obj_args)
 
     # Function to solve the optimization problem given the original list of items to consider
     ##      NOTE: User should not pass any arguments for 'taken' as this is used only internally

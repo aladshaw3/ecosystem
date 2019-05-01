@@ -197,10 +197,11 @@ int ex1_mult(const Matrix<double>& x, Matrix<double> &Ax, const void *data);
 	the sandbox tests. */
 int RUN_SANDBOX();
 
-/// Function to provide a C-style linkage and function call for C++ functions and objects 
+/// Function to provide a C-style linkage and function call for C++ functions and objects
 extern "C"
 {
     int blah();
+    double obj_func(double *list, int len, double *args);
 }
 
 #endif

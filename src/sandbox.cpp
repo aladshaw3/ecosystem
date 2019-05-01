@@ -794,6 +794,13 @@ int ex1_mult(const Matrix<double>& x, Matrix<double> &Ax, const void *data)
 extern "C"
 {
     int blah() {return RUN_SANDBOX();}
+    double obj_func(double *list, int len, double *args)
+    {
+        double sum = 0.0;
+        for (int i=0; i<len; i++)
+            sum += args[i];
+        return sum;
+    }
 }
 
 //Run the sandbox tests
