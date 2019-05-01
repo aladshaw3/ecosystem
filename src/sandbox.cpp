@@ -791,6 +791,11 @@ int ex1_mult(const Matrix<double>& x, Matrix<double> &Ax, const void *data)
 	return success;
 }
 
+extern "C"
+{
+    int blah() {return RUN_SANDBOX();}
+}
+
 //Run the sandbox tests
 int RUN_SANDBOX()
 {

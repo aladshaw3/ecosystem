@@ -12,7 +12,9 @@ This README file outlines how to get setup using the ecosystem codes and executa
 
 ### How do I get set up? ###
 
-* Requirements: gcc/g++ version 4.7 or newer (or llvm version 4.2 or newer)
+* Requirements: 
+	+ gcc/g++ version 4.7 or newer (or llvm version 4.2 or newer)
+	+ python 3.5 or newer (recommended for running python scripts)
 
 * Summary of set up
 
