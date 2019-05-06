@@ -518,6 +518,7 @@ extern "C"
     yaml_cpp_class* New_YAML();
     int YAML_executeYamlRead(yaml_cpp_class* obj, const char *file);
     void YAML_DisplayContents(yaml_cpp_class* obj);
+    const char* YAML_DocumentKeys(yaml_cpp_class* obj);
 }
 
 /// Function to return an all lower case string based on the passed argument

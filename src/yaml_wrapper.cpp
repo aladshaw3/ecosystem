@@ -2493,6 +2493,13 @@ extern "C"
     {
         obj->DisplayContents();
     }
+    const char* YAML_DocumentKeys(yaml_cpp_class* obj)
+    {
+        std::string keys;
+        keys = "Test";
+        keys += " 01";
+        return keys.c_str();
+    }
 }
 
 // Convert input to all lower case

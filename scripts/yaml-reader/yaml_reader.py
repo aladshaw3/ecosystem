@@ -46,13 +46,31 @@ class YAML(object):
         readFunc = lib.YAML_executeYamlRead
         readFunc.restype = c_int
         readFunc.argtypes = [c_void_p, c_char_p]
-        return readFunc(self.obj, file.encode() )
+        return readFunc(self.obj,file.encode())
 
     def displayContents(self):
         dispFunc = lib.YAML_DisplayContents
         dispFunc.argtypes = [c_void_p]
         return dispFunc(self.obj)
 
+    def docKeys(self):
+        docKeys_func = lib.YAML_DocumentKeys
+        docKeys_func.restype = c_char_p
+        docKeys_func.argtypes = [c_void_p]
+        _res = docKeys_func(self.obj)
+        result = str(_res)
+        return result
+
 yaml = YAML()
 yaml.readFile("1979-Test-Case.txt")
 yaml.displayContents()
+keys = yaml.docKeys()
+print(keys)
+start = False
+s_keys = ""
+for char in keys:
+    if char == "'" and start == False:
+        start = True
+    if start == True and char != "'":
+        s_keys += char
+print(s_keys)
