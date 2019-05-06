@@ -798,7 +798,7 @@ extern "C"
     {
         double sum = 0.0;
         for (int i=0; i<len; i++)
-            sum += args[i];
+            sum += list[i];
         return sum;
     }
 }

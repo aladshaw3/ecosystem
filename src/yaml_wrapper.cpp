@@ -2433,7 +2433,7 @@ int yaml_cpp_class::cleanup()
 int yaml_cpp_class::executeYamlRead(const char *file)
 {
 	int success = 0;
-	
+    
 	//Try to open file and initialize yaml objects
 	success = this->setInputFile(file);
 	if (success != 0)
@@ -2452,7 +2452,7 @@ int yaml_cpp_class::executeYamlRead(const char *file)
 	
 	//Close the file and delete temporary objects
 	success = this->cleanup();
-	
+    
 	return success;
 }
 
@@ -2477,6 +2477,23 @@ YamlWrapper& yaml_cpp_class::getYamlWrapper()
 /*
  =========================================== END yaml_cpp_class ==============================================
  */
+
+// Set of C-style functions to be used from python 3.5 (or higher)
+extern "C"
+{
+    yaml_cpp_class* New_YAML()
+    {
+        return new yaml_cpp_class();
+    }
+    int YAML_executeYamlRead(yaml_cpp_class* obj, const char *file)
+    {
+        return obj->executeYamlRead(file);
+    }
+    void YAML_DisplayContents(yaml_cpp_class* obj)
+    {
+        obj->DisplayContents();
+    }
+}
 
 // Convert input to all lower case
 std::string allLower(const std::string &input)

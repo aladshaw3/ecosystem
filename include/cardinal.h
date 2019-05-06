@@ -12,7 +12,7 @@
  *	\date 02/22/2019
  *	\copyright This software was designed and built at the Georgia Institute
  *             of Technology by Austin Ladshaw for research in the area
- *             of radioactive particle decay and transport. Copyright (c) 2018,
+ *             of radioactive particle decay and transport. Copyright (c) 2019,
  *			   all rights reserved.
  */
 

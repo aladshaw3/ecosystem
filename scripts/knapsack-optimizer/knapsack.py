@@ -1,3 +1,23 @@
+''' knapsack script:
+    ----------------
+    Object-Oriented approach to solving the quantitized optimization problem
+    with generic constraints and generic objective functions. User specifies
+    constraints and objective functions and passes those instructions to the
+    ZeroOneKnapsack object. Then, by running the optimizer, the object will
+    find the sub-set of items, given an available list of items, that will
+    maximize the given objective function, subject to the user's constraints. 
+    
+    Uses: This script will be used as part of the uncertainty analyses needed
+            to assess data needs and/or model sensitivity to a discrete 
+            number of control parameters. 
+    
+    Author:     Austin Ladshaw
+    Date:       05/06/2019
+    Copyright:  This software was designed and built at the Georgia Institute
+                of Technology by Austin Ladshaw for research in the area of
+                radioactive particle decay and transport. Copyright (c) 2019,
+                all rights reserved.'''
+
 ## Create Class Objects ##
 
 class Item(object):

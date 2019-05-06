@@ -511,6 +511,15 @@ private:
 	
 };
 
+
+/// Set of C-style functions to be used from python 3.5 (or higher)
+extern "C"
+{
+    yaml_cpp_class* New_YAML();
+    int YAML_executeYamlRead(yaml_cpp_class* obj, const char *file);
+    void YAML_DisplayContents(yaml_cpp_class* obj);
+}
+
 /// Function to return an all lower case string based on the passed argument
 /** This function will copy the input paramter and convert that copy to
 	all lower case. The copy is then returned and can be checked against valid

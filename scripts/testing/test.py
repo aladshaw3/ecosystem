@@ -2,6 +2,12 @@
 ## Run python scripts using Python 3.5 or newer ##
 import numpy as np
 
+# Add path to optimiser to python
+import sys, os
+sys.path.insert(0, '../knapsack-optimizer')
+
+import knapsack as ns
+
 from ctypes import *
 lib = cdll.LoadLibrary('../../libeco.so')
 print(lib)
@@ -60,18 +66,43 @@ def py_func(list, size, args):
         data_set[i] = val
         i += 1
     i = 0
-    for val in args:
-        arg_set[i] = val
-        i += 1
+    if size > 0:
+        for val in args[0]:
+            if i < size:
+                arg_set[i] = val
+            i += 1
     return func(data_set,*py_set)
 
 
-print(py_func([2,3], 2, [2,1]))   #Works!!!
-print(py_func([3], 1, [1]))   #Works!!!
-print(py_func([3,10,4,5], 4, [1,2,3,4]))   #Works!!!
+print(py_func([2,3], 2, ([2,1],)))   #Works!!!
+print(py_func([3], 1, ([1],)))   #Works!!!
+print(py_func([3,10,4,5], 4, ([1,2,3,4],)))   #Works!!!
 
-# LOOPS FOREVER!!!
-#for i in data:
-#    print(i)
+def pick_one(list, size, args):
+    if size <= 1:
+        return True
+    else:
+        return False
 
-#print(data.contents)
+# Test knapsack with C function
+list = [1,2,5,3,10,12,4,6]
+args = [0,1,2,3,4,5,6,7]
+prob = ns.ZeroOneKnapsack()
+prob.register_objective_func(py_func, args)
+prob.register_constraints(pick_one)
+prob.exhaustive_search(False)
+(val, new_list, status) = prob.Optimize(list)
+
+print('\nAfter Optimization: Test 01 Results')
+print(val)
+print(status)
+print('\nTaken')
+for obj in new_list:
+    print(obj)
+
+# Run command line programs in current directory
+os.system("ls -a")
+#os.system("cp test.py test_copy.py") # WORKS
+# MUST make an output directory (CARDNINAL EXPECTS IT TO EXIST!!!)
+os.system("mkdir output")
+os.system("../../eco -e cardinal -i ../../input_files/CARDINAL/1979-Test-Case.txt ../../input_files/CARDINAL/DefaultAtmosphere.txt ../../database/")
