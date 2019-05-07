@@ -41,6 +41,7 @@ class YAML(object):
         initialize = lib.New_YAML
         initialize.restype = c_void_p
         self.obj = initialize()
+        self.map = {}
 
     def readFile(self, file):
         readFunc = lib.YAML_executeYamlRead
@@ -54,23 +55,132 @@ class YAML(object):
         return dispFunc(self.obj)
 
     def docKeys(self):
+        docKeys_size = lib.YAML_DocumentKeys_Size
         docKeys_func = lib.YAML_DocumentKeys
-        docKeys_func.restype = c_char_p
-        docKeys_func.argtypes = [c_void_p]
-        _res = docKeys_func(self.obj)
-        result = str(_res)
-        return result
+        docKeys_size.restype = c_int
+        docKeys_size.argtypes = [c_void_p]
+        docKeys_func.argtypes = [c_void_p, c_char_p]
+        size = docKeys_size(self.obj)
+        keys = create_string_buffer(size)
+        docKeys_func(self.obj, keys)
+        long_keys = str(keys.value,'utf-8')
+        list_keys = long_keys.split(":")
+        for name in list_keys:
+            self.map[name] = {}
+
+    def headKeys(self):
+        for doc in self.map:
+            headKeys_size = lib.YAML_HeaderKeys_Size
+            headKeys_func = lib.YAML_HeaderKeys
+            headKeys_size.restype = c_int
+            headKeys_size.argtypes = [c_void_p, c_char_p]
+            headKeys_func.argtypes = [c_void_p, c_char_p, c_char_p]
+            size = headKeys_size(self.obj,doc.encode())
+            keys = create_string_buffer(size)
+            headKeys_func(self.obj,doc.encode(),keys)
+            long_keys = str(keys.value,'utf-8')
+            list_keys = long_keys.split(":")
+            for name in list_keys:
+                # Don't add a map if there is no key
+                if name != '':
+                    self.map[doc][name] = {}
+
+    def subKeys(self):
+        for doc in self.map:
+            for head in self.map[doc]:
+                subKeys_size = lib.YAML_SubHeaderKeys_Size
+                subKeys_func = lib.YAML_SubHeaderKeys
+                subKeys_size.restype = c_int
+                subKeys_size.argtypes = [c_void_p, c_char_p, c_char_p]
+                subKeys_func.argtypes = [c_void_p, c_char_p, c_char_p, c_char_p]
+                size = subKeys_size(self.obj, doc.encode(), head.encode())
+                keys = create_string_buffer(size)
+                subKeys_func(self.obj,doc.encode(),head.encode(),keys)
+                long_keys = str(keys.value,'utf-8')
+                list_keys = long_keys.split(":")
+                for name in list_keys:
+                    # Don't add a map if there is no key
+                    if name != '':
+                        self.map[doc][head][name] = {}
+
+    def docData(self):
+        for doc in self.map:
+            docData_size = lib.YAML_DocumentData_Size
+            docData_func = lib.YAML_DocumentData
+            docData_size.restype = c_int
+            docData_size.argtypes = [c_void_p, c_char_p]
+            docData_func.argtypes = [c_void_p, c_char_p, c_char_p]
+            size = docData_size(self.obj, doc.encode())
+            key_values = create_string_buffer(size)
+            docData_func(self.obj, doc.encode(), key_values)
+            long_keys = str(key_values.value,'utf-8')
+            list_keys = long_keys.split("*")
+            for items in list_keys:
+                key = items.split(":")
+                if key[0] != '':
+                    self.map[doc][key[0]] = key[1]
+
+    def headData(self):
+        for doc in self.map:
+            for head in self.map[doc]:
+                headData_size = lib.YAML_HeaderData_Size
+                headData_func = lib.YAML_HeaderData
+                headData_size.restype = c_int
+                headData_size.argtypes = [c_void_p, c_char_p, c_char_p]
+                headData_func.argtypes = [c_void_p, c_char_p, c_char_p, c_char_p]
+                size = headData_size(self.obj, doc.encode(), head.encode())
+                key_values = create_string_buffer(size)
+                headData_func(self.obj, doc.encode(), head.encode(), key_values)
+                long_keys = str(key_values.value,'utf-8')
+                list_keys = long_keys.split("*")
+                for items in list_keys:
+                    key = items.split(":")
+                    if key[0] != '':
+                        self.map[doc][head][key[0]] = key[1]
+
+    def subData(self):
+        for doc in self.map:
+            for head in self.map[doc]:
+                for sub in self.map[doc][head]:
+                    subData_size = lib.YAML_SubHeaderData_Size
+                    subData_func = lib.YAML_SubHeaderData
+                    subData_size.restype = c_int
+                    subData_size.argtypes = [c_void_p, c_char_p, c_char_p, c_char_p]
+                    subData_func.argtypes = [c_void_p, c_char_p, c_char_p, c_char_p, c_char_p]
+                    size = subData_size(self.obj, doc.encode(), head.encode(), sub.encode())
+                    key_values = create_string_buffer(size)
+                    subData_func(self.obj, doc.encode(), head.encode(), sub.encode(), key_values)
+                    long_keys = str(key_values.value,'utf-8')
+                    list_keys = long_keys.split("*")
+                    for items in list_keys:
+                        key = items.split(":")
+                        if key[0] != '':
+                            self.map[doc][head][sub][key[0]] = key[1]
+
+## END YAML Class ##
+
 
 yaml = YAML()
-yaml.readFile("1979-Test-Case.txt")
-yaml.displayContents()
-keys = yaml.docKeys()
-print(keys)
-start = False
-s_keys = ""
-for char in keys:
-    if char == "'" and start == False:
-        start = True
-    if start == True and char != "'":
-        s_keys += char
-print(s_keys)
+#yaml.readFile("1979-Test-Case.txt")
+yaml.readFile("test_input.yml")
+#yaml.displayContents()
+yaml.docKeys()
+#print(yaml.map)
+#print(yaml.map["ODE_Options"]) #this works
+yaml.headKeys()
+#print(yaml.map)
+
+yaml.subKeys()
+#print(yaml.map)
+
+#yaml.docData()
+
+#print(yaml.map)
+#yaml.map["TestDoc3"]["apple"] = 5.0   # works
+#print(yaml.map["TestDoc3"]["apple"]) # works
+
+yaml.subData()
+yaml.headData()
+yaml.docData()  #Must call in reverse order
+print(yaml.map)
+

@@ -2485,20 +2485,272 @@ extern "C"
     {
         return new yaml_cpp_class();
     }
+    
     int YAML_executeYamlRead(yaml_cpp_class* obj, const char *file)
     {
         return obj->executeYamlRead(file);
     }
+    
     void YAML_DisplayContents(yaml_cpp_class* obj)
     {
         obj->DisplayContents();
     }
-    const char* YAML_DocumentKeys(yaml_cpp_class* obj)
+    
+    int YAML_DocumentKeys_Size(yaml_cpp_class* obj)
     {
-        std::string keys;
-        keys = "Test";
-        keys += " 01";
-        return keys.c_str();
+        int size = 0;
+        
+        for (auto &x: obj->getYamlWrapper().getDocMap())
+        {
+            size += x.first.length()+1;
+        }
+        
+        return size;
+    }
+    
+    void YAML_DocumentKeys(yaml_cpp_class* obj, char *keys)
+    {
+        std::string s_keys;
+        int i = 0;
+        for (auto &x: obj->getYamlWrapper().getDocMap())
+        {
+            if (i == 0)
+                s_keys += x.first;
+            else
+                s_keys += ":"+x.first;
+            i++;
+        }
+        strcpy(keys, s_keys.c_str());
+    }
+    
+    int YAML_HeaderKeys_Size(yaml_cpp_class* obj, const char *doc)
+    {
+        int size = 0;
+        std::string doc_head(doc);
+        
+        try
+        {
+            for (auto &x: obj->getYamlWrapper()(doc_head).getHeadMap())
+            {
+                size += x.first.length()+1;
+            }
+        }
+        catch(std::out_of_range)
+        {
+            size = 1;
+            mError(key_not_found);
+        }
+        
+        return size;
+    }
+    
+    void YAML_HeaderKeys(yaml_cpp_class* obj, const char *doc, char *keys)
+    {
+        std::string s_keys;
+        std::string doc_head(doc);
+        int i = 0;
+        try
+        {
+            for (auto &x: obj->getYamlWrapper()(doc_head).getHeadMap())
+            {
+                if (i == 0)
+                    s_keys += x.first;
+                else
+                    s_keys += ":"+x.first;
+                i++;
+            }
+            strcpy(keys, s_keys.c_str());
+        }
+        catch(std::out_of_range)
+        {
+            mError(key_not_found);
+        }
+    }
+    
+    int YAML_SubHeaderKeys_Size(yaml_cpp_class* obj, const char *doc, const char *head)
+    {
+        int size = 0;
+        std::string doc_head(doc);
+        std::string head_head(head);
+        try
+        {
+            for (auto &x: obj->getYamlWrapper()(doc_head)(head_head).getSubMap())
+            {
+                size += x.first.length()+1;
+            }
+        }
+        catch(std::out_of_range)
+        {
+            size = 1;
+            mError(key_not_found);
+        }
+        
+        return size;
+    }
+    
+    void YAML_SubHeaderKeys(yaml_cpp_class* obj, const char *doc, const char *head, char *keys)
+    {
+        std::string s_keys;
+        std::string doc_head(doc);
+        std::string head_head(head);
+        int i = 0;
+        try
+        {
+            for (auto &x: obj->getYamlWrapper()(doc_head)(head_head).getSubMap())
+            {
+                if (i == 0)
+                s_keys += x.first;
+                else
+                s_keys += ":"+x.first;
+                i++;
+            }
+            strcpy(keys, s_keys.c_str());
+        }
+        catch(std::out_of_range)
+        {
+            mError(key_not_found);
+        }
+    }
+    
+    int YAML_DocumentData_Size(yaml_cpp_class* obj, const char *doc)
+    {
+        int size = 0;
+        std::string doc_head(doc);
+        
+        try
+        {
+            for (auto &x: obj->getYamlWrapper()(doc_head).getDataMap())
+            {
+                size += x.first.length()+x.second.getValue().length()+2;
+            }
+        }
+        catch(std::out_of_range)
+        {
+            size = 1;
+            mError(key_not_found);
+        }
+        
+        return size;
+    }
+    
+    void YAML_DocumentData(yaml_cpp_class* obj, const char *doc, char *key_values)
+    {
+        std::string s_keys;
+        std::string doc_head(doc);
+        int i = 0;
+        try
+        {
+            for (auto &x: obj->getYamlWrapper()(doc_head).getDataMap())
+            {
+                if (i == 0)
+                    s_keys += x.first+":"+x.second.getValue();
+                else
+                    s_keys += "*"+x.first+":"+x.second.getValue();
+                i++;
+            }
+            strcpy(key_values, s_keys.c_str());
+        }
+        catch(std::out_of_range)
+        {
+            mError(key_not_found);
+        }
+    }
+    
+    int YAML_HeaderData_Size(yaml_cpp_class* obj, const char *doc, const char *head)
+    {
+        int size = 0;
+        std::string doc_head(doc);
+        std::string head_head(head);
+        
+        try
+        {
+            for (auto &x: obj->getYamlWrapper()(doc_head)(head_head).getDataMap())
+            {
+                size += x.first.length()+x.second.getValue().length()+2;
+            }
+        }
+        catch(std::out_of_range)
+        {
+            size = 1;
+            std::cout << "Doc: " << doc_head << std::endl;
+            std::cout << "Head: " << head_head << std::endl;
+            mError(key_not_found);
+        }
+        
+        return size;
+    }
+    
+    void YAML_HeaderData(yaml_cpp_class* obj, const char *doc, const char *head, char *key_values)
+    {
+        std::string s_keys;
+        std::string doc_head(doc);
+        std::string head_head(head);
+        int i = 0;
+        try
+        {
+            for (auto &x: obj->getYamlWrapper()(doc_head)(head_head).getDataMap())
+            {
+                if (i == 0)
+                s_keys += x.first+":"+x.second.getValue();
+                else
+                s_keys += "*"+x.first+":"+x.second.getValue();
+                i++;
+            }
+            strcpy(key_values, s_keys.c_str());
+        }
+        catch(std::out_of_range)
+        {
+            std::cout << "Doc: " << doc_head << std::endl;
+            std::cout << "Head: " << head_head << std::endl;
+            mError(key_not_found);
+        }
+    }
+    
+    int YAML_SubHeaderData_Size(yaml_cpp_class* obj, const char *doc, const char *head, const char *sub)
+    {
+        int size = 0;
+        std::string doc_head(doc);
+        std::string head_head(head);
+        std::string sub_head(sub);
+        try
+        {
+            for (auto &x: obj->getYamlWrapper()(doc_head)(head_head)(sub_head).getMap())
+            {
+                size += x.first.length()+x.second.getValue().length()+2;
+            }
+        }
+        catch(std::out_of_range)
+        {
+            size = 1;
+            mError(key_not_found);
+        }
+        
+        return size;
+    }
+    
+    void YAML_SubHeaderData(yaml_cpp_class* obj, const char *doc, const char *head, const char *sub, char *key_values)
+    {
+        std::string s_keys;
+        std::string doc_head(doc);
+        std::string head_head(head);
+        std::string sub_head(sub);
+        int i = 0;
+        try
+        {
+            for (auto &x: obj->getYamlWrapper()(doc_head)(head_head)(sub_head).getMap())
+            {
+                if (i == 0)
+                s_keys += x.first+":"+x.second.getValue();
+                else
+                s_keys += "*"+x.first+":"+x.second.getValue();
+                i++;
+            }
+            strcpy(key_values, s_keys.c_str());
+        }
+        catch(std::out_of_range)
+        {
+            mError(key_not_found);
+        }
     }
 }
 

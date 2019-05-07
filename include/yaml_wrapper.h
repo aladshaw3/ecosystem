@@ -515,10 +515,30 @@ private:
 /// Set of C-style functions to be used from python 3.5 (or higher)
 extern "C"
 {
-    yaml_cpp_class* New_YAML();
-    int YAML_executeYamlRead(yaml_cpp_class* obj, const char *file);
-    void YAML_DisplayContents(yaml_cpp_class* obj);
-    const char* YAML_DocumentKeys(yaml_cpp_class* obj);
+    yaml_cpp_class* New_YAML();                                                 ///< Create instance of yaml C++ object
+    int YAML_executeYamlRead(yaml_cpp_class* obj, const char *file);            ///< Use yaml object to read a file
+    void YAML_DisplayContents(yaml_cpp_class* obj);                             ///< Display the contents of the yaml object
+    int YAML_DocumentKeys_Size(yaml_cpp_class* obj);                            ///< Return buffer size for all Document Keys
+    void YAML_DocumentKeys(yaml_cpp_class* obj, char *keys);                    ///< Modify char* to gain the list of keys
+    int YAML_HeaderKeys_Size(yaml_cpp_class* obj, const char *doc);             ///< Return buffer size for all Header keys in a doc
+    void YAML_HeaderKeys(yaml_cpp_class* obj, const char *doc, char *keys);     ///< Modify char* to gain list of all keys in doc
+    /// Return buffer size for all Header keys in a doc
+    int YAML_SubHeaderKeys_Size(yaml_cpp_class* obj, const char *doc, const char *head);
+    /// Modify char* to gain list of all keys in doc
+    void YAML_SubHeaderKeys(yaml_cpp_class* obj, const char *doc, const char *head, char *keys);
+    
+    /// Return buffer size for all key-value pairs in the document map
+    int YAML_DocumentData_Size(yaml_cpp_class* obj, const char *doc);
+    /// Modify char* to gain list of all key-value pairs in document separated by * symbols
+    void YAML_DocumentData(yaml_cpp_class* obj, const char *doc, char *key_values);
+    /// Return buffer size for all key-value pairs in the header map
+    int YAML_HeaderData_Size(yaml_cpp_class* obj, const char *doc, const char *head);
+    /// Modify char* to gain list of all key-value pairs in header separated by * symbols
+    void YAML_HeaderData(yaml_cpp_class* obj, const char *doc, const char *head, char *key_values);
+    /// Return buffer size for all key-value pairs in the subheader map
+    int YAML_SubHeaderData_Size(yaml_cpp_class* obj, const char *doc, const char *head, const char *subhead);
+    /// Modify char* to gain list of all key-value pairs in subheader separated by * symbols
+    void YAML_SubHeaderData(yaml_cpp_class* obj, const char *doc, const char *head, const char *subhead, char *key_values);
 }
 
 /// Function to return an all lower case string based on the passed argument
