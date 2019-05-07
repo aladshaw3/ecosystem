@@ -1,0 +1,81 @@
+
+TestDoc1:
+---
+- scenario:
+  act_fun: DAVIES
+  numvar: 25
+  pH: 7.5
+  steadystate: False
+  t_out: 0.101
+- testblock:
+  - subblock:
+    sub: block
+  another: block
+...
+
+TestDoc2:
+---
+- masterspecies:
+  3: NaCl (aq)
+  "Cl - (aq)": 0
+  "H2O (l)": 2
+  "Na + (aq)": 1
+- scenario:
+  act_fun: DAVIES
+  numvar: 25
+  pH: 7.5
+  steadystate: False
+  t_out: 0.101
+- testblock:
+  - subblock:
+    sub: block
+  another: block
+...
+
+TestDoc3:
+---
+- array:
+  - list1:
+    a: 1
+    b: 2
+    c: 3
+  - list2:
+    a: 4
+    b: 5
+    c: 6
+  banana: yellow
+apple: red
+pear: green
+...
+
+TestDoc4:
+---
+- alias:
+  add: to stuff
+  stuff: to do
+- anchor:
+  stuff: to do
+- list:
+  - aliased:
+    atta: ber
+    info: bruh
+  - anchored:
+    atta: boy
+    info: blah
+...
+
+TestDoc5:
+---
+- block:
+  1: 2
+  3: 4
+  still: in block
+- grab:
+  - listcopy:
+    a: 1
+    b: 2
+    c: 3
+  add2: more adds
+  stuff: to do
+...
+

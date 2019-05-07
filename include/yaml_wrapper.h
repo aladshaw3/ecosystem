@@ -516,6 +516,7 @@ private:
 extern "C"
 {
     yaml_cpp_class* New_YAML();                                                 ///< Create instance of yaml C++ object
+    void YAML_DeleteContents(yaml_cpp_class* obj);                              ///< Delete the contents of the obj
     int YAML_executeYamlRead(yaml_cpp_class* obj, const char *file);            ///< Use yaml object to read a file
     void YAML_DisplayContents(yaml_cpp_class* obj);                             ///< Display the contents of the yaml object
     int YAML_DocumentKeys_Size(yaml_cpp_class* obj);                            ///< Return buffer size for all Document Keys

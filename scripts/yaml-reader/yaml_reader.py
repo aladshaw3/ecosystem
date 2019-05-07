@@ -18,7 +18,11 @@
                 all rights reserved.'''
 
 from ctypes import *
-lib = cdll.LoadLibrary('../../libeco.so')
+try:
+    lib = cdll.LoadLibrary('../../libeco.so')
+except:
+    print("Run 'make all' in ecosystem directory first to use this script")
+    exit()
 
 ''' Python Class for interfacing with the C++ yaml wrapper
     ------------------------------------------------------
@@ -35,19 +39,72 @@ lib = cdll.LoadLibrary('../../libeco.so')
         arguments and return types. 
     
         Pass const char* as arg.encode()
-        Pass instances of C++ structures as c_void_p'''
+        Pass instances of C++ structures as c_void_p
+    
+    USAGE: Create instance of the YAML object and then call
+            the readFile('filename') function and the object
+            will automatically fill out a data map with all
+            information from the yaml formatted file. You
+            can also create a map manually and print that
+            to a file. '''
 class YAML(object):
     def __init__(self):
         initialize = lib.New_YAML
         initialize.restype = c_void_p
         self.obj = initialize()
         self.map = {}
+    
+    def __str__(self):
+        string = "\n"
+        for doc in self.map:
+            if " " in doc:
+                string += "\"" + doc + "\"" + ":\n"
+            else:
+                string += doc + ":\n"
+            string += "---\n"
+            for head in self.map[doc]:
+                if isinstance(self.map[doc][head],dict):
+                    if " " in head:
+                        string += "- " + "\"" + head + "\"" + ":\n"
+                    else:
+                        string += "- " + head + ":\n"
+                    for sub in self.map[doc][head]:
+                        if isinstance(self.map[doc][head][sub],dict):
+                            if " " in sub:
+                                string += "  - " + "\"" + sub + "\"" + ":\n"
+                            else:
+                                string += "  - " + sub + ":\n"
+                            for key in self.map[doc][head][sub]:
+                                if " " in key:
+                                    string += "    " + "\"" + key + "\"" + ": " + str(self.map[doc][head][sub][key]) + "\n"
+                                else:
+                                    string += "    " + key + ": " + str(self.map[doc][head][sub][key]) + "\n"
+                        else:
+                            if " " in sub:
+                                string += "  " + "\"" + sub + "\"" + ": " + str(self.map[doc][head][sub]) + "\n"
+                            else:
+                                string += "  " + sub + ": " + str(self.map[doc][head][sub]) + "\n"
+                else:
+                    if " " in head:
+                        string += "\"" + head + "\"" + ": " + str(self.map[doc][head]) + "\n"
+                    else:
+                        string += head + ": " + str(self.map[doc][head]) + "\n"
+        
+            string += "...\n\n"
+        return string
+            
+    def print2file(self, filename):
+        file = open(filename, 'w')
+        info = str(self)
+        file.write(info)
+        file.close()
 
     def readFile(self, file):
         readFunc = lib.YAML_executeYamlRead
         readFunc.restype = c_int
         readFunc.argtypes = [c_void_p, c_char_p]
-        return readFunc(self.obj,file.encode())
+        readFunc(self.obj,file.encode())
+        self.formMap()
 
     def displayContents(self):
         dispFunc = lib.YAML_DisplayContents
@@ -118,7 +175,18 @@ class YAML(object):
             for items in list_keys:
                 key = items.split(":")
                 if key[0] != '':
-                    self.map[doc][key[0]] = key[1]
+                    if key[1].isdigit():
+                        self.map[doc][key[0]] = int(key[1])
+                    else:
+                        try:
+                            self.map[doc][key[0]] = float(key[1])
+                        except:
+                            if key[1].lower() == "true":
+                                self.map[doc][key[0]] = True
+                            elif key[1].lower() == "false":
+                                self.map[doc][key[0]] = False
+                            else:
+                                self.map[doc][key[0]] = key[1]
 
     def headData(self):
         for doc in self.map:
@@ -136,7 +204,18 @@ class YAML(object):
                 for items in list_keys:
                     key = items.split(":")
                     if key[0] != '':
-                        self.map[doc][head][key[0]] = key[1]
+                        if key[1].isdigit():
+                            self.map[doc][head][key[0]] = int(key[1])
+                        else:
+                            try:
+                                self.map[doc][head][key[0]] = float(key[1])
+                            except:
+                                if key[1].lower() == "true":
+                                    self.map[doc][head][key[0]] = True
+                                elif key[1].lower() == "false":
+                                    self.map[doc][head][key[0]] = False
+                                else:
+                                    self.map[doc][head][key[0]] = key[1]
 
     def subData(self):
         for doc in self.map:
@@ -155,32 +234,32 @@ class YAML(object):
                     for items in list_keys:
                         key = items.split(":")
                         if key[0] != '':
-                            self.map[doc][head][sub][key[0]] = key[1]
+                            if key[1].isdigit():
+                                self.map[doc][head][sub][key[0]] = int(key[1])
+                            else:
+                                try:
+                                    self.map[doc][head][sub][key[0]] = float(key[1])
+                                except:
+                                    if key[1].lower() == "true":
+                                        self.map[doc][head][sub][key[0]] = True
+                                    elif key[1].lower() == "false":
+                                        self.map[doc][head][sub][key[0]] = False
+                                    else:
+                                        self.map[doc][head][sub][key[0]] = key[1]
+
+    def formMap(self):
+        self.docKeys()
+        self.headKeys()
+        self.subKeys()
+        self.subData()
+        self.headData()
+        self.docData()
+        self.deleteObj()
+
+    def deleteObj(self):
+        fun = lib.YAML_DeleteContents
+        fun.argtypes = [c_void_p]
+        fun(self.obj)
 
 ## END YAML Class ##
-
-
-yaml = YAML()
-#yaml.readFile("1979-Test-Case.txt")
-yaml.readFile("test_input.yml")
-#yaml.displayContents()
-yaml.docKeys()
-#print(yaml.map)
-#print(yaml.map["ODE_Options"]) #this works
-yaml.headKeys()
-#print(yaml.map)
-
-yaml.subKeys()
-#print(yaml.map)
-
-#yaml.docData()
-
-#print(yaml.map)
-#yaml.map["TestDoc3"]["apple"] = 5.0   # works
-#print(yaml.map["TestDoc3"]["apple"]) # works
-
-yaml.subData()
-yaml.headData()
-yaml.docData()  #Must call in reverse order
-print(yaml.map)
 

@@ -2486,6 +2486,11 @@ extern "C"
         return new yaml_cpp_class();
     }
     
+    void YAML_DeleteContents(yaml_cpp_class* obj)
+    {
+        obj->DeleteContents();
+    }
+    
     int YAML_executeYamlRead(yaml_cpp_class* obj, const char *file)
     {
         return obj->executeYamlRead(file);

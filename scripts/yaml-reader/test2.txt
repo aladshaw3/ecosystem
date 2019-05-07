@@ -1,0 +1,15 @@
+
+Doc1:
+---
+key1: val1
+key2: False
+...
+
+Doc2:
+---
+- head1:
+  head_key: 10
+  - sub:
+    key: 5.5
+...
+

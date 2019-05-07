@@ -6,8 +6,8 @@ TestDoc1: &hat
   numvar: 25
   act_fun: DAVIES
   steadystate: FALSE
-  t_out: 1
-  pH: 0
+  t_out: 1.01E-01
+  pH: 7.5
   
 - testblock:
   another: block
