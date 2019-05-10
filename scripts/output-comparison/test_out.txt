@@ -1,4 +1,4 @@
-Test02: Single variable 1st Order Decay
+Test01: Single variable 1st Order Decay
 ---------------------------------
 du/dt = -u
 

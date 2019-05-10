@@ -16,6 +16,7 @@
                 all rights reserved.'''
 
 import difflib
+import math
 
 ### Class Object for Comparing Files ###
 
@@ -23,9 +24,94 @@ class FileCompare(object):
     # Initialization constructor must take in strings for the gold file and test file
     def __init__(self, gold, test):
         self.num_diff = 0.0                 # Values closest to zero represent smallest differences
-        self.str_ratio = 1.0                # Values closest to one represent smallest differences
+        self.str_diff = 0.0                 # Values closest to zero represent smallest differences
+        self.total_num = 0                  # Number of total numbers in both files
+        self.total_word = 0                 # Number of total words in both files
+        self.hasBeenRead = False
+        self.lnum_gold = len(open(gold,"r").readlines())    #Number of lines in gold file
+        self.lnum_test = len(open(test,"r").readlines())    #Number of lines in test file
         self.gold_file = open(gold,"r")
         self.test_file = open(test,"r")
+        self.computeErrors()
+    
+    def __str__(self):
+        if self.hasBeenRead == False:
+            return "Must call computeErrors() first!"
+        else:
+            message = "\nComparison between " + self.gold_file.name + " and " + self.test_file.name
+            message += "\n\nResults\n"
+            message += "-------\n"
+            message += "Word Diff (%)    =\t" + str(self.str_diff*100.0) + "\n"
+            message += "Total Words      =\t" + str(self.total_word) + "\n"
+            message += "Numerical Error  =\t" + str(self.num_diff) + "\n"
+            message += "Total Numbers    =\t" + str(self.total_num) + "\n"
+            return message
+
+    def computeErrors(self):
+        if self.lnum_test > self.lnum_gold:
+            short_file = self.gold_file
+            long_file = self.test_file
+        else:
+            short_file = self.test_file
+            long_file = self.gold_file
+
+        #Iterate through the short file
+        for s_line in short_file:
+            l_line = long_file.readline()
+            s_line_list = s_line.split()
+            l_line_list = l_line.split()
+
+            if len(s_line_list) > len(l_line_list):
+                short_list = l_line_list
+                long_list = s_line_list
+            else:
+                short_list = s_line_list
+                long_list = l_line_list
+            
+            i = 0
+            #Iteration through the short list
+            for s in short_list:
+                l = long_list[i]
+                try:
+                    self.num_diff += (float(s) - float(l))*(float(s) - float(l))
+                    self.total_num += 1
+                except:
+                    s = difflib.SequenceMatcher(None, s, l)
+                    self.str_diff += s.ratio()
+                    self.total_word += 1
+                i += 1
+
+            #List iteration complete
+
+            #Finish the long list
+            for lf in long_list[i:]:
+                try:
+                    self.num_diff += (float(lf))*(float(lf))
+                    self.total_num += 1
+                except:
+                    s = difflib.SequenceMatcher(None, "", lf)
+                    self.str_diff += s.ratio()
+                    self.total_word += 1
+            #End Finishing
+        #File Iteration complete
+        
+        #Finish reading the long file
+        for remaining in long_file:
+            for item in remaining.split():
+                try:
+                    self.num_diff += (float(item))*(float(item))
+                    self.total_num += 1
+                except:
+                    s = difflib.SequenceMatcher(None, "", item)
+                    self.str_diff += s.ratio()
+                    self.total_word += 1
+        #End finishing
+        
+        #Final Editing Steps
+        self.num_diff = math.sqrt(self.num_diff)
+        self.str_diff = 1.0 - (self.str_diff/self.total_word)
+        self.hasBeenRead = True
+        self.closeFiles()
 
     def closeFiles(self):
         self.gold_file.close()
@@ -48,46 +134,18 @@ class FileCompare(object):
 '''
 
 ### Testing ###
-comp = FileCompare("gold_out.txt","test_out.txt")
-line1 = comp.gold_file.readline().split()
-linea = comp.test_file.readline().split()
-print(line1)
-print(len(line1))
-i = 0
-sum = 0
-for str in line1:
-    if str != linea[i]:
-        sum += 1
-    i += 1
+#comp = FileCompare("gold_out.txt","test_out.txt")
+#print(comp)
 
-print(sum)
-
-d = difflib.Differ()
-diff = d.compare(line1, linea)
-print(list(diff))
-
-hd = difflib.HtmlDiff()
-hdiff = hd.make_file(line1, linea)
-print(hdiff)
-
-### Perform a comparison of string lines and report a numeric difference ratio ###
-sd = difflib.SequenceMatcher()
-sd.set_seqs(line1,linea)
-### if ratio == 1 (SAME lines) if ratio == 0 (Completely Different)
-# ratio = 2.0*M/T  where M = number of matching elements and T = total number of elements (in both).
-print(line1)
-print(linea)
-print(sd.ratio())
-
-''' Plan
-    ----
+''' Method
+    ------
     (1) Iterate through each line in each file
-            How can we tell the total number of lines? (iterate through smallest)
+            (iterate through smallest)
             
     (2) Split each line into individual strings
             Parse on spaces
     
-    (3) Iterate (nested) over each individual string in a lint
+    (3) Iterate (nested) over each individual string in a line
             (loop over the smallest string list)
     
     (4) Check each string for types
@@ -99,8 +157,5 @@ print(sd.ratio())
             Store results in the object 
             Use to determine how much simulation results have changed between runs
 '''
-
-
-comp.closeFiles()
 
 
