@@ -43,7 +43,7 @@ class FileCompare(object):
             message += "-------\n"
             message += "Word Diff (%)    =\t" + str(self.str_diff*100.0) + "\n"
             message += "Total Words      =\t" + str(self.total_word) + "\n"
-            message += "Numerical Error  =\t" + str(self.num_diff) + "\n"
+            message += "Num Diff (-)     =\t" + str(self.num_diff) + "\n"
             message += "Total Numbers    =\t" + str(self.total_num) + "\n"
             return message
 
@@ -73,7 +73,13 @@ class FileCompare(object):
             for s in short_list:
                 l = long_list[i]
                 try:
-                    self.num_diff += (float(s) - float(l))*(float(s) - float(l))
+                    if float(s) != 0.0:
+                        self.num_diff += abs(float(s) - float(l))/abs(float(s))
+                    #print(str(abs(float(s) - float(l))/abs(float(s))))
+                    else:
+                        self.num_diff += abs(float(s) - float(l))
+                    #print(str(abs(float(s) - float(l))))
+
                     self.total_num += 1
                 except:
                     s = difflib.SequenceMatcher(None, s, l)
@@ -86,7 +92,8 @@ class FileCompare(object):
             #Finish the long list
             for lf in long_list[i:]:
                 try:
-                    self.num_diff += (float(lf))*(float(lf))
+                    self.num_diff += abs(float(lf))
+                    #print(str(abs(float(lf))))
                     self.total_num += 1
                 except:
                     s = difflib.SequenceMatcher(None, "", lf)
@@ -99,7 +106,8 @@ class FileCompare(object):
         for remaining in long_file:
             for item in remaining.split():
                 try:
-                    self.num_diff += (float(item))*(float(item))
+                    self.num_diff += abs(float(item))
+                    print(str(abs(float(item))))  #PROBLEM - ERROR TOO HIGH
                     self.total_num += 1
                 except:
                     s = difflib.SequenceMatcher(None, "", item)
@@ -108,7 +116,7 @@ class FileCompare(object):
         #End finishing
         
         #Final Editing Steps
-        self.num_diff = math.sqrt(self.num_diff)
+        self.num_diff = (self.num_diff/self.total_num)
         self.str_diff = 1.0 - (self.str_diff/self.total_word)
         self.hasBeenRead = True
         self.closeFiles()

@@ -4170,19 +4170,16 @@ int CRANE_SCENARIO(const char *yaml_input, const char *atmosphere_data)
 	FILE *file, *cloud;
 	file = fopen("output/CRANE_Results.txt", "w+");
 	cloud = fopen("output/CRANE_CloudGrowth.txt", "w+");
-	if (crane.get_FileOut() == true)
-	{
-		if (file == nullptr)
-		{
-			system("mkdir output");
-			file = fopen("output/CRANE_Results.txt", "w+");
-		}
-		if (cloud == nullptr)
-		{
-			system("mkdir output");
-			cloud = fopen("output/CRANE_CloudGrowth.txt", "w+");
-		}
-	}
+    if (file == nullptr)
+    {
+        system("mkdir output");
+        file = fopen("output/CRANE_Results.txt", "w+");
+    }
+    if (cloud == nullptr)
+    {
+        system("mkdir output");
+        cloud = fopen("output/CRANE_CloudGrowth.txt", "w+");
+    }
 	crane.set_CloudFile(cloud);
 	
 	std::cout << "\n";

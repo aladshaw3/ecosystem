@@ -306,19 +306,16 @@ int CARDINAL_SCENARIO(const char *yaml_input, const char *atmosphere_data, const
 	FILE *file, *cloud;
 	file = fopen("output/CARDINAL_CloudRise.txt", "w+");
 	cloud = fopen("output/CARDINAL_CloudGrowth.txt", "w+");
-	if (cardinal.getCloudRise().get_FileOut() == true)
-	{
-		if (file == nullptr)
-		{
-			system("mkdir output");
-			file = fopen("output/CARDINAL_CloudRise.txt", "w+");
-		}
-		if (cloud == nullptr)
-		{
-			system("mkdir output");
-			cloud = fopen("output/CARDINAL_CloudGrowth.txt", "w+");
-		}
-	}
+    if (file == nullptr)
+    {
+        system("mkdir output");
+        file = fopen("output/CARDINAL_CloudRise.txt", "w+");
+    }
+    if (cloud == nullptr)
+    {
+        system("mkdir output");
+        cloud = fopen("output/CARDINAL_CloudGrowth.txt", "w+");
+    }
 	cardinal.getCloudRise().set_CloudFile(cloud);
 	
 	//Read and setup CRANE associated files
@@ -368,20 +365,21 @@ extern "C"
         
         //Opening output files (optional)
         FILE *file, *cloud;
-        file = fopen("output/CARDINAL_CloudRise.txt", "w+");
-        cloud = fopen("output/CARDINAL_CloudGrowth.txt", "w+");
-        if (cardinal.getCloudRise().get_FileOut() == true)
+        std::string rise_out = "output/", growth_out = "output/", nuclide_out = "output/";
+        rise_out.append(cloud_rise_out);
+        growth_out.append(cloud_growth_out);
+        nuclide_out.append(nuc_out);
+        file = fopen(rise_out.c_str(), "w+");
+        cloud = fopen(growth_out.c_str(), "w+");
+        if (file == nullptr)
         {
-            if (file == nullptr)
-            {
-                system("mkdir output");
-                file = fopen("output/py_CARDINAL_CloudRise.txt", "w+");
-            }
-            if (cloud == nullptr)
-            {
-                system("mkdir output");
-                cloud = fopen("output/py_CARDINAL_CloudGrowth.txt", "w+");
-            }
+            system("mkdir output");
+            file = fopen(rise_out.c_str(), "w+");
+        }
+        if (cloud == nullptr)
+        {
+            system("mkdir output");
+            cloud = fopen(growth_out.c_str(), "w+");
         }
         cardinal.getCloudRise().set_CloudFile(cloud);
         
@@ -402,7 +400,7 @@ extern "C"
         success = cardinal.setupActivityDistribution();
         if (success != 0) {mError(read_error); return -1;}
         
-        success = cardinal.runSimulations(0,"output/py_CARDINAL_Nuclides.txt");
+        success = cardinal.runSimulations(unc_opt,nuclide_out.c_str());
         if (success != 0) {mError(simulation_fail); return -1;}
         
         //Determine total runtime
