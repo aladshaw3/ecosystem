@@ -45,6 +45,7 @@ FissionProducts::FissionProducts()
 	total_mass = 1.0;
 	fiss_extent = 50.0;
 	energy_level = 0.0;
+    uncertainty = 0;
 }
 
 //Default destructor
@@ -219,6 +220,17 @@ void FissionProducts::setThreshold(double val)
 	this->DecayChain::setThreshold(val);
 }
 
+//set uncertainty
+void FissionProducts::setUncertainty(int opt)
+{
+    if (opt < 0)
+        this->uncertainty = -1;
+    else if (opt > 0)
+        this->uncertainty = 1;
+    else
+        this->uncertainty = 0;
+}
+
 //set threshold from time of detonation
 void FissionProducts::timeSinceDetonation(double time, double per)
 {
@@ -294,6 +306,12 @@ double FissionProducts::getTotalMoles()
 double FissionProducts::getFissionExtent()
 {
     return this->fiss_extent;
+}
+
+//return uncertainty
+int FissionProducts::getUncertainty()
+{
+    return this->uncertainty;
 }
 
 //return console bool
@@ -479,7 +497,7 @@ int FissionProducts::evaluateYields()
 			{
 				try
 				{
-					yield = x.second["Yield"].getDouble();
+					yield = x.second["Yield"].getDouble() + x.second["DY"].getDouble()*(double)this->uncertainty;
 					if (moles > 0.0)
 					{
 						success = this->registerInitialNuclide(x.first, yield*moles*this->fiss_extent/100.0);
@@ -527,7 +545,7 @@ int FissionProducts::evaluateYields()
 			if (this->fiss_extent < 100.0)
 				if (moles > 0.0)
 					success = this->registerInitialNuclide(this->InitialMat[i].IsotopeName(), moles*(100.0-this->fiss_extent)/100.0);
-			if (sum >= 1e-6)
+			if (sum >= 1e-6 && this->uncertainty == 0)
 			{
 				mError(invalid_molefraction);
 				std::cout << "Sum of independent yields contains too much error...\n\n";

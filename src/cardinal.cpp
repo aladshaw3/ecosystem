@@ -245,7 +245,7 @@ int Cardinal::setupActivityDistribution()
 	return success;
 }
 
-int Cardinal::runSimulations()
+int Cardinal::runSimulations(int unc, std::string nuc_file)
 {
 	int success = 0;
 	
@@ -275,6 +275,7 @@ int Cardinal::runSimulations()
 	}
 	
 	//Now we need to incorporate neutron captures into initial fission products
+    this->yields.setUncertainty(unc);
 	this->activity.initialize_fractionation(this->yields, this->yield_data);
 	success = this->activity.evaluate_initial_fractionation();
 	if (success != 0) {mError(simulation_fail); std::cout << "\nEigen Solution not tolerable...\n\n"; return -1;}
@@ -283,7 +284,7 @@ int Cardinal::runSimulations()
 	this->activity.evaluate_freiling_ratios(this->cloudrise.get_solidification_time(), this->cloudrise.get_solidification_temp());
 	this->activity.evalute_distribution(this->cloudrise.get_part_conc(), this->cloudrise.get_part_hist());
 	this->activity.distribute_nuclides(this->cloudrise.get_part_hist());
-	this->activity.evaluate_fractionation("output/CARDINAL_Nuclides.txt", true, this->cloudrise.get_solidification_time(), this->cloudrise.get_stabilization_time());
+	this->activity.evaluate_fractionation(nuc_file, true, this->cloudrise.get_solidification_time(), this->cloudrise.get_stabilization_time());
 	
 	return success;
 }
@@ -337,7 +338,7 @@ int CARDINAL_SCENARIO(const char *yaml_input, const char *atmosphere_data, const
 	success = cardinal.setupActivityDistribution();
 	if (success != 0) {mError(read_error); return -1;}
 	
-	success = cardinal.runSimulations();
+	success = cardinal.runSimulations(0,"output/CARDINAL_Nuclides.txt");
 	if (success != 0) {mError(simulation_fail); return -1;}
 	
 	//Determine total runtime
@@ -351,4 +352,69 @@ int CARDINAL_SCENARIO(const char *yaml_input, const char *atmosphere_data, const
 		fclose(cloud);
 	
 	return success;
+}
+
+// C-style interface for use by python 3.5 (or newer)
+extern "C"
+{
+    int cardinal_simulation(const char *yaml_input, const char *atm_data, const char *nuc_path, int unc_opt,
+                            const char *cloud_rise_out, const char *cloud_growth_out, const char *nuc_out)
+    {
+        //Initializations
+        int success = 0;
+        double time;
+        Cardinal cardinal;
+        time = clock();
+        
+        //Opening output files (optional)
+        FILE *file, *cloud;
+        file = fopen("output/CARDINAL_CloudRise.txt", "w+");
+        cloud = fopen("output/CARDINAL_CloudGrowth.txt", "w+");
+        if (cardinal.getCloudRise().get_FileOut() == true)
+        {
+            if (file == nullptr)
+            {
+                system("mkdir output");
+                file = fopen("output/py_CARDINAL_CloudRise.txt", "w+");
+            }
+            if (cloud == nullptr)
+            {
+                system("mkdir output");
+                cloud = fopen("output/py_CARDINAL_CloudGrowth.txt", "w+");
+            }
+        }
+        cardinal.getCloudRise().set_CloudFile(cloud);
+        
+        //Read and setup CRANE associated files
+        success = cardinal.readInputFile(yaml_input);
+        if (success != 0) {mError(read_error); return -1;}
+        
+        success = cardinal.readAtomsphereFile(atm_data);
+        if (success != 0) {mError(read_error); return -1;}
+        
+        success = cardinal.setupCloudRiseSimulation(file);
+        if (success != 0) {mError(read_error); return -1;}
+        
+        //Read and setup KEA associated files
+        success = cardinal.readDatabaseFiles(nuc_path);
+        if (success != 0) {mError(read_error); return -1;}
+        
+        success = cardinal.setupActivityDistribution();
+        if (success != 0) {mError(read_error); return -1;}
+        
+        success = cardinal.runSimulations(0,"output/py_CARDINAL_Nuclides.txt");
+        if (success != 0) {mError(simulation_fail); return -1;}
+        
+        //Determine total runtime
+        time = clock() - time;
+        std::cout << "\nPython CARDINAL Runtime: " << (time / CLOCKS_PER_SEC) << " seconds\n";
+        
+        //Close the open files
+        if (file!= nullptr)
+            fclose(file);
+        if (cloud!=nullptr)
+            fclose(cloud);
+        
+        return success;
+    }
 }

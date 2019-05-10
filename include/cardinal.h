@@ -47,7 +47,7 @@ public:
 	int readDatabaseFiles(const char *path);			///< Read the Nuclides and Fission Yields from the given path
 	int setupActivityDistribution();					///< Setup the activity distribution simulations (post-read)
 	
-	int runSimulations();								///< Run all the simulations
+    int runSimulations(int unc, std::string nuc_file);	///< Run all the simulations (with uncertainty option) default = 0
 	
 protected:
 
@@ -63,5 +63,12 @@ private:
 };
 
 int CARDINAL_SCENARIO(const char *yaml_input, const char *atmosphere_data, const char *data_path);
+
+/// C-style interface for use by python 3.5 (or newer)
+extern "C"
+{
+    int cardinal_simulation(const char *yaml_input, const char *atm_data, const char *nuc_path, int unc_opt,
+                            const char *cloud_rise_out, const char *cloud_growth_out, const char *nuc_out);
+}
 
 #endif /* CARDINAL_HPP_ */

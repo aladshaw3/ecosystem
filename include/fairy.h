@@ -65,6 +65,7 @@ public:
 	void setFissionExtent(double per);				///< Set the extent of fission parameter (%)
 	void setEnergyLevel(double el);					///< Set the energy level for neutron source (eV)
 	void setThreshold(double val);					///< Set the threshold value for half-life (in sec)
+    void setUncertainty(int opt);                   ///< Set the uncertainty option (-1,0,1)
 	
 	/// Automatically sets the threshold value given time (in sec) after detonation and percent conversion rate (default 99%)
 	void timeSinceDetonation(double time, double per);
@@ -80,6 +81,7 @@ public:
     
     double getTotalMoles();                         ///< Return total moles of weapon
     double getFissionExtent();                      ///< Return the % of fission extent
+    int getUncertainty();                           ///< Return the uncertainty option 
 	bool isConsoleOut();							///< Return boolean option for console output
 	
 	std::vector<Isotope> & getWeaponMat();			///< Return reference to vector of isotopes in weapon
@@ -131,6 +133,7 @@ protected:
     double total_moles;                         ///< Total moles of fissionable materials (mol)
 	double fiss_extent;							///< Percentage of the starting material that undergoes fission (%)
 	double energy_level;						///< Energy level of neutron source (eV)
+    int uncertainty;                            ///< Integer option (-1,0,1) to include uncertainty in calculation
 	yaml_cpp_class *fpy_data;					///< Yaml object to read and store the FPY library files
 	
 private:

@@ -167,11 +167,6 @@ void ActivityDistribution::set_soil_capture_fraction(double val)
 	this->soil_capture_fraction = val;
 }
 
-void ActivityDistribution::initialize_fractionation_map(std::map<double, double> & part_conc)
-{
-	
-}
-
 void ActivityDistribution::delete_casing_components()
 {
 	this->casing_atom_frac.clear();
@@ -512,7 +507,6 @@ void ActivityDistribution::compute_soil_capture_fraction(std::map<std::string, d
 
 void ActivityDistribution::initialize_fractionation(FissionProducts & yields, yaml_cpp_class & data)
 {
-	//yields.loadFissionProductYields();
 	yields.loadFissionProductYields(data);
 	yields.evaluateYields();
 	this->initial_frac = yields;

@@ -98,9 +98,7 @@ public:
 	void set_escape_fraction(double val);							///< Set the escape_fraction parameter
 	void set_volatile_fraction(double val);							///< Set the volatile_fraction parameter
 	void set_soil_capture_fraction(double val);						///< Set the soil_capture_fraction parameter
-	
-	void initialize_fractionation_map(std::map<double, double> & part_conc);	///< Setup nuc_frac given the part_conc from CRANE
-	
+		
 	void delete_casing_components();								///< Function to remove all casing components and parameters
 	void add_casing_component(std::string name, double frac);	///< Function to add casing components and corresponding molefraction
 	void verify_casing_components();							///< Function to check casing components for errors and correct
