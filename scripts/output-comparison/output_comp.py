@@ -41,10 +41,10 @@ class FileCompare(object):
             message = "\nComparison between " + self.gold_file.name + " and " + self.test_file.name
             message += "\n\nResults\n"
             message += "-------\n"
-            message += "Word Diff (%)    =\t" + str(self.str_diff*100.0) + "\n"
-            message += "Total Words      =\t" + str(self.total_word) + "\n"
-            message += "Num Diff (-)     =\t" + str(self.num_diff) + "\n"
-            message += "Total Numbers    =\t" + str(self.total_num) + "\n"
+            message += "Avg Word Diff (%) =\t" + str(self.str_diff*100.0) + "\n"
+            message += "Total Words       =\t" + str(self.total_word) + "\n"
+            message += "Avg Num Diff (%)  =\t" + str(self.num_diff*100.0) + "\n"
+            message += "Total Numbers     =\t" + str(self.total_num) + "\n"
             return message
 
     def computeErrors(self):
@@ -73,12 +73,12 @@ class FileCompare(object):
             for s in short_list:
                 l = long_list[i]
                 try:
-                    if float(s) != 0.0:
+                    if abs(float(s)) > abs(float(l)):
                         self.num_diff += abs(float(s) - float(l))/abs(float(s))
-                    #print(str(abs(float(s) - float(l))/abs(float(s))))
+                    elif abs(float(s)) < abs(float(l)):
+                        self.num_diff += abs(float(s) - float(l))/abs(float(l))
                     else:
-                        self.num_diff += abs(float(s) - float(l))
-                    #print(str(abs(float(s) - float(l))))
+                        self.num_diff += 0.0
 
                     self.total_num += 1
                 except:
@@ -92,8 +92,7 @@ class FileCompare(object):
             #Finish the long list
             for lf in long_list[i:]:
                 try:
-                    self.num_diff += abs(float(lf))
-                    #print(str(abs(float(lf))))
+                    self.num_diff += 1.0
                     self.total_num += 1
                 except:
                     s = difflib.SequenceMatcher(None, "", lf)
@@ -106,8 +105,7 @@ class FileCompare(object):
         for remaining in long_file:
             for item in remaining.split():
                 try:
-                    self.num_diff += abs(float(item))
-                    print(str(abs(float(item))))  #PROBLEM - ERROR TOO HIGH
+                    self.num_diff += 1.0
                     self.total_num += 1
                 except:
                     s = difflib.SequenceMatcher(None, "", item)

@@ -43,3 +43,9 @@ success = card_func(sim_file.encode(), atm_file.encode(), nuc_path.encode(), unc
 #All output is in a sub-directory (/output/) from this directory
 comp_rise = oc.FileCompare("output/py_cloud_rise_base.txt","output/py_cloud_rise_mod.txt")
 print(comp_rise)
+
+comp_growth = oc.FileCompare("output/py_cloud_growth_base.txt","output/py_cloud_growth_mod.txt")
+print(comp_growth)
+
+comp_nuc = oc.FileCompare("output/py_nuclide_base.txt","output/py_nuclide_mod.txt")
+print(comp_nuc)
