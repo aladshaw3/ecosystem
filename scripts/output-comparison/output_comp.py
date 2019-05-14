@@ -1,7 +1,7 @@
 ## Python script to read output files and compare them ##
 ## Run python scripts using Python 3.5 or newer ##
 
-''' YAML script:
+''' File Comparison script:
     ----------------
     Script for reading in output produced from an executable and comparing it
     to another output file. Useful for creating small unit tests for code validations
