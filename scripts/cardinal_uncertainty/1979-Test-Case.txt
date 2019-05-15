@@ -10,7 +10,7 @@ console_output: true   #print output to console
 
 #Particle size distribution parameters for log-normal distribution (optional)
 - part_dist:
-  useCustom: false    # True if you want to use values below, otherwise system uses defaults
+  useCustom: true    # True if you want to use values below, otherwise system uses defaults
   min_dia: 0.001      # in um
   max_dia: 100.0      # in um
   mean_dia: 0.407     # in um
