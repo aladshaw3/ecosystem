@@ -29,8 +29,8 @@ nuc_out = "py_nuclide_base.txt"
 success = card_func(sim_file.encode(), atm_file.encode(), nuc_path.encode(), unc_opt, rise_out.encode(), growth_out.encode(), nuc_out.encode())
 
 #Setup new function args (changed the burst height by 10 m)
-sim_file = "1979-Test-Case-Mod.txt"
-atm_file = "DefaultAtmosphere.txt"
+sim_file = "1979-Test-Case.txt"
+atm_file = "DefaultAtmosphere_15.txt"
 nuc_path = "../../database/"
 unc_opt = 0
 rise_out = "py_cloud_rise_mod.txt"

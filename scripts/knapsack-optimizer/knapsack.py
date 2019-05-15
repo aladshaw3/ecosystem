@@ -96,11 +96,13 @@ class ZeroOneKnapsack(object):
             taken = []
         #Check constraints, compute value, view list
         status = self.eval_constraints(taken)
-        value = self.eval_objective_func(taken)
+        #value = self.eval_objective_func(taken)
+        value = 0.0
         result = (value, taken, status)
         
         # Check for empty list
         if list == []:
+            value = self.eval_objective_func(taken)
             result = (value, taken, status)
         else:
             # If constraints are violated or search is exhaustive, force a move to left and right
@@ -180,6 +182,7 @@ class ZeroOneKnapsack(object):
 
                 # No moves valid, return current result
                 else:
+                    value = self.eval_objective_func(taken)
                     result = (value, taken, status)
 
         return result

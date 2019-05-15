@@ -28,11 +28,14 @@ class Atmosphere(object):
 
     def __str__(self):
         string = ""
+        i = 0
         for alt in self.map:
+            if i != 0:
+                string += "\n"
             string += str(alt) + "\t"
             for item in self.map[alt]:
                 string += str(item) + "\t"
-            string += "\n"
+            i += 1
         return string
 
     def readFile(self, file):

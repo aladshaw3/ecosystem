@@ -21,13 +21,13 @@ Simulation_Conditions:
   mean_dia: 0.407
   min_dia: 0.001
   std_dia: 4.0
-  useCustom: True
+  useCustom: False
 - soil_comp:
   CaO: 0.2
   Other: 0.05
   SiO2: 0.7
 bomb_yield: 50
-burst_height: 0
+burst_height: 10.0
 console_output: True
 ground_level: 500
 particle_bins: 10
@@ -65,7 +65,7 @@ casing_thickness: 10
 fission_extent: 3
 fission_yield: 25
 fractionation_model: modified-freiling-tompkins
-total_mass: 60.0
+total_mass: 50
 yield_cutoff: 99
 ...
 
