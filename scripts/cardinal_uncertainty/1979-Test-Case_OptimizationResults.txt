@@ -1,0 +1,33 @@
+Optimization Goal:	Find params that Maximize uncertainty
+Parameter set size restrictions:	0 <= size <= 1
+
+Set of parameters, and their change values, being considered...
+---------------------------------------------------------------
+Name	ID	ChangeType	ChangeValue
+Temperature	0	Percent	10.0
+Pressure	1	Percent	10.0
+Humidity	2	Percent	10.0
+Yield	3	Percent	10.0
+Height	4	Percent	10.0
+Level	5	Percent	10.0
+Wind	6	Percent	10.0
+Mass	7	Percent	10.0
+FissExtent	8	Percent	10.0
+FissYield	9	Percent	10.0
+PartDist	10	Percent	10.0
+Casing	11	Percent	10.0
+FracMod	12	Percent	10.0
+FPY	13	Percent	1
+
+Optimized set of parameters...
+--------------------------------
+Name	ID	ChangeType	ChangeValue
+Yield	3	Percent	10.0
+
+
+Control Input file:	1979-Test-Case/1979-Test-Case_3.txt
+Atmosphere Input file:	1979-Test-Case/DefaultAtmosphere_3.txt
+
+Cloud Rise output file:	output/1979-Test-Case/1979-Test-Case_cloud_rise_out_3.txt
+Cloud Growth output file:	output/1979-Test-Case/1979-Test-Case_cloud_growth_out_3.txt
+Nuclides output file:	output/1979-Test-Case/1979-Test-Case_nuclides_out_3.txt

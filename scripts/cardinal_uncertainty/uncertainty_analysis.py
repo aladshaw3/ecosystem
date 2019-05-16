@@ -42,12 +42,18 @@ class CardinalParam(object):
         CardinalParam.tag += 1
 
     def __str__(self):
-        return self.param_name + " : " + str(self.param_change) + " : " + str(self.usePercent)
+        string = "Name =\t" + self.param_name + "\t"
+        if self.usePercent == True:
+            string += "Percent Change =\t"
+        else:
+            string += "Value Change =\t"
+        string += str(self.param_change) + "\tID Tag =\t" + str(self.id)
+        return string
 
 # Constraint Function
 def subset_size(list, size, args):
-    # args is a Tuple and the first value is the size limit
-    if size > args[0]:
+    # args is a Tuple and the first value is the size limit (args[0] = upper limit && args[1] = lower limit)
+    if size > args[0] or size < args[1]:
         return False
     else:
         return True
@@ -149,14 +155,31 @@ def output_change(list, size, args):
     growth_out += ".txt"
     nuc_out += ".txt"
 
+    # Skip solver if files are same
+    if c_file == args[4] and a_file == args[5]:
+        return 0.0
+
+    # Modify the path to the input files to keep directory clean
+    new_dir = args[4].split(".")[0]
+    if os.path.exists(new_dir) == False:
+        os.mkdir(new_dir)
+    c_file = new_dir + "/" + c_file
+    a_file = new_dir + "/" + a_file
+    out_dir = "output/"+new_dir
+    if os.path.exists(out_dir) == False:
+        os.mkdir(out_dir)
+    rise_out = new_dir + "/" + rise_out
+    growth_out = new_dir + "/" + growth_out
+    nuc_out = new_dir + "/" + nuc_out
+
     # Only print to file if file doesn't exist
     if c_file != args[4]:
         control.print2file(c_file)
     if a_file != args[5]:
         atm.print2file(a_file)
-
+    
     # Call the solver
-    success = success = card_func(c_file.encode(), a_file.encode(), args[6].encode(), fpy_opt, rise_out.encode(), growth_out.encode(), nuc_out.encode())
+    success = success = card_func(c_file.encode(), a_file.encode(), args[6].encode(), int(fpy_opt), rise_out.encode(), growth_out.encode(), nuc_out.encode())
     if success != 0:
         print("Error has occurred...")
         return 0.0
@@ -168,13 +191,16 @@ def output_change(list, size, args):
     numeric_difference += comp_rise.num_diff + comp_growth.num_diff + comp_nuc.num_diff
     
     if args[3] == True:
-        return numeric_difference
+        return numeric_difference/3.0
     else:
-        return -numeric_difference
+        return -numeric_difference/3.0
 #End Objective Function
+
+
 
 ## ----------- Run Script -------------- ##
 
+### ----------------------- User May Interface Below -----------------------###
 # Choose what list of params to use and how to change them
 param_list = []
 param_list.append(CardinalParam("Temperature",10.0,True))
@@ -190,27 +216,93 @@ param_list.append(CardinalParam("FissYield",10.0,True))
 param_list.append(CardinalParam("PartDist",10.0,True))
 param_list.append(CardinalParam("Casing",10.0,True))
 param_list.append(CardinalParam("FracMod",10.0,True))
-param_list.append(CardinalParam("FPY",1.0,True))
+param_list.append(CardinalParam("FPY",1,True))
 
-test = []
-test.append(CardinalParam("Height",10.0,False))
-test.append(CardinalParam("Humidity",10.0,True))
+# Define the Control input file, Atmosphere file, and database path
+control_file = "1979-Test-Case.txt"
+atm_file = "DefaultAtmosphere.txt"
+data_path = "../../database/"
 
-obj_args = ("py_cloud_rise_base.txt","py_cloud_growth_base.txt","py_nuclide_base.txt",True,"1979-Test-Case.txt","DefaultAtmosphere.txt","../../database/")
-size_limit = 1
-#value = output_change(test, len(test), obj_args)
+# Pick whether or not to maximize or minimize uncertainty and the size of the parameter subset you will seek
+Maximize = True
+size_toplimit = 1
+size_bottomlimit = 0
 
+### ----------------------- User May Interface Above -----------------------###
+
+
+
+### ----------------------- DO NOT CHANGE BELOW -----------------------###
+
+# Automatically defining output files (Names come from control file name)
+rise_out = control_file.split(".")[0] + "_cloud_rise_out.txt"
+growth_out = control_file.split(".")[0] + "_cloud_growth_out.txt"
+nuc_out = control_file.split(".")[0] + "_nuclides_out.txt"
+
+# Call Solver routine for the base input files
+card_func = lib.cardinal_simulation
+card_func.restype = c_int
+#                    sim_file,  atm_file, nuc_path, unc_opt, rise_out, growth_out, nuc_out
+card_func.argtypes = [c_char_p, c_char_p, c_char_p, c_int, c_char_p, c_char_p, c_char_p]
+success = card_func(control_file.encode(), atm_file.encode(), data_path.encode(), 0, rise_out.encode(), growth_out.encode(), nuc_out.encode())
+if success != 0:
+    print("Error in simulation setup! Cannot proceed...\n")
+    exit()
+
+#Args List  (cloud_rise_out base file, cloud_growth_out base file, nuclide_out base file, True=Maximize, Control input file, Atmosphere input file, path/to/database)
+obj_args = (rise_out, growth_out, nuc_out, Maximize, control_file, atm_file, data_path)
+
+# Setup the uncertainty analyzer and call the optimization routine
 optimizer = ns.ZeroOneKnapsack()
 optimizer.register_objective_func(output_change, *obj_args)
-optimizer.register_constraints(subset_size, size_limit)
+optimizer.register_constraints(subset_size, size_toplimit, size_bottomlimit)
 optimizer.exhaustive_search(False)
-#optimizer.eval_objective_func(test)
-#optimizer.eval_constraints(test)
-(val, new_list, status) = optimizer.Optimize(test) #Appears to be working, needs more tests
 
-print((val, new_list, status))
-#print(value)
+# Open a results file to print some info
+result_file = open(control_file.split(".")[0] + "_OptimizationResults.txt",'w')
+result_file.write("Optimization Goal:\t")
+if Maximize == True:
+    result_file.write("Find params that Maximize uncertainty\n")
+else:
+    result_file.write("Find params that Minimize uncertainty\n")
+result_file.write("Parameter set size restrictions:\t" + str(size_bottomlimit) + " <= size <= " + str(size_toplimit) + "\n")
+result_file.write("\nSet of parameters, and their change values, being considered...\n")
+result_file.write("---------------------------------------------------------------\n")
+result_file.write("Name\tID\tChangeType\tChangeValue\n")
+for param in param_list:
+    result_file.write(param.param_name + "\t" + str(param.id) + "\t")
+    if param.usePercent == True:
+        result_file.write("Percent\t")
+    else:
+        result_file.write("Linear\t")
+    result_file.write(str(param.param_change)+"\n")
+
+# Call the optimizer
+(val, new_list, status) = optimizer.Optimize(param_list)
+
+# Record the results
+result_file.write("\nOptimized set of parameters...\n")
+result_file.write("--------------------------------\n")
+result_file.write("Name\tID\tChangeType\tChangeValue\n")
+suffix = ""
+for param in new_list:
+    result_file.write(param.param_name + "\t" + str(param.id) + "\t")
+    suffix += "_" + str(param.id)
+    if param.usePercent == True:
+        result_file.write("Percent\t")
+    else:
+        result_file.write("Linear\t")
+    result_file.write(str(param.param_change)+"\n")
+
+result_file.write("\n\nControl Input file:\t" + control_file.split(".")[0] + "/" + control_file.split(".")[0] + suffix + ".txt")
+result_file.write("\nAtmosphere Input file:\t" + control_file.split(".")[0] + "/" + atm_file.split(".")[0] + suffix + ".txt")
+result_file.write("\n\nCloud Rise output file:\t" + "output/" + control_file.split(".")[0] + "/" + rise_out.split(".")[0] + suffix + ".txt")
+result_file.write("\nCloud Growth output file:\t" + "output/" + control_file.split(".")[0] + "/" + growth_out.split(".")[0] + suffix + ".txt")
+result_file.write("\nNuclides output file:\t" + "output/" + control_file.split(".")[0] + "/" + nuc_out.split(".")[0] + suffix + ".txt")
+result_file.close()
+
+print("\nAveraged Percent Error in Response =\t" + str(val))
+print("Was converged? =\t" + str(status))
+print("\nChoosen list of parameters\n---------------")
 for obj in new_list:
     print(obj)
-
-

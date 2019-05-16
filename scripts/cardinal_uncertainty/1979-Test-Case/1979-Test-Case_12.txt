@@ -1,0 +1,120 @@
+
+ODE_Options:
+---
+console_output: False
+converged_dtmin: 0.001
+dtmax: 0.1
+dtmin: 1e-08
+end_time: 1000.0
+file_output: True
+integration_method: bdf2
+preconditioner: sgs
+time_out: 1.0
+time_stepper: adaptive
+tolerance: 0.001
+...
+
+Simulation_Conditions:
+---
+- part_dist:
+  max_dia: 100.0
+  mean_dia: 0.407
+  min_dia: 0.001
+  std_dia: 4.0
+  useCustom: False
+- soil_comp:
+  CaO: 0.2
+  Other: 0.05
+  SiO2: 0.7
+bomb_yield: 50
+burst_height: 0
+console_output: True
+ground_level: 500
+particle_bins: 10
+shear_correction: True
+tight_coupling: True
+...
+
+Solver_Options:
+---
+lin_abs_tol: 1e-06
+lin_out: False
+lin_rel_tol: 0.0001
+line_search: bt
+linear: False
+linear_method: qr
+max_lin_iter: 200
+max_nl_iter: 50
+nl_abs_tol: 1e-06
+nl_out: False
+nl_rel_tol: 1e-06
+precondition: False
+recursion_limit: 2
+restart_limit: 20
+...
+
+Weapon_Info:
+---
+- casing_components:
+  Fe10C: 0.9
+  PbBi: 0.1
+- fissionable_isotopes:
+  U-235: 90
+  U-238: 10
+casing_thickness: 10
+fission_extent: 3
+fission_yield: 25
+fractionation_model: freiling-tompkins
+total_mass: 50
+yield_cutoff: 99
+...
+
+Wind_Profile:
+---
+- 10488:
+  vx: 6.309
+  vy: 9.0156
+- 11887:
+  vx: 8.356
+  vy: 9.9585
+- 13698:
+  vx: 9.8298
+  vy: 6.883
+- 1548:
+  vx: -5.494
+  vy: 11.78
+- 16267:
+  vx: 8.457
+  vy: 3.078
+- 18526:
+  vx: 5.9733
+  vy: -0.61
+- 20665:
+  vx: 6.973
+  vy: -0.618
+- 216:
+  vx: -5.14
+  vy: 6.13
+- 23902:
+  vx: 10.83
+  vy: -1.91
+- 26493:
+  vx: 11.0
+  vy: 1.974
+- 3097:
+  vx: 0.8582
+  vy: 4.924
+- 31023:
+  vx: 24.804
+  vy: -2.1788
+- 5688:
+  vx: 5.13
+  vy: 14.095
+- 7327:
+  vx: 10.898
+  vy: 15.56
+- 9309:
+  vx: 10.28
+  vy: 12.25
+...
+
