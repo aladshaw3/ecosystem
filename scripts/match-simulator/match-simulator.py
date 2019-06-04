@@ -7,10 +7,8 @@
     
     Author:     Austin Ladshaw
     Date:       06/03/2019
-    Copyright:  This software was designed and built at the Georgia Institute
-    of Technology by Austin Ladshaw for research in the area of
-    radioactive particle decay and transport. Copyright (c) 2019,
-    all rights reserved.
+    Copyright:  This software was designed and built by Austin Ladshaw.
+                Copyright (c) 2019, all rights reserved.
 '''
 
 import random
@@ -24,7 +22,52 @@ class MTGData(object):
         for deck in list:
             self.match_ups[deck] = {}
             self.meta_share[deck] = 0.0
-            
+
+    def readMatchupRates(self, file):
+        data = open(file,"r")
+        deck_list = []
+        deck_set = False
+        i = 0
+        for line in data:
+            strings = line.split("\t")
+            #First line is header, so we skip over it
+            if i == 0:
+                if strings[0].split("\n")[0] != "WinRates":
+                    raise ValueError("Unanticipated file format!")
+            #Second line list all decks
+            elif i == 1:
+                if deck_set == False:
+                    deck_set = True
+                    j = 0
+                    for word in strings:
+                        if j != 0:
+                            deck_list.append(word)
+                        j += 1
+                    deck_list[len(strings)-2] = deck_list[len(strings)-2].split("\n")[0]
+                    self.regDecks(deck_list)
+            else:
+                deck1 = strings[0]
+                if deck1 != "" and deck1 != "\n":
+                    for k in range(1,len(strings)-1):
+                        self.set_MatchUp(deck1,deck_list[k-1],float(strings[k]))
+                    self.set_MatchUp(deck1,deck_list[len(strings)-2],float(strings[len(strings)-1].split("\n")[0]))
+            i += 1
+        data.close()
+    
+    def readMetaShare(self, file):
+        data = open(file, "r")
+        i = 0
+        for line in data:
+            strings = line.split("\t")
+            if i == 0:
+                if strings[0].split("\n")[0] != "Meta Game":
+                    raise ValueError("Unanticipated file format!")
+            else:
+                self.set_MetaShare(strings[0],float(strings[1].split("\n")[0]))
+            i += 1
+        
+        data.close()
+    
     def set_MatchUp(self, deck1, deck2, d1_v_d2_rate):
         self.match_ups[deck1][deck2] = d1_v_d2_rate
         self.match_ups[deck2][deck1] = 1.0-d1_v_d2_rate
@@ -51,7 +94,7 @@ class MTGData(object):
         string = "Meta Game:\n"
         string+= "----------\n"
         for deck in self.meta_share:
-            string+= deck + ": " + str(self.meta_share[deck]) + "\n"
+            string+= deck + "\t:\t" + str(self.meta_share[deck]) + "\n"
         string += "\nMatch Ups:\n"
         string +=   "----------\n(Decks)"
         first_line = True
@@ -315,6 +358,55 @@ class TourneyOutcomeSimulator(object):
                 self.deck_record[self.tourney[n].get_player(name).get_deck()][2] += self.tourney[n].get_player(name).get_record()[2]
                 self.tourney[n].get_player(name).erase_record()
 
+class RandomTourneyOutcomeSimulator(object):
+    def __init__(self, tourneys, events_per_tourney, tot_players, data):
+        self.mtg_data = data
+        self.rand_tour = [TourneyOutcomeSimulator(events_per_tourney, data)]*tourneys
+        self.tot_sims = tourneys
+        self.player_record = {}  #Only for static players
+        self.deck_record = {}    #For all decks (static and random)
+        self.static_players = []
+        self.num_players = tot_players
+
+    def __str__(self):
+        string = "Results after " + str(self.tot_sims) + " simulations(s) of " + str(self.rand_tour[0].tot_events) + " tournament(s) of " + str(self.rand_tour[0].tourney[0].max_rounds) + " round(s) each...\n\n"
+        i = 0
+        for name in self.player_record:
+            if i == 0:
+                string += "Player\tWins\tLosses\tDraws\tWinRate(%)\n"
+                string += name + "(" + self.rand_tour[0].tourney[0].get_player(name).get_deck() + ")" + "\t" + str(self.player_record[name][0]) + "\t" + str(self.player_record[name][1]) + "\t" + str(self.player_record[name][2]) + "\t" + str(float(self.player_record[name][0])/float(self.player_record[name][1]+self.player_record[name][0]+self.player_record[name][2])*100.0) + "\n"
+            i += 1
+        string += "\n"
+        i = 0
+        for deck in self.deck_record:
+            if i == 0:
+                string += "Deck\tWins\tLosses\tDraws\tWinRate(%)\n"
+                string += deck + "\t" + str(self.deck_record[deck][0]) + "\t" + str(self.deck_record[deck][1]) + "\t" + str(self.deck_record[deck][2]) + "\t" + str(float(self.deck_record[deck][0])/float(self.deck_record[deck][1]+self.deck_record[deck][0]+self.deck_record[deck][2])*100.0) + "\n"
+            i += 1
+        return string
+
+    def regStaticPlayer(self, player):
+        self.static_players.append(player)
+        self.player_record[player.get_name()] = [0,0,0]
+        self.deck_record[player.get_deck()] = [0,0,0]
+        for m in range(0,len(self.rand_tour)):
+            for n in range(0,len(self.rand_tour[m].tourney)):
+                self.rand_tour[m].tourney[n].regPlayer(player)
+
+    def run_simulations(self):
+        num_rand = self.num_players - len(self.static_players)
+        for tourney in self.rand_tour:
+            for player in self.static_players:
+                tourney.regPlayer(player)
+            tourney.regRandomPlayers(num_rand)
+            
+            #Loop through all players for this tourney and put their deck in the deck_record dict if the deck key doesn't yet exist
+            
+            tourney.run_simulation()
+            print(tourney)
+            tourney.player_record.clear()
+            tourney.deck_record.clear()
+
 
 ## Testing ##
 '''
@@ -379,7 +471,7 @@ tourney.simulate_tournament(data)
 print(tourney)
 '''
 
-
+'''
 decks = ["G Tron", "UW Control", "Titan", "Dredge", "Jund", "Burn", "Storm"]
 data = MTGData()
 data.regDecks(decks)
@@ -440,4 +532,34 @@ result.regRandomPlayers(10)
 result.run_simulation()
 
 print(result)
+'''
 
+'''
+data = MTGData()
+data.readMatchupRates("2019-modern-winrates.txt")
+data.readMetaShare("2019-modern-meta.txt")
+
+result = TourneyOutcomeSimulator(1000, data)
+
+result.regPlayer(Player("Austin","Tron"))
+result.regRandomPlayers(12)
+
+result.run_simulation()
+
+print(result)
+'''
+
+data = MTGData()
+data.readMatchupRates("2019-modern-winrates.txt")
+data.readMetaShare("2019-modern-meta.txt")
+
+num_sim = 10
+num_events = 100
+num_players = 32
+result = RandomTourneyOutcomeSimulator(num_sim, num_events, num_players, data)
+
+result.regStaticPlayer(Player("Austin","Tron"))
+
+result.run_simulations()
+
+print(result)
