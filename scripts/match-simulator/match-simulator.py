@@ -176,7 +176,7 @@ class Tourney(object):
         self.match = {}             #Holds the match data for each round --> [player1, player2, winner]
         self.top_pairs_left = {}     #Holds the match data for each left top 8 round --> [player1, player2, winner]
         self.top_pairs_right = {}     #Holds the match data for each right top 8 round --> [player1, player2, winner]
-        self.final = []                #Holds the match data for the finals --> [player1, player2, winner]
+        self.final = [None,None,None]   #Holds the match data for the finals --> [player1, player2, winner]
         self.top_8 = False
         #random.seed(0)
     
@@ -398,6 +398,8 @@ class TourneyOutcomeSimulator(object):
         self.tot_events = events
         self.player_record = {}     #Record = [Wins, Losses, Draws, Top8s, TourneyWins]
         self.deck_record = {}       #Record = [Wins, Losses, Draws, Top8s, TourneyWins]
+        self.player_wins = {}       #Wins = Wins in each round = [n, m, ...]
+        self.deck_wins = {}         #Wins = Wins in each round = [n, m, ...]
         self.mtg_data = data
     
     def __str__(self):
@@ -415,13 +417,29 @@ class TourneyOutcomeSimulator(object):
                 string += "Deck\tTop8s\tTourneyWins\tWins\tLosses\tDraws\tWinRate(%)\n"
             string += deck + "\t" + str(self.deck_record[deck][3]) + "\t" + str(self.deck_record[deck][4]) + "\t" + str(self.deck_record[deck][0]) + "\t" + str(self.deck_record[deck][1]) + "\t" + str(self.deck_record[deck][2]) + "\t" + str(float(self.deck_record[deck][0])/float(self.deck_record[deck][1]+self.deck_record[deck][0]+self.deck_record[deck][2])*100.0) + "\n"
             i += 1
+    
+        ### Remove Later ###
+        '''
+        for name in self.player_wins:
+            string += name + "\n"
+            string += str(self.player_wins[name]) + "\n"
+        for deck in self.deck_wins:
+            string += deck + "\n"
+            for wins in self.deck_wins[deck]:
+                string += "\t" + str(wins)
+            string += str(self.deck_wins[deck]) + "\n"
+        '''
         return string
 
     def regPlayer(self, player):
         self.player_record[player.get_name()] = [0,0,0,0,0]
         self.deck_record[player.get_deck()] = [0,0,0,0,0]
+        self.player_wins[player.get_name()] = []
+        self.deck_wins[player.get_deck()] = []
         for n in range(0,len(self.tourney)):
             self.tourney[n].regPlayer(player)
+            self.player_wins[player.get_name()].append(0)
+            self.deck_wins[player.get_deck()].append(0)
 
     def regRandomPlayers(self, num):
         #Registers a number of random players based on meta data
@@ -443,12 +461,19 @@ class TourneyOutcomeSimulator(object):
         
             self.player_record[name] = [0,0,0,0,0]
             self.deck_record[res] = [0,0,0,0,0]
+            self.player_wins[name] = []
+            self.deck_wins[res] = []
             for m in range(0,len(self.tourney)):
                 self.tourney[m].regPlayer(Player(name, res))
+                self.player_wins[name].append(0)
+                self.deck_wins[res].append(0)
 
     def run_simulation(self):
         for n in range(0,len(self.tourney)):
             self.tourney[n].simulate_tournament(self.mtg_data)
+            for name in self.player_record:
+                self.player_wins[name][n] = self.tourney[n].get_player(name).get_record()[0]
+                self.deck_wins[self.tourney[n].get_player(name).get_deck()][n] += self.tourney[n].get_player(name).get_record()[0]
             for name in self.player_record:
                 self.player_record[name][0] += self.tourney[n].get_player(name).get_record()[0]
                 self.player_record[name][1] += self.tourney[n].get_player(name).get_record()[1]
@@ -654,7 +679,7 @@ result.run_simulation()
 print(result)
 '''
 
-'''
+
 data = MTGData()
 data.readMatchupRates("2019-modern-winrates.txt")
 data.readMetaShare("2019-modern-meta.txt")
@@ -662,13 +687,14 @@ data.readMetaShare("2019-modern-meta.txt")
 result = TourneyOutcomeSimulator(100, data)
 
 result.regPlayer(Player("Austin","Tron"))
-result.regRandomPlayers(12)
+result.regRandomPlayers(10)
 
 result.run_simulation()
 
 print(result)
-'''
 
+
+'''
 data = MTGData()
 data.readMatchupRates("2019-modern-winrates.txt")
 data.readMetaShare("2019-modern-meta.txt")
@@ -702,4 +728,5 @@ result.regStaticPlayer(Player("Guy12","W/U Control"))
 result.run_simulations()
 
 print(result)
+'''
 
