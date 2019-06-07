@@ -260,6 +260,7 @@ void ActivityDistribution::delete_fractionation()
 	this->refractory_moles.clear();
 	this->freiling_numbers.clear();
 	this->distribution.clear();
+    this->radioactivity_dist.clear();
 }
 
 void ActivityDistribution::delete_capture_fractions()
@@ -362,6 +363,26 @@ double ActivityDistribution::get_volatile_fraction()
 double ActivityDistribution::get_soil_capture_fraction()
 {
 	return this->soil_capture_fraction;
+}
+
+FissionProducts & ActivityDistribution::getNuclides(double size_k)
+{
+    return this->nuc_fractionation[size_k];
+}
+
+double ActivityDistribution::getRadioactivity(double size_k)
+{
+    return this->radioactivity_dist[size_k];
+}
+
+std::map<double, FissionProducts> & ActivityDistribution::getNuclideDistributionMap()
+{
+    return this->nuc_fractionation;
+}
+
+std::map<double, double> & ActivityDistribution::getRadioactivityDistributionMap()
+{
+    return this->radioactivity_dist;
 }
 
 void ActivityDistribution::compute_neutrons_emit(double fission, double fusion)
@@ -797,16 +818,19 @@ void ActivityDistribution::distribute_nuclides(std::map<double, double> & part_h
 	std::map<double, FissionProducts>::iterator it;
 	for (it=this->nuc_fractionation.begin(); it!=this->nuc_fractionation.end(); ++it)
 	{
+        this->radioactivity_dist[it->first] = 0.0;
 		//Looping through the stable and unstable nuclides
 		for (int i=0; i<it->second.getNumberNuclides(); i++)
 		{
 			int mass_num = it->second.getIsotope(i).IsotopeNumber();
 			it->second.getIsotope(i).setInitialCondition(it->second.getIsotope(i).getInitialCondition()*this->distribution[mass_num][it->first]);
+            this->radioactivity_dist[it->first] += it->second.getIsotope(i).getActivity();
 		}
 		for (int i=0; i<it->second.getNumberStableNuclides(); i++)
 		{
 			int mass_num = it->second.getStableIsotope(i).IsotopeNumber();
 			it->second.getStableIsotope(i).setInitialCondition(it->second.getStableIsotope(i).getInitialCondition()*this->distribution[mass_num][it->first]);
+            this->radioactivity_dist[it->first] += it->second.getStableIsotope(i).getActivity();
 		}
 	}
 
@@ -830,6 +854,7 @@ void ActivityDistribution::evaluate_fractionation(std::string file_name, bool fi
 	
 		//Print out initial conditions (at solidification time)
 		fprintf(file, "Solidification Time (s) =\t%.6g\n",solid_time);
+        fprintf(file, "\tRadioactivity");
 		for (int i=0; i<this->initial_frac.getNumberNuclides(); i++)
 		{
 			if (i==0)
@@ -846,6 +871,7 @@ void ActivityDistribution::evaluate_fractionation(std::string file_name, bool fi
 		}
 		fprintf(file, "\n");
 		fprintf(file, "Size (um)");
+        fprintf(file, "\t(Bq)");
 		for (int i=0; i<this->initial_frac.getNumberNuclides(); i++)
 			fprintf(file, "\t%s", this->initial_frac.getIsotope(i).IsotopeName().c_str());
 		for (int i=0; i<this->initial_frac.getNumberStableNuclides(); i++)
@@ -854,6 +880,7 @@ void ActivityDistribution::evaluate_fractionation(std::string file_name, bool fi
 		for (kt=this->nuc_fractionation.begin(); kt!=nuc_fractionation.end(); ++kt)
 		{
 			fprintf(file, "%.6g", kt->first);
+            fprintf(file, "\t%.6g", this->radioactivity_dist[kt->first]);
 			for (int i=0; i<kt->second.getNumberNuclides(); i++)
 				fprintf(file, "\t%.6g", kt->second.getIsotope(i).getInitialCondition());
 			for (int i=0; i<kt->second.getNumberStableNuclides(); i++)
@@ -877,6 +904,16 @@ void ActivityDistribution::evaluate_fractionation(std::string file_name, bool fi
 			std::cout << "\t[" << (int)(percent_comp*100.0) << " %]\n";
 	
 		kt->second.calculateFractionation((stab_time-solid_time));
+        this->radioactivity_dist[kt->first] = 0.0;
+        //Looping through the stable and unstable nuclides
+        for (int i=0; i<kt->second.getNumberNuclides(); i++)
+        {
+            this->radioactivity_dist[kt->first] += kt->second.getIsotope(i).getActivity();
+        }
+        for (int i=0; i<kt->second.getNumberStableNuclides(); i++)
+        {
+            this->radioactivity_dist[kt->first] += kt->second.getStableIsotope(i).getActivity();
+        }
 		current_point++;
 	}
 	if (this->initial_frac.isConsoleOut() == true)
@@ -886,6 +923,7 @@ void ActivityDistribution::evaluate_fractionation(std::string file_name, bool fi
 	if (file_out == true)
 	{
 		fprintf(file, "Stabilization Time (s) =\t%.6g\n",stab_time);
+        fprintf(file, "\tRadioactivity");
 		for (int i=0; i<this->initial_frac.getNumberNuclides(); i++)
 		{
 			if (i==0)
@@ -902,6 +940,7 @@ void ActivityDistribution::evaluate_fractionation(std::string file_name, bool fi
 		}
 		fprintf(file, "\n");
 		fprintf(file, "Size (um)");
+        fprintf(file, "\t(Bq)");
 		for (int i=0; i<this->initial_frac.getNumberNuclides(); i++)
 			fprintf(file, "\t%s", this->initial_frac.getIsotope(i).IsotopeName().c_str());
 		for (int i=0; i<this->initial_frac.getNumberStableNuclides(); i++)
@@ -910,6 +949,7 @@ void ActivityDistribution::evaluate_fractionation(std::string file_name, bool fi
 		for (kt=this->nuc_fractionation.begin(); kt!=nuc_fractionation.end(); ++kt)
 		{
 			fprintf(file, "%.6g", kt->first);
+            fprintf(file, "\t%.6g", this->radioactivity_dist[kt->first]);
 			for (int i=0; i<kt->second.getNumberNuclides(); i++)
 				fprintf(file, "\t%.6g", kt->second.getIsotope(i).getConcentration());
 			for (int i=0; i<kt->second.getNumberStableNuclides(); i++)

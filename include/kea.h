@@ -125,6 +125,12 @@ public:
 	double get_escape_fraction();							///< Get the escape_fraction parameter
 	double get_volatile_fraction();							///< Get the volatile_fraction parameter
 	double get_soil_capture_fraction();						///< Get the soil_capture_fraction parameter
+    
+    FissionProducts &getNuclides(double size_k);            ///< Returns reference to the FissionProducts object for the kth size class
+    double getRadioactivity(double size_k);                 ///< Returns the radioactivity of the kth particle size class
+    
+    std::map<double, FissionProducts> &getNuclideDistributionMap(); ///< Returns reference to the Nuclide Size Distribution Map
+    std::map<double, double> &getRadioactivityDistributionMap();    ///< Returns reference to the radioactivity-size distribution map
 	
 	void compute_neutrons_emit(double fission, double fusion);		///< Compute the neutrons emitted per fission (atoms/fission)
 	void compute_casing_mw();										///< Compute the casing MW (must have initialized materials first)
@@ -169,7 +175,7 @@ public:
 	
 	/// Run fractionation simulation to cloud stabilization time and print results to file
 	void evaluate_fractionation(std::string file_name, bool file_out, double solid_time, double stab_time);
-	
+    
 protected:
 	asd_model model_type;											///< Type of activity-size distribution model to use
     // capfis_ratio = No*(fc)_i
@@ -199,12 +205,13 @@ protected:
 	double soil_capture_fraction;									///< Neutron fraction that is captured by soil
     
     /// Below are the parameters associated with the activity-size distributions
-	FissionProducts initial_frac;									///< Initial fractionation prior to size differentiation
-    std::map<double, FissionProducts> nuc_fractionation;            ///< Fractionation of nuclides with particle size (um)
-	std::map<int, double> total_moles;								///< Total moles of nuclides for each mass number chain
+	FissionProducts initial_frac;                               ///< Initial fractionation prior to size differentiation
+    std::map<double, FissionProducts> nuc_fractionation;       ///< Fractionation of nuclides with particle size (um)
+    std::map<double, double> radioactivity_dist;               ///< Distribution of radioactivity (in Bq) with particle size (um)
+	std::map<int, double> total_moles;                          ///< Total moles of nuclides for each mass number chain
     std::map<int, double> refractory_moles;							///< Refractory moles of nuclides for each mass number chain
 	std::map<int, double> freiling_numbers;							///< Map of the Freiling ratio numbers (b_i)
-	std::unordered_map<int, std::unordered_map<double, double> > distribution;///< Map of the distributions for nuclides [i] ==> mass num [k] ==> particle size
+	std::unordered_map<int, std::unordered_map<double, double> > distribution;///< Map of the normalized distributions for nuclides [i] ==> mass num [k] ==> particle size
 	
 	/// Neutron fractional captures by all atomic materials
 	std::map<std::string, double> casing_capfrac;					///< Casing neutron capture fractions (by atom symbol)

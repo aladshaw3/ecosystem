@@ -80,6 +80,8 @@ public:
 	
 	void setInitialCondition(double ic);				///< Set the value for the initial condition of this nuclide
 	void setConcentration(double c);					///< Set the concentration value for the nuclide
+    void setActivity(double a);                         ///< Set the activity value for the nuclide
+    void setUnits2Moles(bool opt);                      ///< Set concentration units to moles if True is passed
 	void setWarnings(bool opt);							///< Set the warnings boolean value
 	void setThreshold(double val);						///< Set the threshold value for half-life (in sec)
 	void updateDecayRate();								///< Increase decay rate by 1% (used to correct issues with same eigenvalues)
@@ -91,9 +93,11 @@ public:
 	std::string IsotopeName();							///< Return the name of the isotope
 	bool isStable();									///< Return stability condition
 	bool isIsomericState();								///< Return isomeric condition
+    bool isMolar();                                     ///< Returns True if concentration units are moles
 	int DecayModes();									///< Return the number of decay modes
 	double getInitialCondition();						///< Return the value of the initial condition
 	double getConcentration();							///< Return the concentration value of the nuclide
+    double getActivity();                               ///< Return the activity value of the nuclide
 	double AtomicWeight();								///< Return the atomic weight of the isotope
 	double MeltingPoint();								///< Returns the melting point
 	double BoilingPoint();								///< Returns the boiling point
@@ -164,6 +168,8 @@ protected:
 	double initial_condition;							///< Value to hold initial condition for this nuclide (moles or atoms)
 	double concentration;								///< Value to hold concentration after a point in time (moles or atoms)
 	bool Warnings;										///< Boolean is True if you want to print warnings to console
+    bool inMoles;                                       ///< Boolean is True if units of concentration are in moles, False if units in atoms
+    double activity;                                    ///< Radioactivity of the current nuclide (in disintigrations per second) or (Bq)
 	
 	yaml_cpp_class *nuclides;							///< Pointer to a yaml object storing the digital library of all nuclides
 	

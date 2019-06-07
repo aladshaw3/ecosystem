@@ -417,6 +417,8 @@ Isotope::Isotope()
 	Warnings = false;
 	initial_condition = 0.0;
 	concentration = 0.0;
+    inMoles = true;
+    activity = 0.0;
 }
 
 //Default destructor
@@ -646,7 +648,23 @@ void Isotope::setInitialCondition(double ic)
 //set concentration
 void Isotope::setConcentration(double c)
 {
+    if (this->isMolar() == true)
+        this->activity = c*6.0221409e23*this->decay_rate;
+    else
+        this->activity = c*this->decay_rate;
 	this->concentration = c;
+}
+
+//set activity
+void Isotope::setActivity(double a)
+{
+    this->activity = a;
+}
+
+//set units
+void Isotope::setUnits2Moles(bool opt)
+{
+    this->inMoles = opt;
 }
 
 //set warnings
@@ -711,6 +729,12 @@ bool Isotope::isIsomericState()
 	return this->IsomericState;
 }
 
+//Return True if units are moles
+bool Isotope::isMolar()
+{
+    return this->inMoles;
+}
+
 //Return number of decay modes
 int Isotope::DecayModes()
 {
@@ -727,6 +751,12 @@ double Isotope::getInitialCondition()
 double Isotope::getConcentration()
 {
 	return this->concentration;
+}
+
+//Return activity
+double Isotope::getActivity()
+{
+    return this->activity;
 }
 
 //Return weight
@@ -953,6 +983,8 @@ void Isotope::computeDecayRate()
 {
 	double hl_sec = time_conversion(seconds, this->half_life, this->hl_units);
 	this->decay_rate = log(2.0)/hl_sec;
+    if (this->isStable() == true)
+        this->decay_rate = 0.0;
 }
 
 //Append pairs to end of vectors
