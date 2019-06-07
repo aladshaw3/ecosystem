@@ -176,6 +176,9 @@ public:
 	/// Run fractionation simulation to cloud stabilization time and print results to file
 	void evaluate_fractionation(std::string file_name, bool file_out, double solid_time, double stab_time);
     
+    /// Performs a simulation between two time events and records the results (no file output)
+    void simulate_fractionation(double start_time, double end_time);
+    
 protected:
 	asd_model model_type;											///< Type of activity-size distribution model to use
     // capfis_ratio = No*(fc)_i

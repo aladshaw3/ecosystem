@@ -909,10 +909,12 @@ void ActivityDistribution::evaluate_fractionation(std::string file_name, bool fi
         for (int i=0; i<kt->second.getNumberNuclides(); i++)
         {
             this->radioactivity_dist[kt->first] += kt->second.getIsotope(i).getActivity();
+            kt->second.getIsotope(i).setInitialCondition(kt->second.getIsotope(i).getConcentration());
         }
         for (int i=0; i<kt->second.getNumberStableNuclides(); i++)
         {
             this->radioactivity_dist[kt->first] += kt->second.getStableIsotope(i).getActivity();
+            kt->second.getStableIsotope(i).setInitialCondition(kt->second.getStableIsotope(i).getConcentration());
         }
 		current_point++;
 	}
@@ -961,6 +963,11 @@ void ActivityDistribution::evaluate_fractionation(std::string file_name, bool fi
 	//Close the open file
 	if (file != nullptr)
 		fclose(file);
+}
+
+void ActivityDistribution::simulate_fractionation(double start_time, double end_time)
+{
+    this->evaluate_fractionation("", false, start_time, end_time);
 }
 
 /*
