@@ -30,6 +30,8 @@ hl = 0				#half-life in seconds
 hl_s = ' '			#half-life string
 decay_mode = ' '	#decay modes
 branch_frac = 0		#branching fractions
+ex_mass = 0       	#Mass excess energy in MeV
+excite_energy = []	#List of excitation energies for the nuclide
 n_modes = 0			#number of decay modes
 symbol = ' '		#Element symbol
 units = 'seconds'	#units for half-life
@@ -49,6 +51,7 @@ d_A = 0				#mass number of the daughter
 ep_A = 0			#mass number of the emitted particle
 
 modes = {}			#create a map object where keys are decay modes and values are branch fractions
+q_val = {}			#create a map object where keys are decay modes and values are Q-values
 daughters = {}		#create a map object where keys are decay modes and values are daughter particles
 emissions = {}		#create a map object where keys are decay modes and values are emitted particles
 number_parts = {}	#create a map object where keys are decay modes and values are number of emitted particles
@@ -75,6 +78,8 @@ for n in key_list:
 	combo_sum = 0.0
 	hl = data.nuclides[n][0]['half-life']
 	stable = data.nuclides[n][0]['stable']
+	ex_mass = str(data.nuclides[n][0]['mass excess']).split('+')[0]
+        excite_energy = data.isomers(Z,A)
 	try:
 		AW = data.weight(Z,A,0)
 	except:
@@ -836,6 +841,7 @@ for n in key_list:
 		
 		#Set the modes and branch fractions
 		modes[decay_mode] = branch_frac
+		q_val[decay_mode] = data.nuclides[n][0]['decay modes'][m]['Q-value']
 		daughters[decay_mode] = daughter
 		emissions[decay_mode] = particle_em
 		number_parts[decay_mode] = part_num
@@ -945,8 +951,14 @@ for n in key_list:
 	file.write('mass_num: ' + str(A) + '\n')
 	file.write('atom_weight: ' + str(AW) + '\n')
 	file.write('isomeric: ' + str(iso) + '\n')
+        file.write('mass-excess: ' + str(ex_mass) + '\n')
 	file.write('half_life: ' + str(hl) + '\n')
 	file.write('hl_units: ' + str(units) + '\n')
+        file.write('\n- excitations:\n')
+        i = 0
+        for en in excite_energy:
+		file.write('  level0'+str(i)+': ' + str(en) + '\n')
+		i += 1
 	
 	i = 0
 	#Start new decay loop for final editing
@@ -966,11 +978,12 @@ for n in key_list:
 		
 		#write out remaining decay info
 		#write out stability condition (only on first iteration)
-		if i == 0: file.write('stable: ' + str(stable) + '\n')
+		if i == 0: file.write('\nstable: ' + str(stable) + '\n')
 		if i == 0: file.write('\n- decay_modes:\n')
 		file.write('  - mode' + str(i) + ':\n')
 		file.write('    type: ' + str(m) + '\n')
 		file.write('    branch_frac: ' + str(modes[m]) + '\n')
+		file.write('    Q-value: ' + str(q_val[m]) + '\n')
 		file.write('    daughter: ' + str(daughters[m]) + '\n')
 		file.write('    part_emitted: ' + str(emissions[m]) + '\n')
 		file.write('    num_parts: ' + str(number_parts[m]) + '\n')
