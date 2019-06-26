@@ -79,7 +79,7 @@ for n in key_list:
 	hl = data.nuclides[n][0]['half-life']
 	stable = data.nuclides[n][0]['stable']
 	ex_mass = str(data.nuclides[n][0]['mass excess']).split('+')[0]
-        excite_energy = data.isomers(Z,A)
+	excite_energy = data.isomers(Z,A)
 	try:
 		AW = data.weight(Z,A,0)
 	except:
@@ -951,12 +951,12 @@ for n in key_list:
 	file.write('mass_num: ' + str(A) + '\n')
 	file.write('atom_weight: ' + str(AW) + '\n')
 	file.write('isomeric: ' + str(iso) + '\n')
-        file.write('mass-excess: ' + str(ex_mass) + '\n')
+	file.write('mass-excess: ' + str(ex_mass) + '\n')
 	file.write('half_life: ' + str(hl) + '\n')
 	file.write('hl_units: ' + str(units) + '\n')
-        file.write('\n- excitations:\n')
-        i = 0
-        for en in excite_energy:
+	file.write('\n- excitations:\n')
+	i = 0
+	for en in excite_energy:
 		file.write('  level0'+str(i)+': ' + str(en) + '\n')
 		i += 1
 	

@@ -11,6 +11,8 @@
 			The PeriodicTable class creates a digital version of a complete periodic table. Further
 			development of this object can make it possible to query this structure for a particular
 			atom upon user request.
+            
+            Binding Energy Reference: http://www.physics.uwo.ca/~lgonchar/courses/p9826/xdb.pdf
  
  *	\warning The Atom class is mostly complete, but the PeriodicTable object is just a place holder.
  *  \author Austin Ladshaw
@@ -97,6 +99,8 @@ protected:
 	double boiling_point;					///< Holds the boiling point of the element (in K)
 	double thermal_x_sec;					///< Holds the thermal neutron cross section of the element (in barns)
 	double scatter_x_sec;					///< Holds the scattering neutron cross section of the element (in barns)
+    double K_shell_energy;					///< Holds the K-Shell binding energy of electrons (in keV)
+    std::vector<double> L_shell_energy;		///< Holds the list of L-Shell binding energies (in keV)
 	std::string Name;						///< Holds the name of the atom
 	std::string Symbol;						///< Holds the atomic symbol for the atom
 	std::string Category;					///< Holds the category of the atom (e.g., Alkali Metal)

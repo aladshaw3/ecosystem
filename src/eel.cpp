@@ -28,13 +28,16 @@ atomic_radii(0),
 melting_point(0),
 boiling_point(0),
 thermal_x_sec(0),
-scatter_x_sec(0)
+scatter_x_sec(0),
+K_shell_energy(0),
+L_shell_energy(0)
 {
 }
 
 //Default Destructor
 Atom::~Atom()
 {
+	L_shell_energy.clear();
 }
 
 //Register an instance of an Atom object by it's symbol
@@ -58,6 +61,9 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 20.271;
 		this->thermal_x_sec = 0.0;
 		this->scatter_x_sec = 0.0;
+        this->K_shell_energy = 0.0;
+        this->L_shell_energy.resize(1);
+        this->L_shell_energy[0] = 0.0;
 	}
 	else if (Symbol.compare("H") == 0)
 	{
@@ -77,6 +83,9 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 20.271;
 		this->thermal_x_sec = 0.3326;
 		this->scatter_x_sec = 82.02;
+        this->K_shell_energy = 0.0136;
+        this->L_shell_energy.resize(1);
+        this->L_shell_energy[0] = 0.0;
 	}
 	else if (Symbol.compare("He") == 0)
 	{
@@ -96,6 +105,9 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 4.222;
 		this->thermal_x_sec = 0.007;
 		this->scatter_x_sec = 1.34;
+        this->K_shell_energy = 0.0246;
+        this->L_shell_energy.resize(1);
+        this->L_shell_energy[0] = 0.0;
 	}
 	else if (Symbol.compare("Li") == 0)
 	{
@@ -115,6 +127,9 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 1603;
 		this->thermal_x_sec = 70.5;
 		this->scatter_x_sec = 1.37;
+        this->K_shell_energy = 0.0547;
+        this->L_shell_energy.resize(1);
+        this->L_shell_energy[0] = 0.0;
 	}
 	else if (Symbol.compare("Be") == 0)
 	{
@@ -134,6 +149,9 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 2742;
 		this->thermal_x_sec = 0.0092;
 		this->scatter_x_sec = 7.63;
+        this->K_shell_energy = 0.1115;
+        this->L_shell_energy.resize(1);
+        this->L_shell_energy[0] = 0.0;
 	}
 	else if (Symbol.compare("B") == 0)
 	{
@@ -153,6 +171,9 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 4200;
 		this->thermal_x_sec = 767.0;
 		this->scatter_x_sec = 5.24;
+        this->K_shell_energy = 0.188;
+        this->L_shell_energy.resize(1);
+        this->L_shell_energy[0] = 0.0;
 	}
 	else if (Symbol.compare("C") == 0)
 	{
@@ -172,6 +193,9 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 3915;
 		this->thermal_x_sec = 0.0035;
 		this->scatter_x_sec = 5.551;
+        this->K_shell_energy = 0.2842;
+        this->L_shell_energy.resize(1);
+        this->L_shell_energy[0] = 0.0;
 	}
 	else if (Symbol.compare("N") == 0)
 	{
@@ -191,6 +215,9 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 77.355;
 		this->thermal_x_sec = 1.91;
 		this->scatter_x_sec = 11.51;
+        this->K_shell_energy = 0.4099;
+        this->L_shell_energy.resize(1);
+        this->L_shell_energy[0] = 0.0;
 	}
 	else if (Symbol.compare("O") == 0)
 	{
@@ -210,6 +237,9 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 90.188;
 		this->thermal_x_sec = 0.00019;
 		this->scatter_x_sec = 4.232;
+        this->K_shell_energy = 0.5431;
+        this->L_shell_energy.resize(1);
+        this->L_shell_energy[0] = 0.0;
 	}
 	else if (Symbol.compare("F") == 0)
 	{
@@ -229,6 +259,9 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 85.03;
 		this->thermal_x_sec = 0.0096;
 		this->scatter_x_sec = 4.018;
+        this->K_shell_energy = 0.6967;
+        this->L_shell_energy.resize(1);
+        this->L_shell_energy[0] = 0.0;
 	}
 	else if (Symbol.compare("Ne") == 0)
 	{
@@ -248,6 +281,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 27.104;
 		this->thermal_x_sec = 0.04;
 		this->scatter_x_sec = 2.628;
+        this->K_shell_energy = 0.8702;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 0.0485;
+        this->L_shell_energy[1] = 0.0217;
+        this->L_shell_energy[2] = 0.0216;
 	}
 	else if (Symbol.compare("Na") == 0)
 	{
@@ -267,6 +305,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 1156.09;
 		this->thermal_x_sec = 0.53;
 		this->scatter_x_sec = 3.28;
+        this->K_shell_energy = 1.0708;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 0.0635;
+        this->L_shell_energy[1] = 0.03065;
+        this->L_shell_energy[2] = 0.03081;
 	}
 	else if (Symbol.compare("Mg") == 0)
 	{
@@ -286,6 +329,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 1363;
 		this->thermal_x_sec = 0.063;
 		this->scatter_x_sec = 3.71;
+        this->K_shell_energy = 1.303;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 0.0887;
+        this->L_shell_energy[1] = 0.04978;
+        this->L_shell_energy[2] = 0.04950;
 	}
 	else if (Symbol.compare("Al") == 0)
 	{
@@ -305,6 +353,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 2743;
 		this->thermal_x_sec = 0.232;
 		this->scatter_x_sec = 1.503;
+        this->K_shell_energy = 1.5596;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 0.1178;
+        this->L_shell_energy[1] = 0.07295;
+        this->L_shell_energy[2] = 0.07255;
 	}
 	else if (Symbol.compare("Si") == 0)
 	{
@@ -324,6 +377,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 3538;
 		this->thermal_x_sec = 0.171;
 		this->scatter_x_sec = 2.167;
+        this->K_shell_energy = 1.839;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 0.1497;
+        this->L_shell_energy[1] = 0.09982;
+        this->L_shell_energy[2] = 0.09942;
 	}
 	else if (Symbol.compare("P") == 0)
 	{
@@ -343,6 +401,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 553.7;
 		this->thermal_x_sec = 0.172;
 		this->scatter_x_sec = 3.312;
+        this->K_shell_energy = 2.1455;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 0.189;
+        this->L_shell_energy[1] = 0.136;
+        this->L_shell_energy[2] = 0.135;
 	}
 	else if (Symbol.compare("S") == 0)
 	{
@@ -362,6 +425,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 717.8;
 		this->thermal_x_sec = 0.53;
 		this->scatter_x_sec = 1.026;
+        this->K_shell_energy = 2.472;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 0.2309;
+        this->L_shell_energy[1] = 0.1636;
+        this->L_shell_energy[2] = 0.1625;
 	}
 	else if (Symbol.compare("Cl") == 0)
 	{
@@ -381,6 +449,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 239.11;
 		this->thermal_x_sec = 35.5;
 		this->scatter_x_sec = 16.8;
+        this->K_shell_energy = 2.8224;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 0.270;
+        this->L_shell_energy[1] = 0.202;
+        this->L_shell_energy[2] = 0.200;
 	}
 	else if (Symbol.compare("Ar") == 0)
 	{
@@ -400,6 +473,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 87.302;
 		this->thermal_x_sec = 0.675;
 		this->scatter_x_sec = 0.683;
+        this->K_shell_energy = 3.2509;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 0.3263;
+        this->L_shell_energy[1] = 0.2506;
+        this->L_shell_energy[2] = 0.2484;
 	}
 	else if (Symbol.compare("K") == 0)
 	{
@@ -419,6 +497,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 1032;
 		this->thermal_x_sec = 2.1;
 		this->scatter_x_sec = 1.96;
+        this->K_shell_energy = 3.6084;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 0.3786;
+        this->L_shell_energy[1] = 0.2973;
+        this->L_shell_energy[2] = 0.2946;
 	}
 	else if (Symbol.compare("Ca") == 0)
 	{
@@ -438,6 +521,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 1757;
 		this->thermal_x_sec = 0.43;
 		this->scatter_x_sec = 2.83;
+        this->K_shell_energy = 4.0385;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 0.4384;
+        this->L_shell_energy[1] = 0.3497;
+        this->L_shell_energy[2] = 0.3462;
 	}
 	else if (Symbol.compare("Sc") == 0)
 	{
@@ -457,6 +545,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 3109;
 		this->thermal_x_sec = 27.2;
 		this->scatter_x_sec = 23.5;
+        this->K_shell_energy = 4.492;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 0.498;
+        this->L_shell_energy[1] = 0.4036;
+        this->L_shell_energy[2] = 0.3987;
 	}
 	else if (Symbol.compare("Ti") == 0)
 	{
@@ -476,6 +569,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 3034;
 		this->thermal_x_sec = 6.09;
 		this->scatter_x_sec = 4.35;
+        this->K_shell_energy = 4.966;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 0.5609;
+        this->L_shell_energy[1] = 0.4602;
+        this->L_shell_energy[2] = 0.4538;
 	}
 	else if (Symbol.compare("V") == 0)
 	{
@@ -495,6 +593,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 3680;
 		this->thermal_x_sec = 5.08;
 		this->scatter_x_sec = 5.1;
+        this->K_shell_energy = 5.465;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 0.6267;
+        this->L_shell_energy[1] = 0.5198;
+        this->L_shell_energy[2] = 0.5121;
 	}
 	else if (Symbol.compare("Cr") == 0)
 	{
@@ -514,6 +617,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 2944;
 		this->thermal_x_sec = 3.1;
 		this->scatter_x_sec = 3.49;
+        this->K_shell_energy = 5.989;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 0.696;
+        this->L_shell_energy[1] = 0.5838;
+        this->L_shell_energy[2] = 0.5741;
 	}
 	else if (Symbol.compare("Mn") == 0)
 	{
@@ -533,6 +641,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 2334;
 		this->thermal_x_sec = 13.3;
 		this->scatter_x_sec = 2.15;
+        this->K_shell_energy = 6.539;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 0.7691;
+        this->L_shell_energy[1] = 0.6499;
+        this->L_shell_energy[2] = 0.6387;
 	}
 	else if (Symbol.compare("Fe") == 0)
 	{
@@ -552,6 +665,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 3134;
 		this->thermal_x_sec = 2.56;
 		this->scatter_x_sec = 11.62;
+        this->K_shell_energy = 7.112;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 0.8446;
+        this->L_shell_energy[1] = 0.7199;
+        this->L_shell_energy[2] = 0.7068;
 	}
 	else if (Symbol.compare("Co") == 0)
 	{
@@ -571,6 +689,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 2723;
 		this->thermal_x_sec = 37.2;
 		this->scatter_x_sec = 5.6;
+        this->K_shell_energy = 7.709;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 0.9251;
+        this->L_shell_energy[1] = 0.7932;
+        this->L_shell_energy[2] = 0.7781;
 	}
 	else if (Symbol.compare("Ni") == 0)
 	{
@@ -590,6 +713,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 3003;
 		this->thermal_x_sec = 4.49;
 		this->scatter_x_sec = 18.5;
+        this->K_shell_energy = 8.333;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 1.0086;
+        this->L_shell_energy[1] = 0.870;
+        this->L_shell_energy[2] = 0.8527;
 	}
 	else if (Symbol.compare("Cu") == 0)
 	{
@@ -609,6 +737,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 2835;
 		this->thermal_x_sec = 3.78;
 		this->scatter_x_sec = 8.03;
+        this->K_shell_energy = 8.979;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 1.0967;
+        this->L_shell_energy[1] = 0.9523;
+        this->L_shell_energy[2] = 0.9327;
 	}
 	else if (Symbol.compare("Zn") == 0)
 	{
@@ -628,6 +761,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 1180;
 		this->thermal_x_sec = 1.11;
 		this->scatter_x_sec = 4.131;
+        this->K_shell_energy = 9.659;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 1.1962;
+        this->L_shell_energy[1] = 1.0449;
+        this->L_shell_energy[2] = 1.0218;
 	}
 	else if (Symbol.compare("Ga") == 0)
 	{
@@ -647,6 +785,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 2673;
 		this->thermal_x_sec = 2.9;
 		this->scatter_x_sec = 6.83;
+        this->K_shell_energy = 10.367;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 1.299;
+        this->L_shell_energy[1] = 1.1432;
+        this->L_shell_energy[2] = 1.1164;
 	}
 	else if (Symbol.compare("Ge") == 0)
 	{
@@ -666,6 +809,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 3106;
 		this->thermal_x_sec = 2.2;
 		this->scatter_x_sec = 8.6;
+        this->K_shell_energy = 11.103;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 1.4146;
+        this->L_shell_energy[1] = 1.2481;
+        this->L_shell_energy[2] = 1.217;
 	}
 	else if (Symbol.compare("As") == 0)
 	{
@@ -685,6 +833,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 887;
 		this->thermal_x_sec = 4.3;
 		this->scatter_x_sec = 5.5;
+        this->K_shell_energy = 11.867;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 1.527;
+        this->L_shell_energy[1] = 1.3591;
+        this->L_shell_energy[2] = 1.3236;
 	}
 	else if (Symbol.compare("Se") == 0)
 	{
@@ -704,6 +857,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 958;
 		this->thermal_x_sec = 11.7;
 		this->scatter_x_sec = 8.3;
+        this->K_shell_energy = 12.658;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 1.652;
+        this->L_shell_energy[1] = 1.4743;
+        this->L_shell_energy[2] = 1.4339;
 	}
 	else if (Symbol.compare("Br") == 0)
 	{
@@ -723,6 +881,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 332;
 		this->thermal_x_sec = 6.8;
 		this->scatter_x_sec = 5.9;
+        this->K_shell_energy = 13.474;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 1.782;
+        this->L_shell_energy[1] = 1.596;
+        this->L_shell_energy[2] = 1.550;
 	}
 	else if (Symbol.compare("Kr") == 0)
 	{
@@ -742,6 +905,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 119.93;
 		this->thermal_x_sec = 25.0;
 		this->scatter_x_sec = 7.68;
+        this->K_shell_energy = 14.326;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 1.921;
+        this->L_shell_energy[1] = 1.7309;
+        this->L_shell_energy[2] = 1.6784;
 	}
 	else if (Symbol.compare("Rb") == 0)
 	{
@@ -761,6 +929,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 961;
 		this->thermal_x_sec = 0.38;
 		this->scatter_x_sec = 6.8;
+        this->K_shell_energy = 15.2;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 2.065;
+        this->L_shell_energy[1] = 1.864;
+        this->L_shell_energy[2] = 1.804;
 	}
 	else if (Symbol.compare("Sr") == 0)
 	{
@@ -780,6 +953,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 1650;
 		this->thermal_x_sec = 1.28;
 		this->scatter_x_sec = 6.25;
+        this->K_shell_energy = 16.105;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 2.216;
+        this->L_shell_energy[1] = 2.007;
+        this->L_shell_energy[2] = 1.940;
 	}
 	else if (Symbol.compare("Y") == 0)
 	{
@@ -799,6 +977,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 3203;
 		this->thermal_x_sec = 1.28;
 		this->scatter_x_sec = 7.7;
+        this->K_shell_energy = 17.038;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 2.373;
+        this->L_shell_energy[1] = 2.156;
+        this->L_shell_energy[2] = 2.080;
 	}
 	else if (Symbol.compare("Zr") == 0)
 	{
@@ -818,6 +1001,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 4650;
 		this->thermal_x_sec = 0.184;
 		this->scatter_x_sec = 6.46;
+        this->K_shell_energy = 17.998;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 2.532;
+        this->L_shell_energy[1] = 2.307;
+        this->L_shell_energy[2] = 2.223;
 	}
 	else if (Symbol.compare("Nb") == 0)
 	{
@@ -837,6 +1025,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 5017;
 		this->thermal_x_sec = 1.15;
 		this->scatter_x_sec = 6.255;
+        this->K_shell_energy = 18.986;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 2.698;
+        this->L_shell_energy[1] = 2.465;
+        this->L_shell_energy[2] = 2.371;
 	}
 	else if (Symbol.compare("Mo") == 0)
 	{
@@ -856,6 +1049,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 4912;
 		this->thermal_x_sec = 2.6;
 		this->scatter_x_sec = 5.71;
+        this->K_shell_energy = 20.000;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 2.866;
+        this->L_shell_energy[1] = 2.625;
+        this->L_shell_energy[2] = 2.520;
 	}
 	else if (Symbol.compare("Tc") == 0)
 	{
@@ -875,6 +1073,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 4538;
 		this->thermal_x_sec = 20.0;
 		this->scatter_x_sec = 6.3;
+        this->K_shell_energy = 21.044;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 3.043;
+        this->L_shell_energy[1] = 2.793;
+        this->L_shell_energy[2] = 3.677;
 	}
 	else if (Symbol.compare("Ru") == 0)
 	{
@@ -894,6 +1097,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 4423;
 		this->thermal_x_sec = 2.56;
 		this->scatter_x_sec = 6.6;
+        this->K_shell_energy = 22.117;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 3.224;
+        this->L_shell_energy[1] = 2.967;
+        this->L_shell_energy[2] = 2.838;
 	}
 	else if (Symbol.compare("Rh") == 0)
 	{
@@ -913,6 +1121,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 3968;
 		this->thermal_x_sec = 144.8;
 		this->scatter_x_sec = 4.6;
+        this->K_shell_energy = 23.220;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 3.412;
+        this->L_shell_energy[1] = 3.146;
+        this->L_shell_energy[2] = 3.004;
 	}
 	else if (Symbol.compare("Pd") == 0)
 	{
@@ -932,6 +1145,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 3236;
 		this->thermal_x_sec = 6.9;
 		this->scatter_x_sec = 4.48;
+        this->K_shell_energy = 24.350;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 3.604;
+        this->L_shell_energy[1] = 3.330;
+        this->L_shell_energy[2] = 3.173;
 	}
 	else if (Symbol.compare("Ag") == 0)
 	{
@@ -951,6 +1169,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 2435;
 		this->thermal_x_sec = 63.6;
 		this->scatter_x_sec = 4.99;
+        this->K_shell_energy = 25.514;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 3.806;
+        this->L_shell_energy[1] = 3.524;
+        this->L_shell_energy[2] = 3.351;
 	}
 	else if (Symbol.compare("Cd") == 0)
 	{
@@ -970,6 +1193,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 1040;
 		this->thermal_x_sec = 2450.0;
 		this->scatter_x_sec = 6.5;
+        this->K_shell_energy = 26.711;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 4.018;
+        this->L_shell_energy[1] = 3.727;
+        this->L_shell_energy[2] = 3.538;
 	}
 	else if (Symbol.compare("In") == 0)
 	{
@@ -989,6 +1217,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 2345;
 		this->thermal_x_sec = 194;
 		this->scatter_x_sec = 2.62;
+        this->K_shell_energy = 27.940;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 4.238;
+        this->L_shell_energy[1] = 3.938;
+        this->L_shell_energy[2] = 3.730;
 	}
 	else if (Symbol.compare("Sn") == 0)
 	{
@@ -1008,6 +1241,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 2875;
 		this->thermal_x_sec = 0.626;
 		this->scatter_x_sec = 4.892;
+        this->K_shell_energy = 29.200;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 4.465;
+        this->L_shell_energy[1] = 4.156;
+        this->L_shell_energy[2] = 3.929;
 	}
 	else if (Symbol.compare("Sb") == 0)
 	{
@@ -1027,6 +1265,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 1908;
 		this->thermal_x_sec = 4.91;
 		this->scatter_x_sec = 3.9;
+        this->K_shell_energy = 30.491;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 4.698;
+        this->L_shell_energy[1] = 4.380;
+        this->L_shell_energy[2] = 4.132;
 	}
 	else if (Symbol.compare("Te") == 0)
 	{
@@ -1046,6 +1289,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 1261;
 		this->thermal_x_sec = 4.7;
 		this->scatter_x_sec = 4.32;
+        this->K_shell_energy = 31.814;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 4.939;
+        this->L_shell_energy[1] = 4.612;
+        this->L_shell_energy[2] = 4.341;
 	}
 	else if (Symbol.compare("I") == 0)
 	{
@@ -1065,6 +1313,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 457.4;
 		this->thermal_x_sec = 6.2;
 		this->scatter_x_sec = 3.81;
+        this->K_shell_energy = 33.169;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 5.188;
+        this->L_shell_energy[1] = 4.852;
+        this->L_shell_energy[2] = 4.557;
 	}
 	else if (Symbol.compare("Xe") == 0)
 	{
@@ -1084,6 +1337,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 165.051;
 		this->thermal_x_sec = 23.9;
 		this->scatter_x_sec = 0.0;
+        this->K_shell_energy = 34.561;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 5.453;
+        this->L_shell_energy[1] = 5.107;
+        this->L_shell_energy[2] = 4.786;
 	}
 	else if (Symbol.compare("Cs") == 0)
 	{
@@ -1103,6 +1361,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 944;
 		this->thermal_x_sec = 29;
 		this->scatter_x_sec = 3.9;
+        this->K_shell_energy = 35.985;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 5.714;
+        this->L_shell_energy[1] = 5.359;
+        this->L_shell_energy[2] = 5.012;
 	}
 	else if (Symbol.compare("Ba") == 0)
 	{
@@ -1122,6 +1385,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 2118;
 		this->thermal_x_sec = 1.3;
 		this->scatter_x_sec = 3.38;
+        this->K_shell_energy = 37.441;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 5.989;
+        this->L_shell_energy[1] = 5.624;
+        this->L_shell_energy[2] = 5.247;
 	}
 	else if (Symbol.compare("La") == 0)
 	{
@@ -1141,6 +1409,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 3737;
 		this->thermal_x_sec = 8.98;
 		this->scatter_x_sec = 9.66;
+        this->K_shell_energy = 38.925;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 6.266;
+        this->L_shell_energy[1] = 5.891;
+        this->L_shell_energy[2] = 5.483;
 	}
 	else if (Symbol.compare("Ce") == 0)
 	{
@@ -1160,6 +1433,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 3716;
 		this->thermal_x_sec = 0.6;
 		this->scatter_x_sec = 2.94;
+        this->K_shell_energy = 40.443;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 6.549;
+        this->L_shell_energy[1] = 6.164;
+        this->L_shell_energy[2] = 5.723;
 	}
 	else if (Symbol.compare("Pr") == 0)
 	{
@@ -1179,6 +1457,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 3403;
 		this->thermal_x_sec = 11.5;
 		this->scatter_x_sec = 2.66;
+        this->K_shell_energy = 41.991;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 6.835;
+        this->L_shell_energy[1] = 6.440;
+        this->L_shell_energy[2] = 5.964;
 	}
 	else if (Symbol.compare("Nd") == 0)
 	{
@@ -1198,6 +1481,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 3347;
 		this->thermal_x_sec = 49;
 		this->scatter_x_sec = 16.6;
+        this->K_shell_energy = 43.569;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 7.126;
+        this->L_shell_energy[1] = 6.722;
+        this->L_shell_energy[2] = 6.208;
 	}
 	else if (Symbol.compare("Pm") == 0)
 	{
@@ -1217,6 +1505,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 3273;
 		this->thermal_x_sec = 168.4;
 		this->scatter_x_sec = 21.3;
+        this->K_shell_energy = 45.184;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 7.428;
+        this->L_shell_energy[1] = 7.013;
+        this->L_shell_energy[2] = 6.459;
 	}
 	else if (Symbol.compare("Sm") == 0)
 	{
@@ -1236,6 +1529,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 2173;
 		this->thermal_x_sec = 5922;
 		this->scatter_x_sec = 39.0;
+        this->K_shell_energy = 46.834;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 7.737;
+        this->L_shell_energy[1] = 7.312;
+        this->L_shell_energy[2] = 6.716;
 	}
 	else if (Symbol.compare("Eu") == 0)
 	{
@@ -1255,6 +1553,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 1802;
 		this->thermal_x_sec = 4600;
 		this->scatter_x_sec = 9.2;
+        this->K_shell_energy = 48.519;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 8.052;
+        this->L_shell_energy[1] = 7.617;
+        this->L_shell_energy[2] = 6.977;
 	}
 	else if (Symbol.compare("Gd") == 0)
 	{
@@ -1274,6 +1577,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 3273;
 		this->thermal_x_sec = 49000;
 		this->scatter_x_sec = 180.0;
+        this->K_shell_energy = 50.239;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 8.376;
+        this->L_shell_energy[1] = 7.930;
+        this->L_shell_energy[2] = 7.243;
 	}
 	else if (Symbol.compare("Tb") == 0)
 	{
@@ -1293,6 +1601,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 3396;
 		this->thermal_x_sec = 23.4;
 		this->scatter_x_sec = 6.84;
+        this->K_shell_energy = 51.996;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 8.708;
+        this->L_shell_energy[1] = 8.252;
+        this->L_shell_energy[2] = 7.514;
 	}
 	else if (Symbol.compare("Dy") == 0)
 	{
@@ -1312,6 +1625,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 2840;
 		this->thermal_x_sec = 920;
 		this->scatter_x_sec = 90.3;
+        this->K_shell_energy = 53.789;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 9.046;
+        this->L_shell_energy[1] = 8.581;
+        this->L_shell_energy[2] = 7.790;
 	}
 	else if (Symbol.compare("Ho") == 0)
 	{
@@ -1331,6 +1649,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 2873;
 		this->thermal_x_sec = 65;
 		this->scatter_x_sec = 8.42;
+        this->K_shell_energy = 55.618;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 9.394;
+        this->L_shell_energy[1] = 8.918;
+        this->L_shell_energy[2] = 8.071;
 	}
 	else if (Symbol.compare("Er") == 0)
 	{
@@ -1350,6 +1673,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 3141;
 		this->thermal_x_sec = 160;
 		this->scatter_x_sec = 8.7;
+        this->K_shell_energy = 57.486;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 9.751;
+        this->L_shell_energy[1] = 9.264;
+        this->L_shell_energy[2] = 8.358;
 	}
 	else if (Symbol.compare("Tm") == 0)
 	{
@@ -1369,6 +1697,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 2223;
 		this->thermal_x_sec = 100;
 		this->scatter_x_sec = 6.38;
+        this->K_shell_energy = 59.390;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 10.116;
+        this->L_shell_energy[1] = 9.617;
+        this->L_shell_energy[2] = 8.648;
 	}
 	else if (Symbol.compare("Yb") == 0)
 	{
@@ -1388,6 +1721,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 1469;
 		this->thermal_x_sec = 34.8;
 		this->scatter_x_sec = 23.4;
+        this->K_shell_energy = 61.332;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 10.486;
+        this->L_shell_energy[1] = 9.978;
+        this->L_shell_energy[2] = 8.944;
 	}
 	else if (Symbol.compare("Lu") == 0)
 	{
@@ -1407,6 +1745,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 3675;
 		this->thermal_x_sec = 84;
 		this->scatter_x_sec = 7.2;
+        this->K_shell_energy = 63.314;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 10.870;
+        this->L_shell_energy[1] = 10.349;
+        this->L_shell_energy[2] = 9.244;
 	}
 	else if (Symbol.compare("Hf") == 0)
 	{
@@ -1426,6 +1769,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 4876;
 		this->thermal_x_sec = 104;
 		this->scatter_x_sec = 10.2;
+        this->K_shell_energy = 65.351;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 11.271;
+        this->L_shell_energy[1] = 10.739;
+        this->L_shell_energy[2] = 9.561;
 	}
 	else if (Symbol.compare("Ta") == 0)
 	{
@@ -1445,6 +1793,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 5463;
 		this->thermal_x_sec = 20.6;
 		this->scatter_x_sec = 6.01;
+        this->K_shell_energy = 67.416;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 11.682;
+        this->L_shell_energy[1] = 11.136;
+        this->L_shell_energy[2] = 9.881;
 	}
 	else if (Symbol.compare("W") == 0)
 	{
@@ -1464,6 +1817,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 6203;
 		this->thermal_x_sec = 18.3;
 		this->scatter_x_sec = 4.6;
+        this->K_shell_energy = 69.525;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 12.100;
+        this->L_shell_energy[1] = 11.544;
+        this->L_shell_energy[2] = 10.207;
 	}
 	else if (Symbol.compare("Re") == 0)
 	{
@@ -1483,6 +1841,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 5903;
 		this->thermal_x_sec = 89.7;
 		this->scatter_x_sec = 11.5;
+        this->K_shell_energy = 71.676;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 12.527;
+        this->L_shell_energy[1] = 11.959;
+        this->L_shell_energy[2] = 10.535;
 	}
 	else if (Symbol.compare("Os") == 0)
 	{
@@ -1502,6 +1865,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 5285;
 		this->thermal_x_sec = 15;
 		this->scatter_x_sec = 14.7;
+        this->K_shell_energy = 73.871;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 12.968;
+        this->L_shell_energy[1] = 12.385;
+        this->L_shell_energy[2] = 10.871;
 	}
 	else if (Symbol.compare("Ir") == 0)
 	{
@@ -1521,6 +1889,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 4403;
 		this->thermal_x_sec = 425;
 		this->scatter_x_sec = 14.0;
+        this->K_shell_energy = 76.111;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 13.419;
+        this->L_shell_energy[1] = 12.824;
+        this->L_shell_energy[2] = 11.215;
 	}
 	else if (Symbol.compare("Pt") == 0)
 	{
@@ -1540,6 +1913,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 4098;
 		this->thermal_x_sec = 0.96;
 		this->scatter_x_sec = 11.71;
+        this->K_shell_energy = 78.395;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 13.880;
+        this->L_shell_energy[1] = 13.273;
+        this->L_shell_energy[2] = 11.564;
 	}
 	else if (Symbol.compare("Au") == 0)
 	{
@@ -1559,6 +1937,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 3243;
 		this->thermal_x_sec = 98.7;
 		this->scatter_x_sec = 7.75;
+        this->K_shell_energy = 80.725;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 14.353;
+        this->L_shell_energy[1] = 13.734;
+        this->L_shell_energy[2] = 11.919;
 	}
 	else if (Symbol.compare("Hg") == 0)
 	{
@@ -1578,6 +1961,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 629.88;
 		this->thermal_x_sec = 374;
 		this->scatter_x_sec = 26.8;
+        this->K_shell_energy = 83.102;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 14.839;
+        this->L_shell_energy[1] = 14.209;
+        this->L_shell_energy[2] = 12.284;
 	}
 	else if (Symbol.compare("Tl") == 0)
 	{
@@ -1597,6 +1985,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 1746;
 		this->thermal_x_sec = 3.43;
 		this->scatter_x_sec = 9.89;
+        this->K_shell_energy = 85.530;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 15.347;
+        this->L_shell_energy[1] = 14.698;
+        this->L_shell_energy[2] = 12.658;
 	}
 	else if (Symbol.compare("Pb") == 0)
 	{
@@ -1616,6 +2009,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 2022;
 		this->thermal_x_sec = 0.171;
 		this->scatter_x_sec = 11.118;
+        this->K_shell_energy = 88.005;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 15.861;
+        this->L_shell_energy[1] = 15.200;
+        this->L_shell_energy[2] = 13.035;
 	}
 	else if (Symbol.compare("Bi") == 0)
 	{
@@ -1635,6 +2033,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 1837;
 		this->thermal_x_sec = 0.034;
 		this->scatter_x_sec = 9.156;
+        this->K_shell_energy = 90.524;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 16.388;
+        this->L_shell_energy[1] = 15.711;
+        this->L_shell_energy[2] = 13.419;
 	}
 	else if (Symbol.compare("Po") == 0)
 	{
@@ -1654,6 +2057,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 1235;
 		this->thermal_x_sec = 0.03;
 		this->scatter_x_sec = 0.0;
+        this->K_shell_energy = 93.105;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 16.939;
+        this->L_shell_energy[1] = 16.244;
+        this->L_shell_energy[2] = 13.814;
 	}
 	else if (Symbol.compare("At") == 0)
 	{
@@ -1673,6 +2081,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 610;
 		this->thermal_x_sec = 0.0;
 		this->scatter_x_sec = 0.0;
+        this->K_shell_energy = 95.730;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 17.493;
+        this->L_shell_energy[1] = 16.785;
+        this->L_shell_energy[2] = 14.214;
 	}
 	else if (Symbol.compare("Rn") == 0)
 	{
@@ -1692,6 +2105,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 211.5;
 		this->thermal_x_sec = 0.72;
 		this->scatter_x_sec = 12.6;
+        this->K_shell_energy = 98.404;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 18.049;
+        this->L_shell_energy[1] = 17.337;
+        this->L_shell_energy[2] = 14.619;
 	}
 	else if (Symbol.compare("Fr") == 0)
 	{
@@ -1711,6 +2129,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 950;
 		this->thermal_x_sec = 0.0;
 		this->scatter_x_sec = 0.0;
+        this->K_shell_energy = 101.137;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 18.639;
+        this->L_shell_energy[1] = 17.907;
+        this->L_shell_energy[2] = 15.031;
 	}
 	else if (Symbol.compare("Ra") == 0)
 	{
@@ -1730,6 +2153,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 2010;
 		this->thermal_x_sec = 12.8;
 		this->scatter_x_sec = 13.0;
+        this->K_shell_energy = 103.922;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 19.237;
+        this->L_shell_energy[1] = 18.484;
+        this->L_shell_energy[2] = 15.444;
 	}
 	else if (Symbol.compare("Ac") == 0)
 	{
@@ -1749,6 +2177,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 3500;
 		this->thermal_x_sec = 515;
 		this->scatter_x_sec = 0.0;
+        this->K_shell_energy = 106.755;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 19.840;
+        this->L_shell_energy[1] = 19.083;
+        this->L_shell_energy[2] = 15.871;
 	}
 	else if (Symbol.compare("Th") == 0)
 	{
@@ -1768,6 +2201,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 5061;
 		this->thermal_x_sec = 7.37;
 		this->scatter_x_sec = 13.36;
+        this->K_shell_energy = 109.651;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 20.472;
+        this->L_shell_energy[1] = 19.693;
+        this->L_shell_energy[2] = 16.300;
 	}
 	else if (Symbol.compare("Pa") == 0)
 	{
@@ -1787,6 +2225,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 4300;
 		this->thermal_x_sec = 200.6;
 		this->scatter_x_sec = 10.5;
+        this->K_shell_energy = 112.601;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 21.105;
+        this->L_shell_energy[1] = 20.314;
+        this->L_shell_energy[2] = 16.733;
 	}
 	else if (Symbol.compare("U") == 0)
 	{
@@ -1806,6 +2249,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 4404;
 		this->thermal_x_sec = 7.57;
 		this->scatter_x_sec = 8.908;
+        this->K_shell_energy = 115.606;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 21.757;
+        this->L_shell_energy[1] = 20.948;
+        this->L_shell_energy[2] = 17.166;
 	}
 	else if (Symbol.compare("Np") == 0)
 	{
@@ -1825,6 +2273,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 4447;
 		this->thermal_x_sec = 180;
 		this->scatter_x_sec = 14.5;
+        this->K_shell_energy = 118.673;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 22.427;
+        this->L_shell_energy[1] = 21.448;
+        this->L_shell_energy[2] = 17.466;
 	}
 	else if (Symbol.compare("Pu") == 0)
 	{
@@ -1844,6 +2297,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 3505;
 		this->thermal_x_sec = 1017.3;
 		this->scatter_x_sec = 0.0;
+        this->K_shell_energy = 121.805;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 23.098;
+        this->L_shell_energy[1] = 21.948;
+        this->L_shell_energy[2] = 17.666;
 	}
 	else if (Symbol.compare("Am") == 0)
 	{
@@ -1863,6 +2321,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 2880;
 		this->thermal_x_sec = 75.3;
 		this->scatter_x_sec = 9.0;
+        this->K_shell_energy = 125.004;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 23.789;
+        this->L_shell_energy[1] = 22.448;
+        this->L_shell_energy[2] = 17.866;
 	}
 	else if (Symbol.compare("Cm") == 0)
 	{
@@ -1882,6 +2345,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 3383;
 		this->thermal_x_sec = 79;
 		this->scatter_x_sec = 10.9;
+        this->K_shell_energy = 128.230;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 24.494;
+        this->L_shell_energy[1] = 22.948;
+        this->L_shell_energy[2] = 18.066;
 	}
 	else if (Symbol.compare("Bk") == 0)
 	{
@@ -1901,6 +2369,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 2900;
 		this->thermal_x_sec = 710;
 		this->scatter_x_sec = 0.0;
+        this->K_shell_energy = 131.573;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 25.267;
+        this->L_shell_energy[1] = 23.448;
+        this->L_shell_energy[2] = 18.266;
 	}
 	else if (Symbol.compare("Cf") == 0)
 	{
@@ -1920,6 +2393,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 1743;
 		this->thermal_x_sec = 2900;
 		this->scatter_x_sec = 0.0;
+        this->K_shell_energy = 134.952;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 26.065;
+        this->L_shell_energy[1] = 24.048;
+        this->L_shell_energy[2] = 18.466;
 	}
 	else if (Symbol.compare("Es") == 0)
 	{
@@ -1939,6 +2417,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 1269;
 		this->thermal_x_sec = 160;
 		this->scatter_x_sec = 0.0;
+        this->K_shell_energy = 138.446;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 26.843;
+        this->L_shell_energy[1] = 24.648;
+        this->L_shell_energy[2] = 18.666;
 	}
 	else if (Symbol.compare("Fm") == 0)
 	{
@@ -1958,6 +2441,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 3000;
 		this->thermal_x_sec = 5800;
 		this->scatter_x_sec = 0.0;
+        this->K_shell_energy = 142.010;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 27.637;
+        this->L_shell_energy[1] = 25.248;
+        this->L_shell_energy[2] = 18.966;
 	}
 	else if (Symbol.compare("Md") == 0)
 	{
@@ -1977,6 +2465,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 2500;
 		this->thermal_x_sec = 0.0;
 		this->scatter_x_sec = 0.0;
+        this->K_shell_energy = 145.658;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 28.462;
+        this->L_shell_energy[1] = 25.848;
+        this->L_shell_energy[2] = 19.166;
 	}
 	else if (Symbol.compare("No") == 0)
 	{
@@ -1996,6 +2489,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 2500;
 		this->thermal_x_sec = 0.0;
 		this->scatter_x_sec = 0.0;
+        this->K_shell_energy = 149.379;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 29.304;
+        this->L_shell_energy[1] = 26.448;
+        this->L_shell_energy[2] = 19.366;
 	}
 	else if (Symbol.compare("Lr") == 0)
 	{
@@ -2015,6 +2513,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 3100;
 		this->thermal_x_sec = 0.0;
 		this->scatter_x_sec = 0.0;
+        this->K_shell_energy = 153.181;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 30.165;
+        this->L_shell_energy[1] = 27.048;
+        this->L_shell_energy[2] = 19.666;
 	}
 	else if (Symbol.compare("Rf") == 0)
 	{
@@ -2034,6 +2537,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 5800;
 		this->thermal_x_sec = 0.0;
 		this->scatter_x_sec = 0.0;
+        this->K_shell_energy = 156.889;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 30.974;
+        this->L_shell_energy[1] = 29.973;
+        this->L_shell_energy[2] = 22.870;
 	}
 	else if (Symbol.compare("Db") == 0)
 	{
@@ -2053,6 +2561,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 5800;
 		this->thermal_x_sec = 0.0;
 		this->scatter_x_sec = 0.0;
+        this->K_shell_energy = 160.820;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 31.884;
+        this->L_shell_energy[1] = 30.869;
+        this->L_shell_energy[2] = 23.389;
 	}
 	else if (Symbol.compare("Sg") == 0)
 	{
@@ -2072,6 +2585,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 5800;
 		this->thermal_x_sec = 0.0;
 		this->scatter_x_sec = 0.0;
+        this->K_shell_energy = 164.820;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 32.811;
+        this->L_shell_energy[1] = 31.787;
+        this->L_shell_energy[2] = 23.915;
 	}
 	else if (Symbol.compare("Bh") == 0)
 	{
@@ -2091,6 +2609,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 5800;
 		this->thermal_x_sec = 0.0;
 		this->scatter_x_sec = 0.0;
+        this->K_shell_energy = 168.820;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 33.811;
+        this->L_shell_energy[1] = 32.787;
+        this->L_shell_energy[2] = 24.915;
 	}
 	else if (Symbol.compare("Hs") == 0)
 	{
@@ -2110,6 +2633,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 5800;
 		this->thermal_x_sec = 0.0;
 		this->scatter_x_sec = 0.0;
+        this->K_shell_energy = 172.820;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 34.811;
+        this->L_shell_energy[1] = 33.787;
+        this->L_shell_energy[2] = 25.915;
 	}
 	else if (Symbol.compare("Mt") == 0)
 	{
@@ -2129,6 +2657,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 5800;
 		this->thermal_x_sec = 0.0;
 		this->scatter_x_sec = 0.0;
+        this->K_shell_energy = 176.820;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 35.811;
+        this->L_shell_energy[1] = 34.787;
+        this->L_shell_energy[2] = 26.915;
 	}
 	else if (Symbol.compare("Ds") == 0)
 	{
@@ -2148,6 +2681,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 5800;
 		this->thermal_x_sec = 0.0;
 		this->scatter_x_sec = 0.0;
+        this->K_shell_energy = 180.820;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 36.811;
+        this->L_shell_energy[1] = 35.787;
+        this->L_shell_energy[2] = 27.915;
 	}
 	else if (Symbol.compare("Rg") == 0)
 	{
@@ -2167,6 +2705,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 5800;
 		this->thermal_x_sec = 0.0;
 		this->scatter_x_sec = 0.0;
+        this->K_shell_energy = 184.820;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 37.811;
+        this->L_shell_energy[1] = 36.787;
+        this->L_shell_energy[2] = 28.915;
 	}
 	else if (Symbol.compare("Cn") == 0)
 	{
@@ -2186,6 +2729,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 5800;
 		this->thermal_x_sec = 0.0;
 		this->scatter_x_sec = 0.0;
+        this->K_shell_energy = 188.820;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 38.811;
+        this->L_shell_energy[1] = 37.787;
+        this->L_shell_energy[2] = 29.915;
 	}
 	else if (Symbol.compare("Nh") == 0)
 	{
@@ -2205,6 +2753,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 1430;
 		this->thermal_x_sec = 0.0;
 		this->scatter_x_sec = 0.0;
+        this->K_shell_energy = 192.820;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 39.811;
+        this->L_shell_energy[1] = 38.787;
+        this->L_shell_energy[2] = 30.915;
 	}
 	else if (Symbol.compare("Fl") == 0)
 	{
@@ -2224,6 +2777,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 210;
 		this->thermal_x_sec = 0.0;
 		this->scatter_x_sec = 0.0;
+        this->K_shell_energy = 196.820;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 40.811;
+        this->L_shell_energy[1] = 39.787;
+        this->L_shell_energy[2] = 31.915;
 	}
 	else if (Symbol.compare("Mc") == 0)
 	{
@@ -2243,6 +2801,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 1400;
 		this->thermal_x_sec = 0.0;
 		this->scatter_x_sec = 0.0;
+        this->K_shell_energy = 200.820;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 41.811;
+        this->L_shell_energy[1] = 40.787;
+        this->L_shell_energy[2] = 32.915;
 	}
 	else if (Symbol.compare("Lv") == 0)
 	{
@@ -2262,6 +2825,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 1085;
 		this->thermal_x_sec = 0.0;
 		this->scatter_x_sec = 0.0;
+        this->K_shell_energy = 204.820;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 42.811;
+        this->L_shell_energy[1] = 41.787;
+        this->L_shell_energy[2] = 33.915;
 	}
 	else if (Symbol.compare("Ts") == 0)
 	{
@@ -2281,6 +2849,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 883;
 		this->thermal_x_sec = 0.0;
 		this->scatter_x_sec = 0.0;
+        this->K_shell_energy = 208.820;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 43.811;
+        this->L_shell_energy[1] = 42.787;
+        this->L_shell_energy[2] = 34.915;
 	}
 	else if (Symbol.compare("Og") == 0)
 	{
@@ -2300,6 +2873,11 @@ void Atom::Register(std::string Symbol)
 		this->boiling_point = 350;
 		this->thermal_x_sec = 0.0;
 		this->scatter_x_sec = 0.0;
+        this->K_shell_energy = 212.820;
+        this->L_shell_energy.resize(3);
+        this->L_shell_energy[0] = 44.811;
+        this->L_shell_energy[1] = 43.787;
+        this->L_shell_energy[2] = 35.915;
 	}
 	else
 	{
@@ -2317,6 +2895,13 @@ void Atom::Register(std::string Symbol)
 		this->NaturalState = "N/A";
 		this->atomic_number = 0;
 		this->atomic_radii = 1.20;
+        this->melting_point = 0.0;
+        this->boiling_point = 0.0;
+        this->thermal_x_sec = 0.0;
+        this->scatter_x_sec = 0.0;
+        this->K_shell_energy = 0.0;
+        this->L_shell_energy.resize(1);
+        this->L_shell_energy[0] = 0.0;
 	}
 }
 
