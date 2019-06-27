@@ -29,6 +29,7 @@ Z = 0				#atomic number
 hl = 0				#half-life in seconds
 hl_s = ' '			#half-life string
 decay_mode = ' '	#decay modes
+jpi = ' ' 		# spin and parity
 branch_frac = 0		#branching fractions
 ex_mass = 0       	#Mass excess energy in MeV
 excite_energy = []	#List of excitation energies for the nuclide
@@ -79,6 +80,7 @@ for n in key_list:
 	hl = data.nuclides[n][0]['half-life']
 	stable = data.nuclides[n][0]['stable']
 	ex_mass = str(data.nuclides[n][0]['mass excess']).split('+')[0]
+	jpi = data.nuclides[n][0]['Jpi']
 	excite_energy = data.isomers(Z,A)
 	try:
 		AW = data.weight(Z,A,0)
@@ -952,6 +954,7 @@ for n in key_list:
 	file.write('atom_weight: ' + str(AW) + '\n')
 	file.write('isomeric: ' + str(iso) + '\n')
 	file.write('mass-excess: ' + str(ex_mass) + '\n')
+	file.write('Jpi: ' + str(jpi) + '\n')
 	file.write('half_life: ' + str(hl) + '\n')
 	file.write('hl_units: ' + str(units) + '\n')
 	file.write('\n- excitations:\n')
