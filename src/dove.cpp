@@ -2945,7 +2945,7 @@ typedef struct
     double V = 20; //L
     double eps = 0.45; //-
     double k = 3.5; //hr^-1
-    double A = 6.0*pow(V*1000.0,0.33); //m^2
+    double A = 6.0*pow(V*1000.0,0.67)/1000.0; //m^2
     double h = 0.01; //kJ/hr/m^2/K
     double dH_h2o = -64.8; //kJ/mol
     double dS_h2o = -0.1; //kJ/mol/K
