@@ -2926,13 +2926,131 @@ double mb_cstr(int i, const Matrix<double> &u, double t, const void *data, const
 	//std::cout << i << " = " << dove.coupledTimeDerivative("q",u) << std::endl;
 	return rate;
 }
+
+typedef struct
+{
+    double C_h2o_in = 5.30E-5; //mol/L
+    double C_i2_in = 3.3E-7; //mol/L
+    double T_in = 298; //K
+    double C_h2o_0 = 0; //mol/L
+    double C_i2_0 = 0; //mol/L
+    double T_0 = 298; //K
+    double Q = 1000.0; //L/hr
+    double rg = 0.008314; //kJ/K/mol
+    double cg = 1.01; //kJ/kg/K
+    double cs = 1.2; //kJ/kg/K
+    double rhog = 0.001293; //kg/L
+    double T_b = 298; //K
+    double rhob = 0.73; //kg/L
+    double V = 20; //L
+    double eps = 0.45; //-
+    double k = 3.5; //hr^-1
+    double A = 6.0*pow(V*1000.0,0.33); //m^2
+    double h = 0.01; //kJ/hr/m^2/K
+    double dH_h2o = -64.8; //kJ/mol
+    double dS_h2o = -0.1; //kJ/mol/K
+    double dH_i2 = -24; //kJ/mol
+    double dS_i2 = -0.01; //kJ/mol/K
+    double qmax_h2o = 12.5; //mol/kg
+    double qmax_i2 = 0.5; //mol/kg
+} Test07_data;
+
+double meb_mass_timecoef(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove)
+{
+    Test07_data *dat = (Test07_data *) data;
+    return dat->eps*dat->V;
+}
+
+double meb_energy_timecoef(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove)
+{
+    Test07_data *dat = (Test07_data *) data;
+    return (dat->eps*dat->V*dat->cg*dat->rhog) + (dat->cs*dat->rhob*dat->V);
+}
+
+double h2o_ldf_kinetics(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove)
+{
+    Test07_data *dat = (Test07_data *) data;
+    
+    double T = dove.getNewU("T",u);
+    double C_h2o = dove.getNewU("C_h2o", u);
+    double C_i2 = dove.getNewU("C_i2", u);
+    double q_h2o = dove.getNewU("q_h2o", u);
+    
+    double K_h2o = exp((-dat->dH_h2o/dat->rg/T) + (dat->dS_h2o/dat->rg));
+    double K_i2 = exp((-dat->dH_i2/dat->rg/T) + (dat->dS_i2/dat->rg));
+    
+    double qe_h2o = (dat->qmax_h2o*K_h2o*C_h2o)/(1.0 + K_h2o*C_h2o + K_i2*C_i2);
+    
+    double rate = dat->k*(qe_h2o - q_h2o);
+    
+    return rate;
+}
+
+double i2_ldf_kinetics(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove)
+{
+    Test07_data *dat = (Test07_data *) data;
+    
+    double T = dove.getNewU("T",u);
+    double C_h2o = dove.getNewU("C_h2o", u);
+    double C_i2 = dove.getNewU("C_i2", u);
+    double q_i2 = dove.getNewU("q_i2", u);
+    
+    double K_h2o = exp((-dat->dH_h2o/dat->rg/T) + (dat->dS_h2o/dat->rg));
+    double K_i2 = exp((-dat->dH_i2/dat->rg/T) + (dat->dS_i2/dat->rg));
+    
+    double qe_i2 = (dat->qmax_h2o*K_i2*C_i2)/(1.0 + K_h2o*C_h2o + K_i2*C_i2);
+    
+    double rate = dat->k*(qe_i2 - q_i2);
+    
+    return rate;
+}
+
+double h2o_mb(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove)
+{
+    Test07_data *dat = (Test07_data *) data;
+    
+    double C_h2o = dove.getNewU("C_h2o", u);
+    double dq_dt = dove.coupledTimeDerivative("q_h2o",u);
+    
+    double rate = dat->Q*dat->C_h2o_in - dat->Q*C_h2o - dat->rhob*dat->V*dq_dt;
+    
+    return rate;
+}
+
+double i2_mb(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove)
+{
+    Test07_data *dat = (Test07_data *) data;
+    
+    double C_i2 = dove.getNewU("C_i2", u);
+    double dq_dt = dove.coupledTimeDerivative("q_i2",u);
+    
+    double rate = dat->Q*dat->C_i2_in - dat->Q*C_i2 - dat->rhob*dat->V*dq_dt;
+    
+    return rate;
+}
+
+double T_eb(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove)
+{
+    Test07_data *dat = (Test07_data *) data;
+    
+    double T = dove.getNewU("T", u);
+    double dq_h2o_dt = dove.coupledTimeDerivative("q_h2o",u);
+    double dq_i2_dt = dove.coupledTimeDerivative("q_i2",u);
+    
+    double dq_dt_energy = -(dat->dH_h2o*dq_h2o_dt + dat->dH_i2*dq_i2_dt);
+    
+    double rate = dat->Q*dat->rhog*dat->cg*dat->T_in - dat->Q*dat->rhog*dat->cg*T + dat->rhob*dat->V*dq_dt_energy + dat->h*dat->A*(dat->T_b-T);
+    
+    return rate;
+}
+
 // -------------------- End temporary testing --------------------------
 
 //Test function
 int DOVE_TESTS()
 {
 	int success = 0;
-	double time;
+	//double time;
 	
 	FILE *file;
 	file = fopen("output/DOVE_Tests.txt", "w+");
@@ -2942,8 +3060,9 @@ int DOVE_TESTS()
 		file = fopen("output/DOVE_Tests.txt", "w+");
 	}
 	
-	/**  ---------    Test 01: Various methods for First Order Decay (No Coupling) -------------- */
+	//  ---------    Test 01: Various methods for First Order Decay (No Coupling) --------------
 	
+    /**
 	Dove test01;
 	test01.set_outputfile(file);
 	
@@ -2990,9 +3109,9 @@ int DOVE_TESTS()
 	
 	fprintf(file,"\n --------------- End of Test01 ---------------- \n\n");
 	
-	/**  ------------------------------    END Test01   ---------------------------------- */
+	//  ------------------------------    END Test01   ----------------------------------
 	
-	/**  ---------    Test 02: Various methods for Nonlinear Coupled ODEs-------------- */
+	//  ---------    Test 02: Various methods for Nonlinear Coupled ODEs--------------
 	
 	Dove test02;
 	test02.set_outputfile(file);
@@ -3046,9 +3165,9 @@ int DOVE_TESTS()
 
 	fprintf(file,"\n --------------- End of Test02 ---------------- \n\n");
 	
-	/**  ------------------------------    END Test02   ---------------------------------- */
+	//  ------------------------------    END Test02   ----------------------------------
 	
-	/**  ---------    Test 03: Various methods for Linear Coupled ODEs as a PDE -------------- */
+	//  ---------    Test 03: Various methods for Linear Coupled ODEs as a PDE --------------
 	
 	Dove test03;
 	test03.set_outputfile(file);
@@ -3102,9 +3221,9 @@ int DOVE_TESTS()
 	
 	fprintf(file,"\n --------------- End of Test03 ---------------- \n\n");
 	
-	/**  ------------------------------    END Test03   ---------------------------------- */
+	//  ------------------------------    END Test03   ----------------------------------
 	
-	/**  ---------    Test 04: Preconditioning for Linear Coupled ODEs as a PDE -------------- */
+	//  ---------    Test 04: Preconditioning for Linear Coupled ODEs as a PDE --------------
 
 	Dove test04;
 	test04.set_outputfile(file);
@@ -3160,9 +3279,9 @@ int DOVE_TESTS()
 	
 	fprintf(file,"\n --------------- End of Test04 ---------------- \n\n");
 	
-	/**  ------------------------------    END Test04   ---------------------------------- */
+	//  ------------------------------    END Test04   ----------------------------------
 	
-	/**  ---------    Test 05: Preconditioning for NonLinear Coupled ODEs -------------- */
+	//  ---------    Test 05: Preconditioning for NonLinear Coupled ODEs --------------
 	
 	Dove test05;
 	test05.set_outputfile(file);
@@ -3221,9 +3340,9 @@ int DOVE_TESTS()
 	
 	fprintf(file,"\n --------------- End of Test05 ---------------- \n\n");
 	
-	/**  ------------------------------    END Test05   ---------------------------------- */
+	//  ------------------------------    END Test05   ----------------------------------
 	
-	/**  ---------    Test 06: Coupled Time Derivatives -------------- */
+	//  ---------    Test 06: Coupled Time Derivatives --------------
 	Dove test06;
 	test06.set_outputfile(file);
 	fprintf(file,"Test06: Multi-variable test for coupled Time Derivatives\n---------------------------------\n(eps)*dc/dt = Q*co - Q*c - (rho)*dq/dt\ndq/dt=k*(K*c-q)\n");
@@ -3270,8 +3389,62 @@ int DOVE_TESTS()
 	test06.solve_all();
 	
 	fprintf(file,"\n --------------- End of Test06 ---------------- \n\n");
-	
-	/**  ------------------------------    END Test06   ---------------------------------- */
+	//  ------------------------------    END Test06   ----------------------------------
+    
+    */
+    
+    //  ---------    Test 07: Coupled Mass and Energy Balances --------------
+    Dove test07;
+    test07.set_outputfile(file);
+    fprintf(file,"Test07: 2nd Multi-variable test for coupled Time Derivatives\n---------------------------------\n");
+    
+    Test07_data data07;
+    test07.set_userdata((void*)&data07);
+    test07.set_output(true);
+    test07.set_numfunc(5);
+    test07.set_variableName(0, "C_h2o");
+    test07.set_variableName(1, "C_i2");
+    test07.set_variableName(2, "q_h2o");
+    test07.set_variableName(3, "q_i2");
+    test07.set_variableName(4, "T");
+    
+    test07.registerFunction("q_h2o", h2o_ldf_kinetics);
+    test07.registerFunction("q_i2", i2_ldf_kinetics);
+    test07.registerFunction("C_h2o", h2o_mb);
+    test07.registerFunction("C_i2", i2_mb);
+    test07.registerFunction("T", T_eb);
+    
+    test07.registerCoeff("C_h2o", meb_mass_timecoef);
+    test07.registerCoeff("C_i2", meb_mass_timecoef);
+    test07.registerCoeff("T", meb_energy_timecoef);
+    
+    test07.set_starttime(0.0);
+    test07.set_endtime(10000.0);
+    test07.set_timestepper(RATEBASED);
+    test07.set_timestepmax(5.0);
+    test07.set_NonlinearOutput(false);
+    test07.set_output(true);
+    test07.set_headeroutput(true);
+    test07.set_LinearOutput(false);
+    test07.set_LineSearchMethod(BT);
+    test07.set_LinearStatus(false);
+    test07.set_MaxNonLinearIterations(10);
+    test07.set_tolerance(1e-8);
+    
+    test07.set_LinearMethod(QR);
+    
+    test07.set_initialcondition("C_h2o", data07.C_h2o_0);
+    test07.set_initialcondition("C_i2", data07.C_i2_0);
+    test07.set_initialcondition("q_h2o", data07.C_h2o_0);
+    test07.set_initialcondition("q_i2", data07.C_i2_0);
+    test07.set_initialcondition("T", data07.T_0);
+    test07.set_timestep(0.05);
+    test07.set_t_out(8.0);
+    test07.set_integrationtype(BDF2);
+    test07.solve_all();
+    
+    //fprintf(file,"\n --------------- End of Test06 ---------------- \n\n");
+    //  ------------------------------    END Test06   ----------------------------------
 	
 	return success;
 }
