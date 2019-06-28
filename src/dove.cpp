@@ -3419,7 +3419,7 @@ int DOVE_TESTS()
     test07.registerCoeff("T", meb_energy_timecoef);
     
     test07.set_starttime(0.0);
-    test07.set_endtime(10000.0);
+    test07.set_endtime(5000.0);
     test07.set_timestepper(RATEBASED);
     test07.set_timestepmax(5.0);
     test07.set_NonlinearOutput(false);
