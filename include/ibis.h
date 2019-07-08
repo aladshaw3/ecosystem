@@ -55,6 +55,18 @@ std::string decaymode_string(decay_mode mode);
 /// Function to return a string for the units
 std::string timeunits_string(time_units units);
 
+/// Empirical formulation of the Fermi Function
+double EmpFermi(int z, double W);
+
+/// Empirical formulation of the Shape Function
+double EmpShape(int L, double W0, double W);
+
+/// Distribution of beta energy function
+double DistEnergy(int z, int L, double W0, double W);
+
+/// Stepwise integration for average energy
+double MeanEnergy_Stepwise(int z, int L, double E0);
+
 /// Isotope object to hold information and provide decay operations
 /** This is the C++ object to store information and functions associated with the
 	decay of radioactive isotopes. It herits from the Atom object and extends that
@@ -103,12 +115,17 @@ public:
 	double BoilingPoint();								///< Returns the boiling point
 	double ThermalXSection();							///< Returns the thermal cross section
 	double ScatterXSection();							///< Returns the scattering cross section
+    double MassExcess();								///< Returns the mass-excess of the nuclide (in MeV)
+    double Jpi();										///< Returns the magnitude of the spin-parity
 	
 	decay_mode DecayMode(int i);						///< Return the ith decay mode
 	double BranchFraction(int i);						///< Return the ith branch fraction
 	std::string ParticleEmitted(int i);					///< Return the name of the particle emitted for the ith decay mode
 	int NumberParticlesEmitted(int i);					///< Return the number of particles that get emitted
 	std::string Daughter(int i);						///< Return the name of the daughter isotope
+    double QValue(int i);								///< Return the ith Q-value (in MeV)
+    int deltaJ(int i);									///< Return the ith spin jump
+    double MeanEnergy(int i);							///< Return the ith mean radiation energy (in MeV)
 	
 	/// Return a list of indices of the decay modes that this daughter isotope is formed from given the parent isotope's name
 	/** This function will iterate through the decay modes for the parent isotope we are investigating and return a
@@ -133,6 +150,9 @@ protected:
 	std::vector<std::string> particle_emitted;			///< Name of the particle(s) ejected during spec_iso decay
 	std::vector<int> num_particles;						///< Numbers of particles emitted during decay mode
 	std::vector<std::string> daughter;					///< Name of the daughter isotope formed
+    std::vector<double> Q_values;						///< Q-value (or maximum radiation energy) of the decay mode (in MeV)
+    std::vector<double> mean_radiation_energy;			///< Mean radiation energy of the decay modes (calculated in MeV)
+    std::vector<int> spin_jump;							///< Magnitude of change in spin from parent to daughter
 	
 	/// List of all parent and daughter/particles pairs in a chain given this isotope
 	/** Stores the list of parent and daughter pairs. If the parent produces emitted particles, those go
@@ -170,10 +190,13 @@ protected:
 	bool Warnings;										///< Boolean is True if you want to print warnings to console
     bool inMoles;                                       ///< Boolean is True if units of concentration are in moles, False if units in atoms
     double activity;                                    ///< Radioactivity of the current nuclide (in disintigrations per second) or (Bq)
+    double mass_excess;									///< Mass excess of the nuclide (in MeV)
+    double spin_parity;									///< Magnitude of the spin parity of the nuclide
 	
 	yaml_cpp_class *nuclides;							///< Pointer to a yaml object storing the digital library of all nuclides
 	
 	int setConstants();									///< Set the decay_modes, branch_ratios, and other info based on load library
+    int calculateMeanEnergies();						///< Calculate the mean radiation energies for the isotope
 	void computeDecayRate();							///< Compute the decay rate (in 1/s) based on the half-life
 	int addPairs(int i, std::string parent);			///< Function to add parent/daughter pairs given the parent's name and the current level
 	YamlWrapper& getNuclideLibrary();					///< Return reference to the nuclide library

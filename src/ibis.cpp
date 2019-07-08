@@ -397,6 +397,65 @@ std::string timeunits_string(time_units units)
 	return name;
 }
 
+// Empirical formulation of the Fermi Function
+double EmpFermi(int z, double W)
+{
+    double F = 0.0;
+    double A = 0.0; double B = 0.0;
+    
+    if (z >= 16)
+    	A = 1.0 + 0.40456*exp(0.073184*(double)z);
+    else
+    	A = 0.073*(double)z + 0.94;
+    
+    if (z > 56)
+    	B = 1.2277E-3*(double)z*exp(0.10122*(double)z);
+    else
+    	B = 5.5465E-3*(double)z*exp(0.076929*(double)z);
+    
+    F = sqrt(A + (B/(W-1.0)));
+    
+    return F;
+}
+
+// Empirical formulation of the Shape Function
+double EmpShape(int L, double W0, double W)
+{
+	if (L <= 0) L = 1;
+    return pow((W0 - W),2.0*((double)L - 1.0));
+}
+
+// Distribution of beta energy function
+double DistEnergy(int z, int L, double W0, double W)
+{
+    return sqrt(W*W-1.0)*W*(W0-W)*(W0-W)*EmpFermi(z, W)*EmpShape(L, W0, W);
+}
+
+// Stepwise integration for average energy
+double MeanEnergy_Stepwise(int z, int L, double E0)
+{
+    double top = 0.0;
+    double bot = 0.0;
+    double dW = E0/10.0;
+    double En = 0.0001;
+    double Enp1 = 0.0001;
+    double W0 = 1.0 + E0;
+    
+    for (int i=0; i<10; i++)
+    {
+    	En = Enp1;
+    	Enp1 = En + dW;
+        
+        double Wn = En + 1.0;
+        double Wnp1 = Enp1 + 1.0;
+        
+        top += 0.5*(En+Enp1)*0.5*(DistEnergy(z, L, W0, Wn)+DistEnergy(z, L, W0, Wnp1))*(Enp1-En);
+        bot += 0.5*(DistEnergy(z, L, W0, Wn)+DistEnergy(z, L, W0, Wnp1))*(Enp1-En);
+    }
+    
+    return top/bot;
+}
+
 /*
  *								Start: Isotope Class Definitions
  *	-------------------------------------------------------------------------------------
@@ -419,6 +478,8 @@ Isotope::Isotope()
 	concentration = 0.0;
     inMoles = true;
     activity = 0.0;
+    mass_excess = 0.0;
+    spin_parity = 0.0;
 }
 
 //Default destructor
@@ -429,6 +490,9 @@ Isotope::~Isotope()
 	particle_emitted.clear();
 	num_particles.clear();
 	daughter.clear();
+    Q_values.clear();
+    mean_radiation_energy.clear();
+    spin_jump.clear();
 	chain.clear();
 }
 
@@ -485,6 +549,7 @@ int Isotope::registerIsotope(std::string sym, int iso)
 	this->isotope_number = iso;
 	this->editNeutrons(iso - this->AtomicNumber());
 	success = this->setConstants();
+    success = this->calculateMeanEnergies();
 	this->computeDecayRate();
 	return success;
 }
@@ -497,6 +562,7 @@ int Isotope::registerIsotope(int atom_num, int iso_num)
 	this->isotope_number = iso_num;
 	this->editNeutrons(iso_num - atom_num);
 	success = this->setConstants();
+    success = this->calculateMeanEnergies();
 	this->computeDecayRate();
 	return success;
 }
@@ -785,6 +851,16 @@ double Isotope::ScatterXSection()
 	return this->Atom::ScatterXSection();
 }
 
+double Isotope::MassExcess()
+{
+    return this->mass_excess;
+}
+
+double Isotope::Jpi()
+{
+    return this->spin_parity;
+}
+
 //return decay mode
 decay_mode Isotope::DecayMode(int i)
 {
@@ -832,6 +908,33 @@ std::string Isotope::Daughter(int i)
 	else
 		return this->daughter[i];
 	
+}
+
+double Isotope::QValue(int i)
+{
+    if (i < 0 || i >= this->DecayModes())
+        return 0.0;
+    else
+        return this->Q_values[i];
+    
+}
+
+int Isotope::deltaJ(int i)
+{
+    if (i < 0 || i >= this->DecayModes())
+        return 0.0;
+    else
+        return this->spin_jump[i];
+    
+}
+
+double Isotope::MeanEnergy(int i)
+{
+    if (i < 0 || i >= this->DecayModes())
+        return 0.0;
+    else
+        return this->mean_radiation_energy[i];
+    
 }
 
 //return list of decay mode indices that form this isotope
@@ -912,6 +1015,9 @@ int Isotope::setConstants()
 	this->particle_emitted.clear();
 	this->num_particles.clear();
 	this->daughter.clear();
+    this->Q_values.clear();
+    this->mean_radiation_energy.clear();
+    this->spin_jump.clear();
 	
 	//Read from the library to find the isotope
 	try
@@ -930,6 +1036,9 @@ int Isotope::setConstants()
 		this->hl_units = timeunits_choice( read_units );
 		if (this->HalfLife(seconds) < this->hl_threshold)
 			reg = false;
+        
+        this->mass_excess = this->getNuclideLibrary()(this->IsotopeName())["mass-excess"].getDouble();
+        this->spin_parity = this->getNuclideLibrary()(this->IsotopeName())["Jpi"].getDouble();
 		
 		//Loop through the decay_modes header
 		int i = 0;
@@ -946,6 +1055,10 @@ int Isotope::setConstants()
 			this->particle_emitted.push_back( this->getNuclideLibrary()(this->IsotopeName())("decay_modes")(x.first)["part_emitted"].getString() );
 			this->num_particles.push_back(this->getNuclideLibrary()(this->IsotopeName())("decay_modes")(x.first)["num_parts"].getInt());
 			this->daughter.push_back( this->getNuclideLibrary()(this->IsotopeName())("decay_modes")(x.first)["daughter"].getString() );
+            this->Q_values.push_back(this->getNuclideLibrary()(this->IsotopeName())("decay_modes")(x.first)["Q-value"].getDouble());
+            this->mean_radiation_energy.push_back(0.0);
+            double dau_spin = this->getNuclideLibrary()(this->getNuclideLibrary()(this->IsotopeName())("decay_modes")(x.first)["daughter"].getString())["Jpi"].getDouble();
+            this->spin_jump.push_back((int)fabs(this->spin_parity-dau_spin));
 			i++;
 		}
 		
@@ -973,9 +1086,125 @@ int Isotope::setConstants()
 		this->particle_emitted.push_back("None");
 		this->num_particles.push_back(0);
 		this->daughter.push_back("None");
+        this->Q_values.push_back(0.0);
+        this->mean_radiation_energy.push_back(0.0);
+        this->spin_jump.push_back(0);
 		success = -1;
 	}
 	return success;
+}
+
+//Calculate the mean energies
+int Isotope::calculateMeanEnergies()
+{
+    int success = 0;
+    
+    // Loop through all decay modes for this isotope
+    for (int i=0; i<this->DecayModes(); i++)
+    {
+        // If the current decay mode is NOT a form of beta decay, set mean energy to Q-value
+        		// If it is a form of beta decay, then form the integral average
+        switch (this->decay_modes[i])
+        {
+            case stable:
+            	this->mean_radiation_energy[i] = this->Q_values[i];
+                break;
+                
+            case alpha:
+            	this->mean_radiation_energy[i] = this->Q_values[i];
+                break;
+                
+            case spon_fiss:
+            	this->mean_radiation_energy[i] = this->Q_values[i];
+                break;
+                
+            case beta_plus:
+            	this->mean_radiation_energy[i] = MeanEnergy_Stepwise(this->AtomicNumber(), this->spin_jump[i], this->Q_values[i]);
+                break;
+                
+            case beta_min:
+            	this->mean_radiation_energy[i] = MeanEnergy_Stepwise(this->AtomicNumber(), this->spin_jump[i], this->Q_values[i]);
+                break;
+                
+            case iso_trans:
+            	this->mean_radiation_energy[i] = this->Q_values[i];
+                break;
+                
+            case neutron_em:
+            	this->mean_radiation_energy[i] = this->Q_values[i];
+                break;
+                
+            case beta_min_neutron_em:
+            	this->mean_radiation_energy[i] = MeanEnergy_Stepwise(this->AtomicNumber(), this->spin_jump[i], this->Q_values[i]);
+                break;
+                
+            case beta_plus_proton_em:
+            	this->mean_radiation_energy[i] = MeanEnergy_Stepwise(this->AtomicNumber(), this->spin_jump[i], this->Q_values[i]);
+                break;
+                
+            case proton_em:
+            	this->mean_radiation_energy[i] = this->Q_values[i];
+                break;
+                
+            case beta_plus_alpha:
+            	this->mean_radiation_energy[i] = MeanEnergy_Stepwise(this->AtomicNumber(), this->spin_jump[i], this->Q_values[i]);
+                break;
+                
+            case beta_plus_beta_plus:
+            	this->mean_radiation_energy[i] = MeanEnergy_Stepwise(this->AtomicNumber(), this->spin_jump[i], this->Q_values[i]);
+                break;
+                
+            case beta_min_beta_min:
+            	this->mean_radiation_energy[i] = MeanEnergy_Stepwise(this->AtomicNumber(), this->spin_jump[i], this->Q_values[i]);
+                break;
+                
+            case beta_min_2neutron_em:
+            	this->mean_radiation_energy[i] = MeanEnergy_Stepwise(this->AtomicNumber(), this->spin_jump[i], this->Q_values[i]);
+                break;
+                
+            case beta_min_alpha:
+            	this->mean_radiation_energy[i] = MeanEnergy_Stepwise(this->AtomicNumber(), this->spin_jump[i], this->Q_values[i]);
+                break;
+                
+            case proton_em_proton_em:
+            	this->mean_radiation_energy[i] = this->Q_values[i];
+                break;
+                
+            case neutron_em_neutron_em:
+            	this->mean_radiation_energy[i] = this->Q_values[i];
+                break;
+                
+            case beta_min_3neutron_em:
+            	this->mean_radiation_energy[i] = MeanEnergy_Stepwise(this->AtomicNumber(), this->spin_jump[i], this->Q_values[i]);
+                break;
+                
+            case beta_min_4neutron_em:
+            	this->mean_radiation_energy[i] = MeanEnergy_Stepwise(this->AtomicNumber(), this->spin_jump[i], this->Q_values[i]);
+                break;
+                
+            case beta_plus_2proton_em:
+            	this->mean_radiation_energy[i] = MeanEnergy_Stepwise(this->AtomicNumber(), this->spin_jump[i], this->Q_values[i]);
+                break;
+                
+            case beta_plus_3proton_em:
+            	this->mean_radiation_energy[i] = MeanEnergy_Stepwise(this->AtomicNumber(), this->spin_jump[i], this->Q_values[i]);
+                break;
+                
+            case specific_isotope:
+            	this->mean_radiation_energy[i] = this->Q_values[i];
+                break;
+                
+            case undefined:
+            	this->mean_radiation_energy[i] = this->Q_values[i];
+                break;
+                
+            default:
+            	this->mean_radiation_energy[i] = this->Q_values[i];
+                break;
+        }
+    }
+    
+    return success;
 }
 
 //Compute decay rate
@@ -2628,17 +2857,20 @@ int IBIS_TESTS()
 	//test.registerInitialNuclide("U-235", 45.0);
 	//test.registerInitialNuclide("U-238", 10.0);
 	
+    std::string nuc = "Te-132";
 	test.registerInitialNuclide("He-5");
 	test.registerInitialNuclide("He-8");
 	test.registerInitialNuclide("Li-5");
 	test.registerInitialNuclide("Li-9");
 	test.registerInitialNuclide("Li-11");
 	test.registerInitialNuclide("Be-14");
+    test.registerInitialNuclide(nuc);
 	
 	test.setConsoleOut(true);
 	test.createChains();					//Creates list of nuclides and sorts the list from parent to daughter
 	test.formEigenvectors();				//Mandatory before solving
 	test.verifyEigenSoln();					//Completely optional
+    test.setWarnings(true);
 	
 	//test.getEigenvectors().Display("V");
 	test.DisplayEigenMap();
@@ -2663,6 +2895,14 @@ int IBIS_TESTS()
 	test.print_results(file, seconds, 0.1, 10);			//Print results to file
 	
 	test.DisplayEigenMap();
+    
+    std::cout << "\nNuclide Beta Energy Test for " << nuc << " ...\n";
+    for (int i=0; i<test.getIsotope(nuc).DecayModes(); i++)
+    {
+    	std::cout << "Q-value\t" << test.getIsotope(nuc).QValue(i) << std::endl;
+        std::cout << "L\t" << test.getIsotope(nuc).deltaJ(i) << std::endl;
+    	std::cout << "MeanEnergy\t" << test.getIsotope(nuc).MeanEnergy(i) << std::endl;
+    }
 	
 	time = clock() - time;
 	std::cout << "\nSimulation Runtime: " << (time / CLOCKS_PER_SEC) << " seconds for " << test.getNumberNuclides()+test.getNumberStableNuclides() << " isotopes \n";
@@ -2670,6 +2910,6 @@ int IBIS_TESTS()
 	//Close the open file
 	if (file != nullptr)
 		fclose(file);
-	
+    
 	return success;
 }
