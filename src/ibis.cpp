@@ -480,6 +480,7 @@ Isotope::Isotope()
     activity = 0.0;
     mass_excess = 0.0;
     spin_parity = 0.0;
+    ionization_coeff = 0.0;
 }
 
 //Default destructor
@@ -859,6 +860,11 @@ double Isotope::MassExcess()
 double Isotope::Jpi()
 {
     return this->spin_parity;
+}
+
+double Isotope::IonizationCoeff()
+{
+    return this->ionization_coeff;
 }
 
 //return decay mode

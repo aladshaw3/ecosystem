@@ -97,6 +97,19 @@ public:
 	void setWarnings(bool opt);							///< Set the warnings boolean value
 	void setThreshold(double val);						///< Set the threshold value for half-life (in sec)
 	void updateDecayRate();								///< Increase decay rate by 1% (used to correct issues with same eigenvalues)
+    
+    /// Calculate the ionization rate given a list of atoms and their mass fractions in a particular media
+    /** This function uses the Linear Energy Transfer function to calculate the average ionization potential
+    	of this nuclide decaying in a media made up of the given set of atoms and their respective mass
+        fractions. The result is stored in the ionization_coeff parameter and can be accessed via the
+        IonizationCoeff() return function. As the density and/or mass fraction of the media changes, this
+        function needs to be re-called to update that ionization rate.
+        
+        \param atoms reference to a list of atoms in the media
+        \param mass_fracs reference to a list of mass fractions for the list of atoms
+        \param density density of the media in g/cm^3
+        \param potential ionization potential of the media in eV*/
+    void calculateIonization(std::vector<Atom> &atoms, std::vector<double> &mass_fracs, double density, double potential);
 	
 	int IsotopeNumber();								///< Return the isotope number of the atom (i.e., mass number)
 	double DecayRate();									///< Return the decay rate of the isotope
@@ -117,6 +130,7 @@ public:
 	double ScatterXSection();							///< Returns the scattering cross section
     double MassExcess();								///< Returns the mass-excess of the nuclide (in MeV)
     double Jpi();										///< Returns the magnitude of the spin-parity
+    double IonizationCoeff();							///< Returns the average number of ion pairs produced from this nuclide decay
 	
 	decay_mode DecayMode(int i);						///< Return the ith decay mode
 	double BranchFraction(int i);						///< Return the ith branch fraction
@@ -192,6 +206,7 @@ protected:
     double activity;                                    ///< Radioactivity of the current nuclide (in disintigrations per second) or (Bq)
     double mass_excess;									///< Mass excess of the nuclide (in MeV)
     double spin_parity;									///< Magnitude of the spin parity of the nuclide
+    double ionization_coeff;							///< Average number of ion pairs produced per decay of this nuclide
 	
 	yaml_cpp_class *nuclides;							///< Pointer to a yaml object storing the digital library of all nuclides
 	
