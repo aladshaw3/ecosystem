@@ -8,7 +8,40 @@
  *			isotopes through various decay modes. Added to the Atom object are parameters
  *			for decay rates (half-lifes), branching ratios, and decay modes (alpha, beta,
  *			etc). The intent of this system is to determine how radioactive decay occurs
- *			when given a sinle or multiple starting isotopes.
+ *			when given a single or multiple starting isotopes. The branching system of 
+ *			isotopes is solved analytically using an eigenvector-eigenvalue solution
+ *			coupled with a sorting algorithm to guarentee a lower triangular coefficient
+ *			matrix. In addition, we also solve for the accumulation of the stable isotopes
+ *			by integrating the unstable solution through time. This method is based on 
+ *			similar methods from the following sources:
+ *
+ *			Decay Solution Methods:
+ *			-----------------------
+ *			[1] M. Amaku, P.R. Pascholati, V.R. Vanin, Comp. Phys. Com. 181, 21-23, 2010.
+ *			[2] D. Yuan, W. Kernan, J. Appl. Phys. 101, 094907, 2007.
+ *
+ *			Also implemented in the Isotope class are methods to estimate the mean radiation
+ *			energy of beta emitters and the ionization rate coefficient for nuclides of any
+ *			decay modes. The mean radiation energy uses approximations for the Fermi Function
+ *			and Shape Function of the beta spectra. Methods could potentially be improved upon
+ *			by updating those two functions. The ionization coefficient is calculated using 
+ *			the Linear Energy Transfer (LET) model coupled with theoretical models for the 
+ *			Stopping Power of the emissions based on decay type. References are as follows:
+ *
+ *			LET and Stopping Power Functions:
+ *			---------------------------------
+ *			[1] Y.H. Kim, S. Yiacoumi, C. Tsouris, J. Env. Radio. 143, 91-99, 2015.
+ *			[2] H. Huizenga, P.R.M. Storchi, Phys. Med. Biol. 34, 1371-1396, 1989.
+ *			[3] ICRU Report 37, "Stopping Powers for Electrons and Positrons," 1984.
+ *			[4] W.A. Tome, J.R. Palta, Med. Phys. 5, 758-772, 1998.
+ *			[5] Q.H. Mohammad, H.A. Maghdid, Research Reviews: J. Pure Appl. Phys. 5, 22-28, 2017.
+ *
+ *			Mean Energy, Fermi Functions, and Beta Spectra Shape Functions:
+ *			---------------------------------------------------------------
+ *			[1] X. Mougeot, Phys. Rev. C, 91, 055504, 2015.
+ *			[2] V. Venkataramaiah, K. Gopala, A. Basavaraju, S.S. Suryanarayana, H. Sanjeeviah,
+ *				J. Phys. G: Nucl. Phys. 11, 359-364, 1985.
+ *			[3] P.J. Mohr, B.N. Taylor, D.B. Newell, Reviews of Mod. Phys. 84, 1527-1605, 2012.
  *
  *  \author Austin Ladshaw
  *	\date 09/04/2018
@@ -67,6 +100,12 @@ double DistEnergy(int z, int L, double W0, double W);
 /// Stepwise integration for average energy
 double MeanEnergy_Stepwise(int z, int L, double E0);
 
+/// Auxillary Function for beta-
+double aux_beta_minus(double beta, double eta, double tau);
+
+/// Auxillary Function for beta+
+double aux_beta_plus(double beta, double eta, double tau);
+
 /// Isotope object to hold information and provide decay operations
 /** This is the C++ object to store information and functions associated with the
 	decay of radioactive isotopes. It herits from the Atom object and extends that
@@ -109,7 +148,7 @@ public:
         \param mass_fracs reference to a list of mass fractions for the list of atoms
         \param density density of the media in g/cm^3
         \param potential ionization potential of the media in eV*/
-    void calculateIonization(std::vector<Atom> &atoms, std::vector<double> &mass_fracs, double density, double potential);
+    int calculateIonization(std::vector<Atom> &atoms, std::vector<double> &mass_fracs, double density, double potential);
 	
 	int IsotopeNumber();								///< Return the isotope number of the atom (i.e., mass number)
 	double DecayRate();									///< Return the decay rate of the isotope
