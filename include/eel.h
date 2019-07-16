@@ -78,6 +78,7 @@ public:
 	double BoilingPoint();					///< Returns the boiling point
 	double ThermalXSection();				///< Returns the thermal cross section
 	double ScatterXSection();				///< Returns the scattering cross section
+    double KShellEnergy();					///< Returns the K-shell energy (in keV)
 	
 	std::string AtomName();					///< Returns the name of the atom
 	std::string AtomSymbol();				///< Returns the symbol of the atom

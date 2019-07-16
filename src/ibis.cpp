@@ -456,6 +456,87 @@ double MeanEnergy_Stepwise(int z, int L, double E0)
     return top/bot;
 }
 
+// Auxillary Function for beta-
+double aux_beta_minus(double beta, double eta, double tau)
+{
+    double sqbrack = 0.5*tau*tau*eta*eta + (2.0*tau + 1.0)*log(1.0-eta);
+    double G = -1.0 - beta*beta + log(4.0*eta*(1.0-eta)) + (1.0/(1.0-eta)) - (1.0-beta*beta)*sqbrack;
+    return G;
+}
+
+// Auxillary Function for beta+
+double aux_beta_plus(double beta, double eta, double tau)
+{
+    double eps = (1.0/(tau + 2.0));
+    double sqbrack = 1.0+(2.0-eps*eps)*eta - (3.0+eps*eps)*(0.5*tau*eps)*eta*eta + (1.0+tau*eps)*(tau*tau*eps*eps/3.0)*eta*eta - (tau*tau*tau*eps*eps*eps/4.0)*eta*eta*eta*eta;
+    double G = log(4.0*eta) - beta*beta*sqbrack;
+    return G;
+}
+
+// Mean Excitation energy (in eV)
+double mean_excitation_energy(int atom_num)
+{
+    return 9.1*(double)atom_num*(1.0 + 1.9*pow((double)atom_num,-2.0/3.0));
+}
+
+/// Stopping power for beta minus
+double stopping_power_beta_minus(double mean_energy, int Zj, double Aj, double delta)
+{
+	double mec = 0.511004; //MeV
+    double re = 2.818E-13; //cm
+    double u = 1.6605655E-24; //g
+	double beta = sqrt( (1.0 - pow(1.0 + (mean_energy/mec),-2.0)) );
+    double eta = delta/mean_energy;
+    double tau = mean_energy/mec;
+    double G = aux_beta_minus(beta, eta, tau);
+    double Xj = mean_excitation_energy(Zj);
+    
+    return (2.0*M_PI*re*re*mec/beta/beta)*((double)Zj/u/Aj)*( log(mean_energy*mean_energy/Xj/Xj) + log(1.0+tau/2.0) + G );
+}
+
+/// Stopping power for beta plus
+double stopping_power_beta_plus(double mean_energy, int Zj, double Aj, double delta)
+{
+    double mec = 0.511004; //MeV
+    double re = 2.818E-13; //cm
+    double u = 1.6605655E-24; //g
+    double beta = sqrt( (1.0 - pow(1.0 + (mean_energy/mec),-2.0)) );
+    double eta = delta/mean_energy;
+    double tau = mean_energy/mec;
+    double G = aux_beta_plus(beta, eta, tau);
+    double Xj = mean_excitation_energy(Zj);
+    
+    return (2.0*M_PI*re*re*mec/beta/beta)*((double)Zj/u/Aj)*( log(mean_energy*mean_energy/Xj/Xj) + log(1.0+tau/2.0) + G );
+}
+
+/// Stopping power for non-beta
+double stopping_power_nonbeta(double mean_energy, int Zj, double Aj, double delta, double charge)
+{
+    double mec = 0.511004; //MeV
+    double re = 2.818E-13; //cm
+    double u = 1.6605655E-24; //g
+    double beta = sqrt( (1.0 - pow(1.0 + (mean_energy/mec),-2.0)) );
+    double Xj = mean_excitation_energy(Zj);
+    
+    return (4.0*M_PI*re*re*mec/beta/beta)*((double)Zj/u/Aj)*charge*charge*( log(2.0*mec*beta*beta/Xj/(1.0-beta*beta)) - beta*beta );
+}
+
+// Mean path length for beta (cm)
+double mean_path_beta(double mean_energy, double density)
+{
+    double power = 1.265 - 0.0954*log(mean_energy);
+    return 0.412*pow(mean_energy,power)/density;
+}
+
+// Mean path length for non-beta (cm)
+double mean_path_nonbeta(double mean_energy)
+{
+    if (mean_energy < 7.0)
+    	return 0.3*pow(mean_energy,3.0/2.0);
+    else
+    	return (0.005*mean_energy + 0.285)*pow(mean_energy,3.0/2.0);
+}
+
 /*
  *								Start: Isotope Class Definitions
  *	-------------------------------------------------------------------------------------
@@ -752,6 +833,33 @@ void Isotope::setThreshold(double val)
 void Isotope::updateDecayRate()
 {
 	this->decay_rate = this->decay_rate*1.001;
+}
+
+// Calculate ionization coefficient
+int Isotope::calculateIonization(std::vector<Atom> &atoms, std::vector<double> &mass_fracs, double density, double potential)
+{
+    int success = 0;
+    
+    double Ion = 0.0;
+    
+    //Loop through all decay modes
+    for (int i=0; i<this->DecayModes(); i++)
+    {
+        double Ii = 0.0;
+        
+        //Loop through the atoms in the media
+        for (int j=0; j<atoms.size(); j++)
+        {
+        	double delta = pow(10.0,(double)orderMag(atoms[j].KShellEnergy())+1.0)*1000.0;
+            
+        }
+        
+        Ion += Ii*this->BranchFraction(i);
+    }
+    
+    this->ionization_coeff = Ion;
+    
+    return success;
 }
 
 //Return isotope number

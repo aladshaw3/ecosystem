@@ -57,6 +57,7 @@
 #include "eel.h"
 #include "yaml_wrapper.h"
 #include "dove.h"
+#include "gsta_opt.h"
 #include <unordered_map>
 
 
@@ -105,6 +106,24 @@ double aux_beta_minus(double beta, double eta, double tau);
 
 /// Auxillary Function for beta+
 double aux_beta_plus(double beta, double eta, double tau);
+
+/// Mean Excitation energy (in eV)
+double mean_excitation_energy(int atom_num);
+
+/// Stopping power for beta minus
+double stopping_power_beta_minus(double mean_energy, int Zj, double Aj, double delta);
+
+/// Stopping power for beta plus
+double stopping_power_beta_plus(double mean_energy, int Zj, double Aj, double delta);
+
+/// Stopping power for non-beta
+double stopping_power_nonbeta(double mean_energy, int Zj, double Aj, double delta, double charge);
+
+/// Mean path length for beta (cm)
+double mean_path_beta(double mean_energy, double density);
+
+/// Mean path length for non-beta (cm)
+double mean_path_nonbeta(double mean_energy);
 
 /// Isotope object to hold information and provide decay operations
 /** This is the C++ object to store information and functions associated with the

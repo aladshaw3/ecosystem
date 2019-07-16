@@ -3624,6 +3624,12 @@ double Atom::ScatterXSection()
 	return this->scatter_x_sec;
 }
 
+//Return K-shell
+double Atom::KShellEnergy()
+{
+    return this->K_shell_energy;
+}
+
 //Return the name of the atom
 std::string Atom::AtomName()
 {
