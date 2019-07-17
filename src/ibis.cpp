@@ -434,6 +434,7 @@ double DistEnergy(int z, int L, double W0, double W)
 // Stepwise integration for average energy
 double MeanEnergy_Stepwise(int z, int L, double E0)
 {
+	if (E0 <= 0.0) return 0.0;
     double top = 0.0;
     double bot = 0.0;
     double dW = E0/10.0;
@@ -482,6 +483,7 @@ double mean_excitation_energy(int atom_num)
 /// Stopping power for beta minus
 double stopping_power_beta_minus(double mean_energy, int Zj, double Aj, double delta)
 {
+	if (mean_energy <= 0.0) return 0.0;
 	double mec = 0.511004; //MeV
     double re = 2.818E-13; //cm
     double u = 1.6605655E-24; //g
@@ -489,7 +491,7 @@ double stopping_power_beta_minus(double mean_energy, int Zj, double Aj, double d
     double eta = delta/mean_energy;
     double tau = mean_energy/mec;
     double G = aux_beta_minus(beta, eta, tau);
-    double Xj = mean_excitation_energy(Zj);
+    double Xj = mean_excitation_energy(Zj)/1E6;
     
     return (2.0*M_PI*re*re*mec/beta/beta)*((double)Zj/u/Aj)*( log(mean_energy*mean_energy/Xj/Xj) + log(1.0+tau/2.0) + G );
 }
@@ -497,6 +499,7 @@ double stopping_power_beta_minus(double mean_energy, int Zj, double Aj, double d
 /// Stopping power for beta plus
 double stopping_power_beta_plus(double mean_energy, int Zj, double Aj, double delta)
 {
+	if (mean_energy <= 0.0) return 0.0;
     double mec = 0.511004; //MeV
     double re = 2.818E-13; //cm
     double u = 1.6605655E-24; //g
@@ -504,7 +507,7 @@ double stopping_power_beta_plus(double mean_energy, int Zj, double Aj, double de
     double eta = delta/mean_energy;
     double tau = mean_energy/mec;
     double G = aux_beta_plus(beta, eta, tau);
-    double Xj = mean_excitation_energy(Zj);
+    double Xj = mean_excitation_energy(Zj)/1E6;
     
     return (2.0*M_PI*re*re*mec/beta/beta)*((double)Zj/u/Aj)*( log(mean_energy*mean_energy/Xj/Xj) + log(1.0+tau/2.0) + G );
 }
@@ -512,11 +515,12 @@ double stopping_power_beta_plus(double mean_energy, int Zj, double Aj, double de
 /// Stopping power for non-beta
 double stopping_power_nonbeta(double mean_energy, int Zj, double Aj, double delta, double charge)
 {
+	if (mean_energy <= 0.0) return 0.0;
     double mec = 0.511004; //MeV
     double re = 2.818E-13; //cm
     double u = 1.6605655E-24; //g
     double beta = sqrt( (1.0 - pow(1.0 + (mean_energy/mec),-2.0)) );
-    double Xj = mean_excitation_energy(Zj);
+    double Xj = mean_excitation_energy(Zj)/1E6;
     
     return (4.0*M_PI*re*re*mec/beta/beta)*((double)Zj/u/Aj)*charge*charge*( log(2.0*mec*beta*beta/Xj/(1.0-beta*beta)) - beta*beta );
 }
@@ -524,6 +528,7 @@ double stopping_power_nonbeta(double mean_energy, int Zj, double Aj, double delt
 // Mean path length for beta (cm)
 double mean_path_beta(double mean_energy, double density)
 {
+	if (mean_energy <= 0.0) return 0.0;
     double power = 1.265 - 0.0954*log(mean_energy);
     return 0.412*pow(mean_energy,power)/density;
 }
@@ -846,14 +851,215 @@ int Isotope::calculateIonization(std::vector<Atom> &atoms, std::vector<double> &
     for (int i=0; i<this->DecayModes(); i++)
     {
         double Ii = 0.0;
+        double path = 0.0;
+        
+        switch (this->decay_modes[i])
+        {
+            case stable:
+                path = 0.0;
+                break;
+                
+            case alpha:
+                path = mean_path_nonbeta(this->mean_radiation_energy[i]);
+                break;
+                
+            case spon_fiss:
+                path = mean_path_nonbeta(this->mean_radiation_energy[i]);
+                break;
+                
+            case beta_plus:
+                path = mean_path_beta(this->mean_radiation_energy[i], density);
+                break;
+                
+            case beta_min:
+                path = mean_path_beta(this->mean_radiation_energy[i], density);
+                break;
+                
+            case iso_trans:
+                path = 0.0;
+                break;
+                
+            case neutron_em:
+                path = mean_path_nonbeta(this->mean_radiation_energy[i]);
+                break;
+                
+            case beta_min_neutron_em:
+                path = mean_path_beta(this->mean_radiation_energy[i], density);
+                break;
+                
+            case beta_plus_proton_em:
+                path = mean_path_beta(this->mean_radiation_energy[i], density);
+                break;
+                
+            case proton_em:
+                path = mean_path_nonbeta(this->mean_radiation_energy[i]);
+                break;
+                
+            case beta_plus_alpha:
+                path = mean_path_beta(this->mean_radiation_energy[i], density);
+                break;
+                
+            case beta_plus_beta_plus:
+                path = mean_path_beta(this->mean_radiation_energy[i], density);
+                break;
+                
+            case beta_min_beta_min:
+                path = mean_path_beta(this->mean_radiation_energy[i], density);
+                break;
+                
+            case beta_min_2neutron_em:
+                path = mean_path_beta(this->mean_radiation_energy[i], density);
+                break;
+                
+            case beta_min_alpha:
+                path = mean_path_beta(this->mean_radiation_energy[i], density);
+                break;
+                
+            case proton_em_proton_em:
+                path = mean_path_nonbeta(this->mean_radiation_energy[i]);
+                break;
+                
+            case neutron_em_neutron_em:
+                path = mean_path_nonbeta(this->mean_radiation_energy[i]);
+                break;
+                
+            case beta_min_3neutron_em:
+                path = mean_path_beta(this->mean_radiation_energy[i], density);
+                break;
+                
+            case beta_min_4neutron_em:
+                path = mean_path_beta(this->mean_radiation_energy[i], density);
+                break;
+                
+            case beta_plus_2proton_em:
+                path = mean_path_beta(this->mean_radiation_energy[i], density);
+                break;
+                
+            case beta_plus_3proton_em:
+                path = mean_path_beta(this->mean_radiation_energy[i], density);
+                break;
+                
+            case specific_isotope:
+                path = mean_path_nonbeta(this->mean_radiation_energy[i]);
+                break;
+                
+            case undefined:
+                path = 0.0;
+                break;
+                
+            default:
+                path = 0.0;
+                break;
+        }
         
         //Loop through the atoms in the media
         for (int j=0; j<atoms.size(); j++)
         {
-        	double delta = pow(10.0,(double)orderMag(atoms[j].KShellEnergy())+1.0)*1000.0;
+        	double delta = pow(10.0,(double)orderMag(atoms[j].KShellEnergy())+1.0)/1000.0;
+            double stpow = 0.0;
             
+            switch (this->decay_modes[i])
+            {
+                case stable:
+                    stpow = 0.0;
+                    break;
+                    
+                case alpha:
+                    stpow = stopping_power_nonbeta(this->mean_radiation_energy[i], atoms[j].AtomicNumber(), atoms[j].AtomicWeight(), delta, 2.0);
+                    break;
+                    
+                case spon_fiss:
+                    stpow = stopping_power_nonbeta(this->mean_radiation_energy[i], atoms[j].AtomicNumber(), atoms[j].AtomicWeight(), delta, (double)this->AtomicNumber()/2.0);
+                    break;
+                    
+                case beta_plus:
+                    stpow = stopping_power_beta_plus(this->mean_radiation_energy[i], atoms[j].AtomicNumber(), atoms[j].AtomicWeight(), delta);
+                    break;
+                    
+                case beta_min:
+                    stpow = stopping_power_beta_minus(this->mean_radiation_energy[i], atoms[j].AtomicNumber(), atoms[j].AtomicWeight(), delta);
+                    break;
+                    
+                case iso_trans:
+                    stpow = 0.0;
+                    break;
+                    
+                case neutron_em:
+                    stpow = stopping_power_nonbeta(this->mean_radiation_energy[i], atoms[j].AtomicNumber(), atoms[j].AtomicWeight(), delta, 0.0);
+                    break;
+                    
+                case beta_min_neutron_em:
+                    stpow = stopping_power_beta_minus(this->mean_radiation_energy[i], atoms[j].AtomicNumber(), atoms[j].AtomicWeight(), delta);
+                    break;
+                    
+                case beta_plus_proton_em:
+                    stpow = stopping_power_beta_plus(this->mean_radiation_energy[i], atoms[j].AtomicNumber(), atoms[j].AtomicWeight(), delta);
+                    break;
+                    
+                case proton_em:
+                    stpow = stopping_power_nonbeta(this->mean_radiation_energy[i], atoms[j].AtomicNumber(), atoms[j].AtomicWeight(), delta, 1.0);
+                    break;
+                    
+                case beta_plus_alpha:
+                    stpow = stopping_power_beta_plus(this->mean_radiation_energy[i], atoms[j].AtomicNumber(), atoms[j].AtomicWeight(), delta);
+                    break;
+                    
+                case beta_plus_beta_plus:
+                    stpow = stopping_power_beta_plus(this->mean_radiation_energy[i], atoms[j].AtomicNumber(), atoms[j].AtomicWeight(), delta);
+                    break;
+                    
+                case beta_min_beta_min:
+                    stpow = stopping_power_beta_minus(this->mean_radiation_energy[i], atoms[j].AtomicNumber(), atoms[j].AtomicWeight(), delta);
+                    break;
+                    
+                case beta_min_2neutron_em:
+                    stpow = stopping_power_beta_minus(this->mean_radiation_energy[i], atoms[j].AtomicNumber(), atoms[j].AtomicWeight(), delta);
+                    break;
+                    
+                case beta_min_alpha:
+                    stpow = stopping_power_beta_minus(this->mean_radiation_energy[i], atoms[j].AtomicNumber(), atoms[j].AtomicWeight(), delta);
+                    break;
+                    
+                case proton_em_proton_em:
+                    stpow = stopping_power_nonbeta(this->mean_radiation_energy[i], atoms[j].AtomicNumber(), atoms[j].AtomicWeight(), delta, 1.0);
+                    break;
+                    
+                case neutron_em_neutron_em:
+                    stpow = stopping_power_nonbeta(this->mean_radiation_energy[i], atoms[j].AtomicNumber(), atoms[j].AtomicWeight(), delta, 0.0);
+                    break;
+                    
+                case beta_min_3neutron_em:
+                    stpow = stopping_power_beta_minus(this->mean_radiation_energy[i], atoms[j].AtomicNumber(), atoms[j].AtomicWeight(), delta);
+                    break;
+                    
+                case beta_min_4neutron_em:
+                    stpow = stopping_power_beta_minus(this->mean_radiation_energy[i], atoms[j].AtomicNumber(), atoms[j].AtomicWeight(), delta);
+                    break;
+                    
+                case beta_plus_2proton_em:
+                    stpow = stopping_power_beta_plus(this->mean_radiation_energy[i], atoms[j].AtomicNumber(), atoms[j].AtomicWeight(), delta);
+                    break;
+                    
+                case beta_plus_3proton_em:
+                    stpow = stopping_power_beta_plus(this->mean_radiation_energy[i], atoms[j].AtomicNumber(), atoms[j].AtomicWeight(), delta);
+                    break;
+                    
+                case specific_isotope:
+                    stpow = stopping_power_nonbeta(this->mean_radiation_energy[i], atoms[j].AtomicNumber(), atoms[j].AtomicWeight(), delta, 4.0);
+                    break;
+                    
+                case undefined:
+                    stpow = 0.0;
+                    break;
+                    
+                default:
+                    stpow = 0.0;
+                    break;
+            }
+            
+            Ii += mass_fracs[j]*stpow*density;
         }
-        
+        Ii = Ii*path/potential*1E6;
         Ion += Ii*this->BranchFraction(i);
     }
     
@@ -1409,6 +1615,7 @@ DecayChain::DecayChain()
 	avg_eig_error = 0.0;
 	hl_threshold = 0.0;
 	ConsoleOut = false;
+    ionization_rate = 0.0;
 }
 
 //Default destructor
@@ -1944,6 +2151,17 @@ void DecayChain::calculateFractionation(double t)
 	}
 }
 
+//Calculate the ionization rate
+void DecayChain::calculateIonizationRate(std::vector<Atom> &atoms, std::vector<double> &mass_fracs, double density, double potential)
+{
+    this->ionization_rate = 0.0;
+    for (int i=0; i<this->nuc_list.size(); i++)
+    {
+    	this->nuc_list[i].calculateIonization(atoms, mass_fracs, density, potential);
+        this->ionization_rate += this->nuc_list[i].IonizationCoeff()*this->nuc_list[i].getActivity();
+    }
+}
+
 //Print results to a file
 void DecayChain::print_results(FILE *file, time_units units, double end_time, int points)
 {
@@ -2395,6 +2613,12 @@ int DecayChain::getNumberNuclides()
 int DecayChain::getNumberStableNuclides()
 {
 	return (int)this->stable_list.size();
+}
+
+//Return ionization rate
+double DecayChain::getIonizationRate()
+{
+    return this->ionization_rate;
 }
 
 //Return unstable index
@@ -2971,7 +3195,7 @@ int IBIS_TESTS()
 	//test.registerInitialNuclide("U-235", 45.0);
 	//test.registerInitialNuclide("U-238", 10.0);
 	
-    std::string nuc = "Te-132";
+    std::string nuc = "B-12";
 	test.registerInitialNuclide("He-5");
 	test.registerInitialNuclide("He-8");
 	test.registerInitialNuclide("Li-5");
@@ -3010,6 +3234,26 @@ int IBIS_TESTS()
 	
 	test.DisplayEigenMap();
     
+    std::vector<Atom> air;
+    air.resize(4);
+    air[0].Register("C");
+    air[1].Register("N");
+    air[2].Register("O");
+    air[3].Register("Ar");
+    double density = 0.0012; //g/ccm
+    double Wair = 34.0; //eV
+    std::vector<double> frac;
+    frac.resize(4);
+    frac[0] = 0.000124;
+    frac[1] = 0.755267;
+    frac[2] = 0.231781;
+    frac[3] = 0.012827;
+    
+    //test.getIsotope(nuc).calculateIonization(air, frac, density, Wair);
+    
+    test.calculateIonizationRate(air, frac, density, Wair);
+    
+    /**
     std::cout << "\nNuclide Beta Energy Test for " << nuc << " ...\n";
     for (int i=0; i<test.getIsotope(nuc).DecayModes(); i++)
     {
@@ -3017,6 +3261,18 @@ int IBIS_TESTS()
         std::cout << "L\t" << test.getIsotope(nuc).deltaJ(i) << std::endl;
     	std::cout << "MeanEnergy\t" << test.getIsotope(nuc).MeanEnergy(i) << std::endl;
     }
+    std::cout << "Ion Coeff\t" << test.getIsotope(nuc).IonizationCoeff() << std::endl;
+	*/
+    /**
+    for (int i=0; i<test.getNumberNuclides(); i++)
+    {
+        std::cout << test.getIsotope(i).IsotopeName() << std::endl;
+        std::cout << "I (pairs/decay) =\t" << test.getIsotope(i).IonizationCoeff() << std::endl;
+        std::cout << "Eta (decays/sec) =\t" << test.getIsotope(i).getActivity() << std::endl;
+        std::cout << std::endl;
+    }
+    */
+    std::cout << "\nIon Rate\t" << test.getIonizationRate() << std::endl;
 	
 	time = clock() - time;
 	std::cout << "\nSimulation Runtime: " << (time / CLOCKS_PER_SEC) << " seconds for " << test.getNumberNuclides()+test.getNumberStableNuclides() << " isotopes \n";

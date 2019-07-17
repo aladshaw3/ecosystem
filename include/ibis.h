@@ -156,12 +156,12 @@ public:
 	void setThreshold(double val);						///< Set the threshold value for half-life (in sec)
 	void updateDecayRate();								///< Increase decay rate by 1% (used to correct issues with same eigenvalues)
     
-    /// Calculate the ionization rate given a list of atoms and their mass fractions in a particular media
+    /// Calculate the ionization coefficient given a list of atoms and their mass fractions in a particular media
     /** This function uses the Linear Energy Transfer function to calculate the average ionization potential
     	of this nuclide decaying in a media made up of the given set of atoms and their respective mass
         fractions. The result is stored in the ionization_coeff parameter and can be accessed via the
         IonizationCoeff() return function. As the density and/or mass fraction of the media changes, this
-        function needs to be re-called to update that ionization rate.
+        function needs to be re-called to update that ionization coefficient.
         
         \param atoms reference to a list of atoms in the media
         \param mass_fracs reference to a list of mass fractions for the list of atoms
@@ -332,6 +332,19 @@ public:
 	 
 		Use an analytical solution based on linear combinations of eigenvectors. */
 	void calculateFractionation(double t);
+    
+    /// Calculate the ionization rate given a list of atoms and their mass fractions in a particular media
+    /** This function uses the Linear Energy Transfer function to calculate the average ionization potential
+    	of this nuclide decaying in a media made up of the given set of atoms and their respective mass
+     fractions. The result is stored in the ionization_coeff parameter and can be accessed via the
+     IonizationCoeff() return function. As the density and/or mass fraction of the media changes, this
+     function needs to be re-called to update that ionization rate.
+     
+     \param atoms reference to a list of atoms in the media
+     \param mass_fracs reference to a list of mass fractions for the list of atoms
+     \param density density of the media in g/cm^3
+     \param potential ionization potential of the media in eV*/
+    void calculateIonizationRate(std::vector<Atom> &atoms, std::vector<double> &mass_fracs, double density, double potential);
 	
 	/// Function to print results to file based on end_time and number of points
 	/** This function will open an output file named IBIS_Results.txt and print the
@@ -353,6 +366,7 @@ public:
 	
 	int getNumberNuclides();								///< Return the number of nuclides in the decay chain
 	int getNumberStableNuclides();							///< Return the number of stable nuclides
+    double getIonizationRate();								///< Return the stored ionization rate (in ion-pairs/second)
 	int getIsotopeIndex(std::string iso_name);				///< Return the unstable isotope index that corresponds to the given name
 	int getStableIsotopeIndex(std::string iso_name);		///< Return the stable isotope index that corresponds to the given name
 	std::vector<int>& getParentList(int i);					///< Return the vector list of parents for the ith isotope in the nuclide list
@@ -387,7 +401,8 @@ protected:
 	bool Warnings;										///< Boolean is True if you want to print warnings to console
 	double avg_eig_error;								///< Stores the average error in eigen solution
 	double hl_threshold;								///< Half-life value (in seconds) at which 99% of isotope has been converted
-	bool ConsoleOut;									///< Boolean is True if you want to print console messages 
+	bool ConsoleOut;									///< Boolean is True if you want to print console messages
+    double ionization_rate;								///< Total number of ion-pairs produced per second from this decay chain
 	
 private:
 	std::vector<Isotope> nuc_list;							///< List of (ith) nuclides that make up the decay chain
