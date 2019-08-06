@@ -3044,6 +3044,40 @@ double T_eb(int i, const Matrix<double> &u, double t, const void *data, const Do
     return rate;
 }
 
+typedef struct
+{
+    double N0_ic = 50.0;
+    double N1_ic = 0.0;
+    double N2_ic = 0.0;
+} Test08_data;
+
+double N0_rate(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove)
+{
+    //Test08_data *dat = (Test08_data *) data;
+    double N0 = dove.getNewU("N0", u);
+    double N1 = dove.getNewU("N1", u);
+    
+    return -N0*N0 - N0*N1;
+}
+
+double N1_rate(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove)
+{
+    //Test08_data *dat = (Test08_data *) data;
+    double N0 = dove.getNewU("N0", u);
+    double N1 = dove.getNewU("N1", u);
+    
+    return 0.5*N0*N0 - N1*N0;
+}
+
+double N2_rate(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove)
+{
+    //Test08_data *dat = (Test08_data *) data;
+    double N0 = dove.getNewU("N0", u);
+    double N1 = dove.getNewU("N1", u);
+    
+    return N0*N1;
+}
+
 // -------------------- End temporary testing --------------------------
 
 //Test function
@@ -3393,6 +3427,7 @@ int DOVE_TESTS()
     
     */
     
+    /*
     //  ---------    Test 07: Coupled Mass and Energy Balances --------------
     Dove test07;
     test07.set_outputfile(file);
@@ -3443,8 +3478,52 @@ int DOVE_TESTS()
     test07.set_integrationtype(BDF2);
     test07.solve_all();
     
-    //fprintf(file,"\n --------------- End of Test06 ---------------- \n\n");
-    //  ------------------------------    END Test06   ----------------------------------
+    //fprintf(file,"\n --------------- End of Test07 ---------------- \n\n");
+    //  ------------------------------    END Test07   ----------------------------------
+    */
+    
+    //  ---------    Test 08: Coupled Mass and Energy Balances --------------
+    Dove test08;
+    test08.set_outputfile(file);
+    fprintf(file,"Test08: 3-Component Population Balance Model\n---------------------------------\n");
+    
+    Test08_data data08;
+    test08.set_userdata((void*)&data08);
+    test08.set_output(true);
+    test08.set_numfunc(3);
+    test08.set_variableName(0, "N0");
+    test08.set_variableName(1, "N1");
+    test08.set_variableName(2, "N2");
+    
+    test08.registerFunction("N0", N0_rate);
+    test08.registerFunction("N1", N1_rate);
+    test08.registerFunction("N2", N2_rate);
+    
+    test08.set_starttime(0.0);
+    test08.set_endtime(2.0);
+    test08.set_timestepper(CONSTANT);
+    test08.set_timestepmax(0.2);
+    test08.set_NonlinearOutput(true);
+    test08.set_output(true);
+    test08.set_headeroutput(true);
+    test08.set_LinearOutput(false);
+    test08.set_LineSearchMethod(BT);
+    test08.set_LinearStatus(false);
+    test08.set_MaxNonLinearIterations(10);
+    test08.set_tolerance(1e-8);
+    
+    test08.set_LinearMethod(QR);
+    
+    test08.set_initialcondition("N0", data08.N0_ic);
+    test08.set_initialcondition("N1", data08.N1_ic);
+    test08.set_initialcondition("N2", data08.N2_ic);
+    test08.set_timestep(0.05);
+    test08.set_t_out(0.05);
+    test08.set_integrationtype(BDF2);
+    test08.solve_all();
+    
+    //fprintf(file,"\n --------------- End of Test08 ---------------- \n\n");
+    //  ------------------------------    END Test08   ----------------------------------
 	
 	return success;
 }
