@@ -34,7 +34,7 @@ fission_extent: 3    #% of fissionalble isotopes that undergo fission
 fission_yield: 25    #kT weapon yield that is caused by fission (must be number smaller than or equal to bomb_yield)
 yield_cutoff: 99     #% of conversion for fast decaying isotopes (higher % simplifies isotope calculations)
 casing_thickness: 10 #cm of casing material covering the weapon isotopes
-fractionation_model: modified-freiling-tompkins  #freiling, freiling-tompkins, modified-freiling, modified-freiling-tompkins 
+fractionation_model: modified-freiling-tompkins  #options: freiling, freiling-tompkins, modified-freiling, modified-freiling-tompkins 
 
 #Percentages of weapon isotopes that will undergo fission
 - fissionable_isotopes:
