@@ -791,6 +791,11 @@ int ex1_mult(const Matrix<double>& x, Matrix<double> &Ax, const void *data)
 	return success;
 }
 
+void RowCol(int i, int &k)
+{
+    k = i*5;
+}
+
 extern "C"
 {
     int blah() {return RUN_SANDBOX();}
@@ -1151,6 +1156,16 @@ int RUN_SANDBOX()
 	//std::cout << Laplacian_Integral_TrigBasis(4, 1, 0, 1) << std::endl;
 	
 	std::cout << "\nEnd SANDBOX\n\n";
+    
+    int k = 0;
+    RowCol(0, k);
+    std::cout << k << std::endl;
+    RowCol(1, k);
+    std::cout << k << std::endl;
+    RowCol(2, k);
+    std::cout << k << std::endl;
+    RowCol(3, k);
+    std::cout << k << std::endl;
 	
 	return success;
 }
