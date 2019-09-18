@@ -3078,13 +3078,118 @@ double N2_rate(int i, const Matrix<double> &u, double t, const void *data, const
     return N0*N1;
 }
 
+typedef struct
+{
+    int M;
+    std::vector<double> x;
+    std::vector<double> lam;
+    std::vector<double> v;
+    std::vector<std::vector<double> > n;
+} Test09_data;
+
+void fill_x(double x0, double s, Test09_data &data)
+{
+    data.x.resize(data.M);
+    if (x0 <= 0.0)
+        x0 = 1.0;
+    if (s < 1.5)
+        s = 1.5;
+    data.x[0] = x0;
+    for (int i=1; i<data.M; i++)
+    {
+        data.x[i] = data.x[i-1]*s;
+    }
+    
+    data.v.resize(data.M+1);
+    data.v[0] = 0.0;
+    for (int i=1; i<data.M; i++)
+    {
+        data.v[i] = (data.x[i] + data.x[i-1])/2.0;
+    }
+    data.v[data.M] = data.x[data.M-1] + data.x[data.M-2];
+}
+
+void fill_lam(bool Original, Test09_data &data)
+{
+    data.lam.resize(data.M);
+    for (int i=0; i<data.M; i++)
+    {
+        if (Original == true)
+            data.lam[i] = data.x[i]*data.x[i];
+        else
+            data.lam[i] = 1.0;
+        data.lam[i] = 1.0;
+    }
+}
+
+void fill_n(bool Original, Test09_data &data)
+{
+    data.n.resize(data.M);
+    for (int i=0; i<data.M; i++)
+    {
+        data.n[i].resize(data.M);
+        for (int k=0; k<data.M; k++)
+        {
+            if (Original == true)
+            {
+                //old
+                double first, second;
+                if (i == k)
+                    first = 0.0;
+                else
+                    first = (data.x[i+1]-data.x[i])/data.x[k];
+                if (i == 0)
+                    second = 0.0;
+                else
+                    second = (data.x[i]-data.x[i-1])/data.x[k];
+                data.n[i][k] = first + second;
+                
+                //New
+                if (k > i && i < data.M-1)
+                    data.n[i][k] = (2.0/data.x[k])*(data.x[i+1] - data.x[i]);
+                else
+                    data.n[i][k] = 0.0;
+            }
+            else
+            {
+                if (k == i+1)
+                    data.n[i][k] = data.x[k]/data.x[i];
+                else
+                    data.n[i][k] = 0.0;
+            }
+        }
+    }
+}
+
+double breakup_rate(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove)
+{
+    Test09_data *dat = (Test09_data *) data;
+    
+    double rate = 0.0;
+    double source = 0.0;
+    double sink = 0.0;
+    
+    for (int k=i; k<dat->M; k++)
+    {
+        source += dat->n[i][k]*dat->lam[k]*u(k,0);
+    }
+    if (i == 0)
+        sink = 0.0;
+    else
+        sink = dat->lam[i]*u(i,0);
+    
+    rate = source - sink;
+    
+    return rate;
+}
+
 // -------------------- End temporary testing --------------------------
 
 //Test function
 int DOVE_TESTS()
 {
 	int success = 0;
-	//double time;
+	double time;
 	
 	FILE *file;
 	file = fopen("output/DOVE_Tests.txt", "w+");
@@ -3482,7 +3587,8 @@ int DOVE_TESTS()
     //  ------------------------------    END Test07   ----------------------------------
     */
     
-    //  ---------    Test 08: Coupled Mass and Energy Balances --------------
+    //  ---------    Test 08: Aggregation Population Balance Model --------------
+    /*
     Dove test08;
     test08.set_outputfile(file);
     fprintf(file,"Test08: 3-Component Population Balance Model\n---------------------------------\n");
@@ -3524,6 +3630,91 @@ int DOVE_TESTS()
     
     //fprintf(file,"\n --------------- End of Test08 ---------------- \n\n");
     //  ------------------------------    END Test08   ----------------------------------
+     
+     */
+    
+    //  ---------    Test 09: Breakup Population Balance --------------
+    
+    Dove test09;
+    test09.set_outputfile(file);
+    fprintf(file,"Test09: Breakup Population Balance\n");
+    
+    Test09_data data09;
+    data09.M = 3;
+    double x0 = 1.0;
+    double s = 2.0;
+    bool Original = false;
+    
+    fill_x(x0, s, data09);
+    fill_lam(Original, data09);
+    fill_n(Original, data09);
+    
+    //Print out information
+    std::cout << "\nNumber of variable bins =\t" << data09.M << std::endl;
+    std::cout << "\nBin sizes =\n";
+    for (int i=0; i<data09.M; i++)
+    {
+        std::cout << i << "\t" << data09.x[i] << std::endl;
+    }
+    std::cout << "\nRates =\n";
+    for (int i=0; i<data09.M; i++)
+    {
+        std::cout << i << "\t" << data09.lam[i] << std::endl;
+    }
+    std::cout << "\nNumbers =\n";
+    for (int i=0; i<data09.M; i++)
+    {
+        for (int k=0; k<data09.M; k++)
+        {
+            std::cout << "n(" << i << "," << k << ") =\t" << data09.n[i][k] << "\t";
+        }
+        std::cout << std::endl;
+    }
+    
+    test09.set_userdata((void*)&data09);
+    test09.set_numfunc(data09.M);
+    for (int i=0; i<data09.M; i++)
+        test09.registerFunction(i, breakup_rate);
+    
+    test09.set_starttime(0.0);
+    test09.set_endtime(10.0);
+    test09.set_timestepper(CONSTANT);
+    test09.set_timestepmax(0.2);
+    test09.set_NonlinearOutput(false);
+    test09.set_output(false);
+    test09.set_headeroutput(true);
+    test09.set_LinearOutput(false);
+    test09.set_LineSearchMethod(BT);
+    test09.set_LinearStatus(false);
+    test09.set_MaxNonLinearIterations(20);
+    test09.set_tolerance(1e-6);
+    test09.set_NonlinearAbsTol(1e-6);
+    test09.set_NonlinearRelTol(1e-6);
+    
+    test09.set_LinearMethod(QR);
+    
+    for (int i=0; i<data09.M; i++)
+    {
+        if (i < data09.M-1)
+            test09.set_initialcondition(i, 0.0);
+        else
+            test09.set_initialcondition(i, 10.0);
+    }
+    
+    test09.set_timestep(0.05);
+    test09.set_t_out(0.05);
+    test09.set_integrationtype(BDF2);
+    time = clock();
+    
+    test09.solve_all();
+    
+    time = clock() - time;
+    std::cout << "\nSimulation Runtime: " << (time / CLOCKS_PER_SEC) << " seconds\n";
+    
+    fprintf(file,"\n --------------- End of Test09 ---------------- \n\n");
+    
+    //  ------------------------------    END Test09   ----------------------------------
+    
 	
 	return success;
 }
