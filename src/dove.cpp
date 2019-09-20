@@ -3081,6 +3081,7 @@ double N2_rate(int i, const Matrix<double> &u, double t, const void *data, const
 typedef struct
 {
     int M;
+    double nk;
     std::vector<double> x;
     std::vector<double> lam;
     std::vector<double> v;
@@ -3128,7 +3129,12 @@ void fill_n(bool Original, Test09_data &data)
     for (int i=0; i<data.M; i++)
     {
         data.n[i].resize(data.M);
-        for (int k=0; k<data.M; k++)
+    }
+    //LOOP OVER K FIRST
+    for (int k=0; k<data.M; k++)
+    {
+        //LOOP OVER I SECOND
+        for (int i=0; i<data.M; i++)
         {
             if (Original == true)
             {
@@ -3152,10 +3158,27 @@ void fill_n(bool Original, Test09_data &data)
             }
             else
             {
+                // Simple
+                /*
                 if (k == i+1)
                     data.n[i][k] = data.x[k]/data.x[i];
                 else
                     data.n[i][k] = 0.0;
+                */
+                
+                //2-way chip
+                if (i == k-1)
+                {
+                    data.n[i][k] = (data.x[k] - data.nk*data.x[i+1])/(data.x[i] - data.x[i+1]);
+                }
+                else if (i == k && i > 0)
+                {
+                    data.n[i][k] = data.nk - data.n[i-1][k];
+                }
+                else
+                    data.n[i][k] = 0.0;
+                
+                    
             }
         }
     }
@@ -3640,7 +3663,8 @@ int DOVE_TESTS()
     fprintf(file,"Test09: Breakup Population Balance\n");
     
     Test09_data data09;
-    data09.M = 3;
+    data09.M = 2;
+    data09.nk = 2.0;
     double x0 = 1.0;
     double s = 2.0;
     bool Original = false;
