@@ -3129,6 +3129,10 @@ void fill_n(bool Original, Test09_data &data)
     for (int i=0; i<data.M; i++)
     {
         data.n[i].resize(data.M);
+        for (int k=0; k<data.M; k++)
+        {
+            data.n[i][k] = 0.0;
+        }
     }
     //LOOP OVER K FIRST
     for (int k=0; k<data.M; k++)
@@ -3167,6 +3171,7 @@ void fill_n(bool Original, Test09_data &data)
                 */
                 
                 //2-way chip
+                /*
                 if (i == k-1)
                 {
                     data.n[i][k] = (data.x[k] - data.nk*data.x[i+1])/(data.x[i] - data.x[i+1]);
@@ -3177,7 +3182,33 @@ void fill_n(bool Original, Test09_data &data)
                 }
                 else
                     data.n[i][k] = 0.0;
+                 */
                 
+                //Average size dist
+                if (i > 0 && i <= k)
+                {
+                    double num = data.nk*(double)(k+1);
+                    if (k == 0)
+                    {
+                        data.n[i-1][k] = 0.0;
+                        data.n[i][k] = 0.0;
+                    }
+                    
+                    double avg = data.x[k]/num;
+                    
+                    //Special case
+                    if (avg < data.x[0])
+                    {
+                        data.n[0][k] = data.x[k]/data.x[0];
+                    }
+                    
+                    //Generic Case
+                    if (data.x[i-1] <= avg && avg <= data.x[i])
+                    {
+                        data.n[i-1][k] = ((data.x[i]-avg)/(data.x[i]-data.x[i-1]))*num;
+                        data.n[i][k] = ((avg-data.x[i-1])/(data.x[i]-data.x[i-1]))*num;
+                    }
+                }
                     
             }
         }
@@ -3663,8 +3694,8 @@ int DOVE_TESTS()
     fprintf(file,"Test09: Breakup Population Balance\n");
     
     Test09_data data09;
-    data09.M = 2;
-    data09.nk = 2.0;
+    data09.M = 10;
+    data09.nk = 1.5;
     double x0 = 1.0;
     double s = 2.0;
     bool Original = false;
