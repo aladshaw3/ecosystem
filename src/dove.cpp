@@ -3082,15 +3082,17 @@ typedef struct
 {
     int M;
     double nk;
+    bool Original;
     std::vector<double> x;
-    std::vector<double> lam;
     std::vector<double> v;
+    std::vector<double> lam;
     std::vector<std::vector<double> > n;
 } Test09_data;
 
 void fill_x(double x0, double s, Test09_data &data)
 {
     data.x.resize(data.M);
+    data.v.resize(data.M);
     if (x0 <= 0.0)
         x0 = 1.0;
     if (s < 1.5)
@@ -3101,13 +3103,19 @@ void fill_x(double x0, double s, Test09_data &data)
         data.x[i] = data.x[i-1]*s;
     }
     
-    data.v.resize(data.M+1);
-    data.v[0] = 0.0;
+    data.v[0] = x0;
     for (int i=1; i<data.M; i++)
     {
-        data.v[i] = (data.x[i] + data.x[i-1])/2.0;
+        data.v[i] = data.v[i-1]*s;
     }
-    data.v[data.M] = data.x[data.M-1] + data.x[data.M-2];
+    
+    //For Hill Model
+    data.x[0] = data.v[0]/2.0;
+    for (int i=1; i<data.M; i++)
+    {
+        data.x[i] = (data.v[i] + data.v[i-1])/2.0;
+    }
+    
 }
 
 void fill_lam(bool Original, Test09_data &data)
@@ -3115,12 +3123,9 @@ void fill_lam(bool Original, Test09_data &data)
     data.lam.resize(data.M);
     for (int i=0; i<data.M; i++)
     {
-        if (Original == true)
-            data.lam[i] = data.x[i]*data.x[i];
-        else
-            data.lam[i] = 1.0;
         data.lam[i] = 1.0;
     }
+    data.Original = Original;
 }
 
 void fill_n(bool Original, Test09_data &data)
@@ -3143,6 +3148,7 @@ void fill_n(bool Original, Test09_data &data)
             if (Original == true)
             {
                 //old
+                /**
                 double first, second;
                 if (i == k)
                     first = 0.0;
@@ -3159,6 +3165,16 @@ void fill_n(bool Original, Test09_data &data)
                     data.n[i][k] = (2.0/data.x[k])*(data.x[i+1] - data.x[i]);
                 else
                     data.n[i][k] = 0.0;
+                **/
+                if (i >= k)
+                	data.n[i][k] = 0.0;
+                else
+                {
+                    if (i == 0)
+                    	data.n[i][k] = 2.0*data.v[i]/data.v[k-1];
+                    else
+                    	data.n[i][k] = 2.0*(data.v[i]-data.v[i-1])/data.v[k-1];
+                }
             }
             else
             {
@@ -3187,7 +3203,7 @@ void fill_n(bool Original, Test09_data &data)
                 //Average size dist
                 if (i > 0 && i <= k)
                 {
-                    double num = data.nk*(double)(k+1);
+                    double num = data.nk;
                     if (k == 0)
                     {
                         data.n[i-1][k] = 0.0;
@@ -3232,7 +3248,10 @@ double breakup_rate(int i, const Matrix<double> &u, double t, const void *data, 
     else
         sink = dat->lam[i]*u(i,0);
     
-    rate = source - sink;
+    if (dat->Original == true)
+    	rate = 0.75*source - 0.5*sink;
+    else
+    	rate = source - sink;
     
     return rate;
 }
@@ -3695,10 +3714,10 @@ int DOVE_TESTS()
     
     Test09_data data09;
     data09.M = 10;
-    data09.nk = 1.5;
+    data09.nk = 2.0;
     double x0 = 1.0;
     double s = 2.0;
-    bool Original = false;
+    bool Original = true;
     
     fill_x(x0, s, data09);
     fill_lam(Original, data09);
@@ -3710,6 +3729,11 @@ int DOVE_TESTS()
     for (int i=0; i<data09.M; i++)
     {
         std::cout << i << "\t" << data09.x[i] << std::endl;
+    }
+    std::cout << "\nBin ranges =\n";
+    for (int i=0; i<data09.M; i++)
+    {
+        std::cout << i << "\t" << data09.v[i] << std::endl;
     }
     std::cout << "\nRates =\n";
     for (int i=0; i<data09.M; i++)
