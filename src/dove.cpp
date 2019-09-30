@@ -3110,12 +3110,13 @@ void fill_x(double x0, double s, Test09_data &data)
     }
     
     //For Hill Model
+    /**
     data.x[0] = data.v[0]/2.0;
     for (int i=1; i<data.M; i++)
     {
         data.x[i] = (data.v[i] + data.v[i-1])/2.0;
     }
-    
+    */
 }
 
 void fill_lam(bool Original, Test09_data &data)
@@ -3148,7 +3149,7 @@ void fill_n(bool Original, Test09_data &data)
             if (Original == true)
             {
                 //old
-                /**
+                
                 double first, second;
                 if (i == k)
                     first = 0.0;
@@ -3160,12 +3161,17 @@ void fill_n(bool Original, Test09_data &data)
                     second = (data.x[i]-data.x[i-1])/data.x[k];
                 data.n[i][k] = first + second;
                 
+                
                 //New
+                /*
                 if (k > i && i < data.M-1)
                     data.n[i][k] = (2.0/data.x[k])*(data.x[i+1] - data.x[i]);
                 else
                     data.n[i][k] = 0.0;
-                **/
+                */
+                
+                /*
+                //Hill
                 if (i >= k)
                 	data.n[i][k] = 0.0;
                 else
@@ -3175,6 +3181,7 @@ void fill_n(bool Original, Test09_data &data)
                     else
                     	data.n[i][k] = 2.0*(data.v[i]-data.v[i-1])/data.v[k-1];
                 }
+                */
             }
             else
             {
@@ -3715,9 +3722,9 @@ int DOVE_TESTS()
     Test09_data data09;
     data09.M = 10;
     data09.nk = 2.0;
-    double x0 = 1.0;
+    double x0 = 0.1;
     double s = 2.0;
-    bool Original = true;
+    bool Original = false;
     
     fill_x(x0, s, data09);
     fill_lam(Original, data09);
@@ -3774,10 +3781,13 @@ int DOVE_TESTS()
     
     for (int i=0; i<data09.M; i++)
     {
+    	
         if (i < data09.M-1)
             test09.set_initialcondition(i, 0.0);
         else
-            test09.set_initialcondition(i, 10.0);
+            test09.set_initialcondition(i, 1.0);
+        
+        //test09.set_initialcondition(i, exp(-data09.x[i]));
     }
     
     test09.set_timestep(0.05);
