@@ -3100,7 +3100,7 @@ void fill_x(double x0, double s, Test09_data &data)
     data.x[0] = x0;
     for (int i=1; i<data.M; i++)
     {
-        data.x[i] = data.x[i-1]*s;
+        data.x[i] = data.x[i-1]+s;
     }
     
     data.v[0] = x0;
@@ -3110,7 +3110,7 @@ void fill_x(double x0, double s, Test09_data &data)
     }
     
     //For Hill Model
-    /**
+    /*
     data.x[0] = data.v[0]/2.0;
     for (int i=1; i<data.M; i++)
     {
@@ -3125,6 +3125,9 @@ void fill_lam(bool Original, Test09_data &data)
     for (int i=0; i<data.M; i++)
     {
         data.lam[i] = 1.0;
+        //data.lam[i] = data.x[i]*data.x[i]*5.0e-12;
+        //data.lam[i] = 0.1;
+        //data.lam[i] = data.x[i]*100.0;
     }
     data.Original = Original;
 }
@@ -3149,7 +3152,7 @@ void fill_n(bool Original, Test09_data &data)
             if (Original == true)
             {
                 //old
-                
+                /*
                 double first, second;
                 if (i == k)
                     first = 0.0;
@@ -3160,7 +3163,7 @@ void fill_n(bool Original, Test09_data &data)
                 else
                     second = (data.x[i]-data.x[i-1])/data.x[k];
                 data.n[i][k] = first + second;
-                
+                */
                 
                 //New
                 /*
@@ -3170,7 +3173,7 @@ void fill_n(bool Original, Test09_data &data)
                     data.n[i][k] = 0.0;
                 */
                 
-                /*
+                
                 //Hill
                 if (i >= k)
                 	data.n[i][k] = 0.0;
@@ -3181,7 +3184,7 @@ void fill_n(bool Original, Test09_data &data)
                     else
                     	data.n[i][k] = 2.0*(data.v[i]-data.v[i-1])/data.v[k-1];
                 }
-                */
+                
             }
             else
             {
@@ -3235,6 +3238,71 @@ void fill_n(bool Original, Test09_data &data)
                     
             }
         }
+    }
+    
+    /*
+    for (int k=0; k<data.M; k++)
+    {
+        for (int i=data.M-1; i>=0; i--)
+        {
+            if (i <= k)
+            {
+                if (i == k && k !=0 )
+                	data.n[i][k] = 0.5;
+                else if (i == k-1 && k == 1)
+                	data.n[i][k] = 1.5;
+                else if (i == k-1 && k > 1)
+                	data.n[i][k] = 0.75;
+                else if (i < k-1 && i == 0)
+                	data.n[i][k] = data.n[i+1][k];
+                else
+                	data.n[i][k] = data.n[i+1][k]/2.0;
+            }
+            else
+            	data.n[i][k] = 0.0;
+        }
+    }
+    */
+    
+    //New corrected method
+    for (int k=0; k<data.M; k++)
+    {
+        
+        if (k >= 3)
+        {
+        	double sum = 0.0;
+            double xsum = 0.0;
+            for (int i=2; i<=k; i++)
+            {
+            	if (i == k)
+                {
+                    data.n[i][k] = ((data.x[i] - data.x[i-1])/data.x[k])*(data.nk/2.0);
+                }
+                else
+                {
+                    data.n[i][k] = ( ((data.x[i+1] - data.x[i])/data.x[k]) + ((data.x[i] - data.x[i-1])/data.x[k]) )*(data.nk/2.0);
+                }
+                sum += data.n[i][k];
+                xsum += data.n[i][k]*data.x[i];
+            }
+            data.n[1][k] = ( (data.x[k] - xsum) - (data.nk - sum)*data.x[0] ) / (data.x[1] - data.x[0]);
+            data.n[0][k] = (data.nk - sum) - data.n[1][k];
+        }
+        else if (k == 2)
+        {
+            data.n[k][k] = ((data.x[k] - data.x[k-1])/data.x[k])*(data.nk/2.0);
+            data.n[1][k] = ( (data.x[k] - data.n[k][k]*data.x[k]) - (data.nk - data.n[k][k])*data.x[0] ) / (data.x[1] - data.x[0]);
+            data.n[0][k] = (data.nk - data.n[k][k]) - data.n[1][k];
+        }
+        else if (k == 1)
+        {
+            data.n[1][k] = ( (data.x[k] - 0.0) - (data.nk - 0.0)*data.x[0] ) / (data.x[1] - data.x[0]);
+            data.n[0][k] = (data.nk - 0.0) - data.n[1][k];
+        }
+        else
+        	for (int i=data.M-1; i>=0; i--)
+            	data.n[i][k] = 0.0;
+        
     }
 }
 
@@ -3720,10 +3788,10 @@ int DOVE_TESTS()
     fprintf(file,"Test09: Breakup Population Balance\n");
     
     Test09_data data09;
-    data09.M = 10;
+    data09.M = 20;
     data09.nk = 2.0;
-    double x0 = 0.1;
-    double s = 2.0;
+    double x0 = 594.0;
+    double s = 500.0;
     bool Original = false;
     
     fill_x(x0, s, data09);
@@ -3747,12 +3815,13 @@ int DOVE_TESTS()
     {
         std::cout << i << "\t" << data09.lam[i] << std::endl;
     }
+    
     std::cout << "\nNumbers =\n";
     for (int i=0; i<data09.M; i++)
     {
         for (int k=0; k<data09.M; k++)
         {
-            std::cout << "n(" << i << "," << k << ") =\t" << data09.n[i][k] << "\t";
+            std::cout << data09.n[i][k] << "\t";
         }
         std::cout << std::endl;
     }
@@ -3763,9 +3832,9 @@ int DOVE_TESTS()
         test09.registerFunction(i, breakup_rate);
     
     test09.set_starttime(0.0);
-    test09.set_endtime(10.0);
+    test09.set_endtime(59.6);
     test09.set_timestepper(CONSTANT);
-    test09.set_timestepmax(0.2);
+    test09.set_timestepmax(0.5);
     test09.set_NonlinearOutput(false);
     test09.set_output(false);
     test09.set_headeroutput(true);
@@ -3785,13 +3854,20 @@ int DOVE_TESTS()
         if (i < data09.M-1)
             test09.set_initialcondition(i, 0.0);
         else
-            test09.set_initialcondition(i, 1.0);
+            test09.set_initialcondition(i, 10.0);
         
         //test09.set_initialcondition(i, exp(-data09.x[i]));
+        
+        /*
+        if (data09.x[i] < 0.65536)
+        	test09.set_initialcondition(i, 1.7611*data09.x[i]*data09.x[i]-2.7257*data09.x[i]+0.9839);
+        else
+        	test09.set_initialcondition(i, 1.1305*exp(-6.783*data09.x[i]));
+        */
     }
     
     test09.set_timestep(0.05);
-    test09.set_t_out(0.05);
+    test09.set_t_out(0.5);
     test09.set_integrationtype(BDF2);
     time = clock();
     
