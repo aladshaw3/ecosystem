@@ -3110,13 +3110,13 @@ void fill_x(double x0, double s, Test09_data &data)
     }
     
     //For Hill Model
-    /*
+    
     data.x[0] = data.v[0]/2.0;
     for (int i=1; i<data.M; i++)
     {
         data.x[i] = (data.v[i] + data.v[i-1])/2.0;
     }
-    */
+    
 }
 
 void fill_lam(bool Original, Test09_data &data)
@@ -3124,8 +3124,8 @@ void fill_lam(bool Original, Test09_data &data)
     data.lam.resize(data.M);
     for (int i=0; i<data.M; i++)
     {
-        data.lam[i] = 1.0;
-        //data.lam[i] = data.x[i]*data.x[i]*5.0e-12;
+        //data.lam[i] = 1.0;
+        data.lam[i] = data.x[i]*data.x[i]*5.0e-12;
         //data.lam[i] = 0.1;
         //data.lam[i] = data.x[i]*100.0;
     }
@@ -3276,11 +3276,11 @@ void fill_n(bool Original, Test09_data &data)
             {
             	if (i == k)
                 {
-                    data.n[i][k] = ((data.x[i] - data.x[i-1])/data.x[k])*(data.nk/2.0);
+                    data.n[i][k] = ((data.x[i] - data.x[i-1])/data.x[k]);
                 }
                 else
                 {
-                    data.n[i][k] = ( ((data.x[i+1] - data.x[i])/data.x[k]) + ((data.x[i] - data.x[i-1])/data.x[k]) )*(data.nk/2.0);
+                    data.n[i][k] = ( ((data.x[i+1] - data.x[i])/data.x[k]) + ((data.x[i] - data.x[i-1])/data.x[k]) );
                 }
                 sum += data.n[i][k];
                 xsum += data.n[i][k]*data.x[i];
@@ -3290,7 +3290,7 @@ void fill_n(bool Original, Test09_data &data)
         }
         else if (k == 2)
         {
-            data.n[k][k] = ((data.x[k] - data.x[k-1])/data.x[k])*(data.nk/2.0);
+            data.n[k][k] = ((data.x[k] - data.x[k-1])/data.x[k]);
             data.n[1][k] = ( (data.x[k] - data.n[k][k]*data.x[k]) - (data.nk - data.n[k][k])*data.x[0] ) / (data.x[1] - data.x[0]);
             data.n[0][k] = (data.nk - data.n[k][k]) - data.n[1][k];
         }
@@ -3304,6 +3304,93 @@ void fill_n(bool Original, Test09_data &data)
             	data.n[i][k] = 0.0;
         
     }
+    
+    // Kumar and Ramkrishna
+    /*
+    //LOOP OVER K FIRST
+    for (int k=0; k<data.M; k++)
+    {
+        //LOOP OVER I SECOND
+        for (int i=0; i<data.M; i++)
+        {
+        	if (i <= k)
+            {
+            	double first, second;
+            	if (i == k)
+               	 	first = 0.0;
+            	else
+                	first = (data.x[i+1]-data.x[i])/data.x[k];
+            	if (i == 0)
+                	second = 0.0;
+            	else
+                	second = (data.x[i]-data.x[i-1])/data.x[k];
+            	data.n[i][k] = first + second;
+            }
+            else
+            	data.n[i][k] = 0.0;
+        }
+    }
+    */
+    
+    //Newest Method (for nk > 2)
+    if (data.nk > 2)
+    {
+        for (int k=0; k<data.M; k++)
+        {
+            double A, B;
+            B = ( data.nk - ((data.nk-1.0)/(data.nk-2.0)) ) / ( (1.0/(data.nk-1.0)) - ((data.nk-1.0)/data.nk/(data.nk-2.0)) );
+            A = (data.nk-1.0) - B*(data.nk-1.0)/data.nk;
+            //std::cout << A << std::endl;
+            //std::cout << B << std::endl;
+            if (k >= 3)
+            {
+                double sum = 0.0;
+                double xsum = 0.0;
+                for (int i=2; i<=k; i++)
+                {
+                	double a, b, c, d;
+                    c = (1.0/(data.x[i]-data.x[i-1]))*( ((A*(pow(data.x[i],data.nk-1.0)-pow(data.x[i-1],data.nk-1.0)))/((data.nk-1.0)*pow(data.x[k],data.nk-2.0))) + ((B*(pow(data.x[i],data.nk)-pow(data.x[i-1],data.nk)))/(data.nk*pow(data.x[k],data.nk-1.0))) );
+                    d = (data.x[i-1]/(data.x[i]-data.x[i-1]))*( ((A*(pow(data.x[i],data.nk-2.0)-pow(data.x[i-1],data.nk-2.0)))/((data.nk-2.0)*pow(data.x[k],data.nk-2.0))) + ((B*(pow(data.x[i],data.nk-1.0)-pow(data.x[i-1],data.nk-1.0)))/((data.nk-1.0)*pow(data.x[k],data.nk-1.0))) );
+                    if (i == k)
+                    {
+                    	a = 0.0;//unused here
+                        b = 0.0;//unused here
+                        data.n[i][k] = c - d;
+                    }
+                    else
+                    {
+                        a = (data.x[i+1]/(data.x[i+1]-data.x[i]))*( ((A*(pow(data.x[i+1],data.nk-2.0)-pow(data.x[i],data.nk-2.0)))/((data.nk-2.0)*pow(data.x[k],data.nk-2.0))) + ((B*(pow(data.x[i+1],data.nk-1.0)-pow(data.x[i],data.nk-1.0)))/((data.nk-1.0)*pow(data.x[k],data.nk-1.0))) );
+                        b = (1.0/(data.x[i+1]-data.x[i]))*( ((A*(pow(data.x[i+1],data.nk-1.0)-pow(data.x[i],data.nk-1.0)))/((data.nk-1.0)*pow(data.x[k],data.nk-2.0))) + ((B*(pow(data.x[i+1],data.nk)-pow(data.x[i],data.nk)))/(data.nk*pow(data.x[k],data.nk-1.0))) );
+                        data.n[i][k] = a - b + c - d;
+                    }
+                    sum += data.n[i][k];
+                    xsum += data.n[i][k]*data.x[i];
+                }
+                data.n[1][k] = ( (data.x[k] - xsum) - (data.nk - sum)*data.x[0] ) / (data.x[1] - data.x[0]);
+                data.n[0][k] = (data.nk - sum) - data.n[1][k];
+            }
+            else if (k == 2)
+            {
+            	double c, d;
+                int i = k;
+                c = (1.0/(data.x[i]-data.x[i-1]))*( ((A*(pow(data.x[i],data.nk-1.0)-pow(data.x[i-1],data.nk-1.0)))/((data.nk-1.0)*pow(data.x[k],data.nk-2.0))) + ((B*(pow(data.x[i],data.nk)-pow(data.x[i-1],data.nk)))/(data.nk*pow(data.x[k],data.nk-1.0))) );
+                d = (data.x[i-1]/(data.x[i]-data.x[i-1]))*( ((A*(pow(data.x[i],data.nk-2.0)-pow(data.x[i-1],data.nk-2.0)))/((data.nk-2.0)*pow(data.x[k],data.nk-2.0))) + ((B*(pow(data.x[i],data.nk-1.0)-pow(data.x[i-1],data.nk-1.0)))/((data.nk-1.0)*pow(data.x[k],data.nk-1.0))) );
+                data.n[k][k] = c - d;
+                data.n[1][k] = ( (data.x[k] - data.n[k][k]*data.x[k]) - (data.nk - data.n[k][k])*data.x[0] ) / (data.x[1] - data.x[0]);
+                data.n[0][k] = (data.nk - data.n[k][k]) - data.n[1][k];
+            }
+            else if (k == 1)
+            {
+                data.n[1][k] = ( (data.x[k] - 0.0) - (data.nk - 0.0)*data.x[0] ) / (data.x[1] - data.x[0]);
+                data.n[0][k] = (data.nk - 0.0) - data.n[1][k];
+            }
+            else
+                for (int i=data.M-1; i>=0; i--)
+                    data.n[i][k] = 0.0;
+            
+        }
+    }
+    
 }
 
 double breakup_rate(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove)
@@ -3789,9 +3876,9 @@ int DOVE_TESTS()
     
     Test09_data data09;
     data09.M = 20;
-    data09.nk = 2.0;
+    data09.nk = 33.0;
     double x0 = 594.0;
-    double s = 500.0;
+    double s = 2.0;
     bool Original = false;
     
     fill_x(x0, s, data09);
