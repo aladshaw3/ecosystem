@@ -3264,7 +3264,8 @@ void fill_n(bool Original, Test09_data &data)
     }
     */
     
-    //New corrected method
+    //New corrected method (binary only)
+    /*
     for (int k=0; k<data.M; k++)
     {
         
@@ -3304,6 +3305,7 @@ void fill_n(bool Original, Test09_data &data)
             	data.n[i][k] = 0.0;
         
     }
+    */
     
     // Kumar and Ramkrishna
     /*
@@ -3332,14 +3334,22 @@ void fill_n(bool Original, Test09_data &data)
     }
     */
     
-    //Newest Method (for nk > 2)
-    if (data.nk > 2)
+    //Newest Method (for nk >= 2)
+    if (data.nk >= 2)
     {
         for (int k=0; k<data.M; k++)
         {
             double A, B;
-            B = ( data.nk - ((data.nk-1.0)/(data.nk-2.0)) ) / ( (1.0/(data.nk-1.0)) - ((data.nk-1.0)/data.nk/(data.nk-2.0)) );
-            A = (data.nk-1.0) - B*(data.nk-1.0)/data.nk;
+            //B = ( data.nk - ((data.nk-1.0)/(data.nk-2.0)) ) / ( (1.0/(data.nk-1.0)) - ((data.nk-1.0)/data.nk/(data.nk-2.0)) );
+            //A = (data.nk-1.0) - B*(data.nk-1.0)/data.nk;
+            
+            double varnk;
+            varnk = data.nk;
+            //varnk = data.nk+(double)k-1.0;
+            //std::cout << varnk << std::endl;
+            
+            B = -6.0*(varnk-2.0);
+            A = 2.0 - B*2.0/3.0;
             //std::cout << A << std::endl;
             //std::cout << B << std::endl;
             if (k >= 3)
@@ -3349,8 +3359,10 @@ void fill_n(bool Original, Test09_data &data)
                 for (int i=2; i<=k; i++)
                 {
                 	double a, b, c, d;
-                    c = (1.0/(data.x[i]-data.x[i-1]))*( ((A*(pow(data.x[i],data.nk-1.0)-pow(data.x[i-1],data.nk-1.0)))/((data.nk-1.0)*pow(data.x[k],data.nk-2.0))) + ((B*(pow(data.x[i],data.nk)-pow(data.x[i-1],data.nk)))/(data.nk*pow(data.x[k],data.nk-1.0))) );
-                    d = (data.x[i-1]/(data.x[i]-data.x[i-1]))*( ((A*(pow(data.x[i],data.nk-2.0)-pow(data.x[i-1],data.nk-2.0)))/((data.nk-2.0)*pow(data.x[k],data.nk-2.0))) + ((B*(pow(data.x[i],data.nk-1.0)-pow(data.x[i-1],data.nk-1.0)))/((data.nk-1.0)*pow(data.x[k],data.nk-1.0))) );
+                    //c = (1.0/(data.x[i]-data.x[i-1]))*( ((A*(pow(data.x[i],data.nk-1.0)-pow(data.x[i-1],data.nk-1.0)))/((data.nk-1.0)*pow(data.x[k],data.nk-2.0))) + ((B*(pow(data.x[i],data.nk)-pow(data.x[i-1],data.nk)))/(data.nk*pow(data.x[k],data.nk-1.0))) );
+                    //d = (data.x[i-1]/(data.x[i]-data.x[i-1]))*( ((A*(pow(data.x[i],data.nk-2.0)-pow(data.x[i-1],data.nk-2.0)))/((data.nk-2.0)*pow(data.x[k],data.nk-2.0))) + ((B*(pow(data.x[i],data.nk-1.0)-pow(data.x[i-1],data.nk-1.0)))/((data.nk-1.0)*pow(data.x[k],data.nk-1.0))) );
+                    c = (1.0/(data.x[i]-data.x[i-1]))*( ((A*(pow(data.x[i],2.0)-pow(data.x[i-1],2.0)))/(2.0*data.x[k])) + ((B*(pow(data.x[i],3.0)-pow(data.x[i-1],3.0)))/(3.0*pow(data.x[k],2.0))) );
+                    d = (data.x[i-1]/(data.x[i]-data.x[i-1]))*( ((A*(data.x[i]-data.x[i-1]))/(data.x[k])) + ((B*(pow(data.x[i],2.0)-pow(data.x[i-1],2.0)))/(2.0*pow(data.x[k],2.0))) );
                     if (i == k)
                     {
                     	a = 0.0;//unused here
@@ -3359,30 +3371,34 @@ void fill_n(bool Original, Test09_data &data)
                     }
                     else
                     {
-                        a = (data.x[i+1]/(data.x[i+1]-data.x[i]))*( ((A*(pow(data.x[i+1],data.nk-2.0)-pow(data.x[i],data.nk-2.0)))/((data.nk-2.0)*pow(data.x[k],data.nk-2.0))) + ((B*(pow(data.x[i+1],data.nk-1.0)-pow(data.x[i],data.nk-1.0)))/((data.nk-1.0)*pow(data.x[k],data.nk-1.0))) );
-                        b = (1.0/(data.x[i+1]-data.x[i]))*( ((A*(pow(data.x[i+1],data.nk-1.0)-pow(data.x[i],data.nk-1.0)))/((data.nk-1.0)*pow(data.x[k],data.nk-2.0))) + ((B*(pow(data.x[i+1],data.nk)-pow(data.x[i],data.nk)))/(data.nk*pow(data.x[k],data.nk-1.0))) );
+                        //a = (data.x[i+1]/(data.x[i+1]-data.x[i]))*( ((A*(pow(data.x[i+1],data.nk-2.0)-pow(data.x[i],data.nk-2.0)))/((data.nk-2.0)*pow(data.x[k],data.nk-2.0))) + ((B*(pow(data.x[i+1],data.nk-1.0)-pow(data.x[i],data.nk-1.0)))/((data.nk-1.0)*pow(data.x[k],data.nk-1.0))) );
+                        //b = (1.0/(data.x[i+1]-data.x[i]))*( ((A*(pow(data.x[i+1],data.nk-1.0)-pow(data.x[i],data.nk-1.0)))/((data.nk-1.0)*pow(data.x[k],data.nk-2.0))) + ((B*(pow(data.x[i+1],data.nk)-pow(data.x[i],data.nk)))/(data.nk*pow(data.x[k],data.nk-1.0))) );
+                        a = (data.x[i+1]/(data.x[i+1]-data.x[i]))*( ((A*(data.x[i+1]-data.x[i]))/(data.x[k])) + ((B*(pow(data.x[i+1],2.0)-pow(data.x[i],2.0)))/(2.0*pow(data.x[k],2.0))) );
+                        b = (1.0/(data.x[i+1]-data.x[i]))*( ((A*(pow(data.x[i+1],2.0)-pow(data.x[i],2.0)))/(2.0*data.x[k])) + ((B*(pow(data.x[i+1],3.0)-pow(data.x[i],3.0)))/(3.0*pow(data.x[k],2.0))) );
                         data.n[i][k] = a - b + c - d;
                     }
                     sum += data.n[i][k];
                     xsum += data.n[i][k]*data.x[i];
                 }
-                data.n[1][k] = ( (data.x[k] - xsum) - (data.nk - sum)*data.x[0] ) / (data.x[1] - data.x[0]);
-                data.n[0][k] = (data.nk - sum) - data.n[1][k];
+                data.n[1][k] = ( (data.x[k] - xsum) - (varnk - sum)*data.x[0] ) / (data.x[1] - data.x[0]);
+                data.n[0][k] = (varnk - sum) - data.n[1][k];
             }
             else if (k == 2)
             {
             	double c, d;
                 int i = k;
-                c = (1.0/(data.x[i]-data.x[i-1]))*( ((A*(pow(data.x[i],data.nk-1.0)-pow(data.x[i-1],data.nk-1.0)))/((data.nk-1.0)*pow(data.x[k],data.nk-2.0))) + ((B*(pow(data.x[i],data.nk)-pow(data.x[i-1],data.nk)))/(data.nk*pow(data.x[k],data.nk-1.0))) );
-                d = (data.x[i-1]/(data.x[i]-data.x[i-1]))*( ((A*(pow(data.x[i],data.nk-2.0)-pow(data.x[i-1],data.nk-2.0)))/((data.nk-2.0)*pow(data.x[k],data.nk-2.0))) + ((B*(pow(data.x[i],data.nk-1.0)-pow(data.x[i-1],data.nk-1.0)))/((data.nk-1.0)*pow(data.x[k],data.nk-1.0))) );
+                //c = (1.0/(data.x[i]-data.x[i-1]))*( ((A*(pow(data.x[i],data.nk-1.0)-pow(data.x[i-1],data.nk-1.0)))/((data.nk-1.0)*pow(data.x[k],data.nk-2.0))) + ((B*(pow(data.x[i],data.nk)-pow(data.x[i-1],data.nk)))/(data.nk*pow(data.x[k],data.nk-1.0))) );
+                //d = (data.x[i-1]/(data.x[i]-data.x[i-1]))*( ((A*(pow(data.x[i],data.nk-2.0)-pow(data.x[i-1],data.nk-2.0)))/((data.nk-2.0)*pow(data.x[k],data.nk-2.0))) + ((B*(pow(data.x[i],data.nk-1.0)-pow(data.x[i-1],data.nk-1.0)))/((data.nk-1.0)*pow(data.x[k],data.nk-1.0))) );
+                c = (1.0/(data.x[i]-data.x[i-1]))*( ((A*(pow(data.x[i],2.0)-pow(data.x[i-1],2.0)))/(2.0*data.x[k])) + ((B*(pow(data.x[i],3.0)-pow(data.x[i-1],3.0)))/(3.0*pow(data.x[k],2.0))) );
+                d = (data.x[i-1]/(data.x[i]-data.x[i-1]))*( ((A*(data.x[i]-data.x[i-1]))/(data.x[k])) + ((B*(pow(data.x[i],2.0)-pow(data.x[i-1],2.0)))/(2.0*pow(data.x[k],2.0))) );
                 data.n[k][k] = c - d;
-                data.n[1][k] = ( (data.x[k] - data.n[k][k]*data.x[k]) - (data.nk - data.n[k][k])*data.x[0] ) / (data.x[1] - data.x[0]);
-                data.n[0][k] = (data.nk - data.n[k][k]) - data.n[1][k];
+                data.n[1][k] = ( (data.x[k] - data.n[k][k]*data.x[k]) - (varnk - data.n[k][k])*data.x[0] ) / (data.x[1] - data.x[0]);
+                data.n[0][k] = (varnk - data.n[k][k]) - data.n[1][k];
             }
             else if (k == 1)
             {
-                data.n[1][k] = ( (data.x[k] - 0.0) - (data.nk - 0.0)*data.x[0] ) / (data.x[1] - data.x[0]);
-                data.n[0][k] = (data.nk - 0.0) - data.n[1][k];
+                data.n[1][k] = ( (data.x[k] - 0.0) - (varnk - 0.0)*data.x[0] ) / (data.x[1] - data.x[0]);
+                data.n[0][k] = (varnk - 0.0) - data.n[1][k];
             }
             else
                 for (int i=data.M-1; i>=0; i--)
@@ -3876,7 +3892,7 @@ int DOVE_TESTS()
     
     Test09_data data09;
     data09.M = 20;
-    data09.nk = 33.0;
+    data09.nk = 2.0;
     double x0 = 594.0;
     double s = 2.0;
     bool Original = false;
