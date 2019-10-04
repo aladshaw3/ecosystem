@@ -3097,20 +3097,20 @@ void fill_x(double x0, double s, Test09_data &data)
         x0 = 1.0;
     if (s < 1.5)
         s = 1.5;
+    
+    //For our model or Kumar model
     data.x[0] = x0;
     for (int i=1; i<data.M; i++)
     {
         data.x[i] = data.x[i-1]+s;
     }
     
+    //For Hill Model
     data.v[0] = x0;
     for (int i=1; i<data.M; i++)
     {
         data.v[i] = data.v[i-1]*s;
     }
-    
-    //For Hill Model
-    
     data.x[0] = data.v[0]/2.0;
     for (int i=1; i<data.M; i++)
     {
@@ -3126,8 +3126,6 @@ void fill_lam(bool Original, Test09_data &data)
     {
         //data.lam[i] = 1.0;
         data.lam[i] = data.x[i]*data.x[i]*5.0e-12;
-        //data.lam[i] = 0.1;
-        //data.lam[i] = data.x[i]*100.0;
     }
     data.Original = Original;
 }
@@ -3151,29 +3149,6 @@ void fill_n(bool Original, Test09_data &data)
         {
             if (Original == true)
             {
-                //old
-                /*
-                double first, second;
-                if (i == k)
-                    first = 0.0;
-                else
-                    first = (data.x[i+1]-data.x[i])/data.x[k];
-                if (i == 0)
-                    second = 0.0;
-                else
-                    second = (data.x[i]-data.x[i-1])/data.x[k];
-                data.n[i][k] = first + second;
-                */
-                
-                //New
-                /*
-                if (k > i && i < data.M-1)
-                    data.n[i][k] = (2.0/data.x[k])*(data.x[i+1] - data.x[i]);
-                else
-                    data.n[i][k] = 0.0;
-                */
-                
-                
                 //Hill
                 if (i >= k)
                 	data.n[i][k] = 0.0;
@@ -3188,29 +3163,8 @@ void fill_n(bool Original, Test09_data &data)
             }
             else
             {
-                // Simple
-                /*
-                if (k == i+1)
-                    data.n[i][k] = data.x[k]/data.x[i];
-                else
-                    data.n[i][k] = 0.0;
-                */
-                
-                //2-way chip
-                /*
-                if (i == k-1)
-                {
-                    data.n[i][k] = (data.x[k] - data.nk*data.x[i+1])/(data.x[i] - data.x[i+1]);
-                }
-                else if (i == k && i > 0)
-                {
-                    data.n[i][k] = data.nk - data.n[i-1][k];
-                }
-                else
-                    data.n[i][k] = 0.0;
-                 */
-                
-                //Average size dist
+
+                //Average size dist (basic method)
                 if (i > 0 && i <= k)
                 {
                     double num = data.nk;
@@ -3239,30 +3193,6 @@ void fill_n(bool Original, Test09_data &data)
             }
         }
     }
-    
-    /*
-    for (int k=0; k<data.M; k++)
-    {
-        for (int i=data.M-1; i>=0; i--)
-        {
-            if (i <= k)
-            {
-                if (i == k && k !=0 )
-                	data.n[i][k] = 0.5;
-                else if (i == k-1 && k == 1)
-                	data.n[i][k] = 1.5;
-                else if (i == k-1 && k > 1)
-                	data.n[i][k] = 0.75;
-                else if (i < k-1 && i == 0)
-                	data.n[i][k] = data.n[i+1][k];
-                else
-                	data.n[i][k] = data.n[i+1][k]/2.0;
-            }
-            else
-            	data.n[i][k] = 0.0;
-        }
-    }
-    */
     
     //New corrected method (binary only)
     /*
@@ -3307,7 +3237,7 @@ void fill_n(bool Original, Test09_data &data)
     }
     */
     
-    // Kumar and Ramkrishna
+    // Kumar and Ramkrishna (original)
     /*
     //LOOP OVER K FIRST
     for (int k=0; k<data.M; k++)
@@ -3340,18 +3270,12 @@ void fill_n(bool Original, Test09_data &data)
         for (int k=0; k<data.M; k++)
         {
             double A, B;
-            //B = ( data.nk - ((data.nk-1.0)/(data.nk-2.0)) ) / ( (1.0/(data.nk-1.0)) - ((data.nk-1.0)/data.nk/(data.nk-2.0)) );
-            //A = (data.nk-1.0) - B*(data.nk-1.0)/data.nk;
-            
             double varnk;
             varnk = data.nk;
             //varnk = data.nk+(double)k-1.0;
-            //std::cout << varnk << std::endl;
             
             B = -6.0*(varnk-2.0);
             A = 2.0 - B*2.0/3.0;
-            //std::cout << A << std::endl;
-            //std::cout << B << std::endl;
             if (k >= 3)
             {
                 double sum = 0.0;
@@ -3359,8 +3283,6 @@ void fill_n(bool Original, Test09_data &data)
                 for (int i=2; i<=k; i++)
                 {
                 	double a, b, c, d;
-                    //c = (1.0/(data.x[i]-data.x[i-1]))*( ((A*(pow(data.x[i],data.nk-1.0)-pow(data.x[i-1],data.nk-1.0)))/((data.nk-1.0)*pow(data.x[k],data.nk-2.0))) + ((B*(pow(data.x[i],data.nk)-pow(data.x[i-1],data.nk)))/(data.nk*pow(data.x[k],data.nk-1.0))) );
-                    //d = (data.x[i-1]/(data.x[i]-data.x[i-1]))*( ((A*(pow(data.x[i],data.nk-2.0)-pow(data.x[i-1],data.nk-2.0)))/((data.nk-2.0)*pow(data.x[k],data.nk-2.0))) + ((B*(pow(data.x[i],data.nk-1.0)-pow(data.x[i-1],data.nk-1.0)))/((data.nk-1.0)*pow(data.x[k],data.nk-1.0))) );
                     c = (1.0/(data.x[i]-data.x[i-1]))*( ((A*(pow(data.x[i],2.0)-pow(data.x[i-1],2.0)))/(2.0*data.x[k])) + ((B*(pow(data.x[i],3.0)-pow(data.x[i-1],3.0)))/(3.0*pow(data.x[k],2.0))) );
                     d = (data.x[i-1]/(data.x[i]-data.x[i-1]))*( ((A*(data.x[i]-data.x[i-1]))/(data.x[k])) + ((B*(pow(data.x[i],2.0)-pow(data.x[i-1],2.0)))/(2.0*pow(data.x[k],2.0))) );
                     if (i == k)
@@ -3371,8 +3293,6 @@ void fill_n(bool Original, Test09_data &data)
                     }
                     else
                     {
-                        //a = (data.x[i+1]/(data.x[i+1]-data.x[i]))*( ((A*(pow(data.x[i+1],data.nk-2.0)-pow(data.x[i],data.nk-2.0)))/((data.nk-2.0)*pow(data.x[k],data.nk-2.0))) + ((B*(pow(data.x[i+1],data.nk-1.0)-pow(data.x[i],data.nk-1.0)))/((data.nk-1.0)*pow(data.x[k],data.nk-1.0))) );
-                        //b = (1.0/(data.x[i+1]-data.x[i]))*( ((A*(pow(data.x[i+1],data.nk-1.0)-pow(data.x[i],data.nk-1.0)))/((data.nk-1.0)*pow(data.x[k],data.nk-2.0))) + ((B*(pow(data.x[i+1],data.nk)-pow(data.x[i],data.nk)))/(data.nk*pow(data.x[k],data.nk-1.0))) );
                         a = (data.x[i+1]/(data.x[i+1]-data.x[i]))*( ((A*(data.x[i+1]-data.x[i]))/(data.x[k])) + ((B*(pow(data.x[i+1],2.0)-pow(data.x[i],2.0)))/(2.0*pow(data.x[k],2.0))) );
                         b = (1.0/(data.x[i+1]-data.x[i]))*( ((A*(pow(data.x[i+1],2.0)-pow(data.x[i],2.0)))/(2.0*data.x[k])) + ((B*(pow(data.x[i+1],3.0)-pow(data.x[i],3.0)))/(3.0*pow(data.x[k],2.0))) );
                         data.n[i][k] = a - b + c - d;
@@ -3387,8 +3307,6 @@ void fill_n(bool Original, Test09_data &data)
             {
             	double c, d;
                 int i = k;
-                //c = (1.0/(data.x[i]-data.x[i-1]))*( ((A*(pow(data.x[i],data.nk-1.0)-pow(data.x[i-1],data.nk-1.0)))/((data.nk-1.0)*pow(data.x[k],data.nk-2.0))) + ((B*(pow(data.x[i],data.nk)-pow(data.x[i-1],data.nk)))/(data.nk*pow(data.x[k],data.nk-1.0))) );
-                //d = (data.x[i-1]/(data.x[i]-data.x[i-1]))*( ((A*(pow(data.x[i],data.nk-2.0)-pow(data.x[i-1],data.nk-2.0)))/((data.nk-2.0)*pow(data.x[k],data.nk-2.0))) + ((B*(pow(data.x[i],data.nk-1.0)-pow(data.x[i-1],data.nk-1.0)))/((data.nk-1.0)*pow(data.x[k],data.nk-1.0))) );
                 c = (1.0/(data.x[i]-data.x[i-1]))*( ((A*(pow(data.x[i],2.0)-pow(data.x[i-1],2.0)))/(2.0*data.x[k])) + ((B*(pow(data.x[i],3.0)-pow(data.x[i-1],3.0)))/(3.0*pow(data.x[k],2.0))) );
                 d = (data.x[i-1]/(data.x[i]-data.x[i-1]))*( ((A*(data.x[i]-data.x[i-1]))/(data.x[k])) + ((B*(pow(data.x[i],2.0)-pow(data.x[i-1],2.0)))/(2.0*pow(data.x[k],2.0))) );
                 data.n[k][k] = c - d;
@@ -3427,9 +3345,9 @@ double breakup_rate(int i, const Matrix<double> &u, double t, const void *data, 
         sink = dat->lam[i]*u(i,0);
     
     if (dat->Original == true)
-    	rate = 0.75*source - 0.5*sink;
+    	rate = 0.75*source - 0.5*sink; //For Hill only
     else
-    	rate = source - sink;
+    	rate = source - sink; //For our model or Kumar model
     
     return rate;
 }
@@ -3892,7 +3810,7 @@ int DOVE_TESTS()
     
     Test09_data data09;
     data09.M = 20;
-    data09.nk = 2.0;
+    data09.nk = 10.0;
     double x0 = 594.0;
     double s = 2.0;
     bool Original = false;
@@ -3902,6 +3820,7 @@ int DOVE_TESTS()
     fill_n(Original, data09);
     
     //Print out information
+    /*
     std::cout << "\nNumber of variable bins =\t" << data09.M << std::endl;
     std::cout << "\nBin sizes =\n";
     for (int i=0; i<data09.M; i++)
@@ -3928,6 +3847,7 @@ int DOVE_TESTS()
         }
         std::cout << std::endl;
     }
+    */
     
     test09.set_userdata((void*)&data09);
     test09.set_numfunc(data09.M);
@@ -3960,13 +3880,6 @@ int DOVE_TESTS()
             test09.set_initialcondition(i, 10.0);
         
         //test09.set_initialcondition(i, exp(-data09.x[i]));
-        
-        /*
-        if (data09.x[i] < 0.65536)
-        	test09.set_initialcondition(i, 1.7611*data09.x[i]*data09.x[i]-2.7257*data09.x[i]+0.9839);
-        else
-        	test09.set_initialcondition(i, 1.1305*exp(-6.783*data09.x[i]));
-        */
     }
     
     test09.set_timestep(0.05);
