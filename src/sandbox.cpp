@@ -815,6 +815,7 @@ int RUN_SANDBOX()
 	
 	std::cout << "Start SANDBOX\n\n";
 	
+    /*
 	Speciation_Test01_Data dat01;
 	dat01.x.resize(dat01.N+1);
 	dat01.x[0].Register("H2CO3 (aq)");
@@ -883,9 +884,12 @@ int RUN_SANDBOX()
 	//Convert to mol/L
 	success = Convert2Concentration(dat01.logC, dat01.C);
 	dat01.C.Display("C_final");
+    
+    */
 	
 	// ------------- Quantum Mechanics Example: Particle in a Box with Variational Method --------------------------
 	
+    /*
 	std::cout << isEven(6) << "\t" << isEven(5) << std::endl;
 	
 	std::cout << "Solving the Schrodinger Equations for Particle in a Box, with Variational Method\n" << std::endl;
@@ -945,12 +949,12 @@ int RUN_SANDBOX()
 	
 	std::cout << "\nThis demonstrates that the variational method will always approximate the lowest energy state of the system\n\n";
 	
-	
+	*/
 	// -------------------------------------- End Quantum Mechanics Example ----------------------------------------
 	
 	
 	// ----------------------------- Example of Varitational Polynomial Approximation ------------------------------
-	
+	/*
 	std::cout << "Solve d^2/dx^2 (u) = (k/D) * u Approximately with a constrained variational method...\n\n";
 	
 	VPA_Test_DATA vpa_dat;
@@ -993,10 +997,11 @@ int RUN_SANDBOX()
 	ux.Display("u_x");
 	
 	std::cout << "Test was a HUGE SUCCESS!!! ^_^ \n\n";
-	
+	*/
 	// --------------------------------------------- END VPA Example -----------------------------------------------
 	
 	// ----------------------------- Example of QR Solve ------------------------------
+    /*
 	QR_DATA qr_dat;
 	QR_EX1 ex1;
 	ex1.M.set_size(10, 10);
@@ -1040,11 +1045,12 @@ int RUN_SANDBOX()
 	x1.Display("x");
 	
 	std::cout << "QR solve norm = " << (b1 - A1*x1).norm() << std::endl << std::endl;
-	
+	*/
 	
 	// ------------------------------------- END QR Solve Example -----------------------------------------
 	
 	// ----------------------------- Example of Gauss-Seidel ------------------------------
+    /*
 	Matrix<double> r1, U1, L1, s1;
 	r1.set_size(200, 1);
 	s1.set_size(200, 1);
@@ -1073,11 +1079,11 @@ int RUN_SANDBOX()
 		std::cout << i+1 << "\t" << norm << std::endl;
 	}
 	std::cout << "\n\n";
-	
+	*/
 	// ------------------------------------- END Gauss-Seidel Example -----------------------------------------
 	
 	// ----------------------------- Example 02 of Varitational Polynomial Approximation ------------------------------
-	
+	/*
 	std::cout << "Solve {du/dt + v*du/dx = D*d^2u/dx^2} Approximately with a constrained variational method and implicit/CN integration...\n\n";
 	
 	VPA_Test02_DATA vpa_dat02;
@@ -1145,18 +1151,15 @@ int RUN_SANDBOX()
 		vpa_dat02.xnp1.zeros(); //Note: these are zeroed out because the method seems more efficient this way
 		current_time += vpa_dat02.dt;
 	} while (current_time <= end_time+vpa_dat02.dt);
-	
-	
-	// --------------------------------------------- END VPA Example 02 -----------------------------------------------
 	std::cout << "\n\n";
+	*/
+	// --------------------------------------------- END VPA Example 02 -----------------------------------------------
 	
 	//std::cout << TrigBasis_Integrals(COS, SIN, 2, 1, 0, 1) << std::endl;
 	//std::cout << Overlap_Integral_TrigBasis(4, 1, 0, 1) << std::endl;
 	//std::cout << Gradient_Integral_TrigBasis(4, 1, 0, 1) << std::endl;
 	//std::cout << Laplacian_Integral_TrigBasis(4, 1, 0, 1) << std::endl;
-	
-	std::cout << "\nEnd SANDBOX\n\n";
-    
+    /*
     int k = 0;
     RowCol(0, k);
     std::cout << k << std::endl;
@@ -1166,6 +1169,15 @@ int RUN_SANDBOX()
     std::cout << k << std::endl;
     RowCol(3, k);
     std::cout << k << std::endl;
+	*/
+    
+    // ------------------------------ Example Integral Function for Particle Disintegration ------------------------
+    
+    
+    
+    // ------------------------------------------ END Particle Disintegration --------------------------------------
+	std::cout << "\nEnd SANDBOX\n\n";
+    
 	
 	return success;
 }

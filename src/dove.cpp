@@ -3327,6 +3327,172 @@ void fill_n(bool Original, Test09_data &data)
     
 }
 
+double breakup_normal(double A, double B, double xk, double vol, double nk)
+{
+    //return (A/vol)*exp(-B*pow((vol-2.0*xk),2.0)/pow(vol,2.0));
+    return (A/xk)*exp(-B*pow((nk*vol-xk),2.0)/pow(xk,2.0));
+}
+
+double breakup_normal_integral(double A, double B, double lb, double ub, double xk, bool volume, double nk)
+{
+    double value = 0.0;
+    
+    //if volume = true ==> v*b*dv, else ==> b*dv
+    if (lb <= 0.0)
+    	lb = sqrt(DBL_EPSILON);
+    double vol = lb;
+    double func_l = breakup_normal(A,B,xk,vol, nk);
+    double dv = (ub - lb)/10000.0;
+    
+    for (int i=1; i<10001; i++)
+    {
+        double vol_avg = 0.5*(vol + vol + dv);
+        vol = vol + dv;
+        double func_u = breakup_normal(A,B,xk,vol, nk);
+        double func_avg = (func_l + func_u)*0.5;
+        if (volume == true)
+        	value += func_avg*vol_avg*dv;
+        else
+        	value += func_avg*dv;
+        
+        func_l = func_u;
+    }
+    
+    return value;
+}
+
+void fill_n_normal(bool Original, Test09_data &data)
+{
+    data.n.resize(data.M);
+    for (int i=0; i<data.M; i++)
+    {
+        data.n[i].resize(data.M);
+        for (int k=0; k<data.M; k++)
+        {
+            data.n[i][k] = 0.0;
+        }
+    }
+    
+    double A, B;
+    
+    if (data.nk == 2)
+    {
+        //A = 1.366348746;
+        //B = 1.0236E-02;
+        A = 3.623816578;
+        B = 2.44016294;
+    }
+    else if (data.nk == 3)
+    {
+        //A = 1.085528151;
+        //B = 6.0629E-04;
+        A = 11.18911126;
+        B = 4.847698174;
+    }
+    else if (data.nk == 4)
+    {
+        //A = 1.027080673;
+        //B = 5.96457E-05;
+        A = 20.89794097;
+        B = 5.353969782;
+    }
+    else if (data.nk == 5)
+    {
+        //A = 1.008123633;
+        //B = 5.11449E-06;
+        A = 33.97472262;
+        B = 5.798268903;
+    }
+    else
+    {
+        A = 0.0;
+        B = 0.0;
+    }
+    
+    //Truncated Normal Method (for 2 <= nk <= 5)
+    if (data.nk >= 2 && data.nk <= 5)
+    {
+        for (int k=0; k<data.M; k++)
+        {
+            double varnk;
+            varnk = data.nk;
+            
+            if (k >= 3)
+            {
+                double sum = 0.0;
+                double xsum = 0.0;
+                for (int i=2; i<=k; i++)
+                {
+                    double a, b, c, d;
+                    double a_int, b_int, c_int, d_int;
+                    c_int = breakup_normal_integral(A, B, data.x[i-1], data.x[i], data.x[k], true, varnk);
+                    d_int = breakup_normal_integral(A, B, data.x[i-1], data.x[i], data.x[k], false, varnk);
+                    c = (1.0/(data.x[i]-data.x[i-1]))*( c_int );
+                    d = (data.x[i-1]/(data.x[i]-data.x[i-1]))*( d_int );
+                    if (i == k)
+                    {
+                        a = 0.0;//unused here
+                        b = 0.0;//unused here
+                        a_int = 0.0;//unused here
+                        b_int = 0.0;//unused here
+                        data.n[i][k] = c - d;
+                    }
+                    else
+                    {
+                    	a_int = breakup_normal_integral(A, B, data.x[i], data.x[i+1], data.x[k], false, varnk);
+                        b_int = breakup_normal_integral(A, B, data.x[i], data.x[i+1], data.x[k], true, varnk);
+                        a = (data.x[i+1]/(data.x[i+1]-data.x[i]))*( a_int );
+                        b = (1.0/(data.x[i+1]-data.x[i]))*( b_int );
+                        data.n[i][k] = a - b + c - d;
+                    }
+                    sum += data.n[i][k];
+                    xsum += data.n[i][k]*data.x[i];
+                }
+                data.n[1][k] = ( (data.x[k] - xsum) - (varnk - sum)*data.x[0] ) / (data.x[1] - data.x[0]);
+                //Boundary check
+                if (data.n[1][k] < 0.0)
+                {
+                	//std::cout << (data.x[k] - xsum) << "\t" << (varnk - sum)*data.x[0] << std::endl;
+                	data.n[1][k] = 0.0;
+                }
+                data.n[0][k] = (varnk - sum) - data.n[1][k];
+                //Boundary check
+                if (data.n[1][k] == 0.0)
+                    data.n[0][k] = 0.0;
+            }
+            else if (k == 2)
+            {
+                double c, d;
+                int i = k;
+                double c_int, d_int;
+                c_int = breakup_normal_integral(A, B, data.x[i-1], data.x[i], data.x[k], true, varnk);
+                d_int = breakup_normal_integral(A, B, data.x[i-1], data.x[i], data.x[k], false, varnk);
+                c = (1.0/(data.x[i]-data.x[i-1]))*( c_int );
+                d = (data.x[i-1]/(data.x[i]-data.x[i-1]))*( d_int );
+                data.n[k][k] = c - d;
+                data.n[1][k] = ( (data.x[k] - data.n[k][k]*data.x[k]) - (varnk - data.n[k][k])*data.x[0] ) / (data.x[1] - data.x[0]);
+                //Boundary check
+                if (data.n[1][k] < 0.0)
+                    data.n[1][k] = 0.0;
+                data.n[0][k] = (varnk - data.n[k][k]) - data.n[1][k];
+                //Boundary check
+                if (data.n[1][k] == 0.0)
+                    data.n[0][k] = 0.0;
+            }
+            else if (k == 1)
+            {
+                data.n[1][k] = ( (data.x[k] - 0.0) - (varnk - 0.0)*data.x[0] ) / (data.x[1] - data.x[0]);
+                data.n[0][k] = (varnk - 0.0) - data.n[1][k];
+            }
+            else
+                for (int i=data.M-1; i>=0; i--)
+                    data.n[i][k] = 0.0;
+            
+        }
+    }
+
+}
+
 double breakup_rate(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove)
 {
     Test09_data *dat = (Test09_data *) data;
@@ -3810,17 +3976,18 @@ int DOVE_TESTS()
     
     Test09_data data09;
     data09.M = 20;
-    data09.nk = 10.0;
+    data09.nk = 5.0;
     double x0 = 594.0;
     double s = 2.0;
     bool Original = false;
     
     fill_x(x0, s, data09);
     fill_lam(Original, data09);
-    fill_n(Original, data09);
+    //fill_n(Original, data09);
+    fill_n_normal(Original, data09);
     
     //Print out information
-    /*
+    
     std::cout << "\nNumber of variable bins =\t" << data09.M << std::endl;
     std::cout << "\nBin sizes =\n";
     for (int i=0; i<data09.M; i++)
@@ -3847,7 +4014,7 @@ int DOVE_TESTS()
         }
         std::cout << std::endl;
     }
-    */
+    
     
     test09.set_userdata((void*)&data09);
     test09.set_numfunc(data09.M);
@@ -3893,6 +4060,8 @@ int DOVE_TESTS()
     std::cout << "\nSimulation Runtime: " << (time / CLOCKS_PER_SEC) << " seconds\n";
     
     fprintf(file,"\n --------------- End of Test09 ---------------- \n\n");
+    
+    //std::cout << breakup_normal_integral(1.086, 6.063e-4, 0.0, 1, 1, false, 2) << std::endl;
     
     //  ------------------------------    END Test09   ----------------------------------
     
