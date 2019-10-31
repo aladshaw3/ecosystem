@@ -3493,6 +3493,313 @@ void fill_n_normal(bool Original, Test09_data &data)
 
 }
 
+
+void fill_n_exponential(bool Original, Test09_data &data)
+{
+    data.n.resize(data.M);
+    for (int i=0; i<data.M; i++)
+    {
+        data.n[i].resize(data.M);
+        for (int k=0; k<data.M; k++)
+        {
+            data.n[i][k] = 0.0;
+        }
+    }
+    
+    double A, B;
+    
+    if (data.nk == 2)
+    {
+        A = 2.0;
+        B = 0.0;
+    }
+    else if (data.nk == 3)
+    {
+        A = 7.298;
+        B = 2.149;
+    }
+    else if (data.nk == 4)
+    {
+        A = 14.78;
+        B = 3.593;
+    }
+    else if (data.nk == 5)
+    {
+        A = 24.20;
+        B = 4.801;
+    }
+    else
+    {
+        A = 0.0;
+        B = 0.0;
+    }
+    
+    //Exponential Distribution Method (for 2 <= nk <= 5)
+    if (data.nk >= 2 && data.nk <= 5)
+    {
+        for (int k=0; k<data.M; k++)
+        {
+            double varnk;
+            varnk = data.nk;
+            
+            if (k >= 3)
+            {
+                double sum = 0.0;
+                double xsum = 0.0;
+                for (int i=2; i<=k; i++)
+                {
+                    double a, b, c, d;
+                    double a_int, b_int, c_int, d_int;
+                    if (data.nk == 2)
+                    {
+                        c = (1.0/(data.x[i]-data.x[i-1]))*( (A/2.0)*(data.x[i]*data.x[i]-data.x[i-1]*data.x[i-1])/data.x[k] );
+                        d = (data.x[i-1]/(data.x[i]-data.x[i-1]))*( A*(data.x[i]-data.x[i-1])/data.x[k] );
+                    }
+                    else
+                    {
+                    	c_int = (B*data.x[i]/data.x[k] + 1.0)*exp(-B*data.x[i]/data.x[k]) - (B*data.x[i-1]/data.x[k] + 1.0)*exp(-B*data.x[i-1]/data.x[k]);
+                        d_int = exp(-B*data.x[i]/data.x[k]) - exp(-B*data.x[i-1]/data.x[k]);
+                    	c = -(A/B/B)*(data.x[k]/(data.x[i]-data.x[i-1]))*( c_int );
+                    	d = -(A/B)*(data.x[i-1]/(data.x[i]-data.x[i-1]))*( d_int );
+                    }
+                    if (i == k)
+                    {
+                        a = 0.0;//unused here
+                        b = 0.0;//unused here
+                        a_int = 0.0;//unused here
+                        b_int = 0.0;//unused here
+                        data.n[i][k] = c - d;
+                    }
+                    else
+                    {
+                    	if (data.nk == 2)
+                        {
+                            a = (data.x[i+1]/(data.x[i+1]-data.x[i]))*( A*(data.x[i+1]-data.x[i])/data.x[k] );
+                            b = (1.0/(data.x[i+1]-data.x[i]))*( (A/2.0)*(data.x[i+1]*data.x[i+1]-data.x[i]*data.x[i])/data.x[k] );
+                        }
+                        else
+                        {
+                        	a_int = exp(-B*data.x[i+1]/data.x[k]) - exp(-B*data.x[i]/data.x[k]);
+                            b_int = (B*data.x[i+1]/data.x[k] + 1.0)*exp(-B*data.x[i+1]/data.x[k]) - (B*data.x[i]/data.x[k] + 1.0)*exp(-B*data.x[i]/data.x[k]);
+                        	a = -(A/B)*(data.x[i+1]/(data.x[i+1]-data.x[i]))*( a_int );
+                        	b = -(A/B/B)*(data.x[k]/(data.x[i+1]-data.x[i]))*( b_int );
+                        }
+                        data.n[i][k] = a - b + c - d;
+                    }
+                    sum += data.n[i][k];
+                    xsum += data.n[i][k]*data.x[i];
+                }
+                data.n[1][k] = ( (data.x[k] - xsum) - (varnk - sum)*data.x[0] ) / (data.x[1] - data.x[0]);
+                data.n[0][k] = (varnk - sum) - ( ((data.x[k] - xsum) - (varnk - sum)*data.x[0]) / (data.x[1] - data.x[0]) );
+                
+                if (data.n[1][k] < 0.0 || data.n[0][k] < 0.0)
+                {
+                	data.n[1][k] = data.n[2][k]*0.5;
+                    data.n[0][k] = (varnk - sum) - data.n[1][k];
+                    if (data.n[0][k] < 0.0)
+                    	data.n[0][k] = 0.0;
+                }
+                
+                
+            }
+            else if (k == 2)
+            {
+                double c, d;
+                int i = k;
+                double c_int, d_int;
+                if (data.nk == 2)
+                {
+                    c = (1.0/(data.x[i]-data.x[i-1]))*( (A/2.0)*(data.x[i]*data.x[i]-data.x[i-1]*data.x[i-1])/data.x[k] );
+                    d = (data.x[i-1]/(data.x[i]-data.x[i-1]))*( A*(data.x[i]-data.x[i-1])/data.x[k] );
+                }
+                else
+                {
+                    c_int = (B*data.x[i]/data.x[k] + 1.0)*exp(-B*data.x[i]/data.x[k]) - (B*data.x[i-1]/data.x[k] + 1.0)*exp(-B*data.x[i-1]/data.x[k]);
+                    d_int = exp(-B*data.x[i]/data.x[k]) - exp(-B*data.x[i-1]/data.x[k]);
+                    c = -(A/B/B)*(data.x[k]/(data.x[i]-data.x[i-1]))*( c_int );
+                    d = -(A/B)*(data.x[i-1]/(data.x[i]-data.x[i-1]))*( d_int );
+                }
+                data.n[k][k] = c - d;
+                
+                data.n[1][k] = ((data.x[k] - data.n[k][k]*data.x[k]) - (varnk - data.n[k][k])*data.x[0]) / (data.x[1] - data.x[0]);
+                data.n[0][k] = (varnk - data.n[k][k]) - ( ((data.x[k] - data.n[k][k]*data.x[k]) - (varnk - data.n[k][k])*data.x[0]) / (data.x[1] - data.x[0]) );
+                
+                if (data.n[1][k] < 0.0 || data.n[0][k] < 0.0)
+                {
+                    data.n[1][k] = data.n[2][k]*0.5;
+                    data.n[0][k] = (varnk - data.n[k][k]) - data.n[1][k];
+                    if (data.n[0][k] < 0.0)
+                        data.n[0][k] = 0.0;
+                }
+            }
+            else if (k == 1)
+            {
+                data.n[1][k] = ( (data.x[k] - 0.0) - (varnk - 0.0)*data.x[0] ) / (data.x[1] - data.x[0]);
+                data.n[0][k] = (varnk - 0.0) - data.n[1][k];
+            }
+            else
+                for (int i=data.M-1; i>=0; i--)
+                    data.n[i][k] = 0.0;
+            
+        }
+    }
+    
+}
+
+
+void fill_n_approx_exponential(bool Original, Test09_data &data)
+{
+    data.n.resize(data.M);
+    for (int i=0; i<data.M; i++)
+    {
+        data.n[i].resize(data.M);
+        for (int k=0; k<data.M; k++)
+        {
+            data.n[i][k] = 0.0;
+        }
+    }
+    
+    // ------------------------ CORRECT STUFF BELOW ---------------------
+    
+    //Approximate Exponential Distribution Method (for 2 <= nk <= 5)
+    if (data.nk >= 2 && data.nk <= 5)
+    {
+        for (int k=0; k<data.M; k++)
+        {
+            double varnk;
+            varnk = data.nk;
+            
+            double A, B;
+            
+            if (varnk == 2)
+            {
+                A = 2.0;
+                B = 0.0;
+            }
+            else
+            {
+                B = (varnk - 2.0)*(1.0-0.5*varnk)/(0.5*(exp(-(varnk - 2.0))-1.0) - (1.0/(varnk-2.0))*((varnk-2.0+1.0)*exp(-(varnk - 2.0))-1.0));
+                A = varnk + (B/(varnk - 2.0))*(exp(-(varnk - 2.0))-1.0);
+            }
+            
+            if (k >= 3)
+            {
+                double sum = 0.0;
+                double xsum = 0.0;
+                for (int i=2; i<=k; i++)
+                {
+                    double a, b, c, d;
+                    double a_int, b_int, c_int, d_int;
+                    if (data.nk == 2)
+                    {
+                        c = (1.0/(data.x[i]-data.x[i-1]))*( (A/2.0)*(data.x[i]*data.x[i]-data.x[i-1]*data.x[i-1])/data.x[k] );
+                        d = (data.x[i-1]/(data.x[i]-data.x[i-1]))*( A*(data.x[i]-data.x[i-1])/data.x[k] );
+                    }
+                    else
+                    {
+                        c_int = (A/2.0)*(data.x[i]*data.x[i]-data.x[i-1]*data.x[i-1])/data.x[k];
+                        c_int = c_int - 0.0;
+                        d_int = A*(data.x[i]-data.x[i-1])/data.x[k];
+                        d_int = d_int - 0.0;
+                        
+                        c = (1.0/(data.x[i]-data.x[i-1]))*( c_int );
+                        d = (data.x[i-1]/(data.x[i]-data.x[i-1]))*( d_int );
+                    }
+                    if (i == k)
+                    {
+                        a = 0.0;//unused here
+                        b = 0.0;//unused here
+                        a_int = 0.0;//unused here
+                        b_int = 0.0;//unused here
+                        data.n[i][k] = c - d;
+                    }
+                    else
+                    {
+                        if (data.nk == 2)
+                        {
+                            a = (data.x[i+1]/(data.x[i+1]-data.x[i]))*( A*(data.x[i+1]-data.x[i])/data.x[k] );
+                            b = (1.0/(data.x[i+1]-data.x[i]))*( (A/2.0)*(data.x[i+1]*data.x[i+1]-data.x[i]*data.x[i])/data.x[k] );
+                        }
+                        else
+                        {
+                            a_int = A*(data.x[i+1]-data.x[i])/data.x[k];
+                            a_int = a_int - 0.0;
+                            b_int = (A/2.0)*(data.x[i+1]*data.x[i+1]-data.x[i]*data.x[i])/data.x[k];
+                            b_int = b_int - 0.0;
+                            
+                            a = (data.x[i+1]/(data.x[i+1]-data.x[i]))*( a_int );
+                            b = (1.0/(data.x[i+1]-data.x[i]))*( b_int );
+                        }
+                        data.n[i][k] = a - b + c - d;
+                    }
+                    sum += data.n[i][k];
+                    xsum += data.n[i][k]*data.x[i];
+                }
+                data.n[1][k] = ( (data.x[k] - xsum) - (varnk - sum)*data.x[0] ) / (data.x[1] - data.x[0]);
+                data.n[0][k] = (varnk - sum) - ( ((data.x[k] - xsum) - (varnk - sum)*data.x[0]) / (data.x[1] - data.x[0]) );
+                
+                /*
+                if (data.n[1][k] < 0.0 || data.n[0][k] < 0.0)
+                {
+                    data.n[1][k] = data.n[2][k]*0.5;
+                    data.n[0][k] = (varnk - sum) - data.n[1][k];
+                    if (data.n[0][k] < 0.0)
+                        data.n[0][k] = 0.0;
+                }
+                */
+                
+                
+            }
+            else if (k == 2)
+            {
+                double c, d;
+                int i = k;
+                double c_int, d_int;
+                if (data.nk == 2)
+                {
+                    c = (1.0/(data.x[i]-data.x[i-1]))*( (A/2.0)*(data.x[i]*data.x[i]-data.x[i-1]*data.x[i-1])/data.x[k] );
+                    d = (data.x[i-1]/(data.x[i]-data.x[i-1]))*( A*(data.x[i]-data.x[i-1])/data.x[k] );
+                }
+                else
+                {
+                    c_int = (A/2.0)*(data.x[i]*data.x[i]-data.x[i-1]*data.x[i-1])/data.x[k];
+                    c_int = c_int - 0.0;
+                    d_int = A*(data.x[i]-data.x[i-1])/data.x[k];
+                    d_int = d_int - 0.0;
+                    
+                    c = (1.0/(data.x[i]-data.x[i-1]))*( c_int );
+                    d = (data.x[i-1]/(data.x[i]-data.x[i-1]))*( d_int );
+                }
+                data.n[k][k] = c - d;
+                
+                data.n[1][k] = ((data.x[k] - data.n[k][k]*data.x[k]) - (varnk - data.n[k][k])*data.x[0]) / (data.x[1] - data.x[0]);
+                data.n[0][k] = (varnk - data.n[k][k]) - ( ((data.x[k] - data.n[k][k]*data.x[k]) - (varnk - data.n[k][k])*data.x[0]) / (data.x[1] - data.x[0]) );
+                
+                /*
+                if (data.n[1][k] < 0.0 || data.n[0][k] < 0.0)
+                {
+                    data.n[1][k] = data.n[2][k]*0.5;
+                    data.n[0][k] = (varnk - data.n[k][k]) - data.n[1][k];
+                    if (data.n[0][k] < 0.0)
+                        data.n[0][k] = 0.0;
+                }
+                */
+            }
+            else if (k == 1)
+            {
+                data.n[1][k] = ( (data.x[k] - 0.0) - (varnk - 0.0)*data.x[0] ) / (data.x[1] - data.x[0]);
+                data.n[0][k] = (varnk - 0.0) - data.n[1][k];
+            }
+            else
+                for (int i=data.M-1; i>=0; i--)
+                    data.n[i][k] = 0.0;
+            
+        }
+    }
+    
+}
+
+
 double breakup_rate(int i, const Matrix<double> &u, double t, const void *data, const Dove &dove)
 {
     Test09_data *dat = (Test09_data *) data;
@@ -3984,7 +4291,8 @@ int DOVE_TESTS()
     fill_x(x0, s, data09);
     fill_lam(Original, data09);
     //fill_n(Original, data09);
-    fill_n_normal(Original, data09);
+    //fill_n_normal(Original, data09);
+    fill_n_exponential(Original, data09);
     
     //Print out information
     
