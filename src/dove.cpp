@@ -3661,13 +3661,14 @@ void fill_n_approx_exponential(bool Original, Test09_data &data)
     
     // ------------------------ CORRECT STUFF BELOW ---------------------
     
-    //Approximate Exponential Distribution Method (for 2 <= nk <= 5)
-    if (data.nk >= 2 && data.nk <= 5)
+    //Approximate Exponential Distribution Method (for nk >= 2)
+    if (data.nk >= 2)
     {
         for (int k=0; k<data.M; k++)
         {
             double varnk;
             varnk = data.nk;
+            //varnk = data.nk+k-1;
             
             double A, B;
             
@@ -3690,7 +3691,7 @@ void fill_n_approx_exponential(bool Original, Test09_data &data)
                 {
                     double a, b, c, d;
                     double a_int, b_int, c_int, d_int;
-                    if (data.nk == 2)
+                    if (varnk == 2)
                     {
                         c = (1.0/(data.x[i]-data.x[i-1]))*( (A/2.0)*(data.x[i]*data.x[i]-data.x[i-1]*data.x[i-1])/data.x[k] );
                         d = (data.x[i-1]/(data.x[i]-data.x[i-1]))*( A*(data.x[i]-data.x[i-1])/data.x[k] );
@@ -3698,9 +3699,9 @@ void fill_n_approx_exponential(bool Original, Test09_data &data)
                     else
                     {
                         c_int = (A/2.0)*(data.x[i]*data.x[i]-data.x[i-1]*data.x[i-1])/data.x[k];
-                        c_int = c_int - 0.0;
+                        c_int = c_int - (B*data.x[k]/(varnk - 2.0)/(varnk - 2.0))*( ((varnk - 2.0)*(data.x[i]/data.x[k])+1.0)*exp(-(varnk - 2.0)*(data.x[i]/data.x[k])) -  ((varnk - 2.0)*(data.x[i-1]/data.x[k])+1.0)*exp(-(varnk - 2.0)*(data.x[i-1]/data.x[k])) );
                         d_int = A*(data.x[i]-data.x[i-1])/data.x[k];
-                        d_int = d_int - 0.0;
+                        d_int = d_int - (B/(varnk - 2.0))*( exp(-(varnk - 2.0)*(data.x[i]/data.x[k])) -  exp(-(varnk - 2.0)*(data.x[i-1]/data.x[k])) );
                         
                         c = (1.0/(data.x[i]-data.x[i-1]))*( c_int );
                         d = (data.x[i-1]/(data.x[i]-data.x[i-1]))*( d_int );
@@ -3715,7 +3716,7 @@ void fill_n_approx_exponential(bool Original, Test09_data &data)
                     }
                     else
                     {
-                        if (data.nk == 2)
+                        if (varnk == 2)
                         {
                             a = (data.x[i+1]/(data.x[i+1]-data.x[i]))*( A*(data.x[i+1]-data.x[i])/data.x[k] );
                             b = (1.0/(data.x[i+1]-data.x[i]))*( (A/2.0)*(data.x[i+1]*data.x[i+1]-data.x[i]*data.x[i])/data.x[k] );
@@ -3723,9 +3724,9 @@ void fill_n_approx_exponential(bool Original, Test09_data &data)
                         else
                         {
                             a_int = A*(data.x[i+1]-data.x[i])/data.x[k];
-                            a_int = a_int - 0.0;
+                            a_int = a_int - (B/(varnk - 2.0))*( exp(-(varnk - 2.0)*(data.x[i+1]/data.x[k])) -  exp(-(varnk - 2.0)*(data.x[i]/data.x[k])) );
                             b_int = (A/2.0)*(data.x[i+1]*data.x[i+1]-data.x[i]*data.x[i])/data.x[k];
-                            b_int = b_int - 0.0;
+                            b_int = b_int - (B*data.x[k]/(varnk - 2.0)/(varnk - 2.0))*( ((varnk - 2.0)*(data.x[i+1]/data.x[k])+1.0)*exp(-(varnk - 2.0)*(data.x[i+1]/data.x[k])) -  ((varnk - 2.0)*(data.x[i]/data.x[k])+1.0)*exp(-(varnk - 2.0)*(data.x[i]/data.x[k])) );
                             
                             a = (data.x[i+1]/(data.x[i+1]-data.x[i]))*( a_int );
                             b = (1.0/(data.x[i+1]-data.x[i]))*( b_int );
@@ -3755,7 +3756,7 @@ void fill_n_approx_exponential(bool Original, Test09_data &data)
                 double c, d;
                 int i = k;
                 double c_int, d_int;
-                if (data.nk == 2)
+                if (varnk == 2)
                 {
                     c = (1.0/(data.x[i]-data.x[i-1]))*( (A/2.0)*(data.x[i]*data.x[i]-data.x[i-1]*data.x[i-1])/data.x[k] );
                     d = (data.x[i-1]/(data.x[i]-data.x[i-1]))*( A*(data.x[i]-data.x[i-1])/data.x[k] );
@@ -3763,9 +3764,9 @@ void fill_n_approx_exponential(bool Original, Test09_data &data)
                 else
                 {
                     c_int = (A/2.0)*(data.x[i]*data.x[i]-data.x[i-1]*data.x[i-1])/data.x[k];
-                    c_int = c_int - 0.0;
+                    c_int = c_int - (B*data.x[k]/(varnk - 2.0)/(varnk - 2.0))*( ((varnk - 2.0)*(data.x[i]/data.x[k])+1.0)*exp(-(varnk - 2.0)*(data.x[i]/data.x[k])) -  ((varnk - 2.0)*(data.x[i-1]/data.x[k])+1.0)*exp(-(varnk - 2.0)*(data.x[i-1]/data.x[k])) );
                     d_int = A*(data.x[i]-data.x[i-1])/data.x[k];
-                    d_int = d_int - 0.0;
+                    d_int = d_int - (B/(varnk - 2.0))*( exp(-(varnk - 2.0)*(data.x[i]/data.x[k])) -  exp(-(varnk - 2.0)*(data.x[i-1]/data.x[k])) );
                     
                     c = (1.0/(data.x[i]-data.x[i-1]))*( c_int );
                     d = (data.x[i-1]/(data.x[i]-data.x[i-1]))*( d_int );
@@ -4283,7 +4284,7 @@ int DOVE_TESTS()
     
     Test09_data data09;
     data09.M = 20;
-    data09.nk = 5.0;
+    data09.nk = 10.0;
     double x0 = 594.0;
     double s = 2.0;
     bool Original = false;
@@ -4292,7 +4293,8 @@ int DOVE_TESTS()
     fill_lam(Original, data09);
     //fill_n(Original, data09);
     //fill_n_normal(Original, data09);
-    fill_n_exponential(Original, data09);
+    //fill_n_exponential(Original, data09);
+    fill_n_approx_exponential(Original, data09);
     
     //Print out information
     
