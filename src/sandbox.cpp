@@ -808,6 +808,166 @@ extern "C"
     }
 }
 
+bool update_list(int num_frags, int max_vol_size, bool fail, std::vector<int> & current)
+{
+	bool complete = false;
+    if (fail == true)
+    {
+        for (int i=num_frags-1; i>=0; i--)
+        {
+            //check next size
+            int next = current[i]+1;
+            if (next > max_vol_size)
+            {
+                current[i] = 1;
+            }
+            else
+            {
+                current[i] = next;
+                break;
+            }
+        }
+    }
+    else
+    {
+        current[num_frags-1] = 1;
+        
+        for (int i=num_frags-2; i>=0; i--)
+        {
+            //check next size
+            int next = current[i]+1;
+            if (next > max_vol_size)
+            {
+                current[i] = 1;
+            }
+            else
+            {
+                current[i] = next;
+                break;
+            }
+        }
+    }
+    
+    //Check for completeness
+    int sum = 0;
+    for (int i=0; i<num_frags; i++)
+        sum += current[i];
+    if (sum == num_frags)
+    	complete = true;
+    
+    return complete;
+}
+
+void fragment_assignment(int num_frags, int max_vol_size, int parent_vol, std::vector< std::vector<int> > & record)
+{
+    //Starting point
+    std::vector<int> current;
+    current.resize(num_frags);
+    for (int i=0; i<num_frags; i++)
+    	current[i] = 1;
+    record.clear();
+    
+    //Check values
+    bool complete = false;
+    int step = 0;
+    
+    do
+    {
+    	//Check to see if current event meets criteria
+        int vol_sum = 0;
+        for (int i=0; i<num_frags; i++)
+            vol_sum += current[i];
+        
+        if (vol_sum == parent_vol)
+        {
+        	//success
+        	record.push_back(current);
+            complete = update_list(num_frags, max_vol_size, false, current);
+        }
+        else
+        {
+            //fail
+            complete = update_list(num_frags, max_vol_size, true, current);
+        }
+        
+        step++;
+    } while (complete == false);
+    
+}
+
+void fragment_freq(int num_frags, int max_vol_size, std::vector< std::vector<int> > & record, std::vector<double> & freq)
+{
+	freq.clear();
+    
+    //Loop over all fragment sizes
+    for (int f_size=1; f_size<max_vol_size; f_size++)
+    {
+    	double frag_sum = 0.0;
+        for (int event=0; event<record.size(); event++)
+        {
+            for (int frag=0; frag<record[event].size(); frag++)
+            {
+                if (record[event][frag] == f_size)
+                    frag_sum += 1.0;
+            }
+        }
+        
+        if (record.size() == 0)
+        	freq.push_back( 0.0 );
+        else
+        	freq.push_back( frag_sum/(double)record.size() );
+    }
+}
+
+void all_distributions(int parent_size, std::vector< std::vector<double> > & all_freq, std::vector<double> & frag_prob)
+{
+    std::vector< std::vector<int> > current_results;
+    std::vector<double> freq;
+    all_freq.clear();
+    
+    int current_events;
+    int total_events = 0;
+    for (int frag=2; frag<=parent_size; frag++)
+    {
+    	fragment_assignment(frag, parent_size, parent_size, current_results);
+        fragment_freq(frag, parent_size, current_results, freq);
+        all_freq.push_back( freq );
+        current_events = (int)current_results.size();
+        total_events += current_events;
+        frag_prob.push_back( (double)current_events );
+        
+        freq.clear();
+        current_results.clear();
+    }
+    for (int frag=2; frag<=parent_size; frag++)
+    	frag_prob[frag-2] = frag_prob[frag-2]/(double)total_events;
+    
+    //Display results
+    std::cout << "Parent Size =\t" << parent_size << "\n\n";
+    std::cout << "Fragment Probability Distribution\n";
+    std::cout << "---------------------------------\n";
+    std::cout << "NumFrags\tProbability\n";
+    for (int frag=2; frag<=parent_size; frag++)
+    	std::cout << frag << "\t" << frag_prob[frag-2] << std::endl;
+    std::cout << std::endl;
+    
+    std::cout << "Fragment Frequencies\n";
+    std::cout << "--------------------\n";
+    std::cout << "FragVol";
+    for (int frag=2; frag<=parent_size; frag++)
+    	std::cout << "\t" << frag << " Frags";
+    std::cout << std::endl;
+    for (int f_size=1; f_size<parent_size; f_size++)
+    {
+    	std::cout << f_size;
+    	for (int frag=2; frag<=parent_size; frag++)
+        {
+            std::cout << "\t" << all_freq[frag-2][f_size-1];
+        }
+        std::cout << std::endl;
+    }
+}
+
 //Run the sandbox tests
 int RUN_SANDBOX()
 {
@@ -1171,9 +1331,55 @@ int RUN_SANDBOX()
     std::cout << k << std::endl;
 	*/
     
-    // ------------------------------ Example Integral Function for Particle Disintegration ------------------------
+    // ------------------------------ Example for Particle Disintegration ------------------------
     
+    /*
+    std::vector<int> current;
+    bool status;
+    current.resize(4);
+    current[0] = 6;
+    current[1] = 6;
+    current[2] = 6;
+    current[3] = 6;
+    status = update_list(4, 6, false, current);
+    if (status == true)
+    	std::cout << "Search Complete\n";
+    for (int fr=0; fr<current.size(); fr++)
+    {
+        std::cout << "\t" << current[fr];
+    }
+    std::cout << std::endl;
+    */
     
+    /*
+    std::vector< std::vector<int> > results;
+    int num_frags = 6;
+    int max_vol_size = 6;
+    int parent_vol = 5;
+    fragment_assignment(num_frags, max_vol_size, parent_vol, results);
+    
+    for (int ev=0; ev<results.size(); ev++)
+    {
+    	std::cout << "Event " << ev+1 << std::endl;
+        for (int fr=0; fr<results[ev].size(); fr++)
+        {
+            std::cout << "\t" << results[ev][fr];
+        }
+        std::cout << std::endl;
+    }
+    
+    std::vector<double> freq;
+    fragment_freq(num_frags, max_vol_size, results, freq);
+    std::cout << "\nProbabilities\n--------------\nSize\tFreq\n";
+    for (int f_size=1; f_size<max_vol_size; f_size++)
+    {
+        std::cout << f_size << "\t" << freq[f_size-1] << std::endl;
+    }
+    */
+    int parent_size = 6;
+    std::vector< std::vector<double> > all_freq;
+    std::vector<double> frag_prob;
+    all_distributions(parent_size, all_freq, frag_prob);
     
     // ------------------------------------------ END Particle Disintegration --------------------------------------
 	std::cout << "\nEnd SANDBOX\n\n";
