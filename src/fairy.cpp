@@ -351,7 +351,7 @@ int FissionProducts::print_yields()
 	file = fopen("output/FAIRY_Yields.txt", "w+");
 	if (file == nullptr)
 	{
-		system("mkdir output");
+		success = system("mkdir output");
 		file = fopen("output/FAIRY_Yields.txt", "w+");
 	}
 	

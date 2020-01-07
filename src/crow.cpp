@@ -1781,7 +1781,7 @@ int CROW_SCENARIO(const char *yaml_input)
 	file = fopen("output/CROW_Results.txt", "w+");
 	if (file == nullptr)
 	{
-		system("mkdir output");
+		success = system("mkdir output");
 		file = fopen("output/CROW_Results.txt", "w+");
 	}
 	crow.SolverInfo.set_outputfile(file);
@@ -1818,7 +1818,7 @@ int CROW_TESTS()
 	file = fopen("output/CROW_Tests.txt", "w+");
 	if (file == nullptr)
 	{
-		system("mkdir output");
+		success = system("mkdir output");
 		file = fopen("output/CROW_Tests.txt", "w+");
 	}
 	test01.SolverInfo.set_outputfile(file);

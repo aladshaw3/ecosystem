@@ -87,7 +87,6 @@ typedef struct
 	bool MissingArg = true;						///< True if an input argument is missing; False if everything is ok
 	bool BasicUI = true;						///< True if using Basic UI; False if using Advanced UI
 	int argc;									///< Number of console arguments given on input
-	const char * argv[];						///< Actual console arguments given at execution
 	
 }UI_DATA;
 

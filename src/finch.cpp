@@ -3942,7 +3942,7 @@ int FINCH_TESTS()
 	Output = fopen("output/FINCH_TEST_Output.txt","w+");
 	if (Output == nullptr)
 	{
-		system("mkdir output");
+		success = system("mkdir output");
 		Output = fopen("output/FINCH_TEST_Output.txt","w+");
 	}
 	success = yaml.executeYamlRead("input_files/FINCH/FINCH_TestInput.yml");

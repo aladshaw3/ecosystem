@@ -536,7 +536,7 @@ int SCOPSOWL_OPTIMIZE(const char *scene, const char *sorbent, const char *comp, 
 	Comparison = fopen("output/SCOPSOWL_OPT_CompareFile.txt", "w+");
 	if (ParamResults == nullptr)
 	{
-		system("mkdir output");
+		success = system("mkdir output");
 		ParamResults = fopen("output/SCOPSOWL_OPT_ParamFile.txt", "w+");
 		Comparison = fopen("output/SCOPSOWL_OPT_CompareFile.txt", "w+");
 	}

@@ -11971,7 +11971,7 @@ int shark_solver(SHARK_DATA *shark_dat)
 					Jacobian = fopen("output/SHARK_Jacobian.txt","w+");
 					if (Jacobian == nullptr)
 					{
-						system("mkdir output");
+						success = system("mkdir output");
 						Jacobian = fopen("output/SHARK_Jacobian.txt", "w+");
 					}
 					
@@ -12360,7 +12360,7 @@ int SHARK_SCENARIO(const char *yaml_input)
 	Output = fopen("output/SHARK_Output.txt","w+");
 	if (Output == nullptr)
 	{
-		system("mkdir output");
+		success = system("mkdir output");
 		Output = fopen("output/SHARK_Output.txt", "w+");
 	}
 
@@ -12473,7 +12473,7 @@ int SHARK_TESTS()
 	TestOutput = fopen("output/SHARK_Test.txt", "w+");
 	if (TestOutput == nullptr)
 	{
-		system("mkdir output");
+		success = system("mkdir output");
 		TestOutput = fopen("output/SHARK_Test.txt", "w+");
 	}
 	shark_dat.numvar = 25;
@@ -13253,7 +13253,7 @@ int SHARK_TESTS_OLD()
 	TestOutput = fopen("output/SHARK_Test.txt", "w+");
 	if (TestOutput == nullptr)
 	{
-		system("mkdir output");
+		success = system("mkdir output");
 		TestOutput = fopen("output/SHARK_Test.txt", "w+");
 	}
 	shark_dat.numvar = 24;

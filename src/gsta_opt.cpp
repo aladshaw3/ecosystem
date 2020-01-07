@@ -384,6 +384,7 @@ void eval_GSTA(const double *par, int m_dat, const void *data, double *fvec, int
 int gsta_optimize(const char* fileName)
 {
 	//Check for NULL argument
+    int success = 0;
     if (fileName==NULL)
     {
     	std::cout << "Enter file name and extension for input file in this directory\n";
@@ -484,7 +485,7 @@ int gsta_optimize(const char* fileName)
 		
 		if (output == nullptr)
 		{
-			system("mkdir output");
+			success = system("mkdir output");
 			output = fopen("output/All_GSTA_Results.txt","w+");
 			best = fopen("output/Best_GSTA_Results.txt", "w+");
 			norm = fopen("output/GSTA_Norms_v_Fobj.txt","w+");

@@ -503,12 +503,19 @@ void Dove::set_LinearRelTol(double tol)
 //Set default names
 void Dove::set_defaultNames()
 {
-	char buff[10];
 	for (int i=0; i<this->num_func; i++)
 	{
-		sprintf(buff, "u[%i]",i);
-		std::string temp = buff;
+		//char buff[(int)((ceil(log10(i))+1)*sizeof(char))];
+		//sprintf(buff, "u[%i]",i);
+		//std::string temp = buff;
+		//this->var_names.edit(i, 0, temp);
+
+		int length = snprintf( NULL, 0, "u[%i]", i);
+		char * str = (char*)malloc(length+1);
+		snprintf( str, length+1, "u[%i]", i);
+		std::string temp = str;
 		this->var_names.edit(i, 0, temp);
+		free(str);
 	}
 }
 
@@ -687,11 +694,12 @@ void Dove::registerJacobi(std::string func_name, std::string var_name, double (*
 //Print out header info to output file
 void Dove::print_header(bool addNewLine)
 {
+	int success = 0;
 	if (this->Output == nullptr)
 		this->Output = fopen("output/DOVE_Result.txt", "w+");
 	if (this->Output == nullptr)
 	{
-		system("mkdir output");
+		success = system("mkdir output");
 		this->Output = fopen("output/DOVE_Result.txt", "w+");
 	}
 	if (this->DoveHeader == true)
@@ -3838,7 +3846,7 @@ int DOVE_TESTS()
 	file = fopen("output/DOVE_Tests.txt", "w+");
 	if (file == nullptr)
 	{
-		system("mkdir output");
+		success = system("mkdir output");
 		file = fopen("output/DOVE_Tests.txt", "w+");
 	}
 	

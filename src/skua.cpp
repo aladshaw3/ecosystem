@@ -1107,7 +1107,7 @@ int SKUA_SCENARIOS(const char *scene, const char *sorbent, const char *comp, con
 	Output = fopen("output/SKUA_Scenario_Output.txt","w+");
 	if (Output == nullptr)
 	{
-		system("mkdir output");
+		success = system("mkdir output");
 		Output = fopen("output/SKUA_Scenario_Output.txt","w+");
 	}
 	dat.total_steps = 0;
@@ -1274,7 +1274,7 @@ int SKUA_TESTS()
 	TestOutput = fopen("output/SKUA_Test_Output.txt","w+");
 	if (TestOutput == nullptr)
 	{
-		system("mkdir output");
+		success = system("mkdir output");
 		TestOutput = fopen("output/SKUA_Test_Output.txt","w+");
 	}
 	dat.Print2File = true;

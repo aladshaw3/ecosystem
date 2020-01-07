@@ -308,12 +308,12 @@ int CARDINAL_SCENARIO(const char *yaml_input, const char *atmosphere_data, const
 	cloud = fopen("output/CARDINAL_CloudGrowth.txt", "w+");
     if (file == nullptr)
     {
-        system("mkdir output");
+        success = system("mkdir output");
         file = fopen("output/CARDINAL_CloudRise.txt", "w+");
     }
     if (cloud == nullptr)
     {
-        system("mkdir output");
+        success = system("mkdir output");
         cloud = fopen("output/CARDINAL_CloudGrowth.txt", "w+");
     }
 	cardinal.getCloudRise().set_CloudFile(cloud);
@@ -373,12 +373,12 @@ extern "C"
         cloud = fopen(growth_out.c_str(), "w+");
         if (file == nullptr)
         {
-            system("mkdir output");
+            success = system("mkdir output");
             file = fopen(rise_out.c_str(), "w+");
         }
         if (cloud == nullptr)
         {
-            system("mkdir output");
+            success = system("mkdir output");
             cloud = fopen(growth_out.c_str(), "w+");
         }
         cardinal.getCloudRise().set_CloudFile(cloud);

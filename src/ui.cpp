@@ -606,13 +606,14 @@ bool valid_addon_options(UI_DATA *ui_dat)
 //Display a help message
 void display_help(UI_DATA *ui_dat)
 {
+	int success = 0;
 	if (ui_dat->argc == 1 || ui_dat->BasicUI == true)
 	{
 		std::ifstream helpFile ( "/usr/local/bin/ecodoc/eco_help_bui.txt" );
 		if (helpFile.good() == true)
 		{
 			helpFile.close();
-			system("less /usr/local/bin/ecodoc/eco_help_bui.txt");
+			success = system("less /usr/local/bin/ecodoc/eco_help_bui.txt");
 		}
 		else
 			bui_help();
@@ -623,7 +624,7 @@ void display_help(UI_DATA *ui_dat)
 		if (helpFile.good() == true)
 		{
 			helpFile.close();
-			system("less /usr/local/bin/ecodoc/eco_help_aui.txt");
+			success = system("less /usr/local/bin/ecodoc/eco_help_aui.txt");
 		}
 		else
 			aui_help();
@@ -1492,7 +1493,6 @@ int run_executable(int argc, const char * argv[])
 	int success = 0;
 	UI_DATA ui_dat;
 	ui_dat.argc = argc;
-	*ui_dat.argv = *argv;
 	
 	//Run a text based menu in command line
 	if (argc == 1)

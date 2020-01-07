@@ -2396,7 +2396,7 @@ int DecayChain::run_simulation(std::string file_name)
 	file = fopen(file_name.c_str(), "w+");
 	if (file == nullptr)
 	{
-		system("mkdir output");
+		success = system("mkdir output");
 		file = fopen(file_name.c_str(), "w+");
 	}
 	
@@ -3073,7 +3073,7 @@ int IBIS_TESTS()
 	file = fopen("output/IBIS_Results.txt", "w+");
 	if (file == nullptr)
 	{
-		system("mkdir output");
+		success = system("mkdir output");
 		file = fopen("output/IBIS_Results.txt", "w+");
 	}
 	fprintf(file, "This is the header\n\n");

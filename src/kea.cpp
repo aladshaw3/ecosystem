@@ -838,7 +838,7 @@ void ActivityDistribution::distribute_nuclides(std::map<double, double> & part_h
 
 void ActivityDistribution::evaluate_fractionation(std::string file_name, bool file_out, double solid_time, double stab_time)
 {
-	
+	int success = 0;
 	//Open a file to print results to
 	std::map<double, FissionProducts>::iterator kt;
 	FILE *file;
@@ -848,7 +848,7 @@ void ActivityDistribution::evaluate_fractionation(std::string file_name, bool fi
 		file = fopen(file_name.c_str(), "w+");
 		if (file == nullptr)
 		{
-			system("mkdir output");
+			success = system("mkdir output");
 			file = fopen(file_name.c_str(), "w+");
 		}
 	
@@ -1016,12 +1016,12 @@ int KEA_TESTS()
 	cloud = fopen("output/KEA_CRANE_CloudGrowth.txt", "w+");
 	if (file == nullptr)
 	{
-		system("mkdir output");
+		success = system("mkdir output");
 		file = fopen("output/KEA_CRANE_Tests.txt", "w+");
 	}
 	if (cloud == nullptr)
 	{
-		system("mkdir output");
+		success = system("mkdir output");
 		cloud = fopen("output/KEA_CRANE_CloudGrowth.txt", "w+");
 	}
 	cranetest.set_CloudFile(cloud);

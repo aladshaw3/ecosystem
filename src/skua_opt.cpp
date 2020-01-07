@@ -413,7 +413,7 @@ int SKUA_OPTIMIZE(const char *scene, const char *sorbent, const char *comp, cons
 	Comparison = fopen("output/SKUA_OPT_CompareFile.txt", "w+");
 	if (ParamResults == nullptr)
 	{
-		system("mkdir output");
+		success = system("mkdir output");
 		ParamResults = fopen("output/SKUA_OPT_ParamFile.txt", "w+");
 		Comparison = fopen("output/SKUA_OPT_CompareFile.txt", "w+");
 	}

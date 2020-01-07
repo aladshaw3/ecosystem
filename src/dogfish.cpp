@@ -429,7 +429,7 @@ int DOGFISH_TESTS()
 	TestOutput = fopen("output/DOGFISH_TestOutput.txt","w+");
 	if (TestOutput == nullptr)
 	{
-		system("mkdir output");
+		success = system("mkdir output");
 		TestOutput = fopen("output/DOGFISH_TestOutput.txt","w+");
 	}
 	dog_dat.total_steps = 0;

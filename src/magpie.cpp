@@ -1248,7 +1248,7 @@ int MAGPIE_SCENARIOS(const char *inputFileName, const char *sceneFileName)
 	sceneResults = fopen("output/MAGPIE_Results.txt","w+");
 	if (sceneResults == nullptr)
 	{
-		system("mkdir output");
+		success = system("mkdir output");
 		sceneResults = fopen("output/MAGPIE_Results.txt","w+");
 	}
 

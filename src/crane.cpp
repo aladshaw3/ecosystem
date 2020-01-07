@@ -4172,12 +4172,12 @@ int CRANE_SCENARIO(const char *yaml_input, const char *atmosphere_data)
 	cloud = fopen("output/CRANE_CloudGrowth.txt", "w+");
     if (file == nullptr)
     {
-        system("mkdir output");
+        success = system("mkdir output");
         file = fopen("output/CRANE_Results.txt", "w+");
     }
     if (cloud == nullptr)
     {
-        system("mkdir output");
+        success = system("mkdir output");
         cloud = fopen("output/CRANE_CloudGrowth.txt", "w+");
     }
 	crane.set_CloudFile(cloud);
@@ -4283,12 +4283,12 @@ int CRANE_TESTS()
 	cloud = fopen("output/CRANE_Tests_CloudGrowth.txt", "w+");
 	if (file == nullptr)
 	{
-		system("mkdir output");
+		success = system("mkdir output");
 		file = fopen("output/CRANE_Tests.txt", "w+");
 	}
 	if (cloud == nullptr)
 	{
-		system("mkdir output");
+		success = system("mkdir output");
 		cloud = fopen("output/CRANE_Tests_CloudGrowth.txt", "w+");
 	}
 	test.set_CloudFile(cloud);

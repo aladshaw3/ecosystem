@@ -1561,7 +1561,7 @@ int SCOPSOWL_SCENARIOS(const char *scene, const char *sorbent, const char *comp,
 	Output = fopen("output/SCOPSOWL_Output.txt","w+");
 	if (Output == nullptr)
 	{
-		system("mkdir output");
+		success = system("mkdir output");
 		Output = fopen("output/SCOPSOWL_Output.txt","w+");
 	}
 	dat.Print2File = true;
@@ -1760,7 +1760,7 @@ int SCOPSOWL_TESTS()
 	TestOutput = fopen("output/SCOPSOWL_Test_Output.txt","w+");
 	if (TestOutput == nullptr)
 	{
-		system("mkdir output");
+		success = system("mkdir output");
 		TestOutput = fopen("output/SCOPSOWL_Test_Output.txt","w+");
 	}
 	dat.Print2File = true;
