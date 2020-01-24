@@ -1,0 +1,109 @@
+Scenario:
+---
+- vars_fun:
+  numvar: 4
+  num_ssr: 0
+  num_mbe: 1
+  num_multi_sschem: 1
+
+- ss_multichemi_objs:
+  - obj01:
+    name: "Cu-SSZ-13"
+    num_ligands: 1
+
+- sys_data:
+  act_fun: ideal
+  const_pH: true
+  pH: 7
+  temp: 293.15
+  volume: 1.0
+  reactor: batch
+
+- run_time:
+  steady: true
+  specs_curve: false
+  temp_curve: false
+  start_temp: 273.15
+  end_temp: 323.15
+  temp_step: 2.5
+
+...
+
+SolverOptions:
+---
+line_search: true
+search_type: standard
+linear_solve: qr
+nl_abstol: 1e-6
+nl_maxit: 100
+
+...
+
+MasterSpecies:
+---
+- reg:
+  0: H + (aq)
+  1: H2O (g)
+
+
+- unreg:
+  - 2:
+    formula: Z Cu(I)
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: true
+    energy: 0
+    have_G: true
+    phase: adsorbed
+    name: Z1 site
+    lin_form: AlCu
+
+  - 3:
+    formula: Z Cu(I)-H2O
+    charge: 0
+    enthalpy: -83258.0
+    entropy: 45.8
+    have_HS: true
+    energy: -40948.0
+    have_G: true
+    phase: adsorbed
+    name: Z1 site with water
+    lin_form: AlCuH2O
+
+...
+
+MassBalance:
+---
+- water:
+  total_conc: 10.0
+  - delta:
+    "H2O (g)": 1
+
+...
+
+
+"Cu-SSZ-13":
+---
+spec_area: 500.0     #Units: m^2/kg
+total_mass: 1.0     #Units: kg
+surf_activity: ideal
+include_surfcharge: false
+
+- ligand01:
+  name: Z Cu(I)
+  num_rxns: 1
+
+...
+
+"Cu-SSZ-13-Z Cu(I)":
+---
+spec_mole: 1.575     #Units: mol/kg
+
+- rxn01:
+  - stoichiometry:
+    "Z Cu(I)": -1
+    "H2O (g)": -1
+    "Z Cu(I)-H2O": 1
+
+...
