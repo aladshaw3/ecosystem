@@ -35,7 +35,7 @@ atoms(0)
 //Default destructor
 Molecule::~Molecule()
 {
-	
+
 }
 
 //Forming a molecule from its information
@@ -232,11 +232,11 @@ void Molecule::Register(std::string formula)
 {
 	if (formula.length() == 0) {mError(unregistered_name); return;}
 	char first = formula[0];
-	
+
 	//Check to see if the second character needs to be read instead
 	if (first == '(')
 		first = formula[1];
-	
+
 	//Searching is done in alphabetical order by first atom in formula for greater efficiency
 	if (first == 'A')
 	{
@@ -1088,7 +1088,7 @@ void Molecule::Register(std::string formula)
 		{
 			mError(unregistered_name); return;
 		}
-		
+
 	}
 	else if (first == 'I')
 	{
@@ -1277,6 +1277,10 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "N2O (g)")
 		{
+			this->Register(0, 82100.0, 220.0, 103800.0, true, true, "Gas", "Nitrous Oxide", formula, "N2O");
+		}
+		else if (formula == "N2O (g)")
+		{
 			this->Register(0, 82000.0, 220.0, 104200.0, true, true, "Gas", "Nitrous-oxide", formula, "N2O");
 		}
 		else if (formula == "NH3 (g)")
@@ -1290,6 +1294,14 @@ void Molecule::Register(std::string formula)
 		else if (formula == "NO2 - (aq)")
 		{
 			this->Register(-1, -104600.0, 140.0, -37200.0, true, true, "Aqueous", "Nitrite", formula, "NO2");
+		}
+		else if (formula == "NO (g)")
+		{
+			this->Register(0, 90300.0, 210.0, 87600.0, true, true, "Gas", "Nitrogen Oxide", formula, "NO");
+		}
+		else if (formula == "NO2 (g)")
+		{
+			this->Register(0, 33100.0, 240.0, 51300.0, true, true, "Gas", "Nitrogen Dioxide", formula, "NO2");
 		}
 		else if (formula == "Ni 2+ (aq)")
 		{
@@ -1329,7 +1341,7 @@ void Molecule::Register(std::string formula)
 		}
 		else if (formula == "O2 (g)")
 		{
-			this->Register(0, 0.0, 205.0, -86200.0, true, true, "Gas", "Oxygen", formula, "O2");
+			this->Register(0, 0.0, 205.0, 0.0, true, true, "Gas", "Oxygen", formula, "O2"); //Corrected to NIST Chembook
 		}
 		else if (formula == "O2 (aq)")
 		{
@@ -2058,7 +2070,7 @@ std::vector<Atom> & Molecule::getAtoms()
 
 //Display molecule information
 void Molecule::DisplayInfo()
-{	
+{
 	std::cout << "\nCommon Name: " << this->Name << "\tFormula: " << this->Formula << std::endl;
 	std::cout << "-------------------------------------------------\n";
 	std::cout << "Molar Weight (g/mol): " << this->MolarWeight() << std::endl;
@@ -2081,28 +2093,28 @@ int MOLA_TESTS()
 {
 	int success = 0;
 	double time = clock();
-	
+
 	//------------- Testing of the Molecule Object---------------------------------------
 	Molecule H2O(0,-285830.0,69.95,-23780.0,true,true,"Liquid","Water","H2O (l)","H2O");
 	Molecule HHe(0,0,0,0,false,false,"N/A","N/A","H10He22","H10He22");
-	
+
 	HHe = H2O;
 	HHe.Register(0,0,0,0,false,false,"N/A","N/A","H10He22","H10He22");
-	
+
 	H2O.DisplayInfo();
 	HHe.DisplayInfo();
-	
+
 	Molecule NewH2O;
-	
+
 	NewH2O.Register("H2O (l)"); //Example of registering molecule information based on just the formula
 	NewH2O.DisplayInfo();
-	
+
 	Molecule H,OH;
 	H.Register("H + (aq)");		//Note: Registration must follow the standard naming convention
 	OH.Register("OH - (aq)");	//		formula \space charge \space phase
 	H.DisplayInfo();
 	OH.DisplayInfo();
-	
+
 	Molecule Uranyltricarb;
 	Uranyltricarb.Register("UO2(CO3)3 4- (aq)");
 	Uranyltricarb.editOneOxidationState(4, "U"); //Set the oxidation state of U to 4+
@@ -2114,19 +2126,19 @@ int MOLA_TESTS()
 	Uranyltricarb.removeAllAtoms("O");				//Removes all O atoms from the molecule
 	Uranyltricarb.DisplayInfo();
 	//-------------- END molecule testing ----------------------------------------------
-	
+
 	Molecule NaHCO3;
 	NaHCO3.Register("NaHCO3 (aq)");
 	NaHCO3.DisplayInfo();
-	
+
 	Molecule Mus;
 	Mus.Register("KAl3Si3O10(OH)2 (s)");
 	Mus.DisplayInfo();
-	
+
 	Molecule Azu;
 	Azu.Register("(CuCO3)2Cu(OH)2 (s)");
 	Azu.DisplayInfo();
-	
+
 	time = clock() - time;
 	std::cout << "\nRuntime (s): " << (time/CLOCKS_PER_SEC) << std::endl;
 	return success;
