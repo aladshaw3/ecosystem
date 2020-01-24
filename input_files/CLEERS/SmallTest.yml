@@ -1,7 +1,7 @@
 Scenario:
 ---
 - vars_fun:
-  numvar: 4
+  numvar: 6
   num_ssr: 0
   num_mbe: 1
   num_multi_sschem: 1
@@ -9,23 +9,23 @@ Scenario:
 - ss_multichemi_objs:
   - obj01:
     name: "Cu-SSZ-13"
-    num_ligands: 1
+    num_ligands: 2
 
 - sys_data:
   act_fun: ideal
   const_pH: true
   pH: 7
-  temp: 293.15
+  temp: 473.15
   volume: 1.0
   reactor: batch
 
 - run_time:
   steady: true
   specs_curve: false
-  temp_curve: false
+  temp_curve: true
   start_temp: 273.15
-  end_temp: 323.15
-  temp_step: 2.5
+  end_temp: 773.15
+  temp_step: 20.0
 
 ...
 
@@ -52,24 +52,48 @@ MasterSpecies:
     charge: 0
     enthalpy: 0
     entropy: 0
-    have_HS: true
+    have_HS: false
     energy: 0
-    have_G: true
+    have_G: false
     phase: adsorbed
     name: Z1 site
     lin_form: AlCu
 
   - 3:
+    formula: Z2 Cu(II)
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Z2 site
+    lin_form: Al2Cu
+
+  - 4:
     formula: Z Cu(I)-H2O
     charge: 0
-    enthalpy: -83258.0
-    entropy: 45.8
-    have_HS: true
-    energy: -40948.0
-    have_G: true
+    enthalpy: 0.0
+    entropy: 0.0
+    have_HS: false
+    energy: 0.0
+    have_G: false
     phase: adsorbed
     name: Z1 site with water
     lin_form: AlCuH2O
+
+  - 5:
+    formula: Z2 Cu(II)-H2O
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Z2 site with water
+    lin_form: Al2CuH2O
 
 ...
 
@@ -94,6 +118,10 @@ include_surfcharge: false
   name: Z Cu(I)
   num_rxns: 1
 
+- ligand02:
+  name: Z2 Cu(II)
+  num_rxns: 1
+
 ...
 
 "Cu-SSZ-13-Z Cu(I)":
@@ -101,9 +129,27 @@ include_surfcharge: false
 spec_mole: 1.575     #Units: mol/kg
 
 - rxn01:
+  #energy: -15000.0
+  enthalpy: -83258
+  entropy: -143
   - stoichiometry:
     "Z Cu(I)": -1
     "H2O (g)": -1
     "Z Cu(I)-H2O": 1
+
+...
+
+"Cu-SSZ-13-Z2 Cu(II)":
+---
+spec_mole: 0.525     #Units: mol/kg
+
+- rxn01:
+  #energy: -24000.0
+  enthalpy: -88831
+  entropy: -153
+  - stoichiometry:
+    "Z2 Cu(II)": -1
+    "H2O (g)": -1
+    "Z2 Cu(II)-H2O": 1
 
 ...
