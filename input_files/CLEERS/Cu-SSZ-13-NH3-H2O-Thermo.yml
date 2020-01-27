@@ -571,7 +571,7 @@ MassBalance:
 ---
 #Units currently shown are in % by volume (roughly translates to kPa at atmospheric pressure)
 - water:
-  total_conc: 1.0E-6
+  total_conc: 11.0
   - delta:
     "H2O (g)": 1
 
@@ -581,7 +581,7 @@ MassBalance:
     "O2 (g)": 1
 
 - ammonia:
-  total_conc: 8.0E-5
+  total_conc: 1.0E-1
   - delta:
     "NH3 (g)": 1
 
