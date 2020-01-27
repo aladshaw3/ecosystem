@@ -1,0 +1,1019 @@
+Scenario:
+---
+- vars_fun:
+  numvar: 47
+  num_ssr: 0
+  num_mbe: 3
+  num_multi_sschem: 1
+
+- ss_multichemi_objs:
+  - obj01:
+    name: "Cu-SSZ-13"
+    num_ligands: 2
+
+- sys_data:
+  act_fun: ideal
+  const_pH: true
+  pH: 7
+  temp: 473.15
+  volume: 1.0
+  reactor: batch
+
+- run_time:
+  steady: true
+  specs_curve: false
+  temp_curve: true
+  start_temp: 273.15
+  end_temp: 773.15
+  temp_step: 20.0
+
+...
+
+SolverOptions:
+---
+line_search: true
+search_type: standard
+linear_solve: qr
+nl_abstol: 1e-6
+nl_maxit: 100
+
+...
+
+MasterSpecies:
+---
+- reg:
+  0: H + (aq)
+  1: H2O (g)
+  2: O2 (g)
+  3: NH3 (g)
+
+
+- unreg:
+  - 4:
+    formula: Z Cu(I)
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Z1 site
+    lin_form: Cu
+
+  - 5:
+    formula: Z2 Cu(II)
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Z2 site
+    lin_form: Cu
+
+  - 6:
+    formula: Z Cu(II)-OH(H2O)6
+    charge: 0
+    enthalpy: 0.0
+    entropy: 0.0
+    have_HS: false
+    energy: 0.0
+    have_G: false
+    phase: adsorbed
+    name: Z1 site with water
+    lin_form: CuOHH12O6
+
+  - 7:
+    formula: Z Cu(II)-(OH)2
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Z1 site with water
+    lin_form: CuH2O2
+
+  - 8:
+    formula: Z Cu(II)-O
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Z1 site with water
+    lin_form: CuO
+
+  - 9:
+    formula: Z Cu(II)-OH(H2O)5
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Z1 site with water
+    lin_form: CuOHH10O5
+
+  - 10:
+    formula: Z Cu(II)-OH(H2O)4
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Z1 site with water
+    lin_form: CuOHH8O4
+
+  - 11:
+    formula: Z Cu(II)-OH(O2)
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Z1 site with water
+    lin_form: CuOHO2
+
+  - 12:
+    formula: Z Cu(II)-OH(NH3)4
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Z1 site with ammonia
+    lin_form: CuOHN4H12
+
+  - 13:
+    formula: Z Cu(II)-OH(H2O)3
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Z1 site with water
+    lin_form: CuOHH6O3
+
+  - 14:
+    formula: Z Cu(I)-(NH3)4
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Z1 site with ammonia
+    lin_form: CuN4H12
+
+  - 15:
+    formula: Z Cu(II)-OH(H2O)2
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Z1 site with water
+    lin_form: CuOHH4O2
+
+  - 16:
+    formula: Z Cu(I)-O2
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Z1 site with water
+    lin_form: CuO2
+
+  - 17:
+    formula: Z Cu(II)-OH(H2O)
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Z1 site with water
+    lin_form: CuOHH2O
+
+  - 18:
+    formula: Z Cu(I)-H2O
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Z1 site with water
+    lin_form: CuH2O
+
+  - 19:
+    formula: Z Cu(II)-OH
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Z1 site with water
+    lin_form: CuOH
+
+  - 20:
+    formula: Z Cu(II)-OH(NH3)
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Z1 site with ammonia
+    lin_form: CuOHNH3
+
+  - 21:
+    formula: Z Cu(II)-OH(NH3)2
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Z1 site with ammonia
+    lin_form: CuOHN2H6
+
+  - 22:
+    formula: Z Cu(II)-OH(NH3)3
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Z1 site with ammonia
+    lin_form: CuOHN3H9
+
+  - 23:
+    formula: Z Cu(I)-(NH3)3
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Z1 site with ammonia
+    lin_form: CuN3H9
+
+  - 24:
+    formula: Z Cu(I)-(NH3)
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Z1 site with ammonia
+    lin_form: CuNH3
+
+  - 25:
+    formula: Z Cu(I)-(NH3)2
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Z1 site with ammonia
+    lin_form: CuN2H6
+
+  - 26:
+    formula: (ZH)(Z Cu(II)-(OH)2)
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Z2 site with water
+    lin_form: CuHOHOH
+
+  - 27:
+    formula: (ZH)(Z Cu(II)-O)
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Z2 site with water
+    lin_form: CuHO
+
+  - 28:
+    formula: (ZH)(Z Cu(I)-O2)
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Z2 site with water
+    lin_form: CuHO2
+
+  - 29:
+    formula: (ZH)(Z Cu(I)-H2O)
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Z2 site with water
+    lin_form: CuHH2O
+
+  - 30:
+    formula: Z2 Cu(II)-O2
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Z2 site with water
+    lin_form: CuO2
+
+  - 31:
+    formula: (ZH)(Z Cu(I))
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Z2 site with water
+    lin_form: CuH
+
+  - 32:
+    formula: (Z NH4)(Z Cu(I)-(NH3)4)
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Z2 site with ammonia
+    lin_form: CuNH4N4H12
+
+  - 33:
+    formula: Z2 Cu(II)-(H2O)6
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Z2 site with water
+    lin_form: CuH12O6
+
+  - 34:
+    formula: Z2 Cu(II)-(H2O)3
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Z2 site with water
+    lin_form: CuH6O3
+
+  - 35:
+    formula: Z2 Cu(II)-(H2O)4
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Z2 site with water
+    lin_form: CuH8O4
+
+  - 36:
+    formula: Z2 Cu(II)-(H2O)5
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Z2 site with water
+    lin_form: CuH10O5
+
+  - 37:
+    formula: Z2 Cu(II)-H2O
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Z2 site with water
+    lin_form: CuH2O
+
+  - 38:
+    formula: Z2 Cu(II)-(H2O)2
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Z2 site with water
+    lin_form: CuH4O2
+
+  - 39:
+    formula: (Z NH4)(Z Cu(I))
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Z2 site with ammonia
+    lin_form: CuNH4
+
+  - 40:
+    formula: (Z NH4)(Z Cu(I)-(NH3)3)
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Z2 site with ammonia
+    lin_form: CuNH4N3H9
+
+  - 41:
+    formula: (Z NH4)(Z Cu(I)-(NH3))
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Z2 site with ammonia
+    lin_form: CuNH4NH3
+
+  - 42:
+    formula: Z2 Cu(II)-(NH3)
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Z2 site with ammonia
+    lin_form: CuNH3
+
+  - 43:
+    formula: Z2 Cu(II)-(NH3)2
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Z2 site with ammonia
+    lin_form: CuN2H6
+
+  - 44:
+    formula: (Z NH4)(Z Cu(I)-(NH3)2)
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Z2 site with ammonia
+    lin_form: CuNH4N2H6
+
+  - 45:
+    formula: Z2 Cu(II)-(NH3)3
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Z2 site with ammonia
+    lin_form: CuN3H9
+
+  - 46:
+    formula: Z2 Cu(II)-(NH3)4
+    charge: 0
+    enthalpy: 0
+    entropy: 0
+    have_HS: false
+    energy: 0
+    have_G: false
+    phase: adsorbed
+    name: Z2 site with ammonia
+    lin_form: CuN4H12
+
+...
+
+MassBalance:
+---
+#Units currently shown are in % by volume (roughly translates to kPa at atmospheric pressure)
+- water:
+  total_conc: 1.0E-6
+  - delta:
+    "H2O (g)": 1
+
+- oxygen:
+  total_conc: 0.2
+  - delta:
+    "O2 (g)": 1
+
+- ammonia:
+  total_conc: 8.0E-5
+  - delta:
+    "NH3 (g)": 1
+
+...
+
+
+"Cu-SSZ-13":
+---
+spec_area: 500.0     #Units: m^2/kg
+total_mass: 1.0     #Units: kg
+surf_activity: uniquac
+include_surfcharge: false
+
+- ligand01:
+  name: Z Cu(I)
+  num_rxns: 20
+
+- ligand02:
+  name: Z2 Cu(II)
+  num_rxns: 21
+
+...
+
+"Cu-SSZ-13-Z Cu(I)":
+---
+spec_mole: 0.24785     #Units: mol/kg
+
+- rxn01:
+  #energy: 107000
+  enthalpy: -608387
+  entropy: -1512
+  - stoichiometry:
+    "Z Cu(I)": -1
+    "H2O (g)": -6.5
+    "O2 (g)": -0.25
+    "Z Cu(II)-OH(H2O)6": 1
+
+- rxn02:
+  #energy: 73000
+  enthalpy: -53843
+  entropy: -264
+  - stoichiometry:
+    "Z Cu(I)": -1
+    "H2O (g)": -1
+    "O2 (g)": -0.5
+    "Z Cu(II)-(OH)2": 1
+
+- rxn03:
+  #energy: 72000
+  enthalpy: 52518
+  entropy: -36
+  - stoichiometry:
+    "Z Cu(I)": -1
+    "O2 (g)": -0.5
+    "Z Cu(II)-O": 1
+
+- rxn04:
+  #energy: 67000
+  enthalpy: -528462
+  entropy: -1259
+  - stoichiometry:
+    "Z Cu(I)": -1
+    "H2O (g)": -5.5
+    "O2 (g)": -0.25
+    "Z Cu(II)-OH(H2O)5": 1
+
+- rxn05:
+  #energy: 67000
+  enthalpy: -418796
+  entropy: -1027
+  - stoichiometry:
+    "Z Cu(I)": -1
+    "H2O (g)": -4.5
+    "O2 (g)": -0.25
+    "Z Cu(II)-OH(H2O)4": 1
+
+- rxn06:
+  #energy: 67000
+  enthalpy: -87728
+  entropy: -328
+  - stoichiometry:
+    "Z Cu(I)": -1
+    "H2O (g)": -0.5
+    "O2 (g)": -1.25
+    "Z Cu(II)-OH(O2)": 1
+
+- rxn07:
+  energy: 63000
+  #enthalpy: 0
+  #entropy: 0
+  - stoichiometry:
+    "Z Cu(I)": -1
+    "H2O (g)": -0.5
+    "O2 (g)": -0.25
+    "NH3 (g)": -4
+    "Z Cu(II)-OH(NH3)4": 1
+
+- rxn08:
+  #energy: 36000
+  enthalpy: -322334
+  entropy: -758
+  - stoichiometry:
+    "Z Cu(I)": -1
+    "H2O (g)": -3.5
+    "O2 (g)": -0.25
+    "Z Cu(II)-OH(H2O)3": 1
+
+- rxn09:
+  energy: 21000
+  #enthalpy: 0
+  #entropy: 0
+  - stoichiometry:
+    "Z Cu(I)": -1
+    "NH3 (g)": -4
+    "Z Cu(I)-(NH3)4": 1
+
+- rxn10:
+  #energy: 16000
+  enthalpy: -246123
+  entropy: -554
+  - stoichiometry:
+    "Z Cu(I)": -1
+    "H2O (g)": -2.5
+    "O2 (g)": -0.25
+    "Z Cu(II)-OH(H2O)2": 1
+
+- rxn11:
+  #energy: 9000
+  enthalpy: -63468
+  entropy: -153
+  - stoichiometry:
+    "Z Cu(I)": -1
+    "O2 (g)": -1
+    "Z Cu(I)-O2": 1
+
+- rxn12:
+  #energy: -12000
+  enthalpy: -164837
+  entropy: -321
+  - stoichiometry:
+    "Z Cu(I)": -1
+    "H2O (g)": -1.5
+    "O2 (g)": -0.25
+    "Z Cu(II)-OH(H2O)": 1
+
+- rxn13:
+  #energy: -15000
+  enthalpy: -83259
+  entropy: -143
+  - stoichiometry:
+    "Z Cu(I)": -1
+    "H2O (g)": -1
+    "Z Cu(I)-H2O": 1
+
+- rxn14:
+  #energy: -29000
+  enthalpy: -73402
+  entropy: -99
+  - stoichiometry:
+    "Z Cu(I)": -1
+    "H2O (g)": -0.5
+    "O2 (g)": -0.25
+    "Z Cu(II)-OH": 1
+
+- rxn15:
+  energy: -33000
+  #enthalpy: 0
+  #entropy: 0
+  - stoichiometry:
+    "Z Cu(I)": -1
+    "H2O (g)": -0.5
+    "O2 (g)": -0.25
+    "NH3 (g)": -1
+    "Z Cu(II)-OH(NH3)": 1
+
+- rxn16:
+  energy: -35000
+  #enthalpy: 0
+  #entropy: 0
+  - stoichiometry:
+    "Z Cu(I)": -1
+    "H2O (g)": -0.5
+    "O2 (g)": -0.25
+    "NH3 (g)": -2
+    "Z Cu(II)-OH(NH3)2": 1
+
+- rxn17:
+  energy: -36000
+  #enthalpy: 0
+  #entropy: 0
+  - stoichiometry:
+    "Z Cu(I)": -1
+    "H2O (g)": -0.5
+    "O2 (g)": -0.25
+    "NH3 (g)": -3
+    "Z Cu(II)-OH(NH3)3": 1
+
+- rxn18:
+  energy: -54000
+  #enthalpy: 0
+  #entropy: 0
+  - stoichiometry:
+    "Z Cu(I)": -1
+    "NH3 (g)": -3
+    "Z Cu(I)-(NH3)3": 1
+
+- rxn19:
+  energy: -57000
+  #enthalpy: 0
+  #entropy: 0
+  - stoichiometry:
+    "Z Cu(I)": -1
+    "NH3 (g)": -1
+    "Z Cu(I)-(NH3)": 1
+
+- rxn20:
+  energy: -94000
+  #enthalpy: 0
+  #entropy: 0
+  - stoichiometry:
+    "Z Cu(I)": -1
+    "NH3 (g)": -2
+    "Z Cu(I)-(NH3)2": 1
+
+...
+
+"Cu-SSZ-13-Z2 Cu(II)":
+---
+spec_mole: 0.08262     #Units: mol/kg
+
+- rxn01:
+  energy: 391000
+  #enthalpy: 0
+  #entropy: 0
+  - stoichiometry:
+    "Z2 Cu(II)": -1
+    "H2O (g)": -1.5
+    "O2 (g)": -0.25
+    "(ZH)(Z Cu(II)-(OH)2)": 1
+
+- rxn02:
+  #energy: 114000
+  enthalpy: 69569
+  entropy: -91
+  - stoichiometry:
+    "Z2 Cu(II)": -1
+    "H2O (g)": -0.5
+    "O2 (g)": -0.25
+    "(ZH)(Z Cu(II)-O)": 1
+
+- rxn03:
+  #energy: 79000
+  enthalpy: -20265
+  entropy: -208
+  - stoichiometry:
+    "Z2 Cu(II)": -1
+    "H2O (g)": -0.5
+    "O2 (g)": -0.75
+    "(ZH)(Z Cu(I)-O2)": 1
+
+- rxn04:
+  #energy: 59000
+  enthalpy: -40402
+  entropy: -206
+  - stoichiometry:
+    "Z2 Cu(II)": -1
+    "H2O (g)": -1.5
+    "O2 (g)": 0.25
+    "(ZH)(Z Cu(I)-H2O)": 1
+
+- rxn05:
+  #energy: 42000
+  enthalpy: -31560
+  entropy: -155
+  - stoichiometry:
+    "Z2 Cu(II)": -1
+    "O2 (g)": -1
+    "Z2 Cu(II)-O2": 1
+
+- rxn06:
+  #energy: 36000
+  enthalpy: 38183
+  entropy: 7
+  - stoichiometry:
+    "Z2 Cu(II)": -1
+    "H2O (g)": -0.5
+    "O2 (g)": 0.25
+    "(ZH)(Z Cu(I))": 1
+
+- rxn07:
+  energy: 7000
+  #enthalpy: 0
+  #entropy: 0
+  - stoichiometry:
+    "Z2 Cu(II)": -1
+    "H2O (g)": -0.5
+    "O2 (g)": 0.25
+    "NH3 (g)": -5
+    "(Z NH4)(Z Cu(I)-(NH3)4)": 1
+
+- rxn08:
+  #energy: -1000
+  enthalpy: -625927
+  entropy: -1321
+  - stoichiometry:
+    "Z2 Cu(II)": -1
+    "H2O (g)": -6
+    "Z2 Cu(II)-(H2O)6": 1
+
+- rxn09:
+  #energy: -5000
+  enthalpy: -299565
+  entropy: -619
+  - stoichiometry:
+    "Z2 Cu(II)": -1
+    "H2O (g)": -3
+    "Z2 Cu(II)-(H2O)3": 1
+
+- rxn10:
+  #energy: -13000
+  enthalpy: -409970
+  entropy: -846
+  - stoichiometry:
+    "Z2 Cu(II)": -1
+    "H2O (g)": -4
+    "Z2 Cu(II)-(H2O)4": 1
+
+- rxn11:
+  #energy: -22000
+  enthalpy: -541239
+  entropy: -1098
+  - stoichiometry:
+    "Z2 Cu(II)": -1
+    "H2O (g)": -5
+    "Z2 Cu(II)-(H2O)5": 1
+
+- rxn12:
+  #energy: -24000
+  enthalpy: -88831
+  entropy: -153
+  - stoichiometry:
+    "Z2 Cu(II)": -1
+    "H2O (g)": -1
+    "Z2 Cu(II)-H2O": 1
+
+- rxn13:
+  #energy: -25000
+  enthalpy: -181124
+  entropy: -375
+  - stoichiometry:
+    "Z2 Cu(II)": -1
+    "H2O (g)": -2
+    "Z2 Cu(II)-(H2O)2": 1
+
+- rxn14:
+  energy: -26000
+  #enthalpy: 0
+  #entropy: 0
+  - stoichiometry:
+    "Z2 Cu(II)": -1
+    "H2O (g)": -0.5
+    "O2 (g)": 0.25
+    "NH3 (g)": -1
+    "(Z NH4)(Z Cu(I))": 1
+
+- rxn15:
+  energy: -36000
+  #enthalpy: 0
+  #entropy: 0
+  - stoichiometry:
+    "Z2 Cu(II)": -1
+    "H2O (g)": -0.5
+    "O2 (g)": 0.25
+    "NH3 (g)": -4
+    "(Z NH4)(Z Cu(I)-(NH3)3)": 1
+
+- rxn16:
+  energy: -44000
+  #enthalpy: 0
+  #entropy: 0
+  - stoichiometry:
+    "Z2 Cu(II)": -1
+    "H2O (g)": -0.5
+    "O2 (g)": 0.25
+    "NH3 (g)": -2
+    "(Z NH4)(Z Cu(I)-(NH3))": 1
+
+- rxn17:
+  energy: -52000
+  #enthalpy: 0
+  #entropy: 0
+  - stoichiometry:
+    "Z2 Cu(II)": -1
+    "NH3 (g)": -1
+    "Z2 Cu(II)-(NH3)": 1
+
+- rxn18:
+  energy: -73000
+  #enthalpy: 0
+  #entropy: 0
+  - stoichiometry:
+    "Z2 Cu(II)": -1
+    "NH3 (g)": -2
+    "Z2 Cu(II)-(NH3)2": 1
+
+- rxn19:
+  energy: -80000
+  #enthalpy: 0
+  #entropy: 0
+  - stoichiometry:
+    "Z2 Cu(II)": -1
+    "H2O (g)": -0.5
+    "O2 (g)": 0.25
+    "NH3 (g)": -3
+    "(Z NH4)(Z Cu(I)-(NH3)2)": 1
+
+- rxn20:
+  energy: -81000
+  #enthalpy: 0
+  #entropy: 0
+  - stoichiometry:
+    "Z2 Cu(II)": -1
+    "NH3 (g)": -3
+    "Z2 Cu(II)-(NH3)3": 1
+
+- rxn21:
+  energy: -96000
+  #enthalpy: 0
+  #entropy: 0
+  - stoichiometry:
+    "Z2 Cu(II)": -1
+    "NH3 (g)": -4
+    "Z2 Cu(II)-(NH3)4": 1
+
+...
