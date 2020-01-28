@@ -61,7 +61,7 @@ void ConstReaction::SetReverseRate(double rate)
 }
 
 //Insert stoichiometry
-void ConstReaction::InsertStoichiometry(int i, int v)
+void ConstReaction::InsertStoichiometry(int i, double v)
 {
 	this->stoic[i] = v;
 }
@@ -85,7 +85,7 @@ int ConstReaction::getIndex()
 }
 
 //Return reference to map
-std::map<int,int> & ConstReaction::getStoichiometryMap()
+std::map<int,double> & ConstReaction::getStoichiometryMap()
 {
 	return this->stoic;
 }
@@ -95,8 +95,8 @@ double rate_func_ConstReaction(int i, const Matrix<double> &u, double t, const v
 {
 	double rate = 0.0;
 	CROW_DATA *dat = (CROW_DATA *) data;
-	std::map<int, int>::iterator it;
-	
+	std::map<int, double>::iterator it;
+
 	//Iterate forward through the map
 	int count = 0;
 	double forward = 0.0, reverse = 0.0;
@@ -107,21 +107,21 @@ double rate_func_ConstReaction(int i, const Matrix<double> &u, double t, const v
 		{
 			if (first_prod == true)
 			{
-				reverse = pow(u(it->first,0), (double)it->second);
+				reverse = pow(u(it->first,0), it->second);
 				first_prod = false;
 			}
 			else
-				reverse = reverse * pow(u(it->first,0), (double)it->second);
+				reverse = reverse * pow(u(it->first,0), it->second);
 		}
 		else if (it->second < 0)
 		{
 			if (first_reac == true)
 			{
-				forward = pow(u(it->first,0), (double)abs(it->second));
+				forward = pow(u(it->first,0), abs(it->second));
 				first_reac = false;
 			}
 			else
-				forward = forward * pow(u(it->first,0), (double)abs(it->second));
+				forward = forward * pow(u(it->first,0), abs(it->second));
 		}
 		else
 		{
@@ -129,10 +129,10 @@ double rate_func_ConstReaction(int i, const Matrix<double> &u, double t, const v
 		}
 		count++;
 	}
-	
+
 	//Check the sign of the variable of interest's stoichiometry
 	int index = dat->const_reacts[i].getIndex();
-	int stoic = dat->const_reacts[i].getStoichiometryMap()[index];
+	double stoic = dat->const_reacts[i].getStoichiometryMap()[index];
 	if (stoic > 0)
 	{
 		rate = dat->const_reacts[i].getForwardRate()*forward - dat->const_reacts[i].getReverseRate()*reverse;
@@ -145,8 +145,8 @@ double rate_func_ConstReaction(int i, const Matrix<double> &u, double t, const v
 	{
 		rate = 0.0;
 	}
-	
-	return rate*(double)abs(stoic);
+
+	return rate*abs(stoic);
 }
 
 //Jacobi function
@@ -154,9 +154,9 @@ double jacobi_func_ConstReaction(int i, int j, const Matrix<double> &u, double t
 {
 	double jac = 0.0;
 	CROW_DATA *dat = (CROW_DATA *) data;
-	std::map<int, int>::iterator it;
-	int stoic;
-	
+	std::map<int, double>::iterator it;
+	double stoic;
+
 	//Assume j is a variable related to the ith function
 	try
 	{
@@ -164,12 +164,12 @@ double jacobi_func_ConstReaction(int i, int j, const Matrix<double> &u, double t
 		bool prod = false;
 		if (dat->const_reacts[i].getStoichiometryMap().at(j) > 0)
 			prod = true;
-		
+
 		//Iterate forward through the map
 		int count = 0;
 		double forward = 0.0, reverse = 0.0;
 		bool first_prod = true, first_reac = true;
-		
+
 		if (prod == true)
 		{
 			for (it = dat->const_reacts[i].getStoichiometryMap().begin(); it != dat->const_reacts[i].getStoichiometryMap().end(); it++)
@@ -179,16 +179,16 @@ double jacobi_func_ConstReaction(int i, int j, const Matrix<double> &u, double t
 					if (first_prod == true)
 					{
 						if (it->first == j)
-							reverse = pow(u(it->first,0), (double)(it->second-1))*(double)(it->second);
+							reverse = pow(u(it->first,0), (it->second-1))*(it->second);
 						else
-							reverse = pow(u(it->first,0), (double)it->second);
+							reverse = pow(u(it->first,0), it->second);
 						first_prod = false;
 					}
 					else
 						if (it->first == j)
-							reverse = reverse * pow(u(it->first,0), (double)(it->second-1))*(double)(it->second);
+							reverse = reverse * pow(u(it->first,0), (it->second-1))*(it->second);
 						else
-							reverse = reverse * pow(u(it->first,0), (double)it->second);
+							reverse = reverse * pow(u(it->first,0), it->second);
 				}
 				count++;
 			}
@@ -202,21 +202,21 @@ double jacobi_func_ConstReaction(int i, int j, const Matrix<double> &u, double t
 					if (first_reac == true)
 					{
 						if (it->first == j)
-							forward = pow(u(it->first,0), (double)(abs(it->second)-1))*(double)abs(it->second);
+							forward = pow(u(it->first,0), (abs(it->second)-1))*abs(it->second);
 						else
-							forward = pow(u(it->first,0), (double)abs(it->second));
+							forward = pow(u(it->first,0), abs(it->second));
 						first_reac = false;
 					}
 					else
 						if (it->first == j)
-							forward = forward * pow(u(it->first,0), (double)(abs(it->second)-1))*(double)abs(it->second);
+							forward = forward * pow(u(it->first,0), (abs(it->second)-1))*abs(it->second);
 						else
-							forward = forward * pow(u(it->first,0), (double)abs(it->second));
+							forward = forward * pow(u(it->first,0), abs(it->second));
 				}
 				count++;
 			}
 		}
-		
+
 		//Compute Jac from relevant info
 		int index = dat->const_reacts[i].getIndex();
 		stoic = dat->const_reacts[i].getStoichiometryMap()[index];
@@ -237,7 +237,7 @@ double jacobi_func_ConstReaction(int i, int j, const Matrix<double> &u, double t
 	{
 		jac = 0.0;
 	}
-	
+
 	return jac*(double)abs(stoic);
 }
 
@@ -299,7 +299,7 @@ void MultiConstReaction::SetReverseRate(int react, double rate)
 }
 
 //Set stoichiometry
-void MultiConstReaction::InsertStoichiometry(int react, int i, int v)
+void MultiConstReaction::InsertStoichiometry(int react, int i, double v)
 {
 	this->getReaction(react).InsertStoichiometry(i, v);
 }
@@ -329,8 +329,8 @@ double rate_func_MultiConstReaction(int i, const Matrix<double> &u, double t, co
 {
 	double rate = 0.0;
 	CROW_DATA *dat = (CROW_DATA *) data;
-	std::map<int, int>::iterator it;
-	
+	std::map<int, double>::iterator it;
+
 	//Loop through all reactions
 	for (int r=0; r<dat->multi_const_reacts[i].getNumReactions(); r++)
 	{
@@ -344,21 +344,21 @@ double rate_func_MultiConstReaction(int i, const Matrix<double> &u, double t, co
 			{
 				if (first_prod == true)
 				{
-					reverse = pow(u(it->first,0), (double)it->second);
+					reverse = pow(u(it->first,0), it->second);
 					first_prod = false;
 				}
 				else
-					reverse = reverse * pow(u(it->first,0), (double)it->second);
+					reverse = reverse * pow(u(it->first,0), it->second);
 			}
 			else if (it->second < 0)
 			{
 				if (first_reac == true)
 				{
-					forward = pow(u(it->first,0), (double)abs(it->second));
+					forward = pow(u(it->first,0), abs(it->second));
 					first_reac = false;
 				}
 				else
-					forward = forward * pow(u(it->first,0), (double)abs(it->second));
+					forward = forward * pow(u(it->first,0), abs(it->second));
 			}
 			else
 			{
@@ -366,24 +366,24 @@ double rate_func_MultiConstReaction(int i, const Matrix<double> &u, double t, co
 			}
 			count++;
 		}
-	
+
 		//Check the sign of the variable of interest's stoichiometry
 		int index = dat->multi_const_reacts[i].getReaction(r).getIndex();
-		int stoic = dat->multi_const_reacts[i].getReaction(r).getStoichiometryMap()[index];
+		double stoic = dat->multi_const_reacts[i].getReaction(r).getStoichiometryMap()[index];
 		if (stoic > 0)
 		{
-			rate = rate + (double)abs(stoic)*(dat->multi_const_reacts[i].getReaction(r).getForwardRate()*forward - dat->multi_const_reacts[i].getReaction(r).getReverseRate()*reverse);
+			rate = rate + abs(stoic)*(dat->multi_const_reacts[i].getReaction(r).getForwardRate()*forward - dat->multi_const_reacts[i].getReaction(r).getReverseRate()*reverse);
 		}
 		else if (stoic < 0)
 		{
-			rate = rate + (double)abs(stoic)*(dat->multi_const_reacts[i].getReaction(r).getReverseRate()*reverse - dat->multi_const_reacts[i].getReaction(r).getForwardRate()*forward);
+			rate = rate + abs(stoic)*(dat->multi_const_reacts[i].getReaction(r).getReverseRate()*reverse - dat->multi_const_reacts[i].getReaction(r).getForwardRate()*forward);
 		}
 		else
 		{
 			rate = rate + 0.0;
 		}
 	}
-	
+
 	return rate;
 }
 
@@ -392,9 +392,9 @@ double jacobi_func_MultiConstReaction(int i, int j, const Matrix<double> &u, dou
 {
 	double jac = 0.0;
 	CROW_DATA *dat = (CROW_DATA *) data;
-	std::map<int, int>::iterator it;
-	int stoic;
-	
+	std::map<int, double>::iterator it;
+	double stoic;
+
 	//Loop through all reactions
 	for (int r=0; r<dat->multi_const_reacts[i].getNumReactions(); r++)
 	{
@@ -405,12 +405,12 @@ double jacobi_func_MultiConstReaction(int i, int j, const Matrix<double> &u, dou
 			bool prod = false;
 			if (dat->multi_const_reacts[i].getReaction(r).getStoichiometryMap().at(j) > 0)
 				prod = true;
-		
+
 			//Iterate forward through the map
 			int count = 0;
 			double forward = 0.0, reverse = 0.0;
 			bool first_prod = true, first_reac = true;
-		
+
 			if (prod == true)
 			{
 				for (it = dat->multi_const_reacts[i].getReaction(r).getStoichiometryMap().begin(); it != dat->multi_const_reacts[i].getReaction(r).getStoichiometryMap().end(); it++)
@@ -420,16 +420,16 @@ double jacobi_func_MultiConstReaction(int i, int j, const Matrix<double> &u, dou
 						if (first_prod == true)
 						{
 							if (it->first == j)
-								reverse = pow(u(it->first,0), (double)(it->second-1))*(double)(it->second);
+								reverse = pow(u(it->first,0), (it->second-1))*(it->second);
 							else
-								reverse = pow(u(it->first,0), (double)it->second);
+								reverse = pow(u(it->first,0), it->second);
 							first_prod = false;
 						}
 						else
 							if (it->first == j)
-								reverse = reverse * pow(u(it->first,0), (double)(it->second-1))*(double)(it->second);
+								reverse = reverse * pow(u(it->first,0), (it->second-1))*(it->second);
 							else
-								reverse = reverse * pow(u(it->first,0), (double)it->second);
+								reverse = reverse * pow(u(it->first,0), it->second);
 					}
 					count++;
 				}
@@ -443,35 +443,35 @@ double jacobi_func_MultiConstReaction(int i, int j, const Matrix<double> &u, dou
 						if (first_reac == true)
 						{
 							if (it->first == j)
-								forward = pow(u(it->first,0), (double)(abs(it->second)-1))*(double)abs(it->second);
+								forward = pow(u(it->first,0), (abs(it->second)-1))*abs(it->second);
 							else
-								forward = pow(u(it->first,0), (double)abs(it->second));
+								forward = pow(u(it->first,0), abs(it->second));
 							first_reac = false;
 						}
 						else
 							if (it->first == j)
-								forward = forward * pow(u(it->first,0), (double)(abs(it->second)-1))*(double)abs(it->second);
+								forward = forward * pow(u(it->first,0), (abs(it->second)-1))*abs(it->second);
 							else
-								forward = forward * pow(u(it->first,0), (double)abs(it->second));
+								forward = forward * pow(u(it->first,0), abs(it->second));
 					}
 					count++;
 				}
 			}
-		
+
 			//Compute Jac from relevant info
 			int index = dat->multi_const_reacts[i].getReaction(r).getIndex();
 			stoic = dat->multi_const_reacts[i].getReaction(r).getStoichiometryMap()[index];
 			if (stoic > 0)
 			{
-				jac += (double)abs(stoic)*(dat->multi_const_reacts[i].getReaction(r).getForwardRate()*forward - dat->multi_const_reacts[i].getReaction(r).getReverseRate()*reverse);
+				jac += abs(stoic)*(dat->multi_const_reacts[i].getReaction(r).getForwardRate()*forward - dat->multi_const_reacts[i].getReaction(r).getReverseRate()*reverse);
 			}
 			else if (stoic < 0)
 			{
-				jac += (double)abs(stoic)*(dat->multi_const_reacts[i].getReaction(r).getReverseRate()*reverse - dat->multi_const_reacts[i].getReaction(r).getForwardRate()*forward);
+				jac += abs(stoic)*(dat->multi_const_reacts[i].getReaction(r).getReverseRate()*reverse - dat->multi_const_reacts[i].getReaction(r).getForwardRate()*forward);
 			}
 			else
 				jac += 0.0;
-		
+
 		}
 		//If it is not related, then return 0
 		catch (std::out_of_range)
@@ -479,7 +479,7 @@ double jacobi_func_MultiConstReaction(int i, int j, const Matrix<double> &u, dou
 			jac += 0.0;
 		}
 	}
-	
+
 	return jac;
 }
 
@@ -556,14 +556,14 @@ double rate_func_InfiniteBath(int i, const Matrix<double> &u, double t, const vo
 	double res = 0;
 	CROW_DATA *dat = (CROW_DATA *) data;
 	std::map<int, double>::iterator it;
-	
+
 	//Loop over all mapped values
 	for (it = dat->inf_bath[i].getWeightMap().begin(); it != dat->inf_bath[i].getWeightMap().end(); it++)
 	{
 		res += u(it->first,0)*it->second;
 	}
 	res = dat->inf_bath[i].getValue() - res;
-	
+
 	return res;
 }
 
@@ -573,7 +573,7 @@ double jacobi_func_InfiniteBath(int i, int j, const Matrix<double> &u, double t,
 	double jac = 0;
 	CROW_DATA *dat = (CROW_DATA *) data;
 	std::map<int, double>::iterator it;
-	
+
 	//Assume jacobian is only registered for species involved
 	try
 	{
@@ -590,7 +590,7 @@ double jacobi_func_InfiniteBath(int i, int j, const Matrix<double> &u, double t,
 	{
 		jac = 0.0;
 	}
-	
+
 	return jac;
 }
 
@@ -604,7 +604,7 @@ void print2file_crow_header(CROW_DATA *dat)
 {
 	if (dat->FileOutput != true)
 		return;
-	
+
 	fprintf(dat->OutputFile, "------------------- System Information ------------------\n\n");
 	fprintf(dat->OutputFile, "Number of Variables/Functions = \t%i\n",dat->SolverInfo.getNumFunc());
 	fprintf(dat->OutputFile, "List of Variable Names:");
@@ -630,7 +630,7 @@ void print2file_crow_header(CROW_DATA *dat)
 		case EXPLICIT:
 			fprintf(dat->OutputFile, "EXPLICIT\n");
 			break;
-			
+
 		case IMPLICIT:
 			fprintf(dat->OutputFile, "IMPLICIT\n");
 			break;
@@ -641,23 +641,23 @@ void print2file_crow_header(CROW_DATA *dat)
 		case BE:
 			fprintf(dat->OutputFile, "Backwards-Euler\n");
 			break;
-			
+
 		case FE:
 			fprintf(dat->OutputFile, "Forwards-Euler\n");
 			break;
-			
+
 		case CN:
 			fprintf(dat->OutputFile, "Crank-Nicholson\n");
 			break;
-			
+
 		case BDF2:
 			fprintf(dat->OutputFile, "Backwards Differentiation Formula: 2nd Order\n");
 			break;
-			
+
 		case RK4:
 			fprintf(dat->OutputFile, "Runge-Kutta: 4th Order\n");
 			break;
-			
+
 		case RKF:
 			fprintf(dat->OutputFile, "Runge-Kutta-Fehlberg\n");
 			break;
@@ -668,15 +668,15 @@ void print2file_crow_header(CROW_DATA *dat)
 		case CONSTANT:
 			fprintf(dat->OutputFile, "Constant\n");
 			break;
-			
+
 		case ADAPTIVE:
 			fprintf(dat->OutputFile, "Adaptive\n");
 			break;
-			
+
 		case FEHLBERG:
 			fprintf(dat->OutputFile, "Fehlberg\n");
 			break;
-			
+
 		case RATEBASED:
 			fprintf(dat->OutputFile, "Ratebased\n");
 			break;
@@ -687,11 +687,11 @@ void print2file_crow_header(CROW_DATA *dat)
 		case BT:
 			fprintf(dat->OutputFile, "Backtracking\n");
 			break;
-			
+
 		case ABT:
 			fprintf(dat->OutputFile, "Adaptive Backtracking\n");
 			break;
-			
+
 		case NO_LS:
 			fprintf(dat->OutputFile, "None\n");
 			break;
@@ -706,19 +706,19 @@ void print2file_crow_header(CROW_DATA *dat)
 			case JACOBI:
 				fprintf(dat->OutputFile, "Jacobi\n");
 				break;
-			
+
 			case TRIDIAG:
 				fprintf(dat->OutputFile, "Tridiagonal\n");
 				break;
-			
+
 			case UGS:
 				fprintf(dat->OutputFile, "Upper Gauss-Seidel\n");
 				break;
-				
+
 			case LGS:
 				fprintf(dat->OutputFile, "Lower Gauss-Seidel\n");
 				break;
-				
+
 			case SGS:
 				fprintf(dat->OutputFile, "Symmetric Gauss-Seidel\n");
 				break;
@@ -730,39 +730,39 @@ void print2file_crow_header(CROW_DATA *dat)
 		case GMRESLP:
 			fprintf(dat->OutputFile, "Generalized Minimum Residuals (GMRESLP)\n");
 			break;
-			
+
 		case PCG:
 			fprintf(dat->OutputFile, "Conjugate Gradients (PCG)\n");
 			break;
-			
+
 		case BiCGSTAB:
 			fprintf(dat->OutputFile, "Biconjugate Gradients Stabilized (BiCGSTAB)\n");
 			break;
-			
+
 		case CGS:
 			fprintf(dat->OutputFile, "Conjugate Gradients Squared (CGS)\n");
 			break;
-			
+
 		case FOM:
 			fprintf(dat->OutputFile, "Full Orthogonalization (FOM)\n");
 			break;
-			
+
 		case GMRESRP:
 			fprintf(dat->OutputFile, "Generalized Minimum Residuals (GMRESRP)\n");
 			break;
-			
+
 		case GCR:
 			fprintf(dat->OutputFile, "Generalized Conjugate Residuals (GCR)\n");
 			break;
-			
+
 		case GMRESR:
 			fprintf(dat->OutputFile, "Recursive Generalized Minimum Residuals (GMRESR)\n");
 			break;
-			
+
 		case KMS:
 			fprintf(dat->OutputFile, "Kylov Multi-space (KMS)\n");
 			break;
-			
+
 		case QR:
 			fprintf(dat->OutputFile, "QR Factorization (QR)\n");
 			break;
@@ -776,18 +776,18 @@ void print2file_crow_header(CROW_DATA *dat)
 	fprintf(dat->OutputFile, "\tNONLINEAR TOLERANCE (Absolute) =\t%.6g\n", dat->SolverInfo.getNonlinearToleranceABS());
 	fprintf(dat->OutputFile, "\tNONLINEAR TOLERANCE (Relative) =\t%.6g\n", dat->SolverInfo.getNonlinearToleranceREL());
 	fprintf(dat->OutputFile,"\n-----------------------------------------------------------\n\n");
-	
+
 	//Loop over all ConstReaction Objects
 	int i = 0;
 	for (auto &x: dat->const_reacts)
 	{
 		if (i == 0)
 			fprintf(dat->OutputFile, "---------------- Constant Reaction Objects ----------------\n\n");
-		
+
 		fprintf(dat->OutputFile, "Variable:\t%s\nEquation:\td(%s)/dt = ", dat->SolverInfo.getVariableName(x.first).c_str(), dat->SolverInfo.getVariableName(x.first).c_str());
-		
+
 		//Reaction Equation Information
-		std::map<int, int>::iterator it;
+		std::map<int, double>::iterator it;
 		//Forward rate / positive reactants
 		if (dat->const_reacts[x.first].getStoichiometryMap()[dat->const_reacts[x.first].getIndex()] > 0)
 		{
@@ -795,7 +795,7 @@ void print2file_crow_header(CROW_DATA *dat)
 			if (dat->const_reacts[x.first].getForwardRate() != 0)
 			{
 				if (abs(dat->const_reacts[x.first].getStoichiometryMap()[dat->const_reacts[x.first].getIndex()]) > 1)
-					fprintf(dat->OutputFile, "%i*", abs(dat->const_reacts[x.first].getStoichiometryMap()[dat->const_reacts[x.first].getIndex()]));
+					fprintf(dat->OutputFile, "%.6g*", abs(dat->const_reacts[x.first].getStoichiometryMap()[dat->const_reacts[x.first].getIndex()]));
 				fprintf(dat->OutputFile, "kf");
 				for (it = dat->const_reacts[x.first].getStoichiometryMap().begin(); it != dat->const_reacts[x.first].getStoichiometryMap().end(); it++)
 				{
@@ -804,7 +804,7 @@ void print2file_crow_header(CROW_DATA *dat)
 						if (abs(it->second) == 1)
 							fprintf(dat->OutputFile, "*(%s)", dat->SolverInfo.getVariableName(it->first).c_str());
 						else
-							fprintf(dat->OutputFile, "*(%s)^%i", dat->SolverInfo.getVariableName(it->first).c_str(), abs(it->second));
+							fprintf(dat->OutputFile, "*(%s)^%.6g", dat->SolverInfo.getVariableName(it->first).c_str(), abs(it->second));
 					}
 					else
 					{
@@ -812,12 +812,12 @@ void print2file_crow_header(CROW_DATA *dat)
 					}
 				}
 			}
-			
+
 			//Reverse part
 			if (dat->const_reacts[x.first].getReverseRate() != 0)
 			{
 				if (abs(dat->const_reacts[x.first].getStoichiometryMap()[dat->const_reacts[x.first].getIndex()]) > 1)
-					fprintf(dat->OutputFile, " - %i*kr", abs(dat->const_reacts[x.first].getStoichiometryMap()[dat->const_reacts[x.first].getIndex()]));
+					fprintf(dat->OutputFile, " - %.6g*kr", abs(dat->const_reacts[x.first].getStoichiometryMap()[dat->const_reacts[x.first].getIndex()]));
 				else
 					fprintf(dat->OutputFile, " - kr");
 				for (it = dat->const_reacts[x.first].getStoichiometryMap().begin(); it != dat->const_reacts[x.first].getStoichiometryMap().end(); it++)
@@ -827,7 +827,7 @@ void print2file_crow_header(CROW_DATA *dat)
 						if (abs(it->second) == 1)
 							fprintf(dat->OutputFile, "*(%s)", dat->SolverInfo.getVariableName(it->first).c_str());
 						else
-							fprintf(dat->OutputFile, "*(%s)^%i", dat->SolverInfo.getVariableName(it->first).c_str(), abs(it->second));
+							fprintf(dat->OutputFile, "*(%s)^%.6g", dat->SolverInfo.getVariableName(it->first).c_str(), abs(it->second));
 					}
 					else
 					{
@@ -843,7 +843,7 @@ void print2file_crow_header(CROW_DATA *dat)
 			if (dat->const_reacts[x.first].getReverseRate() != 0)
 			{
 				if (abs(dat->const_reacts[x.first].getStoichiometryMap()[dat->const_reacts[x.first].getIndex()]) > 1)
-					fprintf(dat->OutputFile, "%i*", abs(dat->const_reacts[x.first].getStoichiometryMap()[dat->const_reacts[x.first].getIndex()]));
+					fprintf(dat->OutputFile, "%.6g*", abs(dat->const_reacts[x.first].getStoichiometryMap()[dat->const_reacts[x.first].getIndex()]));
 				fprintf(dat->OutputFile, "kr");
 				for (it = dat->const_reacts[x.first].getStoichiometryMap().begin(); it != dat->const_reacts[x.first].getStoichiometryMap().end(); it++)
 				{
@@ -852,7 +852,7 @@ void print2file_crow_header(CROW_DATA *dat)
 						if (abs(it->second) == 1)
 							fprintf(dat->OutputFile, "*(%s)", dat->SolverInfo.getVariableName(it->first).c_str());
 						else
-							fprintf(dat->OutputFile, "*(%s)^%i", dat->SolverInfo.getVariableName(it->first).c_str(), abs(it->second));
+							fprintf(dat->OutputFile, "*(%s)^%.6g", dat->SolverInfo.getVariableName(it->first).c_str(), abs(it->second));
 					}
 					else
 					{
@@ -860,12 +860,12 @@ void print2file_crow_header(CROW_DATA *dat)
 					}
 				}
 			}
-			
+
 			//Forward part
 			if (dat->const_reacts[x.first].getForwardRate() != 0)
 			{
 				if (abs(dat->const_reacts[x.first].getStoichiometryMap()[dat->const_reacts[x.first].getIndex()]) > 1)
-					fprintf(dat->OutputFile, " - %i*kf", abs(dat->const_reacts[x.first].getStoichiometryMap()[dat->const_reacts[x.first].getIndex()]));
+					fprintf(dat->OutputFile, " - %.6g*kf", abs(dat->const_reacts[x.first].getStoichiometryMap()[dat->const_reacts[x.first].getIndex()]));
 				else
 					fprintf(dat->OutputFile, " - kf");
 				for (it = dat->const_reacts[x.first].getStoichiometryMap().begin(); it != dat->const_reacts[x.first].getStoichiometryMap().end(); it++)
@@ -875,7 +875,7 @@ void print2file_crow_header(CROW_DATA *dat)
 						if (abs(it->second) == 1)
 							fprintf(dat->OutputFile, "*(%s)", dat->SolverInfo.getVariableName(it->first).c_str());
 						else
-							fprintf(dat->OutputFile, "*(%s)^%i", dat->SolverInfo.getVariableName(it->first).c_str(), abs(it->second));
+							fprintf(dat->OutputFile, "*(%s)^%.6g", dat->SolverInfo.getVariableName(it->first).c_str(), abs(it->second));
 					}
 					else
 					{
@@ -889,33 +889,33 @@ void print2file_crow_header(CROW_DATA *dat)
 			//Do Nothing
 		}
 		fprintf(dat->OutputFile, "\n");
-		
+
 		//Parameter Information
 		if (dat->const_reacts[x.first].getForwardRate() != 0)
 			fprintf(dat->OutputFile, "Parameter:\tkf =\t%.6g\n", dat->const_reacts[x.first].getForwardRate());
 		if (dat->const_reacts[x.first].getReverseRate() != 0)
 			fprintf(dat->OutputFile, "Parameter:\tkr =\t%.6g\n", dat->const_reacts[x.first].getReverseRate());
-		
+
 		fprintf(dat->OutputFile, "\n");
 		if (i == dat->const_reacts.size()-1)
 			fprintf(dat->OutputFile,"-----------------------------------------------------------\n\n");
 		i++;
 	}//END ConstReaction Loop
-	
+
 	//Loop over all MultiConstReaction Objects
 	i = 0;
 	for (auto &x: dat->multi_const_reacts)
 	{
 		if (i == 0)
 			fprintf(dat->OutputFile, "------------ Multiple Constant Reaction Objects ------------\n\n");
-		
+
 		fprintf(dat->OutputFile, "Variable:\t%s\nEquation:\td(%s)/dt = ", dat->SolverInfo.getVariableName(x.first).c_str(), dat->SolverInfo.getVariableName(x.first).c_str());
-		
+
 		//Loop over all reactions in object
 		for (int r=0; r<dat->multi_const_reacts[x.first].getNumReactions(); r++)
 		{
 			//Reaction Equation Information
-			std::map<int, int>::iterator it;
+			std::map<int, double>::iterator it;
 			//Forward rate / positive reactants
 			if (dat->multi_const_reacts[x.first].getReaction(r).getStoichiometryMap()[dat->multi_const_reacts[x.first].getReaction(r).getIndex()] > 0)
 			{
@@ -925,13 +925,13 @@ void print2file_crow_header(CROW_DATA *dat)
 					if (r == 0)
 					{
 						if (abs(dat->multi_const_reacts[x.first].getReaction(r).getStoichiometryMap()[dat->multi_const_reacts[x.first].getReaction(r).getIndex()]) > 1)
-							fprintf(dat->OutputFile, "%i*", abs(dat->multi_const_reacts[x.first].getReaction(r).getStoichiometryMap()[dat->multi_const_reacts[x.first].getReaction(r).getIndex()]));
+							fprintf(dat->OutputFile, "%.6g*", abs(dat->multi_const_reacts[x.first].getReaction(r).getStoichiometryMap()[dat->multi_const_reacts[x.first].getReaction(r).getIndex()]));
 						fprintf(dat->OutputFile, "kf_%i",r);
 					}
 					else
 					{
 						if (abs(dat->multi_const_reacts[x.first].getReaction(r).getStoichiometryMap()[dat->multi_const_reacts[x.first].getReaction(r).getIndex()]) > 1)
-							fprintf(dat->OutputFile, "+ %i*kf_%i", abs(dat->multi_const_reacts[x.first].getReaction(r).getStoichiometryMap()[dat->multi_const_reacts[x.first].getReaction(r).getIndex()]),r);
+							fprintf(dat->OutputFile, "+ %.6g*kf_%i", abs(dat->multi_const_reacts[x.first].getReaction(r).getStoichiometryMap()[dat->multi_const_reacts[x.first].getReaction(r).getIndex()]),r);
 						else
 							fprintf(dat->OutputFile, "+ kf_%i",r);
 					}
@@ -942,7 +942,7 @@ void print2file_crow_header(CROW_DATA *dat)
 							if (abs(it->second) == 1)
 								fprintf(dat->OutputFile, "*(%s)", dat->SolverInfo.getVariableName(it->first).c_str());
 							else
-								fprintf(dat->OutputFile, "*(%s)^%i", dat->SolverInfo.getVariableName(it->first).c_str(), abs(it->second));
+								fprintf(dat->OutputFile, "*(%s)^%.6g", dat->SolverInfo.getVariableName(it->first).c_str(), abs(it->second));
 						}
 						else
 						{
@@ -950,21 +950,21 @@ void print2file_crow_header(CROW_DATA *dat)
 						}
 					}
 				}
-				
+
 				//Reverse part
 				if (dat->multi_const_reacts[x.first].getReaction(r).getReverseRate() != 0)
 				{
 					if (r == 0)
 					{
 						if (abs(dat->multi_const_reacts[x.first].getReaction(r).getStoichiometryMap()[dat->multi_const_reacts[x.first].getReaction(r).getIndex()]) > 1)
-							fprintf(dat->OutputFile, " - %i*kr_%i", abs(dat->multi_const_reacts[x.first].getReaction(r).getStoichiometryMap()[dat->multi_const_reacts[x.first].getReaction(r).getIndex()]),r);
+							fprintf(dat->OutputFile, " - %.6g*kr_%i", abs(dat->multi_const_reacts[x.first].getReaction(r).getStoichiometryMap()[dat->multi_const_reacts[x.first].getReaction(r).getIndex()]),r);
 						else
 							fprintf(dat->OutputFile, " - kr_%i",r);
 					}
 					else
 					{
 						if (abs(dat->multi_const_reacts[x.first].getReaction(r).getStoichiometryMap()[dat->multi_const_reacts[x.first].getReaction(r).getIndex()]) > 1)
-							fprintf(dat->OutputFile, "- %i*kr_%i", abs(dat->multi_const_reacts[x.first].getReaction(r).getStoichiometryMap()[dat->multi_const_reacts[x.first].getReaction(r).getIndex()]),r);
+							fprintf(dat->OutputFile, "- %.6g*kr_%i", abs(dat->multi_const_reacts[x.first].getReaction(r).getStoichiometryMap()[dat->multi_const_reacts[x.first].getReaction(r).getIndex()]),r);
 						else
 							fprintf(dat->OutputFile, "- kr_%i",r);
 					}
@@ -975,7 +975,7 @@ void print2file_crow_header(CROW_DATA *dat)
 							if (abs(it->second) == 1)
 								fprintf(dat->OutputFile, "*(%s)", dat->SolverInfo.getVariableName(it->first).c_str());
 							else
-								fprintf(dat->OutputFile, "*(%s)^%i", dat->SolverInfo.getVariableName(it->first).c_str(), abs(it->second));
+								fprintf(dat->OutputFile, "*(%s)^%.6g", dat->SolverInfo.getVariableName(it->first).c_str(), abs(it->second));
 						}
 						else
 						{
@@ -993,13 +993,13 @@ void print2file_crow_header(CROW_DATA *dat)
 					if (r == 0)
 					{
 						if (abs(dat->multi_const_reacts[x.first].getReaction(r).getStoichiometryMap()[dat->multi_const_reacts[x.first].getReaction(r).getIndex()]) > 1)
-							fprintf(dat->OutputFile, "%i*", abs(dat->multi_const_reacts[x.first].getReaction(r).getStoichiometryMap()[dat->multi_const_reacts[x.first].getReaction(r).getIndex()]));
+							fprintf(dat->OutputFile, "%.6g*", abs(dat->multi_const_reacts[x.first].getReaction(r).getStoichiometryMap()[dat->multi_const_reacts[x.first].getReaction(r).getIndex()]));
 						fprintf(dat->OutputFile, "kr_%i",r);
 					}
 					else
 					{
 						if (abs(dat->multi_const_reacts[x.first].getReaction(r).getStoichiometryMap()[dat->multi_const_reacts[x.first].getReaction(r).getIndex()]) > 1)
-							fprintf(dat->OutputFile, "+ %i*kr_%i", abs(dat->multi_const_reacts[x.first].getReaction(r).getStoichiometryMap()[dat->multi_const_reacts[x.first].getReaction(r).getIndex()]),r);
+							fprintf(dat->OutputFile, "+ %.6g*kr_%i", abs(dat->multi_const_reacts[x.first].getReaction(r).getStoichiometryMap()[dat->multi_const_reacts[x.first].getReaction(r).getIndex()]),r);
 						else
 							fprintf(dat->OutputFile, "+ kr_%i",r);
 					}
@@ -1010,7 +1010,7 @@ void print2file_crow_header(CROW_DATA *dat)
 							if (abs(it->second) == 1)
 								fprintf(dat->OutputFile, "*(%s)", dat->SolverInfo.getVariableName(it->first).c_str());
 							else
-								fprintf(dat->OutputFile, "*(%s)^%i", dat->SolverInfo.getVariableName(it->first).c_str(), abs(it->second));
+								fprintf(dat->OutputFile, "*(%s)^%.6g", dat->SolverInfo.getVariableName(it->first).c_str(), abs(it->second));
 						}
 						else
 						{
@@ -1018,21 +1018,21 @@ void print2file_crow_header(CROW_DATA *dat)
 						}
 					}
 				}
-				
+
 				//Forward part
 				if (dat->multi_const_reacts[x.first].getReaction(r).getForwardRate() != 0)
 				{
 					if (r == 0)
 					{
 						if (abs(dat->multi_const_reacts[x.first].getReaction(r).getStoichiometryMap()[dat->multi_const_reacts[x.first].getReaction(r).getIndex()]) > 1)
-							fprintf(dat->OutputFile, " - %i*kf_%i", abs(dat->multi_const_reacts[x.first].getReaction(r).getStoichiometryMap()[dat->multi_const_reacts[x.first].getReaction(r).getIndex()]),r);
+							fprintf(dat->OutputFile, " - %.6g*kf_%i", abs(dat->multi_const_reacts[x.first].getReaction(r).getStoichiometryMap()[dat->multi_const_reacts[x.first].getReaction(r).getIndex()]),r);
 						else
 							fprintf(dat->OutputFile, " - kf_%i",r);
 					}
 					else
 					{
 						if (abs(dat->multi_const_reacts[x.first].getReaction(r).getStoichiometryMap()[dat->multi_const_reacts[x.first].getReaction(r).getIndex()]) > 1)
-							fprintf(dat->OutputFile, "- %i*kf_%i", abs(dat->multi_const_reacts[x.first].getReaction(r).getStoichiometryMap()[dat->multi_const_reacts[x.first].getReaction(r).getIndex()]),r);
+							fprintf(dat->OutputFile, "- %.6g*kf_%i", abs(dat->multi_const_reacts[x.first].getReaction(r).getStoichiometryMap()[dat->multi_const_reacts[x.first].getReaction(r).getIndex()]),r);
 						else
 							fprintf(dat->OutputFile, "- kf_%i",r);
 					}
@@ -1043,7 +1043,7 @@ void print2file_crow_header(CROW_DATA *dat)
 							if (abs(it->second) == 1)
 								fprintf(dat->OutputFile, "*(%s)", dat->SolverInfo.getVariableName(it->first).c_str());
 							else
-								fprintf(dat->OutputFile, "*(%s)^%i", dat->SolverInfo.getVariableName(it->first).c_str(), abs(it->second));
+								fprintf(dat->OutputFile, "*(%s)^%.6g", dat->SolverInfo.getVariableName(it->first).c_str(), abs(it->second));
 						}
 						else
 						{
@@ -1057,10 +1057,10 @@ void print2file_crow_header(CROW_DATA *dat)
 				//Do Nothing
 			}
 			fprintf(dat->OutputFile, " ");
-			
+
 		}//END Reaction Loop
 		fprintf(dat->OutputFile, "\n");
-		
+
 		//Loop over all reactions in object
 		for (int r=0; r<dat->multi_const_reacts[x.first].getNumReactions(); r++)
 		{
@@ -1070,7 +1070,7 @@ void print2file_crow_header(CROW_DATA *dat)
 			if (dat->multi_const_reacts[x.first].getReaction(r).getReverseRate() != 0)
 				fprintf(dat->OutputFile, "Parameter:\tkr_%i =\t%.6g\n",r,dat->multi_const_reacts[x.first].getReaction(r).getReverseRate());
 		}
-		
+
 		fprintf(dat->OutputFile, "\n");
 		if (i == dat->multi_const_reacts.size()-1)
 			fprintf(dat->OutputFile,"-----------------------------------------------------------\n\n");
@@ -1083,9 +1083,9 @@ void print2file_crow_header(CROW_DATA *dat)
 	{
 		if (i == 0)
 			fprintf(dat->OutputFile, "------------------ Infinite Bath Objects ------------------\n\n");
-		
+
 		fprintf(dat->OutputFile, "Variable:\t%s\nEquation:\t%.6g = ", dat->SolverInfo.getVariableName(x.first).c_str(),x.second.getValue());
-		
+
 		//Infinite Bath Equation Information
 		std::map<int, double>::iterator it;
 		for (it = dat->inf_bath[x.first].getWeightMap().begin(); it != dat->inf_bath[x.first].getWeightMap().end(); it++)
@@ -1105,24 +1105,24 @@ void print2file_crow_header(CROW_DATA *dat)
 					fprintf(dat->OutputFile, " + (%s)", dat->SolverInfo.getVariableName(it->first).c_str());
 			}
 		}
-		
+
 		fprintf(dat->OutputFile, "\n\n");
 		if (i == dat->inf_bath.size()-1)
 			fprintf(dat->OutputFile,"-----------------------------------------------------------\n\n");
 		i++;
 	}//END InfiniteBath Loop
-	
+
 }
 
 ///Function to validate Function type
 func_type function_choice(std::string &choice)
 {
 	func_type type = INVALID;
-	
+
 	std::string copy = choice;
 	for (int i=0; i<copy.size(); i++)
 		copy[i] = tolower(copy[i]);
-	
+
 	if (copy == "constreaction")
 		type = CONSTREACTION;
 	else if (copy == "multiconstreaction")
@@ -1131,7 +1131,7 @@ func_type function_choice(std::string &choice)
 		type = INFINITEBATH;
 	else
 		type = INVALID;
-	
+
 	return type;
 }
 
@@ -1139,13 +1139,13 @@ func_type function_choice(std::string &choice)
 int read_crow_input(CROW_DATA *dat)
 {
 	int success = 0;
-	
+
 	success = read_crow_system(dat);
 	if (success != 0) {mError(read_error); return -1;}
-	
+
 	success = read_crow_functions(dat);
 	if (success != 0) {mError(read_error); return -1;}
-	
+
 	return success;
 }
 
@@ -1153,7 +1153,7 @@ int read_crow_input(CROW_DATA *dat)
 int read_crow_system(CROW_DATA *dat)
 {
 	int success = 0;
-	
+
 	//Find all required info from System Document
 	try
 	{
@@ -1192,7 +1192,7 @@ int read_crow_system(CROW_DATA *dat)
 		mError(missing_information);
 		return -1;
 	}
-	
+
 	//Solver Options
 	try
 	{
@@ -1335,7 +1335,7 @@ int read_crow_system(CROW_DATA *dat)
 	{
 		dat->SolverInfo.set_LinearOutput(false);
 	}
-	
+
 	//Runtime Options
 	try
 	{
@@ -1389,7 +1389,7 @@ int read_crow_system(CROW_DATA *dat)
 	{
 		dat->SolverInfo.set_timestepmin(0.0);
 	}
-	
+
 	return success;
 }
 
@@ -1397,7 +1397,7 @@ int read_crow_system(CROW_DATA *dat)
 int read_crow_functions(CROW_DATA *dat)
 {
 	int success = 0;
-	
+
 	//Check the number of headers
 	int headers = (int)dat->yaml_object.getYamlWrapper().getDocMap().size();
 	if (headers != dat->SolverInfo.getNumFunc()+1)
@@ -1405,7 +1405,7 @@ int read_crow_functions(CROW_DATA *dat)
 		mError(missing_information);
 		return -1;
 	}
-	
+
 	//Create space for all functions first
 	int valid_names = 0;
 	try
@@ -1430,7 +1430,7 @@ int read_crow_functions(CROW_DATA *dat)
 		mError(missing_information);
 		return -1;
 	}
-	
+
 	//Loop through all document headers and call the appropriate read function
 	int index = 0;
 	try
@@ -1442,24 +1442,24 @@ int read_crow_functions(CROW_DATA *dat)
 				index = dat->SolverInfo.getVariableIndex(x.first);
 				std::string choice = dat->yaml_object.getYamlWrapper()(x.first)["func_type"].getString();
 				func_type type = function_choice(choice);
-				
+
 				switch (type)
 				{
 					case CONSTREACTION:
 						success = read_crow_ConstReaction(index, dat->const_reacts, dat->yaml_object.getYamlWrapper().getDocument(x.first), dat->SolverInfo);
 						if (success == -1) {mError(read_error);return -1;}
 						break;
-						
+
 					case MULTICONSTREACTION:
 						success = read_crow_MultiConstReaction(index, dat->multi_const_reacts, dat->yaml_object.getYamlWrapper().getDocument(x.first), dat->SolverInfo);
 						if (success == -1) {mError(read_error);return -1;}
 						break;
-						
+
 					case INFINITEBATH:
 						success = read_crow_InfiniteBath(index, dat->inf_bath, dat->yaml_object.getYamlWrapper().getDocument(x.first), dat->SolverInfo);
 						if (success == -1) {mError(read_error);return -1;}
 						break;
-						
+
 					default:
 						mError(invalid_type);
 						return -1;
@@ -1467,14 +1467,14 @@ int read_crow_functions(CROW_DATA *dat)
 				}
 			}
 		}
-		
+
 	}
 	catch (std::out_of_range)
 	{
 		mError(missing_information);
 		return -1;
 	}
-	
+
 	return success;
 }
 
@@ -1482,7 +1482,7 @@ int read_crow_functions(CROW_DATA *dat)
 int read_crow_ConstReaction(int index, std::unordered_map<int, ConstReaction> &map, Document &info, Dove &solver)
 {
 	int success = 0;
-	
+
 	//try to set initial condition
 	try
 	{
@@ -1493,14 +1493,14 @@ int read_crow_ConstReaction(int index, std::unordered_map<int, ConstReaction> &m
 		mError(missing_information);
 		return -1;
 	}
-	
+
 	map[index].InitializeSolver(solver);
 	map[index].SetIndex(index);
-	
+
 	//Register appropriate functions
 	solver.registerCoeff(index, default_coeff);
 	solver.registerFunction(index, rate_func_ConstReaction);
-	
+
 	int num_rate = 0;
 	//Read forward and reverse rate info (at least one is required)
 	try
@@ -1526,7 +1526,7 @@ int read_crow_ConstReaction(int index, std::unordered_map<int, ConstReaction> &m
 		mError(missing_information);
 		return -1;
 	}
-	
+
 	//Check the size of the map
 	try
 	{
@@ -1541,7 +1541,7 @@ int read_crow_ConstReaction(int index, std::unordered_map<int, ConstReaction> &m
 		mError(read_error);
 		return -1;
 	}
-	
+
 	//Loop through all stoichiometry
 	for (auto &x: info("stoichiometry").getDataMap())
 	{
@@ -1550,23 +1550,23 @@ int read_crow_ConstReaction(int index, std::unordered_map<int, ConstReaction> &m
 			mError(read_error);
 			return -1;
 		}
-		
+
 		//Grab stoichiometry
 		int species = solver.getVariableIndex(x.first);
 		try
 		{
-			map[index].InsertStoichiometry(species, x.second.getInt());
+			map[index].InsertStoichiometry(species, x.second.getDouble());
 		}
 		catch (std::out_of_range)
 		{
 			mError(read_error);
 			return -1;
 		}
-		
+
 		//Register appropriate jacobian functions
 		solver.registerJacobi(index, species, jacobi_func_ConstReaction);
 	}
-	
+
 	return success;
 }
 
@@ -1574,7 +1574,7 @@ int read_crow_ConstReaction(int index, std::unordered_map<int, ConstReaction> &m
 int read_crow_MultiConstReaction(int index, std::unordered_map<int, MultiConstReaction> &map, Document &info, Dove &solver)
 {
 	int success = 0;
-	
+
 	//Must determine number of reactions for object FIRST!
 	try
 	{
@@ -1585,7 +1585,7 @@ int read_crow_MultiConstReaction(int index, std::unordered_map<int, MultiConstRe
 		mError(missing_information);
 		return -1;
 	}
-	
+
 	//try to set initial condition
 	try
 	{
@@ -1596,14 +1596,14 @@ int read_crow_MultiConstReaction(int index, std::unordered_map<int, MultiConstRe
 		mError(missing_information);
 		return -1;
 	}
-	
+
 	map[index].InitializeSolver(solver);
 	map[index].SetIndex(index);
-	
+
 	//Register appropriate functions
 	solver.registerCoeff(index, default_coeff);
 	solver.registerFunction(index, rate_func_MultiConstReaction);
-	
+
 	//Check number of headers to ensure it is correct
 	int headers = (int)info.getHeadMap().size();
 	if (headers != map[index].getNumReactions())
@@ -1611,7 +1611,7 @@ int read_crow_MultiConstReaction(int index, std::unordered_map<int, MultiConstRe
 		mError(missing_information);
 		return -1;
 	}
-	
+
 	//Loop through all headers to setup reactions (NOTE: header names don't matter)
 	int react = 0;
 	for (auto &y: info.getHeadMap())
@@ -1641,7 +1641,7 @@ int read_crow_MultiConstReaction(int index, std::unordered_map<int, MultiConstRe
 			mError(missing_information);
 			return -1;
 		}
-		
+
 		//Check the size of the map
 		try
 		{
@@ -1656,7 +1656,7 @@ int read_crow_MultiConstReaction(int index, std::unordered_map<int, MultiConstRe
 			mError(read_error);
 			return -1;
 		}
-		
+
 		//Loop through all stoichiometry
 		for (auto &x: info(y.first)("stoichiometry").getMap())
 		{
@@ -1665,25 +1665,25 @@ int read_crow_MultiConstReaction(int index, std::unordered_map<int, MultiConstRe
 				mError(read_error);
 				return -1;
 			}
-			
+
 			//Grab stoichiometry
 			int species = solver.getVariableIndex(x.first);
 			try
 			{
-				map[index].InsertStoichiometry(react, species, x.second.getInt());
+				map[index].InsertStoichiometry(react, species, x.second.getDouble());
 			}
 			catch (std::out_of_range)
 			{
 				mError(read_error);
 				return -1;
 			}
-			
+
 			//Register appropriate jacobian functions
 			solver.registerJacobi(index, species, jacobi_func_ConstReaction);
 		}
 		react++;
 	}
-	
+
 	return success;
 }
 
@@ -1691,14 +1691,14 @@ int read_crow_MultiConstReaction(int index, std::unordered_map<int, MultiConstRe
 int read_crow_InfiniteBath(int index, std::unordered_map<int, InfiniteBath> &map, Document &info, Dove &solver)
 {
 	int success = 0;
-	
+
 	map[index].InitializeSolver(solver);
 	map[index].SetIndex(index);
-	
+
 	//Register appropriate functions
 	solver.registerCoeff(index, default_coeff);
 	solver.registerFunction(index, rate_func_InfiniteBath);
-	
+
 	//Try to set constant value
 	try
 	{
@@ -1710,7 +1710,7 @@ int read_crow_InfiniteBath(int index, std::unordered_map<int, InfiniteBath> &map
 		mError(missing_information);
 		return -1;
 	}
-	
+
 	//Try to set initial condition
 	try
 	{
@@ -1721,7 +1721,7 @@ int read_crow_InfiniteBath(int index, std::unordered_map<int, InfiniteBath> &map
 		mError(missing_information);
 		return -1;
 	}
-	
+
 	//Check the size of the map
 	try
 	{
@@ -1736,7 +1736,7 @@ int read_crow_InfiniteBath(int index, std::unordered_map<int, InfiniteBath> &map
 		mError(read_error);
 		return -1;
 	}
-	
+
 	//Loop through all weights
 	bool found_index = false;
 	for (auto &x: info("weights").getDataMap())
@@ -1746,15 +1746,15 @@ int read_crow_InfiniteBath(int index, std::unordered_map<int, InfiniteBath> &map
 			mError(read_error);
 			return -1;
 		}
-		
+
 		int species = solver.getVariableIndex(x.first);
 		if (index == species)
 			found_index = true;
-		
+
 		map[index].InsertWeight(species, x.second.getDouble());
 		solver.registerJacobi(index, species, jacobi_func_InfiniteBath);
 	}
-	
+
 	//Check to ensure non-singularity
 	if (found_index == false)
 	{
@@ -1762,9 +1762,9 @@ int read_crow_InfiniteBath(int index, std::unordered_map<int, InfiniteBath> &map
 		mError(singular_matrix);
 		return -1;
 	}
-	
+
 	solver.set_variableSteadyState(index);
-	
+
 	return success;
 }
 
@@ -1773,7 +1773,7 @@ int CROW_SCENARIO(const char *yaml_input)
 {
 	int success = 0;
 	double time;
-	
+
 	// ---------------------------- Initializations ---------------------------------
 	time = clock();
 	CROW_DATA crow;
@@ -1787,21 +1787,21 @@ int CROW_SCENARIO(const char *yaml_input)
 	crow.SolverInfo.set_outputfile(file);
 	crow.OutputFile = file;
 	crow.SolverInfo.set_userdata((void*)&crow);
-	
+
 	//Read input file
 	success = crow.yaml_object.executeYamlRead(yaml_input);
 	if (success != 0) {mError(file_dne); return -1;}
 	success = read_crow_input(&crow);
 	if (success != 0) {mError(read_error); return -1;}
-	
+
 	//Execute solver functions
 	print2file_crow_header(&crow);
 	crow.SolverInfo.solve_all();
-	
+
 	//Exit Messages
 	time = clock() - time;
 	std::cout << "\nCROW Runtime: " << (time / CLOCKS_PER_SEC) << " seconds\n";
-	
+
 	return success;
 }
 
@@ -1810,7 +1810,7 @@ int CROW_TESTS()
 {
 	int success = 0;
 	double time;
-	
+
 	// ---------------------------- Initializations ---------------------------------
 	time = clock();
 	CROW_DATA test01;
@@ -1823,9 +1823,9 @@ int CROW_TESTS()
 	}
 	test01.SolverInfo.set_outputfile(file);
 	test01.OutputFile = file;
-	
+
 	// --------------------------- Input Information (Done on Read) -------------------------------
-	
+
 	//---System Info---
 	int N = 3;
 	test01.SolverInfo.set_numfunc(N);
@@ -1835,7 +1835,7 @@ int CROW_TESTS()
 	test01.SolverInfo.set_initialcondition("I2", 1);
 	test01.SolverInfo.set_initialcondition("Ag0", 1);
 	test01.SolverInfo.set_initialcondition("AgI", 0);
-	
+
 	//---Solver Info (may consolidate with system info)---
 	test01.FileOutput = true;
 	test01.SolverInfo.set_output(true);
@@ -1853,9 +1853,9 @@ int CROW_TESTS()
 	test01.SolverInfo.set_LinearMethod(QR);
 	test01.SolverInfo.set_preconditioner(SGS);
 	test01.SolverInfo.set_Preconditioning(true);
-	
+
 	//---Function Info (Specific to ConstReaction)---
-	
+
 	//Use emplace_back for each instance of a variable (C++11)
 	/*
 	//test01.const_reacts.emplace();
@@ -1871,22 +1871,22 @@ int CROW_TESTS()
 	test01.SolverInfo.registerJacobi(0, 0, jacobi_func_ConstReaction); //automate
 	test01.SolverInfo.registerJacobi(0, 1, jacobi_func_ConstReaction); //automate
 	 */
-	
+
 	test01.multi_const_reacts[0].SetNumberReactions(1);//MUST BE CALLED FIRST!!!
 	test01.multi_const_reacts[0].InitializeSolver(test01.SolverInfo);
 	test01.multi_const_reacts[0].SetIndex(0);
-	
+
 	test01.multi_const_reacts[0].SetForwardRate(0, 1);
 	test01.multi_const_reacts[0].SetReverseRate(0, 1);
 	test01.multi_const_reacts[0].InsertStoichiometry(0, 0, -1); //Species 0, stoic 1 (+) for products
 	test01.multi_const_reacts[0].InsertStoichiometry(0, 1, -2); //Species 0, stoic 1 (+) for products
 	test01.multi_const_reacts[0].InsertStoichiometry(0, 2, 2); //Species 0, stoic 1 (+) for products
-	
+
 	test01.SolverInfo.registerCoeff(0, default_coeff);
 	test01.SolverInfo.registerFunction(0, rate_func_MultiConstReaction);
 	test01.SolverInfo.registerJacobi(0, 0, jacobi_func_MultiConstReaction);
 	test01.SolverInfo.registerJacobi(0, 1, jacobi_func_MultiConstReaction);
-	
+
 	//test01.const_reacts.emplace();
 	test01.const_reacts[1].InitializeSolver(test01.SolverInfo);
 	test01.const_reacts[1].SetIndex(1); //Index are the same!!!
@@ -1899,7 +1899,7 @@ int CROW_TESTS()
 	test01.SolverInfo.registerFunction(1, rate_func_ConstReaction);
 	test01.SolverInfo.registerJacobi(1, 0, jacobi_func_ConstReaction);
 	test01.SolverInfo.registerJacobi(1, 1, jacobi_func_ConstReaction);
-	
+
 	/*
 	test01.const_reacts.emplace();
 	test01.const_reacts[2].InitializeSolver(test01.SolverInfo);
@@ -1914,39 +1914,41 @@ int CROW_TESTS()
 	test01.SolverInfo.registerJacobi(2, 0, jacobi_func_ConstReaction);
 	test01.SolverInfo.registerJacobi(2, 1, jacobi_func_ConstReaction);
 	*/
-	
-	
+
+
 	//test01.multi_const_reacts.emplace();
 	test01.multi_const_reacts[2].SetNumberReactions(2);//MUST BE CALLED FIRST!!!
 	test01.multi_const_reacts[2].InitializeSolver(test01.SolverInfo);
 	test01.multi_const_reacts[2].SetIndex(2);
-	
+
 	test01.multi_const_reacts[2].SetForwardRate(0, 0);
 	test01.multi_const_reacts[2].SetReverseRate(0, 1);
 	test01.multi_const_reacts[2].InsertStoichiometry(0, 0, -1); //Species 0, stoic 1 (+) for products
 	test01.multi_const_reacts[2].InsertStoichiometry(0, 1, -2); //Species 0, stoic 1 (+) for products
 	test01.multi_const_reacts[2].InsertStoichiometry(0, 2, 2); //Species 0, stoic 1 (+) for products
-	
+
 	test01.multi_const_reacts[2].SetForwardRate(1, 1);
 	test01.multi_const_reacts[2].SetReverseRate(1, 0);
 	test01.multi_const_reacts[2].InsertStoichiometry(1, 0, -1); //Species 0, stoic 1 (+) for products
 	test01.multi_const_reacts[2].InsertStoichiometry(1, 1, -2); //Species 0, stoic 1 (+) for products
 	test01.multi_const_reacts[2].InsertStoichiometry(1, 2, 2); //Species 0, stoic 1 (+) for products
-	
-	
+
+
 	test01.SolverInfo.registerCoeff(2, default_coeff);
 	test01.SolverInfo.registerFunction(2, rate_func_MultiConstReaction);
 	test01.SolverInfo.registerJacobi(2, 0, jacobi_func_MultiConstReaction);
 	test01.SolverInfo.registerJacobi(2, 1, jacobi_func_MultiConstReaction);
-	
-	
+
+	//test01.SolverInfo.set_variableSteadyStateAll();
+
+
 	//---Call solver---
 	print2file_crow_header(&test01);
 	test01.SolverInfo.solve_all();
-	
+
 	//---Exit Messages and cleanup---
 	time = clock() - time;
 	std::cout << "\nCROW Runtime: " << (time / CLOCKS_PER_SEC) << " seconds\n";
-	
+
 	return success;
 }

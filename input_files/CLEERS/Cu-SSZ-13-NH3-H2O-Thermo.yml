@@ -571,7 +571,7 @@ MassBalance:
 ---
 #Units currently shown are in % by volume (roughly translates to kPa at atmospheric pressure)
 - water:
-  total_conc: 11.0
+  total_conc: 1.0E-6
   - delta:
     "H2O (g)": 1
 
@@ -607,7 +607,7 @@ include_surfcharge: false
 
 "Cu-SSZ-13-Z Cu(I)":
 ---
-spec_mole: 0.24785     #Units: mol/kg
+spec_mole: 0.04125     #Units: mol/kg
 
 - rxn01:
   #energy: 107000
@@ -810,7 +810,7 @@ spec_mole: 0.24785     #Units: mol/kg
 
 "Cu-SSZ-13-Z2 Cu(II)":
 ---
-spec_mole: 0.08262     #Units: mol/kg
+spec_mole: 0.01375     #Units: mol/kg
 
 - rxn01:
   energy: 391000

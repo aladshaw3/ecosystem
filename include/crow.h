@@ -5,7 +5,7 @@
  *			of reaction driven equations using the DOVE (see dove.h) solver. It combines
  *			a generalized description of chemical reaction mathematics with a comprehensive
  *			input file framework to allow systems of equations to be developed on the fly
- *			and solved with reasonable accuracy and efficiency. 
+ *			and solved with reasonable accuracy and efficiency.
  *
  *			Mathematical description of ConstReaction (single reaction):
  *			------------------------------------------------------------
@@ -53,7 +53,7 @@
 /// Enumeration for the list of valid CROW function types
 /** This enumeration will define all the function types that have so far been created in CROW. So far,
 	the list of valid options is as follows...
- 
+
 	\param CONSTREACTION ConstReaction objects for basic chemical reaction mechanisms
 	\param MULTICONSTREACTION MultiConstReaction objects for advanced mechanisms with const coeffs
 	\param INFINITEBATH InfiniteBath objects for a material balance to hold a variable(s) constant
@@ -66,7 +66,7 @@ typedef enum
 } func_type;
 
 /// ConstReaction class is an object for information and functions associated with the Generic Reaction
-/** This is a C++ style object designed to store and operate on the generic representation of a 
+/** This is a C++ style object designed to store and operate on the generic representation of a
 	reaction mechanism. In this object, the reaction parameters are treated as constants and do
 	not change with temperature. This object can be inherited from to add functionality that will
 	compute reaction parameters as a function of system temperature. In addition, this object will
@@ -77,26 +77,26 @@ class ConstReaction
 public:
 	ConstReaction();							///< Default constructor
 	~ConstReaction();							///< Default destructor
-	
+
 	void InitializeSolver(Dove &Solver);		///< Function to initialize the ConstReaction object from the Dove object
 	void SetIndex(int index);					///< Function to set the index of the function/variable of interest
 	void SetForwardRate(double rate);			///< Function to se the forward rate constant of the reaction
 	void SetReverseRate(double rate);			///< Function to se the reverse rate constant of the reaction
-	void InsertStoichiometry(int i, int v);		///< Insert a Stoichiometric value to the existing map
-	
+	void InsertStoichiometry(int i, double v);		///< Insert a Stoichiometric value to the existing map
+
 	double getForwardRate();						///< Function to return the forward reaction rate constant
 	double getReverseRate();						///< Function to return the reverse reaction rate constant
 	int getIndex();									///< Function to return the primary variable index
-	std::map<int, int> & getStoichiometryMap();		///< Function to return reference to the Stoichiometry map object
-	
+	std::map<int, double> & getStoichiometryMap();		///< Function to return reference to the Stoichiometry map object
+
 protected:
 	double forward_rate;						///< Reaction rate constant associated with reactants
 	double reverse_rate;						///< Reaction rate constant associated with products
 	int main_index;								///< Variable index for the variable of interest
-	std::map<int, int> stoic;					///< Map of Stoichiometric coefficients for the reaction (access by var index)
+	std::map<int, double> stoic;					///< Map of Stoichiometric coefficients for the reaction (access by var index)
 	Dove *SolverInfo;							///< Pointer to the Dove Object
 private:
-	
+
 };
 
 /// Rate function for the ConstReaction Object
@@ -104,7 +104,7 @@ private:
  the system of equations. Arguments passed to this function are standard and are required in order
  to have this function registered in the Dove object itself. Parameters of this function are as
  follows...
- 
+
  \param i index of the non-linear variable for which this function applies
  \param u matrix of all non-linear variables in the Dove system
  \param t value of time in the current simulation (user must define units)
@@ -117,7 +117,7 @@ double rate_func_ConstReaction(int i, const Matrix<double> &u, double t, const v
  the system of equations. Arguments passed to this function are standard and are required in order
  to have this function registered in the Dove object itself. Parameters of this function are as
  follows...
- 
+
  \param i index of the non-linear variable for which this function applies
  \param j index of the non-linear variable for which we are taking the derivative with respect to
  \param u matrix of all non-linear variables in the Dove system
@@ -138,24 +138,24 @@ class MultiConstReaction
 public:
 	MultiConstReaction();							///< Default constructor
 	~MultiConstReaction();							///< Default destructor
-	
+
 	void SetNumberReactions(unsigned int i);		///< Set the number of reactions for the rate function
 	void InitializeSolver(Dove &Solver);			///< Function to initialize each ConstReaction object from the Dove object
 	void SetIndex(int index);						///< Function to set the index of the primary variable species (same for all reactions)
-	
+
 	void SetForwardRate(int react, double rate);	///< Function to set the forward reaction rate for the indicated reaction
 	void SetReverseRate(int react, double rate);	///< Function to set the reverse reaction rate for the indicated reaction
-	void InsertStoichiometry(int react, int i, int v);	///< Function to insert stoichiometry for the given reaction
-	
+	void InsertStoichiometry(int react, int i, double v);	///< Function to insert stoichiometry for the given reaction
+
 	int getNumReactions();							///< Return the number of reactions in the object
 	ConstReaction &getReaction(int i);				///< Return reference to the ith ConstReaction object
-	
+
 protected:
 	int num_reactions;									///< Number of reaction objects
 	std::vector<ConstReaction> reactions;				///< List of reaction objects associated with MultiConstReaction
-	
+
 private:
-	
+
 };
 
 /// Rate function for the MultiConstReaction Object
@@ -163,7 +163,7 @@ private:
  the system of equations. Arguments passed to this function are standard and are required in order
  to have this function registered in the Dove object itself. Parameters of this function are as
  follows...
- 
+
  \param i index of the non-linear variable for which this function applies
  \param u matrix of all non-linear variables in the Dove system
  \param t value of time in the current simulation (user must define units)
@@ -176,7 +176,7 @@ double rate_func_MultiConstReaction(int i, const Matrix<double> &u, double t, co
  the system of equations. Arguments passed to this function are standard and are required in order
  to have this function registered in the Dove object itself. Parameters of this function are as
  follows...
- 
+
  \param i index of the non-linear variable for which this function applies
  \param j index of the non-linear variable for which we are taking the derivative with respect to
  \param u matrix of all non-linear variables in the Dove system
@@ -197,24 +197,24 @@ class InfiniteBath
 public:
 	InfiniteBath();								///< Default constructor
 	~InfiniteBath();							///< Default destructor
-	
+
 	void InitializeSolver(Dove &Solver);			///< Function to initialize the InfiniteBath object from the Dove object
 	void SetIndex(int index);						///< Function to set the index of the primary variable species
 	void SetValue(double val);						///< Set the value of the infinite bath parameter
 	void InsertWeight(int i, double w);				///< Insert the weight for the indicated species
-	
+
 	double getValue();								///< Return the value of the infinite bath
 	int getIndex();									///< Function to return the primary variable index
 	std::map<int, double> & getWeightMap();			///< Function to return reference to the weight map object
-	
+
 protected:
 	double Value;								///< Value that the variable or set of variables is being held to
 	int main_index;								///< Variable index for the variable of interest
 	std::map<int, double> weights;				///< Map of weight coefficients for the infinite bath
 	Dove *SolverInfo;							///< Pointer to the Dove Object
-	
+
 private:
-	
+
 };
 
 /// Rate function for the InfiniteBath Object
@@ -222,7 +222,7 @@ private:
  the system of equations. Arguments passed to this function are standard and are required in order
  to have this function registered in the Dove object itself. Parameters of this function are as
  follows...
- 
+
  \param i index of the non-linear variable for which this function applies
  \param u matrix of all non-linear variables in the Dove system
  \param t value of time in the current simulation (user must define units)
@@ -235,7 +235,7 @@ double rate_func_InfiniteBath(int i, const Matrix<double> &u, double t, const vo
  the system of equations. Arguments passed to this function are standard and are required in order
  to have this function registered in the Dove object itself. Parameters of this function are as
  follows...
- 
+
  \param i index of the non-linear variable for which this function applies
  \param j index of the non-linear variable for which we are taking the derivative with respect to
  \param u matrix of all non-linear variables in the Dove system
