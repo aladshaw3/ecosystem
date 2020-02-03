@@ -482,7 +482,7 @@ int gsta_optimize(const char* fileName)
     	norm = fopen("output/GSTA_Norms_v_Fobj.txt","w+");
     	params = fopen("output/GSTA_Parameter_Results.txt","w+");
     	heats = fopen("output/GSTA_Energy_Results.txt","w+");
-		
+
 		if (output == nullptr)
 		{
 			success = system("mkdir output");
@@ -563,6 +563,7 @@ int gsta_optimize(const char* fileName)
 
     			//Stops the loop after fit stops improving or if the increase in norms is greater than 2.5% if qmax is known
     					//and 10% if qmax is unknown
+							
     			if((k!=0 && dat.qmax!=0 && (status.fnorm - dat.norms[dat.iso].at((k-1))) >
     					(dat.norms[dat.iso].at((k-1)) * 0.025))
     						|| (k!=0 && dat.qmax==0 && (status.fnorm - dat.norms[dat.iso].at((k-1))) >
@@ -572,6 +573,7 @@ int gsta_optimize(const char* fileName)
     						<< " is no longer improving after " << (dat.n_par-1) << " parameters.\n" <<  std::endl;
     				break;
     			}
+
 
     			//Creating an average of the adjustable qmax values
     			if(dat.qmax == 0 && fabs(par[0]) > y[(m_dat[dat.iso]-1)] )
@@ -906,4 +908,3 @@ int gsta_optimize(const char* fileName)
 
     return 0;
 }
-
