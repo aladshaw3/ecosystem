@@ -10,6 +10,7 @@ eco
 *.a
 *.so
 *.pyc
+*.dat
 dbg/eco-dbg
 =======
 

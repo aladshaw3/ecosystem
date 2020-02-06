@@ -9,7 +9,7 @@
     reading and storing a digital record of a yaml formatted file. It was specifically
     designed for the purpose of maintaining the same yaml styling as what is used
     by the ecosystem library.
-    
+
     Author:     Austin Ladshaw
     Date:       05/06/2019
     Copyright:  This software was designed and built at the Georgia Institute
@@ -31,16 +31,16 @@ except:
     previously developed in the ecosystem project. This is
     done to ensure consistency between usage and application
     of yaml based input files within the entire project.
-    
+
     NOTE: You need to direct python what the return types
         and argument types are for each C-style function.
         This is especially important when dealing with
         C++ objects, as you will need to use void * as
-        arguments and return types. 
-    
+        arguments and return types.
+
         Pass const char* as arg.encode()
         Pass instances of C++ structures as c_void_p
-    
+
     USAGE: Create instance of the YAML object and then call
             the readFile('filename') function and the object
             will automatically fill out a data map with all
@@ -53,7 +53,7 @@ class YAML(object):
         initialize.restype = c_void_p
         self.obj = initialize()
         self.map = {}
-    
+
     def __str__(self):
         string = "\n"
         for doc in self.map:
@@ -89,10 +89,10 @@ class YAML(object):
                         string += "\"" + head + "\"" + ": " + str(self.map[doc][head]) + "\n"
                     else:
                         string += head + ": " + str(self.map[doc][head]) + "\n"
-        
+
             string += "...\n\n"
         return string
-            
+
     def print2file(self, filename):
         file = open(filename, 'w')
         info = str(self)
@@ -262,4 +262,3 @@ class YAML(object):
         fun(self.obj)
 
 ## END YAML Class ##
-

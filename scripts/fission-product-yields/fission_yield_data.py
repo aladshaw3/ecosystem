@@ -156,7 +156,7 @@ def read_fpy(filepath):
 	z[98] = 'Cf'
 	z[99] = 'Es'
 	z[100] = 'Fm'
-	
+
 	#Initialize
 	FPs = FPY_Iso()
 	FPs.Levels = {}
@@ -172,7 +172,7 @@ def read_fpy(filepath):
 	id = ''		#id value carried over between lines
 	includeState = False		#True to differentiate between states, False to combine states
 	name = ''	#FP name
-	
+
 	if filepath[0] == "n":
 		FPs.NIFP = True
 	else:
@@ -191,7 +191,7 @@ def read_fpy(filepath):
 		c[8] = line[70:72]
 		c[9] = line[72:75]
 		c[10] = line[75:80]
-		
+
 		#check for reading line
 		if start == True and int(c[10]) == 1 and int(c[9]) == 454:
 			#print "First Data Line"
@@ -219,7 +219,7 @@ def read_fpy(filepath):
 					State = sci_notation(c[2])
 					if float(State) > 0.0 and includeState == True:
 						name+='m'
-					
+
 					if name in FPs.Levels[cur-1].Yield:
 						FPs.Levels[cur-1].Yield[name] += float(sci_notation(c[3]))
 						FPs.Levels[cur-1].DY[name] += float(sci_notation(c[4]))
@@ -227,7 +227,7 @@ def read_fpy(filepath):
 						FPs.Levels[cur-1].Yield[name] = float(sci_notation(c[3]))
 						FPs.Levels[cur-1].DY[name] = float(sci_notation(c[4]))
 					id = ''
-			
+
 				#First half of second set
 				if c[5].strip():
 					ZA = parse_num(c[5])
@@ -235,7 +235,7 @@ def read_fpy(filepath):
 					State = sci_notation(c[6])
 					if float(State) > 0.0 and includeState == True:
 						name+='m'
-					
+
 					if name in FPs.Levels[cur-1].Yield:
 						FPs.Levels[cur-1].Yield[name] += 0.0
 						FPs.Levels[cur-1].DY[name] += 0.0
@@ -243,7 +243,7 @@ def read_fpy(filepath):
 						FPs.Levels[cur-1].Yield[name] = 0.0
 						FPs.Levels[cur-1].DY[name] = 0.0
 					id = name
-				
+
 				odd = False
 			else:
 				#Second half of second set
@@ -254,7 +254,7 @@ def read_fpy(filepath):
 					else:
 						FPs.Levels[cur-1].Yield[id] = float(sci_notation(c[1]))
 						FPs.Levels[cur-1].DY[id] = float(sci_notation(c[2]))
-				
+
 				#Last full set
 				if c[3].strip():
 					ZA = parse_num(c[3])
@@ -262,7 +262,7 @@ def read_fpy(filepath):
 					State = sci_notation(c[4])
 					if float(State) > 0.0 and includeState == True:
 						name+='m'
-					
+
 					if name in FPs.Levels[cur-1].Yield:
 						FPs.Levels[cur-1].Yield[name] += float(sci_notation(c[5]))
 						FPs.Levels[cur-1].DY[name] += float(sci_notation(c[6]))
@@ -270,17 +270,17 @@ def read_fpy(filepath):
 						FPs.Levels[cur-1].Yield[name] = float(sci_notation(c[5]))
 						FPs.Levels[cur-1].DY[name] = float(sci_notation(c[6]))
 					id = ''
-				
+
 				odd = True
 			#End odd check
-		
+
 			iNN+=6 #Every line has 6 data entries
 			if iNN >= NN:
 				NewLevel = True
 				odd = True
 				iNN = 0
 		#End if
-		
+
 		#Check for first starting point
 		if int(c[10]) == 99999 and start == False:
 			start = True
@@ -308,7 +308,7 @@ def write_fpy(nfile, iso):
 		nfile.write('- EL-' + str(levels) + ':\n')
 		nfile.write('  Energy: ' + str(iso.Levels[levels].Energy) + '  # (eV)\n')
 		nfile.write('\n')
-		
+
 		#Make Corrections
 		for keys in iso.Levels[levels].Yield:
 			yield_sum+= iso.Levels[levels].Yield[keys]
@@ -334,7 +334,7 @@ def write_fpy(nfile, iso):
 	#End level loop
 
 	nfile.write('...\n\n')
-	
+
 	return
 # --------------------- End write_fpy ------------------------------
 
@@ -387,4 +387,3 @@ for filename in os.listdir(sfy_path):
 #Close the yaml file
 print '\nSpontaneous FPY Library Complete!\n'
 sfile.close()
-

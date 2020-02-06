@@ -7,7 +7,7 @@
     to another output file. Useful for creating small unit tests for code validations
     or making evaluations on how changes in parameters change predicted outcomes. Thus,
     this script will be utilized for the purpose of performing sensitivity analyses.
-    
+
     Author:     Austin Ladshaw
     Date:       05/09/2019
     Copyright:  This software was designed and built at the Georgia Institute
@@ -33,7 +33,7 @@ class FileCompare(object):
         self.gold_file = open(gold,"r")
         self.test_file = open(test,"r")
         self.computeErrors()
-    
+
     def __str__(self):
         if self.hasBeenRead == False:
             return "Must call computeErrors() first!"
@@ -67,7 +67,7 @@ class FileCompare(object):
             else:
                 short_list = s_line_list
                 long_list = l_line_list
-            
+
             i = 0
             #Iteration through the short list
             for s in short_list:
@@ -100,7 +100,7 @@ class FileCompare(object):
                     self.total_word += 1
             #End Finishing
         #File Iteration complete
-        
+
         #Finish reading the long file
         for remaining in long_file:
             for item in remaining.split():
@@ -112,7 +112,7 @@ class FileCompare(object):
                     self.str_diff += s.ratio()
                     self.total_word += 1
         #End finishing
-        
+
         #Final Editing Steps
         self.num_diff = (self.num_diff/self.total_num)
         self.str_diff = 1.0 - (self.str_diff/self.total_word)
@@ -125,7 +125,7 @@ class FileCompare(object):
 
 ### End Class Object ###
 
-''' Notes 
+''' Notes
     -----
     read()   gives all text in file
     read(n)  gives first n characters in file
@@ -147,21 +147,19 @@ class FileCompare(object):
     ------
     (1) Iterate through each line in each file
             (iterate through smallest)
-            
+
     (2) Split each line into individual strings
             Parse on spaces
-    
+
     (3) Iterate (nested) over each individual string in a line
             (loop over the smallest string list)
-    
+
     (4) Check each string for types
             a)  compare numbers/floats (try) and developed numeric different (sq. error)
             b)  compare strings/bools (except) using SequenceMatcher and produce ratio
             c)  Summate all errors keeping track of error types
-    
-    (5) Continue through files and report levels of differences/similarities 
-            Store results in the object 
+
+    (5) Continue through files and report levels of differences/similarities
+            Store results in the object
             Use to determine how much simulation results have changed between runs
 '''
-
-
