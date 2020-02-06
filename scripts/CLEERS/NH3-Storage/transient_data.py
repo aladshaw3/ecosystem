@@ -25,11 +25,11 @@ class TransientData(object):
         self.closeFile()
 
     def __str__(self):
-        message = "File Name: " + self.data_file.name
+        message = "\nFile Name: " + self.data_file.name
         message += "\nFile Header: " + self.exp_header
         message += "Number of Columns: " + str(len(self.data_map))
         message += "\nNumber of Rows: " + str(len(self.data_map['Elapsed Time (min)']))
-        return message
+        return message + "\n"
 
     def readFile(self):
         i = 0
@@ -77,11 +77,64 @@ class TransientData(object):
     def closeFile(self):
         self.data_file.close()
 
+    #This function will add a column to the data map given the column name and associated data
+    def appendColumn(self, column_name, data_set):
+        #First, check to make sure the map has been prepared
+        if (len(self.data_map) == 0):
+            print("Error! File has not been read and stored!")
+            return
+
+        #Next, check to make sure the column_name is not already in the map
+        if column_name in self.data_map.keys():
+            print("Error! That data column is already in the structure!")
+            return
+
+        #Lastly, check to make sure the length of the data_set matches the length of the time series data
+        if len(self.data_map['Elapsed Time (min)']) != len(data_set):
+            print("Error! The data set size does not match the existing data set size!")
+            return
+
+        self.data_map[column_name] = data_set
+
+    #This function will extract column sets from the data_map and return a new, reduced map
+    #   NOTE: Column list must be a list of valid keys in the data_map
+    def extractColumns(self, column_list):
+        new_map = {}
+        for item in column_list:
+            #Check to make sure the item is a key in data_map
+            if item in self.data_map.keys():
+                new_map[item] = self.data_map[item]
+            else:
+                print("Error! Invalid Key!")
+
+        return new_map
+
+
 ## ---------------- End: Definition of TransientData object ------------
 
 
 ## ------ Testing ------
-test = TransientData("20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-150C.dat")
-print(test)
+test01 = TransientData("20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-150C.dat")
+print(test01)
 
+test02 = TransientData("20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2-11-3pctH2O-400ppmNH3-150C.dat")
+print(test02)
+
+'''
+set = []
+i = 0
+for item in test02.data_map['Elapsed Time (min)']:
+    set.append(i)
+    i+=1
+test02.appendColumn('new',set)
+print(test02.data_map['new'])
+'''
+#print(test02.data_map.keys())
+
+map = test02.extractColumns( ['Elapsed Time (min)','NH3 (3000) ','H2O% (20) '] )
+
+#print(map)
+
+#Direct access to class data is allowed
+#print(test02.data_map['Elapsed Time (min)'][-1])
 ## ----- End Testing -----
