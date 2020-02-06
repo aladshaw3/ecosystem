@@ -4,8 +4,8 @@
 IDIR=include
 CC=gcc
 CXX=g++
-CFLAGS=-I$(IDIR) -Wno-ignored-qualifiers
-CXXFLAGS= -I$(IDIR) -Wwrite-strings -Wconversion-null -std=c++11 -fpermissive
+CFLAGS=-I$(IDIR) -Wno-ignored-qualifiers -fPIC
+CXXFLAGS= -I$(IDIR) -Wwrite-strings -Wconversion-null -std=c++11 -fpermissive -fPIC
 
 ODIR=src/obj
 INSDIR=/usr/local/bin

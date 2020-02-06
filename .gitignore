@@ -9,6 +9,7 @@ doc/doxygen/latex
 eco
 *.a
 *.so
+*.pyc
 dbg/eco-dbg
 =======
 
