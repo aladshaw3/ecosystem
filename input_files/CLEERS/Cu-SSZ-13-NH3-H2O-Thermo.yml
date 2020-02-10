@@ -578,13 +578,13 @@ MassBalance:
     "H2O (g)": 1
 
 - oxygen:
-  total_conc: 0.2
+  total_conc: 10.0
   - delta:
     "O2 (g)": 1
 
 # 10,000 ppm ~= 1 kPa
 - ammonia:
-  total_conc: 0.1
+  total_conc: 0.00001
   - delta:
     "NH3 (g)": 1
 
