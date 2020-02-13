@@ -154,7 +154,9 @@ for item in conds_lb:
     conds_tuples[item] = (conds_lb[item], conds_ub[item])
 
 analysis = sa.SensitivitySweep(NH3_Storage_Model_v0, params, conds_tuples)
-file_name = "NH3-Analysis-Results.txt"
+file_name_simple = "NH3-Analysis-Results-Simple.txt"
+file_name_full = "NH3-Analysis-Results-Exhaustive.txt"
 rel = True
 per = 10
-analysis.run_sweep(file_name, rel, per)
+analysis.run_sweep(file_name_simple, rel, per)
+analysis.run_exhaustive_sweep(file_name_full, rel, per)
