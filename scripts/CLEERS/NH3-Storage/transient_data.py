@@ -1,7 +1,17 @@
-''' Python script to read in CLEERS transient data for
-    NH3 storage on Cu-SSZ-13. This script will store the
-    orginal data as is and provide other functions to
-    redistribute, print, or parse that data as needed. '''
+'''
+    \file transient_data.py
+    \brief Read TransientData from CLEERS team
+    \details Python script to read in CLEERS transient data for
+                NH3 storage on Cu-SSZ-13. This script will store the
+                orginal data as is and provide other functions to
+                redistribute, print, or parse that data as needed.
+    \author Austin Ladshaw
+    \date 02/07/2020
+    \copyright This software was designed and built at the Oak Ridge National
+                    Laboratory (ORNL) National Transportation Research Center
+                    (NTRC) by Austin Ladshaw for research in the catalytic
+                    reduction of NOx. Copyright (c) 2020, all rights reserved.
+'''
 
     #NOTE: The CLEERS data files are very, very large, so I am saving them as *.dat files.
     #       The reasoning behind this is so that I can direct 'git' to ignore files that
