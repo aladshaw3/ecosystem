@@ -158,5 +158,7 @@ file_name_simple = "NH3-Analysis-Results-Simple.txt"
 file_name_full = "NH3-Analysis-Results-Exhaustive.txt"
 rel = True
 per = 10
-analysis.run_sweep(file_name_simple, rel, per)
+#analysis.run_sweep(file_name_simple, rel, per)
 analysis.run_exhaustive_sweep(file_name_full, rel, per)
+
+#print(analysis)

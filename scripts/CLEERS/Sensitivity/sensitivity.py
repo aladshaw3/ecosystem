@@ -212,6 +212,7 @@ class SensitivitySweep(object):
                             a condition for temperature that spans 100 degrees
         '''
         self.errors = False
+        self.sweep_computed = False
         start_conditions = {}
         if type(func_conds_tuples) is not dict:
             print("Error! func_conds_tuples must be a dictionary object!")
@@ -225,11 +226,75 @@ class SensitivitySweep(object):
             start_conditions[item] = func_conds_tuples[item][0]
         self.cond_tuples = func_conds_tuples
         self.sens_obj = Sensitivity(func, func_params, start_conditions)
+        #Initialize a list of maps for sensitivity results to be stored digitally
+        ''' The below object (self.sens_maps) has the following format...
+                self.sens_maps[i] = {}                          // i = permutation number  -->  map of data
+                self.sens_maps[i]["func_result"]                // = result of the function for that permutation
+                self.sens_maps[i]["cond_set"] = {}              // map of conditions for the given permutation
+                self.sens_maps[i]["param_response"] = {}        // map of function responses or partials for the parameters at that permutation
+                self.sens_maps[i]["cond_set"][cond]             // = value of the given condition (cond) for the given permutation
+                self.sens_maps[i]["param_response"][param]      // = value of the function response to a change in the given parameter (param) for that permutation
+        '''
+        self.sens_maps = []
+        ''' The below objects (max_* and min_* sens_map) have the following format...
+                self.*_sens_map[param] = {}                     // map of max or min parameter results for the given param
+                                                                //      Keys in this map include: func_result, param_response, and cond_set
+                self.*_sens_map[param]["func_result"]           // = result of the function for that max or min param sensitivity result
+                self.*_sens_map[param]["param_response"]        // = value of the function response to the param change under these conditions
+                                                                //      This will be the max or min response for the parameter
+                self.*_sens_map[param]["cond_set"] = {}         // map of conditions for the max or min parameter response
+                self.*_sens_map[param]["cond_set"][cond]        // = value of the given condition (cond) for the max or min parameter response
+        '''
+        self.max_sens_map = {}      # Map of each parameter's maximum sensitivity
+        self.min_sens_map = {}      # Map of each parameter's minimum sensitivity
+        for param in func_params:
+            self.max_sens_map[param] = {}
+            self.min_sens_map[param] = {}
+            self.max_sens_map[param]["func_result"] = 0
+            self.min_sens_map[param]["func_result"] = 0
+            self.max_sens_map[param]["param_response"] = 0
+            self.min_sens_map[param]["param_response"] = 0
+            self.max_sens_map[param]["cond_set"] = {}
+            self.min_sens_map[param]["cond_set"] = {}
+            for cond in start_conditions:
+                self.max_sens_map[param]["cond_set"][cond] = 0
+                self.min_sens_map[param]["cond_set"][cond] = 0
+
+    #Function to print out results to console (Only useful for quick visualization. Sweeps automatically puts this info in a text file)
+    def __str__(self):
+        message = "\n"
+        if self.errors == True:
+            message += "Errors Present! Check scripts and messages, then recompute results!"
+            return message
+        if self.sweep_computed == False:
+            message += "Sensitivity Analysis has not yet been performed... Need to execute run_sweep() or run_exhaustive_sweep() first...\n"
+        else:
+            message += "------------- Sensitivity Analysis Report -------------\n"
+            message += "\nPermutation\tfunc_result"
+            for cond in self.sens_maps[0]["cond_set"]:
+                message += "\t" + cond
+            for param in self.sens_maps[0]["param_response"]:
+                message += "\t" + param
+            i = 0
+            for map in self.sens_maps:
+                message += "\n" + str(i) + "\t" + str(map["func_result"])
+                for cond in map["cond_set"]:
+                    message += "\t" + str(map["cond_set"][cond])
+                for param in map["param_response"]:
+                    message += "\t" + str(map["param_response"][param])
+                i+=1
+        return message
 
     #Run the Sensitivity Sweep Analysis and print results to a file
     #       User may also specify whether or not to use relative parameter changes and the percent to change
-    def run_sweep(self, sensitivity_file_name = "SensitivitySweepAnalysis.txt", relative = False, per = 1):
+    def run_sweep(self, sensitivity_file_name = "SensitivitySweepAnalysis.dat", relative = False, per = 1):
+        #Enfore a .dat file extension. This is used to flag the file as very large so that
+        #   our git tracking ignores that file. May be unnecessary, but better safe than sorry.
+        set = sensitivity_file_name.split('.')
+        sensitivity_file_name = set[0] + ".dat"
+        max_min_file = set[0] + "-MaxMinAnalysis.dat"
         file = open(sensitivity_file_name,'w')
+        mmfile = open(max_min_file,'w')
         #Write out header information
         file.write("-------------- Sensitivity Sweep Results ---------------\n")
         if relative == False:
@@ -243,12 +308,23 @@ class SensitivitySweep(object):
         for item in self.sens_obj.func_conds:
             file.write(str(item) + "\t" + str(self.sens_obj.func_conds[item]) + "\n")
 
+        mmfile.write("-------------- Sensitivity Sweep Results (Max and Min Sensitivities) ---------------\n")
+        if relative == False:
+            mmfile.write("\tAnalysis performed using Finite Differences\n")
+        else:
+            mmfile.write("\tAnalysis performed using " + str(per) + "% Change in baseline parameter values\n")
+        mmfile.write("\nSystem Parameters:\n")
+        for item in self.sens_obj.func_params:
+            mmfile.write(str(item) + "\t" + str(self.sens_obj.func_params[item]) + "\n")
+
         #Begin looping through conditions, running sensitivity analyses, and printing results in a matrix
         i = 0
+        j = 0
         for cond in self.sens_obj.func_conds:
             file.write("\n")
             file.write("Sensitivity Matrix for " + str(cond) + "\n-----------------------------\n")
             file.write(str(cond))
+            file.write("\tfunc_result")
             for param in self.sens_obj.func_params:
                 if relative == False:
                     file.write("\tdf/d("+str(param)+")")
@@ -266,29 +342,128 @@ class SensitivitySweep(object):
                     dx = dist/10
                     for n in range(0,11):
                         update = self.cond_tuples[cond][0] + n*dx
+                        print(str(cond) + "\t" + str(update))
                         self.sens_obj.func_conds[cond] = update
                         self.sens_obj.compute_partials(relative, per)
+                        func_value = self.sens_obj.eval_func()
+                        self.sens_maps.append({})
+                        self.sens_maps[j]["func_result"] = func_value
+                        self.sens_maps[j]["cond_set"] = {}
+                        self.sens_maps[j]["param_response"] = {}
+
+                        for c in self.sens_obj.func_conds:
+                            self.sens_maps[j]["cond_set"][c] = self.sens_obj.func_conds[c]
                         file.write(str(self.sens_obj.func_conds[cond]))
+                        file.write("\t"+str(func_value))
                         for param in self.sens_obj.func_params:
                             file.write("\t"+str(self.sens_obj.partials[param]))
+                            self.sens_maps[j]["param_response"][param] = self.sens_obj.partials[param]
+
+                            #Check and record maximum and minmum responses for each parameter
+                            if j == 0:
+                                self.max_sens_map[param]["param_response"] = self.sens_maps[j]["param_response"][param]
+                                self.min_sens_map[param]["param_response"] = self.sens_maps[j]["param_response"][param]
+                                self.max_sens_map[param]["func_result"] = func_value
+                                self.min_sens_map[param]["func_result"] = func_value
+                                for c in self.sens_obj.func_conds:
+                                    self.max_sens_map[param]["cond_set"][c] = self.sens_obj.func_conds[c]
+                                    self.min_sens_map[param]["cond_set"][c] = self.sens_obj.func_conds[c]
+                            else:
+                                if abs(self.sens_maps[j]["param_response"][param]) > abs(self.max_sens_map[param]["param_response"]):
+                                    self.max_sens_map[param]["param_response"] = self.sens_maps[j]["param_response"][param]
+                                    self.max_sens_map[param]["func_result"] = func_value
+                                    for c in self.sens_obj.func_conds:
+                                        self.max_sens_map[param]["cond_set"][c] = self.sens_obj.func_conds[c]
+                                if abs(self.sens_maps[j]["param_response"][param]) < abs(self.min_sens_map[param]["param_response"]):
+                                    self.min_sens_map[param]["param_response"] = self.sens_maps[j]["param_response"][param]
+                                    self.min_sens_map[param]["func_result"] = func_value
+                                    for c in self.sens_obj.func_conds:
+                                        self.min_sens_map[param]["cond_set"][c] = self.sens_obj.func_conds[c]
+
                         file.write("\n")
+                        j+=1
             elif type(self.sens_obj.func_conds[cond]) is boolean:
                 #Run simulation as is
                 self.sens_obj.compute_partials(relative, per)
+                func_value = self.sens_obj.eval_func()
+                self.sens_maps.append({})
+                self.sens_maps[j]["func_result"] = func_value
+                self.sens_maps[j]["cond_set"] = {}
+                self.sens_maps[j]["param_response"] = {}
+
+                for c in self.sens_obj.func_conds:
+                    self.sens_maps[j]["cond_set"][c] = self.sens_obj.func_conds[c]
                 file.write(str(self.sens_obj.func_conds[cond]))
+                file.write("\t"+str(func_value))
                 for param in self.sens_obj.func_params:
                     file.write("\t"+str(self.sens_obj.partials[param]))
+                    self.sens_maps[j]["param_response"][param] = self.sens_obj.partials[param]
+
+                    #Check and record maximum and minmum responses for each parameter
+                    if j == 0:
+                        self.max_sens_map[param]["param_response"] = self.sens_maps[j]["param_response"][param]
+                        self.min_sens_map[param]["param_response"] = self.sens_maps[j]["param_response"][param]
+                        self.max_sens_map[param]["func_result"] = func_value
+                        self.min_sens_map[param]["func_result"] = func_value
+                        for c in self.sens_obj.func_conds:
+                            self.max_sens_map[param]["cond_set"][c] = self.sens_obj.func_conds[c]
+                            self.min_sens_map[param]["cond_set"][c] = self.sens_obj.func_conds[c]
+                    else:
+                        if abs(self.sens_maps[j]["param_response"][param]) > abs(self.max_sens_map[param]["param_response"]):
+                            self.max_sens_map[param]["param_response"] = self.sens_maps[j]["param_response"][param]
+                            self.max_sens_map[param]["func_result"] = func_value
+                            for c in self.sens_obj.func_conds:
+                                self.max_sens_map[param]["cond_set"][c] = self.sens_obj.func_conds[c]
+                        if abs(self.sens_maps[j]["param_response"][param]) < abs(self.min_sens_map[param]["param_response"]):
+                            self.min_sens_map[param]["param_response"] = self.sens_maps[j]["param_response"][param]
+                            self.min_sens_map[param]["func_result"] = func_value
+                            for c in self.sens_obj.func_conds:
+                                self.min_sens_map[param]["cond_set"][c] = self.sens_obj.func_conds[c]
+
                 file.write("\n")
+                j+=1
                 #Run simulation changing the boolean
                 if self.sens_obj.func_conds[cond] == True:
                     self.sens_obj.func_conds[cond] = False
                 else:
                     self.sens_obj.func_conds[cond] = True
                 self.sens_obj.compute_partials(relative, per)
+                func_value = self.sens_obj.eval_func()
+                self.sens_maps.append({})
+                self.sens_maps[j]["func_result"] = func_value
+                self.sens_maps[j]["cond_set"] = {}
+                self.sens_maps[j]["param_response"] = {}
+
+                for c in self.sens_obj.func_conds:
+                    self.sens_maps[j]["cond_set"][c] = self.sens_obj.func_conds[c]
                 file.write(str(self.sens_obj.func_conds[cond]))
                 for param in self.sens_obj.func_params:
                     file.write("\t"+str(self.sens_obj.partials[param]))
+                    self.sens_maps[j]["param_response"][param] = self.sens_obj.partials[param]
+
+                    #Check and record maximum and minmum responses for each parameter
+                    if j == 0:
+                        self.max_sens_map[param]["param_response"] = self.sens_maps[j]["param_response"][param]
+                        self.min_sens_map[param]["param_response"] = self.sens_maps[j]["param_response"][param]
+                        self.max_sens_map[param]["func_result"] = func_value
+                        self.min_sens_map[param]["func_result"] = func_value
+                        for c in self.sens_obj.func_conds:
+                            self.max_sens_map[param]["cond_set"][c] = self.sens_obj.func_conds[c]
+                            self.min_sens_map[param]["cond_set"][c] = self.sens_obj.func_conds[c]
+                    else:
+                        if abs(self.sens_maps[j]["param_response"][param]) > abs(self.max_sens_map[param]["param_response"]):
+                            self.max_sens_map[param]["param_response"] = self.sens_maps[j]["param_response"][param]
+                            self.max_sens_map[param]["func_result"] = func_value
+                            for c in self.sens_obj.func_conds:
+                                self.max_sens_map[param]["cond_set"][c] = self.sens_obj.func_conds[c]
+                        if abs(self.sens_maps[j]["param_response"][param]) < abs(self.min_sens_map[param]["param_response"]):
+                            self.min_sens_map[param]["param_response"] = self.sens_maps[j]["param_response"][param]
+                            self.min_sens_map[param]["func_result"] = func_value
+                            for c in self.sens_obj.func_conds:
+                                self.min_sens_map[param]["cond_set"][c] = self.sens_obj.func_conds[c]
+
                 file.write("\n")
+                j+=1
             else:
                 print("Error! Invalid condition type in self.sens_obj.func_conds")
                 file.write("Skipped due to type error\n")
@@ -299,13 +474,59 @@ class SensitivitySweep(object):
         #End func_conds loop
         file.close()
 
+        #Write out the max and min sensitivity results to a file
+        mmfile.write("\nMaximum Function Responses to the Parameter Changes")
+        mmfile.write("\n---------------------------------------------------\n")
+        mmfile.write("Parameter")
+        for cond in self.sens_obj.func_conds:
+            mmfile.write("\t"+str(cond))
+        mmfile.write("\tFunc_Result")
+        if relative == False:
+            mmfile.write("\tMax df/dp")
+        else:
+            mmfile.write("\tMax % Change")
+
+        mmfile.write("\n")
+        for param in self.max_sens_map:
+            mmfile.write(str(param))
+            for cond in self.max_sens_map[param]["cond_set"]:
+                mmfile.write("\t"+str(self.max_sens_map[param]["cond_set"][cond]))
+            mmfile.write("\t"+str(self.max_sens_map[param]["func_result"]))
+            mmfile.write("\t"+str(self.max_sens_map[param]["param_response"]))
+            mmfile.write("\n")
+
+        mmfile.write("\nMinimum Function Responses to the Parameter Changes")
+        mmfile.write("\n---------------------------------------------------\n")
+        mmfile.write("Parameter")
+        for cond in self.sens_obj.func_conds:
+            mmfile.write("\t"+str(cond))
+        mmfile.write("\tFunc_Result")
+        if relative == False:
+            mmfile.write("\tMin df/dp")
+        else:
+            mmfile.write("\tMin % Change")
+
+        mmfile.write("\n")
+        for param in self.min_sens_map:
+            mmfile.write(str(param))
+            for cond in self.min_sens_map[param]["cond_set"]:
+                mmfile.write("\t"+str(self.min_sens_map[param]["cond_set"][cond]))
+            mmfile.write("\t"+str(self.min_sens_map[param]["func_result"]))
+            mmfile.write("\t"+str(self.min_sens_map[param]["param_response"]))
+            mmfile.write("\n")
+
+        mmfile.close()
+        self.sweep_computed = True
+
     #Function to perform an Exhaustive Sensitivity Analysis
     def run_exhaustive_sweep(self, sensitivity_file_name = "ExhaustiveSensitivitySweepAnalysis.dat", relative = False, per = 1):
         #Enfore a .dat file extension. This is used to flag the file as very large so that
         #   our git tracking ignores that file. May be unnecessary, but better safe than sorry.
         set = sensitivity_file_name.split('.')
         sensitivity_file_name = set[0] + ".dat"
+        max_min_file = set[0] + "-MaxMinAnalysis.dat"
         file = open(sensitivity_file_name,'w')
+        mmfile = open(max_min_file,'w')
         #Write out header information
         file.write("-------------- Exhaustive Sensitivity Sweep Results ---------------\n")
         if relative == False:
@@ -315,6 +536,15 @@ class SensitivitySweep(object):
         file.write("\nSystem Parameters:\n")
         for item in self.sens_obj.func_params:
             file.write(str(item) + "\t" + str(self.sens_obj.func_params[item]) + "\n")
+
+        mmfile.write("-------------- Sensitivity Sweep Results (Max and Min Sensitivities) ---------------\n")
+        if relative == False:
+            mmfile.write("\tAnalysis performed using Finite Differences\n")
+        else:
+            mmfile.write("\tAnalysis performed using " + str(per) + "% Change in baseline parameter values\n")
+        mmfile.write("\nSystem Parameters:\n")
+        for item in self.sens_obj.func_params:
+            mmfile.write(str(item) + "\t" + str(self.sens_obj.func_params[item]) + "\n")
 
         cond_list = []
         cond_value = []
@@ -342,6 +572,7 @@ class SensitivitySweep(object):
             return
         #Print out a header line for conditions and parameters
         file.write("\n")
+        file.write("\t")
         n = 0
         for cond in self.sens_obj.func_conds:
             file.write("\tcond_"+str(n))
@@ -351,6 +582,7 @@ class SensitivitySweep(object):
             file.write("\tpartial_"+str(n))
             n+=1
         file.write("\nPermutation")
+        file.write("\tfunc_result")
         for cond in self.sens_obj.func_conds:
             file.write("\t"+str(cond))
         for param in self.sens_obj.func_params:
@@ -370,26 +602,98 @@ class SensitivitySweep(object):
                 self.sens_obj.func_conds[cond] = cond_value[i]
                 i += 1
             self.sens_obj.compute_partials(relative, per)
+            func_value = self.sens_obj.eval_func()
+            self.sens_maps.append({})
+            self.sens_maps[perm]["func_result"] = func_value
+            self.sens_maps[perm]["cond_set"] = {}
+            self.sens_maps[perm]["param_response"] = {}
             file.write(str(perm))
+            file.write("\t"+str(func_value))
             for cond in self.sens_obj.func_conds:
                 file.write("\t"+str(self.sens_obj.func_conds[cond]))
+                self.sens_maps[perm]["cond_set"][cond] = self.sens_obj.func_conds[cond]
             for param in self.sens_obj.func_params:
                 file.write("\t"+str(self.sens_obj.partials[param]))
+                self.sens_maps[perm]["param_response"][param] = self.sens_obj.partials[param]
+
+                #Check and record maximum and minmum responses for each parameter
+                if perm == 0:
+                    self.max_sens_map[param]["param_response"] = self.sens_maps[perm]["param_response"][param]
+                    self.min_sens_map[param]["param_response"] = self.sens_maps[perm]["param_response"][param]
+                    self.max_sens_map[param]["func_result"] = func_value
+                    self.min_sens_map[param]["func_result"] = func_value
+                    for cond in self.sens_obj.func_conds:
+                        self.max_sens_map[param]["cond_set"][cond] = self.sens_obj.func_conds[cond]
+                        self.min_sens_map[param]["cond_set"][cond] = self.sens_obj.func_conds[cond]
+                else:
+                    if abs(self.sens_maps[perm]["param_response"][param]) > abs(self.max_sens_map[param]["param_response"]):
+                        self.max_sens_map[param]["param_response"] = self.sens_maps[perm]["param_response"][param]
+                        self.max_sens_map[param]["func_result"] = func_value
+                        for cond in self.sens_obj.func_conds:
+                            self.max_sens_map[param]["cond_set"][cond] = self.sens_obj.func_conds[cond]
+                    if abs(self.sens_maps[perm]["param_response"][param]) < abs(self.min_sens_map[param]["param_response"]):
+                        self.min_sens_map[param]["param_response"] = self.sens_maps[perm]["param_response"][param]
+                        self.min_sens_map[param]["func_result"] = func_value
+                        for cond in self.sens_obj.func_conds:
+                            self.min_sens_map[param]["cond_set"][cond] = self.sens_obj.func_conds[cond]
             file.write("\n")
             #Update Values
             complete = update_cond(cond_value, cond_limit_lower, cond_limit_upper)
             perm+=1
         file.close()
 
+        #Write out the max and min sensitivity results to a file
+        mmfile.write("\nMaximum Function Responses to the Parameter Changes")
+        mmfile.write("\n---------------------------------------------------\n")
+        mmfile.write("Parameter")
+        for cond in self.sens_obj.func_conds:
+            mmfile.write("\t"+str(cond))
+        mmfile.write("\tFunc_Result")
+        if relative == False:
+            mmfile.write("\tMax df/dp")
+        else:
+            mmfile.write("\tMax % Change")
+
+        mmfile.write("\n")
+        for param in self.max_sens_map:
+            mmfile.write(str(param))
+            for cond in self.max_sens_map[param]["cond_set"]:
+                mmfile.write("\t"+str(self.max_sens_map[param]["cond_set"][cond]))
+            mmfile.write("\t"+str(self.max_sens_map[param]["func_result"]))
+            mmfile.write("\t"+str(self.max_sens_map[param]["param_response"]))
+            mmfile.write("\n")
+
+        mmfile.write("\nMinimum Function Responses to the Parameter Changes")
+        mmfile.write("\n---------------------------------------------------\n")
+        mmfile.write("Parameter")
+        for cond in self.sens_obj.func_conds:
+            mmfile.write("\t"+str(cond))
+        mmfile.write("\tFunc_Result")
+        if relative == False:
+            mmfile.write("\tMin df/dp")
+        else:
+            mmfile.write("\tMin % Change")
+
+        mmfile.write("\n")
+        for param in self.min_sens_map:
+            mmfile.write(str(param))
+            for cond in self.min_sens_map[param]["cond_set"]:
+                mmfile.write("\t"+str(self.min_sens_map[param]["cond_set"][cond]))
+            mmfile.write("\t"+str(self.min_sens_map[param]["func_result"]))
+            mmfile.write("\t"+str(self.min_sens_map[param]["param_response"]))
+            mmfile.write("\n")
+
+        mmfile.close()
+        self.sweep_computed = True
+
 
 # ----------- End: Definition of Class object for SensitivitySweep --------------------
 
 # ---------- Testing -------------
 
-
+'''
 def test_func(params, conds):
     return params["B"]*params["B"]*params["A"] + conds["X"]*params["A"] + conds["Y"]+conds["Z"]*params["B"]
-
 
 test_params = {}
 test_params["A"] = 20
@@ -404,8 +708,8 @@ test_tuples = {}
 
 for item in test_conds:
     test_tuples[item] = (test_conds[item], test_conds[item]+2)
-#test_tuples["Y"] = (0,0)
-#print(test_tuples)
 
 test_obj = SensitivitySweep(test_func,test_params, test_tuples)
-test_obj.run_exhaustive_sweep(sensitivity_file_name = "ExhaustiveSensitivitySweepAnalysis.dat", relative = True, per = 10)
+test_obj.run_sweep("test_analysis-simple",True,10)
+#test_obj.run_exhaustive_sweep("test_analysis-exhaustive",True,10)
+'''
