@@ -25,24 +25,74 @@ class TransientData(object):
     # Initialize data object by passing the current file to it
     # Each key in the data_map represents a column label
     #       Each key maps to a data list
+    # The input file should have a specific convention for naming a file
+    #       e.g., 20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2-11-3pctH2O-400ppmNH3-150C.dat
+    #
+    #       Each important piece of information is split by a "-" character. We then use this to parse
+    #   the file name to obtain particular information. However, that file name convention is not necessarily
+    #   consistent for all files. So we are limited in what can be interpreted from the names. The most important
+    #   information is as follows...
+    #
+    #       item[2] = Name of the catalyst material
+    #       item[3] = Aging condition
+    #       item[5] = flow rate information (in volumes per hour)
+    #       item[-1] = either a temperature or "bp"
+    #                   temperature is irrelevant, but bp indicates that this is inlet information
+    #                   (Also note, item[-1] will carry the file extension with it)
     def __init__(self, file):
+        #Parse the file name to gain specific information
+        file_name_info = file.split("-")
+        self.material_name = file_name_info[2]
+        if file_name_info[3] == "700C4h":
+            self.aging_condition = "De-greened"
+        else:
+            self.aging_condition = file_name_info[3]
+        try:
+            self.flow_rate = float(file_name_info[5].split("k")[0])*1000
+            self.have_flow_rate = True
+        except:
+            self.flow_rate = file_name_info[5]
+            self.have_flow_rate = False
+        if file_name_info[-1].split(".")[0] == "bp":
+            self.inlet_data = True
+            self.isothermal_temp = 25
+        else:
+            self.inlet_data = False
+            try:
+                self.isothermal_temp = float(file_name_info[-1].split(".")[0].split("C")[0])
+            except:
+                self.isothermal_temp = file_name_info[-1].split(".")[0]
+
         self.data_file = open(file,"r") #Contains data file we are digitizing
         self.exp_header = ''            #Contains the first line of the data file
         self.data_map = {}              #Contains a map of all the data by column
         self.ordered_key_list = []      #Contains an ordered list of column names
         self.change_time = []           #Contains an ordered list of the times when experimental inputs changed
+                                        #   NOTE: this is just used to initialize data in the map, it does not
+                                        #           change or update if the map changes
         self.input_change = {}          #Contains a map of the inputs values that correspond to change_time
                                         #   Keys of this map are modifications to the keys of data_map that
                                         #   correspond to output values corresponding to the input values given
         self.readFile()
-        self.closeFile()
 
     def __str__(self):
         message = "\nFile Name: " + self.data_file.name
+        message += "\nMaterial: " + self.material_name
+        message += "\nAging Condition: " + self.aging_condition
+        message += "\nFlow Rate (hr^-1): " + str(self.flow_rate)
+        message += "\nInlet Conditions: "
+        if self.inlet_data == True:
+            message += "True"
+        else:
+            message += "False"
+            message += "\nIsothermal Temp (C): " + str(self.isothermal_temp)
         message += "\nFile Header: " + self.exp_header
-        message += "Number of Columns: " + str(len(self.data_map))
+        message += "\nNumber of Columns: " + str(len(self.data_map))
         message += "\nNumber of Rows: " + str(len(self.data_map['Elapsed Time (min)']))
         return message + "\n"
+
+    def displayColumnNames(self):
+        print(self.data_map.keys())
 
     def readFile(self):
         i = 0
@@ -85,7 +135,8 @@ class TransientData(object):
                                 self.data_map[self.ordered_key_list[n]].append(item)
                     n+=1
             i+=1
-            #END of line loop
+        #END of line loop
+        self.closeFile()
 
     def closeFile(self):
         self.data_file.close()
@@ -113,14 +164,141 @@ class TransientData(object):
     #   NOTE: Column list must be a list of valid keys in the data_map
     def extractColumns(self, column_list):
         new_map = {}
-        for item in column_list:
-            #Check to make sure the item is a key in data_map
-            if item in self.data_map.keys():
-                new_map[item] = self.data_map[item]
+        if type(column_list) is list:
+            for item in column_list:
+                #Check to make sure the item is a key in data_map
+                if item in self.data_map.keys():
+                    new_map[item] = self.data_map[item]
+                else:
+                    print("Error! Invalid Key!")
+            #End item loop
+        else:
+            if column_list in self.data_map.keys():
+                new_map[column_list] = self.data_map[column_list]
             else:
                 print("Error! Invalid Key!")
-        #End item loop
         return new_map
+
+    #This function will extract a row of data (or set of rows) based on the value of Elapsed time provided
+    def extractRows(self, min_time, max_time):
+        new_map = {}
+        for item in self.data_map:
+            new_map[item] = []
+        #loop through all time data
+        n = 0
+        for time in self.data_map['Elapsed Time (min)']:
+            if time > max_time:
+                break
+            if time >= min_time:
+                for item in self.data_map:
+                    if len(self.data_map[item]) > n:
+                        new_map[item].append(self.data_map[item][n])
+            n+=1
+
+        return new_map
+
+    # This function will get a particular data point based on the given elapsed time and column name
+    def getDataPoint(self, time_value, column_name):
+        point = 0
+        if column_name not in self.data_map.keys():
+            print("Error! Invalid Key!")
+            return 0
+        n = 0
+        start_time = 0
+        start_point = 0
+        end_time = 0
+        end_point = 0
+        for time in self.data_map['Elapsed Time (min)']:
+            if time > time_value:
+                if n == 0:
+                    start_time = 0
+                    start_point = self.data_map[column_name][n]
+                else:
+                    start_time = self.data_map['Elapsed Time (min)'][n-1]
+                    start_point = self.data_map[column_name][n-1]
+                end_time = time
+                end_point = self.data_map[column_name][n]
+                break
+            n+=1
+        #Perform linear interpolation between start_point and end_point
+        if type(end_point) is not int and type(end_point) is not float:
+            point = end_point
+        else:
+            point = (end_point - start_point)/(end_time - start_time)*(time_value - start_time) + start_point
+        return point
+
+    #This function will iterate through all columns to find data that can be compressed or eliminated
+    #       For instance,   if a column contains no data, then delete it
+    #                       if there are multiple columns that carrier similar info, then combine them
+    def compressColumns(self):
+        #Iterate through the data map to find information to delete immediately
+        list_to_del = []
+        for item in self.data_map:
+            if len(self.data_map[item]) == 0:
+                list_to_del.append(item)
+        for item in list_to_del:
+            del self.data_map[item]
+
+        #Iterate through the map and find compressible columns
+        frac_keys = {}  #Map of a list of columns that can compress
+        for item in self.data_map:
+            first = item.split("(")
+            if len(first) > 1:
+                last = first[1].split(")")
+            else:
+                last = ""
+            if first[0] in frac_keys.keys():
+                #Value check is used to determine whether or not the duplicated key
+                #       is significant or can be neglected. If it is significant, then
+                #       the value will be a number. Otherwise, the columns can't be merged.
+                try:
+                    val = float(last[0])
+                    frac_keys[first[0]].append(item)
+                except:
+                    val = 0
+            else:
+                frac_keys[first[0]] = []
+                frac_keys[first[0]].append(item)
+        #Any frac_keys[key] ==> list that has a length > 1 can be compressed
+        #       Need to add new key to data_map to hold compressed data, then
+        #       delete the old keys to reduce the map size.
+        for item in frac_keys:
+            if len(frac_keys[item]) > 1:
+                val_list = []
+                for sub_key in frac_keys[item]:
+                    first = sub_key.split("(")
+                    last = first[1].split(")")
+                    val_list.append(float(last[0]))
+                self.data_map[item] = []
+                #Now loop through all rows and insert proper data into new column
+                n = 0
+                for value in self.data_map[frac_keys[item][0]]:
+                    #value we are on here corresponds to the val_list[0] limit
+                    #Loop through all other columns that can compress and
+                    #find value to register based on limits in val_list
+                    dist = []
+                    dist.append(val_list[0] - value)
+                    for i in range(1,len(frac_keys[item])):
+                        dist.append(val_list[i] - self.data_map[frac_keys[item][i]][n])
+
+                    #The index of the smallest postive dist is the index i for the data to append
+                    reg_index = 0
+                    old_d = dist[0]
+                    for i in range(1,len(frac_keys[item])):
+                        if dist[i] > 0 and old_d > 0:
+                            if dist[i] < old_d:
+                                reg_index = i
+                                old_d = dist[i]
+                        elif old_d < 0:
+                            old_d = dist[i]
+                            reg_index = i
+                    #print(dist)
+                    #print(reg_index)
+                    self.data_map[item].append(self.data_map[frac_keys[item][reg_index]][n])
+                    n+=1
+                #End value loop
+                print(self.data_map[item])
+            #End if
 
     #This function will take in a data_map key name and a list of changed values
     #   to add to the map of input_change for each input that corresponds to an
@@ -193,33 +371,15 @@ class TransientData(object):
 
 
 ## ------ Testing ------
-test01 = TransientData("20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-150C.dat")
+#test01 = TransientData("20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-150C.dat")
+test01 = TransientData("20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-bp.dat")
 print(test01)
-#print(test01.change_time)
-#test01.registerChangedInput('NH3 (3000) ',[0,1000,800,600,400,200,100,50,25,12.5,0])
-#print(test01.input_change['NH3 (3000) [input]'])
-test01.autoregChangedInput('NH3 (3000) ')
-print(test01.change_time)
-print(test01.input_change)
+#test01.displayColumnNames()
+#print(test01.extractColumns("NH3 (3000) "))
+#print(test01.extractRows(1.95,2))
+print(test01.getDataPoint(1.27,"NH3 (3000) "))
 
-#test02 = TransientData("20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2-11-3pctH2O-400ppmNH3-150C.dat")
-#print(test02)
+test01.compressColumns()
+#test01.displayColumnNames()
 
-'''
-set = []
-i = 0
-for item in test02.data_map['Elapsed Time (min)']:
-    set.append(i)
-    i+=1
-test02.appendColumn('new',set)
-print(test02.data_map['new'])
-'''
-#print(test02.data_map.keys())
-
-#map = test02.extractColumns( ['Elapsed Time (min)','NH3 (3000) ','H2O% (20) '] )
-
-#print(map)
-
-#Direct access to class data is allowed
-#print(test02.data_map['Elapsed Time (min)'][-1])
 ## ----- End Testing -----
