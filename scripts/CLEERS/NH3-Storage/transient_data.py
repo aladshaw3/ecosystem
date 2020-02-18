@@ -69,6 +69,7 @@ class TransientData(object):
         statinfo = os.stat(file)
         self.exp_header = ''            #Contains the first line of the data file
         self.data_map = {}              #Contains a map of all the data by column
+        self.num_rows = 0               #Contains the number of rows of data
         self.ordered_key_list = []      #Contains an ordered list of column names
         self.change_time = []           #Contains an ordered list of the times when experimental inputs changed
                                         #   NOTE: this is just used to initialize data in the map, it does not
@@ -100,11 +101,7 @@ class TransientData(object):
             message += "\nIsothermal Temp (C):\t" + str(self.isothermal_temp)
         message += "\nFile Header:\t" + self.exp_header
         message += "\nNumber of Columns:\t" + str(len(self.data_map))
-        key = ""
-        for item in self.data_map:
-            key = item
-            break
-        message += "\nNumber of Rows:\t" + str(len(self.data_map[key]))
+        message += "\nNumber of Rows:\t" + str(self.num_rows)
         return message + "\n"
 
     def displayColumnNames(self):
@@ -157,6 +154,7 @@ class TransientData(object):
                     n+=1
             i+=1
         #END of line loop
+        self.num_rows = len(self.data_map[self.time_key])
         self.closeFile()
 
     def closeFile(self):
@@ -483,6 +481,7 @@ class TransientData(object):
                         reset+=1
                 i+=1
             del self.data_map[item]
+        self.num_rows = len(self.data_map[self.time_key])
 
 
     #This function will take in a data_map key name and a list of changed values
@@ -600,15 +599,37 @@ class TransientData(object):
             return
 
         ret_key = inlet_column.split()[0]+"-Retained (normalized)"
-        max_value = 0
         self.data_map[ret_key] = []
         self.data_map[ret_key].append(0)
+        MR_old = 0
+        max_value = MR_old
+        time_old = self.data_map[self.time_key][0]
+        Min_old = self.data_map[inlet_column][0]
+        Mout_old = self.data_map[outlet_column][0]
         i=1
         while i<len(self.data_map[self.time_key]):
-            MR = 0
+            time_new = self.data_map[self.time_key][i]
+            Min_new = self.data_map[inlet_column][i]
+            Mout_new = self.data_map[outlet_column][i]
+            MR_new = MR_old + (time_new-time_old)*self.flow_rate*( (Min_old+Min_new)/2 - (Mout_old+Mout_new)/2 )
+            if MR_new > max_value:
+                max_value = MR_new
             #print(self.data_map[self.time_key][i-1])
             #print(self.data_map[self.time_key][i])
-            self.data_map[ret_key].append(MR)
+            self.data_map[ret_key].append(MR_new)
+            time_old = time_new
+            Min_old = Min_new
+            Mout_old = Mout_new
+            MR_old = MR_new
+            i+=1
+
+        #Check for max values that are very small and make some kind of correction 
+        if max_value == 0:
+            print("here")
+        #Loop one last time to normalize the integrated curve
+        i=0
+        for value in self.data_map[ret_key]:
+            self.data_map[ret_key][i] = self.data_map[ret_key][i]/max_value
             i+=1
 
 
@@ -630,6 +651,8 @@ class TransientData(object):
 
 
 ## ------ Testing ------
+
+# Testing with the NH3 TPDs at constant H2O concentration
 test01 = TransientData("20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-150C.dat")
 
 test01.compressColumns()
@@ -638,7 +661,22 @@ test01.compressColumns()
 test01.retainOnlyColumns(['Elapsed Time (min)','NH3 (300,3000)', 'H2O% (20)', 'TC bot sample in (C)', 'TC bot sample mid 1 (C)', 'TC bot sample mid 2 (C)', 'TC bot sample out 1 (C)', 'TC bot sample out 2 (C)', 'P bottom in (bar)', 'P bottom out (bar)'])
 test01.createStepChangeInputData('NH3 (300,3000)')
 test01.calculateRetentionNormalizedIntegral('NH3 (300,3000)[input]','NH3 (300,3000)')
+#NOTE: Consider using current number of rows to determine how much compression to use
+#print(test01.num_rows)
 test01.compressRows(10)
 test01.printAlltoFile()
+
+# Testing with the Competition between H2O and NH3 TPDs
+test02 = TransientData("20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2-11-3pctH2O-400ppmNH3-150C.dat")
+test02.compressColumns()
+#test02.displayColumnNames()
+test02.retainOnlyColumns(['Elapsed Time (min)','NH3 (300,3000)', 'H2O% (20)', 'TC bot sample in (C)', 'TC bot sample mid 1 (C)', 'TC bot sample mid 2 (C)', 'TC bot sample out 1 (C)', 'TC bot sample out 2 (C)', 'P bottom in (bar)', 'P bottom out (bar)'])
+test02.createStepChangeInputData(['NH3 (300,3000)','H2O% (20)'])
+test02.calculateRetentionNormalizedIntegral('NH3 (300,3000)[input]','NH3 (300,3000)')
+test02.calculateRetentionNormalizedIntegral('H2O% (20)[input]','NH3 (300,3000)')
+#print(test01.num_rows)
+test02.compressRows(2)
+test02.printAlltoFile()
+print(test02)
 
 ## ----- End Testing -----
