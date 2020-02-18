@@ -19,6 +19,7 @@
     #       bloated. The *.dat files behave exactly like regular text files.
 
 import math
+import os
 
 ## ---------------- Begin: Definition of TransientData object ------------
 class TransientData(object):
@@ -65,6 +66,7 @@ class TransientData(object):
                 self.isothermal_temp = file_name_info[-1].split(".")[0]
 
         self.data_file = open(file,"r") #Contains data file we are digitizing
+        statinfo = os.stat(file)
         self.exp_header = ''            #Contains the first line of the data file
         self.data_map = {}              #Contains a map of all the data by column
         self.ordered_key_list = []      #Contains an ordered list of column names
@@ -74,7 +76,16 @@ class TransientData(object):
         self.input_change = {}          #Contains a map of the inputs values that correspond to change_time
                                         #   Keys of this map are modifications to the keys of data_map that
                                         #   correspond to output values corresponding to the input values given
+
+        self.time_key = ""              #Contains the name of the time key for the data_map
+                                        #   Key must contain "Elapsed Time (unit)" in the data file
+                                        #   unit can be any time units, but the first part of the string
+                                        #   must alwas exist as "Elapsed Time (..."
+        if statinfo.st_size >= 10000000:
+            print("Reading large file. Please wait...")
         self.readFile()
+        if statinfo.st_size >= 10000000:
+            print("Finished!")
 
     def __str__(self):
         message = "\nFile Name:\t" + self.data_file.name
@@ -112,6 +123,9 @@ class TransientData(object):
                 for item in line_list:
                     #Ignore the ending character
                     if item != '\n':
+                        #Find the time_key by parsing and checking item
+                        if item.strip().split("(")[0] == "Elapsed Time ":
+                            self.time_key = item.strip()
                         #NOTE: The registered keys will be the column names stripped of leading and trailing whitespaces
                         self.data_map[item.strip()] = []
                         self.ordered_key_list.append(item.strip())
@@ -124,12 +138,12 @@ class TransientData(object):
                 for item in line_list:
                     #Check item to make sure that we do not get another column key
                     # If we do, then do not append data to map, instead record
-                    #   the 'Elapsed Time (min)' value from prior as the point
+                    #   the data_map[time_key] value from prior as the point
                     #   when input conditions changed
                     #NOTE: Check the stripped items for keys
                     if item.strip() in self.data_map.keys():
                         if (n == 0):
-                            self.change_time.append(float(self.data_map['Elapsed Time (min)'][-1]))
+                            self.change_time.append(float(self.data_map[self.time_key][-1]))
                     # If we don't, then record the data into the map
                     else:
                         #Ignore ending character
@@ -161,7 +175,7 @@ class TransientData(object):
             return
 
         #Lastly, check to make sure the length of the data_set matches the length of the time series data
-        if len(self.data_map['Elapsed Time (min)']) != len(data_set):
+        if len(self.data_map[self.time_key]) != len(data_set):
             print("Error! The data set size does not match the existing data set size!")
             return
 
@@ -193,7 +207,7 @@ class TransientData(object):
             new_map[item] = []
         #loop through all time data
         n = 0
-        for time in self.data_map['Elapsed Time (min)']:
+        for time in self.data_map[self.time_key]:
             if time > max_time:
                 break
             if time >= min_time:
@@ -215,13 +229,13 @@ class TransientData(object):
         start_point = 0
         end_time = 0
         end_point = 0
-        for time in self.data_map['Elapsed Time (min)']:
+        for time in self.data_map[self.time_key]:
             if time > time_value:
                 if n == 0:
                     start_time = 0
                     start_point = self.data_map[column_name][n]
                 else:
-                    start_time = self.data_map['Elapsed Time (min)'][n-1]
+                    start_time = self.data_map[self.time_key][n-1]
                     start_point = self.data_map[column_name][n-1]
                 end_time = time
                 end_point = self.data_map[column_name][n]
@@ -439,6 +453,9 @@ class TransientData(object):
             new_key = str(item) + "-" + str(int(factor)) + "x Compression"
             new_key_list[item] = new_key
 
+        #time_key is forced to change here
+        self.time_key += "-" + str(int(factor)) + "x Compression"
+
         #Compression will work by reading the first 'factor' # of values from a list and averaging them
         #   That average value becomes the new value to place into the new data_map with a new key
         #   This cycle repeats until no data is left to compress
@@ -502,15 +519,15 @@ class TransientData(object):
             print("Error! No corresponding output value exists in data_map!")
             return
 
-        #Loop through the 'Elapsed Time (min)' data in REVERSE to get last data first
+        #Loop through the data_map[time_key] data in REVERSE to get last data first
         points = 0
         change_loc = len(self.change_time)-1
         value_sum = 0
-        time_index = len(self.data_map['Elapsed Time (min)'])-1
+        time_index = len(self.data_map[self.time_key])-1
         has_calc = False
         #Initialize the list of inlet conditions (because we fill it in backwards)
         avg_list = [0.0]*len(self.change_time)
-        for time in reversed(self.data_map['Elapsed Time (min)']):
+        for time in reversed(self.data_map[self.time_key]):
             if points >= avg_points:
                 #Run a calculation here
                 if has_calc == False:
@@ -535,28 +552,93 @@ class TransientData(object):
         #End time loop
         self.registerChangedInput(data_key, avg_list)
 
+    #This function will create a new column in the data_map by creating a step-wise set of
+    #   input data based on the change_time and corresponding input_change information.
+    #   When calling this function, it is unnecessary to call registerChangedInput as
+    #   this function will automatically perform the associated actions of that function.
+    #       NOTE: data_key can be a single column or a list of columns
+    def createStepChangeInputData(self, data_key, avg_points = 10, non_neg = True):
+        if type(data_key) is not list:
+            self.autoregChangedInput(data_key,avg_points,non_neg)
+        else:
+            for key in data_key:
+                self.autoregChangedInput(key,avg_points,non_neg)
+        #Iterate through the input_change map
+        for new_key in self.input_change:
+            i=0
+            self.data_map[new_key] = []
+            for time in self.data_map[self.time_key]:
+                try:
+                    time_limit = self.change_time[i+1]
+                except:
+                    time_limit = self.change_time[-1]+time
+                if time > time_limit:
+                    i+=1
+                self.data_map[new_key].append(self.input_change[new_key][i])
+
+
+    #This function will perform a trapezoid rule integration between two given curves
+    #   in the data_map versus the time_key set of data. The first value of the integrated
+    #   curve is always assumed to be zero. The units for the given columns do not matter
+    #   as this method will specifically produce a normalized integrated curve. Generally,
+    #   this function is used to create a data column for Mass Retained in the catalyst.
+    #
+    #   The following relationship is assumed...
+    #
+    #   d(MR)/dt = Q*(Min - Mout)
+    #
+    #   Min = Mass in (given data column to represent inlet mass)
+    #   Mout = Mass out (given data column to represent outlet mass)
+    #   Q = flow rate (usually as space velocity [ hr^-1 ])
+    #   MR = Mass retained in the catalyst (Representative of adsorbed mass)
+    def calculateRetentionNormalizedIntegral(self, inlet_column, outlet_column):
+        if inlet_column not in self.data_map.keys():
+            print("Error! No corresponding inlet column exists in data_map!")
+            return
+        if outlet_column not in self.data_map.keys():
+            print("Error! No corresponding outlet column exists in data_map!")
+            return
+
+        ret_key = inlet_column.split()[0]+"-Retained (normalized)"
+        max_value = 0
+        self.data_map[ret_key] = []
+        self.data_map[ret_key].append(0)
+        i=1
+        while i<len(self.data_map[self.time_key]):
+            MR = 0
+            #print(self.data_map[self.time_key][i-1])
+            #print(self.data_map[self.time_key][i])
+            self.data_map[ret_key].append(MR)
+            i+=1
+
+
+
+
 ## ---------------- End: Definition of TransientData object ------------
 
 
+
+## ---------------- Begin: Definition of PairedTransientData object ------------
+''' This object is used when you want to 'pair' inlet and outlet data sets together,
+    as well as perform some post-processing such as integrals over data sets. To initialize
+    the data set, you must pass a data file that contains the inlet data. For the
+    CLEERS data sets, an inlet data file is denoted by a "-bp" at the end of the file name
+    as opposed to an isothermal temperature.
+'''
+
+## ---------------- End: Definition of PairedTransientData object ------------
+
+
 ## ------ Testing ------
-#test01 = TransientData("20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-150C.dat")
-test01 = TransientData("20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-bp.dat")
-#print(test01)
-#test01.displayColumnNames()
-#print(test01.extractColumns("NH3 (3000)"))
-#print(test01.extractRows(1.95,2))
-#print(test01.getDataPoint(1.27,"NH3 (3000)"))
+test01 = TransientData("20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-150C.dat")
 
 test01.compressColumns()
-test01.deleteColumns("Time")
-test01.deleteColumns(["Ethylene (100,3000)","MFC1: 100 % N2 in N2 (carrier) [6140 sccm]"])
+#NOTE: After compressing the columns, some column names with change to reflect the combination of data
 #test01.displayColumnNames()
-test01.retainOnlyColumns(['Elapsed Time (min)','NH3 (300,3000)'])
-#test01.displayColumnNames()
-print(test01)
+test01.retainOnlyColumns(['Elapsed Time (min)','NH3 (300,3000)', 'H2O% (20)', 'TC bot sample in (C)', 'TC bot sample mid 1 (C)', 'TC bot sample mid 2 (C)', 'TC bot sample out 1 (C)', 'TC bot sample out 2 (C)', 'P bottom in (bar)', 'P bottom out (bar)'])
+test01.createStepChangeInputData('NH3 (300,3000)')
+test01.calculateRetentionNormalizedIntegral('NH3 (300,3000)[input]','NH3 (300,3000)')
 test01.compressRows(10)
 test01.printAlltoFile()
-#test01.printColumnstoFile(['Elapsed Time (min)','NH3 (300,3000)'])
-print(test01.change_time)
 
 ## ----- End Testing -----
