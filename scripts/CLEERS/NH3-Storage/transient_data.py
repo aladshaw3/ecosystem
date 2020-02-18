@@ -89,7 +89,11 @@ class TransientData(object):
             message += "\nIsothermal Temp (C):\t" + str(self.isothermal_temp)
         message += "\nFile Header:\t" + self.exp_header
         message += "\nNumber of Columns:\t" + str(len(self.data_map))
-        message += "\nNumber of Rows:\t" + str(len(self.data_map['Elapsed Time (min)']))
+        key = ""
+        for item in self.data_map:
+            key = item
+            break
+        message += "\nNumber of Rows:\t" + str(len(self.data_map[key]))
         return message + "\n"
 
     def displayColumnNames(self):
@@ -424,6 +428,46 @@ class TransientData(object):
             j+=1
         file.close()
 
+    #This function compresses the rows of the data map
+    #   New columns are created to store compressed data and old columns are deleted to reserve space
+    #   The 'factor' argument is optional and is used to determine how much compression to use
+    #       Default is 2x compression: ==>  Cuts number of rows in half
+    def compressRows(self, factor = 2):
+        new_key_list = {}   #Map that links old key values (item) to the new keys
+        factor = int(factor)
+        for item in self.data_map:
+            new_key = str(item) + "-" + str(int(factor)) + "x Compression"
+            new_key_list[item] = new_key
+
+        #Compression will work by reading the first 'factor' # of values from a list and averaging them
+        #   That average value becomes the new value to place into the new data_map with a new key
+        #   This cycle repeats until no data is left to compress
+        for item in new_key_list:
+            self.data_map[new_key_list[item]] = []
+            i = 0
+            reset = 1
+            avg = 0
+            for value in self.data_map[item]:
+                if type(value) is not int and type(value) is not float:
+                    if reset == factor:
+                        reset = 1
+                        self.data_map[new_key_list[item]].append(value)
+                    else:
+                        reset+=1
+                else:
+                    if reset == factor:
+                        avg += value
+                        avg = avg/float(factor)
+                        reset = 1
+                        self.data_map[new_key_list[item]].append(avg)
+                        avg = 0
+                    else:
+                        avg+=value
+                        reset+=1
+                i+=1
+            del self.data_map[item]
+
+
     #This function will take in a data_map key name and a list of changed values
     #   to add to the map of input_change for each input that corresponds to an
     #   output in data_map for the size of the change_time list
@@ -507,10 +551,12 @@ test01.compressColumns()
 test01.deleteColumns("Time")
 test01.deleteColumns(["Ethylene (100,3000)","MFC1: 100 % N2 in N2 (carrier) [6140 sccm]"])
 #test01.displayColumnNames()
-test01.retainOnlyColumns(['Elapsed Time (min)','H2O% (20)','NH3 (300,3000)', 'NO2 (150,2000)', 'CH4 (250,3000)'])
+test01.retainOnlyColumns(['Elapsed Time (min)','NH3 (300,3000)'])
 #test01.displayColumnNames()
 print(test01)
+test01.compressRows(10)
 test01.printAlltoFile()
-test01.printColumnstoFile(['Elapsed Time (min)','NH3 (300,3000)'])
+#test01.printColumnstoFile(['Elapsed Time (min)','NH3 (300,3000)'])
+print(test01.change_time)
 
 ## ----- End Testing -----
