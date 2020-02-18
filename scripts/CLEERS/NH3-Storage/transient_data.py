@@ -41,6 +41,7 @@ class TransientData(object):
     #                   (Also note, item[-1] will carry the file extension with it)
     def __init__(self, file):
         #Parse the file name to gain specific information
+        self.input_file_name = file
         file_name_info = file.split("-")
         self.material_name = file_name_info[2]
         if file_name_info[3] == "700C4h":
@@ -76,19 +77,19 @@ class TransientData(object):
         self.readFile()
 
     def __str__(self):
-        message = "\nFile Name: " + self.data_file.name
-        message += "\nMaterial: " + self.material_name
-        message += "\nAging Condition: " + self.aging_condition
-        message += "\nFlow Rate (hr^-1): " + str(self.flow_rate)
-        message += "\nInlet Conditions: "
+        message = "\nFile Name:\t" + self.data_file.name
+        message += "\nMaterial:\t" + self.material_name
+        message += "\nAging Condition:\t" + self.aging_condition
+        message += "\nFlow Rate (hr^-1):\t" + str(self.flow_rate)
+        message += "\nInlet Conditions:\t"
         if self.inlet_data == True:
             message += "True"
         else:
             message += "False"
-            message += "\nIsothermal Temp (C): " + str(self.isothermal_temp)
-        message += "\nFile Header: " + self.exp_header
-        message += "\nNumber of Columns: " + str(len(self.data_map))
-        message += "\nNumber of Rows: " + str(len(self.data_map['Elapsed Time (min)']))
+            message += "\nIsothermal Temp (C):\t" + str(self.isothermal_temp)
+        message += "\nFile Header:\t" + self.exp_header
+        message += "\nNumber of Columns:\t" + str(len(self.data_map))
+        message += "\nNumber of Rows:\t" + str(len(self.data_map['Elapsed Time (min)']))
         return message + "\n"
 
     def displayColumnNames(self):
@@ -107,8 +108,9 @@ class TransientData(object):
                 for item in line_list:
                     #Ignore the ending character
                     if item != '\n':
-                        self.data_map[item] = []
-                        self.ordered_key_list.append(item)
+                        #NOTE: The registered keys will be the column names stripped of leading and trailing whitespaces
+                        self.data_map[item.strip()] = []
+                        self.ordered_key_list.append(item.strip())
                     else:
                         # Force a new column for input conditions
                         self.change_time.append(0)
@@ -120,7 +122,8 @@ class TransientData(object):
                     # If we do, then do not append data to map, instead record
                     #   the 'Elapsed Time (min)' value from prior as the point
                     #   when input conditions changed
-                    if item in self.data_map.keys():
+                    #NOTE: Check the stripped items for keys
+                    if item.strip() in self.data_map.keys():
                         if (n == 0):
                             self.change_time.append(float(self.data_map['Elapsed Time (min)'][-1]))
                     # If we don't, then record the data into the map
@@ -265,11 +268,19 @@ class TransientData(object):
         for item in frac_keys:
             if len(frac_keys[item]) > 1:
                 val_list = []
+                new_name = item +"("
+                j=0
                 for sub_key in frac_keys[item]:
                     first = sub_key.split("(")
                     last = first[1].split(")")
                     val_list.append(float(last[0]))
-                self.data_map[item] = []
+                    if j == 0:
+                        new_name += str(int(val_list[j]))
+                    else:
+                        new_name += "," + str(int(val_list[j]))
+                    j+=1
+                new_name += ")"
+                self.data_map[new_name] = []
                 #Now loop through all rows and insert proper data into new column
                 n = 0
                 for value in self.data_map[frac_keys[item][0]]:
@@ -292,13 +303,126 @@ class TransientData(object):
                         elif old_d < 0:
                             old_d = dist[i]
                             reg_index = i
-                    #print(dist)
-                    #print(reg_index)
-                    self.data_map[item].append(self.data_map[frac_keys[item][reg_index]][n])
+                    self.data_map[new_name].append(self.data_map[frac_keys[item][reg_index]][n])
                     n+=1
                 #End value loop
-                print(self.data_map[item])
+
+                #Now, delete the original columns
+                for sub_key in frac_keys[item]:
+                    del self.data_map[sub_key]
+
             #End if
+
+
+    #This function will delete the given columns from the map
+    def deleteColumns(self, column_list):
+        #NOTE: column_list is either a list of columns or a single column_name
+        if type(column_list) is list:
+            #iterate through list and delete any columns that can be deleted
+            for item in column_list:
+                if item in self.data_map.keys():
+                    del self.data_map[item]
+                else:
+                    print("Error! No such column exists!")
+        else:
+            #delete only the given column
+            if column_list in self.data_map.keys():
+                del self.data_map[column_list]
+            else:
+                print("Error! No such column exists!")
+
+    #This function will delete all columns in the data_map except for the ones specified to retain
+    def retainOnlyColumns(self, column_list):
+        #First, check to make sure that the columns named in the list are valid
+        keep = {}
+        if type(column_list) is list:
+            for item in column_list:
+                if item not in self.data_map.keys():
+                    print("Error! Invalid Column Name! No further action taken to delete columns...")
+                    return
+                else:
+                    keep[item] = 0
+        else:
+            if column_list not in self.data_map.keys():
+                print("Error! Invalid Column Name! No further action taken to delete columns...")
+                return
+            else:
+                keep[column_list] = 0
+
+        #Create list of columns to delete
+        list_to_del = []
+        for item in self.data_map:
+            if item not in keep.keys():
+                list_to_del.append(item)
+
+        #Delete items in the list
+        for item in list_to_del:
+            del self.data_map[item]
+
+    #This function is used to print processed data to an output file
+    def printAlltoFile(self, file_name = ""):
+        if file_name == "":
+            file_name = self.input_file_name.split(".")[0]+"-output.dat"
+        file = open(file_name,'w')
+        file.write(str(self))
+        file.write("\n")
+        i=0
+        first = ""
+        for item in self.data_map:
+            if i == 0:
+                file.write(str(item))
+                first = str(item)
+            else:
+                file.write("\t"+str(item))
+            i+=1
+        file.write("\n")
+        j=0
+        for value in self.data_map[first]:
+            i = 0
+            for item in self.data_map:
+                if i == 0:
+                    file.write(str(self.data_map[item][j]))
+                else:
+                    file.write("\t"+str(self.data_map[item][j]))
+                i+=1
+            file.write("\n")
+            j+=1
+        file.close()
+
+    #This function is used to print select columns of data to a file
+    def printColumnstoFile(self, column_list, file_name = ""):
+        if type(column_list) is not list:
+            print("Error! You must provide a list of columns to print to a file!")
+            return
+        for name in column_list:
+            if name not in self.data_map.keys():
+                print("Error! Invalid column names given...")
+                return
+        if file_name == "":
+            file_name = self.input_file_name.split(".")[0]+"-SelectedOutput.dat"
+        file = open(file_name,'w')
+        file.write(str(self))
+        file.write("\n")
+        i=0
+        for name in column_list:
+            if i == 0:
+                file.write(str(name))
+            else:
+                file.write("\t"+str(name))
+            i+=1
+        file.write("\n")
+        j=0
+        for value in self.data_map[column_list[0]]:
+            i = 0
+            for name in column_list:
+                if i == 0:
+                    file.write(str(self.data_map[name][j]))
+                else:
+                    file.write("\t"+str(self.data_map[name][j]))
+                i+=1
+            file.write("\n")
+            j+=1
+        file.close()
 
     #This function will take in a data_map key name and a list of changed values
     #   to add to the map of input_change for each input that corresponds to an
@@ -373,13 +497,20 @@ class TransientData(object):
 ## ------ Testing ------
 #test01 = TransientData("20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-150C.dat")
 test01 = TransientData("20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-bp.dat")
-print(test01)
+#print(test01)
 #test01.displayColumnNames()
-#print(test01.extractColumns("NH3 (3000) "))
+#print(test01.extractColumns("NH3 (3000)"))
 #print(test01.extractRows(1.95,2))
-print(test01.getDataPoint(1.27,"NH3 (3000) "))
+#print(test01.getDataPoint(1.27,"NH3 (3000)"))
 
 test01.compressColumns()
+test01.deleteColumns("Time")
+test01.deleteColumns(["Ethylene (100,3000)","MFC1: 100 % N2 in N2 (carrier) [6140 sccm]"])
 #test01.displayColumnNames()
+test01.retainOnlyColumns(['Elapsed Time (min)','H2O% (20)','NH3 (300,3000)', 'NO2 (150,2000)', 'CH4 (250,3000)'])
+#test01.displayColumnNames()
+print(test01)
+test01.printAlltoFile()
+test01.printColumnstoFile(['Elapsed Time (min)','NH3 (300,3000)'])
 
 ## ----- End Testing -----
