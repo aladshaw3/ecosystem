@@ -602,7 +602,7 @@ class TransientData(object):
         self.data_map[ret_key] = []
         self.data_map[ret_key].append(0)
         MR_old = 0
-        max_value = MR_old
+        max_value = abs(MR_old)
         time_old = self.data_map[self.time_key][0]
         Min_old = self.data_map[inlet_column][0]
         Mout_old = self.data_map[outlet_column][0]
@@ -612,10 +612,8 @@ class TransientData(object):
             Min_new = self.data_map[inlet_column][i]
             Mout_new = self.data_map[outlet_column][i]
             MR_new = MR_old + (time_new-time_old)*self.flow_rate*( (Min_old+Min_new)/2 - (Mout_old+Mout_new)/2 )
-            if MR_new > max_value:
-                max_value = MR_new
-            #print(self.data_map[self.time_key][i-1])
-            #print(self.data_map[self.time_key][i])
+            if abs(MR_new) > max_value:
+                max_value = abs(MR_new)
             self.data_map[ret_key].append(MR_new)
             time_old = time_new
             Min_old = Min_new
@@ -623,7 +621,7 @@ class TransientData(object):
             MR_old = MR_new
             i+=1
 
-        #Check for max values that are very small and make some kind of correction 
+        #Check for max values that are very small and make some kind of correction
         if max_value == 0:
             print("here")
         #Loop one last time to normalize the integrated curve
@@ -673,7 +671,7 @@ test02.compressColumns()
 test02.retainOnlyColumns(['Elapsed Time (min)','NH3 (300,3000)', 'H2O% (20)', 'TC bot sample in (C)', 'TC bot sample mid 1 (C)', 'TC bot sample mid 2 (C)', 'TC bot sample out 1 (C)', 'TC bot sample out 2 (C)', 'P bottom in (bar)', 'P bottom out (bar)'])
 test02.createStepChangeInputData(['NH3 (300,3000)','H2O% (20)'])
 test02.calculateRetentionNormalizedIntegral('NH3 (300,3000)[input]','NH3 (300,3000)')
-test02.calculateRetentionNormalizedIntegral('H2O% (20)[input]','NH3 (300,3000)')
+test02.calculateRetentionNormalizedIntegral('H2O% (20)[input]','H2O% (20)')
 #print(test01.num_rows)
 test02.compressRows(2)
 test02.printAlltoFile()
