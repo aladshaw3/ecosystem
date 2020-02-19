@@ -36,7 +36,7 @@ class TransientData(object):
     #
     #       item[2] = Name of the catalyst material
     #       item[3] = Aging condition
-    #       item[5] = flow rate information (in volumes per hour)
+    #       item[5] = flow rate information (in kilo-volumes per hour)
     #       item[-1] = either a temperature or "bp"
     #                   temperature is irrelevant, but bp indicates that this is inlet information
     #                   (Also note, item[-1] will carry the file extension with it)
@@ -109,6 +109,7 @@ class TransientData(object):
 
     def readFile(self):
         i = 0
+        first_data_line = False
         for line in self.data_file:
             line_list = line.split('\t')
             #Ignore the first line of the data file and stores as header
@@ -130,6 +131,10 @@ class TransientData(object):
                         # Force a new column for input conditions
                         self.change_time.append(0)
 
+            if i == 2:
+                first_data_line = True
+            else:
+                first_data_line = False
             if (i > 1): #or greater
                 n = 0
                 for item in line_list:
@@ -150,7 +155,24 @@ class TransientData(object):
                                 self.data_map[self.ordered_key_list[n]].append(float(item))
                             #Store data as string if it is not a number
                             except:
-                                self.data_map[self.ordered_key_list[n]].append(item)
+                                if first_data_line == True:
+                                    self.data_map[self.ordered_key_list[n]].append(item)
+                                else:
+                                    if len(self.data_map[self.ordered_key_list[n]]) > 0:
+                                        if type(self.data_map[self.ordered_key_list[n]][-1]) is not int and type(self.data_map[self.ordered_key_list[n]][-1]) is not float:
+                                            self.data_map[self.ordered_key_list[n]].append(item)
+                                        #else:
+                                            #print("Warnging")
+                                    #else:
+                                        #print("Warning")
+                                #self.data_map[self.ordered_key_list[n]].append(item)
+                                #if i == 2:
+                                    #self.data_map[self.ordered_key_list[n]].append(item)
+                                #else:
+                                    #if type(self.data_map[self.ordered_key_list[n]][i-3]) is not int and type(self.data_map[self.ordered_key_list[n]][i-3]) is not float:
+                                        #self.data_map[self.ordered_key_list[n]].append(item)
+                                    #else:
+                                        #print("Warning! Some data lost...")
                     n+=1
             i+=1
         #END of line loop
@@ -227,6 +249,7 @@ class TransientData(object):
         start_point = 0
         end_time = 0
         end_point = 0
+        #What should we do if we reach beyond the total time?
         for time in self.data_map[self.time_key]:
             if time > time_value:
                 if n == 0:
@@ -243,7 +266,10 @@ class TransientData(object):
         if type(end_point) is not int and type(end_point) is not float:
             point = end_point
         else:
-            point = (end_point - start_point)/(end_time - start_time)*(time_value - start_time) + start_point
+            try:
+                point = (end_point - start_point)/(end_time - start_time)*(time_value - start_time) + start_point
+            except:
+                point = end_point
         return point
 
     #This function will iterate through all columns to find data that can be compressed or eliminated
@@ -253,7 +279,7 @@ class TransientData(object):
         #Iterate through the data map to find information to delete immediately
         list_to_del = []
         for item in self.data_map:
-            if len(self.data_map[item]) == 0:
+            if len(self.data_map[item]) < len(self.data_map[self.time_key]):
                 list_to_del.append(item)
         for item in list_to_del:
             del self.data_map[item]
@@ -597,6 +623,9 @@ class TransientData(object):
         if outlet_column not in self.data_map.keys():
             print("Error! No corresponding outlet column exists in data_map!")
             return
+        if self.have_flow_rate == False:
+            print("Error! Cannot calculate retention integral without a flow rate. Flow rate is expected in the file name in kilo-volumes per hour...")
+            return
 
         ret_key = inlet_column.split()[0]+"-Retained (normalized)"
         self.data_map[ret_key] = []
@@ -645,7 +674,313 @@ class TransientData(object):
     as opposed to an isothermal temperature.
 '''
 
+
 ## ---------------- End: Definition of PairedTransientData object ------------
+class PairedTransientData(object):
+    #When creating an instance of this object, you must pass to files to the constructor
+    #   (i)     A file for the input data (or by-pass run data)
+    #   (ii)    A file for the output data (or non-by-pass run data)
+    #The constructor will check the file names to make sure that the given information aligns
+    #   so that the given by-pass and non-by-pass data sets should actually be paired.
+    #   Because of this check, maintaining the same file name conventions as before is necessary.
+    def __init__(self, bypass_file, result_file):
+
+        # The constructor for the TransientData will automatically read the files
+        self.bypass_trans_obj = TransientData(bypass_file)
+        self.result_trans_obj = TransientData(result_file)
+        self.aligned = False        #Flag used to determine whether or not the data sets are aligned in time
+
+        # Check some specific file information to make sure there are no errors
+        self.file_errors = False
+        if self.bypass_trans_obj.inlet_data == False:
+            print("Error! Given by-pass data file is not recognized as by-pass data from the given file name...")
+            self.file_errors = True
+        if self.result_trans_obj.inlet_data == True:
+            print("Error! Given results data file is not recognized as results data from the given file name...")
+            self.file_errors = True
+        if self.bypass_trans_obj.material_name != self.result_trans_obj.material_name:
+            print("Error! Files given indicate they are for 2 different materials. They cannot be paired...")
+            self.file_errors = True
+        if self.bypass_trans_obj.aging_condition != self.result_trans_obj.aging_condition:
+            print("Error! Files given indicate they are for 2 different aging conditions. They cannot be paired...")
+            self.file_errors = True
+        if self.bypass_trans_obj.flow_rate != self.result_trans_obj.flow_rate:
+            print("Error! Files given indicate they are for 2 different flow rates. They cannot be paired...")
+            self.file_errors = True
+
+        #Check to make sure that the column names are the same for the by-pass and results data
+        for item in self.bypass_trans_obj.data_map:
+            if item not in self.result_trans_obj.data_map:
+                print("Error! By-pass file and Results file must have all the same columns and column names...")
+                self.file_errors = True
+                break
+
+    #Function to print file information message to console
+    def __str__(self):
+        message = "\nBy-pass Information\n"
+        message += "-------------------\n"
+        message += str(self.bypass_trans_obj)
+        message += "\nResults Information\n"
+        message += "-------------------\n"
+        message += str(self.result_trans_obj)
+        if self.aligned == False:
+            message += "\n\tWARNING: Data sets are unaligned currently!\n\t\tRun alignData() before processing information...\n"
+        return message
+
+    #Function to display the column names to console
+    def displayColumnNames(self):
+        self.bypass_trans_obj.displayColumnNames()
+
+    #Function to compress columns in both data sets
+    def compressColumns(self):
+        self.bypass_trans_obj.compressColumns()
+        self.result_trans_obj.compressColumns()
+
+    #Function to append a column to by-pass data
+    def appendBypassColumn(self, column_name, data_set):
+        self.bypass_trans_obj.appendColumn(column_name, data_set)
+
+    #Function to append a column to result data
+    def appendResultColumn(self, column_name, data_set):
+        self.result_trans_obj.appendColumn(column_name, data_set)
+
+    #Function to extract a map of columns from the by-pass data
+    def extractBypassColumns(self, column_list):
+        return self.bypass_trans_obj.extractColumns(column_list)
+
+    #Function to extract a map of columns from the result data
+    def extractResultColumns(self, column_list):
+        return self.result_trans_obj.extractColumns(column_list)
+
+    #Function to extract a set of rows from the by-pass data
+    def extractBypassRows(self, min_time, max_time):
+        return self.bypass_trans_obj.extractRows(min_time,max_time)
+
+    #Function to extract a set of rows from the result data
+    def extractResultRows(self, min_time, max_time):
+        return self.result_trans_obj.extractRows(min_time,max_time)
+
+    #Function to get a data point from the by-pass data
+    def getBypassDataPoint(self, time_value, column_name):
+        return self.bypass_trans_obj.getDataPoint(time_value, column_name)
+
+    #Function to get a data point from the result data
+    def getResultDataPoint(self, time_value, column_name):
+        return self.result_trans_obj.getDataPoint(time_value, column_name)
+
+    #Function to delete a set of columns from both data sets
+    def deleteColumns(self, column_list):
+        self.bypass_trans_obj.deleteColumns(column_list)
+        self.result_trans_obj.deleteColumns(column_list)
+
+    #Function to delete a set all columns from both data sets, except for the specified set
+    def retainOnlyColumns(self, column_list):
+        self.bypass_trans_obj.retainOnlyColumns(column_list)
+        self.result_trans_obj.retainOnlyColumns(column_list)
+
+    #Function to align the bypass and results data so each has the same number of rows at the appropriate time values
+    #NOTE: This function is riddled with comment lines and print statements that are used for debugging
+    #       DO NOT REMOVE ANY COMMENTS UNLESS THE FUNCTION IS FULLY TESTED AND APPROVED
+    #           This function is exceedingly complicated, do not modify unless you know what you are doing
+    def alignData(self):
+        # Identify which data set will be considered the 'master_set'
+        #   Master set will be the data set that has the most data available
+        #   The sub-set will be forced to conform to the master set
+        # Our goal is to expand the data in the sub-set to match the master set through
+        #   linear interpolations or other means. Thus, the master set of data won't be
+        #   changed, only the sub-set of data will change.
+        master_set = {}             #Point to master data
+        sub_set = {}                #Point to non-master data
+        new_set = {}                #New map to make to override non-master data when finished
+        master_change_time = []     #Point to list of master change_time
+        sub_change_time = []        #Point to list of non-master change_time
+        isResultMaster = False      #True if result_trans_obj is master, False if bypass_trans_obj is master
+        time_column = self.bypass_trans_obj.time_key
+        # Find master and point master's data_map to master_set
+        #       This is so we only have to write code to iterate on master set
+        #       Do not copy, only point. Master set will not change, so a pointer works best
+        # Do same with sub_set, point sub_set to the non-master data set
+        #       However, we also need a new data set to create. That new data set
+        #       will eventually override the non-master original data
+        if len(self.bypass_trans_obj.data_map[time_column]) > len(self.result_trans_obj.data_map[time_column]):
+            isResultMaster = False
+            master_set = self.bypass_trans_obj.data_map
+            for i in range(1,len(self.bypass_trans_obj.change_time)):
+                master_change_time.append((self.bypass_trans_obj.change_time[i-1],self.bypass_trans_obj.change_time[i]))
+            master_change_time.append((self.bypass_trans_obj.change_time[-1],self.bypass_trans_obj.data_map[time_column][-1]))
+
+            sub_set = self.result_trans_obj.data_map
+            for i in range(1,len(self.result_trans_obj.change_time)):
+                sub_change_time.append((self.result_trans_obj.change_time[i-1],self.result_trans_obj.change_time[i]))
+            sub_change_time.append((self.result_trans_obj.change_time[-1],self.result_trans_obj.data_map[time_column][-1]))
+        else:
+            isResultMaster = True
+            master_set = self.result_trans_obj.data_map
+            for i in range(1,len(self.result_trans_obj.change_time)):
+                master_change_time.append((self.result_trans_obj.change_time[i-1],self.result_trans_obj.change_time[i]))
+            master_change_time.append((self.result_trans_obj.change_time[-1],self.result_trans_obj.data_map[time_column][-1]))
+
+            sub_set = self.bypass_trans_obj.data_map
+            for i in range(1,len(self.bypass_trans_obj.change_time)):
+                sub_change_time.append((self.bypass_trans_obj.change_time[i-1],self.bypass_trans_obj.change_time[i]))
+            sub_change_time.append((self.bypass_trans_obj.change_time[-1],self.bypass_trans_obj.data_map[time_column][-1]))
+
+        #Check to make sure that the change times are already aligned
+        if len(master_change_time) != len(sub_change_time):
+            print("Error! Cannot align data if the number of 'change_time' instances are not the same!")
+            return
+
+        #Initialize the new_set with same number of columns and column names,
+        #   but with the number of data points matching master_set
+        for item in sub_set:
+            #Check the data type of the master list at the given item and initialize new_set accordingly
+            if type(master_set[item][0]) is not int and type(master_set[item][0]) is not float:
+                new_set[item] = [""]*len(master_set[item])
+            else:
+                new_set[item] = [0.0]*len(master_set[item])
+
+        #First data point in the new_set should auto-align to the first master_set time,
+        #   regardless of discrepencies in the first time point. This is because
+        #   we have no other information yet to perform any necessary interpolation.
+        for item in new_set:
+            new_set[item][0] = sub_set[item][0]
+        new_set[time_column][0] = master_set[time_column][0]
+
+        #Data from sub_set should be either compressed or elongated depending on the change_times
+        '''
+        i=0
+        for tuple in sub_change_time:
+            sub_dist = tuple[1]-tuple[0]
+            master_dist = master_change_time[i][1] - master_change_time[i][0]
+            if master_dist >= sub_dist:
+                print("Elongate Sub (or keep same)")
+            else:
+                print("Compress Sub")
+            i+=1
+        '''
+
+        #Want to iterate through all rows in the new data set
+        print("\nData Alignment has started... Please wait...")
+        tup_i = 0       #Index for tuple frame
+        i = 1           #Index for master row
+        j = 1           #Index for sub row
+        #The time shifted values below represent how far in time we have traversed for the given tuple frame
+        master_time_shifted = 0     #Start with no time shift for first reference frame
+        sub_time_shifted = 0        #Same reason as above
+        while i < len(new_set[time_column]):
+            #Enfore matching time values
+            new_set[time_column][i] = master_set[time_column][i]
+
+            #Find when to update the tuple frame
+            if master_set[time_column][i] > master_change_time[tup_i][1]:
+                #print("Update tuple frame")
+                tup_i +=1
+                #When the tuple frame updates, we are now forced to update j
+                #   j gets updated to the first indexed time value within the tuple frame
+                for n in range(j,len(sub_set[time_column])):
+                    #print(master_change_time[tup_i][0])
+                    #print(n)
+                    #print(sub_set[time_column][n])
+                    if sub_change_time[tup_i][0] <= sub_set[time_column][n]:
+                        j = n+1
+                        break
+                #print(sub_change_time[tup_i][0])
+                #print(sub_set[time_column][j])
+
+                #At this point, i and j are aligned to their own tuple frames
+                #       However, each may be misaligned with each other
+                #Each time we move into a tuple frame, we should use a time_shited
+                #       value for the actual time to represent distance traveled in
+                #       the given frame of reference.
+                #This resets the time shifting at each tuple frame update
+                master_time_shifted = master_set[time_column][i-1] - master_change_time[tup_i][0]
+                sub_time_shifted = sub_set[time_column][j-1] - sub_change_time[tup_i][0]
+                #print(master_time_shifted)
+                #print(sub_time_shifted)
+            #END Update for tuple frame
+
+            #Calculate distance in time of our position in the master set of data from the previous point
+            master_dt = master_set[time_column][i] - master_set[time_column][i-1]
+            #Calculate the master time within the frame (not the actual time value)
+            master_time_shifted += master_dt
+
+            #Calculate target time for sub_set based on time travel and current tuple frame
+            #WRONG!!!
+            target_time = sub_time_shifted + master_time_shifted
+            #This line was needed for additional alignment because our first frame starts at 0, but first data starts  > 0
+            if tup_i == 0:
+                target_time += sub_set[time_column][j-1]
+
+            #Check to see if target time for sub_set is outside of the correct tuple frame
+            #   If it is outside of the frame, then extrapolate values
+            if master_set[time_column][i] >= 43.583333:
+                message = True
+            else:
+                message = False
+            if target_time > (sub_change_time[tup_i][1]-sub_change_time[tup_i][0]):
+                #print("Target Out of Frame")
+                #For testing purposes, set values to 0
+                if message == True:
+                    print("Miss")
+                for item in new_set:
+                    #print(item)
+                    #print(master_set[item])
+                    if item is not time_column:
+                        if type(new_set[item][i]) is not int and type(new_set[item][i]) is not float:
+                            #Grab the prior times value
+                            new_set[item][i] = new_set[item][i-1]
+                        else:
+                            if message == True and item == 'NH3 (300,3000)':
+                                print(i-1)
+                                print(new_set[item][i-1]) #Old value is calculated to zero occassionally
+                            new_set[item][i] = new_set[item][i-1]
+                    else:
+                        new_set[item][i] = master_set[item][i]
+            #   If it is inside of the frame, then interpolate or extract values
+            else:
+                #print("Data Mapping")
+                #print(str(master_set[time_column][i]) + " ---> " + str(target_time+sub_change_time[tup_i][0]))
+                #print()
+                for item in new_set:
+                    #print(item)
+                    ############ NOTE: There must be some error in the getDataPoint routine #############
+                    if item is not time_column:
+                        if isResultMaster == True:
+                            new_set[item][i] = self.bypass_trans_obj.getDataPoint(target_time+sub_change_time[tup_i][0],item)
+                        else:
+                            new_set[item][i] = self.result_trans_obj.getDataPoint(target_time+sub_change_time[tup_i][0],item)
+                    else:
+                        new_set[item][i] = master_set[item][i]
+            i+=1
+        #END while loop through all times
+
+        #At this point, the new_set should contain all of the data for the sub_set that needs alignment
+        #   Delete all existing data in the sub_set and replace with the new_set
+        for item in new_set:
+            del sub_set[item]
+        for item in new_set:
+            sub_set[item] = []
+            for value in new_set[item]:
+                sub_set[item].append(value)
+        #print(self.bypass_trans_obj.data_map)
+
+        #If we made it this far without error, then the data should be aligned (fingers crossed, no jynx)
+        print("Complete!")
+        self.aligned = True
+        if isResultMaster == True:
+            self.bypass_trans_obj.num_rows = len(sub_set[time_column])
+        else:
+            self.result_trans_obj.num_rows = len(sub_set[time_column])
+    #End alignData()
+
+
+    #NOTE: Before you can compress the rows of data, each data set must be aligned
+    #Function will compress the rows of data based on the given compression factor
+    def compressRows(self, factor = 2):
+        if self.aligned == False:
+            print("Error! Cannot compress the rows of data until data is aligned! Run alignData() first...")
+            return
+
 
 
 ## ------ Testing ------
@@ -669,12 +1004,49 @@ test02 = TransientData("20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2
 test02.compressColumns()
 #test02.displayColumnNames()
 test02.retainOnlyColumns(['Elapsed Time (min)','NH3 (300,3000)', 'H2O% (20)', 'TC bot sample in (C)', 'TC bot sample mid 1 (C)', 'TC bot sample mid 2 (C)', 'TC bot sample out 1 (C)', 'TC bot sample out 2 (C)', 'P bottom in (bar)', 'P bottom out (bar)'])
-test02.createStepChangeInputData(['NH3 (300,3000)','H2O% (20)'])
+test02.createStepChangeInputData(['NH3 (300,3000)','H2O% (20)'],40)
 test02.calculateRetentionNormalizedIntegral('NH3 (300,3000)[input]','NH3 (300,3000)')
 test02.calculateRetentionNormalizedIntegral('H2O% (20)[input]','H2O% (20)')
 #print(test01.num_rows)
+#print("H2O-150")
+#print(test02.change_time)
 test02.compressRows(2)
 test02.printAlltoFile()
-print(test02)
+#print(test02)
+
+
+#Testing with by-pass data
+test03 = TransientData("20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2-11-3pctH2O-400ppmNH3-bp.dat")
+test03.compressColumns()
+test03.retainOnlyColumns(['Elapsed Time (min)','NH3 (300,3000)', 'H2O% (20)'])
+#print(test03.change_time)
+test03.compressRows(1)
+test03.printAlltoFile()
+
+test04 = TransientData("20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-bp.dat")
+test04.compressColumns()
+test04.retainOnlyColumns(['Elapsed Time (min)','NH3 (300,3000)', 'H2O% (20)'])
+#print(test04.change_time)
+test04.compressRows(1)
+test04.printAlltoFile()
+
+
+#Testing Paired data
+test05 = PairedTransientData("20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2-11-3pctH2O-400ppmNH3-bp.dat","20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2-11-3pctH2O-400ppmNH3-150C.dat")
+#test05 = PairedTransientData("20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-bp.dat","20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-150C.dat")
+test05.compressColumns()
+#test05.displayColumnNames()
+#print(test05.extractBypassColumns('NH3 (300,3000)'))
+#print(test05.getBypassDataPoint(0.25,'NH3 (300,3000)'))
+#print(test05)
+test05.alignData()
+test05.retainOnlyColumns(['Elapsed Time (min)','NH3 (300,3000)', 'H2O% (20)'])
+test05.bypass_trans_obj.printAlltoFile("test-bp.dat")
+test05.result_trans_obj.printAlltoFile("test-result.dat")
+
+#If we request a time outside of the range, we should just return the last point 
+print(test05.getBypassDataPoint(100000,'NH3 (300,3000)'))
+#print(test05.bypass_trans_obj.extractColumns('NH3 (300,3000)'))
+#test05.compressRows()
 
 ## ----- End Testing -----
