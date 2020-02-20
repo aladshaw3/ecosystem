@@ -1125,6 +1125,7 @@ test04.printAlltoFile()
 
 
 #Testing Paired data
+'''
 h2o_comp = False
 if h2o_comp == True:
     test05 = PairedTransientData("20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2-11-3pctH2O-400ppmNH3-bp.dat","20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2-11-3pctH2O-400ppmNH3-150C.dat")
@@ -1148,5 +1149,6 @@ else:
     test05.compressRows(10)
 
 test05.printAlltoFile()
+'''
 
 ## ----- End Testing -----
