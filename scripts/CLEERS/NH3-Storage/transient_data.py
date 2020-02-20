@@ -20,6 +20,8 @@
 
 import math
 import os
+from statistics import mean, stdev
+import random
 
 ## ---------------- Begin: Definition of TransientData object ------------
 class TransientData(object):
@@ -183,16 +185,25 @@ class TransientData(object):
         self.data_file.close()
 
     #This function will add a column to the data map given the column name and associated data
+    #   NOTE: Appending the column does NOT copy the column into the map. It merely directs
+    #       the map to point to the given data_set. If you change the data_set that you pass
+    #       to this function, then the data in this object's map will also change.
     def appendColumn(self, column_name, data_set):
         #First, check to make sure the map has been prepared
         if (len(self.data_map) == 0):
             print("Error! File has not been read and stored!")
             return
 
+        #Make sure the data_set is actually a list of data
+        if type(data_set) is not list:
+            print("Error! The data_set must be a list of data!")
+            return
+
         #Next, check to make sure the column_name is not already in the map
         if column_name in self.data_map.keys():
-            print("Error! That data column is already in the structure!")
-            return
+            if len(self.data_map[column_name]) != len(data_set):
+                print("Error! That data column is already in the structure and sizes are mis-matched!")
+                return
 
         #Lastly, check to make sure the length of the data_set matches the length of the time series data
         if len(self.data_map[self.time_key]) != len(data_set):
@@ -249,6 +260,8 @@ class TransientData(object):
         start_point = 0
         end_time = 0
         end_point = 0
+        if time_value >= self.data_map[self.time_key][-1]:
+            return self.data_map[column_name][-1]
         #What should we do if we reach beyond the total time?
         for time in self.data_map[self.time_key]:
             if time > time_value:
@@ -650,9 +663,6 @@ class TransientData(object):
             MR_old = MR_new
             i+=1
 
-        #Check for max values that are very small and make some kind of correction
-        if max_value == 0:
-            print("here")
         #Loop one last time to normalize the integrated curve
         i=0
         for value in self.data_map[ret_key]:
@@ -782,7 +792,10 @@ class PairedTransientData(object):
     #NOTE: This function is riddled with comment lines and print statements that are used for debugging
     #       DO NOT REMOVE ANY COMMENTS UNLESS THE FUNCTION IS FULLY TESTED AND APPROVED
     #           This function is exceedingly complicated, do not modify unless you know what you are doing
-    def alignData(self):
+    def alignData(self, addNoise = True):
+        if self.aligned == True:
+            print("Data already aligned. Cannot re-align...")
+            return
         # Identify which data set will be considered the 'master_set'
         #   Master set will be the data set that has the most data available
         #   The sub-set will be forced to conform to the master set
@@ -867,25 +880,27 @@ class PairedTransientData(object):
         #The time shifted values below represent how far in time we have traversed for the given tuple frame
         master_time_shifted = 0     #Start with no time shift for first reference frame
         sub_time_shifted = 0        #Same reason as above
+        points_in_frame = 0         #Counter to keep track of the total number of points in the sub_set
+                                    #   that exist in the current master_frame
+        new_frame = False
+        avg = {}
+        std = {}
+        hasCalcMean = False
         while i < len(new_set[time_column]):
             #Enfore matching time values
             new_set[time_column][i] = master_set[time_column][i]
 
             #Find when to update the tuple frame
             if master_set[time_column][i] > master_change_time[tup_i][1]:
-                #print("Update tuple frame")
+                # ------------ Update tuple frame -------------
+                new_frame = True
                 tup_i +=1
                 #When the tuple frame updates, we are now forced to update j
                 #   j gets updated to the first indexed time value within the tuple frame
                 for n in range(j,len(sub_set[time_column])):
-                    #print(master_change_time[tup_i][0])
-                    #print(n)
-                    #print(sub_set[time_column][n])
                     if sub_change_time[tup_i][0] <= sub_set[time_column][n]:
                         j = n+1
                         break
-                #print(sub_change_time[tup_i][0])
-                #print(sub_set[time_column][j])
 
                 #At this point, i and j are aligned to their own tuple frames
                 #       However, each may be misaligned with each other
@@ -895,8 +910,8 @@ class PairedTransientData(object):
                 #This resets the time shifting at each tuple frame update
                 master_time_shifted = master_set[time_column][i-1] - master_change_time[tup_i][0]
                 sub_time_shifted = sub_set[time_column][j-1] - sub_change_time[tup_i][0]
-                #print(master_time_shifted)
-                #print(sub_time_shifted)
+            else:
+                new_frame = False
             #END Update for tuple frame
 
             #Calculate distance in time of our position in the master set of data from the previous point
@@ -905,7 +920,6 @@ class PairedTransientData(object):
             master_time_shifted += master_dt
 
             #Calculate target time for sub_set based on time travel and current tuple frame
-            #WRONG!!!
             target_time = sub_time_shifted + master_time_shifted
             #This line was needed for additional alignment because our first frame starts at 0, but first data starts  > 0
             if tup_i == 0:
@@ -913,37 +927,56 @@ class PairedTransientData(object):
 
             #Check to see if target time for sub_set is outside of the correct tuple frame
             #   If it is outside of the frame, then extrapolate values
-            if master_set[time_column][i] >= 43.583333:
-                message = True
-            else:
-                message = False
             if target_time > (sub_change_time[tup_i][1]-sub_change_time[tup_i][0]):
-                #print("Target Out of Frame")
-                #For testing purposes, set values to 0
-                if message == True:
-                    print("Miss")
+                # --------------- Target Out of Frame ------------------
+                # When the target is out of the tuple frame, we need to supplement the data to
+                #   fill in any gaps. Simplest way to fill the gap is just to repeat the last
+                #   relevant data point from the previous frame. However, This is likely
+                #   unrealistic and may produce error.
+                #
+                #   Other options to consider:
+                #       (i) Grab the last point and extend it to the next frame
+                #       (ii) Average the last few points of the current frame to use as an extension
+                #       (iii) Use a running average with artifical "noise" added for realism
                 for item in new_set:
-                    #print(item)
-                    #print(master_set[item])
                     if item is not time_column:
                         if type(new_set[item][i]) is not int and type(new_set[item][i]) is not float:
-                            #Grab the prior times value
+                            #If the data in the column is non-numeric, then just grab the prior time value
                             new_set[item][i] = new_set[item][i-1]
                         else:
-                            if message == True and item == 'NH3 (300,3000)':
-                                print(i-1)
-                                print(new_set[item][i-1]) #Old value is calculated to zero occassionally
-                            new_set[item][i] = new_set[item][i-1]
+                            #If the data in the column is numeric, then just grab the prior time value
+                            #new_set[item][i] = new_set[item][i-1]
+
+                            #If the data in the column is numeric, then just grab average the last 1/4 of elements
+                            if addNoise == False:
+                                new_set[item][i] = new_set[item][i-1]
+                                if hasCalcMean == False:
+                                    avg[item] = mean(new_set[item][i-int(points_in_frame/4):i])
+                                new_set[item][i] = avg[item]
+                            #If the data in the column is numeric, then average the last few points and
+                            #   and in some random noise based on the standard deviation of the last few points
+                            else:
+                                new_set[item][i] = new_set[item][i-1]
+                                if hasCalcMean == False:
+                                    avg[item] = mean(new_set[item][i-int(points_in_frame/4):i])
+                                    std[item] = stdev(new_set[item][i-int(points_in_frame/4):i])
+                                new_set[item][i] = random.gauss(avg[item],std[item])
                     else:
                         new_set[item][i] = master_set[item][i]
+                hasCalcMean = True
             #   If it is inside of the frame, then interpolate or extract values
             else:
-                #print("Data Mapping")
-                #print(str(master_set[time_column][i]) + " ---> " + str(target_time+sub_change_time[tup_i][0]))
-                #print()
+                #----------------- Data Mapping ---------------------
+                #master_set[time_column][i]  ---> target_time+sub_change_time[tup_i][0]
+                # Current time in master set maps to the target time in the sub_set
+                #       plus the off-set dictated by the tuple frame of the sub_set
+                hasCalcMean = False
+                if new_frame == False:
+                    points_in_frame += 1
+                else:
+                    points_in_frame = 1
                 for item in new_set:
-                    #print(item)
-                    ############ NOTE: There must be some error in the getDataPoint routine #############
+                    # Perform a linear interpolation for the correct data_map and place into the new_set
                     if item is not time_column:
                         if isResultMaster == True:
                             new_set[item][i] = self.bypass_trans_obj.getDataPoint(target_time+sub_change_time[tup_i][0],item)
@@ -962,7 +995,6 @@ class PairedTransientData(object):
             sub_set[item] = []
             for value in new_set[item]:
                 sub_set[item].append(value)
-        #print(self.bypass_trans_obj.data_map)
 
         #If we made it this far without error, then the data should be aligned (fingers crossed, no jynx)
         print("Complete!")
@@ -971,6 +1003,15 @@ class PairedTransientData(object):
             self.bypass_trans_obj.num_rows = len(sub_set[time_column])
         else:
             self.result_trans_obj.num_rows = len(sub_set[time_column])
+
+        #Lastly, for book-keeping purposes, point all results columns to the corresponding bypass
+        #       columns by appending the columns with the appropriate column names
+        #After this method has been called, result and bypass structures no longer
+        #       have identical numbers of columns and column names.
+        for item in self.bypass_trans_obj.data_map:
+            if item != self.bypass_trans_obj.time_key:
+                appendName = item+"[bypass]"
+                self.result_trans_obj.appendColumn(appendName, self.bypass_trans_obj.data_map[item])
     #End alignData()
 
 
@@ -981,11 +1022,59 @@ class PairedTransientData(object):
             print("Error! Cannot compress the rows of data until data is aligned! Run alignData() first...")
             return
 
+        self.bypass_trans_obj.compressRows(factor)
+        self.result_trans_obj.compressRows(factor)
+
+    #Function will compute a normalized mass retention integral for the given column
+    #   The align data function must have already been called. That function
+    #   ensures the data sets for bypass and results are aligned and appends the
+    #   aligned data from bypass to the results with "[bypass]" added to the
+    #   end of the file name.
+    def calculateRetentionNormalizedIntegral(self, column_name):
+        #Check for alignment
+        if self.aligned == False:
+            print("Error! Data must be aligned first! Call alignData()...")
+            return
+        appendName = column_name+"[bypass]"
+        if appendName not in self.result_trans_obj.data_map.keys():
+            print("Error! The appended column_name does not match any by-pass/result data keys!")
+            return
+        if column_name not in self.result_trans_obj.data_map.keys():
+            print("Error! The column_name does not match any result data keys!")
+            return
+        self.result_trans_obj.calculateRetentionNormalizedIntegral(appendName, column_name)
+
+    #Function will print out the results to an sinle output file
+    #   Data must already be aligned. This allows us to only print out information
+    #   in the results object, since after alignment the results object is linked
+    #   to the columns in the bypass object.
+    def printAlltoFile(self, file_name = ""):
+        if self.aligned == False:
+            print("Error! Data must be aligned first! Call alignData()...")
+            print("\t\t(NOTE: if you want to print out the bypass and result data separately,")
+            print("\t\t       then call each object's s respective printAlltoFile() functions)")
+            return
+        if file_name == "":
+            file_name = self.result_trans_obj.input_file_name.split(".")[0]+"-AllPairedOutput.dat"
+        self.result_trans_obj.printAlltoFile(file_name)
+
+    #Function to print only specific columns to an output file
+    def printColumnstoFile(self, column_list, file_name = ""):
+        if self.aligned == False:
+            print("Error! Data must be aligned first! Call alignData()...")
+            print("\t\t(NOTE: if you want to print out the bypass and result data separately,")
+            print("\t\t       then call each object's s respective printAlltoFile() functions)")
+            return
+        if file_name == "":
+            file_name = self.result_trans_obj.input_file_name.split(".")[0]+"-SelectedPairedOutput.dat"
+        self.result_trans_obj.printAlltoFile(column_list, file_name)
+
 
 
 ## ------ Testing ------
 
 # Testing with the NH3 TPDs at constant H2O concentration
+'''
 test01 = TransientData("20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-150C.dat")
 
 test01.compressColumns()
@@ -998,8 +1087,10 @@ test01.calculateRetentionNormalizedIntegral('NH3 (300,3000)[input]','NH3 (300,30
 #print(test01.num_rows)
 test01.compressRows(10)
 test01.printAlltoFile()
+'''
 
 # Testing with the Competition between H2O and NH3 TPDs
+'''
 test02 = TransientData("20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2-11-3pctH2O-400ppmNH3-150C.dat")
 test02.compressColumns()
 #test02.displayColumnNames()
@@ -1012,10 +1103,11 @@ test02.calculateRetentionNormalizedIntegral('H2O% (20)[input]','H2O% (20)')
 #print(test02.change_time)
 test02.compressRows(2)
 test02.printAlltoFile()
-#print(test02)
+'''
 
 
 #Testing with by-pass data
+'''
 test03 = TransientData("20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2-11-3pctH2O-400ppmNH3-bp.dat")
 test03.compressColumns()
 test03.retainOnlyColumns(['Elapsed Time (min)','NH3 (300,3000)', 'H2O% (20)'])
@@ -1029,24 +1121,32 @@ test04.retainOnlyColumns(['Elapsed Time (min)','NH3 (300,3000)', 'H2O% (20)'])
 #print(test04.change_time)
 test04.compressRows(1)
 test04.printAlltoFile()
+'''
 
 
 #Testing Paired data
-test05 = PairedTransientData("20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2-11-3pctH2O-400ppmNH3-bp.dat","20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2-11-3pctH2O-400ppmNH3-150C.dat")
-#test05 = PairedTransientData("20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-bp.dat","20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-150C.dat")
+h2o_comp = False
+if h2o_comp == True:
+    test05 = PairedTransientData("20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2-11-3pctH2O-400ppmNH3-bp.dat","20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2-11-3pctH2O-400ppmNH3-150C.dat")
+else:
+    test05 = PairedTransientData("20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-bp.dat","20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-150C.dat")
 test05.compressColumns()
 #test05.displayColumnNames()
-#print(test05.extractBypassColumns('NH3 (300,3000)'))
-#print(test05.getBypassDataPoint(0.25,'NH3 (300,3000)'))
-#print(test05)
-test05.alignData()
-test05.retainOnlyColumns(['Elapsed Time (min)','NH3 (300,3000)', 'H2O% (20)'])
-test05.bypass_trans_obj.printAlltoFile("test-bp.dat")
-test05.result_trans_obj.printAlltoFile("test-result.dat")
 
-#If we request a time outside of the range, we should just return the last point 
-print(test05.getBypassDataPoint(100000,'NH3 (300,3000)'))
-#print(test05.bypass_trans_obj.extractColumns('NH3 (300,3000)'))
-#test05.compressRows()
+#NOTE: If you are going to only retain specific columns, you should run that function
+#       prior to running alignData(). This saves significant computational effort.
+test05.retainOnlyColumns(['Elapsed Time (min)','NH3 (300,3000)', 'H2O% (20)'])
+test05.alignData()
+
+#NOTE: Always perform data processing BEFORE compressing the rows!
+test05.calculateRetentionNormalizedIntegral('NH3 (300,3000)')
+test05.calculateRetentionNormalizedIntegral('H2O% (20)')
+
+if h2o_comp == True:
+    test05.compressRows(2)
+else:
+    test05.compressRows(10)
+
+test05.printAlltoFile()
 
 ## ----- End Testing -----
