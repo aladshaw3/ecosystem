@@ -14,7 +14,8 @@
                     reduction of NOx. Copyright (c) 2020, all rights reserved.
 '''
 
-import sensitivity as sa
+#import sensitivity as sa
+from sensitivity import SensitivitySweep   #Use this line to only import a specific method, class, object, or function 
 import math
 
 def NH3_Storage_Model_v0(params, conds):
@@ -244,7 +245,7 @@ for item in conds_lb:
     conds_tuples[item] = (conds_lb[item], conds_ub[item])
 
 #analysis = sa.SensitivitySweep(NH3_Storage_Model_v0, params, conds_tuples)
-analysis = sa.SensitivitySweep(NH3_Storage_Model_v0_1, params, conds_tuples)
+analysis = SensitivitySweep(NH3_Storage_Model_v0_1, params, conds_tuples)
 file_name_simple = "NH3-Analysis-Results-Simple.txt"
 file_name_full = "NH3-Analysis-Results-Exhaustive.txt"
 rel = True

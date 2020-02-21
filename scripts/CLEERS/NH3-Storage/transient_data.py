@@ -59,7 +59,7 @@ class TransientData(object):
             self.have_flow_rate = False
         if file_name_info[-1].split(".")[0] == "bp":
             self.inlet_data = True
-            self.isothermal_temp = 25
+            self.isothermal_temp = 0
         else:
             self.inlet_data = False
             try:
@@ -81,9 +81,16 @@ class TransientData(object):
                                         #   correspond to output values corresponding to the input values given
 
         self.time_key = ""              #Contains the name of the time key for the data_map
-                                        #   Key must contain "Elapsed Time (unit)" in the data file
+                                        #   Key must contain "Elapsed Time (min)" in the data file
                                         #   unit can be any time units, but the first part of the string
                                         #   must alwas exist as "Elapsed Time (..."
+                                        #       (NOTE: We assume that elapsed time has units of minutes)
+        self.sys_vol = 0.015708         #Volume of the system over which data was gathered (in L)
+                                        #   Space volume of the column for the catalyst
+                                        #   User must manually assign a value, if needed
+        self.void_frac = 0.3309         #Void volume fraction for the total system volume
+                                        #   This would represent the overall bulk porosity of the
+                                        #   catalyst. User must manually override this value if needed.
         if statinfo.st_size >= 10000000:
             print("Reading large file. Please wait...")
         self.readFile()
@@ -163,18 +170,6 @@ class TransientData(object):
                                     if len(self.data_map[self.ordered_key_list[n]]) > 0:
                                         if type(self.data_map[self.ordered_key_list[n]][-1]) is not int and type(self.data_map[self.ordered_key_list[n]][-1]) is not float:
                                             self.data_map[self.ordered_key_list[n]].append(item)
-                                        #else:
-                                            #print("Warnging")
-                                    #else:
-                                        #print("Warning")
-                                #self.data_map[self.ordered_key_list[n]].append(item)
-                                #if i == 2:
-                                    #self.data_map[self.ordered_key_list[n]].append(item)
-                                #else:
-                                    #if type(self.data_map[self.ordered_key_list[n]][i-3]) is not int and type(self.data_map[self.ordered_key_list[n]][i-3]) is not float:
-                                        #self.data_map[self.ordered_key_list[n]].append(item)
-                                    #else:
-                                        #print("Warning! Some data lost...")
                     n+=1
             i+=1
         #END of line loop
@@ -183,6 +178,26 @@ class TransientData(object):
 
     def closeFile(self):
         self.data_file.close()
+
+    #Function to set the system volume
+    def defineVolume(self, vol):
+        try:
+            self.sys_vol = float(vol)
+        except:
+            print("Error! Given value is non-numeric!")
+
+    #Function to set the system porosity
+    def defineVoidFraction(self, frac):
+        try:
+            val = float(frac)
+            if val > 1:
+                val = 1
+            if val < 0:
+                print("Error! Cannot give negative void fraction")
+                return
+            self.void_frac = val
+        except:
+            print("Error! Given value is non-numeric!")
 
     #This function will add a column to the data map given the column name and associated data
     #   NOTE: Appending the column does NOT copy the column into the map. It merely directs
@@ -365,7 +380,6 @@ class TransientData(object):
                 #Now, delete the original columns
                 for sub_key in frac_keys[item]:
                     del self.data_map[sub_key]
-
             #End if
 
 
@@ -617,9 +631,32 @@ class TransientData(object):
 
     #This function will perform a trapezoid rule integration between two given curves
     #   in the data_map versus the time_key set of data. The first value of the integrated
-    #   curve is always assumed to be zero. The units for the given columns do not matter
-    #   as this method will specifically produce a normalized integrated curve. Generally,
+    #   curve is always assumed to be zero. The units for the given columns do not matter,
+    #   resulting curve will have same units as the given columns for inlet and outlet. Generally,
     #   this function is used to create a data column for Mass Retained in the catalyst.
+    #
+    #   User may pass an additional argument to determine whether or not they want the
+    #   integral to be normalized. When normalized, the resulting column becomes unitless
+    #   and is normalized to the magnitude of the maximum integrated value.
+    #
+    #   In addition to normalization, user may also provide a conversion factor to the
+    #   calculated integral. The conversion factor can be used to scaled the normalized
+    #   curve to a desired maximum or minimum, or can be used as a way to convert the
+    #   units of the result from it's starting units to whatever the user desires.
+    #
+    #   For instance, if the units of the given column are in ppmv, but you want the result
+    #   to come out to mol/L, then your conversion factor would be...
+    #
+    #       conv_factor = (1/10^6)*P/8.314/T
+    #
+    #                   where P is total pressure in kPa and T is temperature in K
+    #
+    #   As another unit conversion example, let's say we want the result to come out
+    #   in typical adsorption units: mol adsorbed / L catalyst. Then, the conversion
+    #   factor would be like above, but we would also multiple by the total system
+    #   volume and divide by the solid volume of the catalyst.
+    #
+    #       conv_factor = (1/10^6)*P/8.314/T*(V_tot/V_cat)
     #
     #   The following relationship is assumed...
     #
@@ -629,7 +666,7 @@ class TransientData(object):
     #   Mout = Mass out (given data column to represent outlet mass)
     #   Q = flow rate (usually as space velocity [ hr^-1 ])
     #   MR = Mass retained in the catalyst (Representative of adsorbed mass)
-    def calculateRetentionNormalizedIntegral(self, inlet_column, outlet_column):
+    def calculateRetentionIntegral(self, inlet_column, outlet_column, normalized = True, conv_factor = 1):
         if inlet_column not in self.data_map.keys():
             print("Error! No corresponding inlet column exists in data_map!")
             return
@@ -640,7 +677,10 @@ class TransientData(object):
             print("Error! Cannot calculate retention integral without a flow rate. Flow rate is expected in the file name in kilo-volumes per hour...")
             return
 
-        ret_key = inlet_column.split()[0]+"-Retained (normalized)"
+        if normalized == True:
+            ret_key = inlet_column.split()[0]+"-Retained (normalized)"
+        else:
+            ret_key = inlet_column.split()[0]+"-Retained"
         self.data_map[ret_key] = []
         self.data_map[ret_key].append(0)
         MR_old = 0
@@ -653,10 +693,10 @@ class TransientData(object):
             time_new = self.data_map[self.time_key][i]
             Min_new = self.data_map[inlet_column][i]
             Mout_new = self.data_map[outlet_column][i]
-            MR_new = MR_old + (time_new-time_old)*self.flow_rate*( (Min_old+Min_new)/2 - (Mout_old+Mout_new)/2 )
+            MR_new = MR_old + (time_new-time_old)/60*self.flow_rate*( (Min_old+Min_new)/2 - (Mout_old+Mout_new)/2 )
             if abs(MR_new) > max_value:
                 max_value = abs(MR_new)
-            self.data_map[ret_key].append(MR_new)
+            self.data_map[ret_key].append(MR_new*conv_factor)
             time_old = time_new
             Min_old = Min_new
             Mout_old = Mout_new
@@ -664,10 +704,11 @@ class TransientData(object):
             i+=1
 
         #Loop one last time to normalize the integrated curve
-        i=0
-        for value in self.data_map[ret_key]:
-            self.data_map[ret_key][i] = self.data_map[ret_key][i]/max_value
-            i+=1
+        if normalized == True:
+            i=0
+            for value in self.data_map[ret_key]:
+                self.data_map[ret_key][i] = self.data_map[ret_key][i]/max_value
+                i+=1
 
 
 
@@ -1025,12 +1066,12 @@ class PairedTransientData(object):
         self.bypass_trans_obj.compressRows(factor)
         self.result_trans_obj.compressRows(factor)
 
-    #Function will compute a normalized mass retention integral for the given column
+    #Function will compute a mass retention integral for the given column
     #   The align data function must have already been called. That function
     #   ensures the data sets for bypass and results are aligned and appends the
     #   aligned data from bypass to the results with "[bypass]" added to the
     #   end of the file name.
-    def calculateRetentionNormalizedIntegral(self, column_name):
+    def calculateRetentionIntegral(self, column_name, normalized = True, conv_factor = 1):
         #Check for alignment
         if self.aligned == False:
             print("Error! Data must be aligned first! Call alignData()...")
@@ -1042,7 +1083,7 @@ class PairedTransientData(object):
         if column_name not in self.result_trans_obj.data_map.keys():
             print("Error! The column_name does not match any result data keys!")
             return
-        self.result_trans_obj.calculateRetentionNormalizedIntegral(appendName, column_name)
+        self.result_trans_obj.calculateRetentionIntegral(appendName, column_name, normalized, conv_factor)
 
     #Function will print out the results to an sinle output file
     #   Data must already be aligned. This allows us to only print out information
@@ -1082,7 +1123,7 @@ test01.compressColumns()
 #test01.displayColumnNames()
 test01.retainOnlyColumns(['Elapsed Time (min)','NH3 (300,3000)', 'H2O% (20)', 'TC bot sample in (C)', 'TC bot sample mid 1 (C)', 'TC bot sample mid 2 (C)', 'TC bot sample out 1 (C)', 'TC bot sample out 2 (C)', 'P bottom in (bar)', 'P bottom out (bar)'])
 test01.createStepChangeInputData('NH3 (300,3000)')
-test01.calculateRetentionNormalizedIntegral('NH3 (300,3000)[input]','NH3 (300,3000)')
+test01.calculateRetentionIntegral('NH3 (300,3000)[input]','NH3 (300,3000)')
 #NOTE: Consider using current number of rows to determine how much compression to use
 #print(test01.num_rows)
 test01.compressRows(10)
@@ -1096,8 +1137,8 @@ test02.compressColumns()
 #test02.displayColumnNames()
 test02.retainOnlyColumns(['Elapsed Time (min)','NH3 (300,3000)', 'H2O% (20)', 'TC bot sample in (C)', 'TC bot sample mid 1 (C)', 'TC bot sample mid 2 (C)', 'TC bot sample out 1 (C)', 'TC bot sample out 2 (C)', 'P bottom in (bar)', 'P bottom out (bar)'])
 test02.createStepChangeInputData(['NH3 (300,3000)','H2O% (20)'],40)
-test02.calculateRetentionNormalizedIntegral('NH3 (300,3000)[input]','NH3 (300,3000)')
-test02.calculateRetentionNormalizedIntegral('H2O% (20)[input]','H2O% (20)')
+test02.calculateRetentionIntegral('NH3 (300,3000)[input]','NH3 (300,3000)')
+test02.calculateRetentionIntegral('H2O% (20)[input]','H2O% (20)')
 #print(test01.num_rows)
 #print("H2O-150")
 #print(test02.change_time)
@@ -1125,7 +1166,7 @@ test04.printAlltoFile()
 
 
 #Testing Paired data
-'''
+
 h2o_comp = False
 if h2o_comp == True:
     test05 = PairedTransientData("20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2-11-3pctH2O-400ppmNH3-bp.dat","20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2-11-3pctH2O-400ppmNH3-150C.dat")
@@ -1140,8 +1181,13 @@ test05.retainOnlyColumns(['Elapsed Time (min)','NH3 (300,3000)', 'H2O% (20)'])
 test05.alignData()
 
 #NOTE: Always perform data processing BEFORE compressing the rows!
-test05.calculateRetentionNormalizedIntegral('NH3 (300,3000)')
-test05.calculateRetentionNormalizedIntegral('H2O% (20)')
+normal = False  #If true, then the integral is normalized and unitless
+                #Otherwise, the integral has same units as the given column
+conv_factor = 4.30554723150288E-08
+#NOTE: This factor is for 101.35 kPa, 150 oC, and a 0.0157 L total volume with 0.33 void fraction
+#           Also, this is to convert from ppmv to mol adsorbed per L catalyst 
+test05.calculateRetentionIntegral('NH3 (300,3000)', normal, conv_factor)
+test05.calculateRetentionIntegral('H2O% (20)', normal, 1)
 
 if h2o_comp == True:
     test05.compressRows(2)
@@ -1149,6 +1195,6 @@ else:
     test05.compressRows(10)
 
 test05.printAlltoFile()
-'''
+
 
 ## ----- End Testing -----
