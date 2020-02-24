@@ -92,7 +92,7 @@ class TransientData(object):
                                         #   This would represent the overall bulk porosity of the
                                         #   catalyst. User must manually override this value if needed.
         if statinfo.st_size >= 10000000:
-            print("Reading large file. Please wait...")
+            print("\nReading " + str(statinfo.st_size/1E6) + " MB file. Please wait...")
         self.readFile()
         if statinfo.st_size >= 10000000:
             print("Finished!")
