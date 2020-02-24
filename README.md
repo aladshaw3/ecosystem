@@ -4,7 +4,21 @@ This README file outlines how to get setup using the ecosystem codes and executa
 
 ### What is this repository for? ###
 
-* This repository is for the ecosystem tool set designed and developed by Austin Ladshaw at the Georgia Institute of Technology. Tools and algorithms developed here are designed for simulation and data anaylsis associated with adsorption phenomena in air and water chemistry. However, several sets of tools here are also generalized and could be used in nearly any realm of science and engineering. 
+* This repository is for the ecosystem tool set designed and developed by Austin Ladshaw at the Georgia Institute of Technology and Oak Ridge National Laboratory. Tools and algorithms developed here are designed for simulation and data anaylsis associated with adsorption phenomena in air and water chemistry. However, several sets of tools here are also generalized and could be used in nearly any realm of science and engineering. Below is a brief description of some of the modules...
+
+	+ MACAW - templated C++ matrix object for simple matrix math
+	+ LARK - C-style library of linear and non-linear solvers
+	+ DOVE - C++ object for creating and solving systems of ODEs
+	+ FINCH - C-style library for simulating 1D conservation laws with a MUSCL scheme
+	+ CROW - C++ object for creating and simulating reaction mechanisms 
+	+ IBIS - C++ object for solving radioactive decay chains
+	+ EEL - C++ object to store and register specific atomic information
+	+ MOLA - C++ object to store and register specific molecular information
+	+ SHARK - C++ object for creating and simulating aqueous chemistry and adsorption
+	+ YAML_WRAPPER - C++ object for reading and writing yaml formatted files 
+	+ FAIRY - C++ object to utilize fission yield databases to predict fission products
+	+ MAGPIE - C-style object to simulate multi-species gas phase adsorption thermodynamics
+	+ GSTA_OPT - C-style optimization routine to process gas phase adsorption data 
 
 * Version: 1.0.0
 
@@ -14,7 +28,7 @@ This README file outlines how to get setup using the ecosystem codes and executa
 
 * Requirements: 
 	+ gcc/g++ version 4.7 or newer (or llvm version 4.2 or newer)
-	+ python 3.5 or newer (recommended for running python scripts)
+	+ python 3.7 or newer (recommended for running python scripts)
 
 * Summary of set up
 
@@ -56,7 +70,7 @@ This README file outlines how to get setup using the ecosystem codes and executa
 
 ### Who do I talk to? ###
 
-* Lead Developer: Austin Ladshaw (aladshaw3@gatech.edu)
+* Lead Developer: Austin Ladshaw (ladshawap@ornl.gov, aladshaw3@outlook.com)
 * Trajectory Contributor: Alex Wiechert (awiechert3@gatech.edu)
 
 ### How to cite this repository ###
