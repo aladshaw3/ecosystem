@@ -246,6 +246,131 @@ class TransientData(object):
                 print("Error! Invalid Key!")
         return new_map
 
+    #This function is used to perform a number of operations using a given column
+    #   The default setting is to operate on the given column to change it's values,
+    #   however, the user can specify that the result should create a new column to
+    #   append to the map if desired.
+    #
+    #   Supported Operations:
+    #       multiply by a scalar ==> this_column, "*", constant
+    #       divide by a scalar   ==> this_column, "/", constant
+    #       add a scalar         ==> this_column, "+", constant
+    #       subtract a scalar    ==> this_column, "-", constant
+    #       multiply by a column ==> this_column, "*", other_column
+    #       divide by a column   ==> this_column, "/", other_column
+    #       add a column         ==> this_column, "+", other_column
+    #       subtract a column    ==> this_column, "-", other_column
+    #
+    #   NOTE: Multiplying and dividing by a given column will just take all
+    #           corresponding rows of the first column and perform the operation
+    #           using the data in the other corresponding row of the other column.
+    #
+    #   EXAMPLE USAGE:
+    #       obj.mathOperation("A","*","B")
+    #               this will compute the result of the multiplication of every
+    #                   row of A times every row of B and store the result in A
+    #
+    #       obj.mathOperation("A","+",273,True)
+    #               this will compute the result of every row of A plus 273 and
+    #                   store the result in a new column in the map named "A+273"
+    #
+    #       obj.mathOperation("A","/","B",True,"Res")
+    #               this will compute the result of the division of every row
+    #                   of A divided by every row of B and store the result in a
+    #                   new column in the map named "Res"
+    def mathOperation(self, column_name, operator, value_or_column, append_new = False, append_name = ""):
+        if column_name not in self.data_map.keys():
+            print("Error! Unrecognized column_name...")
+            return
+        if type(operator) is not str:
+            print("Error! Given operator must be a string...")
+            print("\tCurrent Options: '*', '/', '+', and '-' ")
+            return
+        if operator != "*" and operator != "/" and operator != "+" and operator != "-":
+            print("Error! Unsupported operator...")
+            return
+        if type(self.data_map[column_name][0]) is not int and type(self.data_map[column_name][0]) is not float:
+            print("Error! Non-numeric data in the given first column...")
+            return
+
+        #Check the value_or_column variable type
+        if type(value_or_column) is str:
+            if value_or_column not in self.data_map.keys():
+                print("Error! Argument given as the value is not a valid key...")
+                return
+            if type(self.data_map[value_or_column][0]) is not int and type(self.data_map[value_or_column][0]) is not float:
+                print("Error! Non-numeric data in the given second column...")
+                return
+            if append_new == True:
+                new_name = append_name
+                if new_name == "":
+                    new_name = column_name + operator + value_or_column
+                self.data_map[new_name] = []
+                i=0
+                for value in self.data_map[column_name]:
+                    if operator == "*":
+                        self.data_map[new_name].append(value*self.data_map[value_or_column][i])
+                    elif operator == "/":
+                        self.data_map[new_name].append(value/self.data_map[value_or_column][i])
+                    elif operator == "-":
+                        self.data_map[new_name].append(value-self.data_map[value_or_column][i])
+                    elif operator == "+":
+                        self.data_map[new_name].append(value+self.data_map[value_or_column][i])
+                    else:
+                        print("Error! How did you even get here...?")
+                        return
+                    i+=1
+            else:
+                i=0
+                for value in self.data_map[column_name]:
+                    if operator == "*":
+                        self.data_map[column_name][i] = (value*self.data_map[value_or_column][i])
+                    elif operator == "/":
+                        self.data_map[column_name][i] = (value/self.data_map[value_or_column][i])
+                    elif operator == "-":
+                        self.data_map[column_name][i] = (value-self.data_map[value_or_column][i])
+                    elif operator == "+":
+                        self.data_map[column_name][i] = (value+self.data_map[value_or_column][i])
+                    else:
+                        print("Error! How did you even get here...?")
+                        return
+                    i+=1
+        else:
+            if append_new == True:
+                new_name = append_name
+                if new_name == "":
+                    new_name = column_name + operator + str(value_or_column)
+                self.data_map[new_name] = []
+                i=0
+                for value in self.data_map[column_name]:
+                    if operator == "*":
+                        self.data_map[new_name].append(value*value_or_column)
+                    elif operator == "/":
+                        self.data_map[new_name].append(value/value_or_column)
+                    elif operator == "-":
+                        self.data_map[new_name].append(value-value_or_column)
+                    elif operator == "+":
+                        self.data_map[new_name].append(value+value_or_column)
+                    else:
+                        print("Error! How did you even get here...?")
+                        return
+                    i+=1
+            else:
+                i=0
+                for value in self.data_map[column_name]:
+                    if operator == "*":
+                        self.data_map[column_name][i] = (value*value_or_column)
+                    elif operator == "/":
+                        self.data_map[column_name][i] = (value/value_or_column)
+                    elif operator == "-":
+                        self.data_map[column_name][i] = (value-value_or_column)
+                    elif operator == "+":
+                        self.data_map[column_name][i] = (value+value_or_column)
+                    else:
+                        print("Error! How did you even get here...?")
+                        return
+                    i+=1
+
     #This function will extract a row of data (or set of rows) based on the value of Elapsed time provided
     def extractRows(self, min_time, max_time):
         new_map = {}
@@ -392,13 +517,13 @@ class TransientData(object):
                 if item in self.data_map.keys():
                     del self.data_map[item]
                 else:
-                    print("Error! No such column exists!")
+                    return
         else:
             #delete only the given column
             if column_list in self.data_map.keys():
                 del self.data_map[column_list]
             else:
-                print("Error! No such column exists!")
+                return
 
     #This function will delete all columns in the data_map except for the ones specified to retain
     def retainOnlyColumns(self, column_list):
@@ -666,7 +791,7 @@ class TransientData(object):
     #   Mout = Mass out (given data column to represent outlet mass)
     #   Q = flow rate (usually as space velocity [ hr^-1 ])
     #   MR = Mass retained in the catalyst (Representative of adsorbed mass)
-    def calculateRetentionIntegral(self, inlet_column, outlet_column, normalized = True, conv_factor = 1):
+    def calculateRetentionIntegral(self, inlet_column, outlet_column, normalized = False, conv_factor = 1):
         if inlet_column not in self.data_map.keys():
             print("Error! No corresponding inlet column exists in data_map!")
             return
@@ -678,9 +803,9 @@ class TransientData(object):
             return
 
         if normalized == True:
-            ret_key = inlet_column.split()[0]+"-Retained (normalized)"
+            ret_key = outlet_column+"-Retained (normalized)"
         else:
-            ret_key = inlet_column.split()[0]+"-Retained"
+            ret_key = outlet_column+"-Retained"
         self.data_map[ret_key] = []
         self.data_map[ret_key].append(0)
         MR_old = 0
@@ -780,7 +905,7 @@ class PairedTransientData(object):
 
     #Function to display the column names to console
     def displayColumnNames(self):
-        self.bypass_trans_obj.displayColumnNames()
+        self.result_trans_obj.displayColumnNames()
 
     #Function to compress columns in both data sets
     def compressColumns(self):
@@ -1071,7 +1196,14 @@ class PairedTransientData(object):
     #   ensures the data sets for bypass and results are aligned and appends the
     #   aligned data from bypass to the results with "[bypass]" added to the
     #   end of the file name.
-    def calculateRetentionIntegral(self, column_name, normalized = True, conv_factor = 1):
+    #
+    #   By default, the calculated integral will have the same units as the data
+    #       in the given column, however, the user may specify to have the integral
+    #       normalized (thus making the result unitless) and/or may specify a unit
+    #       conversion factor to multiple the results by in order to get a specific
+    #       unit outcome.
+    #
+    def calculateRetentionIntegral(self, column_name, normalized = False, conv_factor = 1):
         #Check for alignment
         if self.aligned == False:
             print("Error! Data must be aligned first! Call alignData()...")
@@ -1084,6 +1216,44 @@ class PairedTransientData(object):
             print("Error! The column_name does not match any result data keys!")
             return
         self.result_trans_obj.calculateRetentionIntegral(appendName, column_name, normalized, conv_factor)
+
+    #This function is used to perform a number of operations using a given column
+    #   The default setting is to operate on the given column to change it's values,
+    #   however, the user can specify that the result should create a new column to
+    #   append to the map if desired.
+    #
+    #   Supported Operations:
+    #       multiply by a scalar ==> this_column, "*", constant
+    #       divide by a scalar   ==> this_column, "/", constant
+    #       add a scalar         ==> this_column, "+", constant
+    #       subtract a scalar    ==> this_column, "-", constant
+    #       multiply by a column ==> this_column, "*", other_column
+    #       divide by a column   ==> this_column, "/", other_column
+    #       add a column         ==> this_column, "+", other_column
+    #       subtract a column    ==> this_column, "-", other_column
+    #
+    #   NOTE: Multiplying and dividing by a given column will just take all
+    #           corresponding rows of the first column and perform the operation
+    #           using the data in the other corresponding row of the other column.
+    #
+    #   EXAMPLE USAGE:
+    #       obj.mathOperation("A","*","B")
+    #               this will compute the result of the multiplication of every
+    #                   row of A times every row of B and store the result in A
+    #
+    #       obj.mathOperation("A","+",273,True)
+    #               this will compute the result of every row of A plus 273 and
+    #                   store the result in a new column in the map named "A+273"
+    #
+    #       obj.mathOperation("A","/","B",True,"Res")
+    #               this will compute the result of the division of every row
+    #                   of A divided by every row of B and store the result in a
+    #                   new column in the map named "Res"
+    def mathOperation(self, column_name, operator, value_or_column, append_new = False, append_name = ""):
+        if self.aligned == False:
+            print("Error! Data must be aligned BEFORE performing operations! Call alignData() first...")
+            return
+        self.result_trans_obj.mathOperation(column_name, operator, value_or_column, append_new, append_name)
 
     #Function will print out the results to an sinle output file
     #   Data must already be aligned. This allows us to only print out information
@@ -1167,7 +1337,7 @@ test04.printAlltoFile()
 
 #Testing Paired data
 
-h2o_comp = False
+h2o_comp = True
 if h2o_comp == True:
     test05 = PairedTransientData("20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2-11-3pctH2O-400ppmNH3-bp.dat","20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2-11-3pctH2O-400ppmNH3-150C.dat")
 else:
@@ -1177,18 +1347,81 @@ test05.compressColumns()
 
 #NOTE: If you are going to only retain specific columns, you should run that function
 #       prior to running alignData(). This saves significant computational effort.
-test05.retainOnlyColumns(['Elapsed Time (min)','NH3 (300,3000)', 'H2O% (20)'])
+#test05.retainOnlyColumns(['Elapsed Time (min)','NH3 (300,3000)', 'H2O% (20)'])
+test05.retainOnlyColumns(['Elapsed Time (min)','NH3 (300,3000)', 'H2O% (20)', 'TC bot sample in (C)', 'TC bot sample mid 1 (C)', 'TC bot sample mid 2 (C)', 'TC bot sample out 1 (C)', 'TC bot sample out 2 (C)', 'P bottom in (bar)', 'P bottom out (bar)'])
 test05.alignData()
 
-#NOTE: Always perform data processing BEFORE compressing the rows!
-normal = False  #If true, then the integral is normalized and unitless
-                #Otherwise, the integral has same units as the given column
-conv_factor = 4.30554723150288E-08
-#NOTE: This factor is for 101.35 kPa, 150 oC, and a 0.0157 L total volume with 0.33 void fraction
-#           Also, this is to convert from ppmv to mol adsorbed per L catalyst 
-test05.calculateRetentionIntegral('NH3 (300,3000)', normal, conv_factor)
-test05.calculateRetentionIntegral('H2O% (20)', normal, 1)
+#NOTE: After data is aligned, all result and bypass data are now in the result_trans_obj.
+#The bypass columns have the same names, but will be suffixed with [bypass]
+#We can then use this knowledge to manipulate or delete very specific sets of data
 
+#Convert all temperatures from (C) to Kelvin, then delete old columns
+test05.mathOperation('TC bot sample in (C)',"+",273.15, True, 'TC bot sample in (K)')
+test05.deleteColumns('TC bot sample in (C)')
+test05.mathOperation('TC bot sample mid 1 (C)',"+",273.15, True, 'TC bot sample mid 1 (K)')
+test05.deleteColumns('TC bot sample mid 1 (C)')
+test05.mathOperation('TC bot sample mid 2 (C)',"+",273.15, True, 'TC bot sample mid 2 (K)')
+test05.deleteColumns('TC bot sample mid 2 (C)')
+test05.mathOperation('TC bot sample out 1 (C)',"+",273.15, True, 'TC bot sample out 1 (K)')
+test05.deleteColumns('TC bot sample out 1 (C)')
+test05.mathOperation('TC bot sample out 2 (C)',"+",273.15, True, 'TC bot sample out 2 (K)')
+test05.deleteColumns('TC bot sample out 2 (C)')
+
+#Delete the temperature columns from the bypass run that we don't need
+#NOTE: Will result in errors displayed, but only because of name changes (this is ok)
+test05.deleteColumns(['TC bot sample in (C)[bypass]','TC bot sample mid 1 (C)[bypass]','TC bot sample mid 2 (C)[bypass]','TC bot sample out 1 (C)[bypass]','TC bot sample out 2 (C)[bypass]'])
+
+#Now, convert all pressures from bar to kPa and delete the extra [bypass] columns
+test05.mathOperation('P bottom in (bar)',"*",100,True,'P bottom in (kPa)')
+test05.deleteColumns('P bottom in (bar)')
+test05.mathOperation('P bottom out (bar)',"*",100,True,'P bottom out (kPa)')
+test05.deleteColumns('P bottom out (bar)')
+test05.deleteColumns(['P bottom in (bar)[bypass]','P bottom out (bar)[bypass]'])
+
+#NOTE: Always perform data processing BEFORE compressing the rows!
+#normal = False  #If true, then the integral is normalized and unitless
+                #Otherwise, the integral has same units as the given column
+#conv_factor = 4.30554723150288E-08
+#NOTE: This factor is for 101.35 kPa, 150 oC, and a 0.0157 L total volume with 0.33 void fraction
+#           Also, this is to convert from ppmv to mol adsorbed per L catalyst
+#test05.calculateRetentionIntegral('NH3 (300,3000)', normal, conv_factor)
+#test05.calculateRetentionIntegral('H2O% (20)', normal, 1)
+
+#Instead of using a constant factor for unit conversion, this time we will
+#have the integral results computed in their respective units, then convert those
+#new columns using the mathOperation() functions with other column data.
+test05.calculateRetentionIntegral('NH3 (300,3000)')
+test05.calculateRetentionIntegral('H2O% (20)')
+
+#test05.displayColumnNames()
+
+#NOTE: The retention integral will have the name of the given column suffixed
+#       with '-Retained' and will have the same units as the given column. Use
+#       that information to perform specific actions on that column.
+
+#NH3 has units of ppmv, want to convert this to mol adsorbed / L catalyst
+test05.mathOperation('NH3 (300,3000)-Retained',"/",1E6)                     #From ppmv to molefraction
+test05.mathOperation('NH3 (300,3000)-Retained',"*","P bottom out (kPa)")    #From molefraction to kPa
+test05.mathOperation('NH3 (300,3000)-Retained',"/",8.314)
+test05.mathOperation('NH3 (300,3000)-Retained',"/",'TC bot sample out 1 (K)') #From kPa to mol/L using Ideal gas law
+test05.mathOperation('NH3 (300,3000)-Retained',"*",0.015708)                #From mol/L to total moles (multiply by total volume)
+#From total moles to mol ads / L cat using solids fraction, then store in new column and delete old column
+test05.mathOperation('NH3 (300,3000)-Retained',"/",(1-0.3309)*0.015708,True,"NH3 ads (mol/L)")
+test05.deleteColumns('NH3 (300,3000)-Retained')
+
+#H2O has units of %, want to convert this to mol adsorbed / L catalyst
+test05.mathOperation('H2O% (20)-Retained',"/",100)                     #From % to molefraction
+test05.mathOperation('H2O% (20)-Retained',"*","P bottom out (kPa)")    #From molefraction to kPa
+test05.mathOperation('H2O% (20)-Retained',"/",8.314)
+test05.mathOperation('H2O% (20)-Retained',"/",'TC bot sample out 1 (K)') #From kPa to mol/L using Ideal gas law
+test05.mathOperation('H2O% (20)-Retained',"*",0.015708)                #From mol/L to total moles (multiply by total volume)
+#From total moles to mol ads / L cat using solids fraction, then store in new column and delete old column
+test05.mathOperation('H2O% (20)-Retained',"/",(1-0.3309)*0.015708,True,"H2O ads (mol/L)")
+test05.deleteColumns('H2O% (20)-Retained')
+
+#NTOE: Only call the compressRows(n) function when you are ready to print information to
+#       a file for visualization or further analysis purposes. The data set will lose
+#       some accuracy when the rows are compressed.
 if h2o_comp == True:
     test05.compressRows(2)
 else:
