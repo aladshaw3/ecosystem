@@ -43,9 +43,11 @@ class TransientData(object):
     #                   temperature is irrelevant, but bp indicates that this is inlet information
     #                   (Also note, item[-1] will carry the file extension with it)
     def __init__(self, file):
+        #Check the given file name for any path information and truncate the path information
+        file_name = file.split("/")[-1]
         #Parse the file name to gain specific information
-        self.input_file_name = file
-        file_name_info = file.split("-")
+        self.input_file_name = file_name
+        file_name_info = file_name.split("-")
         self.material_name = file_name_info[2]
         if file_name_info[3] == "700C4h":
             self.aging_condition = "De-greened"
@@ -532,14 +534,14 @@ class TransientData(object):
         if type(column_list) is list:
             for item in column_list:
                 if item not in self.data_map.keys():
-                    print("Error! Invalid Column Name! No further action taken to delete columns...")
-                    return
+                    print("Warning! Invalid Column Name! No further action taken to delete columns...")
+                    print("\tName given: "+str(item))
                 else:
                     keep[item] = 0
         else:
             if column_list not in self.data_map.keys():
-                print("Error! Invalid Column Name! No further action taken to delete columns...")
-                return
+                print("Warning! Invalid Column Name! No further action taken to delete columns...")
+                print("\tName given: "+str(item))
             else:
                 keep[column_list] = 0
 
