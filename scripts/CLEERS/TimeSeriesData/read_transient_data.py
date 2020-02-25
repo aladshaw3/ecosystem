@@ -252,11 +252,11 @@ class TransientDataFolder(object):
 
     #Function to compute a mass retention integral for all columns of the given name
     #   NOTE: This function SHOULD automatically handle both paired and unpaired data sets
-    def calculateRetentionIntegrals(self, column_name, normalized = False, conv_factor = 1):
+    def calculateRetentionIntegrals(self, column_name, normalized = False, conv_factor = 1, input_col_name=""):
         if self.was_compressed == True:
             print("Warning! Computing integrals after data compression may cause inaccuracies in results!")
         for file in self.paired_data:
-            self.paired_data[file].calculateRetentionIntegral(column_name, normalized, conv_factor)
+            self.paired_data[file].calculateRetentionIntegral(column_name, normalized, conv_factor, input_col_name)
         for file in self.unpaired_data:
             self.unpaired_data[file].createStepChangeInputData(column_name)
             input_name = column_name+"[input]"

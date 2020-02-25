@@ -1247,9 +1247,20 @@ class PairedTransientData(object):
         #       only apply to specific time frames within the new data set.
         for new_name in new_name_set:
             frame_key = new_name.split("[bypass]")[0]+"[input]"
-            #Only apply the ratio adjustment to the new data that has a corresponding frame key 
+            #Only apply the ratio adjustment to the new data that has a corresponding frame key
             if frame_key in frame_ratios.keys():
-                print(frame_key)
+                #iterate through the rows of data
+                tuple_index = 0
+                i=0
+                for time in self.result_trans_obj.data_map[self.result_trans_obj.time_key]:
+                    #Check to see if tuple_index should update
+                    if time > frame_ratio_tuples[tuple_index][1]:
+                        tuple_index +=1
+
+                    #use the tuple_index as the index for the frame_ratios
+                    self.result_trans_obj.data_map[new_name][i] = self.result_trans_obj.data_map[new_name][i]*frame_ratios[frame_key][tuple_index]
+                    i+=1
+
 
     #End alignData()
 
@@ -1276,12 +1287,18 @@ class PairedTransientData(object):
     #       conversion factor to multiple the results by in order to get a specific
     #       unit outcome.
     #
-    def calculateRetentionIntegral(self, column_name, normalized = False, conv_factor = 1):
+    #   NOTE: As an option, the user may specify an input_col_name if that name is
+    #           expected to be different from the given column_name suffixed with
+    #           "[bypass]". May be useful if creating new columns by performing
+    #           unit conversions or other mathOperation() functions.
+    def calculateRetentionIntegral(self, column_name, normalized = False, conv_factor = 1, input_col_name=""):
         #Check for alignment
         if self.aligned == False:
             print("Error! Data must be aligned first! Call alignData()...")
             return
         appendName = column_name+"[bypass]"
+        if input_col_name != "":
+            appendName = input_col_name
         if appendName not in self.result_trans_obj.data_map.keys():
             print("Error! The appended column_name does not match any by-pass/result data keys!")
             return
@@ -1409,7 +1426,7 @@ test04.printAlltoFile()
 
 
 #Testing Paired data
-
+'''
 h2o_comp = False
 if h2o_comp == True:
     test05 = PairedTransientData("20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2-11-3pctH2O-400ppmNH3-bp.dat","20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2-11-3pctH2O-400ppmNH3-150C.dat")
@@ -1461,13 +1478,9 @@ test05.deleteColumns(['P bottom in (bar)[bypass]','P bottom out (bar)[bypass]'])
 #test05.calculateRetentionIntegral('NH3 (300,3000)', normal, conv_factor)
 #test05.calculateRetentionIntegral('H2O% (20)', normal, 1)
 
-#Instead of using a constant factor for unit conversion, this time we will
-#have the integral results computed in their respective units, then convert those
-#new columns using the mathOperation() functions with other column data.
+#Calculate the retention integral, then perform unit conversions
 test05.calculateRetentionIntegral('NH3 (300,3000)')
 test05.calculateRetentionIntegral('H2O% (20)')
-
-#test05.displayColumnNames()
 
 #NOTE: The retention integral will have the name of the given column suffixed
 #       with '-Retained' and will have the same units as the given column. Use
@@ -1475,9 +1488,9 @@ test05.calculateRetentionIntegral('H2O% (20)')
 
 #NH3 has units of ppmv, want to convert this to mol adsorbed / L catalyst
 test05.mathOperation('NH3 (300,3000)-Retained',"/",1E6)                     #From ppmv to molefraction
-test05.mathOperation('NH3 (300,3000)-Retained',"*","P bottom out (kPa)")    #From molefraction to kPa
+test05.mathOperation('NH3 (300,3000)-Retained',"*","P bottom in (kPa)")    #From molefraction to kPa
 test05.mathOperation('NH3 (300,3000)-Retained',"/",8.314)
-test05.mathOperation('NH3 (300,3000)-Retained',"/",'TC bot sample out 1 (K)') #From kPa to mol/L using Ideal gas law
+test05.mathOperation('NH3 (300,3000)-Retained',"/",'TC bot sample in (K)') #From kPa to mol/L using Ideal gas law
 test05.mathOperation('NH3 (300,3000)-Retained',"*",0.015708)                #From mol/L to total moles (multiply by total volume)
 #From total moles to mol ads / L cat using solids fraction, then store in new column and delete old column
 test05.mathOperation('NH3 (300,3000)-Retained',"/",(1-0.3309)*0.015708,True,"NH3 ads (mol/L)")
@@ -1485,13 +1498,72 @@ test05.deleteColumns('NH3 (300,3000)-Retained')
 
 #H2O has units of %, want to convert this to mol adsorbed / L catalyst
 test05.mathOperation('H2O% (20)-Retained',"/",100)                     #From % to molefraction
-test05.mathOperation('H2O% (20)-Retained',"*","P bottom out (kPa)")    #From molefraction to kPa
+test05.mathOperation('H2O% (20)-Retained',"*","P bottom in (kPa)")    #From molefraction to kPa
 test05.mathOperation('H2O% (20)-Retained',"/",8.314)
-test05.mathOperation('H2O% (20)-Retained',"/",'TC bot sample out 1 (K)') #From kPa to mol/L using Ideal gas law
+test05.mathOperation('H2O% (20)-Retained',"/",'TC bot sample in (K)') #From kPa to mol/L using Ideal gas law
 test05.mathOperation('H2O% (20)-Retained',"*",0.015708)                #From mol/L to total moles (multiply by total volume)
 #From total moles to mol ads / L cat using solids fraction, then store in new column and delete old column
 test05.mathOperation('H2O% (20)-Retained',"/",(1-0.3309)*0.015708,True,"H2O ads (mol/L)")
 test05.deleteColumns('H2O% (20)-Retained')
+
+
+#Instead of using a constant factor for unit conversion, this time we will
+#convert the units for the desired inlet and outlet columns first, then ask
+#for the integration of the converted unit columns. This may be the most
+#accurate approach since there are differences in the inlet and outlet
+#temperatures and pressures which are used to convert from molefractions
+#to molar concentrations.
+
+#   Convert NH3 for bypass to mol/L by first converting to molefraction and saving in a new column
+test05.mathOperation('NH3 (300,3000)[bypass]',"/",1E6,True,'NH3 (mol/L)[bypass]')
+#   Then convert that molefraction to kPa and override the new column previously created
+test05.mathOperation('NH3 (mol/L)[bypass]',"*",'P bottom in (kPa)')
+#   Perform the next set of conversion overrides to get to mol/L
+test05.mathOperation('NH3 (mol/L)[bypass]',"/",8.314)
+test05.mathOperation('NH3 (mol/L)[bypass]',"/",'TC bot sample in (K)')
+##   NOTE: we named the new column for the input with a suffixed "[bypass]"
+#           because the integration routine is designed to specifically
+#           look for the "[bypass]" suffix with matching prefixes
+
+#   Convert NH3 for outlet to mol/L by first converting to molefraction and saving in a new column
+test05.mathOperation('NH3 (300,3000)',"/",1E6,True,'NH3 (mol/L)')
+#   Then convert that molefraction to kPa and override the new column previously created
+test05.mathOperation('NH3 (mol/L)',"*",'P bottom in (kPa)')
+#   Perform the next set of conversion overrides to get to mol/L
+test05.mathOperation('NH3 (mol/L)',"/",8.314)
+test05.mathOperation('NH3 (mol/L)',"/",'TC bot sample in (K)')
+##   NOTE: we named the new column based on what the inlet column was previously
+#           named, but removed the suffixed "[bypass]"
+
+#   Convert H2O for bypass to mol/L by first converting to molefraction and saving in a new column
+test05.mathOperation('H2O% (20)[bypass]',"/",100,True,'H2O (mol/L)[bypass]')
+#   Then convert that molefraction to kPa and override the new column previously created
+test05.mathOperation('H2O (mol/L)[bypass]',"*",'P bottom in (kPa)')
+#   Perform the next set of conversion overrides to get to mol/L
+test05.mathOperation('H2O (mol/L)[bypass]',"/",8.314)
+test05.mathOperation('H2O (mol/L)[bypass]',"/",'TC bot sample in (K)')
+##   NOTE: we named the new column for the input with a suffixed "[bypass]"
+#           because the integration routine is designed to specifically
+#           look for the "[bypass]" suffix with matching prefixes
+
+#   Convert H2O for outlet to mol/L by first converting to molefraction and saving in a new column
+test05.mathOperation('H2O% (20)',"/",100,True,'H2O (mol/L)')
+#   Then convert that molefraction to kPa and override the new column previously created
+test05.mathOperation('H2O (mol/L)',"*",'P bottom in (kPa)')
+#   Perform the next set of conversion overrides to get to mol/L
+test05.mathOperation('H2O (mol/L)',"/",8.314)
+test05.mathOperation('H2O (mol/L)',"/",'TC bot sample in (K)')
+
+#The way this was done gives us 4 new columns containing the inlet and outlet
+#   data for both H2O and NH3 in units of mol/L. Now, when we integrate, we
+#   will get the total concentration of each (in mol/L) that have been held up
+#   (or retained) within the space volume of the catalyst.
+test05.calculateRetentionIntegral('NH3 (mol/L)',False,(1/(1-0.3309)))
+test05.calculateRetentionIntegral('H2O (mol/L)',False,(1/(1-0.3309)))
+
+#Both of the above methods for calculating the mass retained and converting
+#the units provide very similar results.
+
 
 #NTOE: Only call the compressRows(n) function when you are ready to print information to
 #       a file for visualization or further analysis purposes. The data set will lose
@@ -1502,6 +1574,6 @@ else:
     test05.compressRows(10)
 
 test05.printAlltoFile()
-
+'''
 
 ## ----- End Testing -----
