@@ -19,7 +19,7 @@
     #       bloated. The *.dat files behave exactly like regular text files.
 
 import math
-import os
+import os, sys
 from statistics import mean, stdev
 import random
 
@@ -697,6 +697,9 @@ class TransientData(object):
         if data_key not in self.data_map.keys():
             print("Error! No corresponding output value exists in data_map!")
             return
+        if type(self.data_map[data_key][-1]) is not int and type(self.data_map[data_key][-1]) is not float:
+            print("Error! Can only autoregChangedInput() for numeric data...")
+            return
 
         #Loop through the data_map[time_key] data in REVERSE to get last data first
         points = 0
@@ -958,12 +961,67 @@ class PairedTransientData(object):
 
     #Function to align the bypass and results data so each has the same number of rows at the appropriate time values
     #NOTE: This function is riddled with comment lines and print statements that are used for debugging
-    #       DO NOT REMOVE ANY COMMENTS UNLESS THE FUNCTION IS FULLY TESTED AND APPROVED
+    #       DO NOT REMOVE ANY COMMENTS UNLESS THE FUNCTION IS FULLY TESTED AND APPROVED (still developing right now)
     #           This function is exceedingly complicated, do not modify unless you know what you are doing
     def alignData(self, addNoise = True):
         if self.aligned == True:
             print("Data already aligned. Cannot re-align...")
             return
+        #NOTE: Data in the bypass file is always misaligned in the x-axis, but may also be
+        #       misaligned in the y-axis. This was demonstrated in the results data for
+        #       NH3 storage at 350 oC where the bypass ppmv measurements were as high as
+        #       50 ppmv above the outlet measurements during the actual run. This causes
+        #       significant errors when trying to interpret mass retention data. To fix
+        #       this issue, data will also be aligned in the y-axis by comparing the
+        #       autoregChangedInput() for each column for both bypass and results and
+        #       using that information to scale the y-axis bypass information to match
+        #       the expected outlet information from each data run.
+        for item in self.bypass_trans_obj.data_map:
+            if item != self.bypass_trans_obj.time_key:
+                if type(self.bypass_trans_obj.data_map[item][-1]) is int or type(self.bypass_trans_obj.data_map[item][-1]) is float:
+                    self.bypass_trans_obj.autoregChangedInput(item,10,False)
+        for item in self.result_trans_obj.data_map:
+            if item != self.result_trans_obj.time_key:
+                if type(self.result_trans_obj.data_map[item][-1]) is int or type(self.result_trans_obj.data_map[item][-1]) is float:
+                    self.result_trans_obj.autoregChangedInput(item,10,False)
+        #Check to make sure all input_change maps have the same keys and throw out any dissimilar keys
+        dissimilar_key = []
+        for change in self.bypass_trans_obj.input_change:
+            if change not in self.result_trans_obj.input_change.keys():
+                dissimilar_key.append(change)
+        for diff_key in dissimilar_key:
+            if diff_key in self.bypass_trans_obj.input_change.keys():
+                del self.bypass_trans_obj.input_change[diff_key]
+            if diff_key in self.result_trans_obj.input_change.keys():
+                del self.result_trans_obj.input_change[diff_key]
+        frame_ratios = {}
+        for item in self.bypass_trans_obj.input_change:
+            frame_ratios[item] = []
+            i=0
+            for value in self.bypass_trans_obj.input_change[item]:
+                if abs(self.result_trans_obj.input_change[item][i]-self.bypass_trans_obj.input_change[item][i]) > 0.01:
+                    if abs(self.bypass_trans_obj.input_change[item][i]) > 2.0*math.sqrt(sys.float_info.epsilon):
+                        frame_ratios[item].append(self.result_trans_obj.input_change[item][i]/self.bypass_trans_obj.input_change[item][i])
+                    else:
+                        frame_ratios[item].append(1)
+                else:
+                    frame_ratios[item].append(1)
+                i+=1
+
+
+        #print(frame_ratios)   ############################################# CLEAN ME ----------------------------
+
+
+        #Create a set of frame_ratio_tuples to get a list of time frames for which the frame_ratios will apply
+        frame_ratio_tuples = []
+        for i in range(1,len(self.result_trans_obj.change_time)):
+            frame_ratio_tuples.append((self.result_trans_obj.change_time[i-1],self.result_trans_obj.change_time[i]))
+        frame_ratio_tuples.append( (self.result_trans_obj.change_time[-1],self.result_trans_obj.data_map[self.result_trans_obj.time_key][-1]) )
+
+
+        #print(frame_ratio_tuples) ############################################# CLEAN ME ----------------------------
+
+
         # Identify which data set will be considered the 'master_set'
         #   Master set will be the data set that has the most data available
         #   The sub-set will be forced to conform to the master set
@@ -1176,10 +1234,23 @@ class PairedTransientData(object):
         #       columns by appending the columns with the appropriate column names
         #After this method has been called, result and bypass structures no longer
         #       have identical numbers of columns and column names.
+        new_name_set = []
         for item in self.bypass_trans_obj.data_map:
             if item != self.bypass_trans_obj.time_key:
                 appendName = item+"[bypass]"
+                new_name_set.append(appendName)
                 self.result_trans_obj.appendColumn(appendName, self.bypass_trans_obj.data_map[item])
+
+        #Before we end here, the data that was just appened to the result_trans_obj needs to be iterated through
+        #       one more time in order to scale all the new data according to the frame_ratios. This
+        #       must also make use of the time_key for result_trans_obj data since the frame_ratios
+        #       only apply to specific time frames within the new data set.
+        for new_name in new_name_set:
+            frame_key = new_name.split("[bypass]")[0]+"[input]"
+            #Only apply the ratio adjustment to the new data that has a corresponding frame key 
+            if frame_key in frame_ratios.keys():
+                print(frame_key)
+
     #End alignData()
 
 
@@ -1338,12 +1409,13 @@ test04.printAlltoFile()
 
 
 #Testing Paired data
-'''
-h2o_comp = True
+
+h2o_comp = False
 if h2o_comp == True:
     test05 = PairedTransientData("20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2-11-3pctH2O-400ppmNH3-bp.dat","20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2-11-3pctH2O-400ppmNH3-150C.dat")
 else:
-    test05 = PairedTransientData("20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-bp.dat","20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-150C.dat")
+    #test05 = PairedTransientData("20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-bp.dat","20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-150C.dat")
+    test05 = PairedTransientData("20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-bp.dat","20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-350C.dat")
 test05.compressColumns()
 #test05.displayColumnNames()
 
@@ -1430,6 +1502,6 @@ else:
     test05.compressRows(10)
 
 test05.printAlltoFile()
-'''
+
 
 ## ----- End Testing -----
