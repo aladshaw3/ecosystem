@@ -22,6 +22,7 @@ import math
 import os, sys
 from statistics import mean, stdev
 import random
+import matplotlib.pyplot as plt
 
 ## ---------------- Begin: Definition of TransientData object ------------
 class TransientData(object):
@@ -1575,5 +1576,13 @@ else:
 
 test05.printAlltoFile()
 '''
+
+#Figure out how to add some plotting tools to the data objects
+#   args as tuples?
+plt.plot([1, 2, 3, 4])
+plt.ylabel('some numbers')
+#plt.show()   #Line to show the plot live (if called first, then cannot savefig())
+plt.savefig('test.png')  #Line to save the plot to a file (CALL THIS FIRST)
+plt.show()
 
 ## ----- End Testing -----
