@@ -397,7 +397,7 @@ class TransientData(object):
         point = 0
         if column_name not in self.data_map.keys():
             print("Error! Invalid Key!")
-            return 0
+            return
         n = 0
         start_time = 0
         start_point = 0
@@ -427,6 +427,35 @@ class TransientData(object):
             except:
                 point = end_point
         return point
+
+    #Function to retrive the maximum value in a given column
+    def getMaximum(self, column_name):
+        if column_name not in self.data_map.keys():
+            print("Error! Invalid Key!")
+            return
+        return max(self.data_map[column_name])
+
+    #Function to retrive the minimum value in a given column
+    def getMinimum(self, column_name):
+        if column_name not in self.data_map.keys():
+            print("Error! Invalid Key!")
+            return
+        return min(self.data_map[column_name])
+
+    #Function to calculate and retrive the average value in a given column
+    def getAverage(self, column_name):
+        if column_name not in self.data_map.keys():
+            print("Error! Invalid Key!")
+            return
+        try:
+            return mean(self.data_map[column_name])
+        except:
+            print("Error! Non-numeric data set has no average value!")
+            return
+
+    #Function to retrive the range of the data in a given column (i.e., max - min point)
+    def getDataRange(self, column_name):
+        return self.getMaximum(column_name) - self.getMinimum(column_name)
 
     #This function will iterate through all columns to find data that can be compressed or eliminated
     #       For instance,   if a column contains no data, then delete it
@@ -466,7 +495,9 @@ class TransientData(object):
         for item in frac_keys:
             if len(frac_keys[item]) > 1:
                 val_list = []
-                new_name = item +"("
+                #NOTE: this line is solely for getting my code editor to recognize function names as symbols
+                o="()"  #Symbol-tree-viewer does not like unclosed parentheses, even in quotes
+                new_name = item +o.split(")")[0]
                 j=0
                 for sub_key in frac_keys[item]:
                     first = sub_key.split("(")
@@ -620,6 +651,141 @@ class TransientData(object):
             file.write("\n")
             j+=1
         file.close()
+
+    #Function to a create plot from the data_map
+    #   Options:
+    #       - column_list: list of columns to create plots of (default is all columns of plottable data)
+    #       - range: tuple of the minimum to maximum time values that you want plotted (default is full range)
+    #       - display: if True, the images will be displayed once complete
+    #       - save: if True, the images will be saved to a file
+    #       - file_name: name of the file to save the plot to
+    #       - file_type: type of image file to save as (default = .png)
+    #                       allowed types: .png, .pdf, .ps, .eps and .svg
+    def createPlot(self, column_list = [], range=None, display=False, save=True, file_name="",file_type=".png",subdir=""):
+        if file_type != ".png" and file_type != ".pdf" and file_type != ".ps" and file_type != ".eps" and file_type != ".svg":
+            print("Warning! Unsupported image file type...")
+            print("\tDefaulting to .png")
+            file_type = ".png"
+        if range == None:
+            range = [self.data_map[self.time_key][0],self.data_map[self.time_key][-1]]
+        if type(range) is not list and type(range) is not tuple:
+            print("Error! The range argument must be a list or tuple!")
+            return
+        #Check to see if folder exists and create if needed
+        if subdir != "" and not os.path.exists(subdir):
+            os.makedirs(subdir)
+            subdir+="/"
+        if type(column_list) is list:
+            if len(column_list) == 0:
+                fig = plt.figure()
+                xvals = self.extractRows(range[0],range[1])[self.time_key]
+                leg = []
+                ylab = ""
+                #if column_list is empty, then plot all data columns
+                if len(self.data_map)-1 > 3:
+                    print("Warning! Plotting all data to single graph will result in visualization problems...")
+                i=0
+                for item in self.data_map:
+                    if item != self.time_key:
+                        yvals = self.extractRows(range[0],range[1])[item]
+                        plt.plot(xvals,yvals)
+                        leg.append(item)
+                        if i==0:
+                            ylab += item
+                        else:
+                            ylab += "\n"+item
+                        i+=1
+                plt.legend(leg)
+                plt.xlabel(self.time_key)
+                plt.ylabel(ylab)
+                plt.tight_layout()
+                if file_name == "":
+                    file_name = 'AllData'
+                if save == True:
+                    plt.savefig(subdir+file_name+'-Plot'+file_type)
+                if display == True:
+                    fig.show()
+                    print("\nDisplaying plot. Press enter to continue...(this closes the images)")
+                    input()
+                plt.close()
+            else:
+                fig = plt.figure()
+                xvals = self.extractRows(range[0],range[1])[self.time_key]
+                leg = []
+                ylab = ""
+                name = ""
+                #otherwise, plot all columns given (except for the time column)
+                if len(column_list)-1 > 3:
+                    print("Warning! Plotting all data to single graph will result in visualization problems...")
+                i=0
+                for column in column_list:
+                    if column not in self.data_map.keys():
+                        print("Warning! Invalid column name given in column_list!")
+                        print("\tSkipping " + column)
+                    else:
+                        if column != self.time_key:
+                            yvals = self.extractRows(range[0],range[1])[column]
+                            plt.plot(xvals,yvals)
+                            leg.append(column)
+                            name += column + "-"
+                            if i==0:
+                                ylab += column
+                            else:
+                                ylab += "\n"+column
+                            i+=1
+                plt.legend(leg)
+                plt.xlabel(self.time_key)
+                plt.ylabel(ylab)
+                plt.tight_layout()
+                if file_name == "":
+                    i=0
+                    for sec in name.split("/"):
+                        if i==0:
+                            file_name += sec
+                        else:
+                            file_name += "_per_" + sec
+                        i+=1
+                if save == True:
+                    plt.savefig(subdir+file_name+'Plot'+file_type)
+                if display == True:
+                    fig.show()
+                    print("\nDisplaying plot. Press enter to continue...(this closes the images)")
+                    input()
+                plt.close()
+        else:
+            if column_list not in self.data_map.keys():
+                print("Error! Invalid column name!")
+                return
+            else:
+                if column_list != self.time_key:
+                    fig = plt.figure()
+                    xvals = self.extractRows(range[0],range[1])[self.time_key]
+                    leg = []
+                    yvals = self.extractRows(range[0],range[1])[column_list]
+                    plt.plot(xvals,yvals)
+                    leg.append(column_list)
+                    name = column_list + "-"
+                    ylab = column_list
+                    plt.legend(leg)
+                    plt.xlabel(self.time_key)
+                    plt.ylabel(ylab)
+                    plt.tight_layout()
+                    if file_name == "":
+                        i=0
+                        for sec in name.split("/"):
+                            if i==0:
+                                file_name += sec
+                            else:
+                                file_name += "_per_" + sec
+                            i+=1
+                    if save == True:
+                        plt.savefig(subdir+file_name+'Plot'+file_type)
+                    if display == True:
+                        fig.show()
+                        print("\nDisplaying plot. Press enter to continue...(this closes the images)")
+                        input()
+                    plt.close()
+
 
     #This function compresses the rows of the data map
     #   New columns are created to store compressed data and old columns are deleted to reserve space
@@ -949,6 +1115,34 @@ class PairedTransientData(object):
     #Function to get a data point from the result data
     def getResultDataPoint(self, time_value, column_name):
         return self.result_trans_obj.getDataPoint(time_value, column_name)
+
+    #Function to get the maximum value of a column (should only use after calling alignData())
+    def getMaximum(self, column_name):
+        if self.aligned == False:
+            print("Error! Data must be aligned before performing any data processing...")
+            return
+        return self.result_trans_obj.getMaximum(column_name)
+
+    #Function to get the minimum value of a column (should only use after calling alignData())
+    def getMinimum(self, column_name):
+        if self.aligned == False:
+            print("Error! Data must be aligned before performing any data processing...")
+            return
+        return self.result_trans_obj.getMinimum(column_name)
+
+    #Function to get the average value of a column (should only use after calling alignData())
+    def getAverage(self, column_name):
+        if self.aligned == False:
+            print("Error! Data must be aligned before performing any data processing...")
+            return
+        return self.result_trans_obj.getAverage(column_name)
+
+    #Function to get the range of values of a column (should only use after calling alignData())
+    def getDataRange(self, column_name):
+        if self.aligned == False:
+            print("Error! Data must be aligned before performing any data processing...")
+            return
+        return self.result_trans_obj.getDataRange(column_name)
 
     #Function to delete a set of columns from both data sets
     def deleteColumns(self, column_list):
@@ -1371,6 +1565,60 @@ class PairedTransientData(object):
             file_name = self.result_trans_obj.input_file_name.split(".")[0]+"-SelectedPairedOutput.dat"
         self.result_trans_obj.printAlltoFile(column_list, file_name)
 
+    #Function to a create plot from the data_map
+    #   Options:
+    #       - column_list: list of columns to create plots of (default is all columns of plottable data)
+    #       - range: tuple of the minimum to maximum time values that you want plotted (default is full range)
+    #       - display: if True, the images will be displayed once complete
+    #       - save: if True, the images will be saved to a file
+    #       - file_name: name of the file to save the plot to
+    #       - file_type: type of image file to save as (default = .png)
+    #                       allowed types: .png, .pdf, .ps, .eps and .svg
+    def createPlot(self, column_list = [], range=None, display=False, save=True, file_name="",file_type=".png",subdir=""):
+        if self.aligned == False:
+            print("Error! Data must be aligned first! Call alignData()...")
+            print("\t\t(NOTE: if you want to create a plot of the bypass and result data separately,")
+            print("\t\t       then call each object's s respective createPlot() functions)")
+            return
+        self.result_trans_obj.createPlot(column_list, range, display, save, file_name, file_type, subdir)
+
+    #Quick use function for saving all processes data plots in a series of output files
+    #   Function will automatically pair result data and bypass data together
+    #   File names will be automatically generated and plots will not be displayed live
+    def savePlots(self, range=None, folder="", file_type=".png"):
+        bypass_list = []
+        result_list = []
+        for item in self.result_trans_obj.data_map:
+            if "[bypass]" in item and item != self.result_trans_obj.time_key:
+                bypass_list.append(item)
+            else:
+                if item != self.result_trans_obj.time_key:
+                    result_list.append(item)
+        pairs = []
+        for item1 in bypass_list:
+            for item2 in result_list:
+                if item1.split("[bypass]")[0] == item2:
+                    pairs.append([item1,item2])
+        for pair in pairs:
+            if pair[1] in result_list:
+                result_list.remove(pair[1])
+
+        #Print to a folder if possible
+        if folder == "":
+            if range != None:
+                folder = self.result_trans_obj.input_file_name.split(".")[0]+"-range"+str(range)+"Plots/"
+            else:
+                folder = self.result_trans_obj.input_file_name.split(".")[0]+"-range(All)"+"Plots/"
+        #Check to see if folder exists and create if needed
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+        #Now, pairs has the list of paired columns to plot
+        #   and result_list has the list of unpaired columns to plot
+        for pair in pairs:
+            self.createPlot(pair,range,False,True,"",file_type,folder)
+        for solo in result_list:
+            self.createPlot(solo,range,False,True,"",file_type,folder)
+
 
 
 ## ------ Testing ------
@@ -1565,6 +1813,106 @@ test05.calculateRetentionIntegral('H2O (mol/L)',False,(1/(1-0.3309)))
 #Both of the above methods for calculating the mass retained and converting
 #the units provide very similar results.
 
+#plt.plot(test05.extractResultColumns('Elapsed Time (min)')['Elapsed Time (min)'],test05.extractResultColumns('NH3 (mol/L)')['NH3 (mol/L)'],'-',test05.extractResultColumns('Elapsed Time (min)')['Elapsed Time (min)'],test05.extractResultColumns('NH3 (300,3000)')['NH3 (300,3000)'],'--')
+#plt.show()
+
+#Works well for 1-2 plots, can do more, but gets impossible to read
+#fig, ax1 = plt.subplots()
+#ax1.plot(test05.extractResultColumns('Elapsed Time (min)')['Elapsed Time (min)'],test05.extractResultColumns('NH3 (mol/L)-Retained')['NH3 (mol/L)-Retained'],'r-',test05.extractResultColumns('Elapsed Time (min)')['Elapsed Time (min)'],test05.extractResultColumns('TC bot sample in (K)')['TC bot sample in (K)'],'g.')
+#ax1.plot(test05.extractResultColumns('Elapsed Time (min)')['Elapsed Time (min)'],test05.extractResultColumns('NH3 (mol/L)-Retained')['NH3 (mol/L)-Retained'],'r-')
+#ax2 = ax1.twinx()
+#ax2.plot(test05.extractResultColumns('Elapsed Time (min)')['Elapsed Time (min)'],test05.extractResultColumns('NH3 (300,3000)')['NH3 (300,3000)'],'b--')
+#plt.show()
+
+#Works well for N plots
+#plt.figure()
+#plt.subplot(221)
+#plt.plot(test05.extractResultColumns('Elapsed Time (min)')['Elapsed Time (min)'],test05.extractResultColumns('NH3 (mol/L)-Retained')['NH3 (mol/L)-Retained'],'r-')
+#plt.subplot(222)
+#plt.plot(test05.extractResultColumns('Elapsed Time (min)')['Elapsed Time (min)'],test05.extractResultColumns('NH3 (300,3000)')['NH3 (300,3000)'],'b--')
+#plt.subplot(223)
+#plt.plot(test05.extractResultColumns('Elapsed Time (min)')['Elapsed Time (min)'],test05.extractResultColumns('TC bot sample in (K)')['TC bot sample in (K)'],'g.')
+#plt.show()
+
+#Combination: Multiplots on one sub-plot + other sub-plots...Works well for N plots
+#   Plan:   - User will request plots for all data (or a sub-set of data)
+#           - Iterate through data and find the range for each set
+#           - Use ranges to determine whether or not that data can be
+#                   plotted on the same y-axis
+#           - If they can, then plot them on that axis
+#           - If they can't, then use figure() and subplot() --OR-- use multiple single plots
+#           - Function to get range of values, average value, maximum value, minimum value, etc in TransientData
+#           - Plot all matching run data and bypass data on the same plot
+
+#       PROBLEM: this method does not allow for easy labeling of the y-axis...
+#
+#       linestyle or ls 	  [ '-' | '--' | '-.' | ':' | 'steps' | ...]
+#       color options one of {'b', 'g', 'r', 'c', 'm', 'y', 'k', 'w'}
+#           Format: third option in plot, pass string as color+line
+#                       e.g.,   'b-'  = blue solid line
+
+#                               'r--' = red dashed line
+#Call figure() each time you are plotting a new figure
+#       figure(num, size, dpi)
+#           num = figure number
+#           size = (w,h)  where w = width (inches) and h = hieght (inches)
+#           dpi = resolution (default = 100)
+#   Should choose (w,h) based on number of subplots requested
+#       dpi should stay 100
+#       max size ==> (8.5, 11)
+#       min size ==> (7,5)
+#
+#   NOTE: Instead of using plt.show(), store figures into temporary variables,
+#           then show() for those variables to get all images to display
+#           at the same time. Requires use of input() command at the last
+#           show() command to pause execution of script for viewing images.
+#a = plt.figure(0)
+#plt.subplot(211)
+#tuple = (test05.extractResultColumns('Elapsed Time (min)')['Elapsed Time (min)'],test05.extractResultColumns('NH3 (300,3000)')['NH3 (300,3000)'],'b--',test05.extractResultColumns('Elapsed Time (min)')['Elapsed Time (min)'],test05.extractResultColumns('TC bot sample in (K)')['TC bot sample in (K)'],'g-.')
+#Use tuples to iterate through and plot sets of info to same figure
+#plt.plot(tuple[0],tuple[1],tuple[2])
+#plt.plot(tuple[3],tuple[4],tuple[5])
+#plt.legend(['NH3 (300,3000)','TC bot sample in (K)'])  #Items must be in same order plotted
+#plt.ylabel('NH3 (300,3000)\nTC bot sample in (K)')
+#xmin = test05.getMinimum('Elapsed Time (min)')
+#xmax = test05.getMaximum('Elapsed Time (min)')
+#NOTE: May want the plotter to automatically pick ymin and ymax
+#      or use the largest range to determine which set to base y-axis from
+#ymin = test05.getMinimum('NH3 (300,3000)') - test05.getDataRange('NH3 (300,3000)')/10
+#ymax = test05.getMaximum('NH3 (300,3000)') + test05.getDataRange('NH3 (300,3000)')/10
+#plt.axis([xmin, xmax, ymin, ymax])
+#plt.subplot(212)
+#plt.plot(test05.extractResultColumns('Elapsed Time (min)')['Elapsed Time (min)'],test05.extractResultColumns('NH3 (mol/L)-Retained')['NH3 (mol/L)-Retained'],'r-')
+#plt.legend(['NH3 (mol/L)-Retained'])
+#plt.ylabel('NH3 (mol/L)-Retained')
+#plt.xlabel('Elapsed Time (min)')
+#xmin = test05.getMinimum('Elapsed Time (min)')
+#xmax = test05.getMaximum('Elapsed Time (min)')
+#ymin = test05.getMinimum('NH3 (mol/L)-Retained') - test05.getDataRange('NH3 (mol/L)-Retained')/10
+#ymax = test05.getMaximum('NH3 (mol/L)-Retained') + test05.getDataRange('NH3 (mol/L)-Retained')/10
+#plt.axis([xmin, xmax, ymin, ymax])
+#Use the 'tight' options to automatically size the figure
+#plt.tight_layout()
+#plt.savefig('test.png', bbox_inches = "tight") #MUST Always call this before show()
+
+#Plot a section of data
+#b = plt.figure(1)
+#plt.subplot(111)
+#xvals = test05.extractResultRows(250,300)['Elapsed Time (min)']
+#yvals = test05.extractResultRows(250,300)['NH3 (300,3000)']
+#plt.plot(xvals,yvals,'o')
+
+#test05.createPlot(['NH3 (300,3000)','NH3 (300,3000)[bypass]'])
+#test05.createPlot(['NH3 (mol/L)-Retained'])
+#test05.createPlot('TC bot sample in (K)')
+
+test05.savePlots()
+test05.savePlots((250,300))
+
+#NOTE: the subplot args represent row,cols,plot_num
+#       plot_num cannot be larger than the product of row*cols
+#       row = number of rows of plots to show
+#       cols = number of columns of plots to show
 
 #NTOE: Only call the compressRows(n) function when you are ready to print information to
 #       a file for visualization or further analysis purposes. The data set will lose
@@ -1576,13 +1924,4 @@ else:
 
 test05.printAlltoFile()
 '''
-
-#Figure out how to add some plotting tools to the data objects
-#   args as tuples?
-plt.plot([1, 2, 3, 4])
-plt.ylabel('some numbers')
-#plt.show()   #Line to show the plot live (if called first, then cannot savefig())
-plt.savefig('test.png')  #Line to save the plot to a file (CALL THIS FIRST)
-plt.show()
-
 ## ----- End Testing -----
