@@ -672,7 +672,7 @@ class TransientData(object):
             print("Error! The range argument must be a list or tuple!")
             return
         #Check to see if folder exists and create if needed
-        if subdir != "" and not os.path.exists(subdir):
+        if subdir != "" and not os.path.exists(subdir) and save == True:
             os.makedirs(subdir)
             subdir+="/"
         if type(column_list) is list:
@@ -785,6 +785,23 @@ class TransientData(object):
                         print("\nDisplaying plot. Press enter to continue...(this closes the images)")
                         input()
                     plt.close()
+
+    #Quick use function for saving all processed data plots in a series of output files
+    #   File names will be automatically generated and plots will not be displayed live
+    def savePlots(self, range=None, folder="", file_type=".png"):
+        #Print to a folder if possible
+        if folder == "":
+            if range != None:
+                folder = self.input_file_name.split(".")[0]+"-range"+str(range)+"Plots/"
+            else:
+                folder = self.input_file_name.split(".")[0]+"-range(All)"+"Plots/"
+        #Check to see if folder exists and create if needed
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+        #iterate through all columns and call the createPlot function
+        for item in self.data_map:
+            if item != self.time_key:
+                self.createPlot(item,range,False,True,"",file_type,folder)
 
 
     #This function compresses the rows of the data map
@@ -1582,7 +1599,7 @@ class PairedTransientData(object):
             return
         self.result_trans_obj.createPlot(column_list, range, display, save, file_name, file_type, subdir)
 
-    #Quick use function for saving all processes data plots in a series of output files
+    #Quick use function for saving all processed data plots in a series of output files
     #   Function will automatically pair result data and bypass data together
     #   File names will be automatically generated and plots will not be displayed live
     def savePlots(self, range=None, folder="", file_type=".png"):

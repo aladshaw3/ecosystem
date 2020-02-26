@@ -276,9 +276,48 @@ class TransientDataFolder(object):
             path_and_name = subdir+"/"+file.split(".")[0]+"-UnpairedOutput.dat"
             self.unpaired_data[file].printAlltoFile(path_and_name)
 
+    #Function to create plots from columns of data
+    #   Options:
+    #       - obj_name: name of the file/obj for which the data we are plotting is held
+    #       - column_list: list of columns to create plots of (default is all columns of plottable data)
+    #       - range: tuple of the minimum to maximum time values that you want plotted (default is full range)
+    #       - display: if True, the images will be displayed once complete
+    #       - save: if True, the images will be saved to a file
+    #       - file_name: name of the file to save the plot to
+    #       - file_type: type of image file to save as (default = .png)
+    #                       allowed types: .png, .pdf, .ps, .eps and .svg
+    def createPlot(self, obj_name, column_list = [], range=None, display=False, save=True, file_name="",file_type=".png",subdir=""):
+        if subdir == "":
+            subdir = self.folder_name+"-Plots/"+obj_name.split(".")[0]+"/"
+        self.grabDataObj(obj_name).createPlot(column_list, range, display, save, file_name, file_type, subdir)
+
+    #Function to save all plots of data to several files
+    #   Function will automatically pair result data and bypass data together
+    #   File names will be automatically generated and plots will not be displayed live
+    #   Folder names are choosen automatically as well
+    def savePlots(self, range=None, file_type=".png"):
+        for file in self.paired_data:
+            if range != None:
+                print("\nPlotting all data for " + file + " in time range " + str(range) + ".\n\tPlease wait...")
+                path = self.folder_name+"-Plots/"+file.split(".")[0]+"/range"+str(range)+"/"
+            else:
+                print("\nPlotting all data for " + file + " in full time range.\n\tPlease wait...")
+                path = self.folder_name+"-Plots/"+file.split(".")[0]+"/range(All)"+"/"
+            self.paired_data[file].savePlots(range,path,file_type)
+            print("\nComplete!")
+        for file in self.unpaired_data:
+            if range != None:
+                print("\nPlotting all data for " + file + " in time range " + str(range) + ".\n\tPlease wait...")
+                path = self.folder_name+"-Plots/"+file.split(".")[0]+"/range"+str(range)+"/"
+            else:
+                print("\nPlotting all data for " + file + " in full time range.\n\tPlease wait...")
+                path = self.folder_name+"-Plots/"+file.split(".")[0]+"/range(All)"+"/"
+            self.unpaired_data[file].savePlots(range,path,file_type)
+            print("\nComplete!")
 
 
 ## ------ Testing ------ ##
+'''
 test01 = TransientDataFolder("BASFCuSSZ13-700C4h-NH3storage")
 test01.retainOnlyColumns(['Elapsed Time (min)','NH3 (300,3000)', 'H2O% (20)', 'TC bot sample in (C)', 'TC bot sample mid 1 (C)', 'TC bot sample mid 2 (C)', 'TC bot sample out 1 (C)', 'TC bot sample out 2 (C)', 'P bottom in (bar)', 'P bottom out (bar)'])
 #test01.displayColumnNames()
@@ -332,8 +371,14 @@ test01.mathOperations('H2O% (20)-Retained',"*",0.015708)                #From mo
 test01.mathOperations('H2O% (20)-Retained',"/",(1-0.3309)*0.015708,True,"H2O ads (mol/L)")
 test01.deleteColumns('H2O% (20)-Retained')
 
+#Test the createPlot function
+#test01.createPlot("20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2-11-3pctH2O-400ppmNH3-200C.dat",'NH3 (300,3000)')
+test01.savePlots()
+test01.savePlots((200,350))
+
 #Compress the processed data for visualization in spreadsheets
 test01.compressAllRows()
 
 #Print the results to a series of output files
 test01.printAlltoFile()
+'''
