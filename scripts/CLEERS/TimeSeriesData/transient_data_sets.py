@@ -1,6 +1,6 @@
 '''
-    \file read_transient_data.py
-    \brief Script to read in all CLEERS data of a particular folder
+    \file transient_data_sets.py
+    \brief Script to read in all sets of CLEERS data of a particular folder
     \details Python script to read in CLEERS transient data for
                 for a particular folder or folders. This script works
                 in tandem with the transient_data.py script which
@@ -337,7 +337,7 @@ class TransientDataFolder(object):
 
 
 ## ------ Testing ------ ##
-
+'''
 test01 = TransientDataFolder("BASFCuSSZ13-700C4h-NH3storage")
 test01.retainOnlyColumns(['Elapsed Time (min)','NH3 (300,3000)', 'H2O% (20)', 'TC bot sample in (C)', 'TC bot sample mid 1 (C)', 'TC bot sample mid 2 (C)', 'TC bot sample out 1 (C)', 'TC bot sample out 2 (C)', 'P bottom in (bar)', 'P bottom out (bar)'])
 #test01.displayColumnNames()
@@ -406,3 +406,4 @@ test01.compressAllRows()
 
 #Print the results to a series of output files
 test01.printAlltoFile()
+'''
