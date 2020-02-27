@@ -57,7 +57,17 @@ class TransientDataFolder(object):
         self.has_paired = False                 #Flag to denote whether or not folder contains paired data (note: CAN have both)
         self.unread = []                        #List to correlate with all file_names to determine if a file has been read or not
         self.was_compressed = False             #Flag to denote whether or not user has requested row compression of data sets
-        #Iterate through the files in the folder and store specific file names
+        self.total_data_processed = 0           #Running total of the number of data points processed (based on rows and columns)
+
+        #First round of iterations is to change all file names to meet standards
+        for file in os.listdir(self.folder_name):
+            if len(file.split(".")) < 2:
+                os.rename(self.folder_name+"/"+file,self.folder_name+"/"+file+".dat")
+            elif file.split(".")[1] != "dat":
+                os.rename(self.folder_name+"/"+file,self.folder_name+"/"+file.split(".")[0]+".dat")
+            else:
+                continue
+        #Iterate through the files in the folder and store updated file names
         for file in os.listdir(self.folder_name):
             #Check to make sure the files have the correct extension
             if len(file.split(".")) < 2:
@@ -86,6 +96,7 @@ class TransientDataFolder(object):
                 print("\t"+file)
                 self.unpaired_data[file] = TransientData(self.folder_name+"/"+file)
                 self.unpaired_data[file].compressColumns()
+                self.total_data_processed+=self.unpaired_data[file].getNumRows()*self.unpaired_data[file].getNumCols()
                 self.unread[i] = False
                 i+=1
         #Check for file_names that should correspond to bypass_names
@@ -103,6 +114,7 @@ class TransientDataFolder(object):
                         self.paired_data[file] = PairedTransientData(self.folder_name+"/"+self.file_pairs[base][i][0],self.folder_name+"/"+self.file_pairs[base][i][1])
                         self.paired_data[file].compressColumns()
                         self.paired_data[file].alignData(addNoise)
+                        self.total_data_processed+=self.paired_data[file].getNumRows()*self.paired_data[file].getNumCols()
                         self.unread[j] = False
                         i+=1
                     j+=1
@@ -204,6 +216,10 @@ class TransientDataFolder(object):
         else:
             print("Error! No such file was read by this object!")
             return
+
+    #Function to report total data processed
+    def getTotalDataProcessed(self):
+        return self.total_data_processed
 
     #Function to compress all rows of data for each data object according to size of rows
     #       NOTE: This function should be called before printing to a file, but after everything else

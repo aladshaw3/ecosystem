@@ -469,6 +469,14 @@ class TransientData(object):
     def getTimeFrames(self):
         return self.time_frames
 
+    #Function to return the number of rows
+    def getNumRows(self):
+        return self.num_rows
+
+    #Function to return the number of columns
+    def getNumCols(self):
+        return len(self.data_map)
+
     #This function will iterate through all columns to find data that can be compressed or eliminated
     #       For instance,   if a column contains no data, then delete it
     #                       if there are multiple columns that carrier similar info, then combine them
@@ -1203,6 +1211,14 @@ class PairedTransientData(object):
     #Function to return the list of time ranges
     def getTimeFrames(self):
         return self.result_trans_obj.time_frames
+
+    #Function to return the number of rows
+    def getNumRows(self):
+        return self.result_trans_obj.num_rows
+
+    #Function to return the number of columns
+    def getNumCols(self):
+        return len(self.result_trans_obj.data_map)
 
     #Function to delete a set of columns from both data sets
     def deleteColumns(self, column_list):
