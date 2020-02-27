@@ -5,7 +5,6 @@ output
 doc/doxygen/html
 doc/doxygen/latex
 *.exe
-<<<<<<< HEAD
 eco
 *.a
 *.so
@@ -13,10 +12,5 @@ eco
 *.dat
 *.png
 dbg/eco-dbg
-=======
-
-
-
 *.stackdump
 eco
->>>>>>> d0729400c6b13a61d5753444086957265119e828
