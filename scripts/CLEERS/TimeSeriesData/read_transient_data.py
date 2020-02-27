@@ -73,7 +73,7 @@ class TransientDataFolder(object):
                         self.file_pairs[file.split("-bp.")[0]] = []
                     else:
                         self.file_names.append(file)
-                        self.unread.append(True) #Fix issue here ---------------
+                        self.unread.append(True)
 
         #Determine what to do when no bypass files are provided
         if len(self.bypass_names) == 0:
@@ -287,7 +287,7 @@ class TransientDataFolder(object):
     #       - file_type: type of image file to save as (default = .png)
     #                       allowed types: .png, .pdf, .ps, .eps and .svg
     def createPlot(self, obj_name, column_list = [], range=None, display=False, save=True, file_name="",file_type=".png",subdir=""):
-        if subdir == "":
+        if subdir == "" and save==True:
             subdir = self.folder_name+"-Plots/"+obj_name.split(".")[0]+"/"
         self.grabDataObj(obj_name).createPlot(column_list, range, display, save, file_name, file_type, subdir)
 
@@ -315,13 +315,34 @@ class TransientDataFolder(object):
             self.unpaired_data[file].savePlots(range,path,file_type)
             print("\nComplete!")
 
+    #Function to iteratively save all plots in all time frames separately
+    def saveTimeFramePlots(self, folder="", file_type=".png"):
+        #Iterate through each paired and unpaired object and call their respective methods
+        for file in self.unpaired_data:
+            print("\nPlotting all data for " + file + " in full time range.\n\tPlease wait...")
+            path = self.folder_name+"-Plots/"+file.split(".")[0]+"/range(All)"+"/"
+            self.unpaired_data[file].savePlots(None,path,file_type)
+            for range in self.unpaired_data[file].getTimeFrames():
+                print("\nPlotting all data for " + file + " in time range " + str(range) + ".\n\tPlease wait...")
+                path = self.folder_name+"-Plots/"+file.split(".")[0]+"/range("+str(int(range[0]))+"-" +str(int(range[1])) + ")/"
+                self.unpaired_data[file].savePlots(range,path,file_type)
+        for file in self.paired_data:
+            print("\nPlotting all data for " + file + " in full time range.\n\tPlease wait...")
+            path = self.folder_name+"-Plots/"+file.split(".")[0]+"/range(All)"+"/"
+            self.paired_data[file].savePlots(None,path,file_type)
+            for range in self.paired_data[file].getTimeFrames():
+                print("\nPlotting all data for " + file + " in time range " + str(range) + ".\n\tPlease wait...")
+                path = self.folder_name+"-Plots/"+file.split(".")[0]+"/range("+str(int(range[0]))+"-" +str(int(range[1])) + ")/"
+                self.paired_data[file].savePlots(range,path,file_type)
+
 
 ## ------ Testing ------ ##
-'''
+
 test01 = TransientDataFolder("BASFCuSSZ13-700C4h-NH3storage")
 test01.retainOnlyColumns(['Elapsed Time (min)','NH3 (300,3000)', 'H2O% (20)', 'TC bot sample in (C)', 'TC bot sample mid 1 (C)', 'TC bot sample mid 2 (C)', 'TC bot sample out 1 (C)', 'TC bot sample out 2 (C)', 'P bottom in (bar)', 'P bottom out (bar)'])
 #test01.displayColumnNames()
 #print(test01.grabDataObj("20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2-11-3pctH2O-400ppmNH3-200C.dat"))
+#print(test01)  #This will display the names of the objects/files you have access to and whether they are paired or not
 
 #Convert all temperatures from (C) to Kelvin, then delete old columns
 test01.mathOperations('TC bot sample in (C)',"+",273.15, True, 'TC bot sample in (K)')
@@ -373,12 +394,15 @@ test01.deleteColumns('H2O% (20)-Retained')
 
 #Test the createPlot function
 #test01.createPlot("20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2-11-3pctH2O-400ppmNH3-200C.dat",'NH3 (300,3000)')
-test01.savePlots()
-test01.savePlots((200,350))
+#test01.savePlots()
+#test01.savePlots((200,350))
+test01.saveTimeFramePlots()
 
 #Compress the processed data for visualization in spreadsheets
 test01.compressAllRows()
 
+#test01.savePlots()
+#test01.savePlots((200,350))
+
 #Print the results to a series of output files
 test01.printAlltoFile()
-'''

@@ -23,6 +23,7 @@ import os, sys
 from statistics import mean, stdev
 import random
 import matplotlib.pyplot as plt
+import re #for regex
 
 ## ---------------- Begin: Definition of TransientData object ------------
 class TransientData(object):
@@ -79,6 +80,10 @@ class TransientData(object):
         self.change_time = []           #Contains an ordered list of the times when experimental inputs changed
                                         #   NOTE: this is just used to initialize data in the map, it does not
                                         #           change or update if the map changes
+        self.time_frames = []           #Contains a list of tuples that hold the start and end time for each
+                                        #   instance in the data where inputs were changed. This item may be
+                                        #   slightly redundant with change_time, but will be more useful to
+                                        #   end users who might want to create separate plots for each time frame
         self.input_change = {}          #Contains a map of the inputs values that correspond to change_time
                                         #   Keys of this map are modifications to the keys of data_map that
                                         #   correspond to output values corresponding to the input values given
@@ -177,6 +182,9 @@ class TransientData(object):
             i+=1
         #END of line loop
         self.num_rows = len(self.data_map[self.time_key])
+        for i in range(1,len(self.change_time)):
+            self.time_frames.append((self.change_time[i-1],self.change_time[i]))
+        self.time_frames.append((self.change_time[-1],self.data_map[self.time_key][-1]))
         self.closeFile()
 
     def closeFile(self):
@@ -456,6 +464,10 @@ class TransientData(object):
     #Function to retrive the range of the data in a given column (i.e., max - min point)
     def getDataRange(self, column_name):
         return self.getMaximum(column_name) - self.getMinimum(column_name)
+
+    #Function to return the list of time ranges
+    def getTimeFrames(self):
+        return self.time_frames
 
     #This function will iterate through all columns to find data that can be compressed or eliminated
     #       For instance,   if a column contains no data, then delete it
@@ -789,19 +801,46 @@ class TransientData(object):
     #Quick use function for saving all processed data plots in a series of output files
     #   File names will be automatically generated and plots will not be displayed live
     def savePlots(self, range=None, folder="", file_type=".png"):
+        input_list = []
+        result_list = []
+        for item in self.data_map:
+            if "[input]" in item and item != self.time_key:
+                input_list.append(item)
+            else:
+                if item != self.time_key:
+                    result_list.append(item)
+        pairs = []
+        for item1 in input_list:
+            for item2 in result_list:
+                if item1.split("[input]")[0] in item2:
+                    pairs.append([item1,item2])
+        for pair in pairs:
+            if pair[1] in result_list:
+                result_list.remove(pair[1])
+
         #Print to a folder if possible
         if folder == "":
             if range != None:
-                folder = self.input_file_name.split(".")[0]+"-range"+str(range)+"Plots/"
+                folder = self.input_file_name.split(".")[0]+"-range("+str(int(range[0]))+"-"+str(int(range[1]))+")Plots/"
             else:
                 folder = self.input_file_name.split(".")[0]+"-range(All)"+"Plots/"
         #Check to see if folder exists and create if needed
         if not os.path.exists(folder):
             os.makedirs(folder)
-        #iterate through all columns and call the createPlot function
-        for item in self.data_map:
-            if item != self.time_key:
-                self.createPlot(item,range,False,True,"",file_type,folder)
+        #iterate through all pairs and columns to call the createPlot function
+        for pair in pairs:
+            self.createPlot(pair,range,False,True,"",file_type,folder)
+        for solo in result_list:
+            self.createPlot(solo,range,False,True,"",file_type,folder)
+
+    #Function to iteratively save all plots in all time frames separately
+    def saveTimeFramePlots(self, folder="", file_type=".png"):
+        #First, save the full time ranges
+        self.savePlots(None,folder,file_type)
+        #Then iterate through all time frames to save separately
+        for frame in self.time_frames:
+            self.savePlots(frame,folder,file_type)
+
 
 
     #This function compresses the rows of the data map
@@ -1160,6 +1199,10 @@ class PairedTransientData(object):
             print("Error! Data must be aligned before performing any data processing...")
             return
         return self.result_trans_obj.getDataRange(column_name)
+
+    #Function to return the list of time ranges
+    def getTimeFrames(self):
+        return self.result_trans_obj.time_frames
 
     #Function to delete a set of columns from both data sets
     def deleteColumns(self, column_list):
@@ -1614,7 +1657,7 @@ class PairedTransientData(object):
         pairs = []
         for item1 in bypass_list:
             for item2 in result_list:
-                if item1.split("[bypass]")[0] == item2:
+                if item1.split("[bypass]")[0] in item2:
                     pairs.append([item1,item2])
         for pair in pairs:
             if pair[1] in result_list:
@@ -1623,7 +1666,7 @@ class PairedTransientData(object):
         #Print to a folder if possible
         if folder == "":
             if range != None:
-                folder = self.result_trans_obj.input_file_name.split(".")[0]+"-range"+str(range)+"Plots/"
+                folder = self.result_trans_obj.input_file_name.split(".")[0]+"-range("+str(int(range[0]))+"-"+str(int(range[1]))+")Plots/"
             else:
                 folder = self.result_trans_obj.input_file_name.split(".")[0]+"-range(All)"+"Plots/"
         #Check to see if folder exists and create if needed
@@ -1635,6 +1678,14 @@ class PairedTransientData(object):
             self.createPlot(pair,range,False,True,"",file_type,folder)
         for solo in result_list:
             self.createPlot(solo,range,False,True,"",file_type,folder)
+
+    #Function to iteratively save all plots in all time frames separately
+    def saveTimeFramePlots(self, folder="", file_type=".png"):
+        #First, save the full time ranges
+        self.savePlots(None,folder,file_type)
+        #Then iterate through all time frames to save separately
+        for frame in self.result_trans_obj.time_frames:
+            self.savePlots(frame,folder,file_type)
 
 
 
@@ -1923,8 +1974,9 @@ test05.calculateRetentionIntegral('H2O (mol/L)',False,(1/(1-0.3309)))
 #test05.createPlot(['NH3 (mol/L)-Retained'])
 #test05.createPlot('TC bot sample in (K)')
 
-test05.savePlots()
-test05.savePlots((250,300))
+#test05.savePlots()
+#test05.savePlots((250,300))
+#test05.saveTimeFramePlots()
 
 #NOTE: the subplot args represent row,cols,plot_num
 #       plot_num cannot be larger than the product of row*cols
