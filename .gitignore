@@ -2,8 +2,10 @@
 *.DS_Store
 *~
 output
-doc/doxygen/html
-doc/doxygen/latex
+doc/**/html
+doc/**/latex
+scripts/**/latex
+scripts/**/html
 *.exe
 eco
 *.a
