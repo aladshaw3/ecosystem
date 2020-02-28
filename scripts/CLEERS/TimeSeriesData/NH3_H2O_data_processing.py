@@ -1,27 +1,31 @@
-'''
-    \file NH3_H2O_data_processing.py
-    \brief Script to read in all folders of NH3 + H2O Catalyst data
-    \details Python script to read in CLEERS transient data for
-                for all sets of folders of the NH3 and H2O transient
-                data and perform a series of analyses, compress the data,
-                output the data into a new compressed format, and prepare
-                a series of plots to visualize all data. This script works
-                in conjunction with the transient_data_sets.py script and
-                is meant to be uninteractive (i.e., the user does not need
-                to provide any live inputs beyond calling the script)
-    \author Austin Ladshaw
-    \date 02/27/2020
-    \copyright This software was designed and built at the Oak Ridge National
-                    Laboratory (ORNL) National Transportation Research Center
-                    (NTRC) by Austin Ladshaw for research in the catalytic
-                    reduction of NOx. Copyright (c) 2020, all rights reserved.
-'''
+##   @package NH3_H2O_data_processing
+#
+#    @brief Script to read in all folders of NH3 + H2O Catalyst data
+#
+#    @details Python script to read in CLEERS transient data for
+#                for all sets of folders of the NH3 and H2O transient
+#                data and perform a series of analyses, compress the data,
+#                output the data into a new compressed format, and prepare
+#                a series of plots to visualize all data. This script works
+#                in conjunction with the transient_data_sets.py script and
+#                is meant to be uninteractive (i.e., the user does not need
+#                to provide any live inputs beyond calling the script)
+#
+#    @author Austin Ladshaw
+#
+#    @date 02/27/2020
+#
+#    @copyright This software was designed and built at the Oak Ridge National
+#                    Laboratory (ORNL) National Transportation Research Center
+#                    (NTRC) by Austin Ladshaw for research in the catalytic
+#                    reduction of NOx. Copyright (c) 2020, all rights reserved.
+
 
 from transient_data_sets import TransientDataFolder
 import os, sys, getopt
 import time
 
-#Define a help message to display
+##Define a help message to display
 def help_message():
     print()
     print("NH3_H2O_data_processing.py script command line options...")
@@ -36,7 +40,8 @@ def help_message():
     print("\tpython NH3_H2O_data_processing.py -i AllNH3Data/")
     print()
 
-#Define a function that reads all data in a given subdirectory and performs standard processing
+##Define a function that reads all data in a given subdirectory and performs standard processing
+#
 #   name_and_path = input_folder + "/" + data_folder
 def perform_standard_processing(name_and_path):
     #Read in all data and retain the information we want
@@ -100,12 +105,17 @@ def perform_standard_processing(name_and_path):
     return data_set.getTotalDataProcessed()
 #END standard processing
 
-#Define the 'main' function
+##Define the 'main' function
+#
 #   argv is the list of arguments pass to the script at the command line
+#
 #   Accepted arguments include...
+#
 #       -h         ==>  display help information
+#
 #       -i dir/    ==>   path and name of the folder than contains other folders of data
-#       -o dir/    ==>   path and name of the folder to place output into
+#
+#       -o dir/    ==>   path and name of the folder to place output into (Unsupported)
 def main(argv):
     input_folder = ""
     output_folder = ""
@@ -158,6 +168,6 @@ def main(argv):
     print("\tWe processed " + str(sum_data) + " data points in " + str(elapse_min) + " min!\n")
 
 
-#Directs python to call the main function
+##Directs python to call the main function
 if __name__ == "__main__":
    main(sys.argv[1:])

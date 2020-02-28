@@ -1,23 +1,43 @@
-'''
-    \file sensitivity.py
-    \brief Simple Sensitivity Analysis
-    \details Python script to perform a sensitivity analysis on a simple model
-                by taking finite partial derivatives of that model given a set of
-                parameters.
-    \author Austin Ladshaw
-    \date 02/12/2020
-    \copyright This software was designed and built at the Oak Ridge National
-                    Laboratory (ORNL) National Transportation Research Center
-                    (NTRC) by Austin Ladshaw for research in the catalytic
-                    reduction of NOx. Copyright (c) 2020, all rights reserved.
-'''
+##   @package sensitivity
+#
+#    @brief Simple Sensitivity Analysis
+#
+#    @details Python script to perform a sensitivity analysis on a simple model
+#                by taking finite partial derivatives of that model given a set of
+#                parameters.
+#
+#    @author Austin Ladshaw
+#
+#    @date 02/12/2020
+#
+#    @copyright This software was designed and built at the Oak Ridge National
+#                    Laboratory (ORNL) National Transportation Research Center
+#                    (NTRC) by Austin Ladshaw for research in the catalytic
+#                    reduction of NOx. Copyright (c) 2020, all rights reserved.
 
 import math
 import sys
 
-# ----------- Start: Definition of Class object for Sensitivity --------------------
+## Sensivity class object for simple analyses
+#
+#   This object is used to perform small to medium scale sensitivity analyses
+#   on a model function written in python. It provides a quick an easy way to
+#   check a simple model to see the responsiveness in the model to changes in
+#   its parameters. Changes can be computed as finite difference derivatives or
+#   percent changes in function response
+#
+#
+#   NOTE:
+#
+#       func_params and func_conds are (or can be) used interchangibly. The
+#       difference is when the routine looks to compute sensitivity, it only
+#       does so for the func_params under the conditions of the system.
 class Sensitivity(object):
-    #Constructor for the object
+    ##Constructor for the object
+    #
+    #   @param func pointer to a func defined and written in python
+    #   @param func_params map or dictionary of parameters the function depends on
+    #   @param func_conds map or dictionary of conditions the function depends on
     def __init__(self, func, func_params, func_conds):
         self.errors = False
         # Check to make sure the arguments are dictionaries
@@ -36,16 +56,23 @@ class Sensitivity(object):
             return
 
         #NOTE: func_params and func_conds should be map objects whose keys are the names of parameters or conditions of interest
-        self.func = func                    #A function that produces a single output given a set of parameters and conditions
-        self.func_params = func_params      #A set of parameters that the sensitivity analysis will be performed on
-        self.func_conds = func_conds        #A set of other conditions or information the model needs to use
-        self.partials = {}                  #Computed set of partial derivatives or percent changes
-        self.relative_sensitivity = False   #When set to True, the partials are computed based on a percent change to the variable
-        self.percent_change = 0.0           #Percent change to apply to parameters when relative_sensitivity = True
+        ##A function that produces a single output given a set of parameters and conditions
+        self.func = func
+        ##A set of parameters that the sensitivity analysis will be performed on
+        self.func_params = func_params
+        ##A set of other conditions or information the model needs to use
+        self.func_conds = func_conds
+        ##Computed set of partial derivatives or percent changes
+        self.partials = {}
+        ##When set to True, the partials are computed based on a percent change to the variable
+        self.relative_sensitivity = False
+        ##Percent change to apply to parameters when relative_sensitivity = True
+        self.percent_change = 0.0
         self.partials_computed = False
         self.lowest_sensitivity = ""
         self.highest_sensitivity = ""
-        self.sorted_param_sensitivity = {}  #Stores a sorted map of most to least sensitve parameters
+        ##Stores a sorted map of most to least sensitve parameters
+        self.sorted_param_sensitivity = {}
 
         #Initialize the list of partial derivatives and look for errors
         for item in self.func_params:
@@ -60,7 +87,7 @@ class Sensitivity(object):
                 return
             self.partials[item] = 0.0
 
-    #Function to print the results of the analysis to the console
+    ##Function to print the results of the analysis to the console
     def __str__(self):
         if self.partials_computed == False:
             return "Analysis not yet performed! Call function 'compute_partials' first...\n"
@@ -85,7 +112,7 @@ class Sensitivity(object):
             message += "Least sensitive parameter: " + self.lowest_sensitivity + "\n"
             return message
 
-    #Function to call the users function with their parameters and conditions
+    ##Function to call the users function with their parameters and conditions
     def eval_func(self):
         if self.errors == False:
             return self.func(self.func_params,self.func_conds)
@@ -93,7 +120,11 @@ class Sensitivity(object):
             print("Errors exist in the object!")
             return 0.0
 
-    #Function to compute all partials
+    ##Function to compute all partials
+    #
+    #   @param relative if False, then partials are computed via finite difference derivatives \n
+    #                   if True, then partials are computed as percent changes in function for percent change in parameters
+    #   @param per the percentage change to use in the parameters (only used if relative == True)
     def compute_partials(self, relative = False, per = 1):
         if self.errors == True:
             print("Errors exist in the object!")
@@ -158,11 +189,48 @@ class Sensitivity(object):
 
 # ----------- End: Definition of Class object for Sensitivity --------------------
 
-#Helper function to iterate through all permutations of conditions
-#       Function will return True after the last permutation has been made
-# cond_value = current list of values of conditions that needs updating
-# cond_limit_lower = list of the upper limits of the conditions
-# cond_limit_upper = list of the upper limits of the conditions
+##Helper function to iterate through all permutations of conditions
+#
+#   What this function does is update the given list of cond_value according to
+#       the corresponding limits given. This allows the sensitivity sweep object
+#       to iteratively move through all permutations of conditions, within the
+#       specified limits, to check all combinations of conditions for parameter
+#       sensivitity.
+#
+#   For Instance:
+#
+#       Consider a state machine that has 3 conditions (A, B, C), each of which can
+#       have 3 different states (0, 1, 2). To exhaustively test all the states
+#       possible, we have to iterate through all permutations of the variables
+#       A, B, and C, at all possible states they can be in (0, 1, 2). In total,
+#       there would be 3^3 (=27) permutations to produce.
+#
+#   The above example would need to produce the following...
+#
+#   A B C   |  A B C   |  A B C \n
+#   --------------------------- \n
+#   0 0 0   |  0 0 1   |  0 0 2 \n
+#   1 0 0   |  1 0 1   |  1 0 2 \n
+#   2 0 0   |  2 0 1   |  2 0 2 \n
+#   0 1 0   |  0 1 1   |  0 1 2 \n
+#   1 1 0   |  1 1 1   |  1 1 2 \n
+#   2 1 0   |  2 1 1   |  2 1 2 \n
+#   0 2 0   |  0 2 1   |  0 2 2 \n
+#   1 2 0   |  1 2 1   |  1 2 2 \n
+#   2 2 0   |  2 2 1   |  2 2 2 \n
+#
+#
+#   The function only changes one state at a time and that changed state is based on
+#   the current state passed to it. It is meant to be coupled with a while loop that
+#   will start from an initial state and continue until this function returns true.
+#   When this function returns false, this means that states can still be updated.
+#
+#
+#   Function will return True after the last permutation has been made
+#
+# @param cond_value  current list of values of conditions that needs updating
+# @param cond_limit_lower  list of the upper limits of the conditions
+# @param cond_limit_upper  list of the upper limits of the conditions
 def update_cond(cond_value, cond_limit_lower, cond_limit_upper):
     complete = False
     i = 0
@@ -193,24 +261,32 @@ def update_cond(cond_value, cond_limit_lower, cond_limit_upper):
     return complete
 
 
-# ----------- Start: Definition of Class object for SensitivitySweep --------------------
-''' The SensitivitySweep object is an object that uses the Sensitivity object to
-    calculation partials or changes in a model with changes in parameters, but
-    also repeats this process for a ranged of conditions to produce sensitivity
-    matrices that are output to a file. This is necessary for complex models as
-    it is possible that a model will not be sensitive to a certain parameter under
-    certain conditions, but becomes more sensitive as the conditions change. '''
+## SensitivitySweep class object for performing a full sensivitity analysis
+#
+# The SensitivitySweep object is an object that uses the Sensitivity object to
+#    calculation partials or changes in a model with changes in parameters, but
+#    also repeats this process for a ranged of conditions to produce sensitivity
+#    matrices that are output to a file. This is necessary for complex models as
+#    it is possible that a model will not be sensitive to a certain parameter under
+#    certain conditions, but becomes more sensitive as the conditions change.
 class SensitivitySweep(object):
-    #Constructor
+    ## Constructor for the sweep object
+    #
+    #   @param func pointer to a func defined and written in python
+    #   @param func_params map or dictionary of parameters the function depends on
+    #   @param func_conds_tuples map of tuples of conditions to sweep through
+    #           where the first tuple arg is the lower_limit and the second is the upper_limit
+    #
+    #   NOTE:
+    #
+    #         func_conds_tuples must be a dictionary whose keys are the simulation/model
+    #        condtions and whose values are tuples representing the lower and upper
+    #        bounds of the conditions, respectively.
+    #
+    #            e.g.,  func_conds_tuples["Temp"] = (273, 373)
+    #
+    #                        a condition for temperature that spans 100 degrees
     def __init__(self, func, func_params, func_conds_tuples):
-        '''
-        NOTE: func_conds_tuples must be a dictionary whose keys are the simulation/model
-                condtions and whose values are tuples representing the lower and upper
-                bounds of the conditions, respectively.
-
-                e.g.,  func_conds_tuples["Temp"] = (273, 373)
-                            a condition for temperature that spans 100 degrees
-        '''
         self.errors = False
         self.sweep_computed = False
         start_conditions = {}
@@ -226,27 +302,54 @@ class SensitivitySweep(object):
             start_conditions[item] = func_conds_tuples[item][0]
         self.cond_tuples = func_conds_tuples
         self.sens_obj = Sensitivity(func, func_params, start_conditions)
-        #Initialize a list of maps for sensitivity results to be stored digitally
-        ''' The below object (self.sens_maps) has the following format...
-                self.sens_maps[i] = {}                          // i = permutation number  -->  map of data
-                self.sens_maps[i]["func_result"]                // = result of the function for that permutation
-                self.sens_maps[i]["cond_set"] = {}              // map of conditions for the given permutation
-                self.sens_maps[i]["param_response"] = {}        // map of function responses or partials for the parameters at that permutation
-                self.sens_maps[i]["cond_set"][cond]             // = value of the given condition (cond) for the given permutation
-                self.sens_maps[i]["param_response"][param]      // = value of the function response to a change in the given parameter (param) for that permutation
-        '''
+        ##Initialize a list of maps for sensitivity results to be stored digitally
+        #
+        # The below object (self.sens_maps) has the following format...
+        #
+        #        self.sens_maps[i] = {}                          // i = permutation number  -->  map of data
+        #
+        #        self.sens_maps[i]["func_result"]                // = result of the function for that permutation
+        #
+        #        self.sens_maps[i]["cond_set"] = {}              // map of conditions for the given permutation
+        #
+        #        self.sens_maps[i]["param_response"] = {}        // map of function responses or partials for the parameters at that permutation
+        #
+        #        self.sens_maps[i]["cond_set"][cond]             // = value of the given condition (cond) for the given permutation
+        #
+        #        self.sens_maps[i]["param_response"][param]      // = value of the function response to a change in the given parameter (param) for that permutation
+        #
         self.sens_maps = []
-        ''' The below objects (max_* and min_* sens_map) have the following format...
-                self.*_sens_map[param] = {}                     // map of max or min parameter results for the given param
-                                                                //      Keys in this map include: func_result, param_response, and cond_set
-                self.*_sens_map[param]["func_result"]           // = result of the function for that max or min param sensitivity result
-                self.*_sens_map[param]["param_response"]        // = value of the function response to the param change under these conditions
-                                                                //      This will be the max or min response for the parameter
-                self.*_sens_map[param]["cond_set"] = {}         // map of conditions for the max or min parameter response
-                self.*_sens_map[param]["cond_set"][cond]        // = value of the given condition (cond) for the max or min parameter response
-        '''
-        self.max_sens_map = {}      # Map of each parameter's maximum sensitivity
-        self.min_sens_map = {}      # Map of each parameter's minimum sensitivity
+
+        ## Map of each parameter's maximum sensitivity
+        # The below objects (max_* and min_* sens_map) have the following format...
+        #
+        #        self.*_sens_map[param] = {}                     // map of max or min parameter results for the given param
+        #                                                        //      Keys in this map include: func_result, param_response, and cond_set
+        #
+        #        self.*_sens_map[param]["func_result"]           // = result of the function for that max or min param sensitivity result
+        #
+        #        self.*_sens_map[param]["param_response"]        // = value of the function response to the param change under these conditions
+        #                                                        //      This will be the max or min response for the parameter
+        #
+        #        self.*_sens_map[param]["cond_set"] = {}         // map of conditions for the max or min parameter response
+        #
+        #        self.*_sens_map[param]["cond_set"][cond]        // = value of the given condition (cond) for the max or min parameter response
+        self.max_sens_map = {}
+        ## Map of each parameter's minimum sensitivity
+        # The below objects (max_* and min_* sens_map) have the following format...
+        #
+        #        self.*_sens_map[param] = {}                     // map of max or min parameter results for the given param
+        #                                                        //      Keys in this map include: func_result, param_response, and cond_set
+        #
+        #        self.*_sens_map[param]["func_result"]           // = result of the function for that max or min param sensitivity result
+        #
+        #        self.*_sens_map[param]["param_response"]        // = value of the function response to the param change under these conditions
+        #                                                        //      This will be the max or min response for the parameter
+        #
+        #        self.*_sens_map[param]["cond_set"] = {}         // map of conditions for the max or min parameter response
+        #
+        #        self.*_sens_map[param]["cond_set"][cond]        // = value of the given condition (cond) for the max or min parameter response
+        self.min_sens_map = {}
         for param in func_params:
             self.max_sens_map[param] = {}
             self.min_sens_map[param] = {}
@@ -260,7 +363,7 @@ class SensitivitySweep(object):
                 self.max_sens_map[param]["cond_set"][cond] = 0
                 self.min_sens_map[param]["cond_set"][cond] = 0
 
-    #Function to print out results to console (Only useful for quick visualization. Sweeps automatically puts this info in a text file)
+    ##Function to print out results to console (Only useful for quick visualization. Sweeps automatically puts this info in a text file)
     def __str__(self):
         message = "\n"
         if self.errors == True:
@@ -285,7 +388,8 @@ class SensitivitySweep(object):
                 i+=1
         return message
 
-    #Run the Sensitivity Sweep Analysis and print results to a file
+    ##Run the Sensitivity Sweep Analysis and print results to a file
+    #
     #       User may also specify whether or not to use relative parameter changes and the percent to change
     def run_sweep(self, sensitivity_file_name = "SensitivitySweepAnalysis.dat", relative = False, per = 1):
         #Enfore a .dat file extension. This is used to flag the file as very large so that
@@ -518,7 +622,10 @@ class SensitivitySweep(object):
         mmfile.close()
         self.sweep_computed = True
 
-    #Function to perform an Exhaustive Sensitivity Analysis
+    ##Function to perform an Exhaustive Sensitivity Analysis
+    #
+    #   The exhaustive sweep uses the helper function update_cond() to go through all condition permutations
+    #   within the specified boundaries of each condition variable.
     def run_exhaustive_sweep(self, sensitivity_file_name = "ExhaustiveSensitivitySweepAnalysis.dat", relative = False, per = 1):
         #Enfore a .dat file extension. This is used to flag the file as very large so that
         #   our git tracking ignores that file. May be unnecessary, but better safe than sorry.

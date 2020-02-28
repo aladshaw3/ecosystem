@@ -1,80 +1,128 @@
-'''
-    \file sensitivity.py
-    \brief Sensitivity Analysis of the NH3 Storage and Aging Model
-    \details Python script using the sensitivity.py script and object to perform a
-                simple sensitivity analysis on the NH3 storage model to see which parameters
-                the model is most or least sensitive to. This can be used to determine whether
-                or not all the reaction schemes and aging mechanisms proposed are useful in
-                determining the NH3 storage capacity on Cu-SSZ-13.
-    \author Austin Ladshaw
-    \date 02/13/2020
-    \copyright This software was designed and built at the Oak Ridge National
-                    Laboratory (ORNL) National Transportation Research Center
-                    (NTRC) by Austin Ladshaw for research in the catalytic
-                    reduction of NOx. Copyright (c) 2020, all rights reserved.
-'''
+##   @package NH3_storage_sensitivity
+#
+#    @brief Sensitivity Analysis of the NH3 Storage and Aging Model
+#
+#    @details Python script using the sensitivity.py script and object to perform a
+#                simple sensitivity analysis on the NH3 storage model to see which parameters
+#                the model is most or least sensitive to. This can be used to determine whether
+#                or not all the reaction schemes and aging mechanisms proposed are useful in
+#                determining the NH3 storage capacity on Cu-SSZ-13.
+#
+#    @author Austin Ladshaw
+#
+#    @date 02/13/2020
+#
+#    @copyright This software was designed and built at the Oak Ridge National
+#                    Laboratory (ORNL) National Transportation Research Center
+#                    (NTRC) by Austin Ladshaw for research in the catalytic
+#                    reduction of NOx. Copyright (c) 2020, all rights reserved.
 
 #import sensitivity as sa
-from sensitivity import SensitivitySweep   #Use this line to only import a specific method, class, object, or function 
+from sensitivity import SensitivitySweep   #Use this line to only import a specific method, class, object, or function
 import math
 
+
+## The previous NH3 storage model contains the following params and conds...
+#
+#            params["dH1"] = reaction enthalpy (J/mol) for reaction 1
+#
+#            params["dS1"] = reaction entropy (J/K/mol) for reaction 1
+#
+#            params["dH2"] = reaction enthalpy (J/mol) for reaction 2
+#
+#            params["dS2"] = reaction entropy (J/K/mol) for reaction 2
+#
+#            params["dH3"] = reaction enthalpy (J/mol) for reaction 3
+#
+#            params["dS3"] = reaction entropy (J/K/mol) for reaction 3
+#
+#            params["dH4"] = reaction enthalpy (J/mol) for reaction 4
+#
+#            params["dS4"] = reaction entropy (J/K/mol) for reaction 4
+#
+#            params["A1"] = pre-exponential factor (1/hr/kPa^0.25) for aging reacion 1
+#
+#            params["E1"] = reaction rate energy (J/mol) for aging reaction 1
+#
+#            params["A2"] = pre-exponential factor (1/hr/kPa^0.25) for aging reacion 2
+#
+#            params["E2"] = reaction rate energy (J/mol) for aging reaction 2
+#
+#            params["A3f"] = pre-exponential factor (1/hr) for Forward aging reacion 3
+#
+#            params["E3f"] = reaction rate energy (J/mol) for Forward aging reaction 3
+#
+#            params["A3r"] = pre-exponential factor (1/hr) for Reverse aging reacion 3
+#
+#            params["E3r"] = reaction rate energy (J/mol) for Reverse aging reaction 3
+#
+#            params["Z1CuOH_o"] = initial site density (mol/L) for Z1 Cu sites
+#
+#            params["Z2Cu_o"] = initial site density (mol/L) for Z2 Cu sites
+#
+#            params["ZH_o"] = initial site density (mol/L) for solitary Bronsted sites
+#
+#            params["ZH-ZCu_o"] = initial site density (mol/L) for Bronsted sites near inactive Z1 Cu sites
+#
+#            params["ZH-CuO_o"] = initial site density (mol/L) for Bronsted sites near CuO species
+#
+#
+#            conds["T"] = temperature (K) for gas stream
+#
+#            conds["P_O2"] = partial pressure (kPa) for O2 in gas stream
+#
+#            conds["P_H2O"] = partial pressure (kPa) for H2O in gas stream
+#
+#            conds["P_NH3"] = partial pressure (kPa) for NH3 in gas stream
+#
+#            conds["aging_time"] = time spent aging (hr)
+#
+#            conds["T_aging"] = temperature during aging (K) for gas stream
+#
+#            conds["P_O2_aging"] = partial pressure during aging (kPa) for O2 in gas stream
+#
+#            conds["P_H2O_aging"] = partial pressure during aging (kPa) for O2 in gas stream
+#
+#
+#            NOTE:
+#
+#               aging_time = 0 for "de-greened" catalyst
+#
+#            NOTE2:
+#
+#                   You can put more information in params if you want sensitivity analysis
+#                    to also cover the model sensitivity to things like temperature and
+#                    partial pressures.
+#
+#            ------------ MODEL INFORMATION GIVEN BELOW -------------
+#
+#            Capacity Reactions:
+#
+#                (1)     (Z1CuOH) + NH3 <== ==> [(Z1CuOH)-NH3]
+#
+#                (2)     (Z2Cu) + NH3 <== ==> [(Z2Cu)-NH3]
+#
+#                (3)     (ZH) + NH3 <== ==> [(ZH)-NH3]
+#
+#                (4)     (Z1CuOH) + H2O <== ==> [(Z1CuOH)-H2O]
+#
+#
+#            Aging Reactions:
+#
+#                (1)     (ZH)(ZCu) + 0.25 O2 --> (Z2Cu) + 0.5 H2O
+#
+#                (2)     (ZH) + 0.25 O2 --> (Z) + 0.5 H2O
+#
+#                (3)     (Z1CuOH) <-- --> (ZH)(CuO)
+#
+#            w1 = (availability of Z1CuOH after aging)
+#
+#            w2 = (availability of Z2Cu after aging)
+#
+#            w3 = (availability of total ZH sites after aging)
+#                    total ZH sites = (ZH) + (ZH)(ZCu) + (ZH)(CuO)
+#
 def NH3_Storage_Model_v0(params, conds):
-    ''' The current NH3 storage model contains the following params and conds...
-            params["dH1"] = reaction enthalpy (J/mol) for reaction 1
-            params["dS1"] = reaction entropy (J/K/mol) for reaction 1
-            params["dH2"] = reaction enthalpy (J/mol) for reaction 2
-            params["dS2"] = reaction entropy (J/K/mol) for reaction 2
-            params["dH3"] = reaction enthalpy (J/mol) for reaction 3
-            params["dS3"] = reaction entropy (J/K/mol) for reaction 3
-            params["dH4"] = reaction enthalpy (J/mol) for reaction 4
-            params["dS4"] = reaction entropy (J/K/mol) for reaction 4
-            params["A1"] = pre-exponential factor (1/hr/kPa^0.25) for aging reacion 1
-            params["E1"] = reaction rate energy (J/mol) for aging reaction 1
-            params["A2"] = pre-exponential factor (1/hr/kPa^0.25) for aging reacion 2
-            params["E2"] = reaction rate energy (J/mol) for aging reaction 2
-            params["A3f"] = pre-exponential factor (1/hr) for Forward aging reacion 3
-            params["E3f"] = reaction rate energy (J/mol) for Forward aging reaction 3
-            params["A3r"] = pre-exponential factor (1/hr) for Reverse aging reacion 3
-            params["E3r"] = reaction rate energy (J/mol) for Reverse aging reaction 3
-            params["Z1CuOH_o"] = initial site density (mol/L) for Z1 Cu sites
-            params["Z2Cu_o"] = initial site density (mol/L) for Z2 Cu sites
-            params["ZH_o"] = initial site density (mol/L) for solitary Bronsted sites
-            params["ZH-ZCu_o"] = initial site density (mol/L) for Bronsted sites near inactive Z1 Cu sites
-            params["ZH-CuO_o"] = initial site density (mol/L) for Bronsted sites near CuO species
-
-            conds["T"] = temperature (K) for gas stream
-            conds["P_O2"] = partial pressure (kPa) for O2 in gas stream
-            conds["P_H2O"] = partial pressure (kPa) for H2O in gas stream
-            conds["P_NH3"] = partial pressure (kPa) for NH3 in gas stream
-            conds["aging_time"] = time spent aging (hr)
-            conds["T_aging"] = temperature during aging (K) for gas stream
-            conds["P_O2_aging"] = partial pressure during aging (kPa) for O2 in gas stream
-            conds["P_H2O_aging"] = partial pressure during aging (kPa) for O2 in gas stream
-
-            NOTE: aging_time = 0 for "de-greened" catalyst
-
-            NOTE2: You can put more information in params if you want sensitivity analysis
-                    to also cover the model sensitivity to things like temperature and
-                    partial pressures.
-
-            ------------ MODEL INFORMATION GIVEN BELOW -------------
-            Capacity Reactions:
-                (1)     (Z1CuOH) + NH3 <== ==> [(Z1CuOH)-NH3]
-                (2)     (Z2Cu) + NH3 <== ==> [(Z2Cu)-NH3]
-                (3)     (ZH) + NH3 <== ==> [(ZH)-NH3]
-                (4)     (Z1CuOH) + H2O <== ==> [(Z1CuOH)-H2O]
-
-            Aging Reactions:
-                (1)     (ZH)(ZCu) + 0.25 O2 --> (Z2Cu) + 0.5 H2O
-                (2)     (ZH) + 0.25 O2 --> (Z) + 0.5 H2O
-                (3)     (Z1CuOH) <-- --> (ZH)(CuO)
-
-            w1 = (availability of Z1CuOH after aging)
-            w2 = (availability of Z2Cu after aging)
-            w3 = (availability of total ZH sites after aging)
-                    total ZH sites = (ZH) + (ZH)(ZCu) + (ZH)(CuO)
-
-    '''
     R = 8.314 #J/K/mol
     #Calculate the model equilibrium parameters based on the simulation conditions given
     K1 = math.exp(-(params["dH1"]/R/conds["T"]) + (params["dS1"]/R))
@@ -104,59 +152,99 @@ def NH3_Storage_Model_v0(params, conds):
     return NH3
 #End NH3_Storage_Model_v0
 
+## The current NH3 storage model contains the following params and conds...
+#
+#            params["dH1"] = reaction enthalpy (J/mol) for reaction 1
+#
+#            params["dS1"] = reaction entropy (J/K/mol) for reaction 1
+#
+#            params["dH2"] = reaction enthalpy (J/mol) for reaction 2
+#
+#            params["dS2"] = reaction entropy (J/K/mol) for reaction 2
+#
+#            params["dH3"] = reaction enthalpy (J/mol) for reaction 3
+#
+#            params["dS3"] = reaction entropy (J/K/mol) for reaction 3
+#
+#            params["dH4"] = reaction enthalpy (J/mol) for reaction 4
+#
+#            params["dS4"] = reaction entropy (J/K/mol) for reaction 4
+#
+#            params["k1"] = aging rate (1/hr/kPa^0.25) for aging reacion 1
+#
+#            params["k2"] = aging rate (1/hr/kPa^0.25) for aging reacion 2
+#
+#            params["k3f"] = aging rate (1/hr) for Forward aging reacion 3
+#
+#            params["k3r"] = aging rate (1/hr) for Reverse aging reacion 3
+#
+#            params["Z1CuOH_o"] = initial site density (mol/L) for Z1 Cu sites
+#
+#            params["Z2Cu_o"] = initial site density (mol/L) for Z2 Cu sites
+#
+#            params["ZH_o"] = initial site density (mol/L) for solitary Bronsted sites
+#
+#            params["ZH-ZCu_o"] = initial site density (mol/L) for Bronsted sites near inactive Z1 Cu sites
+#
+#            params["ZH-CuO_o"] = initial site density (mol/L) for Bronsted sites near CuO species
+#
+#
+#            conds["T"] = temperature (K) for gas stream
+#
+#            conds["P_O2"] = partial pressure (kPa) for O2 in gas stream
+#
+#            conds["P_H2O"] = partial pressure (kPa) for H2O in gas stream
+#
+#            conds["P_NH3"] = partial pressure (kPa) for NH3 in gas stream
+#
+#            conds["aging_time"] = time spent aging (hr)
+#
+#            conds["T_aging"] = temperature during aging (K) for gas stream
+#
+#            conds["P_O2_aging"] = partial pressure during aging (kPa) for O2 in gas stream
+#
+#            conds["P_H2O_aging"] = partial pressure during aging (kPa) for O2 in gas stream
+#
+#
+#            NOTE:
+#
+#               aging_time = 0 for "de-greened" catalyst
+#
+#            NOTE2:
+#
+#                   You can put more information in params if you want sensitivity analysis
+#                    to also cover the model sensitivity to things like temperature and
+#                    partial pressures.
+#
+#            ------------ MODEL INFORMATION GIVEN BELOW -------------
+#
+#            Capacity Reactions:
+#
+#                (1)     (Z1CuOH) + NH3 <== ==> [(Z1CuOH)-NH3]
+#
+#                (2)     (Z2Cu) + NH3 <== ==> [(Z2Cu)-NH3]
+#
+#                (3)     (ZH) + NH3 <== ==> [(ZH)-NH3]
+#
+#                (4)     (Z1CuOH) + H2O <== ==> [(Z1CuOH)-H2O]
+#
+#
+#            Aging Reactions:
+#
+#                (1)     (ZH)(ZCu) + 0.25 O2 --> (Z2Cu) + 0.5 H2O
+#
+#                (2)     (ZH) + 0.25 O2 --> (Z) + 0.5 H2O
+#
+#                (3)     (Z1CuOH) <-- --> (ZH)(CuO)
+#
+#            w1 = (availability of Z1CuOH after aging)
+#
+#            w2 = (availability of Z2Cu after aging)
+#
+#            w3 = (availability of total ZH sites after aging)
+#                    total ZH sites = (ZH) + (ZH)(ZCu) + (ZH)(CuO)
+#
 def NH3_Storage_Model_v0_1(params, conds):
-    ''' The next NH3 storage model contains the following params and conds...
-            params["dH1"] = reaction enthalpy (J/mol) for reaction 1
-            params["dS1"] = reaction entropy (J/K/mol) for reaction 1
-            params["dH2"] = reaction enthalpy (J/mol) for reaction 2
-            params["dS2"] = reaction entropy (J/K/mol) for reaction 2
-            params["dH3"] = reaction enthalpy (J/mol) for reaction 3
-            params["dS3"] = reaction entropy (J/K/mol) for reaction 3
-            params["dH4"] = reaction enthalpy (J/mol) for reaction 4
-            params["dS4"] = reaction entropy (J/K/mol) for reaction 4
-            params["k1"] = aging rate (1/hr/kPa^0.25) for aging reacion 1
-            params["k2"] = aging rate (1/hr/kPa^0.25) for aging reacion 2
-            params["k3f"] = aging rate (1/hr) for Forward aging reacion 3
-            params["k3r"] = aging rate (1/hr) for Reverse aging reacion 3
-            params["Z1CuOH_o"] = initial site density (mol/L) for Z1 Cu sites
-            params["Z2Cu_o"] = initial site density (mol/L) for Z2 Cu sites
-            params["ZH_o"] = initial site density (mol/L) for solitary Bronsted sites
-            params["ZH-ZCu_o"] = initial site density (mol/L) for Bronsted sites near inactive Z1 Cu sites
-            params["ZH-CuO_o"] = initial site density (mol/L) for Bronsted sites near CuO species
-
-            conds["T"] = temperature (K) for gas stream
-            conds["P_O2"] = partial pressure (kPa) for O2 in gas stream
-            conds["P_H2O"] = partial pressure (kPa) for H2O in gas stream
-            conds["P_NH3"] = partial pressure (kPa) for NH3 in gas stream
-            conds["aging_time"] = time spent aging (hr)
-            conds["T_aging"] = temperature during aging (K) for gas stream
-            conds["P_O2_aging"] = partial pressure during aging (kPa) for O2 in gas stream
-            conds["P_H2O_aging"] = partial pressure during aging (kPa) for O2 in gas stream
-
-            NOTE: aging_time = 0 for "de-greened" catalyst
-
-            NOTE2: You can put more information in params if you want sensitivity analysis
-                    to also cover the model sensitivity to things like temperature and
-                    partial pressures.
-
-            ------------ MODEL INFORMATION GIVEN BELOW -------------
-            Capacity Reactions:
-                (1)     (Z1CuOH) + NH3 <== ==> [(Z1CuOH)-NH3]
-                (2)     (Z2Cu) + NH3 <== ==> [(Z2Cu)-NH3]
-                (3)     (ZH) + NH3 <== ==> [(ZH)-NH3]
-                (4)     (Z1CuOH) + H2O <== ==> [(Z1CuOH)-H2O]
-
-            Aging Reactions:
-                (1)     (ZH)(ZCu) + 0.25 O2 --> (Z2Cu) + 0.5 H2O
-                (2)     (ZH) + 0.25 O2 --> (Z) + 0.5 H2O
-                (3)     (Z1CuOH) <-- --> (ZH)(CuO)
-
-            w1 = (availability of Z1CuOH after aging)
-            w2 = (availability of Z2Cu after aging)
-            w3 = (availability of total ZH sites after aging)
-                    total ZH sites = (ZH) + (ZH)(ZCu) + (ZH)(CuO)
-
-    '''
     R = 8.314 #J/K/mol
     #Calculate the model equilibrium parameters based on the simulation conditions given
     K1 = math.exp(-(params["dH1"]/R/conds["T"]) + (params["dS1"]/R))
