@@ -100,12 +100,28 @@ class TransientData(object):
         #Parse the file name to gain specific information
         self.input_file_name = file_name
         file_name_info = file_name.split("-")
+        ##Name of the material this data applies to
         self.material_name = file_name_info[2]
         if file_name_info[3] == "700C4h":
             self.aging_condition = "De-greened"
+            ##Aging time in hours
+            self.aging_time = 0
+            ##Aging temperature in oC
+            self.aging_temp = 700
         else:
             self.aging_condition = file_name_info[3]
+            try:
+                tem = float(file_name_info[3].split("C")[0])
+            except:
+                tem = file_name_info[3].split("C")[0]
+            self.aging_temp = tem
+            try:
+                tim = float(file_name_info[3].split("C")[1].split("h")[0])
+            except:
+                tim = file_name_info[3].split("C")[1].split("h")[0]
+            self.aging_time = tim
         try:
+            ##Space Velocity Flow rate of the experiment (in per hour)
             self.flow_rate = float(file_name_info[5].split("k")[0])*1000
             self.have_flow_rate = True
         except:
@@ -113,6 +129,7 @@ class TransientData(object):
             self.have_flow_rate = False
         if file_name_info[-1].split(".")[0] == "bp":
             self.inlet_data = True
+            ##Isothermal temperature for the experimental run
             self.isothermal_temp = 0
         else:
             self.inlet_data = False
@@ -174,7 +191,7 @@ class TransientData(object):
         #
         #   This would represent the overall bulk porosity of the
         #   catalyst. User must manually override this value if needed.
-             
+
         self.void_frac = 0.3309
         if statinfo.st_size >= 10000000:
             print("\nReading " + str(statinfo.st_size/1E6) + " MB file. Please wait...")
@@ -1241,6 +1258,8 @@ class PairedTransientData(object):
         ## Flag used to determine whether or not the data sets are aligned in time
         self.aligned = False
 
+        self.material_name = self.result_trans_obj.material_name
+
         # Check some specific file information to make sure there are no errors
         self.file_errors = False
         if self.bypass_trans_obj.inlet_data == False:
@@ -1890,308 +1909,260 @@ class PairedTransientData(object):
 
 
 
-## ------ Testing ------
-
-# Testing with the NH3 TPDs at constant H2O concentration
-'''
-test01 = TransientData("20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-150C.dat")
-
-test01.compressColumns()
-#NOTE: After compressing the columns, some column names with change to reflect the combination of data
-#test01.displayColumnNames()
-test01.retainOnlyColumns(['Elapsed Time (min)','NH3 (300,3000)', 'H2O% (20)', 'TC bot sample in (C)', 'TC bot sample mid 1 (C)', 'TC bot sample mid 2 (C)', 'TC bot sample out 1 (C)', 'TC bot sample out 2 (C)', 'P bottom in (bar)', 'P bottom out (bar)'])
-test01.createStepChangeInputData('NH3 (300,3000)')
-test01.calculateRetentionIntegral('NH3 (300,3000)[input]','NH3 (300,3000)')
-#NOTE: Consider using current number of rows to determine how much compression to use
-#print(test01.num_rows)
-test01.compressRows(10)
-test01.printAlltoFile()
-'''
-
-# Testing with the Competition between H2O and NH3 TPDs
-'''
-test02 = TransientData("20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2-11-3pctH2O-400ppmNH3-150C.dat")
-test02.compressColumns()
-#test02.displayColumnNames()
-test02.retainOnlyColumns(['Elapsed Time (min)','NH3 (300,3000)', 'H2O% (20)', 'TC bot sample in (C)', 'TC bot sample mid 1 (C)', 'TC bot sample mid 2 (C)', 'TC bot sample out 1 (C)', 'TC bot sample out 2 (C)', 'P bottom in (bar)', 'P bottom out (bar)'])
-test02.createStepChangeInputData(['NH3 (300,3000)','H2O% (20)'],40)
-test02.calculateRetentionIntegral('NH3 (300,3000)[input]','NH3 (300,3000)')
-test02.calculateRetentionIntegral('H2O% (20)[input]','H2O% (20)')
-#print(test01.num_rows)
-#print("H2O-150")
-#print(test02.change_time)
-test02.compressRows(2)
-test02.printAlltoFile()
-'''
-
-
-#Testing with by-pass data
-'''
-test03 = TransientData("20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2-11-3pctH2O-400ppmNH3-bp.dat")
-test03.compressColumns()
-test03.retainOnlyColumns(['Elapsed Time (min)','NH3 (300,3000)', 'H2O% (20)'])
-#print(test03.change_time)
-test03.compressRows(1)
-test03.printAlltoFile()
-
-test04 = TransientData("20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-bp.dat")
-test04.compressColumns()
-test04.retainOnlyColumns(['Elapsed Time (min)','NH3 (300,3000)', 'H2O% (20)'])
-#print(test04.change_time)
-test04.compressRows(1)
-test04.printAlltoFile()
-'''
-
-
+## Function for testing the above objects
 #Testing Paired data
-'''
-h2o_comp = False
-if h2o_comp == True:
-    test05 = PairedTransientData("20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2-11-3pctH2O-400ppmNH3-bp.dat","20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2-11-3pctH2O-400ppmNH3-150C.dat")
-else:
-    #test05 = PairedTransientData("20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-bp.dat","20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-150C.dat")
-    test05 = PairedTransientData("20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-bp.dat","20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-350C.dat")
-test05.compressColumns()
-#test05.displayColumnNames()
+def testing():
+    h2o_comp = False
+    if h2o_comp == True:
+        test05 = PairedTransientData("20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2-11-3pctH2O-400ppmNH3-bp.dat","20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2-11-3pctH2O-400ppmNH3-150C.dat")
+    else:
+        #test05 = PairedTransientData("20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-bp.dat","20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-150C.dat")
+        test05 = PairedTransientData("20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-bp.dat","20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-350C.dat")
+    test05.compressColumns()
+    #test05.displayColumnNames()
 
-#NOTE: If you are going to only retain specific columns, you should run that function
-#       prior to running alignData(). This saves significant computational effort.
-#test05.retainOnlyColumns(['Elapsed Time (min)','NH3 (300,3000)', 'H2O% (20)'])
-test05.retainOnlyColumns(['Elapsed Time (min)','NH3 (300,3000)', 'H2O% (20)', 'TC bot sample in (C)', 'TC bot sample mid 1 (C)', 'TC bot sample mid 2 (C)', 'TC bot sample out 1 (C)', 'TC bot sample out 2 (C)', 'P bottom in (bar)', 'P bottom out (bar)'])
-test05.alignData()
+    #NOTE: If you are going to only retain specific columns, you should run that function
+    #       prior to running alignData(). This saves significant computational effort.
+    #test05.retainOnlyColumns(['Elapsed Time (min)','NH3 (300,3000)', 'H2O% (20)'])
+    test05.retainOnlyColumns(['Elapsed Time (min)','NH3 (300,3000)', 'H2O% (20)', 'TC bot sample in (C)', 'TC bot sample mid 1 (C)', 'TC bot sample mid 2 (C)', 'TC bot sample out 1 (C)', 'TC bot sample out 2 (C)', 'P bottom in (bar)', 'P bottom out (bar)'])
+    test05.alignData()
 
-#NOTE: After data is aligned, all result and bypass data are now in the result_trans_obj.
-#The bypass columns have the same names, but will be suffixed with [bypass]
-#We can then use this knowledge to manipulate or delete very specific sets of data
+    #NOTE: After data is aligned, all result and bypass data are now in the result_trans_obj.
+    #The bypass columns have the same names, but will be suffixed with [bypass]
+    #We can then use this knowledge to manipulate or delete very specific sets of data
 
-#Convert all temperatures from (C) to Kelvin, then delete old columns
-test05.mathOperation('TC bot sample in (C)',"+",273.15, True, 'TC bot sample in (K)')
-test05.deleteColumns('TC bot sample in (C)')
-test05.mathOperation('TC bot sample mid 1 (C)',"+",273.15, True, 'TC bot sample mid 1 (K)')
-test05.deleteColumns('TC bot sample mid 1 (C)')
-test05.mathOperation('TC bot sample mid 2 (C)',"+",273.15, True, 'TC bot sample mid 2 (K)')
-test05.deleteColumns('TC bot sample mid 2 (C)')
-test05.mathOperation('TC bot sample out 1 (C)',"+",273.15, True, 'TC bot sample out 1 (K)')
-test05.deleteColumns('TC bot sample out 1 (C)')
-test05.mathOperation('TC bot sample out 2 (C)',"+",273.15, True, 'TC bot sample out 2 (K)')
-test05.deleteColumns('TC bot sample out 2 (C)')
+    #Convert all temperatures from (C) to Kelvin, then delete old columns
+    test05.mathOperation('TC bot sample in (C)',"+",273.15, True, 'TC bot sample in (K)')
+    test05.deleteColumns('TC bot sample in (C)')
+    test05.mathOperation('TC bot sample mid 1 (C)',"+",273.15, True, 'TC bot sample mid 1 (K)')
+    test05.deleteColumns('TC bot sample mid 1 (C)')
+    test05.mathOperation('TC bot sample mid 2 (C)',"+",273.15, True, 'TC bot sample mid 2 (K)')
+    test05.deleteColumns('TC bot sample mid 2 (C)')
+    test05.mathOperation('TC bot sample out 1 (C)',"+",273.15, True, 'TC bot sample out 1 (K)')
+    test05.deleteColumns('TC bot sample out 1 (C)')
+    test05.mathOperation('TC bot sample out 2 (C)',"+",273.15, True, 'TC bot sample out 2 (K)')
+    test05.deleteColumns('TC bot sample out 2 (C)')
 
-#Delete the temperature columns from the bypass run that we don't need
-#NOTE: Will result in errors displayed, but only because of name changes (this is ok)
-test05.deleteColumns(['TC bot sample in (C)[bypass]','TC bot sample mid 1 (C)[bypass]','TC bot sample mid 2 (C)[bypass]','TC bot sample out 1 (C)[bypass]','TC bot sample out 2 (C)[bypass]'])
+    #Delete the temperature columns from the bypass run that we don't need
+    #NOTE: Will result in errors displayed, but only because of name changes (this is ok)
+    test05.deleteColumns(['TC bot sample in (C)[bypass]','TC bot sample mid 1 (C)[bypass]','TC bot sample mid 2 (C)[bypass]','TC bot sample out 1 (C)[bypass]','TC bot sample out 2 (C)[bypass]'])
 
-#Now, convert all pressures from bar to kPa and delete the extra [bypass] columns
-test05.mathOperation('P bottom in (bar)',"*",100,True,'P bottom in (kPa)')
-test05.deleteColumns('P bottom in (bar)')
-test05.mathOperation('P bottom out (bar)',"*",100,True,'P bottom out (kPa)')
-test05.deleteColumns('P bottom out (bar)')
-test05.deleteColumns(['P bottom in (bar)[bypass]','P bottom out (bar)[bypass]'])
+    #Now, convert all pressures from bar to kPa and delete the extra [bypass] columns
+    test05.mathOperation('P bottom in (bar)',"*",100,True,'P bottom in (kPa)')
+    test05.deleteColumns('P bottom in (bar)')
+    test05.mathOperation('P bottom out (bar)',"*",100,True,'P bottom out (kPa)')
+    test05.deleteColumns('P bottom out (bar)')
+    test05.deleteColumns(['P bottom in (bar)[bypass]','P bottom out (bar)[bypass]'])
 
-#NOTE: Always perform data processing BEFORE compressing the rows!
-#normal = False  #If true, then the integral is normalized and unitless
+    #NOTE: Always perform data processing BEFORE compressing the rows!
+    #normal = False  #If true, then the integral is normalized and unitless
                 #Otherwise, the integral has same units as the given column
-#conv_factor = 4.30554723150288E-08
-#NOTE: This factor is for 101.35 kPa, 150 oC, and a 0.0157 L total volume with 0.33 void fraction
-#           Also, this is to convert from ppmv to mol adsorbed per L catalyst
-#test05.calculateRetentionIntegral('NH3 (300,3000)', normal, conv_factor)
-#test05.calculateRetentionIntegral('H2O% (20)', normal, 1)
+    #conv_factor = 4.30554723150288E-08
+    #NOTE: This factor is for 101.35 kPa, 150 oC, and a 0.0157 L total volume with 0.33 void fraction
+    #           Also, this is to convert from ppmv to mol adsorbed per L catalyst
+    #test05.calculateRetentionIntegral('NH3 (300,3000)', normal, conv_factor)
+    #test05.calculateRetentionIntegral('H2O% (20)', normal, 1)
 
-#Calculate the retention integral, then perform unit conversions
-test05.calculateRetentionIntegral('NH3 (300,3000)')
-test05.calculateRetentionIntegral('H2O% (20)')
+    #Calculate the retention integral, then perform unit conversions
+    test05.calculateRetentionIntegral('NH3 (300,3000)')
+    test05.calculateRetentionIntegral('H2O% (20)')
 
-#NOTE: The retention integral will have the name of the given column suffixed
-#       with '-Retained' and will have the same units as the given column. Use
-#       that information to perform specific actions on that column.
+    #NOTE: The retention integral will have the name of the given column suffixed
+    #       with '-Retained' and will have the same units as the given column. Use
+    #       that information to perform specific actions on that column.
 
-#NH3 has units of ppmv, want to convert this to mol adsorbed / L catalyst
-test05.mathOperation('NH3 (300,3000)-Retained',"/",1E6)                     #From ppmv to molefraction
-test05.mathOperation('NH3 (300,3000)-Retained',"*","P bottom in (kPa)")    #From molefraction to kPa
-test05.mathOperation('NH3 (300,3000)-Retained',"/",8.314)
-test05.mathOperation('NH3 (300,3000)-Retained',"/",'TC bot sample in (K)') #From kPa to mol/L using Ideal gas law
-test05.mathOperation('NH3 (300,3000)-Retained',"*",0.015708)                #From mol/L to total moles (multiply by total volume)
-#From total moles to mol ads / L cat using solids fraction, then store in new column and delete old column
-test05.mathOperation('NH3 (300,3000)-Retained',"/",(1-0.3309)*0.015708,True,"NH3 ads (mol/L)")
-test05.deleteColumns('NH3 (300,3000)-Retained')
+    #NH3 has units of ppmv, want to convert this to mol adsorbed / L catalyst
+    test05.mathOperation('NH3 (300,3000)-Retained',"/",1E6)                     #From ppmv to molefraction
+    test05.mathOperation('NH3 (300,3000)-Retained',"*","P bottom in (kPa)")    #From molefraction to kPa
+    test05.mathOperation('NH3 (300,3000)-Retained',"/",8.314)
+    test05.mathOperation('NH3 (300,3000)-Retained',"/",'TC bot sample in (K)') #From kPa to mol/L using Ideal gas law
+    test05.mathOperation('NH3 (300,3000)-Retained',"*",0.015708)                #From mol/L to total moles (multiply by total volume)
+    #From total moles to mol ads / L cat using solids fraction, then store in new column and delete old column
+    test05.mathOperation('NH3 (300,3000)-Retained',"/",(1-0.3309)*0.015708,True,"NH3 ads (mol/L)")
+    test05.deleteColumns('NH3 (300,3000)-Retained')
 
-#H2O has units of %, want to convert this to mol adsorbed / L catalyst
-test05.mathOperation('H2O% (20)-Retained',"/",100)                     #From % to molefraction
-test05.mathOperation('H2O% (20)-Retained',"*","P bottom in (kPa)")    #From molefraction to kPa
-test05.mathOperation('H2O% (20)-Retained',"/",8.314)
-test05.mathOperation('H2O% (20)-Retained',"/",'TC bot sample in (K)') #From kPa to mol/L using Ideal gas law
-test05.mathOperation('H2O% (20)-Retained',"*",0.015708)                #From mol/L to total moles (multiply by total volume)
-#From total moles to mol ads / L cat using solids fraction, then store in new column and delete old column
-test05.mathOperation('H2O% (20)-Retained',"/",(1-0.3309)*0.015708,True,"H2O ads (mol/L)")
-test05.deleteColumns('H2O% (20)-Retained')
+    #H2O has units of %, want to convert this to mol adsorbed / L catalyst
+    test05.mathOperation('H2O% (20)-Retained',"/",100)                     #From % to molefraction
+    test05.mathOperation('H2O% (20)-Retained',"*","P bottom in (kPa)")    #From molefraction to kPa
+    test05.mathOperation('H2O% (20)-Retained',"/",8.314)
+    test05.mathOperation('H2O% (20)-Retained',"/",'TC bot sample in (K)') #From kPa to mol/L using Ideal gas law
+    test05.mathOperation('H2O% (20)-Retained',"*",0.015708)                #From mol/L to total moles (multiply by total volume)
+    #From total moles to mol ads / L cat using solids fraction, then store in new column and delete old column
+    test05.mathOperation('H2O% (20)-Retained',"/",(1-0.3309)*0.015708,True,"H2O ads (mol/L)")
+    test05.deleteColumns('H2O% (20)-Retained')
 
 
-#Instead of using a constant factor for unit conversion, this time we will
-#convert the units for the desired inlet and outlet columns first, then ask
-#for the integration of the converted unit columns. This may be the most
-#accurate approach since there are differences in the inlet and outlet
-#temperatures and pressures which are used to convert from molefractions
-#to molar concentrations.
+    #Instead of using a constant factor for unit conversion, this time we will
+    #convert the units for the desired inlet and outlet columns first, then ask
+    #for the integration of the converted unit columns. This may be the most
+    #accurate approach since there are differences in the inlet and outlet
+    #temperatures and pressures which are used to convert from molefractions
+    #to molar concentrations.
 
-#   Convert NH3 for bypass to mol/L by first converting to molefraction and saving in a new column
-test05.mathOperation('NH3 (300,3000)[bypass]',"/",1E6,True,'NH3 (mol/L)[bypass]')
-#   Then convert that molefraction to kPa and override the new column previously created
-test05.mathOperation('NH3 (mol/L)[bypass]',"*",'P bottom in (kPa)')
-#   Perform the next set of conversion overrides to get to mol/L
-test05.mathOperation('NH3 (mol/L)[bypass]',"/",8.314)
-test05.mathOperation('NH3 (mol/L)[bypass]',"/",'TC bot sample in (K)')
-##   NOTE: we named the new column for the input with a suffixed "[bypass]"
-#           because the integration routine is designed to specifically
-#           look for the "[bypass]" suffix with matching prefixes
+    #   Convert NH3 for bypass to mol/L by first converting to molefraction and saving in a new column
+    test05.mathOperation('NH3 (300,3000)[bypass]',"/",1E6,True,'NH3 (mol/L)[bypass]')
+    #   Then convert that molefraction to kPa and override the new column previously created
+    test05.mathOperation('NH3 (mol/L)[bypass]',"*",'P bottom in (kPa)')
+    #   Perform the next set of conversion overrides to get to mol/L
+    test05.mathOperation('NH3 (mol/L)[bypass]',"/",8.314)
+    test05.mathOperation('NH3 (mol/L)[bypass]',"/",'TC bot sample in (K)')
+    #   NOTE: we named the new column for the input with a suffixed "[bypass]"
+    #           because the integration routine is designed to specifically
+    #           look for the "[bypass]" suffix with matching prefixes
 
-#   Convert NH3 for outlet to mol/L by first converting to molefraction and saving in a new column
-test05.mathOperation('NH3 (300,3000)',"/",1E6,True,'NH3 (mol/L)')
-#   Then convert that molefraction to kPa and override the new column previously created
-test05.mathOperation('NH3 (mol/L)',"*",'P bottom in (kPa)')
-#   Perform the next set of conversion overrides to get to mol/L
-test05.mathOperation('NH3 (mol/L)',"/",8.314)
-test05.mathOperation('NH3 (mol/L)',"/",'TC bot sample in (K)')
-##   NOTE: we named the new column based on what the inlet column was previously
-#           named, but removed the suffixed "[bypass]"
+    #   Convert NH3 for outlet to mol/L by first converting to molefraction and saving in a new column
+    test05.mathOperation('NH3 (300,3000)',"/",1E6,True,'NH3 (mol/L)')
+    #   Then convert that molefraction to kPa and override the new column previously created
+    test05.mathOperation('NH3 (mol/L)',"*",'P bottom in (kPa)')
+    #   Perform the next set of conversion overrides to get to mol/L
+    test05.mathOperation('NH3 (mol/L)',"/",8.314)
+    test05.mathOperation('NH3 (mol/L)',"/",'TC bot sample in (K)')
+    #   NOTE: we named the new column based on what the inlet column was previously
+    #           named, but removed the suffixed "[bypass]"
 
-#   Convert H2O for bypass to mol/L by first converting to molefraction and saving in a new column
-test05.mathOperation('H2O% (20)[bypass]',"/",100,True,'H2O (mol/L)[bypass]')
-#   Then convert that molefraction to kPa and override the new column previously created
-test05.mathOperation('H2O (mol/L)[bypass]',"*",'P bottom in (kPa)')
-#   Perform the next set of conversion overrides to get to mol/L
-test05.mathOperation('H2O (mol/L)[bypass]',"/",8.314)
-test05.mathOperation('H2O (mol/L)[bypass]',"/",'TC bot sample in (K)')
-##   NOTE: we named the new column for the input with a suffixed "[bypass]"
-#           because the integration routine is designed to specifically
-#           look for the "[bypass]" suffix with matching prefixes
+    #   Convert H2O for bypass to mol/L by first converting to molefraction and saving in a new column
+    test05.mathOperation('H2O% (20)[bypass]',"/",100,True,'H2O (mol/L)[bypass]')
+    #   Then convert that molefraction to kPa and override the new column previously created
+    test05.mathOperation('H2O (mol/L)[bypass]',"*",'P bottom in (kPa)')
+    #   Perform the next set of conversion overrides to get to mol/L
+    test05.mathOperation('H2O (mol/L)[bypass]',"/",8.314)
+    test05.mathOperation('H2O (mol/L)[bypass]',"/",'TC bot sample in (K)')
+    #   NOTE: we named the new column for the input with a suffixed "[bypass]"
+    #           because the integration routine is designed to specifically
+    #           look for the "[bypass]" suffix with matching prefixes
 
-#   Convert H2O for outlet to mol/L by first converting to molefraction and saving in a new column
-test05.mathOperation('H2O% (20)',"/",100,True,'H2O (mol/L)')
-#   Then convert that molefraction to kPa and override the new column previously created
-test05.mathOperation('H2O (mol/L)',"*",'P bottom in (kPa)')
-#   Perform the next set of conversion overrides to get to mol/L
-test05.mathOperation('H2O (mol/L)',"/",8.314)
-test05.mathOperation('H2O (mol/L)',"/",'TC bot sample in (K)')
+    #   Convert H2O for outlet to mol/L by first converting to molefraction and saving in a new column
+    test05.mathOperation('H2O% (20)',"/",100,True,'H2O (mol/L)')
+    #   Then convert that molefraction to kPa and override the new column previously created
+    test05.mathOperation('H2O (mol/L)',"*",'P bottom in (kPa)')
+    #   Perform the next set of conversion overrides to get to mol/L
+    test05.mathOperation('H2O (mol/L)',"/",8.314)
+    test05.mathOperation('H2O (mol/L)',"/",'TC bot sample in (K)')
 
-#The way this was done gives us 4 new columns containing the inlet and outlet
-#   data for both H2O and NH3 in units of mol/L. Now, when we integrate, we
-#   will get the total concentration of each (in mol/L) that have been held up
-#   (or retained) within the space volume of the catalyst.
-test05.calculateRetentionIntegral('NH3 (mol/L)',False,(1/(1-0.3309)))
-test05.calculateRetentionIntegral('H2O (mol/L)',False,(1/(1-0.3309)))
+    #The way this was done gives us 4 new columns containing the inlet and outlet
+    #   data for both H2O and NH3 in units of mol/L. Now, when we integrate, we
+    #   will get the total concentration of each (in mol/L) that have been held up
+    #   (or retained) within the space volume of the catalyst.
+    test05.calculateRetentionIntegral('NH3 (mol/L)',False,(1/(1-0.3309)))
+    test05.calculateRetentionIntegral('H2O (mol/L)',False,(1/(1-0.3309)))
 
-#Both of the above methods for calculating the mass retained and converting
-#the units provide very similar results.
+    #Both of the above methods for calculating the mass retained and converting
+    #the units provide very similar results.
 
-#plt.plot(test05.extractResultColumns('Elapsed Time (min)')['Elapsed Time (min)'],test05.extractResultColumns('NH3 (mol/L)')['NH3 (mol/L)'],'-',test05.extractResultColumns('Elapsed Time (min)')['Elapsed Time (min)'],test05.extractResultColumns('NH3 (300,3000)')['NH3 (300,3000)'],'--')
-#plt.show()
+    #plt.plot(test05.extractResultColumns('Elapsed Time (min)')['Elapsed Time (min)'],test05.extractResultColumns('NH3 (mol/L)')['NH3 (mol/L)'],'-',test05.extractResultColumns('Elapsed Time (min)')['Elapsed Time (min)'],test05.extractResultColumns('NH3 (300,3000)')['NH3 (300,3000)'],'--')
+    #plt.show()
 
-#Works well for 1-2 plots, can do more, but gets impossible to read
-#fig, ax1 = plt.subplots()
-#ax1.plot(test05.extractResultColumns('Elapsed Time (min)')['Elapsed Time (min)'],test05.extractResultColumns('NH3 (mol/L)-Retained')['NH3 (mol/L)-Retained'],'r-',test05.extractResultColumns('Elapsed Time (min)')['Elapsed Time (min)'],test05.extractResultColumns('TC bot sample in (K)')['TC bot sample in (K)'],'g.')
-#ax1.plot(test05.extractResultColumns('Elapsed Time (min)')['Elapsed Time (min)'],test05.extractResultColumns('NH3 (mol/L)-Retained')['NH3 (mol/L)-Retained'],'r-')
-#ax2 = ax1.twinx()
-#ax2.plot(test05.extractResultColumns('Elapsed Time (min)')['Elapsed Time (min)'],test05.extractResultColumns('NH3 (300,3000)')['NH3 (300,3000)'],'b--')
-#plt.show()
+    #Works well for 1-2 plots, can do more, but gets impossible to read
+    #fig, ax1 = plt.subplots()
+    #ax1.plot(test05.extractResultColumns('Elapsed Time (min)')['Elapsed Time (min)'],test05.extractResultColumns('NH3 (mol/L)-Retained')['NH3 (mol/L)-Retained'],'r-',test05.extractResultColumns('Elapsed Time (min)')['Elapsed Time (min)'],test05.extractResultColumns('TC bot sample in (K)')['TC bot sample in (K)'],'g.')
+    #ax1.plot(test05.extractResultColumns('Elapsed Time (min)')['Elapsed Time (min)'],test05.extractResultColumns('NH3 (mol/L)-Retained')['NH3 (mol/L)-Retained'],'r-')
+    #ax2 = ax1.twinx()
+    #ax2.plot(test05.extractResultColumns('Elapsed Time (min)')['Elapsed Time (min)'],test05.extractResultColumns('NH3 (300,3000)')['NH3 (300,3000)'],'b--')
+    #plt.show()
 
-#Works well for N plots
-#plt.figure()
-#plt.subplot(221)
-#plt.plot(test05.extractResultColumns('Elapsed Time (min)')['Elapsed Time (min)'],test05.extractResultColumns('NH3 (mol/L)-Retained')['NH3 (mol/L)-Retained'],'r-')
-#plt.subplot(222)
-#plt.plot(test05.extractResultColumns('Elapsed Time (min)')['Elapsed Time (min)'],test05.extractResultColumns('NH3 (300,3000)')['NH3 (300,3000)'],'b--')
-#plt.subplot(223)
-#plt.plot(test05.extractResultColumns('Elapsed Time (min)')['Elapsed Time (min)'],test05.extractResultColumns('TC bot sample in (K)')['TC bot sample in (K)'],'g.')
-#plt.show()
+    #Works well for N plots
+    #plt.figure()
+    #plt.subplot(221)
+    #plt.plot(test05.extractResultColumns('Elapsed Time (min)')['Elapsed Time (min)'],test05.extractResultColumns('NH3 (mol/L)-Retained')['NH3 (mol/L)-Retained'],'r-')
+    #plt.subplot(222)
+    #plt.plot(test05.extractResultColumns('Elapsed Time (min)')['Elapsed Time (min)'],test05.extractResultColumns('NH3 (300,3000)')['NH3 (300,3000)'],'b--')
+    #plt.subplot(223)
+    #plt.plot(test05.extractResultColumns('Elapsed Time (min)')['Elapsed Time (min)'],test05.extractResultColumns('TC bot sample in (K)')['TC bot sample in (K)'],'g.')
+    #plt.show()
 
-#Combination: Multiplots on one sub-plot + other sub-plots...Works well for N plots
-#   Plan:   - User will request plots for all data (or a sub-set of data)
-#           - Iterate through data and find the range for each set
-#           - Use ranges to determine whether or not that data can be
-#                   plotted on the same y-axis
-#           - If they can, then plot them on that axis
-#           - If they can't, then use figure() and subplot() --OR-- use multiple single plots
-#           - Function to get range of values, average value, maximum value, minimum value, etc in TransientData
-#           - Plot all matching run data and bypass data on the same plot
+    #Combination: Multiplots on one sub-plot + other sub-plots...Works well for N plots
+    #   Plan:   - User will request plots for all data (or a sub-set of data)
+    #           - Iterate through data and find the range for each set
+    #           - Use ranges to determine whether or not that data can be
+    #                   plotted on the same y-axis
+    #           - If they can, then plot them on that axis
+    #           - If they can't, then use figure() and subplot() --OR-- use multiple single plots
+    #           - Function to get range of values, average value, maximum value, minimum value, etc in TransientData
+    #           - Plot all matching run data and bypass data on the same plot
 
-#       PROBLEM: this method does not allow for easy labeling of the y-axis...
-#
-#       linestyle or ls 	  [ '-' | '--' | '-.' | ':' | 'steps' | ...]
-#       color options one of {'b', 'g', 'r', 'c', 'm', 'y', 'k', 'w'}
-#           Format: third option in plot, pass string as color+line
-#                       e.g.,   'b-'  = blue solid line
+    #       PROBLEM: this method does not allow for easy labeling of the y-axis...
+    #
+    #       linestyle or ls 	  [ '-' | '--' | '-.' | ':' | 'steps' | ...]
+    #       color options one of {'b', 'g', 'r', 'c', 'm', 'y', 'k', 'w'}
+    #           Format: third option in plot, pass string as color+line
+    #                       e.g.,   'b-'  = blue solid line
 
-#                               'r--' = red dashed line
-#Call figure() each time you are plotting a new figure
-#       figure(num, size, dpi)
-#           num = figure number
-#           size = (w,h)  where w = width (inches) and h = hieght (inches)
-#           dpi = resolution (default = 100)
-#   Should choose (w,h) based on number of subplots requested
-#       dpi should stay 100
-#       max size ==> (8.5, 11)
-#       min size ==> (7,5)
-#
-#   NOTE: Instead of using plt.show(), store figures into temporary variables,
-#           then show() for those variables to get all images to display
-#           at the same time. Requires use of input() command at the last
-#           show() command to pause execution of script for viewing images.
-#a = plt.figure(0)
-#plt.subplot(211)
-#tuple = (test05.extractResultColumns('Elapsed Time (min)')['Elapsed Time (min)'],test05.extractResultColumns('NH3 (300,3000)')['NH3 (300,3000)'],'b--',test05.extractResultColumns('Elapsed Time (min)')['Elapsed Time (min)'],test05.extractResultColumns('TC bot sample in (K)')['TC bot sample in (K)'],'g-.')
-#Use tuples to iterate through and plot sets of info to same figure
-#plt.plot(tuple[0],tuple[1],tuple[2])
-#plt.plot(tuple[3],tuple[4],tuple[5])
-#plt.legend(['NH3 (300,3000)','TC bot sample in (K)'])  #Items must be in same order plotted
-#plt.ylabel('NH3 (300,3000)\nTC bot sample in (K)')
-#xmin = test05.getMinimum('Elapsed Time (min)')
-#xmax = test05.getMaximum('Elapsed Time (min)')
-#NOTE: May want the plotter to automatically pick ymin and ymax
-#      or use the largest range to determine which set to base y-axis from
-#ymin = test05.getMinimum('NH3 (300,3000)') - test05.getDataRange('NH3 (300,3000)')/10
-#ymax = test05.getMaximum('NH3 (300,3000)') + test05.getDataRange('NH3 (300,3000)')/10
-#plt.axis([xmin, xmax, ymin, ymax])
-#plt.subplot(212)
-#plt.plot(test05.extractResultColumns('Elapsed Time (min)')['Elapsed Time (min)'],test05.extractResultColumns('NH3 (mol/L)-Retained')['NH3 (mol/L)-Retained'],'r-')
-#plt.legend(['NH3 (mol/L)-Retained'])
-#plt.ylabel('NH3 (mol/L)-Retained')
-#plt.xlabel('Elapsed Time (min)')
-#xmin = test05.getMinimum('Elapsed Time (min)')
-#xmax = test05.getMaximum('Elapsed Time (min)')
-#ymin = test05.getMinimum('NH3 (mol/L)-Retained') - test05.getDataRange('NH3 (mol/L)-Retained')/10
-#ymax = test05.getMaximum('NH3 (mol/L)-Retained') + test05.getDataRange('NH3 (mol/L)-Retained')/10
-#plt.axis([xmin, xmax, ymin, ymax])
-#Use the 'tight' options to automatically size the figure
-#plt.tight_layout()
-#plt.savefig('test.png', bbox_inches = "tight") #MUST Always call this before show()
+    #                               'r--' = red dashed line
+    #Call figure() each time you are plotting a new figure
+    #       figure(num, size, dpi)
+    #           num = figure number
+    #           size = (w,h)  where w = width (inches) and h = hieght (inches)
+    #           dpi = resolution (default = 100)
+    #   Should choose (w,h) based on number of subplots requested
+    #       dpi should stay 100
+    #       max size ==> (8.5, 11)
+    #       min size ==> (7,5)
+    #
+    #   NOTE: Instead of using plt.show(), store figures into temporary variables,
+    #           then show() for those variables to get all images to display
+    #           at the same time. Requires use of input() command at the last
+    #           show() command to pause execution of script for viewing images.
+    #a = plt.figure(0)
+    #plt.subplot(211)
+    #tuple = (test05.extractResultColumns('Elapsed Time (min)')['Elapsed Time (min)'],test05.extractResultColumns('NH3 (300,3000)')['NH3 (300,3000)'],'b--',test05.extractResultColumns('Elapsed Time (min)')['Elapsed Time (min)'],test05.extractResultColumns('TC bot sample in (K)')['TC bot sample in (K)'],'g-.')
+    #Use tuples to iterate through and plot sets of info to same figure
+    #plt.plot(tuple[0],tuple[1],tuple[2])
+    #plt.plot(tuple[3],tuple[4],tuple[5])
+    #plt.legend(['NH3 (300,3000)','TC bot sample in (K)'])  #Items must be in same order plotted
+    #plt.ylabel('NH3 (300,3000)\nTC bot sample in (K)')
+    #xmin = test05.getMinimum('Elapsed Time (min)')
+    #xmax = test05.getMaximum('Elapsed Time (min)')
+    #NOTE: May want the plotter to automatically pick ymin and ymax
+    #      or use the largest range to determine which set to base y-axis from
+    #ymin = test05.getMinimum('NH3 (300,3000)') - test05.getDataRange('NH3 (300,3000)')/10
+    #ymax = test05.getMaximum('NH3 (300,3000)') + test05.getDataRange('NH3 (300,3000)')/10
+    #plt.axis([xmin, xmax, ymin, ymax])
+    #plt.subplot(212)
+    #plt.plot(test05.extractResultColumns('Elapsed Time (min)')['Elapsed Time (min)'],test05.extractResultColumns('NH3 (mol/L)-Retained')['NH3 (mol/L)-Retained'],'r-')
+    #plt.legend(['NH3 (mol/L)-Retained'])
+    #plt.ylabel('NH3 (mol/L)-Retained')
+    #plt.xlabel('Elapsed Time (min)')
+    #xmin = test05.getMinimum('Elapsed Time (min)')
+    #xmax = test05.getMaximum('Elapsed Time (min)')
+    #ymin = test05.getMinimum('NH3 (mol/L)-Retained') - test05.getDataRange('NH3 (mol/L)-Retained')/10
+    #ymax = test05.getMaximum('NH3 (mol/L)-Retained') + test05.getDataRange('NH3 (mol/L)-Retained')/10
+    #plt.axis([xmin, xmax, ymin, ymax])
+    #Use the 'tight' options to automatically size the figure
+    #plt.tight_layout()
+    #plt.savefig('test.png', bbox_inches = "tight") #MUST Always call this before show()
 
-#Plot a section of data
-#b = plt.figure(1)
-#plt.subplot(111)
-#xvals = test05.extractResultRows(250,300)['Elapsed Time (min)']
-#yvals = test05.extractResultRows(250,300)['NH3 (300,3000)']
-#plt.plot(xvals,yvals,'o')
+    #Plot a section of data
+    #b = plt.figure(1)
+    #plt.subplot(111)
+    #xvals = test05.extractResultRows(250,300)['Elapsed Time (min)']
+    #yvals = test05.extractResultRows(250,300)['NH3 (300,3000)']
+    #plt.plot(xvals,yvals,'o')
 
-#test05.createPlot(['NH3 (300,3000)','NH3 (300,3000)[bypass]'])
-#test05.createPlot(['NH3 (mol/L)-Retained'])
-#test05.createPlot('TC bot sample in (K)')
+    #test05.createPlot(['NH3 (300,3000)','NH3 (300,3000)[bypass]'])
+    #test05.createPlot(['NH3 (mol/L)-Retained'])
+    #test05.createPlot('TC bot sample in (K)')
 
-#test05.savePlots()
-#test05.savePlots((250,300))
-#test05.saveTimeFramePlots()
+    #test05.savePlots()
+    #test05.savePlots((250,300))
+    #test05.saveTimeFramePlots()
 
-#NOTE: the subplot args represent row,cols,plot_num
-#       plot_num cannot be larger than the product of row*cols
-#       row = number of rows of plots to show
-#       cols = number of columns of plots to show
+    #NOTE: the subplot args represent row,cols,plot_num
+    #       plot_num cannot be larger than the product of row*cols
+    #       row = number of rows of plots to show
+    #       cols = number of columns of plots to show
 
-#NTOE: Only call the compressRows(n) function when you are ready to print information to
-#       a file for visualization or further analysis purposes. The data set will lose
-#       some accuracy when the rows are compressed.
-if h2o_comp == True:
-    test05.compressRows(2)
-else:
-    test05.compressRows(10)
+    #NTOE: Only call the compressRows(n) function when you are ready to print information to
+    #       a file for visualization or further analysis purposes. The data set will lose
+    #       some accuracy when the rows are compressed.
+    if h2o_comp == True:
+        test05.compressRows(2)
+    else:
+        test05.compressRows(10)
 
-test05.printAlltoFile()
-'''
-## ----- End Testing -----
+    test05.printAlltoFile()
+
+    ## ----- End Testing -----
+
+##Directs python to call the testing function
+if __name__ == "__main__":
+   testing()

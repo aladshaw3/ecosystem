@@ -21,11 +21,63 @@
 #                    (NTRC) by Austin Ladshaw for research in the catalytic
 #                    reduction of NOx. Copyright (c) 2020, all rights reserved.
 
+'''
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.pyplot as plt
+from matplotlib import cm
+from matplotlib.ticker import LinearLocator, FormatStrFormatter
+import numpy as np
+
+
+fig = plt.figure()
+ax = fig.gca(projection='3d')
+
+# Make data.
+X = np.arange(-5, 5, 0.25)
+Y = np.arange(-5, 5, 0.25)
+X, Y = np.meshgrid(X, Y)
+R = np.sqrt(X**2 + Y**2)
+Z = np.sin(R)
+
+# Plot the surface. (X, Y, and Z must be numpy arrays)
+# Convert standard array to numpy array wth X = np.array(X)
+#
+# For our purpose:
+#       X ==> times
+#       Y ==> temperatures (isothermal)
+#       Z ==> any column in the data
+#
+#       X = [ [times, for, 1], [times, for, 2], ..., [etc, ] ]
+#       Y = [ [repeat, temp, 1], [repeat, temp, 2], ..., [etc, ] ]
+#       Z = [ [NH3@time for 1, NH3@next time for 1, ], [NH3@time for 2, NH3@next time for 2, ], ..., [etc, ] ]
+#
+#   Basically, the list set in X and Z is what we already plot, but we create a series of those for each
+#       corresponding temperature to make the contours. Every value in a Y list is the same
+#           e.g., Y [ [150, 150, 150, ...], [175, 175, 175, ...], ... ]
+#
+surf = ax.plot_surface(X, Y, Z, cmap=cm.coolwarm, linewidth=0, antialiased=False)
+
+# Customize the z axis.
+ax.set_zlim(-1.01, 1.01)
+ax.zaxis.set_major_locator(LinearLocator(10))
+ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
+
+# Add a color bar which maps values to colors.
+fig.colorbar(surf, shrink=0.5, aspect=5)
+
+plt.show()
+'''
+
 
 #Generally speaking, we do not know whether or not there is bypass data in the
 #   folders that may need to be paired, so we import all objects from transient_data
 from transient_data import TransientData, PairedTransientData
 import os, sys, getopt
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.pyplot as plt
+from matplotlib import cm
+from matplotlib.ticker import LinearLocator, FormatStrFormatter
+import numpy as np
 
 ## TransientDataFolder
 #   This object creates a map of other transient data objects (paired or unpaired)
@@ -79,6 +131,8 @@ class TransientDataFolder(object):
         self.unpaired_data = {}
         ##Map of Paired Transient Data objects by file_name (paired)
         self.paired_data = {}
+        ##Map of data sets that have specific similarities
+        self.like_sets = {}
         ##Flag to denote whether or not folder contains unpaired data
         self.has_unpaired = False
         ##Flag to denote whether or not folder contains paired data (note: CAN have both)
@@ -89,6 +143,13 @@ class TransientDataFolder(object):
         self.was_compressed = False
         ##Running total of the number of data points processed (based on rows and columns)
         self.total_data_processed = 0
+        ##Map of conditions for like files
+        self.conditions = {}
+        self.conditions["material"] = {}
+        self.conditions["aging_time"] = {}
+        self.conditions["aging_temp"] = {}
+        self.conditions["flow_rate"] = {}
+        self.conditions["iso_temp"] = {}
 
         #First round of iterations is to change all file names to meet standards
         for file in os.listdir(self.folder_name):
@@ -112,9 +173,38 @@ class TransientDataFolder(object):
                     if "-bp." in file:
                         self.bypass_names.append(file)
                         self.file_pairs[file.split("-bp.")[0]] = []
+                        self.like_sets[file.split("-bp.")[0]] = []
                     else:
                         self.file_names.append(file)
                         self.unread.append(True)
+                        base_list = file.split("-")
+                        string = ""
+                        i=0
+                        for item in base_list[:-1]:
+                            if i==0:
+                                string+=item
+                            else:
+                                string+="-"+item
+                            i+=1
+                        self.like_sets[string] = []
+
+
+        #Iterate through the files again to create the like_sets map
+        for file in os.listdir(self.folder_name):
+            if "-bp." not in file:
+                for base in self.like_sets:
+                    self.conditions["material"][base] = {}
+                    self.conditions["aging_time"][base] = {}
+                    self.conditions["aging_temp"][base] = {}
+                    self.conditions["flow_rate"][base] = {}
+                    self.conditions["iso_temp"][base] = {}
+                    if base in file:
+                        self.like_sets[base].append(file)
+                        self.conditions["material"][base][file] = "unknown"
+                        self.conditions["aging_time"][base][file] = 0
+                        self.conditions["aging_temp"][base][file] = 0
+                        self.conditions["flow_rate"][base][file] = 0
+                        self.conditions["iso_temp"][base][file] = 0
 
         #Determine what to do when no bypass files are provided
         if len(self.bypass_names) == 0:
@@ -160,6 +250,11 @@ class TransientDataFolder(object):
                 self.unpaired_data[self.file_names[j]].compressColumns()
             j+=1
 
+        #After done reading, register the file conditions in the conditions map
+        for base in self.like_sets:
+            for file in self.like_sets[base]:
+                self.conditions["material"][base][file] = self.grabDataObj(file).material_name
+
     ##Print object attributes to the console
     def __str__(self):
         message =  "\n ---- Folder: " + str(self.folder_name) + " ---- "
@@ -190,6 +285,44 @@ class TransientDataFolder(object):
         if self.has_unpaired == True:
             print("\n ---- Unpaired Data Column Names ---- \n")
             self.unpaired_data[list(self.unpaired_data.keys())[-1]].displayColumnNames()
+
+    ##Display the names of the file bases that are common to this object
+    #
+    #   This function will display to the console the file base names that are
+    #   common among sets of files in the folder. This can be used to identify
+    #   data sets that are related in a particular way
+    #
+    #   For instance:
+    #
+    #       All unaged data files for NH3 capacity are prefixed with...
+    #
+    #           20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O
+    #
+    #       All unaged data files for H2O competition are prefixed with...
+    #
+    #           20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2-11-3pctH2O-400ppmNH3
+    #
+    #   This information is used to create contour plots of various data over the
+    #   conditions that do differ between those data files, such as isothermal temperature.
+    def displayLikeFileNames(self):
+        print(self.like_sets.keys())
+
+    ##Display the file names that are valid under the given prefix (or all like sets of files)
+    def displayFilesUnderSet(self, file_prefix=""):
+        if file_prefix != "":
+            if file_prefix not in self.like_sets.keys():
+                print("Error! Unrecognized file prefix!")
+                return
+            print(str(file_prefix) + " contains the following...")
+            for file in self.like_sets[file_prefix]:
+                print("\t"+str(file))
+            print()
+        else:
+            for pre in self.like_sets:
+                print(str(pre) + " contains the following...")
+                for file in self.like_sets[pre]:
+                    print("\t"+str(file))
+                print()
 
     ##Delete specific columns from all data sets that we do not need
     def deleteColumns(self, column_list):
@@ -414,74 +547,80 @@ class TransientDataFolder(object):
                 self.paired_data[file].savePlots(range,path,file_type)
 
 
-## ------ Testing ------ ##
-'''
-test01 = TransientDataFolder("BASFCuSSZ13-700C4h-NH3storage")
-test01.retainOnlyColumns(['Elapsed Time (min)','NH3 (300,3000)', 'H2O% (20)', 'TC bot sample in (C)', 'TC bot sample mid 1 (C)', 'TC bot sample mid 2 (C)', 'TC bot sample out 1 (C)', 'TC bot sample out 2 (C)', 'P bottom in (bar)', 'P bottom out (bar)'])
-#test01.displayColumnNames()
-#print(test01.grabDataObj("20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2-11-3pctH2O-400ppmNH3-200C.dat"))
-#print(test01)  #This will display the names of the objects/files you have access to and whether they are paired or not
+## Function for testing the data folder object
+def testing():
+    test01 = TransientDataFolder("BASFCuSSZ13-700C4h-NH3storage")
+    test01.retainOnlyColumns(['Elapsed Time (min)','NH3 (300,3000)', 'H2O% (20)', 'TC bot sample in (C)', 'TC bot sample mid 1 (C)', 'TC bot sample mid 2 (C)', 'TC bot sample out 1 (C)', 'TC bot sample out 2 (C)', 'P bottom in (bar)', 'P bottom out (bar)'])
+    #test01.displayColumnNames()
+    #print(test01.grabDataObj("20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2-11-3pctH2O-400ppmNH3-200C.dat"))
+    #print(test01)  #This will display the names of the objects/files you have access to and whether they are paired or not
 
-#Convert all temperatures from (C) to Kelvin, then delete old columns
-test01.mathOperations('TC bot sample in (C)',"+",273.15, True, 'TC bot sample in (K)')
-test01.deleteColumns('TC bot sample in (C)')
-test01.mathOperations('TC bot sample mid 1 (C)',"+",273.15, True, 'TC bot sample mid 1 (K)')
-test01.deleteColumns('TC bot sample mid 1 (C)')
-test01.mathOperations('TC bot sample mid 2 (C)',"+",273.15, True, 'TC bot sample mid 2 (K)')
-test01.deleteColumns('TC bot sample mid 2 (C)')
-test01.mathOperations('TC bot sample out 1 (C)',"+",273.15, True, 'TC bot sample out 1 (K)')
-test01.deleteColumns('TC bot sample out 1 (C)')
-test01.mathOperations('TC bot sample out 2 (C)',"+",273.15, True, 'TC bot sample out 2 (K)')
-test01.deleteColumns('TC bot sample out 2 (C)')
+    #test01.displayLikeFileNames()
+    #test01.displayFilesUnderSet("20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2-11-3pctH2O-400ppmNH3")
 
-#Delete the temperature columns from the bypass run that we don't need
-test01.deleteColumns(['TC bot sample in (C)[bypass]','TC bot sample mid 1 (C)[bypass]','TC bot sample mid 2 (C)[bypass]','TC bot sample out 1 (C)[bypass]','TC bot sample out 2 (C)[bypass]'])
+    #Convert all temperatures from (C) to Kelvin, then delete old columns
+    test01.mathOperations('TC bot sample in (C)',"+",273.15, True, 'TC bot sample in (K)')
+    test01.deleteColumns('TC bot sample in (C)')
+    test01.mathOperations('TC bot sample mid 1 (C)',"+",273.15, True, 'TC bot sample mid 1 (K)')
+    test01.deleteColumns('TC bot sample mid 1 (C)')
+    test01.mathOperations('TC bot sample mid 2 (C)',"+",273.15, True, 'TC bot sample mid 2 (K)')
+    test01.deleteColumns('TC bot sample mid 2 (C)')
+    test01.mathOperations('TC bot sample out 1 (C)',"+",273.15, True, 'TC bot sample out 1 (K)')
+    test01.deleteColumns('TC bot sample out 1 (C)')
+    test01.mathOperations('TC bot sample out 2 (C)',"+",273.15, True, 'TC bot sample out 2 (K)')
+    test01.deleteColumns('TC bot sample out 2 (C)')
 
-#Now, convert all pressures from bar to kPa and delete the extra [bypass] columns
-test01.mathOperations('P bottom in (bar)',"*",100,True,'P bottom in (kPa)')
-test01.deleteColumns('P bottom in (bar)')
-test01.mathOperations('P bottom out (bar)',"*",100,True,'P bottom out (kPa)')
-test01.deleteColumns('P bottom out (bar)')
+    #Delete the temperature columns from the bypass run that we don't need
+    test01.deleteColumns(['TC bot sample in (C)[bypass]','TC bot sample mid 1 (C)[bypass]','TC bot sample mid 2 (C)[bypass]','TC bot sample out 1 (C)[bypass]','TC bot sample out 2 (C)[bypass]'])
 
-#Delete the pressure columns from the bypass run that we also don't need
-test01.deleteColumns(['P bottom in (bar)[bypass]','P bottom out (bar)[bypass]'])
+    #Now, convert all pressures from bar to kPa and delete the extra [bypass] columns
+    test01.mathOperations('P bottom in (bar)',"*",100,True,'P bottom in (kPa)')
+    test01.deleteColumns('P bottom in (bar)')
+    test01.mathOperations('P bottom out (bar)',"*",100,True,'P bottom out (kPa)')
+    test01.deleteColumns('P bottom out (bar)')
 
-#Calculate the mass retention for species of interest
-test01.calculateRetentionIntegrals('NH3 (300,3000)')
-test01.calculateRetentionIntegrals('H2O% (20)')
+    #Delete the pressure columns from the bypass run that we also don't need
+    test01.deleteColumns(['P bottom in (bar)[bypass]','P bottom out (bar)[bypass]'])
 
-#NH3 has units of ppmv, want to convert this to mol adsorbed / L catalyst
-test01.mathOperations('NH3 (300,3000)-Retained',"/",1E6)                     #From ppmv to molefraction
-test01.mathOperations('NH3 (300,3000)-Retained',"*","P bottom out (kPa)")    #From molefraction to kPa
-test01.mathOperations('NH3 (300,3000)-Retained',"/",8.314)
-test01.mathOperations('NH3 (300,3000)-Retained',"/",'TC bot sample out 1 (K)') #From kPa to mol/L using Ideal gas law
-test01.mathOperations('NH3 (300,3000)-Retained',"*",0.015708)                #From mol/L to total moles (multiply by total volume)
-#From total moles to mol ads / L cat using solids fraction, then store in new column and delete old column
-test01.mathOperations('NH3 (300,3000)-Retained',"/",(1-0.3309)*0.015708,True,"NH3 ads (mol/L)")
-test01.deleteColumns('NH3 (300,3000)-Retained')
+    #Calculate the mass retention for species of interest
+    test01.calculateRetentionIntegrals('NH3 (300,3000)')
+    test01.calculateRetentionIntegrals('H2O% (20)')
 
-#H2O has units of %, want to convert this to mol adsorbed / L catalyst
-test01.mathOperations('H2O% (20)-Retained',"/",100)                     #From % to molefraction
-test01.mathOperations('H2O% (20)-Retained',"*","P bottom out (kPa)")    #From molefraction to kPa
-test01.mathOperations('H2O% (20)-Retained',"/",8.314)
-test01.mathOperations('H2O% (20)-Retained',"/",'TC bot sample out 1 (K)') #From kPa to mol/L using Ideal gas law
-test01.mathOperations('H2O% (20)-Retained',"*",0.015708)                #From mol/L to total moles (multiply by total volume)
-#From total moles to mol ads / L cat using solids fraction, then store in new column and delete old column
-test01.mathOperations('H2O% (20)-Retained',"/",(1-0.3309)*0.015708,True,"H2O ads (mol/L)")
-test01.deleteColumns('H2O% (20)-Retained')
+    #NH3 has units of ppmv, want to convert this to mol adsorbed / L catalyst
+    test01.mathOperations('NH3 (300,3000)-Retained',"/",1E6)                     #From ppmv to molefraction
+    test01.mathOperations('NH3 (300,3000)-Retained',"*","P bottom out (kPa)")    #From molefraction to kPa
+    test01.mathOperations('NH3 (300,3000)-Retained',"/",8.314)
+    test01.mathOperations('NH3 (300,3000)-Retained',"/",'TC bot sample out 1 (K)') #From kPa to mol/L using Ideal gas law
+    test01.mathOperations('NH3 (300,3000)-Retained',"*",0.015708)                #From mol/L to total moles (multiply by total volume)
+    #From total moles to mol ads / L cat using solids fraction, then store in new column and delete old column
+    test01.mathOperations('NH3 (300,3000)-Retained',"/",(1-0.3309)*0.015708,True,"NH3 ads (mol/L)")
+    test01.deleteColumns('NH3 (300,3000)-Retained')
 
-#Test the createPlot function
-#test01.createPlot("20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2-11-3pctH2O-400ppmNH3-200C.dat",'NH3 (300,3000)')
-#test01.savePlots()
-#test01.savePlots((200,350))
-test01.saveTimeFramePlots()
+    #H2O has units of %, want to convert this to mol adsorbed / L catalyst
+    test01.mathOperations('H2O% (20)-Retained',"/",100)                     #From % to molefraction
+    test01.mathOperations('H2O% (20)-Retained',"*","P bottom out (kPa)")    #From molefraction to kPa
+    test01.mathOperations('H2O% (20)-Retained',"/",8.314)
+    test01.mathOperations('H2O% (20)-Retained',"/",'TC bot sample out 1 (K)') #From kPa to mol/L using Ideal gas law
+    test01.mathOperations('H2O% (20)-Retained',"*",0.015708)                #From mol/L to total moles (multiply by total volume)
+    #From total moles to mol ads / L cat using solids fraction, then store in new column and delete old column
+    test01.mathOperations('H2O% (20)-Retained',"/",(1-0.3309)*0.015708,True,"H2O ads (mol/L)")
+    test01.deleteColumns('H2O% (20)-Retained')
 
-#Compress the processed data for visualization in spreadsheets
-test01.compressAllRows()
+    #Test the createPlot function
+    #test01.createPlot("20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2-11-3pctH2O-400ppmNH3-200C.dat",'NH3 (300,3000)')
+    #test01.savePlots()
+    #test01.savePlots((200,350))
+    test01.saveTimeFramePlots()
 
-#test01.savePlots()
-#test01.savePlots((200,350))
+    #Compress the processed data for visualization in spreadsheets
+    test01.compressAllRows()
 
-#Print the results to a series of output files
-test01.printAlltoFile()
-'''
+    #test01.savePlots()
+    #test01.savePlots((200,350))
+
+    #Print the results to a series of output files
+    test01.printAlltoFile()
+
+##Directs python to call the testing function
+if __name__ == "__main__":
+   testing()
