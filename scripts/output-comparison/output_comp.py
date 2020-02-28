@@ -1,39 +1,100 @@
-## Python script to read output files and compare them ##
-## Run python scripts using Python 3.5 or newer ##
-
-''' File Comparison script:
-    ----------------
-    Script for reading in output produced from an executable and comparing it
-    to another output file. Useful for creating small unit tests for code validations
-    or making evaluations on how changes in parameters change predicted outcomes. Thus,
-    this script will be utilized for the purpose of performing sensitivity analyses.
-
-    Author:     Austin Ladshaw
-    Date:       05/09/2019
-    Copyright:  This software was designed and built at the Georgia Institute
-                of Technology by Austin Ladshaw for research in the area of
-                radioactive particle decay and transport. Copyright (c) 2019,
-                all rights reserved.'''
+## @package output_comp
+#
+#   @brief Python script to read output files and compare them
+#
+#   @details Script for reading in output produced from an executable and comparing it
+#            to another output file. Useful for creating small unit tests for code validations
+#            or making evaluations on how changes in parameters change predicted outcomes. Thus,
+#            this script will be utilized for the purpose of performing sensitivity analyses.
+#
+#    @author     Austin Ladshaw
+#
+#    @date       05/09/2019
+#
+#    @copyright  This software was designed and built at the Georgia Institute
+#                of Technology by Austin Ladshaw for research in the area of
+#                radioactive particle decay and transport. Copyright (c) 2019,
+#                all rights reserved.
 
 import difflib
 import math
 
-### Class Object for Comparing Files ###
-
+## Class Object for Comparing Files
+#
+# This object will read in a pair of files line by line, parse the line into
+#   a set of words or numbers, and compare all items in the files to find differences.
+#   This is useful when you are doing unit testing (i.e., want to see if a simulation
+#   produced the same output after updating some code) or can be used for a large
+#   scale uncertainty or sensitivity analysis between a 'gold' standard simulation
+#   and a 'test' case.
+#
+#   Method:
+#
+#    (1) Iterate through each line in each file \n
+#            (iterate through smallest)
+#
+#    (2) Split each line into individual strings \n
+#            Parse on spaces
+#
+#    (3) Iterate (nested) over each individual string in a line \n
+#            (loop over the smallest string list)
+#
+#    (4) Check each string for types \n
+#            a)  compare numbers/floats (try) and developed numeric different (sq. error) \n
+#            b)  compare strings/bools (except) using SequenceMatcher and produce ratio \n
+#            c)  Summate all errors keeping track of error types
+#
+#    (5) Continue through files and report levels of differences/similarities \n
+#            Store results in the object \n
+#            Use to determine how much simulation results have changed between runs
+#
+#   Notes:
+#
+#    read()   gives all text in file
+#
+#    read(n)  gives first n characters in file
+#
+#    readline()   gives first line in file      (**Each instance reads the next line)
+#
+#    readline(n)  gives nth line in the file
+#
+#    readlines()  gives list of all lines in file
+#
+#    for line in file:   loops over all lines in the file
+#
+#    string.split(ch)    produces list of sub-strings parsed by the ch character \n
+#                        leaving ch blank defaults to splitting on blank spaces
+#
+#    use == to compare two strings
+#
+#        e.g.,  str1 == str2   -->   True if same, False if different
+#
 class FileCompare(object):
-    # Initialization constructor must take in strings for the gold file and test file
+    ## Initialization constructor must take in strings for the gold file and test file
+    #
+    #   @param gold name of the file that you are comparing against
+    #   @param test name of the file being tested for changes against the gold file
     def __init__(self, gold, test):
-        self.num_diff = 0.0                 # Values closest to zero represent smallest differences
-        self.str_diff = 0.0                 # Values closest to zero represent smallest differences
-        self.total_num = 0                  # Number of total numbers in both files
-        self.total_word = 0                 # Number of total words in both files
+        ## Variable to keep track of numerical differences in the files
+        #Values closest to zero represent smallest differences
+        self.num_diff = 0.0
+        ## Variable to keep track of string differences in the files
+        #Values closest to zero represent smallest differences
+        self.str_diff = 0.0
+        ## Number of total numbers in both files
+        self.total_num = 0
+        ## Number of total words in both files
+        self.total_word = 0
         self.hasBeenRead = False
-        self.lnum_gold = len(open(gold,"r").readlines())    #Number of lines in gold file
-        self.lnum_test = len(open(test,"r").readlines())    #Number of lines in test file
+        ## Number of lines in gold file
+        self.lnum_gold = len(open(gold,"r").readlines())
+        ## Number of lines in test file
+        self.lnum_test = len(open(test,"r").readlines())
         self.gold_file = open(gold,"r")
         self.test_file = open(test,"r")
         self.computeErrors()
 
+    ##Function to display results of the comparison to the console
     def __str__(self):
         if self.hasBeenRead == False:
             return "Must call computeErrors() first!"
@@ -47,6 +108,9 @@ class FileCompare(object):
             message += "Total Numbers     =\t" + str(self.total_num) + "\n"
             return message
 
+    ## Function to read through each file line by line and compare each element
+    #   and entry in each file with each other. If the two files are the same,
+    #   then there will be no differences recorded between the two files.
     def computeErrors(self):
         if self.lnum_test > self.lnum_gold:
             short_file = self.gold_file
@@ -119,47 +183,13 @@ class FileCompare(object):
         self.hasBeenRead = True
         self.closeFiles()
 
+    ##Function to close the open files (called automatically by computeErrors())
     def closeFiles(self):
         self.gold_file.close()
         self.test_file.close()
 
 ### End Class Object ###
 
-''' Notes
-    -----
-    read()   gives all text in file
-    read(n)  gives first n characters in file
-    readline()   gives first line in file      (**Each instance reads the next line)
-    readline(n)  gives nth line in the file
-    readlines()  gives list of all lines in file
-    for line in file:   loops over all lines in the file
-    string.split(ch)    produces list of sub-strings parsed by the ch character
-                        leaving ch blank defaults to splitting on blank spaces
-    use == to compare two strings
-        e.g.,  str1 == str2   -->   True if same, False if different
-'''
-
 ### Testing ###
 #comp = FileCompare("gold_out.txt","test_out.txt")
 #print(comp)
-
-''' Method
-    ------
-    (1) Iterate through each line in each file
-            (iterate through smallest)
-
-    (2) Split each line into individual strings
-            Parse on spaces
-
-    (3) Iterate (nested) over each individual string in a line
-            (loop over the smallest string list)
-
-    (4) Check each string for types
-            a)  compare numbers/floats (try) and developed numeric different (sq. error)
-            b)  compare strings/bools (except) using SequenceMatcher and produce ratio
-            c)  Summate all errors keeping track of error types
-
-    (5) Continue through files and report levels of differences/similarities
-            Store results in the object
-            Use to determine how much simulation results have changed between runs
-'''

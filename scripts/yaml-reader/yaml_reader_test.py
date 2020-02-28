@@ -9,7 +9,7 @@
     reading and storing a digital record of a yaml formatted file. It was specifically
     designed for the purpose of maintaining the same yaml styling as what is used
     by the ecosystem library.
-    
+
     Author:     Austin Ladshaw
     Date:       05/06/2019
     Copyright:  This software was designed and built at the Georgia Institute
@@ -77,4 +77,3 @@ print( type(yaml.map["TestDoc1"]["scenario"]["numvar"]) )  ## Yes
 print( (yaml.map["TestDoc1"]["scenario"]["t_out"]) + 5.5 )
 
 # Now automatically converts to types: int, double/float, bool, string
-
