@@ -1,21 +1,26 @@
-## Python script to read yaml files using ecosystem library functions ##
-## Run python scripts using Python 3.5 or newer ##
+## @example Example of the usage of the yaml_reader
+#
+# Using the reader...
+#
+# import yaml_reader \n
+# yaml = yaml_reader.YAML() \n
+# yaml.readFile("test_input.yml") \n
+# yaml.print2file("test_out.txt") \n
+#
+#
+# Manually creating a yaml map and printing to a file...
+#
+# yaml3 = yaml_reader.YAML() \n
+# yaml3.map["Doc1"] = {} \n
+# yaml3.map["Doc2"] = {} \n
+# yaml3.map["Doc1"]["key1"] = "val1" \n
+# yaml3.map["Doc1"]["key2"] = False \n
+# yaml3.map["Doc2"]["head1"] = {} \n
+# yaml3.map["Doc2"]["head1"]["head_key"] = 10 \n
+# yaml3.map["Doc2"]["head1"]["sub"] = {} \n
+# yaml3.map["Doc2"]["head1"]["sub"]["key"] = 5.5 \n
 
-''' YAML test script:
-    ----------------
-    Object-Oriented approach to interfacing with the C/C++ functions and objects
-    built into the ecosystem library (libeco.so). This script will provide a
-    Python interface to already previously developed C++ set of objects for
-    reading and storing a digital record of a yaml formatted file. It was specifically
-    designed for the purpose of maintaining the same yaml styling as what is used
-    by the ecosystem library.
-
-    Author:     Austin Ladshaw
-    Date:       05/06/2019
-    Copyright:  This software was designed and built at the Georgia Institute
-                of Technology by Austin Ladshaw for research in the area of
-                radioactive particle decay and transport. Copyright (c) 2019,
-                all rights reserved.'''
+yaml3.print2file("test2.txt")
 
 import yaml_reader
 

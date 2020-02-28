@@ -1,21 +1,22 @@
-## Python script to read yaml files using ecosystem library functions ##
-## Run python scripts using Python 3.5 or newer ##
-
-''' YAML script:
-    ----------------
-    Object-Oriented approach to interfacing with the C/C++ functions and objects
-    built into the ecosystem library (libeco.so). This script will provide a
-    Python interface to already previously developed C++ set of objects for
-    reading and storing a digital record of a yaml formatted file. It was specifically
-    designed for the purpose of maintaining the same yaml styling as what is used
-    by the ecosystem library.
-
-    Author:     Austin Ladshaw
-    Date:       05/06/2019
-    Copyright:  This software was designed and built at the Georgia Institute
-                of Technology by Austin Ladshaw for research in the area of
-                radioactive particle decay and transport. Copyright (c) 2019,
-                all rights reserved.'''
+## @package yaml_reader
+#
+#   @brief Python script to read yaml files using ecosystem library functions
+#
+#   @details Object-Oriented approach to interfacing with the C/C++ functions and objects
+#           built into the ecosystem library (libeco.so). This script will provide a
+#           Python interface to already previously developed C++ set of objects for
+#           reading and storing a digital record of a yaml formatted file. It was specifically
+#           designed for the purpose of maintaining the same yaml styling as what is used
+#           by the ecosystem library.
+#
+#    @author     Austin Ladshaw
+#
+#    @date       05/06/2019
+#
+#    @copyright  This software was designed and built at the Georgia Institute
+#                of Technology by Austin Ladshaw for research in the area of
+#                radioactive particle decay and transport. Copyright (c) 2019,
+#                all rights reserved.
 
 from ctypes import *
 try:
@@ -24,36 +25,54 @@ except:
     print("Run 'make all' in ecosystem directory first to use this script")
     exit()
 
-''' Python Class for interfacing with the C++ yaml wrapper
-    ------------------------------------------------------
-    This class provides the necessary interface for reading
-    yaml formatted files. It uses the yaml wrapper class
-    previously developed in the ecosystem project. This is
-    done to ensure consistency between usage and application
-    of yaml based input files within the entire project.
-
-    NOTE: You need to direct python what the return types
-        and argument types are for each C-style function.
-        This is especially important when dealing with
-        C++ objects, as you will need to use void * as
-        arguments and return types.
-
-        Pass const char* as arg.encode()
-        Pass instances of C++ structures as c_void_p
-
-    USAGE: Create instance of the YAML object and then call
-            the readFile('filename') function and the object
-            will automatically fill out a data map with all
-            information from the yaml formatted file. You
-            can also create a map manually and print that
-            to a file. '''
+## Python Class for interfacing with the C++ yaml wrapper
+#
+#    This class provides the necessary interface for reading
+#    yaml formatted files. It uses the yaml wrapper class
+#    previously developed in the ecosystem project. This is
+#    done to ensure consistency between usage and application
+#    of yaml based input files within the entire project.
+#
+#   IMPORTANT:
+#
+#       This script REQUIRES the libeco.so library to be
+#       either installed or located under the main /ecosystem/
+#       project directory. You CANNOT use this script without
+#       that library file. This script simply uses the C++
+#       yaml_wrapper object developed previously for the
+#       interpretation of yaml files and development of
+#       the yaml maps.
+#
+#    NOTE:
+#
+#        You need to direct python what the return types
+#        and argument types are for each C-style function.
+#        This is especially important when dealing with
+#        C++ objects, as you will need to use void * as
+#        arguments and return types.
+#
+#        Pass const char* as arg.encode()
+#        Pass instances of C++ structures as c_void_p
+#
+#    USAGE:
+#
+#           Create instance of the YAML object and then call
+#            the readFile('filename') function and the object
+#            will automatically fill out a data map with all
+#            information from the yaml formatted file. You
+#            can also create a map manually and print that
+#            to a file.
 class YAML(object):
+    ## Constructor of the object used to initialize the C++ yaml library
     def __init__(self):
         initialize = lib.New_YAML
         initialize.restype = c_void_p
         self.obj = initialize()
+        ## Object that holds a digital copy of all yaml formatted information
         self.map = {}
 
+    ## Function can be used to either display the yaml data to the console,
+    # or print the yaml data into a yaml formatted file.
     def __str__(self):
         string = "\n"
         for doc in self.map:
@@ -93,12 +112,18 @@ class YAML(object):
             string += "...\n\n"
         return string
 
+    ## Function to print out the yaml object to a file in the yaml format
+    #
+    #   @param filename name of the output file
     def print2file(self, filename):
         file = open(filename, 'w')
         info = str(self)
         file.write(info)
         file.close()
 
+    ## Function to read a yaml file and store that information digitally into a map
+    #
+    #   @param file the input file (in yaml format) that we are digitizing
     def readFile(self, file):
         readFunc = lib.YAML_executeYamlRead
         readFunc.restype = c_int
@@ -106,11 +131,13 @@ class YAML(object):
         readFunc(self.obj,file.encode())
         self.formMap()
 
+    ## Function to print out information about the yaml object
     def displayContents(self):
         dispFunc = lib.YAML_DisplayContents
         dispFunc.argtypes = [c_void_p]
         return dispFunc(self.obj)
 
+    ## Helper function to register yaml document keys (not called by user)
     def docKeys(self):
         docKeys_size = lib.YAML_DocumentKeys_Size
         docKeys_func = lib.YAML_DocumentKeys
@@ -125,6 +152,7 @@ class YAML(object):
         for name in list_keys:
             self.map[name] = {}
 
+    ## Helper function to register yaml header keys (not called by user)
     def headKeys(self):
         for doc in self.map:
             headKeys_size = lib.YAML_HeaderKeys_Size
@@ -142,6 +170,7 @@ class YAML(object):
                 if name != '':
                     self.map[doc][name] = {}
 
+    ## Helper function to register yaml sub-header keys (not called by user)
     def subKeys(self):
         for doc in self.map:
             for head in self.map[doc]:
@@ -160,6 +189,7 @@ class YAML(object):
                     if name != '':
                         self.map[doc][head][name] = {}
 
+    ## Helper function to register yaml document data (not called by user)
     def docData(self):
         for doc in self.map:
             docData_size = lib.YAML_DocumentData_Size
@@ -188,6 +218,7 @@ class YAML(object):
                             else:
                                 self.map[doc][key[0]] = key[1]
 
+    ## Helper function to register yaml header data (not called by user)
     def headData(self):
         for doc in self.map:
             for head in self.map[doc]:
@@ -217,6 +248,7 @@ class YAML(object):
                                 else:
                                     self.map[doc][head][key[0]] = key[1]
 
+    ## Helper function to register yaml sub-header data (not called by user)
     def subData(self):
         for doc in self.map:
             for head in self.map[doc]:
@@ -247,6 +279,7 @@ class YAML(object):
                                     else:
                                         self.map[doc][head][sub][key[0]] = key[1]
 
+    ## Helper function to register and build all yaml data into the map object (not called by user)
     def formMap(self):
         self.docKeys()
         self.headKeys()
@@ -256,6 +289,13 @@ class YAML(object):
         self.docData()
         self.deleteObj()
 
+    ## Helper function to delete the C++ yaml data from memory
+    #
+    #   NOTE:
+    #
+    #       This function may be unnecessary since the C++ yaml object
+    #       already has functionality to clean up memory when you leave
+    #       object scope.
     def deleteObj(self):
         fun = lib.YAML_DeleteContents
         fun.argtypes = [c_void_p]
