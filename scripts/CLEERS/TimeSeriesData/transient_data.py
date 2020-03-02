@@ -1255,6 +1255,12 @@ class PairedTransientData(object):
         self.bypass_trans_obj = TransientData(bypass_file)
         ## object for result data
         self.result_trans_obj = TransientData(result_file)
+        self.material_name = self.result_trans_obj.material_name
+        self.aging_time = self.result_trans_obj.aging_time
+        self.aging_temp = self.result_trans_obj.aging_temp
+        self.flow_rate = self.result_trans_obj.flow_rate
+        self.isothermal_temp = self.result_trans_obj.isothermal_temp
+        self.time_key = self.result_trans_obj.time_key
         ## Flag used to determine whether or not the data sets are aligned in time
         self.aligned = False
 
@@ -1328,6 +1334,10 @@ class PairedTransientData(object):
 
     ##Function to extract a set of rows from the result data
     def extractResultRows(self, min_time, max_time):
+        return self.result_trans_obj.extractRows(min_time,max_time)
+
+    ##Function to extract result rows implicitly
+    def extractRows(self, min_time, max_time):
         return self.result_trans_obj.extractRows(min_time,max_time)
 
     ##Function to get a data point from the by-pass data

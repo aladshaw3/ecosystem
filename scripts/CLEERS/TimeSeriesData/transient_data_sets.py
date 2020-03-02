@@ -254,6 +254,15 @@ class TransientDataFolder(object):
         for base in self.like_sets:
             for file in self.like_sets[base]:
                 self.conditions["material"][base][file] = self.grabDataObj(file).material_name
+                self.conditions["aging_time"][base][file] = self.grabDataObj(file).aging_time
+                self.conditions["aging_temp"][base][file] = self.grabDataObj(file).aging_temp
+                self.conditions["flow_rate"][base][file] = self.grabDataObj(file).flow_rate
+                self.conditions["iso_temp"][base][file] = self.grabDataObj(file).isothermal_temp
+
+        #Lastly, order the conditions
+        for cond in self.conditions:
+            for base in self.like_sets:
+                self.conditions[cond][base] = {k: v for k, v in sorted(self.conditions[cond][base].items(), key=lambda item: item[1], reverse=False)}
 
     ##Print object attributes to the console
     def __str__(self):
@@ -528,23 +537,451 @@ class TransientDataFolder(object):
 
     ##Function to iteratively save all plots in all time frames separately
     def saveTimeFramePlots(self, folder="", file_type=".png"):
+        if folder=="":
+            folder = self.folder_name+"-Plots/"
+        if folder[-1] != "/":
+            folder += "/"
         #Iterate through each paired and unpaired object and call their respective methods
         for file in self.unpaired_data:
             print("\nPlotting all data for " + file + " in full time range.\n\tPlease wait...")
-            path = self.folder_name+"-Plots/"+file.split(".")[0]+"/range(All)"+"/"
+            path = folder+file.split(".")[0]+"/range(All)"+"/"
             self.unpaired_data[file].savePlots(None,path,file_type)
             for range in self.unpaired_data[file].getTimeFrames():
                 print("\nPlotting all data for " + file + " in time range " + str(range) + ".\n\tPlease wait...")
-                path = self.folder_name+"-Plots/"+file.split(".")[0]+"/range("+str(int(range[0]))+"-" +str(int(range[1])) + ")/"
+                path = folder+file.split(".")[0]+"/range("+str(int(range[0]))+"-" +str(int(range[1])) + ")/"
                 self.unpaired_data[file].savePlots(range,path,file_type)
         for file in self.paired_data:
             print("\nPlotting all data for " + file + " in full time range.\n\tPlease wait...")
-            path = self.folder_name+"-Plots/"+file.split(".")[0]+"/range(All)"+"/"
+            path = folder+file.split(".")[0]+"/range(All)"+"/"
             self.paired_data[file].savePlots(None,path,file_type)
             for range in self.paired_data[file].getTimeFrames():
                 print("\nPlotting all data for " + file + " in time range " + str(range) + ".\n\tPlease wait...")
-                path = self.folder_name+"-Plots/"+file.split(".")[0]+"/range("+str(int(range[0]))+"-" +str(int(range[1])) + ")/"
+                path = folder+file.split(".")[0]+"/range("+str(int(range[0]))+"-" +str(int(range[1])) + ")/"
                 self.paired_data[file].savePlots(range,path,file_type)
+
+    ##Function to create overlay plots from different runs in same time frame
+    #
+    #   This function will create a plot (or set of plots) of the same columns on the
+    #   same figure for all files in a base file designation (or all base files). This
+    #   is useful for viewing or saving figures of all conditions of a column variable
+    #   on a single plot for comparison purposes. For example, you can plot the NH3
+    #   TPD profile for all isothermal temperatures on the same figure to visually
+    #   compare how changes in isothermal temperature impact the desorption profile
+    #   for NH3.
+    #
+    #   @param column_name name of the columns in each file to plot on the same figure
+    #   @param frame_index time frame index to indicate which section of time to plot the columns over
+    #           Note: frame_index of -1 corresponds to the TDP section of a capacity curve
+    #   @param condition condition used to distinguish the columns on the same plot
+    #           Valid options: "material", "aging_time", "aging_temp", "iso_temp", and "flow_rate"
+    #   @param base the base name of the set of files for which we are plotting. If left as None,
+    #           then all plots for all base file names are plotted.
+    #   @param display if True, then the created figure is plotted and displayed to the console
+    #   @param save if True, then the created figure is saved to an output file
+    #   @param file_name name of the file being saved
+    #   @param file_type type of image file being created. Valid options: .png, .pdf, .ps, .eps and .svg
+    #   @param subdir sub-directory where the file will be saved
+    #
+    #   NOTE 1:
+    #
+    #       We use frame_index instead of the actual time ranges to plot because the columns we want to
+    #       plot together will often be misaligned in their respective time ranges. Thus, we instead
+    #       plot based on the frame_index for the time frames, since each time frame is representative
+    #       of the same "event" for all columns in the folder of files.
+    #
+    #   NOTE 2:
+    #
+    #       For the NH3 capacity data, the only valid condition is "iso_temp" because each folder of
+    #       data has all the same other conditions.
+    def createTimeFrameOverlayPlot(self, column_name, frame_index=-1, base=None, condition="iso_temp", display=False, save=True, file_name="",file_type=".png",subdir=""):
+        if type(column_name) is list:
+            print("Error! Can only create a overlay plot of single column!")
+            return
+        #Check for valid condition
+        if condition != "iso_temp" and condition != "material" and condition != "aging_temp" and condition != "aging_time" and condition != "flow_rate":
+            print("Error! Invalid system condition encountered!")
+            return
+        #Check for valid file type
+        if file_type != ".png" and file_type != ".pdf" and file_type != ".ps" and file_type != ".eps" and file_type != ".svg":
+            print("Warning! Unsupported image file type...")
+            print("\tDefaulting to .png")
+            file_type = ".png"
+        #If no file base is given, then loop through all file bases
+        if base == None:
+            #Check for potential problems with conditions
+            for b in self.conditions[condition]:
+                i=0
+                for file in self.conditions[condition][b]:
+                    if i == 0:
+                        first_cond = self.conditions[condition][b][file]
+                    else:
+                        if first_cond == self.conditions[condition][b][file]:
+                            print("Error! Cannot create overlay plot if given condition variable ("+condition+") is unchanged throughout files...")
+                            return
+                    i+=1
+
+            for b in self.conditions[condition]:
+                self.overlayPlotHelper(column_name, frame_index, b, condition, display, save, file_name, file_type, subdir)
+        else:
+            #Check for potential problems with conditions
+            for b in self.conditions[condition]:
+                i=0
+                for file in self.conditions[condition][b]:
+                    if i == 0:
+                        first_cond = self.conditions[condition][b][file]
+                    else:
+                        if first_cond == self.conditions[condition][b][file]:
+                            print("Error! Cannot create overlay plot if given condition variable ("+condition+") is unchanged throughout files...")
+                            return
+                    i+=1
+
+            self.overlayPlotHelper(column_name, frame_index, base, condition, display, save, file_name, file_type, subdir)
+        return
+
+    ##Helper function for the createTimeFrameOverlayPlot() function [Not called by user]
+    def overlayPlotHelper(self, column_name, frame_index, base, condition, display, save, file_name, file_type, subdir):
+        #Check to see if folder exists and create if needed
+        if subdir != "" and not os.path.exists(subdir) and save == True:
+            os.makedirs(subdir)
+            subdir+="/"
+
+        #Check for valid base
+        if base not in self.conditions[condition]:
+            print("Error! Invalid base file name!")
+            return
+        xvals_set = {}
+        yvals_set = {}
+        added = []
+        frame_name = ""
+        #grab all appropriate data
+        for file in self.conditions[condition][base]:
+            #check the time frame to find the appropriate xvals
+            if frame_index > len(self.grabDataObj(file).getTimeFrames())-1:
+                print("Error! The frame_index is out of bounds!")
+                return
+            xvals_set[file] = self.grabDataObj(file).extractRows(self.grabDataObj(file).getTimeFrames()[frame_index][0],self.grabDataObj(file).getTimeFrames()[frame_index][1])[self.grabDataObj(file).time_key]
+            frame_name = "frame(" + str(int(xvals_set[file][0])) + "," + str(int(xvals_set[file][-1])) + ")"
+
+            yvals_set[file] = {}
+            #extract yvals
+
+            #Check to make sure column is valid
+            if self.isPaired(file) == True:
+                if column_name not in self.grabDataObj(file).result_trans_obj.data_map.keys():
+                    print("Error! Invalid column name!")
+                    return
+            else:
+                if column_name not in self.grabDataObj(file).data_map.keys():
+                    print("Error! Invalid column name!")
+                    return
+            yvals_set[file][column_name] = self.grabDataObj(file).extractRows(xvals_set[file][0],xvals_set[file][-1])[column_name]
+
+            #Loop through the xvals and correct the time frames such that each starts from time = 0
+            i=0
+            start = xvals_set[file][0]
+            for time in xvals_set[file]:
+                xvals_set[file][i] = xvals_set[file][i] - start
+                i+=1
+        #Now, we should have all x and y values for everything we want to plot
+        fig = plt.figure()
+        leg = []
+        ylab = column_name
+        xlab = ""
+        i=0
+        for file in self.conditions[condition][base]:
+            if xlab == "":
+                xlab += "Time Change in "+self.grabDataObj(file).time_key.split("(")[1].split(")")[0]
+            leg.append("@"+str(self.conditions[condition][base][file]))
+            if condition == "iso_temp":
+                leg[i] += " oC"
+            if condition == "aging_time":
+                leg[i] += " hr"
+            if condition == "aging_temp":
+                leg[i] += " oC"
+            if condition == "flow_rate":
+                leg[i] += " hr^-1"
+            plt.plot(xvals_set[file],yvals_set[file][column_name])
+            i+=1
+        plt.legend(leg)
+        plt.xlabel(xlab)
+        plt.ylabel(ylab)
+        plt.tight_layout()
+        if file_name == "":
+            file_name = base + "-" + column_name + "-" + frame_name
+        if save == True:
+            plt.savefig(subdir+file_name+'-OverlayPlot'+file_type)
+        if display == True:
+            fig.show()
+            print("\nDisplaying plot. Press enter to continue...(this closes the images)")
+            input()
+        plt.close()
+        return
+
+    ##Function to create contour plots from different runs in the same time frame
+    #
+    #   This function will create a plot (or set of plots) of the same columns on the
+    #   same figure for all files in a base file designation (or all base files). This
+    #   is useful for viewing or saving figures of all conditions of a column variable
+    #   on a single plot for comparison purposes. For example, you can plot the NH3
+    #   TPD profile for all isothermal temperatures on the same figure to visually
+    #   compare how changes in isothermal temperature impact the desorption profile
+    #   for NH3.
+    #
+    #   @param column_name name of the column to plot on the same figure
+    #   @param frame_index time frame index to indicate which section of time to plot the columns over
+    #           Note: frame_index of -1 corresponds to the TDP section of a capacity curve
+    #   @param condition condition used to distinguish the columns on the same plot
+    #           Valid options: "material", "aging_time", "aging_temp", "iso_temp", and "flow_rate"
+    #   @param base the base name of the set of files for which we are plotting. If left as None,
+    #           then all plots for all base file names are plotted.
+    #   @param display if True, then the created figure is plotted and displayed to the console
+    #   @param save if True, then the created figure is saved to an output file
+    #   @param file_name name of the file being saved
+    #   @param file_type type of image file being created. Valid options: .png, .pdf, .ps, .eps and .svg
+    #   @param subdir sub-directory where the file will be saved
+    #
+    #   NOTE 1:
+    #
+    #       We use frame_index instead of the actual time ranges to plot because the columns we want to
+    #       plot together will often be misaligned in their respective time ranges. Thus, we instead
+    #       plot based on the frame_index for the time frames, since each time frame is representative
+    #       of the same "event" for all columns in the folder of files.
+    #
+    #   NOTE 2:
+    #
+    #       For the NH3 capacity data, the only valid condition is "iso_temp" because each folder of
+    #       data has all the same other conditions.
+    def createTimeFrameContourPlot(self, column_name, frame_index=-1, base=None, condition="iso_temp", display=False, save=True, file_name="",file_type=".png",subdir=""):
+        if type(column_name) is list:
+            print("Error! Can only create a contour plot of single column!")
+            return
+        #Check for valid condition
+        if condition != "iso_temp" and condition != "material" and condition != "aging_temp" and condition != "aging_time" and condition != "flow_rate":
+            print("Error! Invalid system condition encountered!")
+            return
+        #Check for valid file type
+        if file_type != ".png" and file_type != ".pdf" and file_type != ".ps" and file_type != ".eps" and file_type != ".svg":
+            print("Warning! Unsupported image file type...")
+            print("\tDefaulting to .png")
+            file_type = ".png"
+        #If no file base is given, then loop through all file bases
+        if base == None:
+            #Check for potential problems with conditions
+            for b in self.conditions[condition]:
+                i=0
+                for file in self.conditions[condition][b]:
+                    if i == 0:
+                        first_cond = self.conditions[condition][b][file]
+                    else:
+                        if first_cond == self.conditions[condition][ba][file]:
+                            print("Error! Cannot create overlay plot if given condition variable ("+condition+") is unchanged throughout files...")
+                            return
+                    i+=1
+
+            for b in self.conditions[condition]:
+                self.contourPlotHelper(column_name, frame_index, b, condition, display, save, file_name, file_type, subdir)
+        else:
+            #Check for potential problems with conditions
+            for b in self.conditions[condition]:
+                i=0
+                for file in self.conditions[condition][b]:
+                    if i == 0:
+                        first_cond = self.conditions[condition][b][file]
+                    else:
+                        if first_cond == self.conditions[condition][b][file]:
+                            print("Error! Cannot create overlay plot if given condition variable ("+condition+") is unchanged throughout files...")
+                            return
+                    i+=1
+
+            self.contourPlotHelper(column_name, frame_index, base, condition, display, save, file_name, file_type, subdir)
+        return
+
+    ##Helper function for the createTimeFrameContourPlot() function [Not called by user]
+    def contourPlotHelper(self, column_name, frame_index, base, condition, display, save, file_name, file_type, subdir):
+        #Check to see if folder exists and create if needed
+        if subdir != "" and not os.path.exists(subdir) and save == True:
+            os.makedirs(subdir)
+            subdir+="/"
+
+        #Check for valid base
+        if base not in self.conditions[condition]:
+            print("Error! Invalid base file name!")
+            return
+        xvals_set = {}
+        yvals_set = {}
+        added = []
+        frame_name = ""
+        #grab all appropriate data
+        for file in self.conditions[condition][base]:
+            #check the time frame to find the appropriate xvals
+            if frame_index > len(self.grabDataObj(file).getTimeFrames())-1:
+                print("Error! The frame_index is out of bounds!")
+                return
+            xvals_set[file] = self.grabDataObj(file).extractRows(self.grabDataObj(file).getTimeFrames()[frame_index][0],self.grabDataObj(file).getTimeFrames()[frame_index][1])[self.grabDataObj(file).time_key]
+            frame_name = "frame(" + str(int(xvals_set[file][0])) + "," + str(int(xvals_set[file][-1])) + ")"
+
+            yvals_set[file] = {}
+            #extract yvals
+
+            #Check to make sure column is valid
+            if self.isPaired(file) == True:
+                if column_name not in self.grabDataObj(file).result_trans_obj.data_map.keys():
+                    print("Error! Invalid column name!")
+                    return
+            else:
+                if column_name not in self.grabDataObj(file).data_map.keys():
+                    print("Error! Invalid column name!")
+                    return
+            yvals_set[file][column_name] = self.grabDataObj(file).extractRows(xvals_set[file][0],xvals_set[file][-1])[column_name]
+
+            #Loop through the xvals and correct the time frames such that each starts from time = 0
+            i=0
+            start = xvals_set[file][0]
+            for time in xvals_set[file]:
+                xvals_set[file][i] = xvals_set[file][i] - start
+                i+=1
+
+        #Create X,Y, and Z numpy arrays for creating a surface plot
+        X = []
+        Y = []
+        Z = []
+        i=0
+        for file in xvals_set:
+            j=0
+            for item in yvals_set[file][column_name]:
+                X.append(xvals_set[file][j])
+                Z.append(yvals_set[file][column_name][j])
+                Y.append(self.conditions[condition][base][file])
+                j+=1
+            i+=1
+
+        fig = plt.figure()
+        ax = fig.gca(projection='3d')
+        X = np.array(X)
+        Y = np.array(Y)
+        Z = np.array(Z)
+
+        surf = ax.plot_trisurf(X, Y, Z, cmap=cm.coolwarm, linewidth=0, antialiased=False)
+        ax.view_init(azim=120)
+        ax.set_zlabel(column_name)
+        ax.set_xlabel("Time Change in "+self.grabDataObj(file).time_key.split("(")[1].split(")")[0])
+        if condition == "iso_temp":
+            ax.set_ylabel("Temperature (C)")
+        if condition == "aging_time":
+            ax.set_ylabel("Aging Time (hr)")
+        if condition == "aging_temp":
+            ax.set_ylabel("Aging Temperature (C)")
+        if condition == "flow_rate":
+            ax.set_ylabel("Flow Rate (per hr)")
+
+        fig.colorbar(surf, shrink=0.5, aspect=5)
+        plt.tight_layout()
+        if file_name == "":
+            file_name = base + "-" + column_name + "-" + frame_name
+        if save == True:
+            plt.savefig(subdir+file_name+'-ContourPlot'+file_type)
+        if display == True:
+            fig.show()
+            print("\nDisplaying plot. Press enter to continue...(this closes the images)")
+            input()
+        plt.close()
+        return
+
+    ##Function to save all overlay plots
+    #
+    #   This function will save all overlay plots for the given column name to a subfolder
+    #   for all time frames that are associated with that data set. The base name is optional.
+    #   if provided, then it will only perform this action for the given base file name.
+    #   Otherwise, it will apply this function iteratively for all base file names in
+    #   the data folder.
+    #
+    #   @param column_name name of the column to plot on the same figure
+    #   @param condition condition used to distinguish the columns on the same plot
+    #           Valid options: "material", "aging_time", "aging_temp", "iso_temp", and "flow_rate"
+    #   @param base the base name of the set of files for which we are plotting. If left as None,
+    #           then all plots for all base file names are plotted.
+    #   @param folder name of the folder where all the plots will be saved
+    #   @param file_type type of image file being created. Valid options: .png, .pdf, .ps, .eps and .svg
+    def saveOverlayPlots(self, column_name, base=None, condition="iso_temp", folder="", file_type=".png"):
+        #Check for valid condition
+        if condition != "iso_temp" and condition != "material" and condition != "aging_temp" and condition != "aging_time" and condition != "flow_rate":
+            print("Error! Invalid system condition encountered!")
+            return
+
+        #Check folder name and update
+        if folder == "":
+            folder = self.folder_name + "-OverlayPlots/"
+        if folder[-1] != "/":
+            folder += "/"
+
+        if base == None:
+            for b in self.conditions[condition]:
+                for file in self.conditions[condition][b]:
+                    frames = self.grabDataObj(file).getTimeFrames()
+                    break
+                print("\nPlotting all overlays of " + column_name + " data from set " + b + " for all time frames.\n\tPlease wait...")
+                f=0
+                for frame in frames:
+                    self.createTimeFrameOverlayPlot(column_name, f, b, condition, False, True, column_name, file_type, folder+b+"/"+"frame("+str(int(frame[0]))+","+str(int(frame[1]))+")/")
+                    f+=1
+        else:
+            for file in self.conditions[condition][base]:
+                frames = self.grabDataObj(file).getTimeFrames()
+                break
+            print("\nPlotting all overlays of " + column_name + " data from set " + base + " for all time frames.\n\tPlease wait...")
+            f=0
+            for frame in frames:
+                self.createTimeFrameOverlayPlot(column_name, f, base, condition, False, True, column_name, file_type, folder+base+"/"+"frame("+str(int(frame[0]))+","+str(int(frame[1]))+")/")
+                f+=1
+        return
+
+    ##Function to save all contour plots
+    #
+    #   This function will save all contour plots for the given column name to a subfolder
+    #   for all time frames that are associated with that data set. The base name is optional.
+    #   if provided, then it will only perform this action for the given base file name.
+    #   Otherwise, it will apply this function iteratively for all base file names in
+    #   the data folder.
+    #
+    #   @param column_name name of the column to plot on the same figure
+    #   @param condition condition used to distinguish the columns on the same plot
+    #           Valid options: "material", "aging_time", "aging_temp", "iso_temp", and "flow_rate"
+    #   @param base the base name of the set of files for which we are plotting. If left as None,
+    #           then all plots for all base file names are plotted.
+    #   @param folder name of the folder where all the plots will be saved
+    #   @param file_type type of image file being created. Valid options: .png, .pdf, .ps, .eps and .svg
+    def saveContourPlots(self, column_name, base=None, condition="iso_temp", folder="", file_type=".png"):
+        #Check for valid condition
+        if condition != "iso_temp" and condition != "material" and condition != "aging_temp" and condition != "aging_time" and condition != "flow_rate":
+            print("Error! Invalid system condition encountered!")
+            return
+
+        #Check folder name and update
+        if folder == "":
+            folder = self.folder_name + "-ContourPlots/"
+        if folder[-1] != "/":
+            folder += "/"
+
+        if base == None:
+            for b in self.conditions[condition]:
+                for file in self.conditions[condition][b]:
+                    frames = self.grabDataObj(file).getTimeFrames()
+                    break
+                print("\nPlotting all contours of " + column_name + " data from set " + b + " for all time frames.\n\tPlease wait...")
+                f=0
+                for frame in frames:
+                    self.createTimeFrameContourPlot(column_name, f, b, condition, False, True, column_name, file_type, folder+b+"/"+"frame("+str(int(frame[0]))+","+str(int(frame[1]))+")/")
+                    f+=1
+        else:
+            for file in self.conditions[condition][base]:
+                frames = self.grabDataObj(file).getTimeFrames()
+                break
+            print("\nPlotting all contours of " + column_name + " data from set " + base + " for all time frames.\n\tPlease wait...")
+            f=0
+            for frame in frames:
+                self.createTimeFrameContourPlot(column_name, f, base, condition, False, True, column_name, file_type, folder+base+"/"+"frame("+str(int(frame[0]))+","+str(int(frame[1]))+")/")
+                f+=1
+        return
 
 
 ## Function for testing the data folder object
@@ -610,7 +1047,14 @@ def testing():
     #test01.createPlot("20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2-11-3pctH2O-400ppmNH3-200C.dat",'NH3 (300,3000)')
     #test01.savePlots()
     #test01.savePlots((200,350))
-    test01.saveTimeFramePlots()
+    #test01.saveTimeFramePlots()
+    #test01.createTimeFrameOverlayPlot('NH3 (300,3000)',-1,"20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O")
+    #test01.createTimeFrameOverlayPlot('NH3 (300,3000)',-1)
+    #test01.createTimeFrameOverlayPlot('NH3 (300,3000)')
+    #test01.createTimeFrameContourPlot('NH3 (300,3000)',-1,"20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O")
+    #test01.createTimeFrameContourPlot('NH3 (300,3000)')
+    test01.saveOverlayPlots('NH3 (300,3000)')
+    #test01.saveContourPlots('NH3 (300,3000)')
 
     #Compress the processed data for visualization in spreadsheets
     test01.compressAllRows()

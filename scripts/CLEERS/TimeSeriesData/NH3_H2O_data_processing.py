@@ -98,6 +98,7 @@ def perform_standard_processing(name_and_path):
 
     #Save all plots in each time frame
     data_set.saveTimeFramePlots()
+    data_set.saveOverlayPlots('NH3 (300,3000)')
     #Compress the processed data for visualization in spreadsheets
     data_set.compressAllRows()
     #Print the results to a series of output files
