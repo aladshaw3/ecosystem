@@ -103,6 +103,7 @@ class TransientDataFolder(object):
         self.conditions["flow_rate"] = {}
         self.conditions["iso_temp"] = {}
         self.conditions["aging_cond"] = {}
+        self.conditions["run_type"] = {}
 
         #First round of iterations is to change all file names to meet standards
         for file in os.listdir(self.folder_name):
@@ -152,6 +153,7 @@ class TransientDataFolder(object):
                     self.conditions["flow_rate"][base] = {}
                     self.conditions["iso_temp"][base] = {}
                     self.conditions["aging_cond"][base] = {}
+                    self.conditions["run_type"][base] = "unknown"
                     if base in file:
                         self.like_sets[base].append(file)
                         self.conditions["material"][base][file] = "unknown"
@@ -214,11 +216,13 @@ class TransientDataFolder(object):
                 self.conditions["flow_rate"][base][file] = self.grabDataObj(file).flow_rate
                 self.conditions["iso_temp"][base][file] = self.grabDataObj(file).isothermal_temp
                 self.conditions["aging_cond"][base][file] = self.grabDataObj(file).aging_condition
+                self.conditions["run_type"][base] = self.grabDataObj(file).run_type
 
         #Lastly, order the conditions
         for cond in self.conditions:
-            for base in self.like_sets:
-                self.conditions[cond][base] = {k: v for k, v in sorted(self.conditions[cond][base].items(), key=lambda item: item[1], reverse=False)}
+            if cond != "run_type":
+                for base in self.like_sets:
+                    self.conditions[cond][base] = {k: v for k, v in sorted(self.conditions[cond][base].items(), key=lambda item: item[1], reverse=False)}
 
     ##Print object attributes to the console
     def __str__(self):
@@ -288,6 +292,12 @@ class TransientDataFolder(object):
                 for file in self.like_sets[pre]:
                     print("\t"+str(file))
                 print()
+
+    ##Display the run types of the files read in
+    def displayRunTypes(self):
+        print("\nFolder: " + str(self.folder_name) + " contains the following run types...")
+        for base in self.conditions["run_type"]:
+            print("\t"+self.conditions["run_type"][base])
 
     ##Delete specific columns from all data sets that we do not need
     def deleteColumns(self, column_list):
@@ -1037,6 +1047,11 @@ class TransientDataFolderSets(object):
             return
         self.folder_data[folder].displayFilesUnderSet(file_prefix)
 
+    ##Display the run types of the files read in
+    def displayRunTypes(self):
+        for folder in self.folder_data:
+            self.folder_data[folder].displayRunTypes()
+
     ##Delete specific columns from all data sets that we do not need
     def deleteColumns(self, column_list):
         #print()
@@ -1335,55 +1350,93 @@ class TransientDataFolderSets(object):
 
     ##Function to create an overlay plot from data across multiple files in multiple folders
     #
-    def createCrossFolderTimeFrameOverlay(self, column_name, frame_index=-1, base=None, const_cond="iso_temp", var_cond="aging_cond", display=False, save=True, file_name="",file_type=".png",subdir=""):
-        '''
-            if type(column_name) is list:
-                print("Error! Can only create a overlay plot of single column!")
-                return
-            #Check for valid condition
-            if condition != "iso_temp" and condition != "material" and condition != "aging_temp" and condition != "aging_time" and condition != "flow_rate" and condition != "aging_cond":
-                print("Error! Invalid system condition encountered!")
-                return
-            #Check for valid file type
-            if file_type != ".png" and file_type != ".pdf" and file_type != ".ps" and file_type != ".eps" and file_type != ".svg":
-                print("Warning! Unsupported image file type...")
-                print("\tDefaulting to .png")
-                file_type = ".png"
-            #If no file base is given, then loop through all file bases
-            if base == None:
-                #Check for potential problems with conditions
-                for b in self.conditions[condition]:
-                    i=0
-                    for file in self.conditions[condition][b]:
-                        if i == 0:
-                            first_cond = self.conditions[condition][b][file]
-                        else:
-                            if first_cond == self.conditions[condition][b][file]:
-                                print("Error! Cannot create overlay plot if given condition variable ("+condition+") is unchanged throughout files...")
-                                return
-                        i+=1
+    def createCrossFolderTimeFrameOverlayPlots(self, column_name, frame_index=-1, rtype=None, const_cond="iso_temp", var_cond="aging_cond", display=False, save=True, file_name="",file_type=".png",subdir=""):
+        if type(column_name) is not str:
+            print("Error! Can only create overlay plot of a single column!")
+            return
+        #Check for valid conditions
+        if const_cond != "iso_temp" and const_cond != "material" and const_cond != "aging_temp" and const_cond != "aging_time" and const_cond != "flow_rate" and const_cond != "aging_cond":
+            print("Error! Invalid system condition encountered!")
+            return
+        if var_cond != "iso_temp" and var_cond != "material" and var_cond != "aging_temp" and var_cond != "aging_time" and var_cond != "flow_rate" and var_cond != "aging_cond":
+            print("Error! Invalid system condition encountered!")
+            return
+        if const_cond == var_cond:
+            print("Error! Cannot have the same constant and variable conditions!")
+            return
+        #Check for valid file type
+        if file_type != ".png" and file_type != ".pdf" and file_type != ".ps" and file_type != ".eps" and file_type != ".svg":
+            print("Warning! Unsupported image file type...")
+            print("\tDefaulting to .png")
+            file_type = ".png"
+        #Check run type
+        if type(rtype) is not str and rtype != None:
+            print("Error! The run type must be a string representing the type of run to plot data for!")
+            return
 
-                for b in self.conditions[condition]:
-                    self.overlayPlotHelper(column_name, frame_index, b, condition, display, save, file_name, file_type, subdir)
-            else:
-                #Check for potential problems with conditions
-                for b in self.conditions[condition]:
-                    i=0
-                    for file in self.conditions[condition][b]:
-                        if i == 0:
-                            first_cond = self.conditions[condition][b][file]
-                        else:
-                            if first_cond == self.conditions[condition][b][file]:
-                                print("Error! Cannot create overlay plot if given condition variable ("+condition+") is unchanged throughout files...")
-                                return
-                        i+=1
+        #Initialize a run_types list
+        run_types = []
+        if rtype != None:
+            run_types.append(rtype)
+        else:
+            for folder in self.folder_data:
+                for base in self.folder_data[folder].conditions["run_type"]:
+                    if self.folder_data[folder].conditions["run_type"][base] not in run_types:
+                        run_types.append(self.folder_data[folder].conditions["run_type"][base])
 
-                self.overlayPlotHelper(column_name, frame_index, base, condition, display, save, file_name, file_type, subdir)
-        '''
+        #Now create maps of type->folder->file->(const_cond, var_cond) [temporary object]
+        cond_map = {}
+        for types in run_types:
+            cond_map[types] = {}
+            for folder in self.folder_data:
+                cond_map[types][folder] = {}
+                for base in self.folder_data[folder].conditions[const_cond]:
+                    if types == self.folder_data[folder].conditions["run_type"][base]:
+                        for file in self.folder_data[folder].conditions[const_cond][base]:
+                            cond_map[types][folder][file] = (self.folder_data[folder].conditions[const_cond][base][file], self.folder_data[folder].conditions[var_cond][base][file])
+
+        #Check cond_map for errors
+        const_error = False
+        var_error = False
+        for types in cond_map:
+            for folder in cond_map[types]:
+                i=0
+                for file in cond_map[types][folder]:
+                    if i==0:
+                        var_check = cond_map[types][folder][file][1]
+                        const_check = cond_map[types][folder][file][0]
+                    else:
+                        if var_check != cond_map[types][folder][file][1]:
+                            print("Error! The var_cond should be the same for all files in a given folder!")
+                            return
+                        if const_check == cond_map[types][folder][file][0]:
+                            print("Error! The const_cond should be different for all files in a given folder!")
+                            return
+                    i+=1
+
+        #Iterate through cond_map to prep data for plotting =>  info_map[const_cond_val][var_cond_val] -> (folder, file)
+        info_map = {}
+        for types in cond_map:
+            info_map[types] = {}
+            for folder in cond_map[types]:
+                for file in cond_map[types][folder]:
+                    if str(cond_map[types][folder][file][0]) not in info_map[types].keys():
+                        info_map[types][str(cond_map[types][folder][file][0])] = {}
+                    info_map[types][str(cond_map[types][folder][file][0])][str(cond_map[types][folder][file][1])] = (folder,file)
+
+        #Now, we need to iterate through the info map to develop the plots
+        for types in info_map:
+            for con_con in info_map[types]:
+                self.crossOverlayPlotHelper(column_name, frame_index, types, con_con, info_map, display, save, file_name, file_type, subdir)
         return
 
     ## Cross Folder Overlay Plot helper function [not called by user]
-    def crossOverlayPlotHelper(self, column_name, frame_index, base, const_cond, var_cond, display, save, file_name, file_type, subdir):
+    #
+    #   This helper function will create a single cross-folder plot of the requested data 
+    def crossOverlayPlotHelper(self, column_name, frame_index, type, const_cond, info_map, display, save, file_name, file_type, subdir):
+        print(type)
+        print(const_cond)
+        print(info_map[type][const_cond])
         '''
         #Check to see if folder exists and create if needed
         if subdir != "" and not os.path.exists(subdir) and save == True:
@@ -1466,6 +1519,8 @@ class TransientDataFolderSets(object):
 ## Function for testing the data folder object
 def testing():
     test01 = TransientDataFolderSets(["AllNH3Data/BASFCuSSZ13-700C4h-NH3storage","AllNH3Data/BASFCuSSZ13-800C2h-NH3storage"])
+    test01.displayRunTypes()
+    test01.createCrossFolderTimeFrameOverlayPlots('NH3 (300,3000)')
     #test01 = TransientDataFolder("BASFCuSSZ13-700C4h-NH3storage")
     test01.retainOnlyColumns(['Elapsed Time (min)','NH3 (300,3000)', 'H2O% (20)', 'TC bot sample in (C)', 'TC bot sample mid 1 (C)', 'TC bot sample mid 2 (C)', 'TC bot sample out 1 (C)', 'TC bot sample out 2 (C)', 'P bottom in (bar)', 'P bottom out (bar)'])
     #test01.displayColumnNames()

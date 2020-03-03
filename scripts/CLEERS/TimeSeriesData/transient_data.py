@@ -88,6 +88,7 @@ class TransientData(object):
     #
     #       item[2] = Name of the catalyst material
     #       item[3] = Aging condition
+    #       item[4] = Run type (TPD, NH3H2Ocomp, etc)
     #       item[5] = flow rate information (in kilo-volumes per hour)
     #       item[-1] = either a temperature or "bp"
     #                   temperature is irrelevant, but bp indicates that this is inlet information
@@ -102,6 +103,8 @@ class TransientData(object):
         file_name_info = file_name.split("-")
         ##Name of the material this data applies to
         self.material_name = file_name_info[2]
+        ##Type of run for this file
+        self.run_type = file_name_info[4]
         if file_name_info[3] == "700C4h":
             self.aging_condition = "De-greened"
             ##Aging time in hours
@@ -1261,6 +1264,7 @@ class PairedTransientData(object):
         self.flow_rate = self.result_trans_obj.flow_rate
         self.aging_condition = self.result_trans_obj.aging_condition
         self.isothermal_temp = self.result_trans_obj.isothermal_temp
+        self.run_type = self.result_trans_obj.run_type
         self.time_key = self.result_trans_obj.time_key
         ## Flag used to determine whether or not the data sets are aligned in time
         self.aligned = False
