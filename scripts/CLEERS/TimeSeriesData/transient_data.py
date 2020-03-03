@@ -1259,6 +1259,7 @@ class PairedTransientData(object):
         self.aging_time = self.result_trans_obj.aging_time
         self.aging_temp = self.result_trans_obj.aging_temp
         self.flow_rate = self.result_trans_obj.flow_rate
+        self.aging_condition = self.result_trans_obj.aging_condition
         self.isothermal_temp = self.result_trans_obj.isothermal_temp
         self.time_key = self.result_trans_obj.time_key
         ## Flag used to determine whether or not the data sets are aligned in time

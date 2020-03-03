@@ -153,7 +153,7 @@ def main(argv):
     list = []
     for folder in os.listdir(input_folder):
         #Need to check to make sure the folder does not say -Output or -Plots
-        if "-Plots" not in folder and "-Output" not in folder:
+        if "Plots/" not in folder and "Output/" not in folder:
             list.append(input_folder+"/"+folder)
         else:
             continue
