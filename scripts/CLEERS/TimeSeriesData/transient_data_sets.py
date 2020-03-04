@@ -348,6 +348,15 @@ class TransientDataFolder(object):
                 self.paired_data[item].result_trans_obj.retainOnlyColumns(extended_column_list)
                 self.paired_data[item].bypass_trans_obj.retainOnlyColumns(column_list) #May be unnecessary
 
+    ##Function to return a list of all files in the folder
+    def grabFileList(self):
+        list = []
+        for file in self.paired_data:
+            list.append(file)
+        for file in self.unpaired_data:
+            list.append(file)
+        return list
+
     ##Function to return an instance of the TransientData or PairedTransientData object given a file name
     #
     #   NOTE:
@@ -630,7 +639,7 @@ class TransientDataFolder(object):
             return
         xvals_set = {}
         yvals_set = {}
-        added = []
+        #added = []
         frame_name = ""
         #grab all appropriate data
         for file in self.conditions[condition][base]:
@@ -788,7 +797,7 @@ class TransientDataFolder(object):
             return
         xvals_set = {}
         yvals_set = {}
-        added = []
+        #added = []
         frame_name = ""
         #grab all appropriate data
         for file in self.conditions[condition][base]:
@@ -1065,6 +1074,17 @@ class TransientDataFolderSets(object):
         #print("Running retainOnlyColumns("+str(column_list)+")...")
         for folder in self.folder_data:
             self.folder_data[folder].retainOnlyColumns(column_list)
+
+    ##Funtion to grab a specific file from a specific folder
+    def grabDataFromFolder(self, folder, file):
+        if folder not in self.folder_data.keys():
+            print("Error! Invalid folder!")
+            return
+        valid_files = self.folder_data[folder].grabFileList()
+        if file not in valid_files:
+            print("Error! Invalid file name!")
+            return
+        return self.folder_data[folder].grabDataObj(file)
 
     ##Function to return an instance of the TransientData or PairedTransientData object given a file name
     #
@@ -1350,6 +1370,23 @@ class TransientDataFolderSets(object):
 
     ##Function to create an overlay plot from data across multiple files in multiple folders
     #
+    #   This function is used to create a plot of data for a given column in a given time frame
+    #   for a given constant variable condition vs several different conditions that vary. Generally,
+    #   we will use this function to plot the differences in TPDs at a given isothermal temperature
+    #   for a multitude of aging conditions.
+    #
+    #   @param column_name name of the column to plot on the same figure
+    #   @param frame_index time frame index to indicate which section of time to plot the columns over
+    #           Note: frame_index of -1 corresponds to the TDP section of a capacity curve
+    #   @param rtype run type to specify which type of run to plot
+    #           Similar to the "base" option createTimeFrameOverlayPlot()
+    #   @param const_cond the variable condition that is to be held constant for a plot
+    #   @param var_cond the variable condition that is to be changed on the plot
+    #   @param display if True, then the created figure is plotted and displayed to the console
+    #   @param save if True, then the created figure is saved to an output file
+    #   @param file_name name of the file being saved
+    #   @param file_type type of image file being created. Valid options: .png, .pdf, .ps, .eps and .svg
+    #   @param subdir sub-directory where the file will be saved
     def createCrossFolderTimeFrameOverlayPlots(self, column_name, frame_index=-1, rtype=None, const_cond="iso_temp", var_cond="aging_cond", display=False, save=True, file_name="",file_type=".png",subdir=""):
         if type(column_name) is not str:
             print("Error! Can only create overlay plot of a single column!")
@@ -1427,52 +1464,53 @@ class TransientDataFolderSets(object):
         #Now, we need to iterate through the info map to develop the plots
         for types in info_map:
             for con_con in info_map[types]:
-                self.crossOverlayPlotHelper(column_name, frame_index, types, con_con, info_map, display, save, file_name, file_type, subdir)
+                self.crossOverlayPlotHelper(column_name, frame_index, types, con_con, const_cond, info_map[types][con_con], var_cond, display, save, file_name, file_type, subdir)
         return
 
     ## Cross Folder Overlay Plot helper function [not called by user]
     #
-    #   This helper function will create a single cross-folder plot of the requested data 
-    def crossOverlayPlotHelper(self, column_name, frame_index, type, const_cond, info_map, display, save, file_name, file_type, subdir):
-        print(type)
-        print(const_cond)
-        print(info_map[type][const_cond])
-        '''
+    #   This helper function will create a single cross-folder plot of the requested data
+    #
+    #   red_info_map contains a reduced version of the full info_map. It only contains the
+    #   data necessary to develop the current plot.
+    #
+    #   red_info_map = {}
+    #   red_info_map[var_cond] = (folder, file)
+    #
+    #   var_cond are the keys representing the condition that is variable
+    #   (folder, file) is the contents of the map at that key and holds the folder and file names
+    def crossOverlayPlotHelper(self, column_name, frame_index, rtype, const_cond, cond_name, red_info_map, var_name, display, save, file_name, file_type, subdir):
         #Check to see if folder exists and create if needed
         if subdir != "" and not os.path.exists(subdir) and save == True:
             os.makedirs(subdir)
             subdir+="/"
-
-        #Check for valid base
-        if base not in self.conditions[condition]:
-            print("Error! Invalid base file name!")
-            return
+        #Grab all data to plot
         xvals_set = {}
         yvals_set = {}
-        added = []
         frame_name = ""
-        #grab all appropriate data
-        for file in self.conditions[condition][base]:
-            #check the time frame to find the appropriate xvals
-            if frame_index > len(self.grabDataObj(file).getTimeFrames())-1:
+        xlab = ""
+        for var_cond in red_info_map:
+            folder = red_info_map[var_cond][0]
+            file = red_info_map[var_cond][1]
+            if frame_index > len(self.folder_data[folder].grabDataObj(file).getTimeFrames())-1:
                 print("Error! The frame_index is out of bounds!")
                 return
-            xvals_set[file] = self.grabDataObj(file).extractRows(self.grabDataObj(file).getTimeFrames()[frame_index][0],self.grabDataObj(file).getTimeFrames()[frame_index][1])[self.grabDataObj(file).time_key]
+            xvals_set[file] = self.folder_data[folder].grabDataObj(file).extractRows(self.folder_data[folder].grabDataObj(file).getTimeFrames()[frame_index][0],self.folder_data[folder].grabDataObj(file).getTimeFrames()[frame_index][1])[self.folder_data[folder].grabDataObj(file).time_key]
             frame_name = "frame(" + str(int(xvals_set[file][0])) + "," + str(int(xvals_set[file][-1])) + ")"
 
-            yvals_set[file] = {}
-            #extract yvals
-
-            #Check to make sure column is valid
-            if self.isPaired(file) == True:
-                if column_name not in self.grabDataObj(file).result_trans_obj.data_map.keys():
+            #Check for valid column_name
+            if self.folder_data[folder].isPaired(file) == True:
+                if column_name not in self.folder_data[folder].grabDataObj(file).result_trans_obj.data_map.keys():
                     print("Error! Invalid column name!")
                     return
             else:
-                if column_name not in self.grabDataObj(file).data_map.keys():
+                if column_name not in self.folder_data[folder].grabDataObj(file).data_map.keys():
                     print("Error! Invalid column name!")
                     return
-            yvals_set[file][column_name] = self.grabDataObj(file).extractRows(xvals_set[file][0],xvals_set[file][-1])[column_name]
+            yvals_set[file] = self.folder_data[folder].grabDataObj(file).extractRows(xvals_set[file][0],xvals_set[file][-1])[column_name]
+
+            if xlab == "":
+                xlab += "Time Change in "+self.folder_data[folder].grabDataObj(file).time_key.split("(")[1].split(")")[0]
 
             #Loop through the xvals and correct the time frames such that each starts from time = 0
             i=0
@@ -1480,47 +1518,131 @@ class TransientDataFolderSets(object):
             for time in xvals_set[file]:
                 xvals_set[file][i] = xvals_set[file][i] - start
                 i+=1
+
         #Now, we should have all x and y values for everything we want to plot
         fig = plt.figure()
         leg = []
-        ylab = column_name
-        xlab = ""
+        ylab = column_name+"@"+const_cond
+        if cond_name == "iso_temp":
+            ylab += " oC"
+        if cond_name == "aging_time":
+            ylab += " hr"
+        if cond_name == "aging_temp":
+            ylab += " oC"
+        if cond_name == "flow_rate":
+            ylab += " hr^-1"
+
         i=0
-        for file in self.conditions[condition][base]:
-            if xlab == "":
-                xlab += "Time Change in "+self.grabDataObj(file).time_key.split("(")[1].split(")")[0]
-            leg.append("@"+str(self.conditions[condition][base][file]))
-            if condition == "iso_temp":
+        for var_cond in red_info_map:
+            folder = red_info_map[var_cond][0]
+            file = red_info_map[var_cond][1]
+            leg.append("@"+str(var_cond))
+            if var_name == "iso_temp":
                 leg[i] += " oC"
-            if condition == "aging_time":
+            if var_name == "aging_time":
                 leg[i] += " hr"
-            if condition == "aging_temp":
+            if var_name == "aging_temp":
                 leg[i] += " oC"
-            if condition == "flow_rate":
+            if var_name == "flow_rate":
                 leg[i] += " hr^-1"
-            plt.plot(xvals_set[file],yvals_set[file][column_name])
+            plt.plot(xvals_set[file],yvals_set[file])
             i+=1
         plt.legend(leg)
         plt.xlabel(xlab)
         plt.ylabel(ylab)
         plt.tight_layout()
         if file_name == "":
-            file_name = base + "-" + column_name + "-" + frame_name
+            file_name = rtype + "-" + ylab + "_vs_" + var_name + "-" + frame_name
         if save == True:
-            plt.savefig(subdir+file_name+'-OverlayPlot'+file_type)
+            if subdir != "":
+                combined = subdir + "/" + rtype + "-" + cond_name + "_vs_" + var_name + "/"
+            else:
+                combined = rtype + "-" + cond_name + "_vs_" + var_name + "/"
+            if not os.path.exists(combined):
+                os.makedirs(combined)
+            plt.savefig(combined+file_name+'-CrossOverlayPlot'+file_type)
         if display == True:
             fig.show()
-            print("\nDisplaying plot. Press enter to continue...(this closes the images)")
+            print("\nDisplaying plot. Press enter to continue to next plot...(this closes the images)")
             input()
         plt.close()
-        '''
+        return
+
+    ##Function to save all cross-overlay plots
+    #
+    #   This function will save all cross overlay plots for the given column name to a subfolder
+    #   for all time frames that are associated with that data set. The rtype (run type) is an
+    #   optional value the user can provide if they only want to do this for a single type of run.
+    #   Otherwise, it will apply this function iteratively for all run types in all data folders.
+    #   Default is setup to plot the given column at each specific isothermal temperature on
+    #   separate plots and include the data for various aging conditions on the same plot.
+    #
+    #   @param column_name name of the column to plot on the same figure
+    #   @param rtype run type to specify which type of run to plot
+    #           Similar to the "base" option createTimeFrameOverlayPlot()
+    #   @param const_cond the variable condition that is to be held constant for a plot
+    #   @param var_cond the variable condition that is to be changed on the plot
+    #   @param subdir name of the folder where all the plots will be saved
+    #   @param file_type type of image file being created. Valid options: .png, .pdf, .ps, .eps and .svg
+    def saveCrossOverlayPlots(self, column_name, subdir="", rtype=None, const_cond="iso_temp", var_cond="aging_cond", file_type=".png"):
+        #Check for valid conditions
+        if const_cond != "iso_temp" and const_cond != "material" and const_cond != "aging_temp" and const_cond != "aging_time" and const_cond != "flow_rate" and const_cond != "aging_cond":
+            print("Error! Invalid system condition encountered!")
+            return
+        if var_cond != "iso_temp" and var_cond != "material" and var_cond != "aging_temp" and var_cond != "aging_time" and var_cond != "flow_rate" and var_cond != "aging_cond":
+            print("Error! Invalid system condition encountered!")
+            return
+        if const_cond == var_cond:
+            print("Error! The variable condition and constant condition cannot be the same condition!")
+            return
+
+        #Check folder name and update
+        if subdir == "":
+            subdir = column_name+"-CrossOverlayPlots/"
+        else:
+            if subdir[-1] != "/":
+                subdir += "/"
+            subdir += column_name+"-CrossOverlayPlots/"
+
+        #Initialize a run_types and num_frames list
+        #NOTE: each list will be same size and each element in each list corresponds with the other element in the other list
+        run_types = []
+        num_frames = []
+        approx_span = []
+        if rtype != None:
+            run_types.append(rtype)
+            for folder in self.folder_data:
+                for base in self.folder_data[folder].conditions["run_type"]:
+                    if self.folder_data[folder].conditions["run_type"][base] in run_types:
+                        for file in self.folder_data[folder].conditions[const_cond][base]:
+                            num_frames.append(len(self.folder_data[folder].grabDataObj(file).getTimeFrames()))
+                            approx_span.append(self.folder_data[folder].grabDataObj(file).getTimeFrames())
+                            break
+        else:
+            for folder in self.folder_data:
+                for base in self.folder_data[folder].conditions["run_type"]:
+                    if self.folder_data[folder].conditions["run_type"][base] not in run_types:
+                        run_types.append(self.folder_data[folder].conditions["run_type"][base])
+                        for file in self.folder_data[folder].conditions[const_cond][base]:
+                            num_frames.append(len(self.folder_data[folder].grabDataObj(file).getTimeFrames()))
+                            approx_span.append(self.folder_data[folder].grabDataObj(file).getTimeFrames())
+                            break
+
+        #Loop through all run_types and all time_frames
+        i=0
+        for type in run_types:
+            for frame in range(0,num_frames[i]):
+                # file_name=""
+                print("\nPlotting all cross-folder overlays of " + column_name + " from " + type + " for " + var_cond + " vs " + const_cond + " in frame (" + str(int(approx_span[i][frame][0]))+","+str(int(approx_span[i][frame][1])) +  ").\n\tPlease wait...")
+                self.createCrossFolderTimeFrameOverlayPlots(column_name, frame, type, const_cond, var_cond, False, True, "", file_type, subdir+type+"/"+"frame("+str(int(approx_span[i][frame][0]))+","+str(int(approx_span[i][frame][1]))+")/")
+            i+=1
         return
 
 ## Function for testing the data folder object
 def testing():
     test01 = TransientDataFolderSets(["AllNH3Data/BASFCuSSZ13-700C4h-NH3storage","AllNH3Data/BASFCuSSZ13-800C2h-NH3storage"])
-    test01.displayRunTypes()
-    test01.createCrossFolderTimeFrameOverlayPlots('NH3 (300,3000)')
+    #test01.displayRunTypes()
+    #test01.createCrossFolderTimeFrameOverlayPlots('NH3 (300,3000)')
     #test01 = TransientDataFolder("BASFCuSSZ13-700C4h-NH3storage")
     test01.retainOnlyColumns(['Elapsed Time (min)','NH3 (300,3000)', 'H2O% (20)', 'TC bot sample in (C)', 'TC bot sample mid 1 (C)', 'TC bot sample mid 2 (C)', 'TC bot sample out 1 (C)', 'TC bot sample out 2 (C)', 'P bottom in (bar)', 'P bottom out (bar)'])
     #test01.displayColumnNames()
@@ -1588,7 +1710,8 @@ def testing():
     #test01.createTimeFrameOverlayPlot('NH3 (300,3000)')
     #test01.createTimeFrameContourPlot('NH3 (300,3000)',-1,"20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O")
     #test01.createTimeFrameContourPlot('NH3 (300,3000)')
-    test01.saveOverlayPlots('NH3 (300,3000)', "test")
+    #test01.saveOverlayPlots('NH3 (300,3000)', "test")
+    test01.saveCrossOverlayPlots('NH3 (300,3000)', "test", "NH3DesIsoTPD")
     #test01.saveContourPlots('NH3 (300,3000)')
 
     #Compress the processed data for visualization in spreadsheets
