@@ -1145,6 +1145,43 @@ class TransientData(object):
                     i+=1
                 self.data_map[new_key].append(self.input_change[new_key][i])
 
+    ##This function calculates a simple integral of a given column over the time range
+    #
+    #   Integral is calculated via the trapezoid rule and the result of the integral
+    #   is returned as a single value. If the column does not contain numeric data,
+    #   then no computation is performed.
+    #
+    #   Integral sums are computed as follows...
+    #
+    #   integrate( column, min, max) ==> integral(a,b)  [ f(t)*dt ]   \n
+    #   sum += 0.5*[f(t+dt)+f(t)]*dt
+    def calculateIntegralSum(self, column_name, min_time=None, max_time=None):
+        sum = 0
+        if column_name not in self.data_map.keys():
+            print("Error! No corresponding inlet column exists in data_map!")
+            return
+
+        if min_time==None:
+            min_time = self.data_map[self.time_key][0]
+        if max_time==None:
+            max_time = self.data_map[self.time_key][-1]
+        time_set = self.extractRows(min_time, max_time)
+        time_old = time_set[self.time_key][0]
+        f_old = time_set[column_name][0]
+        if type(f_old) is not int and type(f_old) is not float:
+            print("Error! Cannot integrate non-numeric data!")
+            return sum
+        i=1
+        while i<len(time_set[self.time_key]):
+            time_new = time_set[self.time_key][i]
+            f_new = time_set[column_name][i]
+            sum += 0.5*(f_old+f_new)*(time_new-time_old)
+            f_old = time_new
+            f_old = f_new
+            i+=1
+
+        return sum
+
 
     ##This function will perform a trapezoid rule integration between two given curves
     #   in the data_map versus the time_key set of data. The first value of the integrated
@@ -1738,6 +1775,19 @@ class PairedTransientData(object):
         self.bypass_trans_obj.compressRows(factor)
         self.result_trans_obj.compressRows(factor)
 
+    ##This function calculates a simple integral of a given column over the time range
+    #
+    #   Integral is calculated via the trapezoid rule and the result of the integral
+    #   is returned as a single value. If the column does not contain numeric data,
+    #   then no computation is performed.
+    #
+    #   Integral sums are computed as follows...
+    #
+    #   integrate( column, min, max) ==> integral(a,b)  [ f(t)*dt ]   \n
+    #   sum += 0.5*[f(t+dt)+f(t)]*dt
+    def calculateIntegralSum(self, column_name, min_time=None, max_time=None):
+        return self.result_trans_obj.calculateIntegralSum(column_name, min_time, max_time)
+
     ##Function will compute a mass retention integral for the given column
     #
     #   The align data function must have already been called. That function
@@ -1931,8 +1981,8 @@ def testing():
     if h2o_comp == True:
         test05 = PairedTransientData("20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2-11-3pctH2O-400ppmNH3-bp.dat","20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2-11-3pctH2O-400ppmNH3-150C.dat")
     else:
-        #test05 = PairedTransientData("20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-bp.dat","20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-150C.dat")
-        test05 = PairedTransientData("20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-bp.dat","20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-350C.dat")
+        test05 = PairedTransientData("20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-bp.dat","20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-150C.dat")
+        #test05 = PairedTransientData("20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-bp.dat","20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-350C.dat")
     test05.compressColumns()
     #test05.displayColumnNames()
 
@@ -1941,6 +1991,11 @@ def testing():
     #test05.retainOnlyColumns(['Elapsed Time (min)','NH3 (300,3000)', 'H2O% (20)'])
     test05.retainOnlyColumns(['Elapsed Time (min)','NH3 (300,3000)', 'H2O% (20)', 'TC bot sample in (C)', 'TC bot sample mid 1 (C)', 'TC bot sample mid 2 (C)', 'TC bot sample out 1 (C)', 'TC bot sample out 2 (C)', 'P bottom in (bar)', 'P bottom out (bar)'])
     test05.alignData()
+
+    print("Calculating sum...")
+    print(test05.calculateIntegralSum('NH3 (300,3000)[bypass]',15,24))
+    print(test05.calculateIntegralSum('NH3 (300,3000)',15,24))
+    print(str(test05.calculateIntegralSum('NH3 (300,3000)[bypass]',15,24)-test05.calculateIntegralSum('NH3 (300,3000)',15,24)))
 
     #NOTE: After data is aligned, all result and bypass data are now in the result_trans_obj.
     #The bypass columns have the same names, but will be suffixed with [bypass]

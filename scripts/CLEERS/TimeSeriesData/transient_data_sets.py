@@ -105,6 +105,9 @@ class TransientDataFolder(object):
         self.conditions["aging_cond"] = {}
         self.conditions["run_type"] = {}
 
+        ##Quick access to the time key
+        self.time_key = ""
+
         #First round of iterations is to change all file names to meet standards
         for file in os.listdir(self.folder_name):
             if len(file.split(".")) < 2:
@@ -175,6 +178,7 @@ class TransientDataFolder(object):
                 self.unpaired_data[file] = TransientData(self.folder_name+"/"+file)
                 self.unpaired_data[file].compressColumns()
                 self.total_data_processed+=self.unpaired_data[file].getNumRows()*self.unpaired_data[file].getNumCols()
+                self.time_key = self.unpaired_data[file].time_key
                 self.unread[i] = False
                 i+=1
         #Check for file_names that should correspond to bypass_names
@@ -193,6 +197,7 @@ class TransientDataFolder(object):
                         self.paired_data[file].compressColumns()
                         self.paired_data[file].alignData(addNoise)
                         self.total_data_processed+=2*self.paired_data[file].getNumRows()*self.paired_data[file].getNumCols()
+                        self.time_key = self.paired_data[file].time_key
                         self.unread[j] = False
                         i+=1
                     j+=1
@@ -433,6 +438,31 @@ class TransientDataFolder(object):
             paired = False
         return paired
 
+    ##This function calculates a simple integral of a given column over the time range in one data file
+    #
+    #   Integral is calculated via the trapezoid rule and the result of the integral
+    #   is returned as a single value. If the column does not contain numeric data,
+    #   then no computation is performed.
+    #
+    #   Integral sums are computed as follows...
+    #
+    #   integrate( column, min, max) ==> integral(a,b)  [ f(t)*dt ]   \n
+    #   sum += 0.5*[f(t+dt)+f(t)]*dt
+    #
+    #   NOTE:
+    #
+    #       If no file name is provided, then this method returns a map of integral sums for all files
+    def calculateIntegralSum(self, column_name, file=None, min_time=None, max_time=None):
+        if file != None:
+            return self.grabDataObj(file).calculateIntegralSum(column_name, min_time, max_time)
+        else:
+            result_map = {}
+            for file in self.unpaired_data:
+                result_map[file] = self.unpaired_data[file].calculateIntegralSum(column_name, min_time, max_time)
+            for file in self.paired_data:
+                result_map[file] = self.paired_data[file].calculateIntegralSum(column_name, min_time, max_time)
+            return result_map
+
     ##Function to compute a mass retention integral for all columns of the given name
     #
     #   NOTE:
@@ -569,6 +599,8 @@ class TransientDataFolder(object):
     #   @param file_name name of the file being saved
     #   @param file_type type of image file being created. Valid options: .png, .pdf, .ps, .eps and .svg
     #   @param subdir sub-directory where the file will be saved
+    #   @param second_column name of the other column to plot the first column_name against
+    #               if left None, then the time column is automatically used
     #
     #   NOTE 1:
     #
@@ -581,9 +613,14 @@ class TransientDataFolder(object):
     #
     #       For the NH3 capacity data, the only valid condition is "iso_temp" because each folder of
     #       data has all the same other conditions.
-    def createTimeFrameOverlayPlot(self, column_name, frame_index=-1, base=None, condition="iso_temp", display=False, save=True, file_name="",file_type=".png",subdir=""):
+    def createTimeFrameOverlayPlot(self, column_name, frame_index=-1, base=None, condition="iso_temp", display=False, save=True, file_name="",file_type=".png",subdir="", second_column=None):
         if type(column_name) is list:
             print("Error! Can only create a overlay plot of single column!")
+            return
+        if second_column == None:
+            second_column = self.time_key
+        if type(second_column) is not str:
+            print("Error! Invalid x-axis column type!")
             return
         #Check for valid condition
         if condition != "iso_temp" and condition != "material" and condition != "aging_temp" and condition != "aging_time" and condition != "flow_rate" and condition != "aging_cond":
@@ -609,7 +646,7 @@ class TransientDataFolder(object):
                     i+=1
 
             for b in self.conditions[condition]:
-                self.overlayPlotHelper(column_name, frame_index, b, condition, display, save, file_name, file_type, subdir)
+                self.overlayPlotHelper(column_name, frame_index, b, condition, display, save, file_name, file_type, subdir, second_column)
         else:
             #Check for potential problems with conditions
             for b in self.conditions[condition]:
@@ -623,11 +660,11 @@ class TransientDataFolder(object):
                             return
                     i+=1
 
-            self.overlayPlotHelper(column_name, frame_index, base, condition, display, save, file_name, file_type, subdir)
+            self.overlayPlotHelper(column_name, frame_index, base, condition, display, save, file_name, file_type, subdir, second_column)
         return
 
     ##Helper function for the createTimeFrameOverlayPlot() function [Not called by user]
-    def overlayPlotHelper(self, column_name, frame_index, base, condition, display, save, file_name, file_type, subdir):
+    def overlayPlotHelper(self, column_name, frame_index, base, condition, display, save, file_name, file_type, subdir, second_column):
         #Check to see if folder exists and create if needed
         if subdir != "" and not os.path.exists(subdir) and save == True:
             os.makedirs(subdir)
@@ -639,6 +676,7 @@ class TransientDataFolder(object):
             return
         xvals_set = {}
         yvals_set = {}
+        time_set = {}
         #added = []
         frame_name = ""
         #grab all appropriate data
@@ -647,8 +685,9 @@ class TransientDataFolder(object):
             if frame_index > len(self.grabDataObj(file).getTimeFrames())-1:
                 print("Error! The frame_index is out of bounds!")
                 return
-            xvals_set[file] = self.grabDataObj(file).extractRows(self.grabDataObj(file).getTimeFrames()[frame_index][0],self.grabDataObj(file).getTimeFrames()[frame_index][1])[self.grabDataObj(file).time_key]
-            frame_name = "frame(" + str(int(xvals_set[file][0])) + "," + str(int(xvals_set[file][-1])) + ")"
+            xvals_set[file] = self.grabDataObj(file).extractRows(self.grabDataObj(file).getTimeFrames()[frame_index][0],self.grabDataObj(file).getTimeFrames()[frame_index][1])[second_column]
+            time_set[file] = self.grabDataObj(file).extractRows(self.grabDataObj(file).getTimeFrames()[frame_index][0],self.grabDataObj(file).getTimeFrames()[frame_index][1])[self.time_key]
+            frame_name = "frame(" + str(int(time_set[file][0])) + "," + str(int(time_set[file][-1])) + ")"
 
             yvals_set[file] = {}
             #extract yvals
@@ -662,14 +701,15 @@ class TransientDataFolder(object):
                 if column_name not in self.grabDataObj(file).data_map.keys():
                     print("Error! Invalid column name!")
                     return
-            yvals_set[file][column_name] = self.grabDataObj(file).extractRows(xvals_set[file][0],xvals_set[file][-1])[column_name]
+            yvals_set[file][column_name] = self.grabDataObj(file).extractRows(time_set[file][0],time_set[file][-1])[column_name]
 
-            #Loop through the xvals and correct the time frames such that each starts from time = 0
-            i=0
-            start = xvals_set[file][0]
-            for time in xvals_set[file]:
-                xvals_set[file][i] = xvals_set[file][i] - start
-                i+=1
+            if second_column == self.time_key:
+                #Loop through the xvals and correct the time frames such that each starts from time = 0
+                i=0
+                start = xvals_set[file][0]
+                for time in xvals_set[file]:
+                    xvals_set[file][i] = xvals_set[file][i] - start
+                    i+=1
         #Now, we should have all x and y values for everything we want to plot
         fig = plt.figure()
         leg = []
@@ -678,7 +718,10 @@ class TransientDataFolder(object):
         i=0
         for file in self.conditions[condition][base]:
             if xlab == "":
-                xlab += "Time Change in "+self.grabDataObj(file).time_key.split("(")[1].split(")")[0]
+                if second_column == self.time_key:
+                    xlab += "Time Change in "+self.grabDataObj(file).time_key.split("(")[1].split(")")[0]
+                else:
+                    xlab += second_column
             leg.append("@"+str(self.conditions[condition][base][file]))
             if condition == "iso_temp":
                 leg[i] += " oC"
@@ -727,6 +770,8 @@ class TransientDataFolder(object):
     #   @param file_name name of the file being saved
     #   @param file_type type of image file being created. Valid options: .png, .pdf, .ps, .eps and .svg
     #   @param subdir sub-directory where the file will be saved
+    #   @param second_column name of the other column to plot the first column_name against
+    #               if left None, then the time column is automatically used
     #
     #   NOTE 1:
     #
@@ -739,9 +784,14 @@ class TransientDataFolder(object):
     #
     #       For the NH3 capacity data, the only valid condition is "iso_temp" because each folder of
     #       data has all the same other conditions.
-    def createTimeFrameContourPlot(self, column_name, frame_index=-1, base=None, condition="iso_temp", display=False, save=True, file_name="",file_type=".png",subdir=""):
+    def createTimeFrameContourPlot(self, column_name, frame_index=-1, base=None, condition="iso_temp", display=False, save=True, file_name="",file_type=".png",subdir="", second_column=None):
         if type(column_name) is list:
             print("Error! Can only create a contour plot of single column!")
+            return
+        if second_column == None:
+            second_column = self.time_key
+        if type(second_column) is not str:
+            print("Error! Invalid x-axis column type!")
             return
         #Check for valid condition
         if condition != "iso_temp" and condition != "material" and condition != "aging_temp" and condition != "aging_time" and condition != "flow_rate" and condition != "aging_cond":
@@ -767,7 +817,7 @@ class TransientDataFolder(object):
                     i+=1
 
             for b in self.conditions[condition]:
-                self.contourPlotHelper(column_name, frame_index, b, condition, display, save, file_name, file_type, subdir)
+                self.contourPlotHelper(column_name, frame_index, b, condition, display, save, file_name, file_type, subdir, second_column)
         else:
             #Check for potential problems with conditions
             for b in self.conditions[condition]:
@@ -781,11 +831,11 @@ class TransientDataFolder(object):
                             return
                     i+=1
 
-            self.contourPlotHelper(column_name, frame_index, base, condition, display, save, file_name, file_type, subdir)
+            self.contourPlotHelper(column_name, frame_index, base, condition, display, save, file_name, file_type, subdir, second_column)
         return
 
     ##Helper function for the createTimeFrameContourPlot() function [Not called by user]
-    def contourPlotHelper(self, column_name, frame_index, base, condition, display, save, file_name, file_type, subdir):
+    def contourPlotHelper(self, column_name, frame_index, base, condition, display, save, file_name, file_type, subdir, second_column):
         #Check to see if folder exists and create if needed
         if subdir != "" and not os.path.exists(subdir) and save == True:
             os.makedirs(subdir)
@@ -797,6 +847,7 @@ class TransientDataFolder(object):
             return
         xvals_set = {}
         yvals_set = {}
+        time_set = {}
         #added = []
         frame_name = ""
         #grab all appropriate data
@@ -805,8 +856,9 @@ class TransientDataFolder(object):
             if frame_index > len(self.grabDataObj(file).getTimeFrames())-1:
                 print("Error! The frame_index is out of bounds!")
                 return
-            xvals_set[file] = self.grabDataObj(file).extractRows(self.grabDataObj(file).getTimeFrames()[frame_index][0],self.grabDataObj(file).getTimeFrames()[frame_index][1])[self.grabDataObj(file).time_key]
-            frame_name = "frame(" + str(int(xvals_set[file][0])) + "," + str(int(xvals_set[file][-1])) + ")"
+            xvals_set[file] = self.grabDataObj(file).extractRows(self.grabDataObj(file).getTimeFrames()[frame_index][0],self.grabDataObj(file).getTimeFrames()[frame_index][1])[second_column]
+            time_set[file] = self.grabDataObj(file).extractRows(self.grabDataObj(file).getTimeFrames()[frame_index][0],self.grabDataObj(file).getTimeFrames()[frame_index][1])[self.time_key]
+            frame_name = "frame(" + str(int(time_set[file][0])) + "," + str(int(time_set[file][-1])) + ")"
 
             yvals_set[file] = {}
             #extract yvals
@@ -820,14 +872,15 @@ class TransientDataFolder(object):
                 if column_name not in self.grabDataObj(file).data_map.keys():
                     print("Error! Invalid column name!")
                     return
-            yvals_set[file][column_name] = self.grabDataObj(file).extractRows(xvals_set[file][0],xvals_set[file][-1])[column_name]
+            yvals_set[file][column_name] = self.grabDataObj(file).extractRows(time_set[file][0],time_set[file][-1])[column_name]
 
-            #Loop through the xvals and correct the time frames such that each starts from time = 0
-            i=0
-            start = xvals_set[file][0]
-            for time in xvals_set[file]:
-                xvals_set[file][i] = xvals_set[file][i] - start
-                i+=1
+            if second_column == self.time_key:
+                #Loop through the xvals and correct the time frames such that each starts from time = 0
+                i=0
+                start = xvals_set[file][0]
+                for time in xvals_set[file]:
+                    xvals_set[file][i] = xvals_set[file][i] - start
+                    i+=1
 
         #Create X,Y, and Z numpy arrays for creating a surface plot
         X = []
@@ -852,7 +905,10 @@ class TransientDataFolder(object):
         surf = ax.plot_trisurf(X, Y, Z, cmap=cm.coolwarm, linewidth=0, antialiased=False)
         ax.view_init(azim=120)
         ax.set_zlabel(column_name)
-        ax.set_xlabel("Time Change in "+self.grabDataObj(file).time_key.split("(")[1].split(")")[0])
+        if second_column == self.time_key:
+            ax.set_xlabel("Time Change in "+self.grabDataObj(file).time_key.split("(")[1].split(")")[0])
+        else:
+            ax.set_xlabel(second_column)
         if condition == "iso_temp":
             ax.set_ylabel("Temperature (C)")
         if condition == "aging_time":
@@ -912,7 +968,7 @@ class TransientDataFolder(object):
                 print("\nPlotting all overlays of " + column_name + " data from set " + b + " for all time frames.\n\tPlease wait...")
                 f=0
                 for frame in frames:
-                    self.createTimeFrameOverlayPlot(column_name, f, b, condition, False, True, column_name, file_type, folder+b+"/"+"frame("+str(int(frame[0]))+","+str(int(frame[1]))+")/")
+                    self.createTimeFrameOverlayPlot(column_name, f, b, condition, False, True, column_name, file_type, folder+b+"/"+"frame("+str(int(frame[0]))+","+str(int(frame[1]))+")/", None)
                     f+=1
         else:
             for file in self.conditions[condition][base]:
@@ -921,7 +977,7 @@ class TransientDataFolder(object):
             print("\nPlotting all overlays of " + column_name + " data from set " + base + " for all time frames.\n\tPlease wait...")
             f=0
             for frame in frames:
-                self.createTimeFrameOverlayPlot(column_name, f, base, condition, False, True, column_name, file_type, folder+base+"/"+"frame("+str(int(frame[0]))+","+str(int(frame[1]))+")/")
+                self.createTimeFrameOverlayPlot(column_name, f, base, condition, False, True, column_name, file_type, folder+base+"/"+"frame("+str(int(frame[0]))+","+str(int(frame[1]))+")/", None)
                 f+=1
         return
 
@@ -962,7 +1018,7 @@ class TransientDataFolder(object):
                 print("\nPlotting all contours of " + column_name + " data from set " + b + " for all time frames.\n\tPlease wait...")
                 f=0
                 for frame in frames:
-                    self.createTimeFrameContourPlot(column_name, f, b, condition, False, True, column_name, file_type, folder+b+"/"+"frame("+str(int(frame[0]))+","+str(int(frame[1]))+")/")
+                    self.createTimeFrameContourPlot(column_name, f, b, condition, False, True, column_name, file_type, folder+b+"/"+"frame("+str(int(frame[0]))+","+str(int(frame[1]))+")/", None)
                     f+=1
         else:
             for file in self.conditions[condition][base]:
@@ -971,7 +1027,7 @@ class TransientDataFolder(object):
             print("\nPlotting all contours of " + column_name + " data from set " + base + " for all time frames.\n\tPlease wait...")
             f=0
             for frame in frames:
-                self.createTimeFrameContourPlot(column_name, f, base, condition, False, True, column_name, file_type, folder+base+"/"+"frame("+str(int(frame[0]))+","+str(int(frame[1]))+")/")
+                self.createTimeFrameContourPlot(column_name, f, base, condition, False, True, column_name, file_type, folder+base+"/"+"frame("+str(int(frame[0]))+","+str(int(frame[1]))+")/", None)
                 f+=1
         return
 
@@ -1166,6 +1222,40 @@ class TransientDataFolderSets(object):
             if result == True:
                 return result
         return result
+
+    ##This function calculates a simple integral of a given column over the time range in one data file
+    #
+    #   Integral is calculated via the trapezoid rule and the result of the integral
+    #   is returned as a single value. If the column does not contain numeric data,
+    #   then no computation is performed.
+    #
+    #   Integral sums are computed as follows...
+    #
+    #   integrate( column, min, max) ==> integral(a,b)  [ f(t)*dt ]   \n
+    #   sum += 0.5*[f(t+dt)+f(t)]*dt
+    #
+    #   NOTE:
+    #
+    #       If no file name is provided, then this method returns a map of integral sums for all files
+    #
+    #   NOTE:
+    #
+    #       If no folder is given, then this method returns a map of maps for all integral sums
+    #       in all folders and files.
+    def calculateIntegralSum(self, column_name, folder=None, file=None, min_time=None, max_time=None):
+        if folder == None:
+            result_map = {}
+            for f in self.folder_data:
+                if file == None:
+                    result_map[f] = self.grabFolderObj(f).calculateIntegralSum(column_name, file, min_time, max_time)
+                else:
+                    result_map[f] = self.grabDataFromFolder(f, file).calculateIntegralSum(column_name, min_time, max_time)
+            return result_map
+        else:
+            if file == None:
+                return self.grabFolderObj(folder).calculateIntegralSum(column_name, file, min_time, max_time)
+            else:
+                return self.grabDataFromFolder(folder, file).calculateIntegralSum(column_name, min_time, max_time)
 
     ##Function to compute a mass retention integral for all columns of the given name
     #
@@ -1649,6 +1739,9 @@ def testing():
     #print(test01.grabDataObj("20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2-11-3pctH2O-400ppmNH3-200C.dat"))
     #print(test01)  #This will display the names of the objects/files you have access to and whether they are paired or not
 
+    print("Calculating sum...")
+    print(test01.calculateIntegralSum('NH3 (300,3000)',None,None,15,24))
+
     #test01.displayLikeFileNames()
     #test01.displayFilesUnderSet("20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2-11-3pctH2O-400ppmNH3")
 
@@ -1711,8 +1804,10 @@ def testing():
     #test01.createTimeFrameContourPlot('NH3 (300,3000)',-1,"20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O")
     #test01.createTimeFrameContourPlot('NH3 (300,3000)')
     #test01.saveOverlayPlots('NH3 (300,3000)', "test")
-    test01.saveCrossOverlayPlots('NH3 (300,3000)', "test", "NH3DesIsoTPD")
+    #test01.saveCrossOverlayPlots('NH3 (300,3000)', "test", "NH3DesIsoTPD")
     #test01.saveContourPlots('NH3 (300,3000)')
+
+    test01.grabFolderObj("AllNH3Data/BASFCuSSZ13-700C4h-NH3storage").createTimeFrameOverlayPlot('NH3 (300,3000)', -1, "20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O", "iso_temp", True, False, "",".png","", 'TC bot sample in (K)')
 
     #Compress the processed data for visualization in spreadsheets
     test01.compressAllRows()
