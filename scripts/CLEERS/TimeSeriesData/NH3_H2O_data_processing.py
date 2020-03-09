@@ -96,78 +96,14 @@ def perform_standard_processing(list, output_folder):
 
     #Save all plots in each time frame
     data.saveTimeFramePlots(output_folder)
-    data.saveOverlayPlots('NH3 (300,3000)',output_folder)
+    data.saveOverlayPlots('NH3 (300,3000)',None, output_folder)
+    data.saveOverlayPlots('NH3 (300,3000)','TC bot sample out 1 (K)', output_folder)
     data.saveCrossOverlayPlots('NH3 (300,3000)',output_folder)
     #Compress the processed data for visualization in spreadsheets
     data.compressAllRows()
     #Print the results to a series of output files
     data.printAlltoFile(output_folder)
     return data.getTotalDataProcessed()
-    '''
-    sum = 0
-    for name_and_path in list:
-        #Read in all data and retain the information we want
-        data_set = TransientDataFolder(name_and_path)
-        data_set.retainOnlyColumns(['Elapsed Time (min)','NH3 (300,3000)', 'H2O% (20)', 'TC bot sample in (C)', 'TC bot sample mid 1 (C)', 'TC bot sample mid 2 (C)', 'TC bot sample out 1 (C)', 'TC bot sample out 2 (C)', 'P bottom in (bar)', 'P bottom out (bar)'])
-
-        #Convert all temperatures from (C) to Kelvin, then delete old columns
-        data_set.mathOperations('TC bot sample in (C)',"+",273.15, True, 'TC bot sample in (K)')
-        data_set.deleteColumns('TC bot sample in (C)')
-        data_set.mathOperations('TC bot sample mid 1 (C)',"+",273.15, True, 'TC bot sample mid 1 (K)')
-        data_set.deleteColumns('TC bot sample mid 1 (C)')
-        data_set.mathOperations('TC bot sample mid 2 (C)',"+",273.15, True, 'TC bot sample mid 2 (K)')
-        data_set.deleteColumns('TC bot sample mid 2 (C)')
-        data_set.mathOperations('TC bot sample out 1 (C)',"+",273.15, True, 'TC bot sample out 1 (K)')
-        data_set.deleteColumns('TC bot sample out 1 (C)')
-        data_set.mathOperations('TC bot sample out 2 (C)',"+",273.15, True, 'TC bot sample out 2 (K)')
-        data_set.deleteColumns('TC bot sample out 2 (C)')
-
-        #Delete the temperature columns from the bypass run that we don't need
-        data_set.deleteColumns(['TC bot sample in (C)[bypass]','TC bot sample mid 1 (C)[bypass]','TC bot sample mid 2 (C)[bypass]','TC bot sample out 1 (C)[bypass]','TC bot sample out 2 (C)[bypass]'])
-
-        #Now, convert all pressures from bar to kPa and delete the extra [bypass] columns
-        data_set.mathOperations('P bottom in (bar)',"*",100,True,'P bottom in (kPa)')
-        data_set.deleteColumns('P bottom in (bar)')
-        data_set.mathOperations('P bottom out (bar)',"*",100,True,'P bottom out (kPa)')
-        data_set.deleteColumns('P bottom out (bar)')
-
-        #Delete the pressure columns from the bypass run that we also don't need
-        data_set.deleteColumns(['P bottom in (bar)[bypass]','P bottom out (bar)[bypass]'])
-
-        #Calculate the mass retention for species of interest
-        data_set.calculateRetentionIntegrals('NH3 (300,3000)')
-        data_set.calculateRetentionIntegrals('H2O% (20)')
-
-        #NH3 has units of ppmv, want to convert this to mol adsorbed / L catalyst
-        data_set.mathOperations('NH3 (300,3000)-Retained',"/",1E6)                     #From ppmv to molefraction
-        data_set.mathOperations('NH3 (300,3000)-Retained',"*","P bottom out (kPa)")    #From molefraction to kPa
-        data_set.mathOperations('NH3 (300,3000)-Retained',"/",8.314)
-        data_set.mathOperations('NH3 (300,3000)-Retained',"/",'TC bot sample out 1 (K)') #From kPa to mol/L using Ideal gas law
-        data_set.mathOperations('NH3 (300,3000)-Retained',"*",0.015708)                #From mol/L to total moles (multiply by total volume)
-        #From total moles to mol ads / L cat using solids fraction, then store in new column and delete old column
-        data_set.mathOperations('NH3 (300,3000)-Retained',"/",(1-0.3309)*0.015708,True,"NH3 ads (mol/L)")
-        data_set.deleteColumns('NH3 (300,3000)-Retained')
-
-        #H2O has units of %, want to convert this to mol adsorbed / L catalyst
-        data_set.mathOperations('H2O% (20)-Retained',"/",100)                     #From % to molefraction
-        data_set.mathOperations('H2O% (20)-Retained',"*","P bottom out (kPa)")    #From molefraction to kPa
-        data_set.mathOperations('H2O% (20)-Retained',"/",8.314)
-        data_set.mathOperations('H2O% (20)-Retained',"/",'TC bot sample out 1 (K)') #From kPa to mol/L using Ideal gas law
-        data_set.mathOperations('H2O% (20)-Retained',"*",0.015708)                #From mol/L to total moles (multiply by total volume)
-        #From total moles to mol ads / L cat using solids fraction, then store in new column and delete old column
-        data_set.mathOperations('H2O% (20)-Retained',"/",(1-0.3309)*0.015708,True,"H2O ads (mol/L)")
-        data_set.deleteColumns('H2O% (20)-Retained')
-
-        #Save all plots in each time frame
-        data_set.saveTimeFramePlots(output_folder)
-        data_set.saveOverlayPlots('NH3 (300,3000)',output_folder)
-        #Compress the processed data for visualization in spreadsheets
-        data_set.compressAllRows()
-        #Print the results to a series of output files
-        data_set.printAlltoFile(output_folder)
-        sum+=data_set.getTotalDataProcessed()
-    return sum
-    '''
 #END standard processing
 
 ##Define the 'main' function
@@ -214,7 +150,7 @@ def main(argv):
     list = []
     for folder in os.listdir(input_folder):
         #Need to check to make sure the folder does not say -Output or -Plots
-        if "Plots/" not in folder and "Output/" not in folder:
+        if "Plots" not in folder and "Output" not in folder:
             list.append(input_folder+"/"+folder)
         else:
             continue
