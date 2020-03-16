@@ -95,10 +95,11 @@ def perform_standard_processing(list, output_folder):
     data.deleteColumns('H2O% (20)-Retained')
 
     #Save all plots in each time frame
-    data.saveTimeFramePlots(output_folder)
-    data.saveOverlayPlots('NH3 (300,3000)',None, output_folder)
-    data.saveOverlayPlots('NH3 (300,3000)','TC bot sample out 1 (K)', output_folder)
-    data.saveCrossOverlayPlots('NH3 (300,3000)',output_folder)
+    #data.saveTimeFramePlots(output_folder)
+    #data.saveOverlayPlots('NH3 (300,3000)',None, output_folder)
+    #data.saveOverlayPlots('NH3 (300,3000)','TC bot sample out 1 (K)', output_folder)
+    #data.saveCrossOverlayPlots('NH3 (300,3000)',output_folder)
+    data.save2peakTPDs('NH3 (300,3000)',output_folder)
     #Compress the processed data for visualization in spreadsheets
     data.compressAllRows()
     #Print the results to a series of output files

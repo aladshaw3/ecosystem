@@ -207,7 +207,7 @@ class TransientDataFolder(object):
         for check in self.unread:
             if check == True:
                 print("\nReading the following skipped unpaired files...")
-                print("\t"+file)
+                print("\t"+self.file_names[j])
                 self.unpaired_data[self.file_names[j]] = TransientData(self.folder_name+"/"+self.file_names[j])
                 self.unpaired_data[self.file_names[j]].compressColumns()
             j+=1
@@ -518,6 +518,31 @@ class TransientDataFolder(object):
         if subdir == "" and save==True:
             subdir = self.folder_name+"-Plots/"+obj_name.split(".")[0]+"/"
         self.grabDataObj(obj_name).createPlot(column_list, range, display, save, file_name, file_type, subdir)
+    
+    ## Function to fit a 2-peak distribution to the TPD
+    #
+    #   This function will attempt to fit a 2-peak normal distribution to the last time_frame set of
+    #   data for the given column_name. We can use the optimized parameters to then determine how
+    #   much of the TPD can be contributed to low temperature binding and high temperature binding.
+    #
+    #   Options:
+    #
+    #       - obj_name: name of the file/obj for which the data we are plotting is held
+    #
+    #       - column_name: name of the column to fit the 2-peak normal distribution to
+    #
+    #       - display: if True, the images will be displayed once complete
+    #
+    #       - save: if True, the images will be saved to a file
+    #
+    #       - file_name: name of the file to save the plot to
+    #
+    #       - file_type: type of image file to save as (default = .png)
+    #                       allowed types: .png, .pdf, .ps, .eps and .svg
+    def fit2peakTPD(self, obj_name, column_name, display=False, save=True, file_name="",file_type=".png",subdir="", p0=[]):
+        if subdir == "" and save==True:
+            subdir = self.folder_name+"-TPDmodelPlots/"
+        self.grabDataObj(obj_name).fit2peakTPD(column_name, display, save, file_name, file_type, subdir,p0)
 
     ##Function to save all plots of data to several files
     #
@@ -550,6 +575,28 @@ class TransientDataFolder(object):
                 path = folder+file.split(".")[0]+"/range(All)"+"/"
             self.unpaired_data[file].savePlots(range,path,file_type)
             print("\nComplete!")
+    
+    ##Function to save all fitted 2-peak TPD plots
+    def save2peakTPDs(self, column_name, folder="", file_type=".png"):
+        if folder=="":
+            folder = self.folder_name+"-TPDmodelPlots/"
+        else:
+            if folder[-1] != "/":
+                folder += "/"
+            folder += self.folder_name+"-TPDmodelPlots/"
+        params = []
+        con = []
+            
+        print("\nComputing 2-peak TPD curve ratios for " + str(self.folder_name) + ". Please wait...")
+        for file in self.paired_data:
+            if "TPD" in file:
+                params, con = self.paired_data[file].fit2peakTPD(column_name, False, True, "", file_type, folder, params)
+                print(params)
+        for file in self.unpaired_data:
+            if "TPD" in file:
+                params, con = self.unpaired_data[file].fit2peakTPD(column_name, False, True, "", file_type, folder, params)
+                print(params)
+        print("\nComplete!")
 
     ##Function to iteratively save all plots in all time frames separately
     def saveTimeFramePlots(self, folder="", file_type=".png"):
@@ -1324,6 +1371,11 @@ class TransientDataFolderSets(object):
     def savePlots(self, range=None, file_type=".png"):
         for folder in self.folder_data:
             self.folder_data[folder].savePlots(range, file_type)
+    
+    ##Function to save all fitted 2-peak TPD plots
+    def save2peakTPDs(self, column_name, subdir="", file_type=".png"):
+        for folder in self.folder_data:
+            self.folder_data[folder].save2peakTPDs(column_name, subdir, file_type)
 
     ##Function to iteratively save all plots in all time frames separately
     def saveTimeFramePlots(self, subdir="", file_type=".png"):
@@ -1747,14 +1799,20 @@ class TransientDataFolderSets(object):
 ## Function for testing the data folder object
 def testing():
     test01 = TransientDataFolderSets(["AllNH3Data/BASFCuSSZ13-700C4h-NH3storage","AllNH3Data/BASFCuSSZ13-800C2h-NH3storage"])
+    #test01 = TransientDataFolderSets(["AllNH3Data/BASFCuSSZ13-700C4h-NH3storage"])
     #test01.displayRunTypes()
     #test01.createCrossFolderTimeFrameOverlayPlots('NH3 (300,3000)')
     #test01 = TransientDataFolder("BASFCuSSZ13-700C4h-NH3storage")
     test01.retainOnlyColumns(['Elapsed Time (min)','NH3 (300,3000)', 'H2O% (20)', 'TC bot sample in (C)', 'TC bot sample mid 1 (C)', 'TC bot sample mid 2 (C)', 'TC bot sample out 1 (C)', 'TC bot sample out 2 (C)', 'P bottom in (bar)', 'P bottom out (bar)'])
     #test01.displayColumnNames()
     #print(test01.grabDataObj("20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2-11-3pctH2O-400ppmNH3-200C.dat"))
+    #test01.grabFolderObj("AllNH3Data/BASFCuSSZ13-700C4h-NH3storage").fit2peakTPD("20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2-11-3pctH2O-400ppmNH3-200C.dat",'NH3 (300,3000)')
     #print(test01)  #This will display the names of the objects/files you have access to and whether they are paired or not
 
+    #test01.grabFolderObj("AllNH3Data/BASFCuSSZ13-700C4h-NH3storage").save2peakTPDs('NH3 (300,3000)',"test")
+    #test01.save2peakTPDs('NH3 (300,3000)',"test")
+    
+    
     #print("Calculating sum...")
     #print(test01.calculateIntegralSum('NH3 (300,3000)',None,None,15,24))
 
@@ -1819,14 +1877,15 @@ def testing():
     #test01.createTimeFrameOverlayPlot('NH3 (300,3000)')
     #test01.createTimeFrameContourPlot('NH3 (300,3000)',-1,"20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O")
     #test01.createTimeFrameContourPlot('NH3 (300,3000)')
-    test01.saveOverlayPlots('NH3 (300,3000)','TC bot sample out 1 (K)', "test")
-    test01.saveOverlayPlots('NH3 (300,3000)',None, "test")
+    #test01.saveOverlayPlots('NH3 (300,3000)','TC bot sample out 1 (K)', "test")
+    #test01.saveOverlayPlots('NH3 (300,3000)',None, "test")
     #test01.saveCrossOverlayPlots('NH3 (300,3000)', "test", "NH3DesIsoTPD")
     #test01.saveContourPlots('NH3 (300,3000)')
 
     #test01.grabFolderObj("AllNH3Data/BASFCuSSZ13-700C4h-NH3storage").createTimeFrameOverlayPlot('NH3 (300,3000)', -1, "20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O", "iso_temp", True, False, "",".png","", 'TC bot sample in (K)')
     #test01.grabFolderObj("AllNH3Data/BASFCuSSZ13-700C4h-NH3storage").createTimeFrameContourPlot('NH3 (300,3000)', -1, "20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O", "iso_temp", True, False, "",".png","", 'TC bot sample in (K)')
 
+    test01.save2peakTPDs('NH3 (300,3000)',"test")
     #Compress the processed data for visualization in spreadsheets
     test01.compressAllRows()
 

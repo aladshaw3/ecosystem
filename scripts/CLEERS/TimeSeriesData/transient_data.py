@@ -24,6 +24,36 @@ import os, sys
 from statistics import mean, stdev
 import random
 import matplotlib.pyplot as plt
+from scipy.optimize import curve_fit
+from scipy.stats import norm
+
+## Helper function for Normal Distribution
+# This function computes the sum of normal distributions. It is used in the transient_data
+#   objects in a curve fitting routine to try and determine the contribution of the high
+#   and low temperature portions of the TPDs.
+#
+#   @param x time or temperature value in the TPD
+#   @param n number of normal distributions to consider
+#   @param p list of params for each normal distribution
+#           p[n][0] = avg
+#           p[n][1] = std
+#           p[n][2] = scale
+def normal_sum_func(x, n, p):
+    sum = 0
+    for i in range(0,n):
+        sum += norm.pdf(x, p[i][0], p[i][1])*p[i][2]
+    return sum
+
+## Secondary Helper function for curve_fit
+# This is the helper function used by the curve_fit routine. It basically takes a list
+#   of parameters for a 2-peak distribution and packs those parameters into proper items
+#   needed for the normal_sum_func().
+def double_peak_normal(x, avg1, std1, scale1, avg2, std2, scale2):
+    n = 2
+    p = []
+    p.append([avg1,std1,scale1])
+    p.append([avg2,std2,scale2])
+    return normal_sum_func(x, n, p)
 
 ## TransientData
 # This is the basic object to read, operate on, plot, and save transient CLEERS data
@@ -1263,6 +1293,117 @@ class TransientData(object):
             for value in self.data_map[ret_key]:
                 self.data_map[ret_key][i] = self.data_map[ret_key][i]/max_value
                 i+=1
+    
+    ## Function to fit a 2-peak distribution to the TPD
+    #
+    #   This function will attempt to fit a 2-peak normal distribution to the last time_frame set of
+    #   data for the given column_name. We can use the optimized parameters to then determine how
+    #   much of the TPD can be contributed to low temperature binding and high temperature binding.
+    #
+    #   Options:
+    #
+    #       - column_name: name of the column to fit the 2-peak normal distribution to
+    #
+    #       - display: if True, the images will be displayed once complete
+    #
+    #       - save: if True, the images will be saved to a file
+    #
+    #       - file_name: name of the file to save the plot to
+    #
+    #       - file_type: type of image file to save as (default = .png)
+    #                       allowed types: .png, .pdf, .ps, .eps and .svg
+    def fit2peakTPD(self, column_name, display=False, save=True, file_name="",file_type=".png",subdir="", p0 = []):
+        if column_name not in self.data_map.keys():
+            print("Error! No corresponding column exists in data_map!")
+            return
+        if file_type != ".png" and file_type != ".pdf" and file_type != ".ps" and file_type != ".eps" and file_type != ".svg":
+            print("Warning! Unsupported image file type...")
+            print("\tDefaulting to .png")
+            file_type = ".png"
+        #Check to see if folder exists and create if needed
+        if subdir != "" and not os.path.exists(subdir) and save == True:
+            os.makedirs(subdir)
+            subdir+="/"
+        xdata = self.extractRows(self.getTimeFrames()[-1][0], self.getTimeFrames()[-1][1])[self.time_key]
+        ydata = self.extractRows(self.getTimeFrames()[-1][0], self.getTimeFrames()[-1][1])[column_name]
+        
+        if len(p0) != 6:
+            p0 = [mean(xdata)-10,10,mean(ydata)*2,mean(xdata)+10,10,mean(ydata)*0.5]
+        if p0[0] < xdata[0]:
+            p0[0] = xdata[0]+10
+        if p0[0] > xdata[-1]:
+            p0[0] = xdata[-1]-10
+        if p0[3] < xdata[0]:
+            p0[3] = xdata[0]+10
+        if p0[3] > xdata[-1]:
+            p0[3] = xdata[-1]-10
+        popt, pcov = curve_fit(double_peak_normal, xdata, ydata, p0, bounds=([xdata[0],5,0,xdata[0],5,0],[xdata[-1],15,10000,xdata[-1],15,10000]) )
+        ymodel = []
+        y1 = []
+        y2 = []
+        leg = []
+        for time in xdata:
+            ymodel.append(double_peak_normal(time, popt[0],popt[1],popt[2],popt[3],popt[4],popt[5]))
+            if popt[0] < popt[3]:
+                y1.append( normal_sum_func(time,1,[[popt[0],popt[1],popt[2]]] ) )
+                y2.append( normal_sum_func(time,1,[[popt[3],popt[4],popt[5]]] ) )
+            else:
+                y2.append( normal_sum_func(time,1,[[popt[0],popt[1],popt[2]]] ) )
+                y1.append( normal_sum_func(time,1,[[popt[3],popt[4],popt[5]]] ) )
+        if popt[0] < popt[3]:
+            ratio = popt[2]/popt[5]
+        else:
+            ratio = popt[5]/popt[2]
+        fig = plt.figure()
+        plt.plot(xdata,ydata)
+        leg.append("TPD Data")
+        plt.plot(xdata,ymodel,'r:')
+        leg.append("TPD Model")
+        plt.plot(xdata,y1,'--')
+        leg.append("1st Peak")
+        plt.plot(xdata,y2,'-.')
+        leg.append("2nd Peak")
+        plt.title("1st Peak -to- 2nd Peak Ratio = "+str(ratio))
+        
+        plt.legend(leg)
+        plt.xlabel(self.time_key)
+        plt.ylabel(column_name)
+        plt.tight_layout()
+        name = column_name+"--"+str(int(self.isothermal_temp))+"oC"
+        
+        if file_name == "":
+            i=0
+            for sec in name.split("/"):
+                if i==0:
+                    file_name += sec
+                else:
+                    file_name += "_per_" + sec
+                i+=1
+        if save == True:
+            plt.savefig(subdir+file_name+'-TPDmodelPlot'+file_type)
+            
+            file = open(subdir+file_name+'-TPDcurve.dat','w')
+            file.write(self.time_key+"\t")
+            file.write(column_name+"\n")
+            i=0
+            running_sum = 0
+            for time in xdata:
+                running_sum += time-xdata[0]
+                if running_sum >= 1.0:
+                    file.write(str(time))
+                    file.write("\t"+str(ydata[i]))
+                    file.write("\n")
+                    running_sum = 0
+                i+=1
+            file.close()
+            
+        if display == True:
+            fig.show()
+            print("\nDisplaying plot. Press enter to continue...(this closes the images)")
+            input()
+        plt.close()
+        
+        return popt, pcov
 
 
 
@@ -1971,18 +2112,42 @@ class PairedTransientData(object):
         #Then iterate through all time frames to save separately
         for frame in self.result_trans_obj.time_frames:
             self.savePlots(frame,folder,file_type)
+    
+    ## Function to fit a 2-peak distribution to the TPD
+    #
+    #   This function will attempt to fit a 2-peak normal distribution to the last time_frame set of
+    #   data for the given column_name. We can use the optimized parameters to then determine how
+    #   much of the TPD can be contributed to low temperature binding and high temperature binding.
+    #
+    #   Options:
+    #
+    #       - column_name: name of the column to fit the 2-peak normal distribution to
+    #
+    #       - display: if True, the images will be displayed once complete
+    #
+    #       - save: if True, the images will be saved to a file
+    #
+    #       - file_name: name of the file to save the plot to
+    #
+    #       - file_type: type of image file to save as (default = .png)
+    #                       allowed types: .png, .pdf, .ps, .eps and .svg
+    def fit2peakTPD(self, column_name, display=False, save=True, file_name="",file_type=".png",subdir="", p0 = []):
+        return self.result_trans_obj.fit2peakTPD(column_name, display, save, file_name, file_type, subdir, p0)
 
 
 
 ## Function for testing the above objects
 #Testing Paired data
 def testing():
+    #a = normal_sum_func(0,1,[[1,1,1]])
+    #print(a)
     h2o_comp = False
     if h2o_comp == True:
         test05 = PairedTransientData("20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2-11-3pctH2O-400ppmNH3-bp.dat","20160209-CLRK-BASFCuSSZ13-700C4h-NH3H2Ocomp-30k-0_2pctO2-11-3pctH2O-400ppmNH3-150C.dat")
     else:
-        test05 = PairedTransientData("20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-bp.dat","20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-150C.dat")
+        test05 = PairedTransientData("20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-bp.dat","20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-175C.dat")
         #test05 = PairedTransientData("20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-bp.dat","20160205-CLRK-BASFCuSSZ13-700C4h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-350C.dat")
+        #test05 = PairedTransientData("20160311-CLRK-BASFCuSSZ13-800C16h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-bp.dat","20160311-CLRK-BASFCuSSZ13-800C16h-NH3DesIsoTPD-30k-0_2pctO2-5pctH2O-350C.dat")
     test05.compressColumns()
     #test05.displayColumnNames()
 
@@ -1992,10 +2157,17 @@ def testing():
     test05.retainOnlyColumns(['Elapsed Time (min)','NH3 (300,3000)', 'H2O% (20)', 'TC bot sample in (C)', 'TC bot sample mid 1 (C)', 'TC bot sample mid 2 (C)', 'TC bot sample out 1 (C)', 'TC bot sample out 2 (C)', 'P bottom in (bar)', 'P bottom out (bar)'])
     test05.alignData()
 
-    print("Calculating sum...")
-    print(test05.calculateIntegralSum('NH3 (300,3000)[bypass]',15,24))
-    print(test05.calculateIntegralSum('NH3 (300,3000)',15,24))
-    print(str(test05.calculateIntegralSum('NH3 (300,3000)[bypass]',15,24)-test05.calculateIntegralSum('NH3 (300,3000)',15,24)))
+    #print("Calculating sum...")
+    #print(test05.calculateIntegralSum('NH3 (300,3000)[bypass]',15,24))
+    #print(test05.calculateIntegralSum('NH3 (300,3000)',15,24))
+    #print(str(test05.calculateIntegralSum('NH3 (300,3000)[bypass]',15,24)-test05.calculateIntegralSum('NH3 (300,3000)',15,24)))
+    
+    print("\nFitting curves...")
+    #p0 = [ 254.17897219,   13.89793735, 2636.78644076,  278.23501362,    6.78306823, 372.94330633]
+    p0=[]
+    popt, pcov = test05.fit2peakTPD('NH3 (300,3000)', p0=p0)
+    #[ 254.17897219,   13.89793735, 2636.78644076,  278.23501362,    6.78306823, 372.94330633]
+    print(popt)
 
     #NOTE: After data is aligned, all result and bypass data are now in the result_trans_obj.
     #The bypass columns have the same names, but will be suffixed with [bypass]
