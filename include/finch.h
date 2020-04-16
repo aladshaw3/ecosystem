@@ -413,4 +413,6 @@ int burgers_bcs(const void *user_data);
 	correctness, efficiency, and accuracy. This test should never report a failure. */
 int FINCH_TESTS();
 
+int FINCH_TEST_OLD();
+
 #endif

@@ -22,6 +22,7 @@ int main(int argc, const char * argv[])
 
 	//Space below for overrides of the run_executable function
 	//success = DOVE_TESTS();
+    //success = FINCH_TEST_OLD();
 
 	std::cout << "Exit Code:\t" << success << std::endl;
 	return success;

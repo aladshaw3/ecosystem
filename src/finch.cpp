@@ -4336,3 +4336,188 @@ int FINCH_TESTS()
 	std::cout << "\n\nPulse Time = " << pulse_time << " seconds...\n";
 	return success;
 }
+
+int FINCH_TEST_OLD()
+{
+    int success = 0;
+      
+      /*                     Testing of the scheme                */
+      
+      //Declarations
+      FINCH_DATA dat;
+      double time;
+      FILE *Output;
+      double exponent = 0.0;
+      double truncErr;
+      int time_steps = 0;
+      
+      //Initializations
+      time = clock();
+      Output = fopen("output/FINCH_TEST_Output.txt","w+");
+      if (Output == nullptr)
+      {
+          success = system("mkdir output");
+          Output = fopen("output/FINCH_TEST_Output.txt","w+");
+      }
+      if (success != 0)
+      {
+          std::cout << "\nFINCH input file not found!\n\n";
+          std::cout << "File must be located under 'input_files/FINCH/FINCH_TestInput.yml'\n";
+          return -1;
+      }
+      
+      //Change Parameters for Testing
+      dat.uIC = 0.0;
+      dat.uo = 1.0;
+      dat.vIC = 0;
+      dat.vo = 0;
+      dat.DIC = 0.1;
+      dat.Do = 0.1;
+      dat.kIC = 0.0;
+      dat.ko = 0.0;
+      dat.RIC = 1.0;
+      dat.Ro = 1.0;
+      dat.kfn = 1.0;
+      dat.kfnp1 = 1.0;
+      dat.L = 1.0;
+      dat.s = 1.0;
+      dat.T = 10;
+      dat.LN = 9;
+      dat.t_old = 0.0;
+      dat.dt_old = 0.0;
+      dat.d = 2;
+      dat.dt_const = 0.25;
+    
+      
+      //Boolean Statments
+       dat.Dirichlet = false;
+       dat.CheckMass = false;
+       dat.Iterative = true;
+       dat.SteadyState = false;
+       dat.NormTrack = true;
+       dat.CN = false;
+      
+      
+      //Iterative Methods
+      dat.nl_method = FINCH_Picard; //0 = FINCH_Picard, 1 = LARK_Picard, 2 = LARK_PJFNK
+      dat.tol_abs = 1e-10;
+      dat.tol_rel = 1e-10;
+      dat.pjfnk_dat.nl_tol_rel = 1e-6;
+      dat.pjfnk_dat.nl_tol_abs = 1e-6;
+      dat.pjfnk_dat.linear_solver = QR;
+      dat.pjfnk_dat.LineSearch = true;
+      dat.pjfnk_dat.Bounce = true;
+
+      /*
+          After extensive testing, we can show that our Picard iteration is the most
+          efficient solution method. However, PJFNK is still good and will be useful
+          for solving more complex, non-linear systems.
+       */
+      
+      //Used in determining truncation error
+      if (dat.CN == true)
+          exponent = exponent + 1.0;
+      else
+          exponent = exponent + 0.5;
+      if (dat.ExplicitFlux == false)
+          exponent = exponent + 1.0;
+      else
+          exponent = exponent + 0.5;
+      
+      //Set up the FINCH_DATA
+      
+      //Buckley-Leverett Non-Linear Tests with Default Dirichlet BCs
+      //success = setup_FINCH_DATA(default_execution,buckley_leverett_ic,default_timestep,default_preprocess,default_solve,buckley_leverett_params,minmod_discretization,default_bcs,default_res,default_precon,default_postprocess,default_reset,&dat,(void *)&dat);
+      
+      //Inviscous Burger's Non-Linear Tests with Periodic BCs
+      //success = setup_FINCH_DATA(default_execution,burgers_ic,default_timestep,default_preprocess,default_solve,burgers_params,minmod_discretization,burgers_bcs,default_res,default_precon,default_postprocess,default_reset,&dat,(void *)&dat);
+      
+      //Below uses minmod discretization (least dispersive, least oscillatory, worst convergence)
+      success = setup_FINCH_DATA(default_execution,default_ic,default_timestep,default_preprocess,default_solve,default_params,minmod_discretization,default_bcs,default_res,default_precon,default_postprocess,default_reset,&dat,(void *)&dat);
+      
+      //Below uses Ospre discretization (less dispersive, less oscillatory, better convergence)
+      //success = setup_FINCH_DATA(default_execution,default_ic,default_timestep,default_preprocess,default_solve,default_params,ospre_discretization,default_bcs,default_res,default_precon,default_postprocess,default_reset,&dat,(void *)&dat);
+      
+      //Below uses van Albada discretization (most dispersive, most oscillations, best convergence)
+      //success = setup_FINCH_DATA(default_execution,default_ic,default_timestep,default_preprocess,default_solve,default_params,vanAlbada_discretization,default_bcs,default_res,default_precon,default_postprocess,default_reset,&dat,(void *)&dat);
+      
+      if (success != 0) {mError(simulation_fail); return -1;}
+      
+      //Make header file for output
+      print2file_dim_header(Output, &dat);
+      print2file_newline(Output, &dat);
+      print2file_time_header(Output, &dat);
+      print2file_newline(Output, &dat);
+      
+      //Set Initial Conditions
+      success = (*dat.setic) (&dat);
+      if (success != 0) {mError(simulation_fail); return -1;}
+      
+      //Print out ICs
+      print2file_result_old(Output, &dat);
+      print2file_newline(Output, &dat);
+      
+      //Loop to solve for each time step in simulation
+      do
+      {
+          //Check to see if system needs updating
+          if (dat.Update == true)
+          {
+              success = (*dat.resettime) ((void *)&dat);
+              if (success != 0) {mError(simulation_fail); return -1;}
+          }
+          
+          //Step size based of off CFL condition
+          success = (*dat.settime) ((void *)&dat);
+          if (success != 0) {mError(simulation_fail); return -1;}
+          
+          if (dat.SteadyState == false)
+              dat.t = dat.t_old + dat.dt;
+          else
+              dat.t = INFINITY;
+          
+          
+          //Call the routine
+          std::cout << "Evaluating Time: " << dat.t << std::endl;
+          success = (*dat.callroutine) ((void *)&dat);
+          if (success == 0)
+          {
+              std::cout << "Simulation Successful!\n" << std::endl;
+              dat.Update = true; //Be sure to set update = true if simulation successful!
+          }
+          else {mError(simulation_fail); dat.Update = false; return -1;}
+          
+          //Print out simulation results
+          dat.t_count = dat.t_count + dat.dt;
+          if (dat.t_count >= (dat.t_out+sqrt(DBL_EPSILON))
+              || dat.t_count >= (dat.t_out-sqrt(DBL_EPSILON))
+              || dat.t >= dat.T)
+          {
+              print2file_result_new(Output, &dat);
+              print2file_newline(Output, &dat);
+              dat.t_count = 0.0;
+          }
+          
+          time_steps++;
+          
+      } while (dat.t < (dat.T) && dat.SteadyState == false);
+      
+      //END PROGRAM
+      fclose(Output);
+      time = clock() - time;
+    
+      if (dat.SteadyState == false)
+          truncErr = pow(dat.dz,2.0) + pow(dat.dt,exponent);
+      else
+          truncErr = pow(dat.dz,2.0);
+      
+      //Display performance metrics for tests
+      std::cout << "Runtime Time (s):\t" << (time / CLOCKS_PER_SEC) << std::endl;
+      std::cout << "Truncation Error:\t" << truncErr << std::endl;
+      std::cout << "Total Iterations:\t" << dat.total_iter << std::endl;
+      std::cout << "Total Time Steps:\t" << time_steps+1 << std::endl;
+      std::cout << "Average Iterations:\t" << (double)dat.total_iter/(time_steps+1) << std::endl;
+      std::cout << "Complexity (ms):\t" << (time / CLOCKS_PER_SEC)/(double)(dat.total_iter+time_steps)*1000.0 << std::endl;
+      
+      return success;
+}
