@@ -377,6 +377,29 @@ class TransientData(object):
             return
 
         self.data_map[column_name] = data_set
+    
+    ## This function is used to create a step input column based on data frames
+    #
+    # @param column_name Name of the column to append to the data
+    # @param column_value_list List of column data values for the corresponding data frame windows
+    def appendColumnByFrame(self, column_name, column_value_list):
+        # First, check to make sure the column name is not in the data_map
+        if column_name in self.data_map.keys():
+            print("Error! That data column already exists!")
+            return
+        # Next, check to make sure the column_value_list is the same length as the time_frames
+        if len(column_value_list) != len(self.time_frames):
+            print("Error! The size of the column_value_list does not match the data frame size!")
+            return
+            
+        #Loop through all time values
+        self.data_map[column_name] = []
+        index = 0
+        for time in self.data_map[self.time_key]:
+            if time > self.time_frames[index][1]:
+                index+=1
+            self.data_map[column_name].append(column_value_list[index])
+        
 
     ## This function will extract column sets from the data_map and return a new, reduced map
     #
@@ -809,6 +832,78 @@ class TransientData(object):
                 i+=1
             file.write("\n")
             j+=1
+        file.close()
+        
+    ##This function is used to print out the equilibrium information in each column for each time frame
+    def printEquilibriaTimeFrames(self, file_name = "", avg_points = 10):
+        if file_name == "":
+            file_name = self.input_file_name.split(".")[0]+"-Equilibria.dat"
+        file = open(file_name,'w')
+        file.write(str(self))
+        file.write("\n")
+        equ_map = {}
+        for item in self.data_map:
+            if item != self.time_key:
+                equ_map[item] = [0.0]*len(self.time_frames)
+        
+        # Loop through each item
+        for item in self.data_map:
+            if item != self.time_key:
+                # Loop through each time in reverse
+                points = 0
+                value_sum = 0.0
+                has_calc = False
+                index = len(self.time_frames)-1
+                time_index = len(self.data_map[self.time_key])-1
+                for time in reversed(self.data_map[self.time_key]):
+                    if points >= avg_points:
+                        #Run Calculation
+                        if has_calc == False:
+                            value_sum = value_sum/avg_points
+                            has_calc = True
+                            if value_sum < 0:
+                                value_sum = 0
+                            equ_map[item][index] = value_sum
+                        value_sum = 0
+                        #Update only if in next time bin
+                        if self.time_frames[index][0] >= time:
+                            index = index - 1
+                            value_sum += self.data_map[item][time_index]
+                            has_calc = False
+                            points = 1
+                    else:
+                        #grab more data
+                        value_sum += self.data_map[item][time_index]
+                        points += 1
+                    time_index = time_index - 1
+                #End time loop
+        #End item loop
+        
+        #Iterate through equ_map and print to file
+        i=0
+        first = ""
+        file.write(str("Time Frame")+"\t")
+        for item in equ_map:
+            if i == 0:
+                file.write(str(item))
+                first = str(item)
+            else:
+                file.write("\t"+str(item))
+            i+=1
+        file.write("\n")
+        j=0
+        for value in equ_map[first]:
+            i = 0
+            file.write(str(self.time_frames[j])+"\t")
+            for item in equ_map:
+                if i == 0:
+                    file.write(str(equ_map[item][j]))
+                else:
+                    file.write("\t"+str(equ_map[item][j]))
+                i+=1
+            file.write("\n")
+            j+=1
+            
         file.close()
 
     ##This function is used to print select columns of data to a file
@@ -1502,6 +1597,13 @@ class PairedTransientData(object):
     ##Function to append a column to result data
     def appendResultColumn(self, column_name, data_set):
         self.result_trans_obj.appendColumn(column_name, data_set)
+    
+    ##Function to call the appendColumnByFrame function
+    def appendColumnByFrame(self, column_name, column_value_list):
+        if self.aligned == False:
+            print("Error! Data must be aligned before performing any data processing...")
+            return
+        self.result_trans_obj.appendColumnByFrame(column_name, column_value_list)
 
     ##Function to extract a map of columns from the by-pass data
     def extractBypassColumns(self, column_list):
@@ -1616,7 +1718,9 @@ class PairedTransientData(object):
     # @param addNoise if True, then the gaps in data are filled in with random noise to simulate the missing information \n
     #                 if False, then the gaps in data are filled in with the average value of the last few points of the
     #                           current time frame.
-    def alignData(self, addNoise = True):
+    # @param verticalAlignment if True, then the y-axis data values from the bypass run are scaled to be the same as \n
+    #                           the non-bypass data. If False, no scaling is applied to bypass data.
+    def alignData(self, addNoise = True, verticalAlignment = True):
         if self.aligned == True:
             print("Data already aligned. Cannot re-align...")
             return
@@ -1646,7 +1750,10 @@ class PairedTransientData(object):
             for value in self.bypass_trans_obj.input_change[item]:
                 if abs(self.result_trans_obj.input_change[item][i]-self.bypass_trans_obj.input_change[item][i]) > 0.01:
                     if abs(self.bypass_trans_obj.input_change[item][i]) > 2.0*math.sqrt(sys.float_info.epsilon):
-                        frame_ratios[item].append(self.result_trans_obj.input_change[item][i]/self.bypass_trans_obj.input_change[item][i])
+                        if verticalAlignment == True:
+                            frame_ratios[item].append(self.result_trans_obj.input_change[item][i]/self.bypass_trans_obj.input_change[item][i])
+                        else:
+                            frame_ratios[item].append(1)
                     else:
                         frame_ratios[item].append(1)
                 else:
@@ -2031,6 +2138,17 @@ class PairedTransientData(object):
         if file_name == "":
             file_name = self.result_trans_obj.input_file_name.split(".")[0]+"-AllPairedOutput.dat"
         self.result_trans_obj.printAlltoFile(file_name)
+        
+    ##This function is used to print out the equilibrium information in each column for each time frame
+    def printEquilibriaTimeFrames(self, file_name = "", avg_points = 10):
+        if self.aligned == False:
+            print("Error! Data must be aligned first! Call alignData()...")
+            print("\t\t(NOTE: if you want to print out the bypass and result data separately,")
+            print("\t\t       then call each object's s respective printAlltoFile() functions)")
+            return
+        if file_name == "":
+            file_name = self.result_trans_obj.input_file_name.split(".")[0]+"-AllPairedEquilibria.dat"
+        self.result_trans_obj.printEquilibriaTimeFrames(file_name,avg_points)
 
     ##Function to print only specific columns to an output file
     def printColumnstoFile(self, column_list, file_name = ""):
@@ -2404,7 +2522,27 @@ def testing():
     test05.printAlltoFile()
 
     ## ----- End Testing -----
+    
+def testing02():
+    test = PairedTransientData("20160202-CLRK-BASFCuSSZ13-700C4h-NH3Inv-60k-a1_0-bp.dat","20160202-CLRK-BASFCuSSZ13-700C4h-NH3Inv-60k-a1_0-250C.dat")
+    test.compressColumns()
+    #test.displayColumnNames()
+    test.retainOnlyColumns(['Elapsed Time (min)','NH3 (300,3000)', 'H2O% (20)', 'N2O (100,200,300)', 'NO (350,3000)', 'NO2 (150,2000)', 'TC bot sample out 2 (C)', 'P bottom in (bar)', 'P bottom out (bar)'])
+    test.alignData(True, False)
+    test.deleteColumns(['P bottom in (bar)[bypass]','P bottom out (bar)[bypass]', 'TC bot sample out 2 (C)[bypass]'])
+    #print(test.getTimeFrames())
+    
+    # NOTE: Need to add O2 concentration by frame windows back into data to keep track of oxidation.
+    # Specific to the NH3Inv data, time frame index 1 has O2 concentration of 0.2 %. All other time frames
+    # have O2 concentration of 10%.
+    test.appendColumnByFrame('O2%', [10,0.2,10,10,10,10,10,10,10,10])
+    
+    # NOTE: You should call the 'printEquilibriaTimeFrames' before comression
+    test.printEquilibriaTimeFrames()
+    test.compressRows(10)
+    test.printAlltoFile()
+    ## ----- End Testing02 ----
 
 ##Directs python to call the testing function
 if __name__ == "__main__":
-   testing()
+   testing02()
