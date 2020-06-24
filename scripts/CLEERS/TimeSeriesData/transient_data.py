@@ -2524,7 +2524,7 @@ def testing():
     ## ----- End Testing -----
     
 def testing02():
-    test = PairedTransientData("20160202-CLRK-BASFCuSSZ13-700C4h-NH3Inv-60k-a1_0-bp.dat","20160202-CLRK-BASFCuSSZ13-700C4h-NH3Inv-60k-a1_0-250C.dat")
+    test = PairedTransientData("20160308-CLRK-BASFCuSSZ13-800C16-NH3Inv-60k-a1_0-bp.dat","20160308-CLRK-BASFCuSSZ13-800C16-NH3Inv-60k-a1_0-550C.dat")
     test.compressColumns()
     #test.displayColumnNames()
     test.retainOnlyColumns(['Elapsed Time (min)','NH3 (300,3000)', 'H2O% (20)', 'N2O (100,200,300)', 'NO (350,3000)', 'NO2 (150,2000)', 'TC bot sample out 2 (C)', 'P bottom in (bar)', 'P bottom out (bar)'])
