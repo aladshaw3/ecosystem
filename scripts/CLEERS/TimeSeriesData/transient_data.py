@@ -2524,18 +2524,29 @@ def testing():
     ## ----- End Testing -----
     
 def testing02():
-    test = PairedTransientData("20160308-CLRK-BASFCuSSZ13-800C16-NH3Inv-60k-a1_0-bp.dat","20160308-CLRK-BASFCuSSZ13-800C16-NH3Inv-60k-a1_0-550C.dat")
+    #test = PairedTransientData("20160202-CLRK-BASFCuSSZ13-700C4h-NO+NO2SCR-60k-a1_0-bp.dat","20160202-CLRK-BASFCuSSZ13-700C4h-NO+NO2SCR-60k-a1_0-250+150C.dat")
+    test = TransientData("20160308-CLRK-BASFCuSSZ13-800C16-NO2SCR-60k-a1_0-550-225C.dat")
     test.compressColumns()
     #test.displayColumnNames()
     test.retainOnlyColumns(['Elapsed Time (min)','NH3 (300,3000)', 'H2O% (20)', 'N2O (100,200,300)', 'NO (350,3000)', 'NO2 (150,2000)', 'TC bot sample out 2 (C)', 'P bottom in (bar)', 'P bottom out (bar)'])
-    test.alignData(True, False)
+    #test.alignData(True, False) #Only for paired data
     test.deleteColumns(['P bottom in (bar)[bypass]','P bottom out (bar)[bypass]', 'TC bot sample out 2 (C)[bypass]'])
-    #print(test.getTimeFrames())
+    #print(test.getTimeFrames())  #9 time frames for unpaired  (13 for NO2SCR)
     
     # NOTE: Need to add O2 concentration by frame windows back into data to keep track of oxidation.
     # Specific to the NH3Inv data, time frame index 1 has O2 concentration of 0.2 %. All other time frames
     # have O2 concentration of 10%.
-    test.appendColumnByFrame('O2%', [10,0.2,10,10,10,10,10,10,10,10])
+    #test.appendColumnByFrame('O2%', [10,0.2,10,10,10,10,10,10,10,10])
+    #test.appendColumnByFrame('O2%', [10,10,10,10,10,10,10,10,10])
+    #test.appendColumnByFrame('NH3 (300,3000)[bypass]', [300,300,300,300,300,300,300,300,300])
+    #test.appendColumnByFrame('N2O (100,200,300)[bypass]', [0,0,0,0,0,0,0,0,0])
+    #test.appendColumnByFrame('NO (350,3000)[bypass]', [300,300,300,300,300,300,300,300,300])
+    #test.appendColumnByFrame('NO2 (150,2000)[bypass]', [0,0,0,0,0,0,0,0,0])
+    test.appendColumnByFrame('O2%', [10,10,10,10,10,10,10,10,10,10,10,10,10])
+    test.appendColumnByFrame('NH3 (300,3000)[bypass]', [300,300,300,300,300,300,300,300,300,300,300,300,300])
+    test.appendColumnByFrame('N2O (100,200,300)[bypass]', [0,0,0,0,0,0,0,0,0,0,0,0,0])
+    test.appendColumnByFrame('NO (350,3000)[bypass]', [0,0,0,0,0,0,0,0,0,0,0,0,0])
+    test.appendColumnByFrame('NO2 (150,2000)[bypass]', [200,200,200,200,200,200,200,200,200,200,200,200,200])
     
     # NOTE: You should call the 'printEquilibriaTimeFrames' before comression
     test.printEquilibriaTimeFrames()
