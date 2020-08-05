@@ -2523,6 +2523,7 @@ def testing():
 
     ## ----- End Testing -----
     
+## Testing for SCR NOx rate data
 def testing02():
     #test = PairedTransientData("20160202-CLRK-BASFCuSSZ13-700C4h-NO+NO2SCR-60k-a1_0-bp.dat","20160202-CLRK-BASFCuSSZ13-700C4h-NO+NO2SCR-60k-a1_0-250+150C.dat")
     test = TransientData("20160308-CLRK-BASFCuSSZ13-800C16-NO2SCR-60k-a1_0-550-225C.dat")
@@ -2553,7 +2554,13 @@ def testing02():
     test.compressRows(10)
     test.printAlltoFile()
     ## ----- End Testing02 ----
+    
+## Testing for Co-Optima Data
+def testing03():
+    print("Test")
+    ## --- End Testing03 ----
+
 
 ##Directs python to call the testing function
 if __name__ == "__main__":
-   testing02()
+   testing03()
