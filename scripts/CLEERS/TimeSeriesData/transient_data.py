@@ -2651,8 +2651,76 @@ def testing03():
     #run_name =    "20170421-CPTMA-MalibuTWC-SGDI-30k-CH3CH2OH+iC8H18+C6H5CH3-5Cramp-lambda0_999-3"
     
     # ethanol (3)
-    bypass_name = "20170424-CPTMA-MalibuTWC-SGDI-30k-CH3CH2OH-5Cramp-lambda0_999-bp-3"
-    run_name =    "20170424-CPTMA-MalibuTWC-SGDI-30k-CH3CH2OH-5Cramp-lambda0_999-3"
+    #bypass_name = "20170424-CPTMA-MalibuTWC-SGDI-30k-CH3CH2OH-5Cramp-lambda0_999-bp-3"
+    #run_name =    "20170424-CPTMA-MalibuTWC-SGDI-30k-CH3CH2OH-5Cramp-lambda0_999-3"
+    
+    # ethene (3)
+    #bypass_name = "20170718-CPTMA-MalibuTWC-SGDI-30k-C2H4ONLY-5Cramp-lambda0_999-bp-3"
+    #run_name =    "20170718-CPTMA-MalibuTWC-SGDI-30k-C2H4ONLY-5Cramp-lambda0_999-3"
+    
+    # ethyl acetate (3)
+    #bypass_name = "20170510-CPTMA-MalibuTWC-SGDI-30k-EthylAcetate-5Cramp-lambda0_999-bp-3"
+    #run_name =    "20170510-CPTMA-MalibuTWC-SGDI-30k-EthylAcetate-5Cramp-lambda0_999-3"
+    
+    # furan mix (4)
+    #bypass_name = "20170425-CPTMA-MalibuTWC-SGDI-30k-FuranMix-5Cramp-lambda0_999-bp-4"
+    #run_name =    "20170425-CPTMA-MalibuTWC-SGDI-30k-FuranMix-5Cramp-lambda0_999-4"
+    
+    # iso-butanol (3)
+    #bypass_name = "20170412-CPTMA-MalibuTWC-SGDI-30k-iBuOH-5Cramp-lambda0_999-bp-3"
+    #run_name =    "20170412-CPTMA-MalibuTWC-SGDI-30k-iBuOH-5Cramp-lambda0_999-3"
+    
+    # iso-butylacetate (3)
+    #bypass_name = "20170823-CPTMA-MalibuTWC-SGDI-30k-isoButylAcetate-5Cramp-lambda0_999-bp-3"
+    #run_name =    "20170823-CPTMA-MalibuTWC-SGDI-30k-isoButylAcetate-5Cramp-lambda0_999-3"
+    
+    # iso-butylacetate REPEAT (same folder) (3)
+    #bypass_name = "20170824-CPTMA-MalibuTWC-SGDI-30k-isoButylAcetate-REPEAT-5Cramp-lambda0_999-bp-3"
+    #run_name =    "20170824-CPTMA-MalibuTWC-SGDI-30k-isoButylAcetate-REPEAT-5Cramp-lambda0_999-3"
+    
+    # iso-octane (3)
+    #bypass_name = "20170518-CPTMA-MalibuTWC-SGDI-30k-isooctane-5Cramp-lambda0_999-bp-3"
+    #run_name =    "20170518-CPTMA-MalibuTWC-SGDI-30k-isooctane-5Cramp-lambda0_999-3"
+    
+    # m-xylene (3)
+    #bypass_name = "20170524-CPTMA-MalibuTWC-SGDI-30k-mXylene-5Cramp-lambda0_999-bp-3"
+    #run_name =    "20170524-CPTMA-MalibuTWC-SGDI-30k-mXylene-5Cramp-lambda0_999-3"
+    
+    # mesitylene (3)
+    #bypass_name = "20170428-CPTMA-MalibuTWC-SGDI-30k-mesitylene-5Cramp-lambda0_999-bp-3"
+    #run_name =    "20170428-CPTMA-MalibuTWC-SGDI-30k-mesitylene-5Cramp-lambda0_999-3"
+    
+    # methane (3)
+    #bypass_name = "20170720-CPTMA-MalibuTWC-SGDI-30k-CH4ONLY-5Cramp-lambda0_999-bp-3"
+    #run_name =    "20170720-CPTMA-MalibuTWC-SGDI-30k-CH4ONLY-5Cramp-lambda0_999-3"
+    
+    # methylcyclohexane (622 same folder) (2)
+    #bypass_name = "20170622-CPTMA-MalibuTWC-SGDI-30k-MCH-5Cramp-REPEAT-lambda0_999-bp-2"
+    #run_name =    "20170622-CPTMA-MalibuTWC-SGDI-30k-MCH-5Cramp-REPEAT-lambda0_999-2"
+    
+    # methylcyclohexane (627 same folder) (2)
+    #bypass_name = "20170627-CPTMA-MalibuTWC-SGDI-30k-MCH-5Cramp-REPEAT-lambda0_999-bp-2"
+    #run_name =    "20170627-CPTMA-MalibuTWC-SGDI-30k-MCH-5Cramp-REPEAT-lambda0_999-2"
+    
+    # methylcyclopentane (3)
+    #bypass_name = "20170621-CPTMA-MalibuTWC-SGDI-30k-MCP-5Cramp-REPEAT-lambda0_999-bp-3"
+    #run_name =    "20170621-CPTMA-MalibuTWC-SGDI-30k-MCP-5Cramp-REPEAT-lambda0_999-3"
+    
+    # methylisobutylketone (3)
+    #bypass_name = "20170822-CPTMA-MalibuTWC-SGDI-30k-MIBK-5Cramp-lambda0_999-bp-3"
+    #run_name =    "20170822-CPTMA-MalibuTWC-SGDI-30k-MIBK-5Cramp-lambda0_999-3"
+    
+    # n-butanol (728 same folder) (3)
+    #bypass_name = "20170728-CPTMA-MalibuTWC-SGDI-30k-nButanol-5Cramp-REPEAT-lambda0_999-bp-3"
+    #run_name =    "20170728-CPTMA-MalibuTWC-SGDI-30k-nButanol-5Cramp-REPEAT-lambda0_999-3"
+    
+    # n-butanol (731 same folder) (2)
+    #bypass_name = "20170731-CPTMA-MalibuTWC-SGDI-30k-nButanol-5Cramp-REPEAT-lambda0_999-bp-2"
+    #run_name =    "20170731-CPTMA-MalibuTWC-SGDI-30k-nButanol-5Cramp-REPEAT-lambda0_999-2"
+    
+    # n-butanol (801 same folder) (2)
+    bypass_name = "20170801-CPTMA-MalibuTWC-SGDI-30k-nButanol-5Cramp-REPEAT-lambda0_999-bp-3"
+    run_name =    "20170801-CPTMA-MalibuTWC-SGDI-30k-nButanol-5Cramp-REPEAT-lambda0_999-3"
     
     bypass = TransientData(bypass_name)
     run = TransientData(run_name)
@@ -2717,7 +2785,46 @@ def testing03():
     #list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)', 'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'Formaldehyde (70)', 'Acetaldehyde (1000)', 'Methyl ethyl ketone', 'Cyclohexane (100) 150C', 'Acetylene (1000)', 'Ethylene (100,3000)', 'Toluene (1000)', 'Isobutylene (500)', 'Ethane (1000)', 'Propylene (200,1000)', 'Isopentane (500)', 'AI 2', 'AI 31', 'AI 57', 'AI 91', 'FID THC (ppm C1)', 'TC top sample in (C)', 'TC top sample mid 2 (C)', 'TC top sample out (C)', 'P tup in (bar)', 'P top out (bar)', 'NH3 (3000,300)', 'CO (500,10000)', 'Ethanol (1000,10000)', 'CH4 (250,3000)']
     
     # ethanol
-    list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)', 'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'Formaldehyde (70)', 'Acetaldehyde (1000)', 'Methyl ethyl ketone', 'Cyclohexane (100) 150C', 'Acetylene (1000)', 'Ethylene (100,3000)', 'Toluene (1000)', 'Isobutylene (500)', 'Ethane (1000)', 'Propylene (200,1000)', 'Isopentane (500)', 'AI 2', 'AI 31', 'AI 57', 'AI 91', 'FID THC (ppm C1)', 'TC top sample in (C)', 'TC top sample mid 2 (C)', 'TC top sample out (C)', 'P tup in (bar)', 'P top out (bar)', 'NH3 (3000,300)', 'CO (500,10000)', 'Ethanol (1000,10000)', 'CH4 (250,3000)']
+    #list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)', 'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'Formaldehyde (70)', 'Acetaldehyde (1000)', 'Methyl ethyl ketone', 'Cyclohexane (100) 150C', 'Acetylene (1000)', 'Ethylene (100,3000)', 'Toluene (1000)', 'Isobutylene (500)', 'Ethane (1000)', 'Propylene (200,1000)', 'Isopentane (500)', 'AI 2', 'AI 31', 'AI 57', 'AI 91', 'FID THC (ppm C1)', 'TC top sample in (C)', 'TC top sample mid 2 (C)', 'TC top sample out (C)', 'P tup in (bar)', 'P top out (bar)', 'NH3 (3000,300)', 'CO (500,10000)', 'Ethanol (1000,10000)', 'CH4 (250,3000)']
+    
+    # ethene
+    #list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)', 'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'Formaldehyde (70)', 'Acetaldehyde (1000)', 'Toluene (1000)', 'Cyclohexane (100) 150C', 'Acetylene (1000)', 'Ethylene (100,3000)', 'Propylene (200,1000)', 'Isobutylene (500)', 'Ethane (1000)', 'Propane', 'Anisole 150c', 'AI 2', 'AI 26', 'AI 57', 'AI 91', 'FID THC (ppm C1)', 'TC top sample in (C)', 'TC top sample mid 2 (C)', 'TC top sample out (C)', 'P tup in (bar)', 'P top out (bar)', 'NH3 (300,3000)', 'CO (500,10000)', 'Ethanol (1000,10000)', 'CH4 (250,3000)']
+    
+    # ethyl acetate
+    #list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)', 'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'Formaldehyde (70)', 'Acetaldehyde (1000)', 'Ethyl Acetate 150c', 'Cyclohexane (100) 150C', 'Acetylene (1000)', 'Ethylene (100,3000)', 'Toluene (1000)', 'Isobutylene (500)', 'Ethane (1000)', 'Propylene (200,1000)', 'Isopentane (500)', 'AI 2', 'AI 43', 'AI 57', 'AI 91', 'FID THC (ppm C1)', 'TC top sample in (C)', 'TC top sample mid 2 (C)', 'TC top sample out (C)', 'P tup in (bar)', 'P top out (bar)', 'NH3 (3000,300)', 'CO (500,10000)', 'Ethanol (1000,10000)', 'CH4 (250,3000)']
+    
+    # furan mix
+    #list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)', 'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'Formaldehyde (70)', 'Acetaldehyde (1000)', 'Methyl ethyl ketone', 'Cyclohexane (100) 150C', 'Acetylene (1000)', 'Ethylene (100,3000)', 'Toluene (1000)', 'Isobutylene (500)', 'Ethane (1000)', 'Propylene (200,1000)', 'Isopentane (500)', 'AI 2', 'AI 82', 'AI 96', 'AI 91', 'FID THC (ppm C1)', 'TC top sample in (C)', 'TC top sample mid 2 (C)', 'TC top sample out (C)', 'P tup in (bar)', 'P top out (bar)', 'NH3 (3000,300)', 'CO (500,10000)', 'Ethanol (1000,10000)', 'CH4 (250,3000)']
+    
+    # iso-butanol
+    #list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)', 'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'Formaldehyde (70)', 'Acetaldehyde (1000)', 'Toluene (1000)', 'Cyclohexane (100) 150C', 'Acetylene (1000)', 'Ethylene (100,3000)', 'Propylene (200,1000)', 'Isobutylene (500)', 'Ethane (1000)', 'Isopentane (500)', 'Methyl ethyl ketone', 'AI 2', 'AI 43', 'AI 96', 'AI 91', 'FID THC (ppm C1)', 'TC top sample in (C)', 'TC top sample mid 2 (C)', 'TC top sample out (C)', 'P tup in (bar)', 'P top out (bar)', 'NH3 (3000,300)', 'CO (500,10000)', 'Ethanol (1000,10000)', 'CH4 (250,3000)']
+    
+    # iso-butylacetate (and repeat)
+    #list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)', 'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'Formaldehyde (70)', 'Acetaldehyde (1000)', 'Ethyl Acetate 150c', 'Cyclohexane (100) 150C', 'Acetylene (1000)', 'Ethylene (100,3000)', 'Propylene (200,1000)', 'Isobutylene (500)', 'Ethane (1000)', 'Toluene (1000)', 'Isopentane (500)', 'AI 2', 'AI 43', 'AI 56', 'AI 91', 'FID THC (ppm C1)', 'TC top sample in (C)', 'TC top sample mid 2 (C)', 'TC top sample out (C)', 'P tup in (bar)', 'P top out (bar)', 'NH3 (300,3000)', 'CO (500,10000)', 'Ethanol (1000,10000)', 'CH4 (250,3000)']
+    
+    # iso-octane
+    #list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)', 'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'Formaldehyde (70)', 'Acetaldehyde (1000)', '2-Pentanone 150c', 'Cyclohexane (100) 150C', 'Acetylene (1000)', 'Ethylene (100,3000)', 'Toluene (1000)', 'Isobutylene (500)', 'Ethane (1000)', 'Propylene (200,1000)', 'Isopentane (500)', 'AI 2', 'AI 31', 'AI 57', 'AI 91', 'FID THC (ppm C1)', 'TC top sample in (C)', 'TC top sample mid 2 (C)', 'TC top sample out (C)', 'P tup in (bar)', 'P top out (bar)', 'NH3 (3000,300)', 'CO (500,10000)', 'Ethanol (1000,10000)', 'CH4 (250,3000)']
+    
+    # m-xylene
+    #list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)', 'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'Formaldehyde (70)', 'Acetaldehyde (1000)', '2-Pentanone 150c', 'Cyclohexane (100) 150C', 'Acetylene (1000)', 'Ethylene (100,3000)', 'Toluene (1000)', 'Isobutylene (500)', 'Ethane (1000)', 'Propylene (200,1000)', 'Isopentane (500)', 'AI 2', 'AI 31', 'AI 77', 'AI 91', 'FID THC (ppm C1)', 'TC top sample in (C)', 'TC top sample mid 2 (C)', 'TC top sample out (C)', 'P tup in (bar)', 'P top out (bar)', 'NH3 (3000,300)', 'CO (500,10000)', 'Ethanol (1000,10000)', 'CH4 (250,3000)']
+    
+    # mesitylene
+    #list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)', 'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'Formaldehyde (70)', 'Acetaldehyde (1000)', 'Methyl ethyl ketone', 'Cyclohexane (100) 150C', 'Acetylene (1000)', 'Ethylene (100,3000)', 'Toluene (1000)', 'Isobutylene (500)', 'Ethane (1000)', 'Propylene (200,1000)', 'Isopentane (500)', 'AI 2', 'AI 77', 'AI 57', 'AI 91', 'FID THC (ppm C1)', 'TC top sample in (C)', 'TC top sample mid 2 (C)', 'TC top sample out (C)', 'P tup in (bar)', 'P top out (bar)', 'NH3 (3000,300)', 'CO (500,10000)', 'Ethanol (1000,10000)', 'CH4 (250,3000)']
+    
+    # methane
+    #list = ['Elapsed Time (min)', 'NO (350,3000)', 'NO2 (150)', 'Propylene (200,1000)', 'H2O% (20)', 'CO2% (20)', 'Formaldehyde (70)', 'Acetaldehyde (1000)', 'Propane', 'Cyclohexane (100) 150C', 'Acetylene (1000)', 'Ethylene (100,3000)', 'Anisole 150c', 'Isobutylene (500)', 'Ethane (1000)', 'Toluene (1000)', 'N2O (100,200,300)', 'AI 2', 'AI 15', 'AI 57', 'AI 91', 'FID THC (ppm C1)', 'TC top sample in (C)', 'TC top sample mid 2 (C)', 'TC top sample out (C)', 'P tup in (bar)', 'P top out (bar)', 'NH3 (3000,300)', 'CO (500,10000)', 'Ethanol (1000,10000)', 'CH4 (250,3000)']
+    
+    # methylcyclohexane
+    #list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)', 'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'Formaldehyde (70)', 'Acetaldehyde (1000)', '2-Pentanone 150c', 'Cyclohexane (100) 150C', 'Acetylene (1000)', 'Ethylene (100,3000)', 'Toluene (1000)', 'Isobutylene (500)', 'Ethane (1000)', 'Propylene (200,1000)', 'Isopentane (500)', 'AI 2', 'AI 41', 'AI 55', 'AI 83', 'FID THC (ppm C1)', 'TC top sample in (C)', 'TC top sample mid 2 (C)', 'TC top sample out (C)', 'P tup in (bar)', 'P top out (bar)', 'NH3 (3000,300)', 'CO (500,10000)', 'Ethanol (1000,10000)', 'CH4 (250,3000)']
+    
+    # methylcyclopentane
+    #list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)', 'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'Formaldehyde (70)', 'Acetaldehyde (1000)', '2-Pentanone 150c', 'Cyclohexane (100) 150C', 'Acetylene (1000)', 'Ethylene (100,3000)', 'Toluene (1000)', 'Isobutylene (500)', 'Ethane (1000)', 'Propylene (200,1000)', 'Isopentane (500)', 'AI 2', 'AI 56', 'AI 57', 'AI 91', 'FID THC (ppm C1)', 'TC top sample in (C)', 'TC top sample mid 2 (C)', 'TC top sample out (C)', 'P tup in (bar)', 'P top out (bar)', 'NH3 (3000,300)', 'CO (500,10000)', 'Ethanol (1000,10000)', 'CH4 (250,3000)']
+    
+    # methylisobutylketone
+    #list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)', 'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'Formaldehyde (70)', 'Acetaldehyde (1000)', '2-Pentanone 150c', 'Cyclohexane (100) 150C', 'Acetylene (1000)', 'Ethylene (100,3000)', 'Propylene (200,1000)', 'Isobutylene (500)', 'Ethane (1000)', 'Toluene (1000)', 'Isopentane (500)', 'AI 2', 'AI 43', 'AI 57', 'AI 91', 'FID THC (ppm C1)', 'TC top sample in (C)', 'TC top sample mid 2 (C)', 'TC top sample out (C)', 'P tup in (bar)', 'P top out (bar)', 'NH3 (300,3000)', 'CO (500,10000)', 'Ethanol (1000,10000)', 'CH4 (250,3000)']
+    
+    # n-butanol
+    list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)', 'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'Formaldehyde (70)', 'Acetaldehyde (1000)', 'Toluene (1000)', 'Cyclohexane (100) 150C', 'Acetylene (1000)', 'Ethylene (100,3000)', 'Propylene (200,1000)', 'Ethane (1000)', 'Isopentane (500)', 'Isobutylene (500)', 'Anisole 150c', 'AI 2', 'AI 42', 'AI 57', 'AI 91', 'FID THC (ppm C1)', 'TC top sample in (C)', 'TC top sample mid 2 (C)', 'TC top sample out (C)', 'P tup in (bar)', 'P top out (bar)', 'NH3 (300,3000)', 'CO (500,10000)', 'Ethanol (1000,10000)', 'CH4 (250,3000)']
     
     bypass.retainOnlyColumns(list)
     run.retainOnlyColumns(list)
