@@ -31,10 +31,11 @@ def readCoOptimaFile(run_name, bypass_name):
     
     # Use the fuel name as the folder to store processed data
     #       Sub-directory in that folder will be named after date and run #
+    print("Reading file: " + run_name + "...")
     
     base_folder = run_name.split("-")[5]
     if base_folder == "1":
-        base_folder += run_name.split("-")[5]
+        base_folder += run_name.split("-")[6]
     sub_folder = run_name.split("-")[0] + "_run" + run_name.split("-")[-1]
     sub_folder = sub_folder.split("/")[1]
     
@@ -308,38 +309,55 @@ def readCoOptimaFile(run_name, bypass_name):
     run.mathOperation('TC top sample out (C)',"+",'TC top sample mid 2 (C)', True, 'Avg Internal Temp (C)')
     run.mathOperation('Avg Internal Temp (C)',"/",2)
     
-    # At this point, we can automatically create and save some plots for visualization
-    # NOTE: The time frame indexed by 1 represents the temperature ramp
-    base_name = run_name.split(".")[0]
-    base_name = base_name.split("/")[1]
-    
-    run.createPlot('THC Conversion %', range=run.getTimeFrames()[1], display=False, save=True, file_name=base_name+"--THC_Conv",file_type=".png",subdir=base_folder+"-output/"+sub_folder+"/",x_col='TC top sample in (C)')
-    
-    run.createPlot('CO Conversion %', range=run.getTimeFrames()[1], display=False, save=True, file_name=base_name+"--CO_Conv",file_type=".png",subdir=base_folder+"-output/"+sub_folder+"/",x_col='TC top sample in (C)')
-    
-    run.createPlot('NOx Conversion %', range=run.getTimeFrames()[1], display=False, save=True, file_name=base_name+"--NOx_Conv",file_type=".png",subdir=base_folder+"-output/"+sub_folder+"/",x_col='TC top sample in (C)')
-    
-    # At this point, we would attempt to calculate rate information (prior to row compression)
-    
-    # May also want to calculate different T-n values and print to another file
-    
-    
-    # Lastly, we will compress the rows and print the data to a file
-    run.compressRows(10)
-    run.printAlltoFile(base_folder+"-output/"+sub_folder+"/"+base_name+"_output.dat")
-    
     return run
+    
+## Function to calculate various T-n values and print them to a file
+def printTnValues(obj, out_dir):
+    # For simplification, we will calculate and print out T-10, T-30, T-50, T-70, and T-90
+    conv_per = [10,30,50,70,90]
+    temp = 'TC top sample in (C)'
+    chem_name = out_dir.split("/")[0].split("-")[0]
+    
+    #Iterate through the data map of the obj and record temperatures from +/- 5 conversion % for each category
+    #   Categories:  'THC Conversion %', 'CO Conversion %', and 'NOx Conversion %'
+    conv_map = {}
+    conv_map['THC Conversion %'] = [0.]*len(conv_per)
+    conv_map['CO Conversion %'] = [0.]*len(conv_per)
+    conv_map['NOx Conversion %'] = [0.]*len(conv_per)
+    
+    for item in conv_map:
+        i=0
+        for per in conv_per:
+            count = 0
+            j=0
+            for value in obj.data_map[item]:
+                if value >= per - 5 and value <= per + 5:
+                    conv_map[item][i] += obj.data_map[temp][j]
+                    count+=1
+                j+=1
+            conv_map[item][i] = conv_map[item][i]/count
+            i+=1
+    
+    file_name = out_dir + "ConversionTemperatures.dat"
+    file = open(file_name,'w')
+    file.write("T-n")
+    for item in conv_map:
+        file.write("\t"+item)
+    file.write("\n")
+    i=0
+    for value in conv_per:
+        file.write(str(value))
+        for item in conv_map:
+            file.write("\t"+str(conv_map[item][i]))
+        i+=1
+        file.write("\n")
+    file.close()
+    return
 
-    
-## Main function
-def main(argv):
-    # Co-Optima data cannot be automatically paired with by-pass data since the data frames for
-    # the runs and by-pass do not match exactly. Instead, we will read in each seperately and
-    # combine manually.
-    
+## Function to read in a specific folder
+def readCoOptimaPureFuelFolder(folder):
     # Read in the bypass and run files separately
     run = []
-    folder = "toluene"
     
     # 1-hexene (3)
     if folder == "1-hexene":
@@ -347,6 +365,7 @@ def main(argv):
         run_name =    "20170807-CPTMA-MalibuTWC-SGDI-30k-1Hexene-5Cramp-lambda0_999-1"
         
         run.append(readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name))
+        avg_run = readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name)
         
         bypass_name = "20170807-CPTMA-MalibuTWC-SGDI-30k-1Hexene-5Cramp-lambda0_999-bp-2"
         run_name =    "20170807-CPTMA-MalibuTWC-SGDI-30k-1Hexene-5Cramp-lambda0_999-2"
@@ -364,6 +383,7 @@ def main(argv):
         run_name =    "20170522-CPTMA-MalibuTWC-SGDI-30k-1-Octene-5Cramp-lambda0_999-1"
         
         run.append(readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name))
+        avg_run = readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name)
         
         bypass_name = "20170522-CPTMA-MalibuTWC-SGDI-30k-1-Octene-5Cramp-lambda0_999-bp-2"
         run_name =    "20170522-CPTMA-MalibuTWC-SGDI-30k-1-Octene-5Cramp-lambda0_999-2"
@@ -386,6 +406,7 @@ def main(argv):
         run_name =    "20170706-CPTMA-MalibuTWC-SGDI-30k-1Propanol-5Cramp-REPEAT-lambda0_999-1"
         
         run.append(readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name))
+        avg_run = readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name)
         
         bypass_name = "20170706-CPTMA-MalibuTWC-SGDI-30k-1Propanol-5Cramp-REPEAT-lambda0_999-bp-2"
         run_name =    "20170706-CPTMA-MalibuTWC-SGDI-30k-1Propanol-5Cramp-REPEAT-lambda0_999-2"
@@ -403,6 +424,7 @@ def main(argv):
         run_name =    "20170411-CPTMA-MalibuTWC-SGDI-30k-2Butanone-5Cramp-lambda0_999-1"
         
         run.append(readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name))
+        avg_run = readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name)
         
         bypass_name = "20170411-CPTMA-MalibuTWC-SGDI-30k-2Butanone-5Cramp-lambda0_999-bp-2"
         run_name =    "20170411-CPTMA-MalibuTWC-SGDI-30k-2Butanone-5Cramp-lambda0_999-2"
@@ -420,6 +442,7 @@ def main(argv):
         run_name =    "20170810-CPTMA-MalibuTWC-SGDI-30k-2MethylPentane-5Cramp-lambda0_999-1"
         
         run.append(readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name))
+        avg_run = readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name)
         
         bypass_name = "20170810-CPTMA-MalibuTWC-SGDI-30k-2MethylPentane-5Cramp-lambda0_999-bp-2"
         run_name =    "20170810-CPTMA-MalibuTWC-SGDI-30k-2MethylPentane-5Cramp-lambda0_999-2"
@@ -437,6 +460,7 @@ def main(argv):
         run_name =    "20170804-CPTMA-MalibuTWC-SGDI-30k-2Pentaone-5Cramp-lambda0_999-1"
         
         run.append(readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name))
+        avg_run = readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name)
         
         bypass_name = "20170804-CPTMA-MalibuTWC-SGDI-30k-2Pentaone-5Cramp-lambda0_999-bp-2"
         run_name =    "20170804-CPTMA-MalibuTWC-SGDI-30k-2Pentaone-5Cramp-lambda0_999-2"
@@ -454,6 +478,7 @@ def main(argv):
         run_name =    "20170614-CPTMA-MalibuTWC-SGDI-30k-2Propanol-5Cramp-REPEAT-lambda0_999-1"
         
         run.append(readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name))
+        avg_run = readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name)
         
         bypass_name = "20170614-CPTMA-MalibuTWC-SGDI-30k-2Propanol-5Cramp-REPEAT-lambda0_999-bp-2"
         run_name =    "20170614-CPTMA-MalibuTWC-SGDI-30k-2Propanol-5Cramp-REPEAT-lambda0_999-2"
@@ -471,6 +496,7 @@ def main(argv):
         run_name =    "20170629-CPTMA-MalibuTWC-SGDI-30k-Anisole-5Cramp-lambda0_999-1"
         
         run.append(readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name))
+        avg_run = readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name)
         
         bypass_name = "20170629-CPTMA-MalibuTWC-SGDI-30k-Anisole-5Cramp-lambda0_999-bp-2"
         run_name =    "20170629-CPTMA-MalibuTWC-SGDI-30k-Anisole-5Cramp-lambda0_999-2"
@@ -488,6 +514,7 @@ def main(argv):
         run_name =    "20170815-CPTMA-MalibuTWC-SGDI-30k-ButylAcetate-5Cramp-lambda0_999-1"
         
         run.append(readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name))
+        avg_run = readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name)
         
         bypass_name = "20170815-CPTMA-MalibuTWC-SGDI-30k-ButylAcetate-5Cramp-lambda0_999-bp-2"
         run_name =    "20170815-CPTMA-MalibuTWC-SGDI-30k-ButylAcetate-5Cramp-lambda0_999-2"
@@ -505,6 +532,7 @@ def main(argv):
         run_name =    "20170511-CPTMA-MalibuTWC-SGDI-30k-Cyclopentanone-5Cramp-lambda0_999-1"
         
         run.append(readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name))
+        avg_run = readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name)
         
         bypass_name = "20170511-CPTMA-MalibuTWC-SGDI-30k-Cyclopentanone-5Cramp-lambda0_999-bp-2"
         run_name =    "20170511-CPTMA-MalibuTWC-SGDI-30k-Cyclopentanone-5Cramp-lambda0_999-2"
@@ -522,6 +550,7 @@ def main(argv):
         run_name =    "20170427-CPTMA-MalibuTWC-SGDI-30k-Diisobutylene-5Cramp-lambda0_999-1"
         
         run.append(readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name))
+        avg_run = readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name)
         
         bypass_name = "20170427-CPTMA-MalibuTWC-SGDI-30k-Diisobutylene-5Cramp-lambda0_999-bp-2"
         run_name =    "20170427-CPTMA-MalibuTWC-SGDI-30k-Diisobutylene-5Cramp-lambda0_999-2"
@@ -539,6 +568,7 @@ def main(argv):
         run_name =    "20170421-CPTMA-MalibuTWC-SGDI-30k-CH3CH2OH+iC8H18+C6H5CH3-5Cramp-lambda0_999-1"
         
         run.append(readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name))
+        avg_run = readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name)
         
         bypass_name = "20170421-CPTMA-MalibuTWC-SGDI-30k-CH3CH2OH+iC8H18+C6H5CH3-5Cramp-lambda0_999-bp-2"
         run_name =    "20170421-CPTMA-MalibuTWC-SGDI-30k-CH3CH2OH+iC8H18+C6H5CH3-5Cramp-lambda0_999-2"
@@ -556,6 +586,7 @@ def main(argv):
         run_name =    "20170424-CPTMA-MalibuTWC-SGDI-30k-CH3CH2OH-5Cramp-lambda0_999-1"
         
         run.append(readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name))
+        avg_run = readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name)
         
         bypass_name = "20170424-CPTMA-MalibuTWC-SGDI-30k-CH3CH2OH-5Cramp-lambda0_999-bp-2"
         run_name =    "20170424-CPTMA-MalibuTWC-SGDI-30k-CH3CH2OH-5Cramp-lambda0_999-2"
@@ -573,6 +604,7 @@ def main(argv):
         run_name =    "20170718-CPTMA-MalibuTWC-SGDI-30k-C2H4ONLY-5Cramp-lambda0_999-1"
         
         run.append(readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name))
+        avg_run = readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name)
         
         bypass_name = "20170718-CPTMA-MalibuTWC-SGDI-30k-C2H4ONLY-5Cramp-lambda0_999-bp-2"
         run_name =    "20170718-CPTMA-MalibuTWC-SGDI-30k-C2H4ONLY-5Cramp-lambda0_999-2"
@@ -590,6 +622,7 @@ def main(argv):
         run_name =    "20170510-CPTMA-MalibuTWC-SGDI-30k-EthylAcetate-5Cramp-lambda0_999-1"
         
         run.append(readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name))
+        avg_run = readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name)
         
         bypass_name = "20170510-CPTMA-MalibuTWC-SGDI-30k-EthylAcetate-5Cramp-lambda0_999-bp-2"
         run_name =    "20170510-CPTMA-MalibuTWC-SGDI-30k-EthylAcetate-5Cramp-lambda0_999-2"
@@ -607,6 +640,7 @@ def main(argv):
         run_name =    "20170425-CPTMA-MalibuTWC-SGDI-30k-FuranMix-5Cramp-lambda0_999-1"
         
         run.append(readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name))
+        avg_run = readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name)
         
         bypass_name = "20170425-CPTMA-MalibuTWC-SGDI-30k-FuranMix-5Cramp-lambda0_999-bp-2"
         run_name =    "20170425-CPTMA-MalibuTWC-SGDI-30k-FuranMix-5Cramp-lambda0_999-2"
@@ -629,6 +663,7 @@ def main(argv):
         run_name =    "20170412-CPTMA-MalibuTWC-SGDI-30k-iBuOH-5Cramp-lambda0_999-1"
         
         run.append(readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name))
+        avg_run = readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name)
         
         bypass_name = "20170412-CPTMA-MalibuTWC-SGDI-30k-iBuOH-5Cramp-lambda0_999-bp-2"
         run_name =    "20170412-CPTMA-MalibuTWC-SGDI-30k-iBuOH-5Cramp-lambda0_999-2"
@@ -646,6 +681,7 @@ def main(argv):
         run_name =    "20170823-CPTMA-MalibuTWC-SGDI-30k-isoButylAcetate-5Cramp-lambda0_999-1"
         
         run.append(readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name))
+        avg_run = readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name)
         
         bypass_name = "20170823-CPTMA-MalibuTWC-SGDI-30k-isoButylAcetate-5Cramp-lambda0_999-bp-2"
         run_name =    "20170823-CPTMA-MalibuTWC-SGDI-30k-isoButylAcetate-5Cramp-lambda0_999-2"
@@ -679,6 +715,7 @@ def main(argv):
         run_name =    "20170518-CPTMA-MalibuTWC-SGDI-30k-isooctane-5Cramp-lambda0_999-1"
         
         run.append(readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name))
+        avg_run = readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name)
         
         bypass_name = "20170518-CPTMA-MalibuTWC-SGDI-30k-isooctane-5Cramp-lambda0_999-bp-2"
         run_name =    "20170518-CPTMA-MalibuTWC-SGDI-30k-isooctane-5Cramp-lambda0_999-2"
@@ -696,6 +733,7 @@ def main(argv):
         run_name =    "20170524-CPTMA-MalibuTWC-SGDI-30k-mXylene-5Cramp-lambda0_999-1"
         
         run.append(readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name))
+        avg_run = readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name)
         
         bypass_name = "20170524-CPTMA-MalibuTWC-SGDI-30k-mXylene-5Cramp-lambda0_999-bp-2"
         run_name =    "20170524-CPTMA-MalibuTWC-SGDI-30k-mXylene-5Cramp-lambda0_999-2"
@@ -713,6 +751,7 @@ def main(argv):
         run_name =    "20170428-CPTMA-MalibuTWC-SGDI-30k-mesitylene-5Cramp-lambda0_999-1"
         
         run.append(readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name))
+        avg_run = readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name)
         
         bypass_name = "20170428-CPTMA-MalibuTWC-SGDI-30k-mesitylene-5Cramp-lambda0_999-bp-2"
         run_name =    "20170428-CPTMA-MalibuTWC-SGDI-30k-mesitylene-5Cramp-lambda0_999-2"
@@ -730,6 +769,7 @@ def main(argv):
         run_name =    "20170720-CPTMA-MalibuTWC-SGDI-30k-CH4ONLY-5Cramp-lambda0_999-1"
         
         run.append(readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name))
+        avg_run = readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name)
         
         bypass_name = "20170720-CPTMA-MalibuTWC-SGDI-30k-CH4ONLY-5Cramp-lambda0_999-bp-2"
         run_name =    "20170720-CPTMA-MalibuTWC-SGDI-30k-CH4ONLY-5Cramp-lambda0_999-2"
@@ -747,6 +787,7 @@ def main(argv):
         run_name =    "20170622-CPTMA-MalibuTWC-SGDI-30k-MCH-5Cramp-REPEAT-lambda0_999-1"
         
         run.append(readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name))
+        avg_run = readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name)
         
         bypass_name = "20170622-CPTMA-MalibuTWC-SGDI-30k-MCH-5Cramp-REPEAT-lambda0_999-bp-2"
         run_name =    "20170622-CPTMA-MalibuTWC-SGDI-30k-MCH-5Cramp-REPEAT-lambda0_999-2"
@@ -769,6 +810,7 @@ def main(argv):
         run_name =    "20170621-CPTMA-MalibuTWC-SGDI-30k-MCP-5Cramp-REPEAT-lambda0_999-1"
         
         run.append(readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name))
+        avg_run = readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name)
         
         bypass_name = "20170621-CPTMA-MalibuTWC-SGDI-30k-MCP-5Cramp-REPEAT-lambda0_999-bp-2"
         run_name =    "20170621-CPTMA-MalibuTWC-SGDI-30k-MCP-5Cramp-REPEAT-lambda0_999-2"
@@ -786,6 +828,7 @@ def main(argv):
         run_name =    "20170822-CPTMA-MalibuTWC-SGDI-30k-MIBK-5Cramp-lambda0_999-1"
         
         run.append(readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name))
+        avg_run = readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name)
         
         bypass_name = "20170822-CPTMA-MalibuTWC-SGDI-30k-MIBK-5Cramp-lambda0_999-bp-2"
         run_name =    "20170822-CPTMA-MalibuTWC-SGDI-30k-MIBK-5Cramp-lambda0_999-2"
@@ -803,6 +846,7 @@ def main(argv):
         run_name =    "20170728-CPTMA-MalibuTWC-SGDI-30k-nButanol-5Cramp-REPEAT-lambda0_999-1"
         
         run.append(readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name))
+        avg_run = readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name)
         
         bypass_name = "20170728-CPTMA-MalibuTWC-SGDI-30k-nButanol-5Cramp-REPEAT-lambda0_999-bp-2"
         run_name =    "20170728-CPTMA-MalibuTWC-SGDI-30k-nButanol-5Cramp-REPEAT-lambda0_999-2"
@@ -845,6 +889,7 @@ def main(argv):
         run_name =    "20170808-CPTMA-MalibuTWC-SGDI-30k-nHeptane-5Cramp-lambda0_999-1"
         
         run.append(readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name))
+        avg_run = readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name)
         
         bypass_name = "20170808-CPTMA-MalibuTWC-SGDI-30k-nHeptane-5Cramp-lambda0_999-bp-2"
         run_name =    "20170808-CPTMA-MalibuTWC-SGDI-30k-nHeptane-5Cramp-lambda0_999-2"
@@ -862,6 +907,7 @@ def main(argv):
         run_name =    "20170519-CPTMA-MalibuTWC-SGDI-30k-nOctane-5Cramp-lambda0_999-1"
         
         run.append(readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name))
+        avg_run = readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name)
         
         bypass_name = "20170519-CPTMA-MalibuTWC-SGDI-30k-nOctane-5Cramp-lambda0_999-bp-2"
         run_name =    "20170519-CPTMA-MalibuTWC-SGDI-30k-nOctane-5Cramp-lambda0_999-2"
@@ -879,6 +925,7 @@ def main(argv):
         run_name =    "20170717-CPTMA-MalibuTWC-SGDI-30k-C3H8ONLY-5Cramp-lambda0_999-1"
         
         run.append(readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name))
+        avg_run = readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name)
         
         bypass_name = "20170717-CPTMA-MalibuTWC-SGDI-30k-C3H8ONLY-5Cramp-lambda0_999-bp-2"
         run_name =    "20170717-CPTMA-MalibuTWC-SGDI-30k-C3H8ONLY-5Cramp-lambda0_999-2"
@@ -896,6 +943,7 @@ def main(argv):
         run_name =    "20170724-CPTMA-MalibuTWC-SGDI-30k-C3H6ONLY-5Cramp-lambda0_999-1"
         
         run.append(readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name))
+        avg_run = readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name)
         
         bypass_name = "20170724-CPTMA-MalibuTWC-SGDI-30k-C3H6ONLY-5Cramp-lambda0_999-bp-2"
         run_name =    "20170724-CPTMA-MalibuTWC-SGDI-30k-C3H6ONLY-5Cramp-lambda0_999-2"
@@ -928,6 +976,7 @@ def main(argv):
         run_name =    "20170505-CPTMA-MalibuTWC-SGDI-30k-Toluene-5Cramp-lambda0_999-1"
     
         run.append(readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name))
+        avg_run = readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name)
     
         bypass_name = "20170505-CPTMA-MalibuTWC-SGDI-30k-Toluene-5Cramp-lambda0_999-bp-2"
         run_name =    "20170505-CPTMA-MalibuTWC-SGDI-30k-Toluene-5Cramp-lambda0_999-2"
@@ -938,9 +987,108 @@ def main(argv):
         run_name =    "20170505-CPTMA-MalibuTWC-SGDI-30k-Toluene-5Cramp-lambda0_999-3"
     
         run.append(readCoOptimaFile(folder+"/"+run_name, folder+"/"+bypass_name))
+        
     
+    #After the nested if statements, the run list should be holding all pre-processed data
+    # Loop through this data to produce plots, charts, output, and post-processing
+    i=0
+    for obj in run:
+        #Start aggregating runs to create the average
+        if i > 0:
+            for item in avg_run.data_map:
+                j=0
+                for value in avg_run.data_map[item]:
+                    try:
+                        avg_run.data_map[item][j] += obj.data_map[item][j]
+                    except:
+                        avg_run.data_map[item][j] += avg_run.data_map[item][j]
+                    j+=1
+    
+        # At this point, we can automatically create and save some plots for visualization
+        # NOTE: The time frame indexed by 1 represents the temperature ramp
+        base_name = obj.input_file_name.split(".")[0]
+        
+        base_folder = base_name.split("-")[5]
+        if base_folder == "1":
+            base_folder += base_name.split("-")[6]
+        sub_folder = base_name.split("-")[0] + "_run" + base_name.split("-")[-1]
+        
+        obj.createPlot('THC Conversion %', range=obj.getTimeFrames()[1], display=False, save=True, file_name=base_name+"--THC_Conv",file_type=".png",subdir=base_folder+"-output/"+sub_folder+"/",x_col='TC top sample in (C)')
+        
+        obj.createPlot('CO Conversion %', range=obj.getTimeFrames()[1], display=False, save=True, file_name=base_name+"--CO_Conv",file_type=".png",subdir=base_folder+"-output/"+sub_folder+"/",x_col='TC top sample in (C)')
+        
+        obj.createPlot('NOx Conversion %', range=obj.getTimeFrames()[1], display=False, save=True, file_name=base_name+"--NOx_Conv",file_type=".png",subdir=base_folder+"-output/"+sub_folder+"/",x_col='TC top sample in (C)')
+        
+        # At this point, we would attempt to calculate rate information (prior to row compression)
+        
+        # May also want to calculate different T-n values and print to another file
+        printTnValues(obj, out_dir=base_folder+"-output/"+sub_folder+"/")
+        
+        i+=1
+    
+    #Output information for the average run
+    # First, loop to average the sum
+    for item in avg_run.data_map:
+        j=0
+        for value in avg_run.data_map[item]:
+            avg_run.data_map[item][j] = avg_run.data_map[item][j]/len(run)
+            j+=1
+        
+    #Next create the plots and calculate some specific rate info
+    base_name = avg_run.input_file_name.split(".")[0]
+    
+    base_folder = base_name.split("-")[5]
+    if base_folder == "1":
+        base_folder += base_name.split("-")[6]
+    sub_folder = base_name.split("-")[0] + "_avg"
+    
+    avg_run.createPlot('THC Conversion %', range=avg_run.getTimeFrames()[1], display=False, save=True, file_name=base_name+"--THC_Conv_Avg",file_type=".png",subdir=base_folder+"-output/"+sub_folder+"/",x_col='TC top sample in (C)')
+    
+    avg_run.createPlot('CO Conversion %', range=avg_run.getTimeFrames()[1], display=False, save=True, file_name=base_name+"--CO_Conv_Avg",file_type=".png",subdir=base_folder+"-output/"+sub_folder+"/",x_col='TC top sample in (C)')
+    
+    avg_run.createPlot('NOx Conversion %', range=avg_run.getTimeFrames()[1], display=False, save=True, file_name=base_name+"--NOx_Conv_Avg",file_type=".png",subdir=base_folder+"-output/"+sub_folder+"/",x_col='TC top sample in (C)')
+    
+    # At this point, we would attempt to calculate rate information (prior to row compression)
+    
+    # May also want to calculate different T-n values and print to another file
+    printTnValues(avg_run, out_dir=base_folder+"-output/"+sub_folder+"/")
+    
+        
+    # Lastly, we will compress the rows and print the data to a file
+    i=0
+    for obj in run:
+        base_name = obj.input_file_name.split(".")[0]
+        
+        base_folder = base_name.split("-")[5]
+        if base_folder == "1":
+            base_folder += base_name.split("-")[6]
+        sub_folder = base_name.split("-")[0] + "_run" + base_name.split("-")[-1]
+        
+        obj.compressRows(10)
+        obj.printAlltoFile(base_folder+"-output/"+sub_folder+"/"+base_name+"_output.dat")
+        i+=1
+    
+    #Output for the averaged data
+    base_name = avg_run.input_file_name.split(".")[0]
+    
+    base_folder = base_name.split("-")[5]
+    if base_folder == "1":
+        base_folder += base_name.split("-")[6]
+    sub_folder = base_name.split("-")[0] + "_avg"
+    
+    avg_run.compressRows(10)
+    obj.printAlltoFile(base_folder+"-output/"+sub_folder+"/"+base_name+"_Avg_output.dat")
     return
+
     
+## Main function
+def main(argv):
+    # Co-Optima data cannot be automatically paired with by-pass data since the data frames for
+    # the runs and by-pass do not match exactly. Instead, we will read in each seperately and
+    # combine manually.
+    
+    readCoOptimaPureFuelFolder("toluene")
+    return
 
 ##Directs python to call the main function
 if __name__ == "__main__":
