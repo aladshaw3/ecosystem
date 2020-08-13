@@ -353,6 +353,39 @@ def printTnValues(obj, out_dir):
         file.write("\n")
     file.close()
     return
+    
+##Function to print out the rate map
+def printRateMap(obj, map, out_dir):
+    file_name = out_dir + "ApproximateRateData.dat"
+    file = open(file_name,'w')
+    i=0
+    first = ""
+    for item in obj.data_map:
+        if i==0:
+            file.write(item)
+            first = item
+            file.write("\t"+"d["+item+"]/dt")
+        else:
+            file.write("\t"+item)
+            file.write("\t"+"d["+item+"]/dt")
+        i+=1
+    
+    file.write("\n")
+    j=0
+    for value in map[first]:
+        i = 0
+        for item in obj.data_map:
+            if i == 0:
+                file.write(str(map[item][j]))
+                file.write("\t"+str(map["d["+item+"]/dt"][j]))
+            else:
+                file.write("\t"+str(map[item][j]))
+                file.write("\t"+str(map["d["+item+"]/dt"][j]))
+            i+=1
+        file.write("\n")
+        j+=1
+    file.close()
+    return
 
 ## Function to read in a specific folder
 def readCoOptimaPureFuelFolder(folder):
@@ -1049,6 +1082,9 @@ def readCoOptimaPureFuelFolder(folder):
     avg_run.createPlot('NOx Conversion %', range=avg_run.getTimeFrames()[1], display=False, save=True, file_name=base_name+"--NOx_Conv_Avg",file_type=".png",subdir=base_folder+"-output/"+sub_folder+"/",x_col='TC top sample in (C)')
     
     # At this point, we would attempt to calculate rate information (prior to row compression)
+    print("Starting rate map...\n")
+    rate_map = avg_run.createRateMap()
+    printRateMap(avg_run, rate_map, out_dir=base_folder+"-output/"+sub_folder+"/")
     
     # May also want to calculate different T-n values and print to another file
     printTnValues(avg_run, out_dir=base_folder+"-output/"+sub_folder+"/")

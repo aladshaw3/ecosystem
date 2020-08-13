@@ -970,6 +970,83 @@ class TransientData(object):
             file.write("\n")
             j+=1
         file.close()
+        
+    ##Function to create an approximate rate_map and return it for further processing or printing
+    #
+    #   This function will take in user arguments to construct approximate rate calculations of
+    #   columns in the data_map. The rate calculations are all approximations of the time derivatives
+    #   of the given columns. Time derivatives are approximated with a centered difference using
+    #   n-1, n, and n+1 points.
+    #
+    #       df/dt = f(n+1) - f(n-1) / ( t_n+1 - t_n-1 )
+    #
+    #   The n-1, n, and n+1 points are constructed from 21 neighboring points in order to more accurately
+    #   estimate the smooth rates of change when the data is relatively noisy. Thus, to approximate a single
+    #   rate requires 63 data points.
+    #
+    #   @param column_list list of column names to calculate rates for (can be list or single name)
+    #   @param max_count maximum number of data points to aggregate to form n-1, n, and n+1
+    def createRateMap(self, column_list = [], max_count = 21):
+        rate_map = {}
+        col_list = []
+        if len(column_list) == 0:
+            for item in self.data_map:
+                column_list.append(item)
+        
+        if type(column_list) is list:
+            col_list = column_list
+        else:
+            if column_list not in self.data_map.keys():
+                print("Error! Invalid column name!")
+                return
+            else:
+                col_list.append(column_list)
+            
+        for item in col_list:
+            rate_map[item] = []
+        
+        #Forces the rate map to contain the time key
+        rate_map[self.time_key] = []
+                
+        #Loop over all items in the rate_map
+        for item in rate_map:
+            #Start by looping through the current rows
+            count = 0
+            fn=0
+            j=0
+            while j<self.getNumRows():
+                if count < max_count:
+                    fn+=self.data_map[item][j]
+                    count+=1
+                else:
+                    fn = fn/max_count
+                    rate_map[item].append(fn)
+                    fn=0
+                    count=0
+                j+=1
+            #End While loop
+        #End map loop
+        
+        #Loop again to over the rate_map to approximate time derivatives
+        time_der_map = {}
+        for item in rate_map:
+            #if item == self.time_key:
+            #    break
+            name ="d["+item+"]/dt"
+            time_der_map[name] = [0.]*len(rate_map[self.time_key])
+            
+            n=1
+            while n<len(time_der_map[name])-1:
+                time_der_map[name][n] = (rate_map[item][n+1] - rate_map[item][n-1]) / (rate_map[self.time_key][n+1] - rate_map[self.time_key][n-1])
+                n+=1
+            
+            time_der_map[name][0] = (rate_map[item][1] - rate_map[item][0]) / (rate_map[self.time_key][1] - rate_map[self.time_key][0])
+            time_der_map[name][len(time_der_map[name])-1] = (rate_map[item][len(time_der_map[name])-1] - rate_map[item][len(time_der_map[name])-2]) / (rate_map[self.time_key][len(time_der_map[name])-1] - rate_map[self.time_key][len(time_der_map[name])-2])
+        
+        for item in time_der_map:
+            rate_map[item] = time_der_map[item]
+        
+        return rate_map
 
     ##Function to a create plot from the data_map
     #
