@@ -33,10 +33,11 @@ def readCoOptimaFile(run_name, bypass_name):
     #       Sub-directory in that folder will be named after date and run #
     print("Reading file: " + run_name + "...")
     
-    base_folder = run_name.split("-")[5]
+    base_folder = run_name.split("/")[1].split("-")[5]
     if base_folder == "1":
-        base_folder += run_name.split("-")[6]
-    sub_folder = run_name.split("-")[0] + "_run" + run_name.split("-")[-1]
+        base_folder += run_name.split("/")[1].split("-")[6]
+    sub_folder =  run_name.split("/")[0] + "/" + run_name.split("/")[1].split("-")[0] + "_run" + run_name.split("/")[1].split("-")[-1]
+    print(sub_folder)
     sub_folder = sub_folder.split("/")[1]
     
     bypass = TransientData(bypass_name)
@@ -214,19 +215,41 @@ def readCoOptimaFile(run_name, bypass_name):
     # Now, we can apply some additional pre-processing, such as normalization or scaling of data based on the bypass
     AI_list = []
     for item in list:
-        if item.split()[0] == "AI":
+        if "AI" in item and "bypass" not in item:
             AI_list.append(item)
     for item in AI_list:
         # This line will automatically override the existing AI columns and normalize them to the bypass AI columns
         # Then, for specific AI columns, we can multiply through by the ppm specific value
         # NOTE: Since the AI columns change from folder to folder, we can't really automate more than AI 2 for H2
+        
         if item == 'AI 2' or item == 'AI 2)':
             run.mathOperation(item,"/",item+'[bypass]')
             run.mathOperation(item,"*",1670, True, 'H2 (ppm)')
             frame_list = [1670]*len(run.getTimeFrames())
             run.appendColumnByFrame('H2 (ppm)[bypass]', frame_list)
         else:
+            run.mathOperation(item+'[bypass]',"-",run.getMinimum(item))
+            run.mathOperation(item,"-",run.getMinimum(item))
             run.mathOperation(item,"/",item+'[bypass]')
+    
+    #Special case for E10 mixture
+    if base_folder == "CH3CH2OH+iC8H18+C6H5CH3":
+        for item in AI_list:
+            if item == 'AI 31':
+                run.mathOperation(item,"*",0.10, True, 'ethanol (ppm C1)')
+                run.mathOperation('ethanol (ppm C1)',"*",3000)
+                frame_list = [300]*len(run.getTimeFrames())
+                run.appendColumnByFrame('ethanol (ppm C1)[bypass]', frame_list)
+            if item == 'AI 57':
+                run.mathOperation(item,"*",0.65, True, 'iso-octane (ppm C1)')
+                run.mathOperation('iso-octane (ppm C1)',"*",3000)
+                frame_list = [1950]*len(run.getTimeFrames())
+                run.appendColumnByFrame('iso-octane (ppm C1)[bypass]', frame_list)
+            if item == 'AI 91':
+                run.mathOperation(item,"*",0.25, True, 'toluene (ppm C1)')
+                run.mathOperation('toluene (ppm C1)',"*",3000)
+                frame_list = [750]*len(run.getTimeFrames())
+                run.appendColumnByFrame('toluene (ppm C1)[bypass]', frame_list)
             
     # AI values...
     #       2 = H2
@@ -234,6 +257,11 @@ def readCoOptimaFile(run_name, bypass_name):
     #       31 = ethanol
     #       91 = toluene
     #       43 = n-octane
+    
+    #       E10 (blend)
+    #           65% iso-octane
+    #           25% toluene
+    #           10% ethanol
     
     # Next, scale the 'FID THC (ppm C1)' column by dividing by the corresponding bypass, then multiplying by 3000
     run.mathOperation('FID THC (ppm C1)',"/",'FID THC (ppm C1)[bypass]')
@@ -280,7 +308,130 @@ def readCoOptimaFile(run_name, bypass_name):
     #           25% toluene
     #           10% ethanol         0.708
     
-    frame_list = [0.65]*len(run.getTimeFrames())
+    # 1-hexene
+    if base_folder == "1Hexene":
+        frame_list = [0.71]*len(run.getTimeFrames())
+    
+    # 1-octene
+    if base_folder == "1Octene":
+        frame_list = [0.71]*len(run.getTimeFrames())
+    
+    # 1-propanol
+    if base_folder == "1Propanol":
+        frame_list = [0.71]*len(run.getTimeFrames())
+    
+    # 2-Butanone
+    if base_folder == "2Butanone":
+        frame_list = [0.68]*len(run.getTimeFrames())
+    
+    # 2-methylpentane
+    if base_folder == "2MethylPentane":
+        frame_list = [0.74]*len(run.getTimeFrames())
+    
+    # 2-pentanone
+    if base_folder == "2Pentaone":
+        frame_list = [0.68]*len(run.getTimeFrames())
+    
+    # 2-propanol
+    if base_folder == "2Propanol":
+        frame_list = [0.71]*len(run.getTimeFrames())
+    
+    # anisole
+    if base_folder == "Anisole":
+        frame_list = [0.63]*len(run.getTimeFrames())
+    
+    # butylacetate
+    if base_folder == "ButylAcetate":
+        frame_list = [0.66]*len(run.getTimeFrames())
+    
+    # cyclopentanone
+    if base_folder == "Cyclopentanone":
+        frame_list = [0.65]*len(run.getTimeFrames())
+    
+    # diisobutylene
+    if base_folder == "Diisobutylene":
+        frame_list = [0.71]*len(run.getTimeFrames())
+    
+    # E10
+    if base_folder == "CH3CH2OH+iC8H18+C6H5CH3":
+        frame_list = [0.708]*len(run.getTimeFrames())
+    
+    # ethanol
+    if base_folder == "CH3CH2OH":
+        frame_list = [0.71]*len(run.getTimeFrames())
+    
+    # ethene
+    if base_folder == "C2H4ONLY":
+        frame_list = [0.71]*len(run.getTimeFrames())
+    
+    # ethyl acetate
+    if base_folder == "EthylAcetate":
+        frame_list = [0.64]*len(run.getTimeFrames())
+    
+    # furan mix
+    if base_folder == "FuranMix":
+        frame_list = [0.63]*len(run.getTimeFrames())
+    
+    # iso-butanol
+    if base_folder == "iBuOH":
+        frame_list = [0.71]*len(run.getTimeFrames())
+    
+    # iso-butylacetate (and repeat)
+    if base_folder == "isoButylAcetate":
+        frame_list = [0.66]*len(run.getTimeFrames())
+    
+    # iso-octane
+    if base_folder == "isooctane":
+        frame_list = [0.73]*len(run.getTimeFrames())
+    
+    # m-xylene
+    if base_folder == "mXylene":
+        frame_list = [0.66]*len(run.getTimeFrames())
+    
+    # mesitylene
+    if base_folder == "mesitylene":
+        frame_list = [0.66]*len(run.getTimeFrames())
+    
+    # methane
+    if base_folder == "CH4ONLY":
+        frame_list = [0.86]*len(run.getTimeFrames())
+    
+    # methylcyclohexane
+    if base_folder == "MCH":
+        frame_list = [0.71]*len(run.getTimeFrames())
+    
+    # methylcyclopentane
+    if base_folder == "MCP":
+        frame_list = [0.71]*len(run.getTimeFrames())
+    
+    # methylisobutylketone
+    if base_folder == "MIBK":
+        frame_list = [0.69]*len(run.getTimeFrames())
+    
+    # n-butanol
+    if base_folder == "nButanol":
+        frame_list = [0.71]*len(run.getTimeFrames())
+    
+    # n-heptane
+    if base_folder == "nHeptane":
+        frame_list = [0.74]*len(run.getTimeFrames())
+    
+    # n-octane
+    if base_folder == "nOctane":
+        frame_list = [0.73]*len(run.getTimeFrames())
+    
+    # propane
+    if base_folder == "C3H8ONLY":
+        frame_list = [0.76]*len(run.getTimeFrames())
+    
+    # propene
+    if base_folder == "C3H6ONLY":
+        frame_list = [0.71]*len(run.getTimeFrames())
+    
+    # toluene
+    if base_folder == "Toluene":
+        frame_list = [0.65]*len(run.getTimeFrames())
+    
     run.appendColumnByFrame('O2%', frame_list)
     
     # Now, create column for FID Conversion %, CO conversion %, and NOx conversion %
@@ -314,7 +465,8 @@ def readCoOptimaFile(run_name, bypass_name):
 ## Function to calculate various T-n values and print them to a file
 def printTnValues(obj, out_dir):
     # For simplification, we will calculate and print out T-10, T-30, T-50, T-70, and T-90
-    conv_per = [10,30,50,70,90]
+    conv_per = [10,20,30,40,50,60,70,80,90]  #unit: %
+    span = 1  # +/- 1%
     temp = 'TC top sample in (C)'
     chem_name = out_dir.split("/")[0].split("-")[0]
     
@@ -331,7 +483,7 @@ def printTnValues(obj, out_dir):
             count = 0
             j=0
             for value in obj.data_map[item]:
-                if value >= per - 5 and value <= per + 5:
+                if value >= per - span and value <= per + span:
                     conv_map[item][i] += obj.data_map[temp][j]
                     count+=1
                 j+=1
@@ -354,6 +506,72 @@ def printTnValues(obj, out_dir):
     file.close()
     return
     
+##Function to print out conversion rates at different temperatures
+def printConvRates(obj, out_dir, tau):
+    conv_temp = [100,120,140,160,180,200,220,240,260,280,300,320,340,360,380,400,420,440,460,480,500]
+    span = 5
+    temp = 'TC top sample in (C)'
+    chem_name = out_dir.split("/")[0].split("-")[0]
+    
+    conv_map = {}
+    conv_map['THC Conversion %'] = [0.]*len(conv_temp)
+    conv_map['CO Conversion %'] = [0.]*len(conv_temp)
+    conv_map['NOx Conversion %'] = [0.]*len(conv_temp)
+    conv_map['TC top sample mid 2 (C)'] = [0.]*len(conv_temp)
+    conv_map['TC top sample out (C)'] = [0.]*len(conv_temp)
+    conv_map['Avg Internal Temp (C)'] = [0.]*len(conv_temp)
+    conv_map['O2%'] = [0.]*len(conv_temp)
+    
+    for item in obj.data_map:
+        #What we want from all files
+        if 'N2O' in item and 'bypass' not in item:
+            conv_map[item] = [0.]*len(conv_temp)
+            conv_map[item+'[bypass]'] = [0.]*len(conv_temp)
+        if 'NO' in item and 'bypass' not in item and 'NOx' not in item:
+            conv_map[item] = [0.]*len(conv_temp)
+            conv_map[item+'[bypass]'] = [0.]*len(conv_temp)
+        if 'NO2' in item and 'bypass' not in item:
+            conv_map[item] = [0.]*len(conv_temp)
+            conv_map[item+'[bypass]'] = [0.]*len(conv_temp)
+        if 'H2O' in item and 'bypass' not in item:
+            conv_map[item] = [0.]*len(conv_temp)
+            conv_map[item+'[bypass]'] = [0.]*len(conv_temp)
+        if 'CO2' in item and 'bypass' not in item:
+            conv_map[item] = [0.]*len(conv_temp)
+            conv_map[item+'[bypass]'] = [0.]*len(conv_temp)
+        if 'FID' in item and 'bypass' not in item:
+            conv_map[item] = [0.]*len(conv_temp)
+            conv_map[item+'[bypass]'] = [0.]*len(conv_temp)
+        if 'NH3' in item and 'bypass' not in item:
+            conv_map[item] = [0.]*len(conv_temp)
+            conv_map[item+'[bypass]'] = [0.]*len(conv_temp)
+        if 'CO' in item and 'bypass' not in item and 'Conversion' not in item:
+            conv_map[item] = [0.]*len(conv_temp)
+            conv_map[item+'[bypass]'] = [0.]*len(conv_temp)
+        if 'H2' in item and 'bypass' not in item:
+            conv_map[item] = [0.]*len(conv_temp)
+            conv_map[item+'[bypass]'] = [0.]*len(conv_temp)
+        
+        #Special Case
+        if chem_name == "CH3CH2OH+iC8H18+C6H5CH3":
+            if 'ethanol' in item and 'bypass' not in item:
+                conv_map[item] = [0.]*len(conv_temp)
+                conv_map[item+'[bypass]'] = [0.]*len(conv_temp)
+            if 'iso-octane' in item and 'bypass' not in item:
+                conv_map[item] = [0.]*len(conv_temp)
+                conv_map[item+'[bypass]'] = [0.]*len(conv_temp)
+            if 'toluene' in item and 'bypass' not in item:
+                conv_map[item] = [0.]*len(conv_temp)
+                conv_map[item+'[bypass]'] = [0.]*len(conv_temp)
+    
+    print(chem_name)
+    print(conv_map.keys())
+    #Only start the average after the start of the time frame obj.getTimeFrames()[1][0]
+    #End average after the end of the time frame obj.getTimeFrames()[1][1]
+    print(obj.getTimeFrames()[1])
+    
+    return
+    
 ##Function to print out the rate map
 def printRateMap(obj, map, out_dir):
     file_name = out_dir + "ApproximateRateData.dat"
@@ -361,13 +579,22 @@ def printRateMap(obj, map, out_dir):
     i=0
     first = ""
     for item in obj.data_map:
-        if i==0:
-            file.write(item)
-            first = item
-            file.write("\t"+"d["+item+"]/dt")
-        else:
-            file.write("\t"+item)
-            file.write("\t"+"d["+item+"]/dt")
+        if "bypass" not in item:
+            if i==0:
+                file.write(item)
+                if item != obj.time_key:
+                    if item+"[bypass]" in obj.data_map.keys():
+                        file.write(item+"[bypass]")
+                first = item
+                if item != obj.time_key:
+                    file.write("\t"+"d{"+item+"}/dt")
+            else:
+                file.write("\t"+item)
+                if item != obj.time_key:
+                    if item+"[bypass]" in obj.data_map.keys():
+                        file.write("\t"+item+"[bypass]")
+                if item != obj.time_key and "bypass" not in item:
+                    file.write("\t"+"d{"+item+"}/dt")
         i+=1
     
     file.write("\n")
@@ -375,12 +602,21 @@ def printRateMap(obj, map, out_dir):
     for value in map[first]:
         i = 0
         for item in obj.data_map:
-            if i == 0:
-                file.write(str(map[item][j]))
-                file.write("\t"+str(map["d["+item+"]/dt"][j]))
-            else:
-                file.write("\t"+str(map[item][j]))
-                file.write("\t"+str(map["d["+item+"]/dt"][j]))
+            if "bypass" not in item:
+                if i == 0:
+                    file.write(str(map[item][j]))
+                    if item != obj.time_key:
+                        if item+"[bypass]" in obj.data_map.keys():
+                            file.write(str(map[item+"[bypass]"][j]))
+                    if item != obj.time_key:
+                        file.write("\t"+str(map["d{"+item+"}/dt"][j]))
+                else:
+                    file.write("\t"+str(map[item][j]))
+                    if item != obj.time_key:
+                        if item+"[bypass]" in obj.data_map.keys():
+                            file.write("\t"+str(map[item+"[bypass]"][j]))
+                    if item != obj.time_key:
+                        file.write("\t"+str(map["d{"+item+"}/dt"][j]))
             i+=1
         file.write("\n")
         j+=1
@@ -1053,6 +1289,8 @@ def readCoOptimaPureFuelFolder(folder):
         obj.createPlot('NOx Conversion %', range=obj.getTimeFrames()[1], display=False, save=True, file_name=base_name+"--NOx_Conv",file_type=".png",subdir=base_folder+"-output/"+sub_folder+"/",x_col='TC top sample in (C)')
         
         # At this point, we would attempt to calculate rate information (prior to row compression)
+        rate_map = obj.createRateMap()
+        printRateMap(obj, rate_map, out_dir=base_folder+"-output/"+sub_folder+"/")
         
         # May also want to calculate different T-n values and print to another file
         printTnValues(obj, out_dir=base_folder+"-output/"+sub_folder+"/")
@@ -1082,12 +1320,14 @@ def readCoOptimaPureFuelFolder(folder):
     avg_run.createPlot('NOx Conversion %', range=avg_run.getTimeFrames()[1], display=False, save=True, file_name=base_name+"--NOx_Conv_Avg",file_type=".png",subdir=base_folder+"-output/"+sub_folder+"/",x_col='TC top sample in (C)')
     
     # At this point, we would attempt to calculate rate information (prior to row compression)
-    print("Starting rate map...\n")
     rate_map = avg_run.createRateMap()
     printRateMap(avg_run, rate_map, out_dir=base_folder+"-output/"+sub_folder+"/")
     
     # May also want to calculate different T-n values and print to another file
     printTnValues(avg_run, out_dir=base_folder+"-output/"+sub_folder+"/")
+    
+    # Print the conversion rates (NOTE: We may have to pass the folder because each folder has different headers)
+    printConvRates(avg_run, out_dir=base_folder+"-output/"+sub_folder+"/", tau=24.909)
     
         
     # Lastly, we will compress the rows and print the data to a file
@@ -1113,7 +1353,7 @@ def readCoOptimaPureFuelFolder(folder):
     sub_folder = base_name.split("-")[0] + "_avg"
     
     avg_run.compressRows(10)
-    obj.printAlltoFile(base_folder+"-output/"+sub_folder+"/"+base_name+"_Avg_output.dat")
+    avg_run.printAlltoFile(base_folder+"-output/"+sub_folder+"/"+base_name+"_Avg_output.dat")
     return
 
     
@@ -1123,7 +1363,8 @@ def main(argv):
     # the runs and by-pass do not match exactly. Instead, we will read in each seperately and
     # combine manually.
     
-    readCoOptimaPureFuelFolder("toluene")
+    #readCoOptimaPureFuelFolder("toluene")
+    readCoOptimaPureFuelFolder("E10-baseline")
     return
 
 ##Directs python to call the main function

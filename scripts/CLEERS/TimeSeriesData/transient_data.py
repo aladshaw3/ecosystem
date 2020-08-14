@@ -1032,7 +1032,7 @@ class TransientData(object):
         for item in rate_map:
             #if item == self.time_key:
             #    break
-            name ="d["+item+"]/dt"
+            name ="d{"+item+"}/dt"
             time_der_map[name] = [0.]*len(rate_map[self.time_key])
             
             n=1
