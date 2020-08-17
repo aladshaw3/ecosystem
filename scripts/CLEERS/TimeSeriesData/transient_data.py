@@ -267,6 +267,7 @@ class TransientData(object):
     def readFile(self):
         i = 0
         first_data_line = False
+        has_read_map = {}
         for line in self.data_file:
             line_list = line.split('\t')
             #Ignore the first line of the data file and stores as header
@@ -283,6 +284,7 @@ class TransientData(object):
                             self.time_key = item.strip()
                         #NOTE: The registered keys will be the column names stripped of leading and trailing whitespaces
                         self.data_map[item.strip()] = []
+                        has_read_map[item.strip()] = False
                         self.ordered_key_list.append(item.strip())
                     else:
                         # Force a new column for input conditions
@@ -307,18 +309,22 @@ class TransientData(object):
                     else:
                         #Ignore ending character
                         if item != '\n':
-                            #Attempt to store data as a number
-                            try:
-                                self.data_map[self.ordered_key_list[n]].append(float(item))
-                            #Store data as string if it is not a number
-                            except:
-                                if first_data_line == True:
-                                    self.data_map[self.ordered_key_list[n]].append(item)
-                                else:
-                                    if len(self.data_map[self.ordered_key_list[n]]) > 0:
-                                        if type(self.data_map[self.ordered_key_list[n]][-1]) is not int and type(self.data_map[self.ordered_key_list[n]][-1]) is not float:
-                                            self.data_map[self.ordered_key_list[n]].append(item)
+                            if has_read_map[self.ordered_key_list[n]] == False:
+                                #Attempt to store data as a number
+                                try:
+                                    self.data_map[self.ordered_key_list[n]].append(float(item))
+                                #Store data as string if it is not a number
+                                except:
+                                    if first_data_line == True:
+                                        self.data_map[self.ordered_key_list[n]].append(item)
+                                    else:
+                                        if len(self.data_map[self.ordered_key_list[n]]) > 0:
+                                            if type(self.data_map[self.ordered_key_list[n]][-1]) is not int and type(self.data_map[self.ordered_key_list[n]][-1]) is not float:
+                                                self.data_map[self.ordered_key_list[n]].append(item)
+                                has_read_map[self.ordered_key_list[n]] = True
                     n+=1
+                for item in has_read_map:
+                    has_read_map[item] = False
             i+=1
         #END of line loop
         self.num_rows = len(self.data_map[self.time_key])
