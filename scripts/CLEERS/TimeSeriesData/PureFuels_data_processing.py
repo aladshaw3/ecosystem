@@ -510,10 +510,14 @@ def printTnValues(obj, out_dir):
     return
     
 ##Function to print out conversion rates at different temperatures
-def printConvRates(obj, out_dir, tau):
+def printConvRates(obj, out_dir, tau, inlet_temp=True):
     conv_temp = [120,140,160,180,200,220,240,260,280,300,320,340,360,380,400,420,440,460,480,500]
     span = 5
-    temp = 'TC top sample in (C)'
+    if inlet_temp == True:
+        temp = 'TC top sample in (C)'
+    else:
+        temp = 'Avg Internal Temp (C)'
+        conv_temp.append(520)
     chem_name = out_dir.split("/")[0].split("-")[0]
         
     conv_map = {}
@@ -663,7 +667,10 @@ def printConvRates(obj, out_dir, tau):
                     j+=1
         
     
-    file_name = out_dir + "ConversionRates.dat"
+    if inlet_temp == True:
+        file_name = out_dir + "ConversionRates.dat"
+    else:
+        file_name = out_dir + "ConversionRates-CatTemp.dat"
     file = open(file_name,'w')
     file.write("RefTemp (C)")
     for item in conv_map:
@@ -1405,6 +1412,7 @@ def readCoOptimaPureFuelFolder(folder, tau):
         
         # Print the conversion rates (NOTE: We may have to pass the folder because each folder has different headers)
         printConvRates(obj, base_folder+"-output/"+sub_folder+"/", tau)
+        printConvRates(obj, base_folder+"-output/"+sub_folder+"/", tau, False)
         
         i+=1
     
@@ -1441,6 +1449,7 @@ def readCoOptimaPureFuelFolder(folder, tau):
     
     # Print the conversion rates (NOTE: We may have to pass the folder because each folder has different headers)
     printConvRates(avg_run, base_folder+"-output/"+sub_folder+"/", tau)
+    printConvRates(avg_run, base_folder+"-output/"+sub_folder+"/", tau, False)
     
         
     # Lastly, we will compress the rows and print the data to a file
@@ -1505,8 +1514,8 @@ def main(argv):
     #readCoOptimaPureFuelFolder("n-heptane", tau=8.3333)
     #readCoOptimaPureFuelFolder("n-octane", tau=8.3333)
     #readCoOptimaPureFuelFolder("propane", tau=8.3333)
-    readCoOptimaPureFuelFolder("propene", tau=8.3333)
-    #readCoOptimaPureFuelFolder("toluene", tau=8.3333)
+    #readCoOptimaPureFuelFolder("propene", tau=8.3333)
+    readCoOptimaPureFuelFolder("toluene", tau=8.3333)
     
     return
 
