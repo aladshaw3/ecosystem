@@ -176,16 +176,29 @@ class Sensitivity(object):
                 largest = abs(self.partials[param_name])
                 self.highest_sensitivity = param_name
             else:
-                if abs(self.partials[param_name]) > largest:
-                    largest = abs(self.partials[param_name])
-                    self.highest_sensitivity = param_name
-                if abs(self.partials[param_name]) < smallest:
-                    smallest = abs(self.partials[param_name])
-                    self.lowest_sensitivity = param_name
+                try:
+                    if abs(self.partials[param_name].any()) > largest.any():
+                        largest = abs(self.partials[param_name])
+                        self.highest_sensitivity = param_name
+                except:
+                    if abs(self.partials[param_name]) > largest:
+                        largest = abs(self.partials[param_name])
+                        self.highest_sensitivity = param_name
+                try:
+                    if abs(self.partials[param_name].any()) < smallest.any():
+                        smallest = abs(self.partials[param_name])
+                        self.lowest_sensitivity = param_name
+                except:
+                    if abs(self.partials[param_name]) < smallest:
+                        smallest = abs(self.partials[param_name])
+                        self.lowest_sensitivity = param_name
             i += 1
         self.partials_computed = True
         #Sort the parameters from most to least sensitive
-        self.sorted_param_sensitivity = {k: v for k, v in sorted(self.partials.items(), key=lambda item: abs(item[1]), reverse=True)}
+        try:
+            self.sorted_param_sensitivity = {k: v for k, v in sorted(self.partials.items(), key=lambda item: abs(item[1].any()), reverse=True)}
+        except:
+            self.sorted_param_sensitivity = {k: v for k, v in sorted(self.partials.items(), key=lambda item: abs(item[1]), reverse=True)}
 
 # ----------- End: Definition of Class object for Sensitivity --------------------
 
@@ -196,6 +209,9 @@ class Sensitivity(object):
 #       to iteratively move through all permutations of conditions, within the
 #       specified limits, to check all combinations of conditions for parameter
 #       sensivitity.
+#
+#   Number of permutations = S^c
+#       where S = number of states  &&  c = number of conditions
 #
 #   For Instance:
 #
@@ -446,7 +462,7 @@ class SensitivitySweep(object):
                     dx = dist/10
                     for n in range(0,11):
                         update = self.cond_tuples[cond][0] + n*dx
-                        print(str(cond) + "\t" + str(update))
+                        #print(str(cond) + "\t" + str(update))
                         self.sens_obj.func_conds[cond] = update
                         self.sens_obj.compute_partials(relative, per)
                         func_value = self.sens_obj.eval_func()
@@ -473,20 +489,34 @@ class SensitivitySweep(object):
                                     self.max_sens_map[param]["cond_set"][c] = self.sens_obj.func_conds[c]
                                     self.min_sens_map[param]["cond_set"][c] = self.sens_obj.func_conds[c]
                             else:
-                                if abs(self.sens_maps[j]["param_response"][param]) > abs(self.max_sens_map[param]["param_response"]):
-                                    self.max_sens_map[param]["param_response"] = self.sens_maps[j]["param_response"][param]
-                                    self.max_sens_map[param]["func_result"] = func_value
-                                    for c in self.sens_obj.func_conds:
-                                        self.max_sens_map[param]["cond_set"][c] = self.sens_obj.func_conds[c]
-                                if abs(self.sens_maps[j]["param_response"][param]) < abs(self.min_sens_map[param]["param_response"]):
-                                    self.min_sens_map[param]["param_response"] = self.sens_maps[j]["param_response"][param]
-                                    self.min_sens_map[param]["func_result"] = func_value
-                                    for c in self.sens_obj.func_conds:
-                                        self.min_sens_map[param]["cond_set"][c] = self.sens_obj.func_conds[c]
+                                try:
+                                    if abs(self.sens_maps[j]["param_response"][param].any()) > abs(self.max_sens_map[param]["param_response"].any()):
+                                        self.max_sens_map[param]["param_response"] = self.sens_maps[j]["param_response"][param]
+                                        self.max_sens_map[param]["func_result"] = func_value
+                                        for c in self.sens_obj.func_conds:
+                                            self.max_sens_map[param]["cond_set"][c] = self.sens_obj.func_conds[c]
+                                except:
+                                    if abs(self.sens_maps[j]["param_response"][param]) > abs(self.max_sens_map[param]["param_response"]):
+                                        self.max_sens_map[param]["param_response"] = self.sens_maps[j]["param_response"][param]
+                                        self.max_sens_map[param]["func_result"] = func_value
+                                        for c in self.sens_obj.func_conds:
+                                            self.max_sens_map[param]["cond_set"][c] = self.sens_obj.func_conds[c]
+                                try:
+                                    if abs(self.sens_maps[j]["param_response"][param].any()) < abs(self.min_sens_map[param]["param_response"].any()):
+                                        self.min_sens_map[param]["param_response"] = self.sens_maps[j]["param_response"][param]
+                                        self.min_sens_map[param]["func_result"] = func_value
+                                        for c in self.sens_obj.func_conds:
+                                            self.min_sens_map[param]["cond_set"][c] = self.sens_obj.func_conds[c]
+                                except:
+                                    if abs(self.sens_maps[j]["param_response"][param]) < abs(self.min_sens_map[param]["param_response"]):
+                                        self.min_sens_map[param]["param_response"] = self.sens_maps[j]["param_response"][param]
+                                        self.min_sens_map[param]["func_result"] = func_value
+                                        for c in self.sens_obj.func_conds:
+                                            self.min_sens_map[param]["cond_set"][c] = self.sens_obj.func_conds[c]
 
                         file.write("\n")
                         j+=1
-            elif type(self.sens_obj.func_conds[cond]) is boolean:
+            elif type(self.sens_obj.func_conds[cond]) is bool:
                 #Run simulation as is
                 self.sens_obj.compute_partials(relative, per)
                 func_value = self.sens_obj.eval_func()
@@ -513,16 +543,30 @@ class SensitivitySweep(object):
                             self.max_sens_map[param]["cond_set"][c] = self.sens_obj.func_conds[c]
                             self.min_sens_map[param]["cond_set"][c] = self.sens_obj.func_conds[c]
                     else:
-                        if abs(self.sens_maps[j]["param_response"][param]) > abs(self.max_sens_map[param]["param_response"]):
-                            self.max_sens_map[param]["param_response"] = self.sens_maps[j]["param_response"][param]
-                            self.max_sens_map[param]["func_result"] = func_value
-                            for c in self.sens_obj.func_conds:
-                                self.max_sens_map[param]["cond_set"][c] = self.sens_obj.func_conds[c]
-                        if abs(self.sens_maps[j]["param_response"][param]) < abs(self.min_sens_map[param]["param_response"]):
-                            self.min_sens_map[param]["param_response"] = self.sens_maps[j]["param_response"][param]
-                            self.min_sens_map[param]["func_result"] = func_value
-                            for c in self.sens_obj.func_conds:
-                                self.min_sens_map[param]["cond_set"][c] = self.sens_obj.func_conds[c]
+                        try:
+                            if abs(self.sens_maps[j]["param_response"][param].any()) > abs(self.max_sens_map[param]["param_response"].any()):
+                                self.max_sens_map[param]["param_response"] = self.sens_maps[j]["param_response"][param]
+                                self.max_sens_map[param]["func_result"] = func_value
+                                for c in self.sens_obj.func_conds:
+                                    self.max_sens_map[param]["cond_set"][c] = self.sens_obj.func_conds[c]
+                        except:
+                            if abs(self.sens_maps[j]["param_response"][param]) > abs(self.max_sens_map[param]["param_response"]):
+                                self.max_sens_map[param]["param_response"] = self.sens_maps[j]["param_response"][param]
+                                self.max_sens_map[param]["func_result"] = func_value
+                                for c in self.sens_obj.func_conds:
+                                    self.max_sens_map[param]["cond_set"][c] = self.sens_obj.func_conds[c]
+                        try:
+                            if abs(self.sens_maps[j]["param_response"][param].any()) < abs(self.min_sens_map[param]["param_response"].any()):
+                                self.min_sens_map[param]["param_response"] = self.sens_maps[j]["param_response"][param]
+                                self.min_sens_map[param]["func_result"] = func_value
+                                for c in self.sens_obj.func_conds:
+                                    self.min_sens_map[param]["cond_set"][c] = self.sens_obj.func_conds[c]
+                        except:
+                            if abs(self.sens_maps[j]["param_response"][param]) < abs(self.min_sens_map[param]["param_response"]):
+                                self.min_sens_map[param]["param_response"] = self.sens_maps[j]["param_response"][param]
+                                self.min_sens_map[param]["func_result"] = func_value
+                                for c in self.sens_obj.func_conds:
+                                    self.min_sens_map[param]["cond_set"][c] = self.sens_obj.func_conds[c]
 
                 file.write("\n")
                 j+=1
@@ -555,16 +599,30 @@ class SensitivitySweep(object):
                             self.max_sens_map[param]["cond_set"][c] = self.sens_obj.func_conds[c]
                             self.min_sens_map[param]["cond_set"][c] = self.sens_obj.func_conds[c]
                     else:
-                        if abs(self.sens_maps[j]["param_response"][param]) > abs(self.max_sens_map[param]["param_response"]):
-                            self.max_sens_map[param]["param_response"] = self.sens_maps[j]["param_response"][param]
-                            self.max_sens_map[param]["func_result"] = func_value
-                            for c in self.sens_obj.func_conds:
-                                self.max_sens_map[param]["cond_set"][c] = self.sens_obj.func_conds[c]
-                        if abs(self.sens_maps[j]["param_response"][param]) < abs(self.min_sens_map[param]["param_response"]):
-                            self.min_sens_map[param]["param_response"] = self.sens_maps[j]["param_response"][param]
-                            self.min_sens_map[param]["func_result"] = func_value
-                            for c in self.sens_obj.func_conds:
-                                self.min_sens_map[param]["cond_set"][c] = self.sens_obj.func_conds[c]
+                        try:
+                            if abs(self.sens_maps[j]["param_response"][param].any()) > abs(self.max_sens_map[param]["param_response"].any()):
+                                self.max_sens_map[param]["param_response"] = self.sens_maps[j]["param_response"][param]
+                                self.max_sens_map[param]["func_result"] = func_value
+                                for c in self.sens_obj.func_conds:
+                                    self.max_sens_map[param]["cond_set"][c] = self.sens_obj.func_conds[c]
+                        except:
+                            if abs(self.sens_maps[j]["param_response"][param]) > abs(self.max_sens_map[param]["param_response"]):
+                                self.max_sens_map[param]["param_response"] = self.sens_maps[j]["param_response"][param]
+                                self.max_sens_map[param]["func_result"] = func_value
+                                for c in self.sens_obj.func_conds:
+                                    self.max_sens_map[param]["cond_set"][c] = self.sens_obj.func_conds[c]
+                        try:
+                            if abs(self.sens_maps[j]["param_response"][param].any()) < abs(self.min_sens_map[param]["param_response"].any()):
+                                self.min_sens_map[param]["param_response"] = self.sens_maps[j]["param_response"][param]
+                                self.min_sens_map[param]["func_result"] = func_value
+                                for c in self.sens_obj.func_conds:
+                                    self.min_sens_map[param]["cond_set"][c] = self.sens_obj.func_conds[c]
+                        except:
+                            if abs(self.sens_maps[j]["param_response"][param]) < abs(self.min_sens_map[param]["param_response"]):
+                                self.min_sens_map[param]["param_response"] = self.sens_maps[j]["param_response"][param]
+                                self.min_sens_map[param]["func_result"] = func_value
+                                for c in self.sens_obj.func_conds:
+                                    self.min_sens_map[param]["cond_set"][c] = self.sens_obj.func_conds[c]
 
                 file.write("\n")
                 j+=1
@@ -733,16 +791,30 @@ class SensitivitySweep(object):
                         self.max_sens_map[param]["cond_set"][cond] = self.sens_obj.func_conds[cond]
                         self.min_sens_map[param]["cond_set"][cond] = self.sens_obj.func_conds[cond]
                 else:
-                    if abs(self.sens_maps[perm]["param_response"][param]) > abs(self.max_sens_map[param]["param_response"]):
-                        self.max_sens_map[param]["param_response"] = self.sens_maps[perm]["param_response"][param]
-                        self.max_sens_map[param]["func_result"] = func_value
-                        for cond in self.sens_obj.func_conds:
-                            self.max_sens_map[param]["cond_set"][cond] = self.sens_obj.func_conds[cond]
-                    if abs(self.sens_maps[perm]["param_response"][param]) < abs(self.min_sens_map[param]["param_response"]):
-                        self.min_sens_map[param]["param_response"] = self.sens_maps[perm]["param_response"][param]
-                        self.min_sens_map[param]["func_result"] = func_value
-                        for cond in self.sens_obj.func_conds:
-                            self.min_sens_map[param]["cond_set"][cond] = self.sens_obj.func_conds[cond]
+                    try:
+                        if abs(self.sens_maps[perm]["param_response"][param].any()) > abs(self.max_sens_map[param]["param_response"].any()):
+                            self.max_sens_map[param]["param_response"] = self.sens_maps[perm]["param_response"][param]
+                            self.max_sens_map[param]["func_result"] = func_value
+                            for cond in self.sens_obj.func_conds:
+                                self.max_sens_map[param]["cond_set"][cond] = self.sens_obj.func_conds[cond]
+                    except:
+                        if abs(self.sens_maps[perm]["param_response"][param]) > abs(self.max_sens_map[param]["param_response"]):
+                            self.max_sens_map[param]["param_response"] = self.sens_maps[perm]["param_response"][param]
+                            self.max_sens_map[param]["func_result"] = func_value
+                            for cond in self.sens_obj.func_conds:
+                                self.max_sens_map[param]["cond_set"][cond] = self.sens_obj.func_conds[cond]
+                    try:
+                        if abs(self.sens_maps[perm]["param_response"][param].any()) < abs(self.min_sens_map[param]["param_response"].any()):
+                            self.min_sens_map[param]["param_response"] = self.sens_maps[perm]["param_response"][param]
+                            self.min_sens_map[param]["func_result"] = func_value
+                            for cond in self.sens_obj.func_conds:
+                                self.min_sens_map[param]["cond_set"][cond] = self.sens_obj.func_conds[cond]
+                    except:
+                        if abs(self.sens_maps[perm]["param_response"][param]) < abs(self.min_sens_map[param]["param_response"]):
+                            self.min_sens_map[param]["param_response"] = self.sens_maps[perm]["param_response"][param]
+                            self.min_sens_map[param]["func_result"] = func_value
+                            for cond in self.sens_obj.func_conds:
+                                self.min_sens_map[param]["cond_set"][cond] = self.sens_obj.func_conds[cond]
             file.write("\n")
             #Update Values
             complete = update_cond(cond_value, cond_limit_lower, cond_limit_upper)
