@@ -13,6 +13,8 @@
 
 
 #include "sandbox.h"
+#include <algorithm>
+#include <string>
 
 //Test function number 01 for speciation problems
 int Speciation_Test01_Function(const Matrix<double> &x, Matrix<double> &F, const void *res_data)
@@ -1376,12 +1378,50 @@ int RUN_SANDBOX()
         std::cout << f_size << "\t" << freq[f_size-1] << std::endl;
     }
     */
+    
+    /*
     int parent_size = 6;
     std::vector< std::vector<double> > all_freq;
     std::vector<double> frag_prob;
     all_distributions(parent_size, all_freq, frag_prob);
+     */
     
     // ------------------------------------------ END Particle Disintegration --------------------------------------
+    
+    
+    // ------------------------------ Example for Using MOLA to Collect MWs ------------------------
+    std::ifstream myfile( "List.txt" );
+    FILE *output;
+    output = fopen("List-Mod.txt","w+");
+    std::string name;
+    std::string line;
+    std::string sym = ")";
+    std::string curr;
+    bool newobj = false;
+    while (myfile >> line)
+    {
+        curr = line.back();
+        if (curr != sym)
+        {
+            name += line + " ";
+        }
+        else
+        {
+            name += line;
+            Molecule spec;
+            spec.Register(name);
+            spec.DisplayInfo();
+            
+            //fprintf(output, "Results for isotherm %i at %12g K:\n",(dat.iso+1),iso_temp[dat.iso] );
+            fprintf(output, "%s\t%.6g\t%.6g\t%.6g\n", name.c_str(),spec.MolarWeight(), spec.MolarVolume(), spec.MolarArea());
+            name = "";
+        }
+    }
+    
+    myfile.close();
+    fclose(output);
+    
+    // ------------------------------------------ END Using MOLA to Collect MWs --------------------------------------
 	std::cout << "\nEnd SANDBOX\n\n";
     
 	
