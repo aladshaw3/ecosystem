@@ -1,6 +1,6 @@
 # -- NOTE: MUST name NO as NOx, because python interprets NO as a boolean  ---
 Simulate_Only: False
-Data_File: toluene_data.txt
+Data_File: 1-hexene_data.txt
 Run_Seriel: False
 Weight_Method: relative
 
@@ -10,14 +10,14 @@ Temperature_Set: [393,413,433,453,473,493,513,533,553,573,593,613,633,653,673,69
 Space_Velocity: 8.333
 Void_Fraction: 0.3309
 Inlet_Conc:
-  HC: 428.57
-  CO: 5069
-  NOx: 1038
+  HC: 500
+  CO: 5272
+  NOx: 1063
   N2O: 0
   NH3: 0
   H2: 1670
-  O2: 6500
-  H2O: 134283
+  O2: 7100
+  H2O: 133562
 Reaction_Params:
   r1: {A: 1.00466E+18, E: 205901.5765, B: 0}
   r2: {A: 1482.134149, E: 52752.02221, B: 0}
@@ -61,9 +61,9 @@ Reactant_Powers:
 #Molar contributions may be a function of the specific HC
 Molar_Contributions_to_MBs:
   #CO: r12 = -x
-  CO: {r1: 1, r4: 1, r5: 1, r8: 2.5, r9: 1, r11: 1, r12: -7, r13: 1, r15: 1}
+  CO: {r1: 1, r4: 1, r5: 1, r8: 2.5, r9: 1, r11: 1, r12: -6, r13: 1, r15: 1}
   #H2: r12 = -(x + y/2)
-  H2: {r2: 1, rr2: -1, r6: 2.5, r7: 1, r9: 1.5, r11: -1, r12: -11, r14: 1}
+  H2: {r2: 1, rr2: -1, r6: 2.5, r7: 1, r9: 1.5, r11: -1, r12: -12, r14: 1}
   #NOx: r10 = (2x + y/2 - z)
   NOx: {r4: 1, r5: 2, r6: 1, r7: 1, r8: 1, r9: 1, r10: 18, r14: 2, r15: -2, r16: 1, r18: 2}
 

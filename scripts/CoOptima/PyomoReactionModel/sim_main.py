@@ -12,6 +12,7 @@ def execute_model(file):
     result.read_yaml_simfile(file)
     result.run_model()
     result.print_to_file()
+    #result.Display()
 
 ##Define a help message to display
 def help_message():

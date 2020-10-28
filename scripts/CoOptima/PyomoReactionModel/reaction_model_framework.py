@@ -19,6 +19,18 @@ import yaml
 import os.path
 from os import path
 
+## Return string value for a valid weight method
+def interpret_weight_method(name):
+    option = name.lower()
+    if option == "default":
+        return "default"
+    elif option == "equalizer":
+        return "equalizer"
+    elif option == "relative":
+        return "relative"
+    else:
+        return "default"
+
 ##Calculation of rate constant
 # E = activation energy in J/mol
 # A = pre-exponential factor (units depend on reaction)
@@ -45,10 +57,12 @@ class ReactionModel(object):
         self.run_seriel = True   #Run simulations at each temperature in series
         self.data_set = False
         self.sub_dir = ""
+        self.weight_method = "default"
 
         self.temperature_set = {}  #Used to simulate at various temperatures
         self.Solution = {}  #Used to store solutions
         self.Data = {}  #Used to store data for optimization
+        self.Weight_Factors = {} #Dictionary of weight factors for data fitting
 
     # Read a data file
     #
@@ -66,6 +80,7 @@ class ReactionModel(object):
                 for item in line.split():
                     if j>0:
                         self.Data[item] = {}
+                        self.Weight_Factors[item] = {}
                         ordered_list.append(item)
                     j+=1
             # Read in data for each species
@@ -76,6 +91,7 @@ class ReactionModel(object):
                         self.temperature_set["T"+str(i-1)] = float(item)+273.15
                     else:
                         self.Data[ordered_list[j-1]]["T"+str(i-1)] = float(item)
+                        self.Weight_Factors[ordered_list[j-1]]["T"+str(i-1)] = 1.0
                     j+=1
             i+=1
 
@@ -100,6 +116,11 @@ class ReactionModel(object):
             else:
                 print("\nError! Key 'Simulate_Only' must be a boolean!\n")
                 return
+
+            try:
+                self.weight_method = interpret_weight_method( doc["Weight_Method"] )
+            except:
+                self.weight_method = "default"
 
             i=0
             temp_list = []
@@ -149,6 +170,8 @@ class ReactionModel(object):
             self.add_reactions( doc["Rxn_Keys"] )
 
             self.build_instance()
+
+            self.set_weight_factors()
 
             for species in self.Data:
                 for temp in self.Data[species]:
@@ -305,7 +328,7 @@ class ReactionModel(object):
             solver.options['tol'] = 1e-6
             solver.options['acceptable_tol'] = 1e-6
             solver.options['compl_inf_tol'] = 1e-6
-            solver.options['max_iter'] = 10
+            solver.options['max_iter'] = 100
             solver.options['obj_scaling_factor'] = 1 #Set scaling factor to value similar to tol?
             results = solver.solve(self.instance, tee=True, load_solutions=False)
             try:
@@ -340,7 +363,7 @@ class ReactionModel(object):
             solver.options['tol'] = 1e-6
             solver.options['acceptable_tol'] = 1e-6
             solver.options['compl_inf_tol'] = 1e-6
-            solver.options['max_iter'] = 100
+            solver.options['max_iter'] = 1000
             solver.options['obj_scaling_factor'] = 1 #Set scaling factor to value similar to tol?
             if self.simulate_only == False:
                 solver.options['diverging_iterates_tol'] = 1e60
@@ -369,7 +392,7 @@ class ReactionModel(object):
                 solver.options['tol'] = 1e-6
                 solver.options['acceptable_tol'] = 1e-6
                 solver.options['compl_inf_tol'] = 1e-6
-                solver.options['max_iter'] = 10
+                solver.options['max_iter'] = 100
                 solver.options['obj_scaling_factor'] = 1 #Set scaling factor to value similar to tol?
                 results = solver.solve(self.instance, tee=True, load_solutions=False)
                 try:
@@ -413,6 +436,7 @@ class ReactionModel(object):
                 return
         self.model.MB_data = Set(initialize=Specs)
         self.model.C_data = Param(self.model.MB_data, self.model.T_set, domain=Reals, initialize=0, mutable=True)
+        self.model.wf = Param(self.model.MB_data, self.model.T_set, domain=NonNegativeReals, initialize=1, mutable=True)
         self.data_set = True
 
     # Add reactions to the system (each MB gets a set of reactions)
@@ -514,9 +538,12 @@ class ReactionModel(object):
             print("\tMust call build_instance() first...")
             return
         for rxn in self.instance.rxns:
-            self.instance.A[rxn].unfix()
-            self.instance.B[rxn].unfix()
-            self.instance.E[rxn].unfix()
+            if value(self.instance.A[rxn]) > 0:
+                self.instance.A[rxn].unfix()
+            if value(self.instance.B[rxn]) > 0:
+                self.instance.B[rxn].unfix()
+            if value(self.instance.E[rxn]) > 0:
+                self.instance.E[rxn].unfix()
 
     # Set the tau value
     def set_tau(self, value):
@@ -553,6 +580,40 @@ class ReactionModel(object):
             return
         self.instance.powers[species,rxn].set_value(value)
 
+    # Function to determine weight factors
+    def set_weight_factors(self):
+        if self.built == False:
+            print("Model is not constructed!")
+            print("\tMust call build_instance() first...")
+            return
+        if self.weight_method == "default":
+            return
+        elif self.weight_method == "equalizer":
+            self.weight_equalizer()
+        elif self.weight_method == "relative":
+            self.weight_relative()
+        else:
+            return
+
+        for temp in self.instance.T_set:
+            for spec in self.instance.MB_data:
+                self.instance.wf[spec, temp].set_value(self.Weight_Factors[spec][temp])
+
+    # Weight Equalization Method
+    def weight_equalizer(self):
+        for temp in self.instance.T_set:
+            sum=0
+            for spec in self.instance.MB_data:
+                sum+=self.Data[spec][temp]
+            for spec in self.instance.MB_data:
+                self.Weight_Factors[spec][temp] = (sum/(self.Data[spec][temp]+1e-4))**2
+
+    # Weight Equalization Method
+    def weight_relative(self):
+        for temp in self.instance.T_set:
+            for spec in self.instance.MB_data:
+                self.Weight_Factors[spec][temp] = (1.0/(self.Data[spec][temp]+1e-4))**2
+
     # Return reaction rate
     def comp_rate(self, rxn, model, temp):
         k = rate_const(model.A[rxn], model.B[rxn], model.E[rxn], model.T[temp])
@@ -580,5 +641,5 @@ class ReactionModel(object):
         sum = 0
         for spec in model.MB_data:
             for temp in model.T_set:
-                sum+= (model.C[spec, temp] - model.C_data[spec, temp])**2
+                sum+= model.wf[spec, temp]*(model.C[spec, temp] - model.C_data[spec, temp])**2
         return sum
