@@ -1,0 +1,151 @@
+# -- NOTE: MUST name NO as NOx, because python interprets NO as a boolean  ---
+Simulate_Only: False
+Data_File: 1-hexene_data.txt
+Run_Seriel: False
+Weight_Method: default
+
+All_Rxn_Unbound: False
+All_Rxn_Search_Fraction: 0.5
+
+Chemical_Species: [HC,CO,NOx,N2O,NH3,H2,O2,H2O]
+Rxn_Keys: [r1,r2,rr2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,r13,r14,r15,r16,r17,r18]
+Temperature_Set: [393,413,433,453,473,493,513,533,553,573,593,613,633,653,673,693,713,733,753,773,793]
+Space_Velocity: 8.333
+Void_Fraction: 0.3309
+Inlet_Conc:
+  HC: 500
+  CO: 5272
+  NOx: 1063
+  N2O: 0
+  NH3: 0
+  H2: 1670
+  O2: 7100
+  H2O: 133562
+Reaction_Params:
+  r1: {A: 8.75931E+24,      E: 303430.1196,        B: 0,
+    unbound_A: False,        unbound_E: False,       unbound_B: False,
+    delta_A: None,           delta_E: None,       delta_B: None,
+    frac_A: 0.2,            frac_E: 0.2,           frac_B: 0.2
+    }
+  r2: {A: 11107879.73, E: 84671.49264, B: 0,
+    unbound_A: True,        unbound_E: True,       unbound_B: True,
+    delta_A: 1e5,           delta_E: 100000,       delta_B: 1,
+    frac_A: 0.2,            frac_E: 0.2,           frac_B: 0.2
+    }
+  rr2: {A: 5417194678, E: 96405.2105, B: 0,
+    unbound_A: True,        unbound_E: True,       unbound_B: True,
+    delta_A: 1e5,           delta_E: 100000,       delta_B: 1,
+    frac_A: 0.2,            frac_E: 0.2,           frac_B: 0.2
+    }
+  r3: {A: 1.0512E+24, E: 311069.2447, B: 0,
+    unbound_A: True,        unbound_E: True,       unbound_B: True,
+    delta_A: 1e5,           delta_E: 100000,       delta_B: 1,
+    frac_A: 0.2,            frac_E: 0.2,           frac_B: 0.2
+    }
+  r4: {A: 0.322055616, E: 20385.72941, B: 0,
+    unbound_A: True,        unbound_E: True,       unbound_B: True,
+    delta_A: 1e5,           delta_E: 100000,       delta_B: 1,
+    frac_A: 0.2,            frac_E: 0.2,           frac_B: 0.2
+    }
+  r5: {A: 114.5622528, E: 42301.84721, B: 0,
+    unbound_A: True,        unbound_E: True,       unbound_B: True,
+    delta_A: 1e5,           delta_E: 100000,       delta_B: 1,
+    frac_A: 0.2,            frac_E: 0.2,           frac_B: 0.2
+    }
+  r6: {A: 0, E: 0, B: 0,
+    unbound_A: True,        unbound_E: True,       unbound_B: True,
+    delta_A: 1e5,           delta_E: 100000,       delta_B: 1,
+    frac_A: 0.2,            frac_E: 0.2,           frac_B: 0.2
+    }
+  r7: {A: 0, E: 0, B: 0,
+    unbound_A: True,        unbound_E: True,       unbound_B: True,
+    delta_A: 1e5,           delta_E: 100000,       delta_B: 1,
+    frac_A: 0.2,            frac_E: 0.2,           frac_B: 0.2
+    }
+  r8: {A: 26.86636859, E: 88543.53567, B: 0,
+    unbound_A: True,        unbound_E: True,       unbound_B: True,
+    delta_A: 1e5,           delta_E: 100000,       delta_B: 1,
+    frac_A: 0.2,            frac_E: 0.2,           frac_B: 0.2
+    }
+  r9: {A: 0, E: 0, B: 0,
+    unbound_A: True,        unbound_E: True,       unbound_B: True,
+    delta_A: 1e5,           delta_E: 100000,       delta_B: 1,
+    frac_A: 0.2,            frac_E: 0.2,           frac_B: 0.2
+    }
+  r10: {A: 1.73826E+34, E: 401007.9452, B: 0,
+    unbound_A: True,        unbound_E: True,       unbound_B: True,
+    delta_A: 1e5,           delta_E: 100000,       delta_B: 1,
+    frac_A: 0.2,            frac_E: 0.2,           frac_B: 0.2
+    }
+  r11: {A: 0, E: 0, B: 0,
+    unbound_A: True,        unbound_E: True,       unbound_B: True,
+    delta_A: 1e5,           delta_E: 100000,       delta_B: 1,
+    frac_A: 0.2,            frac_E: 0.2,           frac_B: 0.2
+    }
+  r12: {A: 0, E: 0, B: 0,
+    unbound_A: True,        unbound_E: True,       unbound_B: True,
+    delta_A: 1e5,           delta_E: 100000,       delta_B: 1,
+    frac_A: 0.2,            frac_E: 0.2,           frac_B: 0.2
+    }
+  r13: {A: 0, E: 0, B: 0,
+    unbound_A: True,        unbound_E: True,       unbound_B: True,
+    delta_A: 1e5,           delta_E: 100000,       delta_B: 1,
+    frac_A: 0.2,            frac_E: 0.2,           frac_B: 0.2
+    }
+  r14: {A: 0, E: 0, B: 0,
+    unbound_A: True,        unbound_E: True,       unbound_B: True,
+    delta_A: 1e5,           delta_E: 100000,       delta_B: 1,
+    frac_A: 0.2,            frac_E: 0.2,           frac_B: 0.2
+    }
+  r15: {A: 24519825.88, E: 123486.1447, B: 0,
+    unbound_A: True,        unbound_E: True,       unbound_B: True,
+    delta_A: 1e5,           delta_E: 100000,       delta_B: 1,
+    frac_A: 0.2,            frac_E: 0.2,           frac_B: 0.2
+    }
+  r16: {A: 9.66042E+28, E: 382725.1918, B: 0,
+    unbound_A: True,        unbound_E: True,       unbound_B: True,
+    delta_A: 1e5,           delta_E: 100000,       delta_B: 1,
+    frac_A: 0.2,            frac_E: 0.2,           frac_B: 0.2
+    }
+  r17: {A: 2.42097E+28, E: 418565.6654, B: 0,
+    unbound_A: True,        unbound_E: True,       unbound_B: True,
+    delta_A: 1e5,           delta_E: 100000,       delta_B: 1,
+    frac_A: 0.2,            frac_E: 0.2,           frac_B: 0.2
+    }
+  r18: {A: 3.21823E+27, E: 364766.072, B: 0,
+    unbound_A: True,        unbound_E: True,       unbound_B: True,
+    delta_A: 1e5,           delta_E: 100000,       delta_B: 1,
+    frac_A: 0.2,            frac_E: 0.2,           frac_B: 0.2
+    }
+Reactant_Powers:
+  r1: {CO: 1, O2: 1}
+  r2: {H2: 1, O2: 1}
+  rr2: {H2O: 1}
+  r3: {HC: 1, O2: 1}
+  r4: {CO: 1, NOx: 1}
+  r5: {CO: 1, NOx: 1}
+  r6: {H2: 1, NOx: 1}
+  r7: {H2: 1, NOx: 1}
+  r8: {CO: 1, NOx: 1, H2O: 1}
+  r9: {CO: 1, NOx: 1, H2: 1}
+  r10: {HC: 1, NOx: 1}
+  r11: {CO: 1, H2O: 1}
+  r12: {HC: 1, H2O: 1}
+  r13: {N2O: 1, CO: 1}
+  r14: {H2: 1, NOx: 1}
+  r15: {N2O: 1, CO: 1, O2: 1}
+  r16: {HC: 1, NOx: 1, O2: 1}
+  r17: {NH3: 1, O2: 1}
+  r18: {HC: 1, NOx: 1, O2: 1}
+#Molar contributions may be a function of the specific HC
+Molar_Contributions_to_MBs:
+  #CO: r12 = -x
+  CO: {r1: 1, r4: 1, r5: 1, r8: 2.5, r9: 1, r11: 1, r12: -6, r13: 1, r15: 1}
+  #H2: r12 = -(x + y/2)
+  H2: {r2: 1, rr2: -1, r6: 2.5, r7: 1, r9: 1.5, r11: -1, r12: -12, r14: 1}
+  #NOx: r10 = (2x + y/2 - z)
+  NOx: {r4: 1, r5: 2, r6: 1, r7: 1, r8: 1, r9: 1, r10: 18, r14: 2, r15: -2, r16: 1, r18: 2}
+
+  N2O: {r5: -1, r13: 1, r14: -1, r15: 1, r18: -1}
+  NH3: {r6: -1, r8: -1, r9: -1, r16: -1, r17: 2}
+  HC: {r3: 1, r10: 1, r12: 1, r16: 1, r18: 1}

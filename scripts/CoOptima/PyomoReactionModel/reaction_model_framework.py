@@ -58,6 +58,8 @@ class ReactionModel(object):
         self.data_set = False
         self.sub_dir = ""
         self.weight_method = "default"
+        self.obj_value = 0
+        self.total_var = 0
 
         self.temperature_set = {}  #Used to simulate at various temperatures
         self.Solution = {}  #Used to store solutions
@@ -197,9 +199,86 @@ class ReactionModel(object):
                 self.set_initial(species,doc["Inlet_Conc"][species])
                 self.set_inlet(species,doc["Inlet_Conc"][species])
             for rxn in doc["Reaction_Params"]:
-                self.set_A(rxn,float(doc["Reaction_Params"][rxn]["A"]))
-                self.set_E(rxn,float(doc["Reaction_Params"][rxn]["E"]))
-                self.set_B(rxn,float(doc["Reaction_Params"][rxn]["B"]))
+                unbound_A = False
+                unbound_E = False
+                unbound_B = False
+                delta_A = None
+                delta_E = None
+                delta_B = None
+                frac_A = 0.2
+                frac_E = 0.2
+                frac_B = 0.2
+
+                try:
+                    if isinstance(doc["Reaction_Params"][rxn]["unbound_A"], bool):
+                        unbound_A = doc["Reaction_Params"][rxn]["unbound_A"]
+                except:
+                    unbound_A = False
+                try:
+                    if isinstance(doc["Reaction_Params"][rxn]["unbound_E"], bool):
+                        unbound_E = doc["Reaction_Params"][rxn]["unbound_E"]
+                except:
+                    unbound_E = False
+                try:
+                    if isinstance(doc["Reaction_Params"][rxn]["unbound_B"], bool):
+                        unbound_B = doc["Reaction_Params"][rxn]["unbound_B"]
+                except:
+                    unbound_B = False
+
+                try:
+                    if isinstance(doc["Reaction_Params"][rxn]["delta_A"], (int,float)):
+                        delta_A = doc["Reaction_Params"][rxn]["delta_A"]
+                except:
+                    delta_A = None
+                try:
+                    if isinstance(doc["Reaction_Params"][rxn]["delta_E"], (int,float)):
+                        delta_E = doc["Reaction_Params"][rxn]["delta_E"]
+                except:
+                    delta_E = None
+                try:
+                    if isinstance(doc["Reaction_Params"][rxn]["delta_B"], (int,float)):
+                        delta_B = doc["Reaction_Params"][rxn]["delta_B"]
+                except:
+                    delta_B = None
+
+                try:
+                    if isinstance(doc["Reaction_Params"][rxn]["frac_A"], (int,float)):
+                        frac_A = doc["Reaction_Params"][rxn]["frac_A"]
+                except:
+                    frac_A = 0.2
+                try:
+                    if isinstance(doc["Reaction_Params"][rxn]["frac_E"], (int,float)):
+                        frac_E = doc["Reaction_Params"][rxn]["frac_E"]
+                except:
+                    frac_E = 0.2
+                try:
+                    if isinstance(doc["Reaction_Params"][rxn]["frac_B"], (int,float)):
+                        frac_B = doc["Reaction_Params"][rxn]["frac_B"]
+                except:
+                    frac_B = 0.2
+
+                try:
+                    if isinstance(doc["All_Rxn_Unbound"], bool):
+                        unbound_A = doc["All_Rxn_Unbound"]
+                        unbound_E = doc["All_Rxn_Unbound"]
+                        unbound_B = doc["All_Rxn_Unbound"]
+                except:
+                    pass
+
+                try:
+                    if isinstance(doc["All_Rxn_Search_Fraction"], (int, float)):
+                        frac_A = doc["All_Rxn_Search_Fraction"]
+                        frac_E = doc["All_Rxn_Search_Fraction"]
+                        frac_B = doc["All_Rxn_Search_Fraction"]
+                        delta_A = None
+                        delta_E = None
+                        delta_B = None
+                except:
+                    pass
+
+                self.set_A(rxn,float(doc["Reaction_Params"][rxn]["A"]),unbound_A,frac_A,delta_A)
+                self.set_E(rxn,float(doc["Reaction_Params"][rxn]["E"]),unbound_E,frac_E,delta_E)
+                self.set_B(rxn,float(doc["Reaction_Params"][rxn]["B"]),unbound_B,frac_B,delta_B)
             for rxn in doc["Reactant_Powers"]:
                 for species in doc["Reactant_Powers"][rxn]:
                     self.set_species_rxn_power(species,rxn,float(doc["Reactant_Powers"][rxn][species]))
@@ -328,7 +407,7 @@ class ReactionModel(object):
             solver.options['tol'] = 1e-6
             solver.options['acceptable_tol'] = 1e-6
             solver.options['compl_inf_tol'] = 1e-6
-            solver.options['max_iter'] = 100
+            solver.options['max_iter'] = 100*self.total_var
             solver.options['obj_scaling_factor'] = 1 #Set scaling factor to value similar to tol?
             results = solver.solve(self.instance, tee=True, load_solutions=False)
             try:
@@ -363,7 +442,7 @@ class ReactionModel(object):
             solver.options['tol'] = 1e-6
             solver.options['acceptable_tol'] = 1e-6
             solver.options['compl_inf_tol'] = 1e-6
-            solver.options['max_iter'] = 1000
+            solver.options['max_iter'] = 1000*self.total_var
             solver.options['obj_scaling_factor'] = 1 #Set scaling factor to value similar to tol?
             if self.simulate_only == False:
                 solver.options['diverging_iterates_tol'] = 1e60
@@ -375,6 +454,7 @@ class ReactionModel(object):
                     for species in self.instance.MBs:
                         self.Solution[temp][species] = value(self.instance.C[species,temp])
             self.solved = True
+            self.obj_value = value(self.instance.obj)
 
             for temp in self.instance.T_set:
                 for species in self.instance.MBs:
@@ -392,7 +472,7 @@ class ReactionModel(object):
                 solver.options['tol'] = 1e-6
                 solver.options['acceptable_tol'] = 1e-6
                 solver.options['compl_inf_tol'] = 1e-6
-                solver.options['max_iter'] = 100
+                solver.options['max_iter'] = 100*self.total_var
                 solver.options['obj_scaling_factor'] = 1 #Set scaling factor to value similar to tol?
                 results = solver.solve(self.instance, tee=True, load_solutions=False)
                 try:
@@ -420,6 +500,7 @@ class ReactionModel(object):
             print("\tMust call add_temperatures() first...")
             return
         self.model.MBs = Set(initialize=Specs)
+        self.total_var += len(Specs)
         self.model.C = Var(self.model.MBs, self.model.T_set, domain=Reals, initialize=0)
         self.model.Cin = Param(self.model.MBs, domain=NonNegativeReals, initialize=0, mutable=True)
         self.mb_set = True
@@ -446,6 +527,7 @@ class ReactionModel(object):
             print("\tMust call add_dataset() first...")
             return
         self.model.rxns = Set(initialize=rxns)
+        self.total_var += 3*len(rxns)
         self.model.scale = Param(self.model.MBs, self.model.rxns, domain=Reals, initialize=0, mutable=True)
         self.model.A = Var(self.model.rxns, domain=NonNegativeReals, initialize=0)
         self.model.B = Var(self.model.rxns, domain=Reals, initialize=0)
@@ -491,34 +573,55 @@ class ReactionModel(object):
         self.instance.scale[species,rxn].set_value(value)
 
     # Set the pre-exponential A for each reaction
-    def set_A(self, rxn, value):
+    def set_A(self, rxn, value, unbounded=False, factor=0.2, delta=None):
         if self.built == False:
             print("Model is not constructed!")
             print("\tMust call build_instance() first...")
             return
         self.instance.A[rxn].set_value(value)
-        self.instance.A[rxn].setlb(value*0.8)
-        self.instance.A[rxn].setub(value*1.2)
+        if unbounded == True:
+            return
+        if delta == None:
+            self.instance.A[rxn].setlb(value*(1.0-factor))
+            self.instance.A[rxn].setub(value*(1.+factor))
+        else:
+            if (value-delta) <= 0:
+                self.instance.A[rxn].setlb(1e-16)
+            else:
+                self.instance.A[rxn].setlb(value-delta)
+            self.instance.A[rxn].setub(value+delta)
 
     # Set the power coefficient B for each reaction
-    def set_B(self, rxn, value):
+    def set_B(self, rxn, value, unbounded=False, factor=0.2, delta=None):
         if self.built == False:
             print("Model is not constructed!")
             print("\tMust call build_instance() first...")
             return
         self.instance.B[rxn].set_value(value)
-        self.instance.B[rxn].setlb(value*0.8)
-        self.instance.B[rxn].setub(value*1.2)
+        if unbounded == True:
+            return
+        if delta == None:
+            self.instance.B[rxn].setlb(value*(1.0-factor))
+            self.instance.B[rxn].setub(value*(1.+factor))
+        else:
+            self.instance.B[rxn].setlb(value-delta)
+            self.instance.B[rxn].setub(value+delta)
 
     # Set the activation energy for each reaction
-    def set_E(self, rxn, value):
+    def set_E(self, rxn, value, unbounded=False, factor=0.2, delta=None):
         if self.built == False:
             print("Model is not constructed!")
             print("\tMust call build_instance() first...")
             return
         self.instance.E[rxn].set_value(value)
-        self.instance.E[rxn].setlb(value*0.8)
-        self.instance.E[rxn].setub(value*1.2)
+        if unbounded == True:
+            return
+        if delta == None:
+            self.instance.E[rxn].setlb(value*(1.0-factor))
+            self.instance.E[rxn].setub(value*(1.+factor))
+        else:
+            self.instance.E[rxn].setlb(value-delta)
+            self.instance.E[rxn].setub(value+delta)
 
     # Function to fix the kinetic parameters
     def fix_kinetics(self):
@@ -530,6 +633,7 @@ class ReactionModel(object):
             self.instance.A[rxn].fix()
             self.instance.B[rxn].fix()
             self.instance.E[rxn].fix()
+            self.total_var = self.total_var - 3
 
     # Function to unfix kinetics
     def unfix_kinetics(self):
@@ -540,10 +644,13 @@ class ReactionModel(object):
         for rxn in self.instance.rxns:
             if value(self.instance.A[rxn]) > 0:
                 self.instance.A[rxn].unfix()
-            if value(self.instance.B[rxn]) > 0:
+                self.total_var = self.total_var + 1
+            if abs(value(self.instance.B[rxn])) > 0:
                 self.instance.B[rxn].unfix()
-            if value(self.instance.E[rxn]) > 0:
+                self.total_var = self.total_var + 1
+            if abs(value(self.instance.E[rxn])) > 0:
                 self.instance.E[rxn].unfix()
+                self.total_var = self.total_var + 1
 
     # Set the tau value
     def set_tau(self, value):
