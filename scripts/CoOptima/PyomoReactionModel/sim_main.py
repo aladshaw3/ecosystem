@@ -1,5 +1,6 @@
 ## Script to run a simulation
 from reaction_model_framework import ReactionModel
+from monte_carlo_rxn_param_search import MCSearch_ReactionModel
 import os, sys, getopt
 import time
 import os.path
@@ -12,7 +13,12 @@ def execute_model(file):
     result.read_yaml_simfile(file)
     result.run_model()
     result.print_to_file()
-    #result.Display()
+
+# Create a MC model for parameter searching
+def execute_MC_model(iter, file):
+    result = MCSearch_ReactionModel()
+    result.read_yaml_simfile(file)
+    result.run_monte_carlo_analysis(iter)
 
 ##Define a help message to display
 def help_message():
@@ -60,9 +66,11 @@ def update_file_name(file):
 #       -o dir/    ==>   path and name of the folder to place output into
 def main(argv):
     input_file = ""
+    has_iter = False
+    iter = 0
     #Check for valid arguments
     try:
-        opts, args = getopt.getopt(argv,"hi:",["input_file="])
+        opts, args = getopt.getopt(argv,"hi:n:",["input_file=","mc_iter="])
     except:
         help_message()
         sys.exit(2)
@@ -73,6 +81,9 @@ def main(argv):
             sys.exit()
         if opt in ("-i", "--ifile"):
             input_file = arg
+        if opt in ("-n", "--iter"):
+            iter = int(arg)
+            has_iter = True
 
     #If we made it to this point, then no errors in input
     #Check to see if the input_folder does exist
@@ -83,7 +94,10 @@ def main(argv):
 
     start = time.time()
     input_file = update_file_name(input_file)
-    execute_model(input_file)
+    if has_iter == False:
+        execute_model(input_file)
+    else:
+        execute_MC_model(iter, input_file)
     end = time.time()
     elapse_min = (end-start)/60
     print("\nCOMPLETED!!!")

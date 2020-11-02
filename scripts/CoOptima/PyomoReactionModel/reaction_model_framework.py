@@ -298,12 +298,13 @@ class ReactionModel(object):
         self.instance.pprint()
 
     # Print results to a file
-    def print_to_file(self):
+    def print_to_file(self, name=""):
         if self.solved == False:
             print("Model is not solved!")
             print("\tMust call run_model() first...")
             return
-        name = "ReactionModel"
+        if name == "" or name == None:
+            name = "ReactionModel"
         if self.simulate_only == True:
             name+="-SimulationResults.txt"
         else:
@@ -407,7 +408,7 @@ class ReactionModel(object):
             solver.options['tol'] = 1e-6
             solver.options['acceptable_tol'] = 1e-6
             solver.options['compl_inf_tol'] = 1e-6
-            solver.options['max_iter'] = 100*self.total_var
+            solver.options['max_iter'] = 10*self.total_var
             solver.options['obj_scaling_factor'] = 1 #Set scaling factor to value similar to tol?
             results = solver.solve(self.instance, tee=True, load_solutions=False)
             try:
@@ -442,7 +443,7 @@ class ReactionModel(object):
             solver.options['tol'] = 1e-6
             solver.options['acceptable_tol'] = 1e-6
             solver.options['compl_inf_tol'] = 1e-6
-            solver.options['max_iter'] = 1000*self.total_var
+            solver.options['max_iter'] = 20*self.total_var
             solver.options['obj_scaling_factor'] = 1 #Set scaling factor to value similar to tol?
             if self.simulate_only == False:
                 solver.options['diverging_iterates_tol'] = 1e60
@@ -472,7 +473,7 @@ class ReactionModel(object):
                 solver.options['tol'] = 1e-6
                 solver.options['acceptable_tol'] = 1e-6
                 solver.options['compl_inf_tol'] = 1e-6
-                solver.options['max_iter'] = 100*self.total_var
+                solver.options['max_iter'] = 10*self.total_var
                 solver.options['obj_scaling_factor'] = 1 #Set scaling factor to value similar to tol?
                 results = solver.solve(self.instance, tee=True, load_solutions=False)
                 try:
@@ -579,6 +580,10 @@ class ReactionModel(object):
             print("\tMust call build_instance() first...")
             return
         self.instance.A[rxn].set_value(value)
+        if factor < 0:
+            factor = 0.1
+        if factor > 1:
+            factor = 0.9
         if unbounded == True:
             return
         if delta == None:
@@ -598,6 +603,10 @@ class ReactionModel(object):
             print("\tMust call build_instance() first...")
             return
         self.instance.B[rxn].set_value(value)
+        if factor < 0:
+            factor = 0.1
+        if factor > 1:
+            factor = 0.9
         if unbounded == True:
             return
         if delta == None:
@@ -614,6 +623,10 @@ class ReactionModel(object):
             print("\tMust call build_instance() first...")
             return
         self.instance.E[rxn].set_value(value)
+        if factor < 0:
+            factor = 0.1
+        if factor > 1:
+            factor = 0.9
         if unbounded == True:
             return
         if delta == None:
@@ -633,7 +646,12 @@ class ReactionModel(object):
             self.instance.A[rxn].fix()
             self.instance.B[rxn].fix()
             self.instance.E[rxn].fix()
-            self.total_var = self.total_var - 3
+            if value(self.instance.A[rxn]) > 0:
+                self.total_var = self.total_var - 1
+            if abs(value(self.instance.B[rxn])) > 0:
+                self.total_var = self.total_var - 1
+            if abs(value(self.instance.E[rxn])) > 0:
+                self.total_var = self.total_var - 1
 
     # Function to unfix kinetics
     def unfix_kinetics(self):

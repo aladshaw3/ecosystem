@@ -2,7 +2,7 @@
 Simulate_Only: False
 Data_File: 1-hexene_data.txt
 Run_Seriel: False
-Weight_Method: default
+Weight_Method: relative
 
 All_Rxn_Unbound: False
 All_Rxn_Search_Fraction: 0.5
