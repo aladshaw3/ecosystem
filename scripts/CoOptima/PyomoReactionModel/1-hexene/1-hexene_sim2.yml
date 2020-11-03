@@ -25,7 +25,8 @@ Reaction_Params:
   r1: {A: 8.75931E+24,      E: 303430.1196,        B: 0,
     unbound_A: False,        unbound_E: False,       unbound_B: False,
     delta_A: None,           delta_E: None,       delta_B: None,
-    frac_A: 0.2,            frac_E: 0.2,           frac_B: 0.2
+    frac_A: 0.2,            frac_E: 0.2,           frac_B: 0.2,
+    lock_A: False,          lock_E: False,         lock_B: False
     }
   r2: {A: 11107879.73, E: 84671.49264, B: 0,
     unbound_A: True,        unbound_E: True,       unbound_B: True,

@@ -208,6 +208,11 @@ class ReactionModel(object):
                 frac_A = 0.2
                 frac_E = 0.2
                 frac_B = 0.2
+                lock_A = False
+                lock_B = False
+                lock_E = False
+
+                # TODO: Figure out a way to lock specific variables during optimization 
 
                 try:
                     if isinstance(doc["Reaction_Params"][rxn]["unbound_A"], bool):
