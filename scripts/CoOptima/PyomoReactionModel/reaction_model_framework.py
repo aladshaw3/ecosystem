@@ -451,7 +451,7 @@ class ReactionModel(object):
             solver.options['max_iter'] = 20*self.total_var
             solver.options['obj_scaling_factor'] = 1 #Set scaling factor to value similar to tol?
             if self.simulate_only == False:
-                solver.options['diverging_iterates_tol'] = 1e70
+                solver.options['diverging_iterates_tol'] = 1e95
             results = solver.solve(self.instance, tee=True, load_solutions=False)
             try:
                 self.instance.solutions.load_from(results)
