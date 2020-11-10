@@ -507,7 +507,7 @@ class ReactionModel(object):
             return
         self.model.MBs = Set(initialize=Specs)
         self.total_var += len(Specs)
-        self.model.C = Var(self.model.MBs, self.model.T_set, domain=NonNegativeReals, initialize=0)
+        self.model.C = Var(self.model.MBs, self.model.T_set, domain=NonNegativeReals, bounds=(1e-20,1e20), initialize=0)
         #self.model.C = Var(self.model.MBs, self.model.T_set, domain=Reals, initialize=0)
         self.model.Cin = Param(self.model.MBs, domain=NonNegativeReals, initialize=0, mutable=True)
         self.mb_set = True
