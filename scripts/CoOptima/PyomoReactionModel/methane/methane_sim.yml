@@ -1,0 +1,76 @@
+# -- NOTE: MUST name NO as NOx, because python interprets NO as a boolean  ---
+Simulate_Only: False
+Data_File: methane_data.txt
+Run_Seriel: False
+Weight_Method: default
+
+All_Rxn_Search_Fraction: 0.5
+
+Chemical_Species: [HC,CO,NOx,N2O,NH3,H2,O2,H2O]
+Rxn_Keys: [r1,r2,rr2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,r13,r14,r15,r16,r17,r18]
+Temperature_Set: [393,413,433,453,473,493,513,533,553,573,593,613,633,653,673,693,713,733,753,773,793]
+Space_Velocity: 8.333
+Void_Fraction: 0.3309
+Inlet_Conc:
+  HC: 3000
+  CO: 5345
+  NOx: 1070
+  N2O: 0
+  NH3: 0
+  H2: 1670
+  O2: 8600
+  H2O: 133019
+Reaction_Params:
+  r1: {A: 1.04952E+40, E: 398399.9532, B: 0}
+  r2: {A: 5425793.699, E: 82983.30378, B: 0}
+  rr2: {A: 1219655180, E: 92146.48127, B: 0}
+  r3: {A: 764373.5695, E: 126596.1269, B: 0}
+  r4: {A: 8.32047E+12, E: 134178.1859, B: 0}
+  r5: {A: 921981599.2, E: 98569.09806, B: 0}
+  r6: {A: 0, E: 0, B: 0}
+  r7: {A: 0, E: 0, B: 0}
+  r8: {A: 0.918372728, E: 73270.92949, B: 0,
+        lock_A: True,          lock_E: True,         lock_B: True}
+  r9: {A: 0, E: 0, B: 0}
+  r10: {A: 0, E: 10000, B: 0}
+  r11: {A: 0, E: 0, B: 0}
+  r12: {A: 0, E: 0, B: 0}
+  r13: {A: 0, E: 0, B: 0}
+  r14: {A: 0, E: 0, B: 0}
+  r15: {A: 329270.3016, E: 109770.7188, B: 0}
+  r16: {A: 0, E: 599779.2331, B: 0}
+# 0
+  r17: {A: 0, E: 194681.3485, B: 0}
+  r18: {A: 0, E: 226940.3635, B: 0}
+Reactant_Powers:
+  r1: {CO: 1, O2: 1}
+  r2: {H2: 1, O2: 1}
+  rr2: {H2O: 1}
+  r3: {HC: 1, O2: 1}
+  r4: {CO: 1, NOx: 1}
+  r5: {CO: 1, NOx: 1}
+  r6: {H2: 1, NOx: 1}
+  r7: {H2: 1, NOx: 1}
+  r8: {CO: 1, NOx: 1, H2O: 1}
+  r9: {CO: 1, NOx: 1, H2: 1}
+  r10: {HC: 1, NOx: 1}
+  r11: {CO: 1, H2O: 1}
+  r12: {HC: 1, H2O: 1}
+  r13: {N2O: 1, CO: 1}
+  r14: {H2: 1, NOx: 1}
+  r15: {N2O: 1, CO: 1, O2: 1}
+  r16: {HC: 1, NOx: 1, O2: 1}
+  r17: {NH3: 1, O2: 1}
+  r18: {HC: 1, NOx: 1, O2: 1}
+#Molar contributions may be a function of the specific HC
+Molar_Contributions_to_MBs:
+  #CO: r12 = -x
+  CO: {r1: 1, r4: 1, r5: 1, r8: 2.5, r9: 1, r11: 1, r12: -1, r13: 1, r15: 1}
+  #H2: r12 = -(x + y/2)
+  H2: {r2: 1, rr2: -1, r6: 2.5, r7: 1, r9: 1.5, r11: -1, r12: -3, r14: 1}
+  #NOx: r10 = (2x + y/2 - z)
+  NOx: {r4: 1, r5: 2, r6: 1, r7: 1, r8: 1, r9: 1, r10: 4, r14: 2, r15: -2, r16: 1, r18: 2}
+
+  N2O: {r5: -1, r13: 1, r14: -1, r15: 1, r18: -1}
+  NH3: {r6: -1, r8: -1, r9: -1, r16: -1, r17: 2}
+  HC: {r3: 1, r10: 1, r12: 1, r16: 1, r18: 1}

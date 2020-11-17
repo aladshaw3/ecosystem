@@ -65,6 +65,7 @@ class ReactionModel(object):
         self.Solution = {}  #Used to store solutions
         self.Data = {}  #Used to store data for optimization
         self.Weight_Factors = {} #Dictionary of weight factors for data fitting
+        self.fix_dict = {}  #Dictionary of kinetic parameters to fix/lock
 
     # Read a data file
     #
@@ -212,8 +213,21 @@ class ReactionModel(object):
                 lock_B = False
                 lock_E = False
 
-                # TODO: Figure out a way to lock specific variables during optimization
-
+                try:
+                    if isinstance(doc["Reaction_Params"][rxn]["lock_A"], bool):
+                        self.fix_dict[rxn]["A"] = doc["Reaction_Params"][rxn]["lock_A"]
+                except:
+                    self.fix_dict[rxn]["A"] = False
+                try:
+                    if isinstance(doc["Reaction_Params"][rxn]["lock_B"], bool):
+                        self.fix_dict[rxn]["B"] = doc["Reaction_Params"][rxn]["lock_B"]
+                except:
+                    self.fix_dict[rxn]["B"] = False
+                try:
+                    if isinstance(doc["Reaction_Params"][rxn]["lock_E"], bool):
+                        self.fix_dict[rxn]["E"] = doc["Reaction_Params"][rxn]["lock_E"]
+                except:
+                    self.fix_dict[rxn]["E"] = False
                 try:
                     if isinstance(doc["Reaction_Params"][rxn]["unbound_A"], bool):
                         unbound_A = doc["Reaction_Params"][rxn]["unbound_A"]
@@ -413,7 +427,7 @@ class ReactionModel(object):
             solver.options['tol'] = 1e-6
             solver.options['acceptable_tol'] = 1e-6
             solver.options['compl_inf_tol'] = 1e-6
-            solver.options['max_iter'] = 10*self.total_var
+            solver.options['max_iter'] = 20*self.total_var
             solver.options['obj_scaling_factor'] = 1 #Set scaling factor to value similar to tol?
             results = solver.solve(self.instance, tee=True, load_solutions=False)
             try:
@@ -448,10 +462,10 @@ class ReactionModel(object):
             solver.options['tol'] = 1e-6
             solver.options['acceptable_tol'] = 1e-6
             solver.options['compl_inf_tol'] = 1e-6
-            solver.options['max_iter'] = 20*self.total_var
+            solver.options['max_iter'] = 30*self.total_var
             solver.options['obj_scaling_factor'] = 1 #Set scaling factor to value similar to tol?
             if self.simulate_only == False:
-                solver.options['diverging_iterates_tol'] = 1e95
+                solver.options['diverging_iterates_tol'] = 1e100
             results = solver.solve(self.instance, tee=True, load_solutions=False)
             try:
                 self.instance.solutions.load_from(results)
@@ -478,7 +492,7 @@ class ReactionModel(object):
                 solver.options['tol'] = 1e-6
                 solver.options['acceptable_tol'] = 1e-6
                 solver.options['compl_inf_tol'] = 1e-6
-                solver.options['max_iter'] = 10*self.total_var
+                solver.options['max_iter'] = 20*self.total_var
                 solver.options['obj_scaling_factor'] = 1 #Set scaling factor to value similar to tol?
                 results = solver.solve(self.instance, tee=True, load_solutions=False)
                 try:
@@ -541,6 +555,12 @@ class ReactionModel(object):
         self.model.E = Var(self.model.rxns, domain=Reals, initialize=0)
         self.model.powers = Param(self.model.MBs, self.model.rxns, domain=Any, initialize=0, mutable=True)
         self.rxns_set = True
+
+        for r in rxns:
+            self.fix_dict[r] = {}
+            self.fix_dict[r]["A"] = False
+            self.fix_dict[r]["B"] = False
+            self.fix_dict[r]["E"] = False
 
     # Set initial conditions for a species
     def set_initial(self, species, value):
@@ -653,11 +673,14 @@ class ReactionModel(object):
             self.instance.B[rxn].fix()
             self.instance.E[rxn].fix()
             if value(self.instance.A[rxn]) > 0:
-                self.total_var = self.total_var - 1
+                if self.fix_dict[rxn]["A"] == False:
+                    self.total_var = self.total_var - 1
             if abs(value(self.instance.B[rxn])) > 0:
-                self.total_var = self.total_var - 1
+                if self.fix_dict[rxn]["B"] == False:
+                    self.total_var = self.total_var - 1
             if abs(value(self.instance.E[rxn])) > 0:
-                self.total_var = self.total_var - 1
+                if self.fix_dict[rxn]["E"] == False:
+                    self.total_var = self.total_var - 1
 
     # Function to unfix kinetics
     def unfix_kinetics(self):
@@ -667,14 +690,17 @@ class ReactionModel(object):
             return
         for rxn in self.instance.rxns:
             if value(self.instance.A[rxn]) > 0:
-                self.instance.A[rxn].unfix()
-                self.total_var = self.total_var + 1
+                if self.fix_dict[rxn]["A"] == False:
+                    self.instance.A[rxn].unfix()
+                    self.total_var = self.total_var + 1
             if abs(value(self.instance.B[rxn])) > 0:
-                self.instance.B[rxn].unfix()
-                self.total_var = self.total_var + 1
+                if self.fix_dict[rxn]["B"] == False:
+                    self.instance.B[rxn].unfix()
+                    self.total_var = self.total_var + 1
             if abs(value(self.instance.E[rxn])) > 0:
-                self.instance.E[rxn].unfix()
-                self.total_var = self.total_var + 1
+                if self.fix_dict[rxn]["E"] == False:
+                    self.instance.E[rxn].unfix()
+                    self.total_var = self.total_var + 1
 
     # Set the tau value
     def set_tau(self, value):
