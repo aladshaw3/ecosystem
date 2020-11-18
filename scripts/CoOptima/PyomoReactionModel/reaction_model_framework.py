@@ -28,6 +28,8 @@ def interpret_weight_method(name):
         return "equalizer"
     elif option == "relative":
         return "relative"
+    elif option == "custom":
+        return "custom"
     else:
         return "default"
 
@@ -66,6 +68,7 @@ class ReactionModel(object):
         self.Data = {}  #Used to store data for optimization
         self.Weight_Factors = {} #Dictionary of weight factors for data fitting
         self.fix_dict = {}  #Dictionary of kinetic parameters to fix/lock
+        self.custom_wfs = {} #Dictionary of custom weight factors
 
     # Read a data file
     #
@@ -166,6 +169,26 @@ class ReactionModel(object):
             for species in doc["Chemical_Species"]:
                 for temp in temp_list:
                     self.Solution[temp][species] = 0
+
+            if self.weight_method == "custom" and self.simulate_only == False:
+                wf_map = {}
+                try:
+                    wf_map = doc["Weight_Factors"]
+                except:
+                    print("\nError! Key 'Weight_Factors' is missing!\n")
+                    return
+                if not isinstance(wf_map, dict):
+                    print("\nError! Key 'Weight_Factors' must be a Dictionary!\n")
+                    return
+
+                for spec in wf_map:
+                    if spec not in data_spec:
+                        print("\nError! " + spec + " key 'Weight_Factors' is not in the data set!\n")
+                        return
+                    if wf_map[spec] > 0:
+                        self.custom_wfs[spec] = wf_map[spec]
+                    else:
+                        self.custom_wfs[spec] = 0
 
             if type(doc["Rxn_Keys"]) is not list:
                 print("\nError! Key 'Rxn_Keys' must be a list!\n")
@@ -749,6 +772,8 @@ class ReactionModel(object):
             self.weight_equalizer()
         elif self.weight_method == "relative":
             self.weight_relative()
+        elif self.weight_method == "custom":
+            self.weight_custom()
         else:
             return
 
@@ -770,6 +795,15 @@ class ReactionModel(object):
         for temp in self.instance.T_set:
             for spec in self.instance.MB_data:
                 self.Weight_Factors[spec][temp] = (1.0/(self.Data[spec][temp]+1e-4))**2
+
+    # Custom Weight Method
+    def weight_custom(self):
+        for temp in self.instance.T_set:
+            for spec in self.instance.MB_data:
+                try:
+                    self.Weight_Factors[spec][temp] = self.custom_wfs[spec]
+                except:
+                    self.Weight_Factors[spec][temp] = 1.0
 
     # Return reaction rate
     def comp_rate(self, rxn, model, temp):
