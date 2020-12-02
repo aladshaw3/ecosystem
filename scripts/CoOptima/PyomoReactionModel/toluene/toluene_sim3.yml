@@ -1,0 +1,74 @@
+# -- NOTE: MUST name NO as NOx, because python interprets NO as a boolean  ---
+Simulate_Only: True
+Data_File: toluene_data.txt
+Run_Seriel: False
+Weight_Method: default
+# NOTE: The Weight_Factors only need values for species in the data set (see Data_File)
+Weight_Factors: {HC: 3, CO: 0.5, NOx: 2, N2O: 0.5, NH3: 1.5, H2: 0.1}
+
+Chemical_Species: [HC,CO,NOx,N2O,NH3,H2,O2,H2O]
+Rxn_Keys: [r1,r2,rr2,r3,r4,r5,r6,r7,r8,r9,r10,r11,r12,r13,r14,r15,r16,r17,r18]
+Temperature_Set: [393,413,433,453,473,493,513,533,553,573,593,613,633,653,673,693,713,733,753,773,793]
+Space_Velocity: 8.333
+Void_Fraction: 0.3309
+Inlet_Conc:
+  HC: 428.57
+  CO: 5069
+  NOx: 1038
+  N2O: 0
+  NH3: 0
+  H2: 1670
+  O2: 6500
+  H2O: 134283
+Reaction_Params:
+  r1: {A: 8.76E+26, E: 301072.2181, B: 0}
+  r2: {A: 1778.560979, E: 53689.31094, B: 0}
+  rr2: {A: 804615.7064, E: 65974.92676, B: 0}
+  r3: {A: 7.88341E+15, E: 204098.7981, B: 0}
+  r4: {A: 2.253002143, E: 34410.26123, B: 0}
+  r5: {A: 209.9158801, E: 43202.26907, B: 0}
+  r6: {A: 0, E: 0, B: 0}
+  r7: {A: 0, E: 0, B: 0}
+  r8: {A: 0.060910274, E: 65283.02877, B: 0}
+  r9: {A: 0, E: 0, B: 0}
+  r10: {A: 3.18E+30, E: 339190.3488, B: 0}
+  r11: {A: 0, E: 0, B: 0}
+  r12: {A: 0, E: 0, B: 0}
+  r13: {A: 0, E: 0, B: 0}
+  r14: {A: 0, E: 0, B: 0}
+  r15: {A: 5917464.065, E: 117357.0151, B: 0}
+  r16: {A: 1.58E+31, E: 395428.9499, B: 0}
+  r17: {A: 4.42E+13, E: 224425.3547, B: 0}
+  r18: {A: 1.11E+20, E: 280507.8007, B: 0}
+Reactant_Powers:
+  r1: {CO: 1, O2: 1}
+  r2: {H2: 1, O2: 1}
+  rr2: {H2O: 1}
+  r3: {HC: 1, O2: 1}
+  r4: {CO: 1, NOx: 1}
+  r5: {CO: 1, NOx: 1}
+  r6: {H2: 1, NOx: 1}
+  r7: {H2: 1, NOx: 1}
+  r8: {CO: 1, NOx: 1, H2O: 1}
+  r9: {CO: 1, NOx: 1, H2: 1}
+  r10: {HC: 1, NOx: 1}
+  r11: {CO: 1, H2O: 1}
+  r12: {HC: 1, H2O: 1}
+  r13: {N2O: 1, CO: 1}
+  r14: {H2: 1, NOx: 1}
+  r15: {N2O: 1, CO: 1, O2: 1}
+  r16: {HC: 1, NOx: 1, O2: 1}
+  r17: {NH3: 1, O2: 1}
+  r18: {HC: 1, NOx: 1, O2: 1}
+#Molar contributions may be a function of the specific HC
+Molar_Contributions_to_MBs:
+  #CO: r12 = -x
+  CO: {r1: 1, r4: 1, r5: 1, r8: 2.5, r9: 1, r11: 1, r12: -7, r13: 1, r15: 1}
+  #H2: r12 = -(x + y/2)
+  H2: {r2: 1, rr2: -1, r6: 2.5, r7: 1, r9: 1.5, r11: -1, r12: -11, r14: 1}
+  #NOx: r10 = (2x + y/2 - z)
+  NOx: {r4: 1, r5: 2, r6: 1, r7: 1, r8: 1, r9: 1, r10: 18, r14: 2, r15: -2, r16: 1, r18: 2}
+
+  N2O: {r5: -1, r13: 1, r14: -1, r15: 1, r18: -1}
+  NH3: {r6: -1, r8: -1, r9: -1, r16: -1, r17: 2}
+  HC: {r3: 1, r10: 1, r12: 1, r16: 1, r18: 1}
