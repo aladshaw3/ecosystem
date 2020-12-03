@@ -240,17 +240,26 @@ class ReactionModel(object):
                     if isinstance(doc["Reaction_Params"][rxn]["lock_A"], bool):
                         self.fix_dict[rxn]["A"] = doc["Reaction_Params"][rxn]["lock_A"]
                 except:
-                    self.fix_dict[rxn]["A"] = False
+                    if self.simulate_only == False:
+                        self.fix_dict[rxn]["A"] = False
+                    else:
+                        self.fix_dict[rxn]["A"] = True
                 try:
                     if isinstance(doc["Reaction_Params"][rxn]["lock_B"], bool):
                         self.fix_dict[rxn]["B"] = doc["Reaction_Params"][rxn]["lock_B"]
                 except:
-                    self.fix_dict[rxn]["B"] = False
+                    if self.simulate_only == False:
+                        self.fix_dict[rxn]["B"] = False
+                    else:
+                        self.fix_dict[rxn]["B"] = True
                 try:
                     if isinstance(doc["Reaction_Params"][rxn]["lock_E"], bool):
                         self.fix_dict[rxn]["E"] = doc["Reaction_Params"][rxn]["lock_E"]
                 except:
-                    self.fix_dict[rxn]["E"] = False
+                    if self.simulate_only == False:
+                        self.fix_dict[rxn]["E"] = False
+                    else:
+                        self.fix_dict[rxn]["E"] = True
                 try:
                     if isinstance(doc["Reaction_Params"][rxn]["unbound_A"], bool):
                         unbound_A = doc["Reaction_Params"][rxn]["unbound_A"]
