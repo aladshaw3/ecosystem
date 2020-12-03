@@ -42,7 +42,7 @@ Reaction_Params:
   r15: {A: 18899795.83, E: 120981.4744, B: 0}
   r16: {A: 4.03E+58, E: 739165.483, B: 0,
         lock_A: False,          lock_E: False,         lock_B: True}
-  r17: {A: 45.32369523, E: 67785.95178, B: 0,
+  r17: {A: 2.13E+19, E: 325209.4731, B: 0,
         lock_A: False,          lock_E: False,         lock_B: True}
   r18: {A: 1.49E+39, E: 614490.5225, B: 0}
 Reactant_Powers:
