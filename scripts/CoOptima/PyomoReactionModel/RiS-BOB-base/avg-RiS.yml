@@ -1,0 +1,102 @@
+# -- NOTE: MUST name NO as NOx, because python interprets NO as a boolean  ---
+Simulate_Only: True
+#Data_File: E10_data.txt
+Run_Seriel: False
+#Weight_Method: default
+# NOTE: The Weight_Factors only need values for species in the data set (see Data_File)
+#Weight_Factors: {CO: 0.5, NOx: 1.5, N2O: 0.7, NH3: 10, H2: 0.1}
+
+# HCa = toluene, HCb = iso-octane, HCc = ethanol, HCd = n-heptane, HCe = 1-hexene
+
+#All_Rxn_Search_Fraction: 0.2
+
+Chemical_Species: [HCa,HCb,HCc,HCd,HCe,CO,NOx,N2O,NH3,H2,O2,H2O]
+Rxn_Keys: [r1,r2,rr2,r3a,r3b,r3c,r3d,r3e,r4,r5,r8,r10a,r10b,r10c,r10d,r10e,r15,r16a,r16b,r16c,r16d,r16e,r17,r18a,r18b,r18c,r18d,r18e]
+Temperature_Set: [393,413,433,453,473,493,513,533,553,573,593,613,633,653,673,693,713,733,753,773,793]
+Space_Velocity: 8.333
+Void_Fraction: 0.3309
+Inlet_Conc:
+  HCa: 134.2857143    #toluene
+  HCb: 189.5     #iso-octane
+  HCc: 0        #ethanol
+  HCd: 58.28571429        #n-heptane
+  HCe: 22.66666667        #1-hexene
+  CO: 5299
+  NOx: 1027
+  N2O: 0
+  NH3: 0
+  H2: 1670
+  O2: 7060
+  H2O: 133742
+Reaction_Params:
+  r1: {A: 1.47521E+26, E: 301069.3477, B: 0}
+  r2: {A: 6338.895286, E: 56364.26616, B: 0}
+  rr2: {A: 2282706.765, E: 67318.63593, B: 0}
+  r3a: {A: 7.88341E+15, E: 204098.7981, B: 0} #toluene
+  r3b: {A: 2.21557E+11, E: 162928.1425, B: 0} #iso-octane
+  r3c: {A: 237467905.1, E: 111956.4292, B: 0} #ethanol
+  r3d: {A: 3.57865E+11, E: 154776.0323, B: 0} #n-heptane
+  r3e: {A: 1.05E+24, E: 311429.0924, B: 0} #1-hexene
+  r4: {A: 7.856576293, E: 35842.84756, B: 0}
+  r5: {A: 127.2987715, E: 42373.2315, B: 0}
+  r8: {A: 0.430050647, E: 72647.24247, B: 0}
+  r10a: {A: 3.18386E+30, E: 339190.3488, B: 0}  #toluene
+  r10b: {A: 2.34E+32, E: 424515.5175, B: 0}      #iso-octane
+  r10c: {A: 6.33E+27, E: 311762.4285, B: 0}   #ethanol
+  r10d: {A: 2.45705E+32, E: 392671.3298, B: 0}   #n-heptane
+  r10e: {A: 1.74E+34, E: 401620.2438, B: 0}   #1-hexene
+  r15: {A: 8361198.578, E: 121843.0508, B: 0}
+  r16a: {A: 1.58256E+31, E: 395428.9499, B: 0}  #toluene
+  r16b: {A: 1.04E+30, E: 443891.0174, B: 0} #iso-octane
+  r16c: {A: 9.95E+27, E: 364288.1757, B: 0} #ethanol
+  r16d: {A: 1.21402E+30, E: 409902.2735, B: 0} #n-heptane
+  r16e: {A: 9.66E+28, E: 379347.51, B: 0} #1-hexene
+  r17: {A: 3.13712E+19, E: 328610.5994, B: 0}
+  r18a: {A: 1.1097E+20, E: 280507.8007, B: 0} #toluene
+  r18b: {A: 0.0425, E: 55412.72589, B: 0}   #iso-octane
+  r18c: {A: 2758431.075, E: 118793.9673, B: 0} #ethanol
+  r18d: {A: 0.412, E: 60279.01689, B: 0} #n-heptane
+  r18e: {A: 1.31E+22, E: 316587.4952, B: 0} #1-hexene
+Reactant_Powers:
+  r1: {CO: 1, O2: 1}
+  r2: {H2: 1, O2: 1}
+  rr2: {H2O: 1}
+  r3a: {HCa: 1, O2: 1}
+  r3b: {HCb: 1, O2: 1}
+  r3c: {HCc: 1, O2: 1}
+  r3d: {HCd: 1, O2: 1}
+  r3e: {HCe: 1, O2: 1}
+  r4: {CO: 1, NOx: 1}
+  r5: {CO: 1, NOx: 1}
+  r8: {CO: 1, NOx: 1, H2O: 1}
+  r10a: {HCa: 1, NOx: 1}
+  r10b: {HCb: 1, NOx: 1}
+  r10c: {HCc: 1, NOx: 1}
+  r10d: {HCd: 1, NOx: 1}
+  r10e: {HCe: 1, NOx: 1}
+  r15: {N2O: 1, CO: 1, O2: 1}
+  r16a: {HCa: 1, NOx: 1, O2: 1}
+  r16b: {HCb: 1, NOx: 1, O2: 1}
+  r16c: {HCc: 1, NOx: 1, O2: 1}
+  r16d: {HCd: 1, NOx: 1, O2: 1}
+  r16e: {HCe: 1, NOx: 1, O2: 1}
+  r17: {NH3: 1, O2: 1}
+  r18a: {HCa: 1, NOx: 1, O2: 1}
+  r18b: {HCb: 1, NOx: 1, O2: 1}
+  r18c: {HCc: 1, NOx: 1, O2: 1}
+  r18d: {HCd: 1, NOx: 1, O2: 1}
+  r18e: {HCe: 1, NOx: 1, O2: 1}
+#Molar contributions may be a function of the specific HC
+Molar_Contributions_to_MBs:
+  CO: {r1: 1, r4: 1, r5: 1, r8: 2.5, r15: 1}
+  H2: {r2: 1, rr2: -1}
+  #NOx: r10 = (2x + y/2 - z)
+  NOx: {r4: 1, r5: 2, r8: 1, r10a: 18, r10b: 25, r10c: 6, r10d: 22, r10e: 18, r15: -2, r16a: 1, r16b: 1, r16c: 1, r16d: 1, r16e: 1, r18a: 2, r18b: 2, r18c: 2, r18d: 2, r18e: 2}
+
+  N2O: {r5: -1, r15: 1, r18a: -1, r18b: -1, r18c: -1, r18d: -1, r18e: -1}
+  NH3: {r8: -1, r16a: -1, r16b: -1, r16c: -1, r16d: -1, r16e: -1, r17: 2}
+  HCa: {r3a: 1, r10a: 1, r16a: 1, r18a: 1}
+  HCb: {r3b: 1, r10b: 1, r16b: 1, r18b: 1}
+  HCc: {r3c: 1, r10c: 1, r16c: 1, r18c: 1}
+  HCd: {r3d: 1, r10d: 1, r16d: 1, r18d: 1}
+  HCe: {r3e: 1, r10e: 1, r16e: 1, r18e: 1}

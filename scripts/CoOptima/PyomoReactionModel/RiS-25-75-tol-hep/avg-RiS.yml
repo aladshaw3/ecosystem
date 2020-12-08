@@ -1,0 +1,72 @@
+# -- NOTE: MUST name NO as NOx, because python interprets NO as a boolean  ---
+Simulate_Only: True
+#Data_File: E10_data.txt
+Run_Seriel: False
+#Weight_Method: default
+# NOTE: The Weight_Factors only need values for species in the data set (see Data_File)
+#Weight_Factors: {CO: 0.5, NOx: 1.5, N2O: 0.7, NH3: 10, H2: 0.1}
+
+# HCa = toluene, HCb = n-heptane
+
+#All_Rxn_Search_Fraction: 0.2
+
+Chemical_Species: [HCa,HCb,CO,NOx,N2O,NH3,H2,O2,H2O]
+Rxn_Keys: [r1,r2,rr2,r3a,r3b,r4,r5,r8,r10a,r10b,r15,r16a,r16b,r17,r18a,r18b]
+Temperature_Set: [393,413,433,453,473,493,513,533,553,573,593,613,633,653,673,693,713,733,753,773,793]
+Space_Velocity: 8.333
+Void_Fraction: 0.3309
+Inlet_Conc:
+  HCa: 107.143
+  HCb: 321.429
+  CO: 5401
+  NOx: 1056
+  N2O: 0
+  NH3: 0
+  H2: 1670
+  O2: 7080
+  H2O: 135265
+Reaction_Params:
+  r1: {A: 3.37488E+27, E: 300962.1033, B: 0}
+  r2: {A: 7824.528519, E: 57057.00935, B: 0}
+  rr2: {A: 2504259.752, E: 66904.62614, B: 0}
+  r3a: {A: 7.88341E+15, E: 204098.7981, B: 0}
+  r3b: {A: 3.57865E+11, E: 154776.0323, B: 0}
+  r4: {A: 16.1984774, E: 37871.46413, B: 0}
+  r5: {A: 69.00392179, E: 40429.39237, B: 0}
+  r8: {A: 0.284465138, E: 69820.815, B: 0}
+  r10a: {A: 3.18386E+30, E: 339190.3488, B: 0}
+  r10b: {A: 2.45705E+32, E: 392671.3298, B: 0}
+  r15: {A: 6255355.992, E: 122258.8918, B: 0}
+  r16a: {A: 1.58256E+31, E: 395428.9499, B: 0}
+  r16b: {A: 1.21402E+30, E: 409902.2735, B: 0}
+  r17: {A: 1.96655E+19, E: 330799.2318, B: 0}
+  r18a: {A: 1.1097E+20, E: 280507.8007, B: 0}
+  r18b: {A: 0.412, E: 60279.01689, B: 0}
+Reactant_Powers:
+  r1: {CO: 1, O2: 1}
+  r2: {H2: 1, O2: 1}
+  rr2: {H2O: 1}
+  r3a: {HCa: 1, O2: 1}
+  r3b: {HCb: 1, O2: 1}
+  r4: {CO: 1, NOx: 1}
+  r5: {CO: 1, NOx: 1}
+  r8: {CO: 1, NOx: 1, H2O: 1}
+  r10a: {HCa: 1, NOx: 1}
+  r10b: {HCb: 1, NOx: 1}
+  r15: {N2O: 1, CO: 1, O2: 1}
+  r16a: {HCa: 1, NOx: 1, O2: 1}
+  r16b: {HCb: 1, NOx: 1, O2: 1}
+  r17: {NH3: 1, O2: 1}
+  r18a: {HCa: 1, NOx: 1, O2: 1}
+  r18b: {HCb: 1, NOx: 1, O2: 1}
+#Molar contributions may be a function of the specific HC
+Molar_Contributions_to_MBs:
+  CO: {r1: 1, r4: 1, r5: 1, r8: 2.5, r15: 1}
+  H2: {r2: 1, rr2: -1}
+  #NOx: r10 = (2x + y/2 - z)
+  NOx: {r4: 1, r5: 2, r8: 1, r10a: 18, r10b: 22, r15: -2, r16a: 1, r16b: 1, r18a: 2, r18b: 2}
+
+  N2O: {r5: -1, r15: 1, r18a: -1, r18b: -1}
+  NH3: {r8: -1, r16a: -1, r16b: -1, r17: 2}
+  HCa: {r3a: 1, r10a: 1, r16a: 1, r18a: 1}
+  HCb: {r3b: 1, r10b: 1, r16b: 1, r18b: 1}
