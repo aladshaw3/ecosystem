@@ -704,15 +704,15 @@ class ReactionModel(object):
             self.instance.A[rxn].fix()
             self.instance.B[rxn].fix()
             self.instance.E[rxn].fix()
-            if value(self.instance.A[rxn]) > 0:
-                if self.fix_dict[rxn]["A"] == False:
-                    self.total_var = self.total_var - 1
-            if abs(value(self.instance.B[rxn])) > 0:
-                if self.fix_dict[rxn]["B"] == False:
-                    self.total_var = self.total_var - 1
-            if abs(value(self.instance.E[rxn])) > 0:
-                if self.fix_dict[rxn]["E"] == False:
-                    self.total_var = self.total_var - 1
+            #if value(self.instance.A[rxn]) > 0:
+            #    if self.fix_dict[rxn]["A"] == False:
+            #        self.total_var = self.total_var - 1
+            #if abs(value(self.instance.B[rxn])) > 0:
+            #    if self.fix_dict[rxn]["B"] == False:
+            #        self.total_var = self.total_var - 1
+            #if abs(value(self.instance.E[rxn])) > 0:
+            #    if self.fix_dict[rxn]["E"] == False:
+            #        self.total_var = self.total_var - 1
 
     # Function to unfix kinetics
     def unfix_kinetics(self):
@@ -724,15 +724,15 @@ class ReactionModel(object):
             if value(self.instance.A[rxn]) > 0:
                 if self.fix_dict[rxn]["A"] == False:
                     self.instance.A[rxn].unfix()
-                    self.total_var = self.total_var + 1
+                    #self.total_var = self.total_var + 1
             if abs(value(self.instance.B[rxn])) > 0:
                 if self.fix_dict[rxn]["B"] == False:
                     self.instance.B[rxn].unfix()
-                    self.total_var = self.total_var + 1
+                    #self.total_var = self.total_var + 1
             if abs(value(self.instance.E[rxn])) > 0:
                 if self.fix_dict[rxn]["E"] == False:
                     self.instance.E[rxn].unfix()
-                    self.total_var = self.total_var + 1
+                    #self.total_var = self.total_var + 1
 
     # Set the tau value
     def set_tau(self, value):
