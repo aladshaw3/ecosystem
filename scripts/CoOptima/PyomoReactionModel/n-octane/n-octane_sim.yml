@@ -1,10 +1,10 @@
 # -- NOTE: MUST name NO as NOx, because python interprets NO as a boolean  ---
-Simulate_Only: True
+Simulate_Only: False
 Data_File: n-octane_data.txt
 Run_Seriel: False
 Weight_Method: custom
 # NOTE: The Weight_Factors only need values for species in the data set (see Data_File)
-Weight_Factors: {HC: 4, CO: 0.5, NOx: 1.5, N2O: 0.3, NH3: 0.5, H2: 0.1}
+Weight_Factors: {HC: 12, CO: 1, NOx: 5, N2O: 5, NH3: 10, H2: 0.1}
 
 All_Rxn_Search_Fraction: 0.2
 
@@ -23,26 +23,33 @@ Inlet_Conc:
   O2: 7300
   H2O: 134072
 Reaction_Params:
-  r1: {A: 4.54E+28, E: 292239.0507, B: 0}
-  r2: {A: 23977.68552, E: 59676.99468, B: 0}
-  rr2: {A: 6392316.375, E: 69105.9609, B: 0}
+  r1: {A: 4.54E+28, E: 292239.0507, B: 0,
+        lock_A: True,          lock_E: True,         lock_B: True}
+  r2: {A: 23977.68552, E: 59676.99468, B: 0,
+        lock_A: True,          lock_E: True,         lock_B: True}
+  rr2: {A: 6392316.375, E: 69105.9609, B: 0,
+        lock_A: True,          lock_E: True,         lock_B: True}
   r3: {A: 2.02603E+12, E: 162897.527, B: 0,
-        lock_A: False,          lock_E: False,         lock_B: True}
-  r4: {A: 25610.63555, E: 61816.52485, B: 0}
-  r5: {A: 45.56763331, E: 38930.49453, B: 0}
+        lock_A: True,          lock_E: True,         lock_B: True}
+  r4: {A: 288.64, E: 49430, B: 0}
+  r5: {A: 45.56763331, E: 38930.49453, B: 0,
+        lock_A: True,          lock_E: True,         lock_B: True}
   r6: {A: 0, E: 0, B: 0}
   r7: {A: 0, E: 0, B: 0}
   r8: {A: 1.572583727, E: 75004.58022, B: 0,
         lock_A: True,          lock_E: True,         lock_B: True}
   r9: {A: 0, E: 0, B: 0}
-  r10: {A: 2.92E+32, E: 386511.2554, B: 0}
+  r10: {A: 2.92E+32, E: 386511.2554, B: 0,
+        lock_A: True,          lock_E: True,         lock_B: True}
   r11: {A: 0, E: 0, B: 0}
   r12: {A: 0, E: 0, B: 0}
   r13: {A: 0, E: 0, B: 0}
   r14: {A: 0, E: 0, B: 0}
-  r15: {A: 5749829.86, E: 122742.4725, B: 0}
+  r15: {A: 5749829.86, E: 122742.4725, B: 0,
+        lock_A: True,          lock_E: True,         lock_B: True}
   r16: {A: 1.30E+30, E: 405619.3184, B: 0}
-  r17: {A: 2.13E+19, E: 325209.4731, B: 0}
+  r17: {A: 2.641E+16, E: 276665, B: 0,
+        lock_A: True,          lock_E: True,         lock_B: True}
   r18: {A: 2.14, E: 63211.37228, B: 0,
         lock_A: True,          lock_E: True,         lock_B: True}
 Reactant_Powers:

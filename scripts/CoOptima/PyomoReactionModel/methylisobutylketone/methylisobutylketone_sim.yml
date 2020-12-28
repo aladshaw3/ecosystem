@@ -4,7 +4,7 @@ Data_File: methylisobutylketone_data.txt
 Run_Seriel: False
 Weight_Method: custom
 # NOTE: The Weight_Factors only need values for species in the data set (see Data_File)
-Weight_Factors: {HC: 5, CO: 1, NOx: 2, N2O: 0.1, NH3: 0.1, H2: 0.1}
+Weight_Factors: {HC: 10, CO: 1, NOx: 5, N2O: 5, NH3: 10, H2: 0.1}
 
 All_Rxn_Search_Fraction: 0.2
 
@@ -23,29 +23,35 @@ Inlet_Conc:
   O2: 6900
   H2O: 133498
 Reaction_Params:
-  r1: {A: 2.72E+30, E: 315586.55, B: 0}
-  r2: {A: 258615.7627, E: 75577.29622, B: 0}
-  rr2: {A: 319378606.2, E: 91915.34326, B: 0}
-  # 216623873.4
-  r3: {A: 316623873.4, E: 121397.0474, B: 0,
-        lock_A: False,          lock_E: False,         lock_B: True}
-  r4: {A: 248541.8705, E: 73029.5159, B: 0}
-  r5: {A: 31.29818384, E: 38396.09227, B: 0}
+  r1: {A: 2.72E+30, E: 315697.1131, B: 0,
+        lock_A: True,          lock_E: True,         lock_B: True}
+  r2: {A: 310338.9152, E: 75106.85632, B: 0,
+        lock_A: True,          lock_E: True,         lock_B: True}
+  rr2: {A: 255502885, E: 89006.45406, B: 0,
+        lock_A: True,          lock_E: True,         lock_B: True}
+  r3: {A: 379948648.1, E: 127168.0865, B: 0,
+        lock_A: True,          lock_E: True,         lock_B: True}
+  r4: {A: 288.64, E: 49430, B: 0}
+  r5: {A: 37.55782061, E: 38617.77859, B: 0,
+        lock_A: True,          lock_E: True,         lock_B: True}
   r6: {A: 0, E: 0, B: 0}
   r7: {A: 0, E: 0, B: 0}
-  r8: {A: 0.33371205, E: 71261.38191, B: 0}
+  r8: {A: 0.40045446, E: 69910.43311, B: 0,
+        lock_A: True,          lock_E: True,         lock_B: True}
   r9: {A: 0, E: 0, B: 0}
-  r10: {A: 6.33E+27, E: 326295.3356, B: 0}
+  r10: {A: 6.33E+27, E: 331570.8771, B: 0,
+        lock_A: True,          lock_E: True,         lock_B: True}
   r11: {A: 0, E: 0, B: 0}
   r12: {A: 0, E: 0, B: 0}
   r13: {A: 0, E: 0, B: 0}
   r14: {A: 0, E: 0, B: 0}
-  r15: {A: 2072673.685, E: 115004.3755, B: 0}
-  r16: {A: 9.95E+27, E: 372064.808, B: 0}
-  r17: {A: 1.04E+19, E: 310613.2376, B: 0}
-  # 21033724.3
-  r18: {A: 11033724.3, E: 130185.6781, B: 0,
-        lock_A: False,          lock_E: False,         lock_B: True}
+  r15: {A: 1658138.948, E: 116372.7499, B: 0,
+        lock_A: True,          lock_E: True,         lock_B: True}
+  r16: {A: 9.95E+27, E: 375757.1504, B: 0}
+  r17: {A: 2.641E+16, E: 276665, B: 0,
+        lock_A: True,          lock_E: True,         lock_B: True}
+  r18: {A: 13240469.16, E: 128539.99, B: 0,
+        lock_A: True,          lock_E: True,         lock_B: True}
 Reactant_Powers:
   r1: {CO: 1, O2: 1}
   r2: {H2: 1, O2: 1}

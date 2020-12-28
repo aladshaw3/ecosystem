@@ -1,8 +1,10 @@
 # -- NOTE: MUST name NO as NOx, because python interprets NO as a boolean  ---
-Simulate_Only: True
+Simulate_Only: False
 Data_File: methane_data.txt
 Run_Seriel: False
-Weight_Method: default
+Weight_Method: custom
+# NOTE: The Weight_Factors only need values for species in the data set (see Data_File)
+Weight_Factors: {HC: 2, CO: 1, NOx: 5, N2O: 5, NH3: 10, H2: 0.1}
 
 All_Rxn_Search_Fraction: 0.5
 
@@ -21,12 +23,17 @@ Inlet_Conc:
   O2: 8600
   H2O: 133019
 Reaction_Params:
-  r1: {A: 2.72E+31, E: 316742.6667, B: 0}
-  r2: {A: 12208035.82, E: 83039.61595, B: 0}
-  rr2: {A: 964156998.2, E: 86315.87795, B: 0}
-  r3: {A: 337340.6426, E: 121447.8617, B: 0}
-  r4: {A: 1306594.576, E: 75156.5849, B: 0}
-  r5: {A: 124.0762432, E: 42612.09437, B: 0}
+  r1: {A: 2.72E+31, E: 316742.6667, B: 0,
+        lock_A: True,          lock_E: True,         lock_B: True}
+  r2: {A: 12208035.82, E: 83039.61595, B: 0,
+        lock_A: True,          lock_E: True,         lock_B: True}
+  rr2: {A: 964156998.2, E: 86315.87795, B: 0,
+        lock_A: True,          lock_E: True,         lock_B: True}
+  r3: {A: 337340.6426, E: 121447.8617, B: 0,
+        lock_A: True,          lock_E: True,         lock_B: True}
+  r4: {A: 288.64, E: 49430, B: 0}
+  r5: {A: 124.0762432, E: 42612.09437, B: 0,
+        lock_A: True,          lock_E: True,         lock_B: True}
   r6: {A: 0, E: 0, B: 0}
   r7: {A: 0, E: 0, B: 0}
   r8: {A: 0.918372728, E: 73270.92949, B: 0,
@@ -38,10 +45,10 @@ Reaction_Params:
   r12: {A: 0, E: 0, B: 0}
   r13: {A: 0, E: 0, B: 0}
   r14: {A: 0, E: 0, B: 0}
-  r15: {A: 711223.8515, E: 117070.8921, B: 0}
-  r16: {A: 7.17E+26, E: 554150.3044, B: 0,
+  r15: {A: 711223.8515, E: 117070.8921, B: 0,
         lock_A: True,          lock_E: True,         lock_B: True}
-  r17: {A: 45.32369523, E: 67785.95178, B: 0,
+  r16: {A: 7.17E+26, E: 554150.3044, B: 0}
+  r17: {A: 2.641E+16, E: 276665, B: 0,
         lock_A: True,          lock_E: True,         lock_B: True}
   r18: {A: 9.06561E+25, E: 543021.2425, B: 0,
         lock_A: True,          lock_E: True,         lock_B: True}
