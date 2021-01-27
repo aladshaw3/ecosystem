@@ -1,6 +1,17 @@
 ## This is the framework set of objects and helper functions for the inhibition kinetic model
 # contactor using Pyomo model objects and the 'ipopt' solver library
 #
+
+
+# Import the pyomo environment
+from pyomo.environ import *
+
+# Other import statements
+import yaml
+import os.path
+from os import path
+
+# Import the IDAES environment (includes a custom 'ipopt' library)
 # NOTE: This script piggy-backs off of the 'ipopt' solver factory available
 #       through the IDAES framework. You must have installed IDAES through
 #       the 'conda' environment/package manager.
@@ -8,16 +19,9 @@
 #       For IDAES installation instructions:
 #           https://idaes-pse.readthedocs.io/en/stable/advanced_user_guide/advanced_install/index.html#advanced-user-installation
 
-# Import the pyomo environment
-from pyomo.environ import *
-
-# Import the IDAES environment (includes SolverFactory() and 'ipopt')
-from idaes.core import *
-
-# Other import statements
-import yaml
-import os.path
-from os import path
+# IDAES is not installed, then the script will search for any other available 'ipopt' library
+if os.environ['CONDA_DEFAULT_ENV'] == "idaes":
+    from idaes.core import *
 
 ## Return string value for a valid weight method
 def interpret_weight_method(name):
@@ -460,7 +464,7 @@ class ReactionModel(object):
             solver.options['acceptable_tol'] = 1e-6
             solver.options['compl_inf_tol'] = 1e-6
             solver.options['max_iter'] = 20*self.total_var
-            solver.options['obj_scaling_factor'] = 1 #Set scaling factor to value similar to tol?
+            solver.options['obj_scaling_factor'] = 1
             results = solver.solve(self.instance, tee=True, load_solutions=False)
             try:
                 self.instance.solutions.load_from(results)
@@ -495,7 +499,7 @@ class ReactionModel(object):
             solver.options['acceptable_tol'] = 1e-6
             solver.options['compl_inf_tol'] = 1e-6
             solver.options['max_iter'] = 30*self.total_var
-            solver.options['obj_scaling_factor'] = 1 #Set scaling factor to value similar to tol?
+            solver.options['obj_scaling_factor'] = 1e3 #May need to change
             if self.simulate_only == False:
                 solver.options['diverging_iterates_tol'] = 1e100
             results = solver.solve(self.instance, tee=True, load_solutions=False)
@@ -525,7 +529,7 @@ class ReactionModel(object):
                 solver.options['acceptable_tol'] = 1e-6
                 solver.options['compl_inf_tol'] = 1e-6
                 solver.options['max_iter'] = 20*self.total_var
-                solver.options['obj_scaling_factor'] = 1 #Set scaling factor to value similar to tol?
+                solver.options['obj_scaling_factor'] = 1 #May need to change
                 results = solver.solve(self.instance, tee=True, load_solutions=False)
                 try:
                     self.instance.solutions.load_from(results)

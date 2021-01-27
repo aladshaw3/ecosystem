@@ -6,11 +6,21 @@
 # Import the pyomo environment
 from pyomo.environ import *
 
-# Import the IDAES environment (includes SolverFactory() and 'ipopt')
-from idaes.core import *
-
 from reaction_model_framework import ReactionModel
 import random
+import os
+
+# Import the IDAES environment (includes a custom 'ipopt' library)
+# NOTE: This script piggy-backs off of the 'ipopt' solver factory available
+#       through the IDAES framework. You must have installed IDAES through
+#       the 'conda' environment/package manager.
+#
+#       For IDAES installation instructions:
+#           https://idaes-pse.readthedocs.io/en/stable/advanced_user_guide/advanced_install/index.html#advanced-user-installation
+
+# IDAES is not installed, then the script will search for any other available 'ipopt' library
+if os.environ['CONDA_DEFAULT_ENV'] == "idaes":
+    from idaes.core import *
 
 
 # Object to perform Monte Carlo analysis
