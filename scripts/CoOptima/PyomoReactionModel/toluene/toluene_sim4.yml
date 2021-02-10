@@ -1,5 +1,5 @@
 # -- NOTE: MUST name NO as NOx, because python interprets NO as a boolean  ---
-Simulate_Only: False
+Simulate_Only: True
 Data_File: toluene_data.txt
 Run_Seriel: False
 Weight_Method: custom
