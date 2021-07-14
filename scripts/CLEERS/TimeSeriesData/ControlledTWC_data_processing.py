@@ -131,16 +131,6 @@ def readCoOptimaPureFuelFolder(folder):
                     except:
                         avg_run.data_map[item][j] += obj.data_map[item][-1]
                     j+=1
-
-        # At this point, we can automatically create and save some plots for visualization
-        # NOTE: The time frame indexed by 1 represents the temperature ramp
-        base_name = obj.input_file_name.split(".")[0]
-
-        base_folder = base_name.split("-")[5]
-        if base_folder == "1":
-            base_folder += base_name.split("-")[6]
-        sub_folder = base_name.split("-")[0] + "_run" + base_name.split("-")[-1]
-
         i+=1
 
 
@@ -153,24 +143,31 @@ def readCoOptimaPureFuelFolder(folder):
             j+=1
 
 
-    #Next create the plots and calculate some specific rate info
-    base_name = avg_run.input_file_name.split(".")[0]
-
-    base_folder = base_name.split("-")[5]
-    if base_folder == "1":
-        base_folder += base_name.split("-")[6]
-    sub_folder = base_name.split("-")[0] + "_avg"
-
-
     # Lastly, we will compress the rows and print the data to a file
     i=0
     for obj in run:
         base_name = obj.input_file_name.split(".")[0]
 
-        base_folder = base_name.split("-")[5]
-        if base_folder == "1":
-            base_folder += base_name.split("-")[6]
+        base_folder = folder
         sub_folder = base_name.split("-")[0] + "_run" + base_name.split("-")[-1]
+
+        if not os.path.exists(base_folder+"-output/"+sub_folder):
+            os.makedirs(base_folder+"-output/"+sub_folder)
+
+        obj.createPlot('N2O (100,200,300)',file_name="N2O",x_col='TC top sample in (C)',
+                        subdir=base_folder+"-output/"+sub_folder+"/")
+
+        obj.createPlot('NO (350,3000)',file_name="NO",x_col='TC top sample in (C)',
+                        subdir=base_folder+"-output/"+sub_folder+"/")
+
+        obj.createPlot('NH3 (300,3000)',file_name="NH3",x_col='TC top sample in (C)',
+                        subdir=base_folder+"-output/"+sub_folder+"/")
+
+        obj.createPlot('CO (500,10000)',file_name="CO",x_col='TC top sample in (C)',
+                        subdir=base_folder+"-output/"+sub_folder+"/")
+
+        obj.createPlot('H2 normal signal',file_name="H2_sig",x_col='TC top sample in (C)',
+                        subdir=base_folder+"-output/"+sub_folder+"/")
 
         obj.compressRows(10)
         obj.printAlltoFile(base_folder+"-output/"+sub_folder+"/"+base_name+"_output.dat")
@@ -179,10 +176,26 @@ def readCoOptimaPureFuelFolder(folder):
     #Output for the averaged data
     base_name = avg_run.input_file_name.split(".")[0]
 
-    base_folder = base_name.split("-")[5]
-    if base_folder == "1":
-        base_folder += base_name.split("-")[6]
+    base_folder = folder
     sub_folder = base_name.split("-")[0] + "_avg"
+
+    if not os.path.exists(base_folder+"-output/"+sub_folder):
+        os.makedirs(base_folder+"-output/"+sub_folder)
+
+    avg_run.createPlot('N2O (100,200,300)',file_name="N2O",x_col='TC top sample in (C)',
+                    subdir=base_folder+"-output/"+sub_folder+"/")
+
+    avg_run.createPlot('NO (350,3000)',file_name="NO",x_col='TC top sample in (C)',
+                    subdir=base_folder+"-output/"+sub_folder+"/")
+
+    avg_run.createPlot('NH3 (300,3000)',file_name="NH3",x_col='TC top sample in (C)',
+                    subdir=base_folder+"-output/"+sub_folder+"/")
+
+    avg_run.createPlot('CO (500,10000)',file_name="CO",x_col='TC top sample in (C)',
+                    subdir=base_folder+"-output/"+sub_folder+"/")
+
+    avg_run.createPlot('H2 normal signal',file_name="H2_sig",x_col='TC top sample in (C)',
+                    subdir=base_folder+"-output/"+sub_folder+"/")
 
     avg_run.compressRows(10)
     avg_run.printAlltoFile(base_folder+"-output/"+sub_folder+"/"+base_name+"_Avg_output.dat")
