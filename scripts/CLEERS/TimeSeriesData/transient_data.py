@@ -386,7 +386,7 @@ class TransientData(object):
             return
 
         self.data_map[column_name] = data_set
-    
+
     ## This function is used to create a step input column based on data frames
     #
     # @param column_name Name of the column to append to the data
@@ -400,7 +400,7 @@ class TransientData(object):
         if len(column_value_list) != len(self.time_frames):
             print("Error! The size of the column_value_list does not match the data frame size!")
             return
-            
+
         #Loop through all time values
         self.data_map[column_name] = []
         index = 0
@@ -408,7 +408,7 @@ class TransientData(object):
             if time > self.time_frames[index][1]:
                 index+=1
             self.data_map[column_name].append(column_value_list[index])
-        
+
 
     ## This function will extract column sets from the data_map and return a new, reduced map
     #
@@ -431,7 +431,7 @@ class TransientData(object):
             else:
                 print("Error! Invalid Key!")
         return new_map
-    
+
     ## This function is used to set all negative observations to zero for a given column or list of columns
     #  The provided column_list argument can either be a list of columns in the map, or the name of 1 column
     #  All negative values are replaced with zeros.
@@ -869,7 +869,7 @@ class TransientData(object):
             file.write("\n")
             j+=1
         file.close()
-        
+
     ##This function is used to print out the equilibrium information in each column for each time frame
     def printEquilibriaTimeFrames(self, file_name = "", avg_points = 10):
         if file_name == "":
@@ -881,7 +881,7 @@ class TransientData(object):
         for item in self.data_map:
             if item != self.time_key:
                 equ_map[item] = [0.0]*len(self.time_frames)
-        
+
         # Loop through each item
         for item in self.data_map:
             if item != self.time_key:
@@ -914,7 +914,7 @@ class TransientData(object):
                     time_index = time_index - 1
                 #End time loop
         #End item loop
-        
+
         #Iterate through equ_map and print to file
         i=0
         first = ""
@@ -939,7 +939,7 @@ class TransientData(object):
                 i+=1
             file.write("\n")
             j+=1
-            
+
         file.close()
 
     ##This function is used to print select columns of data to a file
@@ -976,7 +976,7 @@ class TransientData(object):
             file.write("\n")
             j+=1
         file.close()
-        
+
     ##Function to create an approximate rate_map and return it for further processing or printing
     #
     #   This function will take in user arguments to construct approximate rate calculations of
@@ -998,7 +998,7 @@ class TransientData(object):
         if len(column_list) == 0:
             for item in self.data_map:
                 column_list.append(item)
-        
+
         if type(column_list) is list:
             col_list = column_list
         else:
@@ -1007,13 +1007,13 @@ class TransientData(object):
                 return
             else:
                 col_list.append(column_list)
-            
+
         for item in col_list:
             rate_map[item] = []
-        
+
         #Forces the rate map to contain the time key
         rate_map[self.time_key] = []
-                
+
         #Loop over all items in the rate_map
         for item in rate_map:
             #Start by looping through the current rows
@@ -1032,7 +1032,7 @@ class TransientData(object):
                 j+=1
             #End While loop
         #End map loop
-        
+
         #Loop again to over the rate_map to approximate time derivatives
         time_der_map = {}
         for item in rate_map:
@@ -1040,18 +1040,18 @@ class TransientData(object):
             #    break
             name ="d{"+item+"}/dt"
             time_der_map[name] = [0.]*len(rate_map[self.time_key])
-            
+
             n=1
             while n<len(time_der_map[name])-1:
                 time_der_map[name][n] = (rate_map[item][n+1] - rate_map[item][n-1]) / (rate_map[self.time_key][n+1] - rate_map[self.time_key][n-1])
                 n+=1
-            
+
             time_der_map[name][0] = (rate_map[item][1] - rate_map[item][0]) / (rate_map[self.time_key][1] - rate_map[self.time_key][0])
             time_der_map[name][len(time_der_map[name])-1] = (rate_map[item][len(time_der_map[name])-1] - rate_map[item][len(time_der_map[name])-2]) / (rate_map[self.time_key][len(time_der_map[name])-1] - rate_map[self.time_key][len(time_der_map[name])-2])
-        
+
         for item in time_der_map:
             rate_map[item] = time_der_map[item]
-        
+
         return rate_map
 
     ##Function to a create plot from the data_map
@@ -1510,7 +1510,7 @@ class TransientData(object):
             for value in self.data_map[ret_key]:
                 self.data_map[ret_key][i] = self.data_map[ret_key][i]/max_value
                 i+=1
-    
+
     ## Function to fit a 2-peak distribution to the TPD
     #
     #   This function will attempt to fit a 2-peak normal distribution to the last time_frame set of
@@ -1543,7 +1543,7 @@ class TransientData(object):
             subdir+="/"
         xdata = self.extractRows(self.getTimeFrames()[-1][0], self.getTimeFrames()[-1][1])[self.time_key]
         ydata = self.extractRows(self.getTimeFrames()[-1][0], self.getTimeFrames()[-1][1])[column_name]
-        
+
         if len(p0) != 6:
             p0 = [mean(xdata)-10,10,mean(ydata)*2,mean(xdata)+10,10,mean(ydata)*0.5]
         if p0[0] < xdata[0]:
@@ -1581,13 +1581,13 @@ class TransientData(object):
         plt.plot(xdata,y2,'-.')
         leg.append("2nd Peak")
         plt.title("1st Peak -to- 2nd Peak Ratio = "+str(ratio))
-        
+
         plt.legend(leg)
         plt.xlabel(self.time_key)
         plt.ylabel(column_name)
         plt.tight_layout()
         name = column_name+"--"+str(int(self.isothermal_temp))+"oC"
-        
+
         if file_name == "":
             i=0
             for sec in name.split("/"):
@@ -1598,7 +1598,7 @@ class TransientData(object):
                 i+=1
         if save == True:
             plt.savefig(subdir+file_name+'-TPDmodelPlot'+file_type)
-            
+
             file = open(subdir+file_name+'-TPDcurve.dat','w')
             file.write(self.time_key+"\t")
             file.write(column_name+"\n")
@@ -1613,13 +1613,13 @@ class TransientData(object):
                     running_sum = 0
                 i+=1
             file.close()
-            
+
         if display == True:
             fig.show()
             print("\nDisplaying plot. Press enter to continue...(this closes the images)")
             input()
         plt.close()
-        
+
         return popt, pcov
 
 
@@ -1719,7 +1719,7 @@ class PairedTransientData(object):
     ##Function to append a column to result data
     def appendResultColumn(self, column_name, data_set):
         self.result_trans_obj.appendColumn(column_name, data_set)
-    
+
     ##Function to call the appendColumnByFrame function
     def appendColumnByFrame(self, column_name, column_value_list):
         if self.aligned == False:
@@ -2260,7 +2260,7 @@ class PairedTransientData(object):
         if file_name == "":
             file_name = self.result_trans_obj.input_file_name.split(".")[0]+"-AllPairedOutput.dat"
         self.result_trans_obj.printAlltoFile(file_name)
-        
+
     ##This function is used to print out the equilibrium information in each column for each time frame
     def printEquilibriaTimeFrames(self, file_name = "", avg_points = 10):
         if self.aligned == False:
@@ -2352,7 +2352,7 @@ class PairedTransientData(object):
         #Then iterate through all time frames to save separately
         for frame in self.result_trans_obj.time_frames:
             self.savePlots(frame,folder,file_type)
-    
+
     ## Function to fit a 2-peak distribution to the TPD
     #
     #   This function will attempt to fit a 2-peak normal distribution to the last time_frame set of
@@ -2401,7 +2401,7 @@ def testing():
     #print(test05.calculateIntegralSum('NH3 (300,3000)[bypass]',15,24))
     #print(test05.calculateIntegralSum('NH3 (300,3000)',15,24))
     #print(str(test05.calculateIntegralSum('NH3 (300,3000)[bypass]',15,24)-test05.calculateIntegralSum('NH3 (300,3000)',15,24)))
-    
+
     print("\nFitting curves...")
     #p0 = [ 254.17897219,   13.89793735, 2636.78644076,  278.23501362,    6.78306823, 372.94330633]
     p0=[]
@@ -2644,7 +2644,7 @@ def testing():
     test05.printAlltoFile()
 
     ## ----- End Testing -----
-    
+
 ## Testing for SCR NOx rate data
 def testing02():
     #test = PairedTransientData("20160202-CLRK-BASFCuSSZ13-700C4h-NO+NO2SCR-60k-a1_0-bp.dat","20160202-CLRK-BASFCuSSZ13-700C4h-NO+NO2SCR-60k-a1_0-250+150C.dat")
@@ -2655,7 +2655,7 @@ def testing02():
     #test.alignData(True, False) #Only for paired data
     test.deleteColumns(['P bottom in (bar)[bypass]','P bottom out (bar)[bypass]', 'TC bot sample out 2 (C)[bypass]'])
     #print(test.getTimeFrames())  #9 time frames for unpaired  (13 for NO2SCR)
-    
+
     # NOTE: Need to add O2 concentration by frame windows back into data to keep track of oxidation.
     # Specific to the NH3Inv data, time frame index 1 has O2 concentration of 0.2 %. All other time frames
     # have O2 concentration of 10%.
@@ -2670,301 +2670,301 @@ def testing02():
     test.appendColumnByFrame('N2O (100,200,300)[bypass]', [0,0,0,0,0,0,0,0,0,0,0,0,0])
     test.appendColumnByFrame('NO (350,3000)[bypass]', [0,0,0,0,0,0,0,0,0,0,0,0,0])
     test.appendColumnByFrame('NO2 (150,2000)[bypass]', [200,200,200,200,200,200,200,200,200,200,200,200,200])
-    
+
     # NOTE: You should call the 'printEquilibriaTimeFrames' before comression
     test.printEquilibriaTimeFrames()
     test.compressRows(10)
     test.printAlltoFile()
     ## ----- End Testing02 ----
-    
+
 ## Testing for Co-Optima Data
 def testing03():
     # Co-Optima data cannot be automatically paired with by-pass data since the data frames for
     # the runs and by-pass do not match exactly. Instead, we will read in each seperately and
     # combine manually.
-    
+
     # Read in the bypass and run files separately
-    
+
     # 1-hexene (3)
     #bypass_name = "20170807-CPTMA-MalibuTWC-SGDI-30k-1Hexene-5Cramp-lambda0_999-bp-1"
     #run_name =    "20170807-CPTMA-MalibuTWC-SGDI-30k-1Hexene-5Cramp-lambda0_999-1"
-    
+
     # 1-octene (4)
     #bypass_name = "20170522-CPTMA-MalibuTWC-SGDI-30k-1-Octene-5Cramp-lambda0_999-bp-1"
     #run_name =    "20170522-CPTMA-MalibuTWC-SGDI-30k-1-Octene-5Cramp-lambda0_999-1"
-    
+
     # 1-propanol (3)
     #bypass_name = "20170706-CPTMA-MalibuTWC-SGDI-30k-1Propanol-5Cramp-REPEAT-lambda0_999-bp-1"
     #run_name =    "20170706-CPTMA-MalibuTWC-SGDI-30k-1Propanol-5Cramp-REPEAT-lambda0_999-1"
-    
+
     # 2-Butanone (3)
     #bypass_name = "20170411-CPTMA-MalibuTWC-SGDI-30k-2Butanone-5Cramp-lambda0_999-bp-1"
     #run_name =    "20170411-CPTMA-MalibuTWC-SGDI-30k-2Butanone-5Cramp-lambda0_999-1"
-    
+
     # 2-methylpentane (3)
     #bypass_name = "20170810-CPTMA-MalibuTWC-SGDI-30k-2MethylPentane-5Cramp-lambda0_999-bp-3"
     #run_name =    "20170810-CPTMA-MalibuTWC-SGDI-30k-2MethylPentane-5Cramp-lambda0_999-3"
-    
+
     # 2-pentanone (3)
     #bypass_name = "20170804-CPTMA-MalibuTWC-SGDI-30k-2Pentaone-5Cramp-lambda0_999-bp-3"
     #run_name =    "20170804-CPTMA-MalibuTWC-SGDI-30k-2Pentaone-5Cramp-lambda0_999-3"
-    
+
     # 2-propanol (3)
     #bypass_name = "20170614-CPTMA-MalibuTWC-SGDI-30k-2Propanol-5Cramp-REPEAT-lambda0_999-bp-3"
     #run_name =    "20170614-CPTMA-MalibuTWC-SGDI-30k-2Propanol-5Cramp-REPEAT-lambda0_999-3"
-    
+
     # anisole (3)
     #bypass_name = "20170629-CPTMA-MalibuTWC-SGDI-30k-Anisole-5Cramp-lambda0_999-bp-3"
     #run_name =    "20170629-CPTMA-MalibuTWC-SGDI-30k-Anisole-5Cramp-lambda0_999-3"
-    
+
     # butylacetate (3)
     #bypass_name = "20170815-CPTMA-MalibuTWC-SGDI-30k-ButylAcetate-5Cramp-lambda0_999-bp-3"
     #run_name =    "20170815-CPTMA-MalibuTWC-SGDI-30k-ButylAcetate-5Cramp-lambda0_999-3"
-    
+
     # cyclopentanone (3)
     #bypass_name = "20170511-CPTMA-MalibuTWC-SGDI-30k-Cyclopentanone-5Cramp-lambda0_999-bp-3"
     #run_name =    "20170511-CPTMA-MalibuTWC-SGDI-30k-Cyclopentanone-5Cramp-lambda0_999-3"
-    
+
     # diisobutylene (3)
     #bypass_name = "20170427-CPTMA-MalibuTWC-SGDI-30k-Diisobutylene-5Cramp-lambda0_999-bp-3"
     #run_name =    "20170427-CPTMA-MalibuTWC-SGDI-30k-Diisobutylene-5Cramp-lambda0_999-3"
-    
+
     # E10 (3)
     #bypass_name = "20170421-CPTMA-MalibuTWC-SGDI-30k-CH3CH2OH+iC8H18+C6H5CH3-5Cramp-lambda0_999-bp-3"
     #run_name =    "20170421-CPTMA-MalibuTWC-SGDI-30k-CH3CH2OH+iC8H18+C6H5CH3-5Cramp-lambda0_999-3"
-    
+
     # ethanol (3)
     #bypass_name = "20170424-CPTMA-MalibuTWC-SGDI-30k-CH3CH2OH-5Cramp-lambda0_999-bp-3"
     #run_name =    "20170424-CPTMA-MalibuTWC-SGDI-30k-CH3CH2OH-5Cramp-lambda0_999-3"
-    
+
     # ethene (3)
     #bypass_name = "20170718-CPTMA-MalibuTWC-SGDI-30k-C2H4ONLY-5Cramp-lambda0_999-bp-3"
     #run_name =    "20170718-CPTMA-MalibuTWC-SGDI-30k-C2H4ONLY-5Cramp-lambda0_999-3"
-    
+
     # ethyl acetate (3)
     #bypass_name = "20170510-CPTMA-MalibuTWC-SGDI-30k-EthylAcetate-5Cramp-lambda0_999-bp-3"
     #run_name =    "20170510-CPTMA-MalibuTWC-SGDI-30k-EthylAcetate-5Cramp-lambda0_999-3"
-    
+
     # furan mix (4)
     #bypass_name = "20170425-CPTMA-MalibuTWC-SGDI-30k-FuranMix-5Cramp-lambda0_999-bp-4"
     #run_name =    "20170425-CPTMA-MalibuTWC-SGDI-30k-FuranMix-5Cramp-lambda0_999-4"
-    
+
     # iso-butanol (3)
     #bypass_name = "20170412-CPTMA-MalibuTWC-SGDI-30k-iBuOH-5Cramp-lambda0_999-bp-3"
     #run_name =    "20170412-CPTMA-MalibuTWC-SGDI-30k-iBuOH-5Cramp-lambda0_999-3"
-    
+
     # iso-butylacetate (3)
     #bypass_name = "20170823-CPTMA-MalibuTWC-SGDI-30k-isoButylAcetate-5Cramp-lambda0_999-bp-3"
     #run_name =    "20170823-CPTMA-MalibuTWC-SGDI-30k-isoButylAcetate-5Cramp-lambda0_999-3"
-    
+
     # iso-butylacetate REPEAT (same folder) (3)
     #bypass_name = "20170824-CPTMA-MalibuTWC-SGDI-30k-isoButylAcetate-REPEAT-5Cramp-lambda0_999-bp-3"
     #run_name =    "20170824-CPTMA-MalibuTWC-SGDI-30k-isoButylAcetate-REPEAT-5Cramp-lambda0_999-3"
-    
+
     # iso-octane (3)
     #bypass_name = "20170518-CPTMA-MalibuTWC-SGDI-30k-isooctane-5Cramp-lambda0_999-bp-3"
     #run_name =    "20170518-CPTMA-MalibuTWC-SGDI-30k-isooctane-5Cramp-lambda0_999-3"
-    
+
     # m-xylene (3)
     #bypass_name = "20170524-CPTMA-MalibuTWC-SGDI-30k-mXylene-5Cramp-lambda0_999-bp-3"
     #run_name =    "20170524-CPTMA-MalibuTWC-SGDI-30k-mXylene-5Cramp-lambda0_999-3"
-    
+
     # mesitylene (3)
     #bypass_name = "20170428-CPTMA-MalibuTWC-SGDI-30k-mesitylene-5Cramp-lambda0_999-bp-3"
     #run_name =    "20170428-CPTMA-MalibuTWC-SGDI-30k-mesitylene-5Cramp-lambda0_999-3"
-    
+
     # methane (3)
     #bypass_name = "20170720-CPTMA-MalibuTWC-SGDI-30k-CH4ONLY-5Cramp-lambda0_999-bp-3"
     #run_name =    "20170720-CPTMA-MalibuTWC-SGDI-30k-CH4ONLY-5Cramp-lambda0_999-3"
-    
+
     # methylcyclohexane (622 same folder) (2)
     #bypass_name = "20170622-CPTMA-MalibuTWC-SGDI-30k-MCH-5Cramp-REPEAT-lambda0_999-bp-2"
     #run_name =    "20170622-CPTMA-MalibuTWC-SGDI-30k-MCH-5Cramp-REPEAT-lambda0_999-2"
-    
+
     # methylcyclohexane (627 same folder) (2)
     #bypass_name = "20170627-CPTMA-MalibuTWC-SGDI-30k-MCH-5Cramp-REPEAT-lambda0_999-bp-2"
     #run_name =    "20170627-CPTMA-MalibuTWC-SGDI-30k-MCH-5Cramp-REPEAT-lambda0_999-2"
-    
+
     # methylcyclopentane (3)
     #bypass_name = "20170621-CPTMA-MalibuTWC-SGDI-30k-MCP-5Cramp-REPEAT-lambda0_999-bp-3"
     #run_name =    "20170621-CPTMA-MalibuTWC-SGDI-30k-MCP-5Cramp-REPEAT-lambda0_999-3"
-    
+
     # methylisobutylketone (3)
     #bypass_name = "20170822-CPTMA-MalibuTWC-SGDI-30k-MIBK-5Cramp-lambda0_999-bp-3"
     #run_name =    "20170822-CPTMA-MalibuTWC-SGDI-30k-MIBK-5Cramp-lambda0_999-3"
-    
+
     # n-butanol (728 same folder) (3)
     #bypass_name = "20170728-CPTMA-MalibuTWC-SGDI-30k-nButanol-5Cramp-REPEAT-lambda0_999-bp-3"
     #run_name =    "20170728-CPTMA-MalibuTWC-SGDI-30k-nButanol-5Cramp-REPEAT-lambda0_999-3"
-    
+
     # n-butanol (731 same folder) (2)
     #bypass_name = "20170731-CPTMA-MalibuTWC-SGDI-30k-nButanol-5Cramp-REPEAT-lambda0_999-bp-2"
     #run_name =    "20170731-CPTMA-MalibuTWC-SGDI-30k-nButanol-5Cramp-REPEAT-lambda0_999-2"
-    
+
     # n-butanol (801 same folder) (2)
     #bypass_name = "20170801-CPTMA-MalibuTWC-SGDI-30k-nButanol-5Cramp-REPEAT-lambda0_999-bp-3"
     #run_name =    "20170801-CPTMA-MalibuTWC-SGDI-30k-nButanol-5Cramp-REPEAT-lambda0_999-3"
-    
+
     # n-heptane (3)
     #bypass_name = "20170808-CPTMA-MalibuTWC-SGDI-30k-nHeptane-5Cramp-lambda0_999-bp-3"
     #run_name =    "20170808-CPTMA-MalibuTWC-SGDI-30k-nHeptane-5Cramp-lambda0_999-3"
-    
+
     # n-octane (3)
     #bypass_name = "20170519-CPTMA-MalibuTWC-SGDI-30k-nOctane-5Cramp-lambda0_999-bp-3"
     #run_name =    "20170519-CPTMA-MalibuTWC-SGDI-30k-nOctane-5Cramp-lambda0_999-3"
-    
+
     # propane (3)
     #bypass_name = "20170717-CPTMA-MalibuTWC-SGDI-30k-C3H8ONLY-5Cramp-lambda0_999-bp-3"
     #run_name =    "20170717-CPTMA-MalibuTWC-SGDI-30k-C3H8ONLY-5Cramp-lambda0_999-3"
-    
+
     # propane (724 same folder) (3)
     #bypass_name = "20170724-CPTMA-MalibuTWC-SGDI-30k-C3H6ONLY-5Cramp-lambda0_999-bp-3"
     #run_name =    "20170724-CPTMA-MalibuTWC-SGDI-30k-C3H6ONLY-5Cramp-lambda0_999-3"
-    
+
     # propane (725 same folder) (3)
     #bypass_name = "20170725-CPTMA-MalibuTWC-SGDI-30k-C3H6ONLY-5Cramp-lambda0_999-bp-3"
     #run_name =    "20170725-CPTMA-MalibuTWC-SGDI-30k-C3H6ONLY-5Cramp-lambda0_999-3"
-    
+
     # toluene (3)
     bypass_name = "20170505-CPTMA-MalibuTWC-SGDI-30k-Toluene-5Cramp-lambda0_999-bp-3"
     run_name =    "20170505-CPTMA-MalibuTWC-SGDI-30k-Toluene-5Cramp-lambda0_999-3"
-    
+
     bypass = TransientData(bypass_name)
     run = TransientData(run_name)
-    
+
     # Next, the Ethanol and CO columns have different tolerances, but with different units.
     # To deal with this, we need to first do some column manipulation to create new columns based
     # on the ppm tolerances.
     bypass.mathOperation('CO% (1)',"*",10000,True,'CO (10000)')
     run.mathOperation('CO% (1)',"*",10000,True,'CO (10000)')
-    
+
     bypass.mathOperation('Ethanol% (1)',"*",10000,True,'Ethanol (10000)')
     run.mathOperation('Ethanol% (1)',"*",10000,True,'Ethanol (10000)')
-    
+
     bypass.deleteColumns(['CO% (1)','Ethanol% (1)'])
     run.deleteColumns(['CO% (1)','Ethanol% (1)'])
-    
+
     # Now we can compress the columns for each AND delete columns we don't need...
     bypass.compressColumns()
     run.compressColumns()
-    
+
     #bypass.displayColumnNames()
     run.displayColumnNames()
-    
+
     #       NOTE: Many of these items to retain may change from file to file, which is why we have to do this manually
-    
+
     # 1-hexene
     #list = ['Elapsed Time (min)','NH3 (300,3000)', 'H2O% (20)', 'N2O (100,200,300)', 'NO (350,3000)', 'NO2 (150)', 'CO2% (20)', 'CO (500,10000)', 'Formaldehyde (70)', 'Acetaldehyde (1000)', 'Ethanol (1000,10000)', 'Toluene (1000)', 'Cyclohexane (100) 150C', 'Acetylene (1000)', 'Ethylene (100,3000)', 'Propylene (200,1000)', 'Ethane (1000)', '2-Pentanone 150c', 'Isobutylene (500)', 'Isopentane (500)', 'CH4 (250,3000)', 'AI 2', 'AI 41', 'AI 43', 'AI 91', 'FID THC (ppm C1)', 'TC top sample in (C)', 'TC top sample mid 2 (C)', 'TC top sample out (C)', 'P tup in (bar)', 'P top out (bar)']
-    
+
     # 1-octene
     #list = ['Elapsed Time (min)','NH3 (3000,300)', 'H2O% (20)', 'N2O (100,200,300)', 'NO (350,3000)', 'NO2 (150)', 'CO2% (20)', 'CO (500,10000)', 'Formaldehyde (70)', 'Acetaldehyde (1000)', 'Ethanol (1000,10000)', 'Toluene (1000)', 'Cyclohexane (100) 150C', 'Acetylene (1000)', 'Ethylene (100,3000)', 'Propylene (200,1000)', 'Ethane (1000)', '2-Pentanone 150c', 'Isobutylene (500)', 'Isopentane (500)', 'CH4 (250,3000)', 'AI 2', 'AI 55', 'AI 56', 'AI 91', 'FID THC (ppm C1)', 'TC top sample in (C)', 'TC top sample mid 2 (C)', 'TC top sample out (C)', 'P tup in (bar)', 'P top out (bar)']
-    
+
     # 1-propanol
     #list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)', 'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'Formaldehyde (70)', 'Acetaldehyde (1000)', 'Anisole 150c', 'Cyclohexane (100) 150C', 'Acetylene (1000)', 'Ethylene (100,3000)', 'Toluene (1000)', 'Isobutylene (500)', 'Ethane (1000)', 'Propylene (200,1000)', 'Isopentane (500)', 'AI 2', 'AI 31', 'AI 57', 'AI 91', 'FID THC (ppm C1)', 'TC top sample in (C)', 'TC top sample mid 2 (C)', 'TC top sample out (C)', 'P tup in (bar)', 'P top out (bar)', 'NH3 (3000,300)', 'CO (500,10000)', 'Ethanol (1000,10000)', 'CH4 (250,3000)']
-    
+
     # 2-Butanone
     #list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)', 'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'Formaldehyde (70)', 'Acetaldehyde (1000)', 'Toluene (1000)', 'Cyclohexane (100) 150C', 'Acetylene (1000)', 'Ethylene (100,3000)', 'Propylene (200,1000)', 'Isobutylene (500)', 'Ethane (1000)', 'Isopentane (500)', 'Methyl ethyl ketone', 'AI 2', 'AI 43', 'AI 96', 'AI 91', 'FID THC (ppm C1)', 'TC top sample in (C)', 'TC top sample mid 2 (C)', 'TC top sample out (C)', 'P tup in (bar)', 'P top out (bar)', 'NH3 (3000,300)', 'CO (500,10000)', 'Ethanol (1000,10000)', 'CH4 (250,3000)']
-    
+
     # 2-methylpentane
     #list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)', 'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'Formaldehyde (70)', 'Acetaldehyde (1000)', 'Toluene (1000)', 'Cyclohexane (100) 150C', 'Acetylene (1000)', 'Ethylene (100,3000)', 'Propylene (200,1000)', 'Ethane (1000)', '2-Pentanone 150c', 'Isobutylene (500)', 'Isopentane (500)', 'AI 2', 'AI 41', 'AI 42', 'AI 43', 'FID THC (ppm C1)', 'TC top sample in (C)', 'TC top sample mid 2 (C)', 'TC top sample out (C)', 'P tup in (bar)', 'P top out (bar)', 'NH3 (300,3000)', 'CO (500,10000)', 'Ethanol (1000,10000)', 'CH4 (250,3000)']
-    
+
     # 2-pentanone
     #list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)', 'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'Formaldehyde (70)', 'Acetaldehyde (1000)', 'Toluene (1000)', 'Cyclohexane (100) 150C', 'Acetylene (1000)', 'Ethylene (100,3000)', 'Propylene (200,1000)', 'Ethane (1000)', '2-Pentanone 150c', 'Isobutylene (500)', 'Isopentane (500)', 'AI 2', 'AI 42', 'AI 43', 'AI 91', 'FID THC (ppm C1)', 'TC top sample in (C)', 'TC top sample mid 2 (C)', 'TC top sample out (C)', 'P tup in (bar)', 'P top out (bar)', 'NH3 (300,3000)', 'CO (500,10000)', 'Ethanol (1000,10000)', 'CH4 (250,3000)']
-    
+
     ## ------- WARNING -------- This data set has an incorrectly labeled MS column for AI 2 --> 'AI 2)'
     ## ------------------------------------- see below -----------------------------------------------
     # 2-propanol
     #list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)', 'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'Formaldehyde (70)', 'Acetaldehyde (1000)', '2-Pentanone 150c', 'Cyclohexane (100) 150C', 'Acetylene (1000)', 'Ethylene (100,3000)', 'Toluene (1000)', 'Isobutylene (500)', 'Ethane (1000)', 'Propylene (200,1000)', 'Isopentane (500)', 'AI 2)', 'AI 45', 'AI 57', 'AI 91', 'FID THC (ppm C1)', 'TC top sample in (C)', 'TC top sample mid 2 (C)', 'TC top sample out (C)', 'P tup in (bar)', 'P top out (bar)', 'NH3 (3000,300)', 'CO (500,10000)', 'Ethanol (1000,10000)', 'CH4 (250,3000)']
-    
+
     # anisole
     #list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)', 'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'Formaldehyde (70)', 'Acetaldehyde (1000)', 'Anisole 150c', 'Cyclohexane (100) 150C', 'Acetylene (1000)', 'Ethylene (100,3000)', 'Toluene (1000)', 'Isobutylene (500)', 'Ethane (1000)', 'Propylene (200,1000)', 'Isopentane (500)', 'AI 2', 'AI 65', 'AI 78', 'AI 93', 'FID THC (ppm C1)', 'TC top sample in (C)', 'TC top sample mid 2 (C)', 'TC top sample out (C)', 'P tup in (bar)', 'P top out (bar)', 'NH3 (3000,300)', 'CO (500,10000)', 'Ethanol (1000,10000)', 'CH4 (250,3000)']
-    
+
     # butylacetate
     #list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)', 'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'Formaldehyde (70)', 'Acetaldehyde (1000)', 'Ethyl Acetate 150c', 'Cyclohexane (100) 150C', 'Acetylene (1000)', 'Ethylene (100,3000)', 'Propylene (200,1000)', 'Isobutylene (500)', 'Ethane (1000)', 'Toluene (1000)', 'Isopentane (500)', 'AI 2', 'AI 43', 'AI 57', 'AI 91', 'FID THC (ppm C1)', 'TC top sample in (C)', 'TC top sample mid 2 (C)', 'TC top sample out (C)', 'P tup in (bar)', 'P top out (bar)', 'NH3 (300,3000)', 'CO (500,10000)', 'Ethanol (1000,10000)', 'CH4 (250,3000)']
-    
+
     # cyclopentanone
     #list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)', 'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'Formaldehyde (70)', 'Acetaldehyde (1000)', '2-Pentanone 150c', 'Cyclohexane (100) 150C', 'Acetylene (1000)', 'Ethylene (100,3000)', 'Toluene (1000)', 'Isobutylene (500)', 'Ethane (1000)', 'Propylene (200,1000)', 'Isopentane (500)', 'AI 2', 'AI 43', 'AI 57', 'AI 91', 'FID THC (ppm C1)', 'TC top sample in (C)', 'TC top sample mid 2 (C)', 'TC top sample out (C)', 'P tup in (bar)', 'P top out (bar)', 'NH3 (3000,300)', 'CO (500,10000)', 'Ethanol (1000,10000)', 'CH4 (250,3000)']
-    
+
     # diisobutylene
     #list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)', 'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'Formaldehyde (70)', 'Acetaldehyde (1000)', 'Methyl ethyl ketone', 'Cyclohexane (100) 150C', 'Acetylene (1000)', 'Ethylene (100,3000)', 'Toluene (1000)', 'Isobutylene (500)', 'Ethane (1000)', 'Propylene (200,1000)', 'Isopentane (500)', 'AI 2', 'AI 97', 'AI 57', 'AI 91', 'FID THC (ppm C1)', 'TC top sample in (C)', 'TC top sample mid 2 (C)', 'TC top sample out (C)', 'P tup in (bar)', 'P top out (bar)', 'NH3 (3000,300)', 'CO (500,10000)', 'Ethanol (1000,10000)', 'CH4 (250,3000)']
-    
+
     # E10
     #list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)', 'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'Formaldehyde (70)', 'Acetaldehyde (1000)', 'Methyl ethyl ketone', 'Cyclohexane (100) 150C', 'Acetylene (1000)', 'Ethylene (100,3000)', 'Toluene (1000)', 'Isobutylene (500)', 'Ethane (1000)', 'Propylene (200,1000)', 'Isopentane (500)', 'AI 2', 'AI 31', 'AI 57', 'AI 91', 'FID THC (ppm C1)', 'TC top sample in (C)', 'TC top sample mid 2 (C)', 'TC top sample out (C)', 'P tup in (bar)', 'P top out (bar)', 'NH3 (3000,300)', 'CO (500,10000)', 'Ethanol (1000,10000)', 'CH4 (250,3000)']
-    
+
     # ethanol
     #list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)', 'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'Formaldehyde (70)', 'Acetaldehyde (1000)', 'Methyl ethyl ketone', 'Cyclohexane (100) 150C', 'Acetylene (1000)', 'Ethylene (100,3000)', 'Toluene (1000)', 'Isobutylene (500)', 'Ethane (1000)', 'Propylene (200,1000)', 'Isopentane (500)', 'AI 2', 'AI 31', 'AI 57', 'AI 91', 'FID THC (ppm C1)', 'TC top sample in (C)', 'TC top sample mid 2 (C)', 'TC top sample out (C)', 'P tup in (bar)', 'P top out (bar)', 'NH3 (3000,300)', 'CO (500,10000)', 'Ethanol (1000,10000)', 'CH4 (250,3000)']
-    
+
     # ethene
     #list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)', 'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'Formaldehyde (70)', 'Acetaldehyde (1000)', 'Toluene (1000)', 'Cyclohexane (100) 150C', 'Acetylene (1000)', 'Ethylene (100,3000)', 'Propylene (200,1000)', 'Isobutylene (500)', 'Ethane (1000)', 'Propane', 'Anisole 150c', 'AI 2', 'AI 26', 'AI 57', 'AI 91', 'FID THC (ppm C1)', 'TC top sample in (C)', 'TC top sample mid 2 (C)', 'TC top sample out (C)', 'P tup in (bar)', 'P top out (bar)', 'NH3 (300,3000)', 'CO (500,10000)', 'Ethanol (1000,10000)', 'CH4 (250,3000)']
-    
+
     # ethyl acetate
     #list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)', 'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'Formaldehyde (70)', 'Acetaldehyde (1000)', 'Ethyl Acetate 150c', 'Cyclohexane (100) 150C', 'Acetylene (1000)', 'Ethylene (100,3000)', 'Toluene (1000)', 'Isobutylene (500)', 'Ethane (1000)', 'Propylene (200,1000)', 'Isopentane (500)', 'AI 2', 'AI 43', 'AI 57', 'AI 91', 'FID THC (ppm C1)', 'TC top sample in (C)', 'TC top sample mid 2 (C)', 'TC top sample out (C)', 'P tup in (bar)', 'P top out (bar)', 'NH3 (3000,300)', 'CO (500,10000)', 'Ethanol (1000,10000)', 'CH4 (250,3000)']
-    
+
     # furan mix
     #list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)', 'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'Formaldehyde (70)', 'Acetaldehyde (1000)', 'Methyl ethyl ketone', 'Cyclohexane (100) 150C', 'Acetylene (1000)', 'Ethylene (100,3000)', 'Toluene (1000)', 'Isobutylene (500)', 'Ethane (1000)', 'Propylene (200,1000)', 'Isopentane (500)', 'AI 2', 'AI 82', 'AI 96', 'AI 91', 'FID THC (ppm C1)', 'TC top sample in (C)', 'TC top sample mid 2 (C)', 'TC top sample out (C)', 'P tup in (bar)', 'P top out (bar)', 'NH3 (3000,300)', 'CO (500,10000)', 'Ethanol (1000,10000)', 'CH4 (250,3000)']
-    
+
     # iso-butanol
     #list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)', 'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'Formaldehyde (70)', 'Acetaldehyde (1000)', 'Toluene (1000)', 'Cyclohexane (100) 150C', 'Acetylene (1000)', 'Ethylene (100,3000)', 'Propylene (200,1000)', 'Isobutylene (500)', 'Ethane (1000)', 'Isopentane (500)', 'Methyl ethyl ketone', 'AI 2', 'AI 43', 'AI 96', 'AI 91', 'FID THC (ppm C1)', 'TC top sample in (C)', 'TC top sample mid 2 (C)', 'TC top sample out (C)', 'P tup in (bar)', 'P top out (bar)', 'NH3 (3000,300)', 'CO (500,10000)', 'Ethanol (1000,10000)', 'CH4 (250,3000)']
-    
+
     # iso-butylacetate (and repeat)
     #list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)', 'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'Formaldehyde (70)', 'Acetaldehyde (1000)', 'Ethyl Acetate 150c', 'Cyclohexane (100) 150C', 'Acetylene (1000)', 'Ethylene (100,3000)', 'Propylene (200,1000)', 'Isobutylene (500)', 'Ethane (1000)', 'Toluene (1000)', 'Isopentane (500)', 'AI 2', 'AI 43', 'AI 56', 'AI 91', 'FID THC (ppm C1)', 'TC top sample in (C)', 'TC top sample mid 2 (C)', 'TC top sample out (C)', 'P tup in (bar)', 'P top out (bar)', 'NH3 (300,3000)', 'CO (500,10000)', 'Ethanol (1000,10000)', 'CH4 (250,3000)']
-    
+
     # iso-octane
     #list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)', 'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'Formaldehyde (70)', 'Acetaldehyde (1000)', '2-Pentanone 150c', 'Cyclohexane (100) 150C', 'Acetylene (1000)', 'Ethylene (100,3000)', 'Toluene (1000)', 'Isobutylene (500)', 'Ethane (1000)', 'Propylene (200,1000)', 'Isopentane (500)', 'AI 2', 'AI 31', 'AI 57', 'AI 91', 'FID THC (ppm C1)', 'TC top sample in (C)', 'TC top sample mid 2 (C)', 'TC top sample out (C)', 'P tup in (bar)', 'P top out (bar)', 'NH3 (3000,300)', 'CO (500,10000)', 'Ethanol (1000,10000)', 'CH4 (250,3000)']
-    
+
     # m-xylene
     #list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)', 'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'Formaldehyde (70)', 'Acetaldehyde (1000)', '2-Pentanone 150c', 'Cyclohexane (100) 150C', 'Acetylene (1000)', 'Ethylene (100,3000)', 'Toluene (1000)', 'Isobutylene (500)', 'Ethane (1000)', 'Propylene (200,1000)', 'Isopentane (500)', 'AI 2', 'AI 31', 'AI 77', 'AI 91', 'FID THC (ppm C1)', 'TC top sample in (C)', 'TC top sample mid 2 (C)', 'TC top sample out (C)', 'P tup in (bar)', 'P top out (bar)', 'NH3 (3000,300)', 'CO (500,10000)', 'Ethanol (1000,10000)', 'CH4 (250,3000)']
-    
+
     # mesitylene
     #list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)', 'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'Formaldehyde (70)', 'Acetaldehyde (1000)', 'Methyl ethyl ketone', 'Cyclohexane (100) 150C', 'Acetylene (1000)', 'Ethylene (100,3000)', 'Toluene (1000)', 'Isobutylene (500)', 'Ethane (1000)', 'Propylene (200,1000)', 'Isopentane (500)', 'AI 2', 'AI 77', 'AI 57', 'AI 91', 'FID THC (ppm C1)', 'TC top sample in (C)', 'TC top sample mid 2 (C)', 'TC top sample out (C)', 'P tup in (bar)', 'P top out (bar)', 'NH3 (3000,300)', 'CO (500,10000)', 'Ethanol (1000,10000)', 'CH4 (250,3000)']
-    
+
     # methane
     #list = ['Elapsed Time (min)', 'NO (350,3000)', 'NO2 (150)', 'Propylene (200,1000)', 'H2O% (20)', 'CO2% (20)', 'Formaldehyde (70)', 'Acetaldehyde (1000)', 'Propane', 'Cyclohexane (100) 150C', 'Acetylene (1000)', 'Ethylene (100,3000)', 'Anisole 150c', 'Isobutylene (500)', 'Ethane (1000)', 'Toluene (1000)', 'N2O (100,200,300)', 'AI 2', 'AI 15', 'AI 57', 'AI 91', 'FID THC (ppm C1)', 'TC top sample in (C)', 'TC top sample mid 2 (C)', 'TC top sample out (C)', 'P tup in (bar)', 'P top out (bar)', 'NH3 (3000,300)', 'CO (500,10000)', 'Ethanol (1000,10000)', 'CH4 (250,3000)']
-    
+
     # methylcyclohexane
     #list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)', 'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'Formaldehyde (70)', 'Acetaldehyde (1000)', '2-Pentanone 150c', 'Cyclohexane (100) 150C', 'Acetylene (1000)', 'Ethylene (100,3000)', 'Toluene (1000)', 'Isobutylene (500)', 'Ethane (1000)', 'Propylene (200,1000)', 'Isopentane (500)', 'AI 2', 'AI 41', 'AI 55', 'AI 83', 'FID THC (ppm C1)', 'TC top sample in (C)', 'TC top sample mid 2 (C)', 'TC top sample out (C)', 'P tup in (bar)', 'P top out (bar)', 'NH3 (3000,300)', 'CO (500,10000)', 'Ethanol (1000,10000)', 'CH4 (250,3000)']
-    
+
     # methylcyclopentane
     #list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)', 'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'Formaldehyde (70)', 'Acetaldehyde (1000)', '2-Pentanone 150c', 'Cyclohexane (100) 150C', 'Acetylene (1000)', 'Ethylene (100,3000)', 'Toluene (1000)', 'Isobutylene (500)', 'Ethane (1000)', 'Propylene (200,1000)', 'Isopentane (500)', 'AI 2', 'AI 56', 'AI 57', 'AI 91', 'FID THC (ppm C1)', 'TC top sample in (C)', 'TC top sample mid 2 (C)', 'TC top sample out (C)', 'P tup in (bar)', 'P top out (bar)', 'NH3 (3000,300)', 'CO (500,10000)', 'Ethanol (1000,10000)', 'CH4 (250,3000)']
-    
+
     # methylisobutylketone
     #list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)', 'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'Formaldehyde (70)', 'Acetaldehyde (1000)', '2-Pentanone 150c', 'Cyclohexane (100) 150C', 'Acetylene (1000)', 'Ethylene (100,3000)', 'Propylene (200,1000)', 'Isobutylene (500)', 'Ethane (1000)', 'Toluene (1000)', 'Isopentane (500)', 'AI 2', 'AI 43', 'AI 57', 'AI 91', 'FID THC (ppm C1)', 'TC top sample in (C)', 'TC top sample mid 2 (C)', 'TC top sample out (C)', 'P tup in (bar)', 'P top out (bar)', 'NH3 (300,3000)', 'CO (500,10000)', 'Ethanol (1000,10000)', 'CH4 (250,3000)']
-    
+
     # n-butanol
     #list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)', 'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'Formaldehyde (70)', 'Acetaldehyde (1000)', 'Toluene (1000)', 'Cyclohexane (100) 150C', 'Acetylene (1000)', 'Ethylene (100,3000)', 'Propylene (200,1000)', 'Ethane (1000)', 'Isopentane (500)', 'Isobutylene (500)', 'Anisole 150c', 'AI 2', 'AI 42', 'AI 57', 'AI 91', 'FID THC (ppm C1)', 'TC top sample in (C)', 'TC top sample mid 2 (C)', 'TC top sample out (C)', 'P tup in (bar)', 'P top out (bar)', 'NH3 (300,3000)', 'CO (500,10000)', 'Ethanol (1000,10000)', 'CH4 (250,3000)']
-    
+
     # n-heptane
     #list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)', 'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'Formaldehyde (70)', 'Acetaldehyde (1000)', 'Toluene (1000)', 'Cyclohexane (100) 150C', 'Acetylene (1000)', 'Ethylene (100,3000)', 'Propylene (200,1000)', 'Ethane (1000)', '2-Pentanone 150c', 'Isobutylene (500)', 'Isopentane (500)', 'AI 2', 'AI 43', 'AI 57', 'AI 71', 'FID THC (ppm C1)', 'TC top sample in (C)', 'TC top sample mid 2 (C)', 'TC top sample out (C)', 'P tup in (bar)', 'P top out (bar)', 'NH3 (300,3000)', 'CO (500,10000)', 'Ethanol (1000,10000)', 'CH4 (250,3000)']
-    
+
     # n-octane
     #list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)', 'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'Formaldehyde (70)', 'Acetaldehyde (1000)', '2-Pentanone 150c', 'Cyclohexane (100) 150C', 'Acetylene (1000)', 'Ethylene (100,3000)', 'Toluene (1000)', 'Isobutylene (500)', 'Ethane (1000)', 'Propylene (200,1000)', 'Isopentane (500)', 'AI 2', 'AI 43', 'AI 57', 'AI 91', 'FID THC (ppm C1)', 'TC top sample in (C)', 'TC top sample mid 2 (C)', 'TC top sample out (C)', 'P tup in (bar)', 'P top out (bar)', 'NH3 (3000,300)', 'CO (500,10000)', 'Ethanol (1000,10000)', 'CH4 (250,3000)']
-    
+
     # propane
     #list = ['Elapsed Time (min)', 'NO (350,3000)', 'NO2 (150)', 'Propylene (200,1000)', 'H2O% (20)', 'CO2% (20)', 'Formaldehyde (70)', 'Acetaldehyde (1000)', 'Propane', 'Cyclohexane (100) 150C', 'Acetylene (1000)', 'Ethylene (100,3000)', 'Anisole 150c', 'Isobutylene (500)', 'Ethane (1000)', 'Toluene (1000)', 'N2O (100,200,300)', 'AI 2', 'AI 15', 'AI 30', 'AI 43', 'FID THC (ppm C1)', 'TC top sample in (C)', 'TC top sample mid 2 (C)', 'TC top sample out (C)', 'P tup in (bar)', 'P top out (bar)', 'NH3 (3000,300)', 'CO (500,10000)', 'Ethanol (1000,10000)', 'CH4 (250,3000)']
-    
+
     # propene
     #list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)', 'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'Formaldehyde (70)', 'Acetaldehyde (1000)', 'Toluene (1000)', 'Cyclohexane (100) 150C', 'Acetylene (1000)', 'Ethylene (100,3000)', 'Propylene (200,1000)', 'Ethane (1000)', 'Propane', 'Isobutylene (500)', 'Anisole 150c', 'AI 2', 'AI 39', 'AI 41', 'AI 42', 'FID THC (ppm C1)', 'TC top sample in (C)', 'TC top sample mid 2 (C)', 'TC top sample out (C)', 'P tup in (bar)', 'P top out (bar)', 'NH3 (300,3000)', 'CO (500,10000)', 'Ethanol (1000,10000)', 'CH4 (250,3000)']
-    
+
     # toluene
     list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)', 'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'Formaldehyde (70)', 'Acetaldehyde (1000)', 'Methyl ethyl ketone', 'Cyclohexane (100) 150C', 'Acetylene (1000)', 'Ethylene (100,3000)', 'Toluene (1000)', 'Isobutylene (500)', 'Ethane (1000)', 'Propylene (200,1000)', 'Isopentane (500)', 'AI 2', 'AI 31', 'AI 57', 'AI 91', 'FID THC (ppm C1)', 'TC top sample in (C)', 'TC top sample mid 2 (C)', 'TC top sample out (C)', 'P tup in (bar)', 'P top out (bar)', 'NH3 (3000,300)', 'CO (500,10000)', 'Ethanol (1000,10000)', 'CH4 (250,3000)']
-    
+
     bypass.retainOnlyColumns(list)
     run.retainOnlyColumns(list)
-    
+
     # If not errors are reported, then both the bypass and the run will have the same columns/names at this point
-    
+
     #bypass.displayColumnNames()
     #run.displayColumnNames()
-    
+
     # Next, remove any negative values from observations since they are not physically relavent
     bypass.removeNegatives(list)
     run.removeNegatives(list)
-    
+
     # Now, we need to use the bypass data to find the average input values for each column
     avg = {}
     for item in list:
         avg[item] = bypass.getAverage(item)
-    
+
     # Next, append columns to the run using the average inlet values just calculated from the bypass
     # Have to use appendColumnByFrame even though each frame will have same values
     frame_list = [0.]*len(run.getTimeFrames())
@@ -2977,7 +2977,7 @@ def testing03():
             run.appendColumnByFrame(item+'[bypass]', frame_list)
 
     #run.displayColumnNames()
-    
+
     # Now, we can apply some additional pre-processing, such as normalization or scaling of data based on the bypass
     AI_list = []
     for item in list:
@@ -2994,22 +2994,22 @@ def testing03():
             run.appendColumnByFrame('H2 (ppm)[bypass]', frame_list)
         else:
             run.mathOperation(item,"/",item+'[bypass]')
-        
+
     #run.displayColumnNames()
-    
+
     # AI values...
     #       2 = H2
     #       57 = iso-octane
     #       31 = ethanol
     #       91 = toluene
     #       43 = n-octane
-    
+
     # Next, scale the 'FID THC (ppm C1)' column by dividing by the corresponding bypass, then multiplying by 3000
     run.mathOperation('FID THC (ppm C1)',"/",'FID THC (ppm C1)[bypass]')
     run.mathOperation('FID THC (ppm C1)',"*",3000)
     run.mathOperation('FID THC (ppm C1)[bypass]',"/",'FID THC (ppm C1)[bypass]')
     run.mathOperation('FID THC (ppm C1)[bypass]',"*",3000)
-    
+
     # Next, create columns for the appropriate O2 concentrations based on Sreshtha's paper (table 4)
     #       Fuel                   O2 %
     #       ---------               -----
@@ -3048,19 +3048,19 @@ def testing03():
     #           65% iso-octane
     #           25% toluene
     #           10% ethanol         0.708
-    
+
     frame_list = [0.65]*len(run.getTimeFrames())
     run.appendColumnByFrame('O2%', frame_list)
-    
+
     # Now, create column for FID Conversion %, CO conversion %, and NOx conversion %
     run.mathOperation('FID THC (ppm C1)[bypass]',"-",'FID THC (ppm C1)', True, 'THC Conversion %')
     run.mathOperation('THC Conversion %',"/",'FID THC (ppm C1)[bypass]')
     run.mathOperation('THC Conversion %',"*",100)
-    
+
     run.mathOperation('CO (500,10000)[bypass]',"-",'CO (500,10000)', True, 'CO Conversion %')
     run.mathOperation('CO Conversion %',"/",'CO (500,10000)[bypass]')
     run.mathOperation('CO Conversion %',"*",100)
-    
+
     frame_list = [0.]*len(run.getTimeFrames())
     run.appendColumnByFrame('NOx (ppm)', frame_list)
     run.appendColumnByFrame('NOx (ppm)[bypass]', frame_list)
@@ -3068,34 +3068,34 @@ def testing03():
     run.mathOperation('NOx (ppm)',"+",'NO2 (150)')
     run.mathOperation('NOx (ppm)[bypass]',"+",'NO (350,3000)[bypass]')
     run.mathOperation('NOx (ppm)[bypass]',"+",'NO2 (150)[bypass]')
-    
+
     run.mathOperation('NOx (ppm)[bypass]',"-",'NOx (ppm)', True, 'NOx Conversion %')
     run.mathOperation('NOx Conversion %',"/",'NOx (ppm)[bypass]')
     run.mathOperation('NOx Conversion %',"*",100)
-    
+
     # Next, we will create a column for the average internal temperature. This temperature will
     # be just a simple average since each zone of the catalyst is the same length.
     run.mathOperation('TC top sample out (C)',"+",'TC top sample mid 2 (C)', True, 'Avg Internal Temp (C)')
     run.mathOperation('Avg Internal Temp (C)',"/",2)
-    
+
     # At this point, we can automatically create and save some plots for visualization
     # NOTE: The time frame indexed by 1 represents the temperature ramp
     base_name = run_name.split(".")[0]
-    
+
     run.createPlot('THC Conversion %', range=run.getTimeFrames()[1], display=False, save=True, file_name=base_name+"--THC_Conv",file_type=".png",subdir="",x_col='TC top sample in (C)')
     run.createPlot('CO Conversion %', range=run.getTimeFrames()[1], display=False, save=True, file_name=base_name+"--CO_Conv",file_type=".png",subdir="",x_col='TC top sample in (C)')
     run.createPlot('NOx Conversion %', range=run.getTimeFrames()[1], display=False, save=True, file_name=base_name+"--NOx_Conv",file_type=".png",subdir="",x_col='TC top sample in (C)')
-    
+
     # At this point, we would attempt to calculate rate information (prior to row compression)
-    
+
     # May also want to calculate different T-n values and print to another file
-    
-    
+
+
     # Lastly, we will compress the rows and print the data to a file
     run.compressRows(10)
     run.printAlltoFile()  #May want to change name and some data when calculting the rate information
-    
-    
+
+
     ## --- End Testing03 ----
 
 
