@@ -56,6 +56,62 @@ def readCoOptimaFile(run_name):
                 'P tup in (bar)', 'DP top (bar)', 'P top out (bar)',
                 'NH3 (300,3000)', 'CO (500,10000)']
 
+    # CO2_H2O_NO
+    if base_folder == "CO2_H2O_NO":
+        list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)',
+                'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'AI 2', 'TC top sample in (C)',
+                'TC top sample mid 2 (C)', 'TC top sample out (C)',
+                'P tup in (bar)', 'DP top (bar)', 'P top out (bar)',
+                'NH3 (300,3000)', 'CO (500,10000)']
+
+    # CO2_H2O_H2_NO
+    if base_folder == "CO2_H2O_H2_NO":
+        list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)',
+                'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'AI 2', 'TC top sample in (C)',
+                'TC top sample mid 2 (C)', 'TC top sample out (C)',
+                'P tup in (bar)', 'DP top (bar)', 'P top out (bar)',
+                'NH3 (300,3000)', 'CO (500,10000)']
+
+    # CO2_H2O_CO_H2_NO
+    if base_folder == "CO2_H2O_CO_H2_NO":
+        list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)',
+                'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'AI 2', 'TC top sample in (C)',
+                'TC top sample mid 2 (C)', 'TC top sample out (C)',
+                'P tup in (bar)', 'DP top (bar)', 'P top out (bar)',
+                'NH3 (300,3000)', 'CO (500,10000)']
+
+    # CO2_H2O_CO_H2
+    if base_folder == "CO2_H2O_CO_H2":
+        list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)',
+                'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'AI 2', 'TC top sample in (C)',
+                'TC top sample mid 2 (C)', 'TC top sample out (C)',
+                'P tup in (bar)', 'DP top (bar)', 'P top out (bar)',
+                'NH3 (300,3000)', 'CO (500,10000)']
+
+    # CO2_H2O_CO_NO
+    if base_folder == "CO2_H2O_CO_NO":
+        list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)',
+                'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'AI 2', 'TC top sample in (C)',
+                'TC top sample mid 2 (C)', 'TC top sample out (C)',
+                'P tup in (bar)', 'DP top (bar)', 'P top out (bar)',
+                'NH3 (300,3000)', 'CO (500,10000)']
+
+    # CO2_H2O_CO
+    if base_folder == "CO2_H2O_CO":
+        list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)',
+                'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'AI 2', 'TC top sample in (C)',
+                'TC top sample mid 2 (C)', 'TC top sample out (C)',
+                'P tup in (bar)', 'DP top (bar)', 'P top out (bar)',
+                'NH3 (300,3000)', 'CO (500,10000)']
+
+    # H2O_CO
+    if base_folder == "H2O_CO":
+        list = ['Elapsed Time (min)', 'N2O (100,200,300)', 'NO (350,3000)',
+                'NO2 (150)', 'H2O% (20)', 'CO2% (20)', 'AI 2', 'TC top sample in (C)',
+                'TC top sample mid 2 (C)', 'TC top sample out (C)',
+                'P tup in (bar)', 'DP top (bar)', 'P top out (bar)',
+                'NH3 (300,3000)', 'CO (500,10000)']
+
     run.retainOnlyColumns(list)
 
     # If not errors are reported, then both the bypass and the run will have the same columns/names at this point
@@ -83,14 +139,144 @@ def readCoOptimaFile(run_name):
         frame_list = [0.]*len(run.getTimeFrames())
         run.appendColumnByFrame('NO ppm inlet', frame_list)
 
+    if base_folder == "CO2_H2O_NO":
+        frame_list = [0.]*len(run.getTimeFrames())
+        run.appendColumnByFrame('O2% inlet', frame_list)
+
+        frame_list = [13.]*len(run.getTimeFrames())
+        run.appendColumnByFrame('CO2% inlet', frame_list)
+
+        frame_list = [13.]*len(run.getTimeFrames())
+        run.appendColumnByFrame('H2O% inlet', frame_list)
+
+        frame_list = [0.]*len(run.getTimeFrames())
+        run.appendColumnByFrame('CO ppm inlet', frame_list)
+
+        frame_list = [0.]*len(run.getTimeFrames())
+        run.appendColumnByFrame('H2 ppm inlet', frame_list)
+
+        frame_list = [1070.]*len(run.getTimeFrames())
+        run.appendColumnByFrame('NO ppm inlet', frame_list)
+
+    if base_folder == "CO2_H2O_H2_NO":
+        frame_list = [0.0135]*len(run.getTimeFrames())
+        run.appendColumnByFrame('O2% inlet', frame_list)
+
+        frame_list = [13.]*len(run.getTimeFrames())
+        run.appendColumnByFrame('CO2% inlet', frame_list)
+
+        frame_list = [13.]*len(run.getTimeFrames())
+        run.appendColumnByFrame('H2O% inlet', frame_list)
+
+        frame_list = [0.]*len(run.getTimeFrames())
+        run.appendColumnByFrame('CO ppm inlet', frame_list)
+
+        frame_list = [1670.]*len(run.getTimeFrames())
+        run.appendColumnByFrame('H2 ppm inlet', frame_list)
+
+        frame_list = [1070.]*len(run.getTimeFrames())
+        run.appendColumnByFrame('NO ppm inlet', frame_list)
+
+    if base_folder == "CO2_H2O_CO_H2_NO":
+        frame_list = [0.2635]*len(run.getTimeFrames())
+        run.appendColumnByFrame('O2% inlet', frame_list)
+
+        frame_list = [13.]*len(run.getTimeFrames())
+        run.appendColumnByFrame('CO2% inlet', frame_list)
+
+        frame_list = [13.]*len(run.getTimeFrames())
+        run.appendColumnByFrame('H2O% inlet', frame_list)
+
+        frame_list = [5000.]*len(run.getTimeFrames())
+        run.appendColumnByFrame('CO ppm inlet', frame_list)
+
+        frame_list = [1670.]*len(run.getTimeFrames())
+        run.appendColumnByFrame('H2 ppm inlet', frame_list)
+
+        frame_list = [1070.]*len(run.getTimeFrames())
+        run.appendColumnByFrame('NO ppm inlet', frame_list)
+
+    if base_folder == "CO2_H2O_CO_H2":
+        frame_list = [0.3135]*len(run.getTimeFrames())
+        run.appendColumnByFrame('O2% inlet', frame_list)
+
+        frame_list = [13.]*len(run.getTimeFrames())
+        run.appendColumnByFrame('CO2% inlet', frame_list)
+
+        frame_list = [13.]*len(run.getTimeFrames())
+        run.appendColumnByFrame('H2O% inlet', frame_list)
+
+        frame_list = [5000.]*len(run.getTimeFrames())
+        run.appendColumnByFrame('CO ppm inlet', frame_list)
+
+        frame_list = [1670.]*len(run.getTimeFrames())
+        run.appendColumnByFrame('H2 ppm inlet', frame_list)
+
+        frame_list = [0.]*len(run.getTimeFrames())
+        run.appendColumnByFrame('NO ppm inlet', frame_list)
+
+    if base_folder == "CO2_H2O_CO_NO":
+        frame_list = [0.18]*len(run.getTimeFrames())
+        run.appendColumnByFrame('O2% inlet', frame_list)
+
+        frame_list = [13.]*len(run.getTimeFrames())
+        run.appendColumnByFrame('CO2% inlet', frame_list)
+
+        frame_list = [13.]*len(run.getTimeFrames())
+        run.appendColumnByFrame('H2O% inlet', frame_list)
+
+        frame_list = [5000.]*len(run.getTimeFrames())
+        run.appendColumnByFrame('CO ppm inlet', frame_list)
+
+        frame_list = [0.]*len(run.getTimeFrames())
+        run.appendColumnByFrame('H2 ppm inlet', frame_list)
+
+        frame_list = [1070.]*len(run.getTimeFrames())
+        run.appendColumnByFrame('NO ppm inlet', frame_list)
+
+    if base_folder == "CO2_H2O_CO":
+        frame_list = [0.23]*len(run.getTimeFrames())
+        run.appendColumnByFrame('O2% inlet', frame_list)
+
+        frame_list = [13.]*len(run.getTimeFrames())
+        run.appendColumnByFrame('CO2% inlet', frame_list)
+
+        frame_list = [13.]*len(run.getTimeFrames())
+        run.appendColumnByFrame('H2O% inlet', frame_list)
+
+        frame_list = [5000.]*len(run.getTimeFrames())
+        run.appendColumnByFrame('CO ppm inlet', frame_list)
+
+        frame_list = [0.]*len(run.getTimeFrames())
+        run.appendColumnByFrame('H2 ppm inlet', frame_list)
+
+        frame_list = [0.]*len(run.getTimeFrames())
+        run.appendColumnByFrame('NO ppm inlet', frame_list)
+
+    if base_folder == "H2O_CO":
+        frame_list = [0.]*len(run.getTimeFrames())
+        run.appendColumnByFrame('O2% inlet', frame_list)
+
+        frame_list = [0.]*len(run.getTimeFrames())
+        run.appendColumnByFrame('CO2% inlet', frame_list)
+
+        frame_list = [13.]*len(run.getTimeFrames())
+        run.appendColumnByFrame('H2O% inlet', frame_list)
+
+        frame_list = [5000.]*len(run.getTimeFrames())
+        run.appendColumnByFrame('CO ppm inlet', frame_list)
+
+        frame_list = [0.]*len(run.getTimeFrames())
+        run.appendColumnByFrame('H2 ppm inlet', frame_list)
+
+        frame_list = [0.]*len(run.getTimeFrames())
+        run.appendColumnByFrame('NO ppm inlet', frame_list)
+
 
     #run.displayColumnNames()
     #exit()
 
-    H2_name = ""
-
-    if base_folder == "CO2_H2O":
-        H2_name = "AI 2"
+    H2_name = "AI 2"
 
     max_val = run.getMaximum(H2_name)
     min_val = run.getMinimum(H2_name)
@@ -114,6 +300,96 @@ def readCoOptimaPureFuelFolder(folder):
         avg_run = readCoOptimaFile(folder+"/"+run_name)
 
         run_name =    "20210510-CPTMA-MalibuTWC-SGDI-30k-13pctCO2-13pctH2O-5Cramp-lambda0_999-1"
+        run.append(readCoOptimaFile(folder+"/"+run_name))
+
+    # CO2_H2O_NO (2)
+    if folder == "CO2_H2O_NO":
+        run_name =    "20210527-CPTMA-MalibuTWC-SGDI-30k-13pctH2O-13pctCO2-1000ppmNO-5Cramp-lambda0_999-1"
+        run.append(readCoOptimaFile(folder+"/"+run_name))
+        avg_run = readCoOptimaFile(folder+"/"+run_name)
+
+    # CO2_H2O_H2_NO (2)
+    if folder == "CO2_H2O_H2_NO":
+        run_name =    "20210527-CPTMA-MalibuTWC-SGDI-30k-13pctH2O-13pctCO2-0ppmCO-1670ppmH2-1000ppmNO-5Cramp-lambda0_999-1"
+        run.append(readCoOptimaFile(folder+"/"+run_name))
+        avg_run = readCoOptimaFile(folder+"/"+run_name)
+
+        run_name =    "20210527-CPTMA-MalibuTWC-SGDI-30k-13pctH2O-13pctCO2-0ppmCO-1670ppmH2-1000ppmNO-5Cramp-lambda0_999-2"
+        run.append(readCoOptimaFile(folder+"/"+run_name))
+
+        run_name =    "20210527-CPTMA-MalibuTWC-SGDI-30k-13pctH2O-13pctCO2-0ppmCO-1670ppmH2-1000ppmNO-5Cramp-lambda0_999-3"
+        run.append(readCoOptimaFile(folder+"/"+run_name))
+
+    # CO2_H2O_H2_NO (2)
+    if folder == "CO2_H2O_CO_H2_NO":
+        run_name =    "20210504-CPTMA-MalibuTWC-SGDI-30k-13pctCO2-13pctH2O-5000ppmCO-1670ppmH2-1000ppmNO-5Cramp-lambda0_999-1"
+        run.append(readCoOptimaFile(folder+"/"+run_name))
+        avg_run = readCoOptimaFile(folder+"/"+run_name)
+
+        run_name =    "20210504-CPTMA-MalibuTWC-SGDI-30k-13pctCO2-13pctH2O-5000ppmCO-1670ppmH2-1000ppmNO-5Cramp-lambda0_999-2"
+        run.append(readCoOptimaFile(folder+"/"+run_name))
+
+        run_name =    "20210504-CPTMA-MalibuTWC-SGDI-30k-13pctCO2-13pctH2O-5000ppmCO-1670ppmH2-1000ppmNO-5Cramp-lambda0_999-3"
+        run.append(readCoOptimaFile(folder+"/"+run_name))
+
+        run_name =    "20210511-CPTMA-MalibuTWC-SGDI-30k-13pctCO2-13pctH2O-5000ppmCO-1670ppmH2-1000ppmNO-5Cramp-lambda0_999-1"
+        run.append(readCoOptimaFile(folder+"/"+run_name))
+
+        run_name =    "20210511-CPTMA-MalibuTWC-SGDI-30k-13pctCO2-13pctH2O-5000ppmCO-1670ppmH2-1000ppmNO-5Cramp-lambda0_999-2"
+        run.append(readCoOptimaFile(folder+"/"+run_name))
+
+        run_name =    "20210511-CPTMA-MalibuTWC-SGDI-30k-13pctCO2-13pctH2O-5000ppmCO-1670ppmH2-1000ppmNO-5Cramp-lambda0_999-3"
+        run.append(readCoOptimaFile(folder+"/"+run_name))
+
+    # CO2_H2O_H2_NO (2)
+    if folder == "CO2_H2O_CO_H2":
+        run_name =    "20210511-CPTMA-MalibuTWC-SGDI-30k-13pctCO2-13pctH2O-5000ppmCO-1670ppmH2-5Cramp-lambda0_999-1"
+        run.append(readCoOptimaFile(folder+"/"+run_name))
+        avg_run = readCoOptimaFile(folder+"/"+run_name)
+
+        run_name =    "20210511-CPTMA-MalibuTWC-SGDI-30k-13pctCO2-13pctH2O-5000ppmCO-1670ppmH2-5Cramp-lambda0_999-2"
+        run.append(readCoOptimaFile(folder+"/"+run_name))
+
+        run_name =    "20210511-CPTMA-MalibuTWC-SGDI-30k-13pctCO2-13pctH2O-5000ppmCO-1670ppmH2-5Cramp-lambda0_999-3"
+        run.append(readCoOptimaFile(folder+"/"+run_name))
+
+    # CO2_H2O_CO_NO (2)
+    if folder == "CO2_H2O_CO_NO":
+        run_name =    "20210511-CPTMA-MalibuTWC-SGDI-30k-13pctCO2-13pctH2O-5000ppmCO-1000ppmNO-5Cramp-lambda0_999-1"
+        run.append(readCoOptimaFile(folder+"/"+run_name))
+        avg_run = readCoOptimaFile(folder+"/"+run_name)
+
+        run_name =    "20210511-CPTMA-MalibuTWC-SGDI-30k-13pctCO2-13pctH2O-5000ppmCO-1000ppmNO-5Cramp-lambda0_999-2"
+        run.append(readCoOptimaFile(folder+"/"+run_name))
+
+        run_name =    "20210511-CPTMA-MalibuTWC-SGDI-30k-13pctCO2-13pctH2O-5000ppmCO-1000ppmNO-5Cramp-lambda0_999-3"
+        run.append(readCoOptimaFile(folder+"/"+run_name))
+
+    # CO2_H2O_CO (2)
+    if folder == "CO2_H2O_CO":
+        run_name =    "20210511-CPTMA-MalibuTWC-SGDI-30k-13pctCO2-13pctH2O-5000ppmCO-5Cramp-lambda0_999-1"
+        run.append(readCoOptimaFile(folder+"/"+run_name))
+        avg_run = readCoOptimaFile(folder+"/"+run_name)
+
+    # H2O_CO (2)
+    if folder == "H2O_CO":
+        run_name =    "20210511-CPTMA-MalibuTWC-SGDI-30k-13pctH2O-5000ppmCO-5Cramp-lambda0_999-1"
+        run.append(readCoOptimaFile(folder+"/"+run_name))
+        avg_run = readCoOptimaFile(folder+"/"+run_name)
+
+        run_name =    "20210511-CPTMA-MalibuTWC-SGDI-30k-13pctH2O-5000ppmCO-5Cramp-lambda0_999-2"
+        run.append(readCoOptimaFile(folder+"/"+run_name))
+
+        run_name =    "20210511-CPTMA-MalibuTWC-SGDI-30k-13pctH2O-5000ppmCO-5Cramp-lambda0_999-3"
+        run.append(readCoOptimaFile(folder+"/"+run_name))
+
+        run_name =    "20210525-CPTMA-MalibuTWC-SGDI-30k-13pctH2O-5000ppmCO-5Cramp-lambda0_999-1"
+        run.append(readCoOptimaFile(folder+"/"+run_name))
+
+        run_name =    "20210525-CPTMA-MalibuTWC-SGDI-30k-13pctH2O-5000ppmCO-5Cramp-lambda0_999-2"
+        run.append(readCoOptimaFile(folder+"/"+run_name))
+
+        run_name =    "20210525-CPTMA-MalibuTWC-SGDI-30k-13pctH2O-5000ppmCO-5Cramp-lambda0_999-3"
         run.append(readCoOptimaFile(folder+"/"+run_name))
 
 
@@ -208,7 +484,14 @@ def main(argv):
     # very effectively, thus, we will just read in the signal responses and
     # condense that information into an easier to digest format.
 
-    readCoOptimaPureFuelFolder("CO2_H2O")
+    #readCoOptimaPureFuelFolder("CO2_H2O")
+    #readCoOptimaPureFuelFolder("CO2_H2O_NO")
+    #readCoOptimaPureFuelFolder("CO2_H2O_H2_NO")
+    #readCoOptimaPureFuelFolder("CO2_H2O_CO_H2_NO")
+    #readCoOptimaPureFuelFolder("CO2_H2O_CO_H2")
+    #readCoOptimaPureFuelFolder("CO2_H2O_CO_NO")
+    #readCoOptimaPureFuelFolder("CO2_H2O_CO")
+    readCoOptimaPureFuelFolder("H2O_CO")
 
     return
 
