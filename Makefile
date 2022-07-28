@@ -4,8 +4,22 @@
 IDIR=include
 CC=gcc
 CXX=g++
-CFLAGS=-I$(IDIR) -Wno-ignored-qualifiers -fPIC
-CXXFLAGS= -I$(IDIR) -Wwrite-strings -Wconversion-null -std=c++11 -fpermissive -fPIC
+CFLAGS=-I$(IDIR) -Wno-ignored-qualifiers
+CXXFLAGS= -I$(IDIR) -Wwrite-strings -Wconversion-null -std=c++11 -fpermissive
+
+
+# This code will check to see if you are on some windows platform
+# and if not, add the -fPIC flag to the compile flags 
+TARGET_TRIPLE := $(subst -, ,$(shell $(CC) -dumpmachine))
+TARGET_ARCH   := $(word 1,$(TARGET_TRIPLE))
+TARGET_OS     := $(word 3,$(TARGET_TRIPLE))
+
+ifeq      ($(TARGET_OS),mingw32)
+else ifeq ($(TARGET_OS),cygwin)
+else
+CFLAGS += -fPIC
+CXXFLAGS += -fPIC
+endif
 
 ODIR=src/obj
 INSDIR=/usr/local/bin
