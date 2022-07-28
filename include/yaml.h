@@ -1,7 +1,7 @@
 /**
  * @file yaml.h
  * @brief Public interface for libyaml.
- * 
+ *
  * Include the header file with the code:
  * @code
  * #include <yaml.h>
@@ -28,7 +28,9 @@ extern "C" {
 
 /** The public API declaration. */
 
-#ifdef _WIN32
+#if defined(__MINGW32__)
+#   define  YAML_DECLARE(type)  type
+#elif defined(_WIN32)
 #   if defined(YAML_DECLARE_STATIC)
 #       define  YAML_DECLARE(type)  type
 #   elif defined(YAML_DECLARE_EXPORT)
@@ -390,7 +392,7 @@ typedef struct yaml_event_s {
 
     /** The event data. */
     union {
-        
+
         /** The stream parameters (for @c YAML_STREAM_START_EVENT). */
         struct {
             /** The document encoding. */
@@ -726,7 +728,7 @@ struct yaml_node_s {
 
     /** The node data. */
     union {
-        
+
         /** The scalar parameters (for @c YAML_SCALAR_NODE). */
         struct {
             /** The scalar value. */
@@ -1970,4 +1972,3 @@ yaml_emitter_flush(yaml_emitter_t *emitter);
 #endif
 
 #endif /* #ifndef YAML_H */
-
