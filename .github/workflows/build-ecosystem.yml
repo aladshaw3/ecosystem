@@ -32,7 +32,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           channels: conda-forge,defaults
           channel-priority: true
-          activate-environment: spansil
+          activate-environment: ecosystem
 
       - name: Install dependencies into environment
         shell: bash -l {0}
