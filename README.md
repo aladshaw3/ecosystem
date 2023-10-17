@@ -1,3 +1,5 @@
+[![Checks](https://github.com/aladshaw3/ecosystem/actions/workflows/build-ecosystem.yml/badge.svg)](https://github.com/aladshaw3/ecosystem/actions/workflows/build-ecosystem.yml)
+
 # README #
 
 This README file outlines how to get setup using the ecosystem codes and executables. Please see below for guidelines on how to cite this repository if you are using any of these modules for a publication. Thanks. 

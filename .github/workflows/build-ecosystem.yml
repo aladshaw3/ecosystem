@@ -1,0 +1,59 @@
+name: Build Ecosystem
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  schedule:
+    - cron: '30 5 * * 5'
+
+jobs:
+  unit-tests:
+    name: Run Build Tests (py${{ matrix.python-version }}/${{ matrix.os }})
+    runs-on: ${{ matrix.os-version }}
+    strategy:
+      matrix:
+        python-version:
+          - '3.11'
+        os:
+          - linux
+        include:
+          - os: linux
+            os-version: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@main
+        with:
+          submodules: 'recursive'
+
+      - name: Activate spansil environment (${{ matrix.python-version }})
+        uses: conda-incubator/setup-miniconda@v2.2.0
+        with:
+          python-version: ${{ matrix.python-version }}
+          channels: conda-forge,defaults
+          channel-priority: true
+          activate-environment: ecosystem
+
+      - name: Install dependencies into environment
+        shell: bash -l {0}
+        run: |
+          conda init
+          conda activate ecosystem
+          conda install -c conda-forge doxygen pytest
+          conda list
+        
+      - name: Build Executable
+        shell: bash -l {0}
+        run: |
+          conda activate ecosystem
+          make
+      - name: Run Tests
+        shell: bash -l {0}
+        run: |
+          conda activate ecosystem
+          ./eco -t lark
+          ./eco -t dove
+          ./eco -t crow
+          ./eco -t shark
+          ./eco -t ibis
+          ./eco -t crane
