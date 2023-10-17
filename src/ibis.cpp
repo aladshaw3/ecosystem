@@ -3278,8 +3278,7 @@ int IBIS_TESTS()
 	std::cout << "\nSimulation Runtime: " << (time / CLOCKS_PER_SEC) << " seconds for " << test.getNumberNuclides()+test.getNumberStableNuclides() << " isotopes \n";
 	
 	//Close the open file
-	if (file != nullptr)
-		fclose(file);
+	fclose(file);
     
 	return success;
 }
