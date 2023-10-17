@@ -72,7 +72,7 @@ This README file outlines how to get setup using the ecosystem codes and executa
 
 ### Who do I talk to? ###
 
-* Lead Developer: Austin Ladshaw (ladshawap@ornl.gov, aladshaw3@outlook.com)
+* Lead Developer: Austin Ladshaw (austin.ladshaw@span.io, aladshaw3@outlook.com)
 * Trajectory Contributor: Alex Wiechert (awiechert3@gatech.edu)
 
 ### How to cite this repository ###
