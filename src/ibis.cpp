@@ -3069,6 +3069,7 @@ int IBIS_TESTS()
 	test.loadNuclides(nuc_data);
 	
 	//Open a file to print results to
+	/*
 	FILE *file;
 	file = fopen("output/IBIS_Results.txt", "w+");
 	if (file == nullptr)
@@ -3077,6 +3078,7 @@ int IBIS_TESTS()
 		file = fopen("output/IBIS_Results.txt", "w+");
 	}
 	fprintf(file, "This is the header\n\n");
+	**/
 	
 	//test.registerInitialNuclide("Ba-114");
 	//test.registerInitialNuclide("U-235");
@@ -3230,7 +3232,7 @@ int IBIS_TESTS()
 		test.getIsotope(i).setInitialCondition(1.0);
 	}
 	
-	test.print_results(file, seconds, 0.1, 10);			//Print results to file
+	//test.print_results(file, seconds, 0.1, 10);			//Print results to file
 	
 	test.DisplayEigenMap();
     
@@ -3272,14 +3274,13 @@ int IBIS_TESTS()
         std::cout << std::endl;
     }
     */
-    std::cout << "\nIon Rate\t" << test.getIonizationRate() << std::endl;
+    //std::cout << "\nIon Rate\t" << test.getIonizationRate() << std::endl;
 	
 	time = clock() - time;
 	std::cout << "\nSimulation Runtime: " << (time / CLOCKS_PER_SEC) << " seconds for " << test.getNumberNuclides()+test.getNumberStableNuclides() << " isotopes \n";
 	
 	//Close the open file
-	if (file != nullptr)
-		fclose(file);
+	//fclose(file);
     
 	return success;
 }

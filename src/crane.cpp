@@ -4409,10 +4409,12 @@ int CRANE_TESTS()
 	time = clock() - time;
 	std::cout << "\nTest Runtime: " << (time / CLOCKS_PER_SEC) << " seconds\n";
 	
+	/*
 	if (file!= nullptr)
 		fclose(file);
 	if (cloud!=nullptr)
 		fclose(cloud);
+	*/
 	
 	return success;
 }
